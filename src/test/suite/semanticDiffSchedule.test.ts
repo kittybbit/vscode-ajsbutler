@@ -314,6 +314,62 @@ suite("Semantic Diff Schedule", () => {
     );
   });
 
+  test("calculates calendar-independent month-end and weekday schedules", () => {
+    const afterRoot = jobnet("/root/main", [], {
+      sd: ["1,2024/02/b-00", "2,2026/04/mo:2"],
+      st: ["1,09:00", "2,10:00"],
+    });
+    const result = compareSemanticDiff({
+      before: document([]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2024-02-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+
+    assert.deepStrictEqual(
+      result.scheduleComparison?.runChanges.map((change) => [
+        change.date,
+        change.after?.time,
+      ]),
+      [
+        ["2024-02-29", "09:00"],
+        ["2026-04-13", "10:00"],
+      ],
+    );
+    assert.deepStrictEqual(result.unsupportedItems, []);
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("treats a missing fifth weekday occurrence as a complete zero-run", () => {
+    const afterRoot = jobnet("/root/main", [], {
+      sd: "2026/02/su:5",
+      st: "09:00",
+    });
+    const result = compareSemanticDiff({
+      before: document([]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-02-01",
+          to: "2026-03-01",
+        },
+      },
+    });
+
+    assert.deepStrictEqual(result.scheduleComparison?.runChanges, []);
+    assert.deepStrictEqual(
+      result.confirmationRequired.map((item) => item.id),
+      ["confirm:schedule-zero-runs:/root/main"],
+    );
+    assert.deepStrictEqual(result.unsupportedItems, []);
+  });
+
   test("reports unsupported schedule elements as uncalculated instead of guessing", () => {
     const afterRoot = jobnet("/root/main", [], {
       cy: "(1,d)",

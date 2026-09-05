@@ -131,7 +131,9 @@ and tests before it can pass its completion review.
 ## Slice 2 Implementation Evidence
 
 - Status: Slice 2 implementation complete; focused replan approved and replan
-  commit pending; Completion Approval intentionally pending.
+  commit `cb17d26a`; implementation-reviewer Ready with no findings; Completion
+  Approval granted 2026-09-06 automatically under the user's explicit
+  per-slice instruction; ready for the exact completion commit.
 - Changed behavior: fully qualified `YYYY/MM/b` and `YYYY/MM/b-DD` values now
   calculate Gregorian month ends with zero-based offsets. Fully qualified
   absolute weekdays now calculate first, nth, and last occurrences. A valid
@@ -141,6 +143,12 @@ and tests before it can pass its completion review.
   weekday uses `JP1-PARAM-SCHEDULE-WEEKDAY-001`. Existing direct date forms,
   omitted-component behavior, half-open periods, and `0,ud` ownership remain
   unchanged. Relative and calendar-dependent forms remain uncalculated.
+- Correction evidence: `ScheduleDateRules.ts` now accepts fully qualified
+  absolute weekdays while preserving `+`-prefixed relative and
+  omitted-component boundaries. Focused diagnostic tests cover first/nth/last,
+  invalid occurrences, and those boundaries. Schedule projector assertions are
+  filtered to `parameter.key === "sd"`; 31-day month-end tests cover `b-00`,
+  `b-30`, and invalid `b-31`.
 - Application evidence: newly calculated forms use the existing schedule run,
   unsupported-item, and zero-run confirmation shapes. No public/neutral DTO,
   confirmation policy, presentation, command, or calendar-context contract
@@ -157,13 +165,10 @@ and tests before it can pass its completion review.
   valid no-runs remains distinct. README and CHANGELOG now state the expanded
   observable support. Future calendar-dependent, relative, open/closed,
   inheritance, 48-hour, cycle, and substitution work remains deferred.
-- Review findings and replan: the projector calculates absolute weekdays, but
-  `ScheduleDateRules.ts` still requires a `+` prefix and therefore emits
-  `invalid-start-date` for those supported forms. The approved correction adds
-  that validator path and `evaluateScheduleDiagnosticViolations.test.ts`,
-  filters schedule-rule assertions to `sd`, and adds explicit 31-day month-end
-  coverage. No new diagnostic ID, schedule form, or public/neutral DTO is
-  introduced.
+- Review findings and replan: the approved correction synchronizes
+  `ScheduleDateRules.ts` with calculated absolute weekdays, filters schedule
+  assertions to `sd`, and adds explicit 31-day month-end coverage. No new
+  diagnostic ID, schedule form, or public/neutral DTO is introduced.
 - Replan approval: Human Approval was recorded on 2026-09-05 after the
   `plan-reviewer` returned Ready with no findings. The exact approved correction
   scope is `src/domain/services/diagnostics/ScheduleDateRules.ts`,
@@ -172,11 +177,26 @@ and tests before it can pass its completion review.
   assertion filtering and 31-day month-end coverage, plus synchronized
   `docs/specs/features/schedule-semantics-expansion/TASKS.md` and
   `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md` evidence.
-  Replan commit is pending.
+  Replan commit is `cb17d26a`.
+- Completion approval: the implementation-reviewer returned Ready with no
+  findings, and Completion Approval was automatically granted on 2026-09-06
+  under the user's explicit per-slice instruction. The exact approved current
+  diff paths are `CHANGELOG.md`, `README.md`,
+  `docs/requirements/domain-rules/interpret-jp1-parameters.md`,
+  `docs/requirements/use-cases/uc-build-semantic-diff.md`,
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md`,
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`,
+  `src/domain/services/diagnostics/ScheduleDateRules.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts`,
+  `src/test/suite/semanticDiffSchedule.test.ts`, and
+  `src/test/suite/semanticDiffScheduleRules.test.ts`.
 - Carried-forward implementation: the existing uncommitted Slice 2
   interpreter/projector, application, documentation, and integration-test
   changes remain preserved and are not broadened by this approval. Slice 2
-  Completion Approval and feature-level final/closure approval remain pending.
-- Recommended route after the replan commit: implement the exact approved
-  correction paths, then send Slice 2 to the independent
-  implementation-reviewer.
+  Completion Approval is granted and the exact completion commit remains
+  pending; feature-level final/closure approval remains pending until Slices
+  3–5 are complete for the requested bulk human approval.
+- Recommended route: send the exact approved Slice 2 diff to the completion
+  committer.

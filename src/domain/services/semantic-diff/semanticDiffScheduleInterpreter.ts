@@ -41,6 +41,21 @@ const invalidParameterEvidence = (
 ): string =>
   `schedule:${parameter.key}:invalid:${rule === undefined ? parameter.value : rule}`;
 
+const calendarIndependentDateEvidence = (
+  date: ReturnType<typeof interpretScheduleDateValue>,
+): string | undefined => {
+  if (!date || date.year === undefined || date.month === undefined) {
+    return undefined;
+  }
+  if (date.day.kind === "backward" && date.day.prefix === undefined) {
+    return "JP1-PARAM-SCHEDULE-MONTH-END-001";
+  }
+  if (date.day.kind === "weekday" && date.day.prefix === "") {
+    return "JP1-PARAM-SCHEDULE-WEEKDAY-001";
+  }
+  return undefined;
+};
+
 const evidence = (
   parameter: AjsParameter,
   id: string,
@@ -108,6 +123,16 @@ const interpretScheduleDateRule = (
     });
   }
   if (date.day.kind !== "calendar") {
+    const calendarIndependentEvidence = calendarIndependentDateEvidence(date);
+    if (calendarIndependentEvidence) {
+      return ruleResult({
+        parameter,
+        status: "supported",
+        id: calendarIndependentEvidence,
+        rule: date.rule,
+        date,
+      });
+    }
     return ruleResult({
       parameter,
       status: "unsupported",

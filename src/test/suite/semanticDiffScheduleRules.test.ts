@@ -383,6 +383,185 @@ suite("Semantic Diff Schedule Rules", () => {
     );
   });
 
+  test("projects fully qualified Gregorian month-end forms", () => {
+    const after = jobnet("/root/main", {
+      sd: [
+        "1,2024/02/b",
+        "2,1900/02/b",
+        "3,2000/02/b-00",
+        "4,2026/04/b-29",
+        "5,2026/04/b-30",
+        "6,2026/13/b",
+        "7,2026/01/b-00",
+        "8,2026/01/b-30",
+        "9,2026/01/b-31",
+      ],
+      st: [
+        "1,09:00",
+        "2,09:00",
+        "3,09:00",
+        "4,09:00",
+        "5,09:00",
+        "6,09:00",
+        "7,09:00",
+        "8,09:00",
+        "9,09:00",
+      ],
+    });
+    const interpretation = interpretSchedule(after);
+    assert.deepStrictEqual(
+      interpretation.scheduleDateRules.map((rule) => [
+        rule.parameter.value,
+        rule.status,
+        rule.evidence.id,
+      ]),
+      [
+        ["1,2024/02/b", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["2,1900/02/b", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["3,2000/02/b-00", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["4,2026/04/b-29", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["5,2026/04/b-30", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["6,2026/13/b", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["7,2026/01/b-00", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["8,2026/01/b-30", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["9,2026/01/b-31", "supported", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+      ],
+    );
+    const projection = projectScheduleRuns({
+      interpretation,
+      period: { from: "1900-01-01", to: "2027-01-01" },
+    });
+    assert.deepStrictEqual(
+      projection.runs.map((run) => [run.rule, run.date]),
+      [
+        [1, "2024-02-29"],
+        [2, "1900-02-28"],
+        [3, "2000-02-29"],
+        [4, "2026-04-01"],
+        [7, "2026-01-31"],
+        [8, "2026-01-01"],
+      ],
+    );
+    assert.deepStrictEqual(
+      projection.rules
+        .filter(
+          (rule) =>
+            rule.parameter.key === "sd" &&
+            ["5,2026/04/b-30", "6,2026/13/b", "9,2026/01/b-31"].includes(
+              rule.parameter.value,
+            ),
+        )
+        .map((rule) => [rule.status, rule.reason, rule.evidence.id]),
+      [
+        ["invalid", "invalid-calendar-day", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["invalid", "invalid-calendar-day", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+        ["invalid", "invalid-calendar-day", "JP1-PARAM-SCHEDULE-MONTH-END-001"],
+      ],
+    );
+    assert.strictEqual(
+      projection.evidence.find((item) => item.rule === 1)?.id,
+      "JP1-PARAM-SCHEDULE-MONTH-END-001",
+    );
+    assert.deepStrictEqual(
+      projectScheduleRuns({
+        interpretation,
+        period: { from: "2024-02-29", to: "2024-03-01" },
+      }).runs.map((run) => run.date),
+      ["2024-02-29"],
+    );
+    assert.deepStrictEqual(
+      projectScheduleRuns({
+        interpretation,
+        period: { from: "2024-02-01", to: "2024-02-29" },
+      }).runs.map((run) => run.date),
+      [],
+    );
+  });
+
+  test("projects absolute weekday forms and keeps omitted or relative forms unresolved", () => {
+    const after = jobnet("/root/main", {
+      sd: [
+        "1,2026/04/mo",
+        "2,2026/04/mo:2",
+        "3,2026/04/mo:b",
+        "4,2026/02/su:5",
+        "5,2026/04/mo:0",
+        "6,2026/04/mo:6",
+        "7,2026/04/+mo",
+        "8,04/mo",
+        "9,04/b",
+        "10,b",
+      ],
+      st: [
+        "1,09:00",
+        "2,09:00",
+        "3,09:00",
+        "4,09:00",
+        "5,09:00",
+        "6,09:00",
+        "7,09:00",
+        "8,09:00",
+        "9,09:00",
+        "10,09:00",
+      ],
+    });
+    const interpretation = interpretSchedule(after);
+    assert.deepStrictEqual(
+      interpretation.scheduleDateRules.map((rule) => [
+        rule.parameter.value,
+        rule.status,
+        rule.evidence.id,
+      ]),
+      [
+        ["1,2026/04/mo", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        ["2,2026/04/mo:2", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        ["3,2026/04/mo:b", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        ["4,2026/02/su:5", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        ["5,2026/04/mo:0", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        ["6,2026/04/mo:6", "supported", "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        ["7,2026/04/+mo", "unsupported", "schedule:sd:unsupported:7"],
+        ["8,04/mo", "unsupported", "schedule:sd:unsupported:8"],
+        ["9,04/b", "unsupported", "schedule:sd:unsupported:9"],
+        ["10,b", "unsupported", "schedule:sd:unsupported:10"],
+      ],
+    );
+    const projection = projectScheduleRuns({
+      interpretation,
+      period: { from: "2026-02-01", to: "2026-05-01" },
+    });
+    assert.deepStrictEqual(
+      projection.runs.map((run) => [run.rule, run.date]),
+      [
+        [1, "2026-04-06"],
+        [2, "2026-04-13"],
+        [3, "2026-04-27"],
+      ],
+    );
+    assert.deepStrictEqual(
+      projection.rules
+        .filter(
+          (rule) =>
+            rule.parameter.key === "sd" && [4, 5, 6].includes(rule.rule ?? -1),
+        )
+        .map((rule) => [rule.rule, rule.status, rule.reason, rule.evidence.id]),
+      [
+        [4, "no-runs", undefined, "JP1-PARAM-SCHEDULE-WEEKDAY-001"],
+        [
+          5,
+          "invalid",
+          "invalid-calendar-day",
+          "JP1-PARAM-SCHEDULE-WEEKDAY-001",
+        ],
+        [
+          6,
+          "invalid",
+          "invalid-calendar-day",
+          "JP1-PARAM-SCHEDULE-WEEKDAY-001",
+        ],
+      ],
+    );
+  });
+
   test("bounds calendar candidates to the comparison period", () => {
     const after = jobnet("/root/main", {
       sd: [

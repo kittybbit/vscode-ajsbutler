@@ -151,6 +151,82 @@ suite("Evaluate schedule diagnostic violations", () => {
     );
   });
 
+  test("accepts fully qualified absolute weekdays and preserves boundaries", () => {
+    const unit = createScheduleUnit([
+      { key: "ty", value: "n" },
+      { key: "sd", value: "1,2036/04/mo" },
+      { key: "sd", value: "2,2036/04/mo:2" },
+      { key: "sd", value: "3,2036/04/mo:b" },
+      { key: "sd", value: "4,2036/04/+mo" },
+      { key: "sd", value: "5,04/mo" },
+      { key: "sd", value: "6,mo" },
+      { key: "sd", value: "7,2036/04/mo:0" },
+      { key: "sd", value: "8,2036/04/mo:6" },
+      { key: "sd", value: "9,+mo" },
+      { key: "sd", value: "10,04/+mo" },
+    ]);
+
+    const violations = evaluateScheduleDiagnosticViolations(
+      createScheduleDocument(unit),
+    );
+
+    assert.deepStrictEqual(
+      violations.map(({ ruleId, reason, evidence }) => ({
+        ruleId,
+        reason,
+        value: evidence.value,
+      })),
+      [
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "5,04/mo",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "6,mo",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "7,2036/04/mo:0",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "8,2036/04/mo:6",
+        },
+      ],
+    );
+  });
+
+  test("accepts 31-day month-end boundaries including b-00 and b-30", () => {
+    const unit = createScheduleUnit([
+      { key: "ty", value: "n" },
+      { key: "sd", value: "1,2036/01/b-00" },
+      { key: "sd", value: "2,2036/01/b-30" },
+      { key: "sd", value: "3,2036/01/b-31" },
+    ]);
+
+    assert.deepStrictEqual(
+      evaluateScheduleDiagnosticViolations(createScheduleDocument(unit)).map(
+        ({ ruleId, reason, evidence }) => ({
+          ruleId,
+          reason,
+          value: evidence.value,
+        }),
+      ),
+      [
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "3,2036/01/b-31",
+        },
+      ],
+    );
+  });
+
   test("preserves schedule limit override and explicit target-type behavior", () => {
     const explicitTarget = createScheduleUnit([
       { key: "ty", value: "g" },

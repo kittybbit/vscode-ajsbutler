@@ -133,7 +133,16 @@ const isBackwardScheduleDateDayToken = (
 const isWeekdayScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
-  if (parsed.day.kind !== "weekday" || parsed.day.prefix !== "+") {
+  if (parsed.day.kind !== "weekday") {
+    return undefined;
+  }
+
+  const isRelativeWeekday = parsed.day.prefix === "+";
+  const isFullyQualifiedAbsoluteWeekday =
+    parsed.day.prefix === "" &&
+    parsed.year !== undefined &&
+    parsed.month !== undefined;
+  if (!isRelativeWeekday && !isFullyQualifiedAbsoluteWeekday) {
     return undefined;
   }
 

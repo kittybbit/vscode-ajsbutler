@@ -180,6 +180,30 @@ Scenario: Schedule comparison distinguishes complete no-runs from unresolved evi
   But an unsupported-only, partial, or missing-context projection does not
     become a zero-run conclusion
 
+Scenario: Schedule comparison calculates fully qualified Gregorian dates
+  Given schedule comparison is requested for a period
+  And a jobnet contains a fully qualified month-end or absolute weekday `sd`
+    value with a matching normal `st` value
+  When semantic diff is built
+  Then month-end uses the Gregorian last day and zero-based `b-DD` offset
+  And an absolute weekday uses its first, nth, or last occurrence in that month
+  And the existing schedule comparison run shape and half-open period are used
+  And no operational calendar or host locale is consulted
+
+Scenario: Calendar-independent schedule forms remain explicit when unsupported
+  Given schedule comparison is requested for a period
+  And a jobnet uses an omitted-component or relative calendar-dependent date
+  When semantic diff is built
+  Then the existing uncalculated schedule item is returned
+  And it is not treated as a valid no-runs conclusion
+
+Scenario: A missing fifth weekday occurrence is a valid no-runs schedule
+  Given schedule comparison is requested for a period
+  And a fully qualified weekday rule has no fifth matching weekday in its month
+  When semantic diff is built
+  Then the complete supported projection has no calculated runs
+  And the existing zero-run confirmation is included exactly once
+
 Scenario: Rule-zero undefined schedule is a complete no-runs result
   Given schedule comparison is requested for a period
   And a jobnet contains `sd=0,ud`

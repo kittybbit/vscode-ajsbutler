@@ -13,6 +13,21 @@ import type {
 
 type ValidPeriod = { from: Date; to: Date };
 
+type DateCandidateResult = {
+  candidates: string[];
+  invalid: boolean;
+};
+
+const createGregorianDate = (
+  year: number,
+  monthIndex: number,
+  day: number,
+): Date => {
+  const date = new Date(Date.UTC(1970, 0, 1));
+  date.setUTCFullYear(year, monthIndex, day);
+  return date;
+};
+
 const toUtcDate = (value: string): Date | undefined => {
   const matched = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!matched) {
@@ -21,12 +36,132 @@ const toUtcDate = (value: string): Date | undefined => {
   const year = Number(matched[1]);
   const month = Number(matched[2]);
   const day = Number(matched[3]);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const date = createGregorianDate(year, month - 1, day);
   return date.getUTCFullYear() === year &&
     date.getUTCMonth() === month - 1 &&
     date.getUTCDate() === day
     ? date
     : undefined;
+};
+
+const daysInGregorianMonth = (
+  year: number,
+  month: number,
+): number | undefined => {
+  if (month < 1 || month > 12) {
+    return undefined;
+  }
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  return [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][
+    month - 1
+  ];
+};
+
+const formatDate = (year: number, month: number, day: number): string =>
+  `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+const dateCandidates = (
+  parameter: AjsParameter,
+  period: ValidPeriod,
+): DateCandidateResult => {
+  const parsed = interpretScheduleDateValue(parameter.value);
+  if (!parsed) {
+    return { candidates: [], invalid: true };
+  }
+
+  if (
+    parsed.year !== undefined &&
+    parsed.month !== undefined &&
+    parsed.day.kind === "backward" &&
+    parsed.day.prefix === undefined
+  ) {
+    const days = daysInGregorianMonth(parsed.year, parsed.month);
+    const offset = parsed.day.offset ?? 0;
+    if (days === undefined || offset < 0 || offset >= days) {
+      return { candidates: [], invalid: true };
+    }
+    return {
+      candidates: [formatDate(parsed.year, parsed.month, days - offset)],
+      invalid: false,
+    };
+  }
+
+  if (
+    parsed.year !== undefined &&
+    parsed.month !== undefined &&
+    parsed.day.kind === "weekday" &&
+    parsed.day.prefix === ""
+  ) {
+    const days = daysInGregorianMonth(parsed.year, parsed.month);
+    if (days === undefined) {
+      return { candidates: [], invalid: true };
+    }
+    const weekday = ["su", "mo", "tu", "we", "th", "fr", "sa"].indexOf(
+      parsed.day.weekday,
+    );
+    const firstWeekday = createGregorianDate(
+      parsed.year,
+      parsed.month - 1,
+      1,
+    ).getUTCDay();
+    if (parsed.day.occurrence === "b") {
+      const lastWeekday = createGregorianDate(
+        parsed.year,
+        parsed.month - 1,
+        days,
+      ).getUTCDay();
+      const day = days - ((lastWeekday - weekday + 7) % 7);
+      return {
+        candidates: [formatDate(parsed.year, parsed.month, day)],
+        invalid: false,
+      };
+    }
+    const occurrence = parsed.day.occurrence ?? 1;
+    if (occurrence < 1 || occurrence > 5) {
+      return { candidates: [], invalid: true };
+    }
+    const day = 1 + ((weekday - firstWeekday + 7) % 7) + (occurrence - 1) * 7;
+    return day > days
+      ? { candidates: [], invalid: false }
+      : {
+          candidates: [formatDate(parsed.year, parsed.month, day)],
+          invalid: false,
+        };
+  }
+
+  if (parsed.day.kind !== "calendar") {
+    return { candidates: [], invalid: false };
+  }
+  const day = String(parsed.day.value).padStart(2, "0");
+  if (parsed.year !== undefined && parsed.month !== undefined) {
+    return {
+      candidates: [
+        `${String(parsed.year).padStart(4, "0")}-${String(parsed.month).padStart(2, "0")}-${day}`,
+      ],
+      invalid: false,
+    };
+  }
+  const years = Array.from(
+    { length: period.to.getUTCFullYear() - period.from.getUTCFullYear() + 1 },
+    (_, index) => period.from.getUTCFullYear() + index,
+  );
+  if (parsed.month !== undefined) {
+    return {
+      candidates: years.map(
+        (year) => `${year}-${String(parsed.month).padStart(2, "0")}-${day}`,
+      ),
+      invalid: false,
+    };
+  }
+  return {
+    candidates: years.flatMap((year) =>
+      Array.from(
+        { length: 12 },
+        (_, index) => `${year}-${String(index + 1).padStart(2, "0")}-${day}`,
+      ),
+    ),
+    invalid: false,
+  };
 };
 
 const parsePeriod = (
@@ -37,36 +172,22 @@ const parsePeriod = (
   return from && to && from < to ? { from, to } : undefined;
 };
 
-const dateCandidates = (
-  parameter: AjsParameter,
-  period: ValidPeriod,
-): string[] => {
-  const parsed = interpretScheduleDateValue(parameter.value);
-  if (!parsed || parsed.day.kind !== "calendar") {
-    return [];
+const projectedDateEvidenceId = (
+  rule: SemanticDiffScheduleRuleInterpretation,
+  runs: SemanticDiffScheduleRun[],
+): string => {
+  if (rule.evidence.id.startsWith("JP1-PARAM-SCHEDULE-")) {
+    return rule.evidence.id;
   }
-  const day = String(parsed.day.value).padStart(2, "0");
-  if (parsed.year !== undefined && parsed.month !== undefined) {
-    return [
-      `${String(parsed.year).padStart(4, "0")}-${String(parsed.month).padStart(2, "0")}-${day}`,
-    ];
-  }
-  const years = Array.from(
-    { length: period.to.getUTCFullYear() - period.from.getUTCFullYear() + 1 },
-    (_, index) => period.from.getUTCFullYear() + index,
-  );
-  if (parsed.month !== undefined) {
-    return years.map(
-      (year) => `${year}-${String(parsed.month).padStart(2, "0")}-${day}`,
-    );
-  }
-  return years.flatMap((year) =>
-    Array.from(
-      { length: 12 },
-      (_, index) => `${year}-${String(index + 1).padStart(2, "0")}-${day}`,
-    ),
-  );
+  return `schedule:sd:${runs.length === 0 ? "no-runs" : "supported"}:${rule.rule ?? 1}`;
 };
+
+const invalidDateEvidenceId = (
+  rule: SemanticDiffScheduleRuleInterpretation,
+): string =>
+  rule.evidence.id.startsWith("JP1-PARAM-SCHEDULE-")
+    ? rule.evidence.id
+    : `schedule:sd:invalid-calendar-day:${rule.rule ?? rule.parameter.value}`;
 
 const isWithin = (date: Date, period: ValidPeriod): boolean =>
   date >= period.from && date < period.to;
@@ -172,16 +293,18 @@ export function projectScheduleRuns(
       return rule;
     }
     const startTime = startTimes.get(rule.rule ?? 1);
-    const candidates = dateCandidates(rule.parameter, parsedPeriod);
+    const candidateResult = dateCandidates(rule.parameter, parsedPeriod);
+    const candidates = candidateResult.candidates;
     if (
-      candidates.length === 0 ||
-      candidates.every((candidate) => !toUtcDate(candidate))
+      candidateResult.invalid ||
+      (candidates.length > 0 &&
+        candidates.every((candidate) => !toUtcDate(candidate)))
     ) {
       return cloneRule(rule, {
         status: "invalid",
         reason: "invalid-calendar-day",
         evidence: {
-          id: `schedule:sd:invalid-calendar-day:${rule.rule ?? rule.parameter.value}`,
+          id: invalidDateEvidenceId(rule),
           rawParameters: [
             rule.parameter,
             ...(startTime?.parameter ? [startTime.parameter] : []),
@@ -195,7 +318,9 @@ export function projectScheduleRuns(
         status: "missing-context",
         reason: "missing-start-time",
         evidence: {
-          id: `schedule:sd:missing-start-time:${rule.rule ?? 1}`,
+          id: rule.evidence.id.startsWith("JP1-PARAM-SCHEDULE-")
+            ? rule.evidence.id
+            : `schedule:sd:missing-start-time:${rule.rule ?? 1}`,
           rawParameters: [
             rule.parameter,
             ...(startTime?.parameter ? [startTime.parameter] : []),
@@ -226,7 +351,7 @@ export function projectScheduleRuns(
     return cloneRule(rule, {
       status: runs.length === 0 ? "no-runs" : "supported",
       evidence: {
-        id: `schedule:sd:${runs.length === 0 ? "no-runs" : "supported"}:${rule.rule ?? 1}`,
+        id: projectedDateEvidenceId(rule, runs),
         rawParameters: [rule.parameter, startTime.parameter],
         rule: rule.rule,
       },
@@ -250,18 +375,20 @@ export function projectScheduleRuns(
     ) {
       return;
     }
-    dateCandidates(rule.parameter, parsedPeriod).forEach((candidate) => {
-      const date = toUtcDate(candidate);
-      if (date && isWithin(date, parsedPeriod)) {
-        runs.push({
-          unitPath: interpretation.unit.absolutePath,
-          unitName: interpretation.unit.name,
-          rule: rule.rule ?? 1,
-          date: candidate,
-          time: startTime.startTime.value,
-        });
-      }
-    });
+    dateCandidates(rule.parameter, parsedPeriod).candidates.forEach(
+      (candidate) => {
+        const date = toUtcDate(candidate);
+        if (date && isWithin(date, parsedPeriod)) {
+          runs.push({
+            unitPath: interpretation.unit.absolutePath,
+            unitName: interpretation.unit.name,
+            rule: rule.rule ?? 1,
+            date: candidate,
+            time: startTime.startTime.value,
+          });
+        }
+      },
+    );
   });
   const completeness = statusForRules(projectedRules, false);
   const status =

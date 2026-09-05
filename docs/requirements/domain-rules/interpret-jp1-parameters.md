@@ -114,6 +114,37 @@ wording or a diagnostic message.
   schedule confirmation shape rather than exposing an additional status field.
 - Source: [Command Reference 5.2.4, `sd=0,ud`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM).
 
+### `JP1-PARAM-SCHEDULE-MONTH-END-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/b` and `YYYY/MM/b-DD`.
+- `b` selects the last calendar day of the specified month. `b-00` is the
+  same value, and each additional offset selects the preceding calendar day.
+  Leap years use Gregorian rules, including the 400-year century boundary.
+- An offset outside the specified month's calendar-day range, or an
+  impossible year/month, is invalid. This meaning is calendar-independent and
+  does not require a normalized operational calendar or host locale.
+- Omitted-year or omitted-month forms such as `MM/b` and `b` remain
+  uncalculated; existing direct `YYYY/MM/DD`, `MM/DD`, and `DD` behavior is
+  unchanged.
+- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
+### `JP1-PARAM-SCHEDULE-WEEKDAY-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/{su|mo|tu|we|th|fr|sa}`, `YYYY/MM/{weekday}:n`, and
+  `YYYY/MM/{weekday}:b`.
+- An omitted occurrence selects the first matching weekday. `:n` selects the
+  nth matching weekday (`1` through `5`), and `:b` selects the last matching
+  weekday in the specified month. A valid fifth occurrence that is absent is a
+  valid no-runs result for that period.
+- Occurrence `0` or an occurrence above `5`, an impossible year/month, and
+  prefixed relative weekday forms are not calendar-independent supported
+  values. Omitted-year or omitted-month weekday forms remain uncalculated.
+- This meaning uses only proleptic Gregorian date arithmetic and does not
+  consult an operational calendar, host locale, timezone, or current clock.
+- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in

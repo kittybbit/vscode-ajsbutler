@@ -50,6 +50,10 @@ JP1/AJS定義から、ジョブやジョブネットなどのユニットを一�
 
 `JP1/AJS: Compare JP1/AJS Semantic Diff` で、現在の定義と選択した比較元の定義を意味単位で比較できます。比較後に Summary、Full、Audit、JSON の出力モードを選べます。Fullが既定の人向けレポートで、Summaryは概要、Auditは判断根拠、JSONはロケールに依存しない自動処理向けです。表示中のMarkdownは `JP1/AJS: Copy Semantic Diff Markdown` で明示的にコピーでき、MarkdownまたはJSONは `JP1/AJS: Save Semantic Diff Output` で保存できます。保存やコピーは自動では行われません。
 
+Semantic Diffのスケジュール比較では、完全修飾されたGregorian暦の月末
+（`YYYY/MM/b`、`YYYY/MM/b-DD`）と絶対曜日
+（`YYYY/MM/{weekday}`、`:n`、`:b`）を計算できます。登録時刻や運用暦が必要な省略形・相対形は、引き続き未計算として明示します。
+
 ### 診断とホバー
 
 定義の診断結果をエディターで確認できます。対応するパラメーターにカーソルを合わせると、ホバーで補足情報を確認できます。
