@@ -5,8 +5,8 @@
 - Purpose: expand evidence-based review recommendations without presenting
   definition changes as verified runtime failures.
 - Approved or active slice: Slice 2; Slice 1 is completion-committed and the
-  selected Slice 2 implementation scope is approved for the next
-  implementation handoff.
+  independently reviewed revised Slice 2 implementation scope is approved for
+  its focused replan commit.
 - Do not: add cycle or terminal-reachability analysis, schedule-semantics
   expansion, runtime or external probes, identity rules, a new confirmation
   level, or a competing structured-result DTO.
@@ -18,8 +18,9 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 2 implementation to `implementer` after this
-  focused approval-state commit.
+- Next decision: delegate the revised Slice 2 planning documents to
+  `approval-committer` for the focused replan commit, then resume the existing
+  Slice 2 implementation handoff.
 
 ## Replanning Record
 
@@ -35,11 +36,38 @@
   decisions; fix the v13-backed environment semantics and deliberate raw-value
   comparison; and delegate final UTF-16 ordinal ordering to the structured
   serializer.
+- Trigger: Slice 2 implementation review found a P1 in the dependency-owned
+  English Full renderer: `calculated-schedule-run-removed` reads
+  `detail.rawValues`, while the approved schedule record stores its date/time
+  in `detail.beforeValues` and intentionally leaves `rawValues` empty. The
+  user-visible Full report therefore omits the removed run's date/time.
+- Revision: authorize the existing reason-specific English Full renderer
+  mapping to read the structured `beforeValues` date/time for this reason;
+  add a Full regression fixture; and verify Audit and JSON preserve the exact
+  `beforeValues` date/time and empty `rawValues`. Keep the neutral detail
+  schema, application mapping, Audit/JSON ownership, and all other reason
+  mappings unchanged.
+- Ownership exception: the dependency-owned structured-output feature remains
+  the owner of the result schema, all report mappings except this one existing
+  English mapping, all Japanese renderings, Audit, and JSON. The revised
+  boundary grants this feature one narrow exception only for the existing
+  English `calculated-schedule-run-removed` Full mapping, so it can extract the
+  already-recorded schedule date/time from `beforeValues`; no other renderer or
+  output ownership moves.
+- Follow-up plan-review finding: the first replan package left the validation
+  checklist's historical `Ready`/approval/`806d2abd` entries looking current,
+  omitted `TRACEABILITY.md` from the planning-document commit scope, and did
+  not make the ownership exception or exact Full extraction/assertions narrow
+  enough. This revision separates historical state, revised gates, and
+  post-approval implementation paths and records the exact contract below.
 - Preserved: the four existing dependency-ordered slices, current evidence
   and report boundaries, approval gates, and all exclusions remain in force.
-  No new implementation slice or runtime surface is introduced.
-- Route: independent plan re-review is required; Human Approval remains
-  pending until a `Ready` verdict is returned.
+  The current uncommitted Slice 2 domain/application implementation and tests
+  remain preserved; no new implementation slice, schema, or report mode is
+  introduced, and only one existing reason-specific mapping is corrected.
+- Route: independent plan re-review returned `Ready`, and Human Approval covers
+  the revised renderer mapping/test boundary. A focused replan commit is
+  required before implementation resumes.
 
 ## Sync Rule
 
@@ -58,27 +86,37 @@
 
 ## Plan Status
 
-- Status: Slice 2 approved for implementation.
+- Status: Revised Slice 2 plan reviewed `Ready` and approved for replan commit.
 - Planning scope: revised complete four-slice plan covering supported
   start-condition evidence, supported-versus-unsupported calculated schedule
   opportunity loss, external wait constraints, and v13-backed non-assertive
-  execution-user-type/resource-group recommendations.
-- Review status: Ready; independent plan review complete.
-- Human approval: Approved for Slice 2 implementation under the user's current
-  conversation direction to continue all planned slices in order and apply
-  conditional Completion Approval when independent review returns no findings.
+  execution-user-type/resource-group recommendations, with the localized
+  Slice 2 Full projection correction recorded below.
+- Review status: `Ready`; independent revised-plan review complete.
+- Human approval: Approved for the revised Slice 2 boundary in the current
+  conversation, including the narrow exception for the existing English Full
+  mapping and its regression fixture.
 - Active implementation slice: Slice 2.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-05, explicit user approval in current conversation
-- Approved scope: Slice 2 — supported-versus-unsupported schedule evidence
-  classification, mapping existing supported removed-run decisions and
-  supported zero-run evidence into the established confirmation contract, and
-  the named tests within the Slice 2 Approval Boundary.
-- Approved paths:
+- Approved scope: revised Slice 2 — the existing schedule evidence and
+  confirmation mapping scope plus the existing reason-specific English Full
+  renderer mapping and its Full regression test. Audit/JSON are verification-
+  only and must retain exact detail values.
+- Historical pre-replan approved paths:
   - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
+- Revised replan planning-document commit scope:
+  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
+  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
+- Proposed post-approval implementation paths (not part of the planning-
+  document commit):
+  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts` (Full regression)
+- Dependency-owned validation-only path (no planned implementation edit):
+  - `src/test/suite/semanticDiffJson.test.ts` (exact-detail assertion)
 
 The approved Slice 2 implementation scope is recorded above. Main delegates
 and completes one slice at a time in the order below. The user's standing
@@ -362,7 +400,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 2: Recommend Review For Supported Schedule Opportunity Loss
 
-- Status: Approved; ready for implementation handoff.
+- Status: Implementation complete for the pre-replan scope; P1 finding
+  requires the localized renderer replan before completion review.
 - Scope: preserve explicit after-side zero-run review and add one
   `calculated-schedule-run-removed` record for each removed run already emitted
   by the supported schedule comparison, after classifying supported,
@@ -371,8 +410,9 @@ not an implementation surface owned by this feature:
   execution opportunity that disappeared within the chosen period without
   interpreting uncalculated schedules as proof of no start.
 - Cohesive Change Group: existing schedule-evaluation evidence projection;
-  application confirmation mapping; structured-contract consumption and
-  validation; focused domain, application, renderer, and serializer tests.
+  application confirmation mapping; the existing reason-specific English Full
+  renderer mapping; structured-contract consumption and validation; focused
+  domain, application, renderer, Audit, JSON, and serializer tests.
 - Acceptance: a supported before run absent after emits a deterministic record
   targeted at the matched after jobnet with the exact fixed detail projection,
   v13, runtime, and comparison-period evidence; changed-time, added-run, and
@@ -380,32 +420,62 @@ not an implementation surface owned by this feature:
   zero-run behavior remains only when a supported after pair was evaluated;
   unsupported-only schedules emit neither zero-run nor removed-run
   confirmation; mixed schedules derive confirmations only from supported pairs
-  and preserve their unsupported records; invalid periods remain limitations.
+  and preserve their unsupported records; invalid periods remain limitations;
+  Full renders a removed run's date/time from the item's structured
+  `beforeValues` even when `rawValues` is empty. For the existing English Full
+  mapping, extract the entries `date=YYYY-MM-DD` and `time=HH:MM` from
+  `detail.beforeValues` without changing their stored values, strip only those
+  field prefixes for the human-readable line, and render exactly
+  `<unit-name> calculated schedule run YYYY-MM-DD HH:MM removed`. Audit retains
+  the exact `beforeValues` entries and `rawValues: []`; JSON retains both
+  fields unchanged.
 - Validation: update and run `semanticDiffScheduleRules`,
-  `semanticDiffSchedule`, structured contract/JSON, Summary, Full, and Audit
-  focused suites; cover removed, changed-time, added, zero-run,
+  `semanticDiffSchedule`, `semanticDiffMarkdownProjections`, structured
+  contract/JSON, Summary, Full, and Audit focused suites; cover removed,
+  changed-time, added, zero-run,
   unsupported-only, mixed-supported/unsupported, invalid-period, ID ordering,
   and locale/host-neutral serialization fixtures, including unsupported-only,
   supported-before/unsupported-after, unsupported-before/supported-after, and
-  mixed zero/removed cases; run
+  mixed zero/removed cases. Add a Full regression with
+  `beforeValues: ["date=2026-04-11", "time=10:00"]` and `rawValues: []` that
+  asserts the exact output string
+  `- schedule-job calculated schedule run 2026-04-11 10:00 removed`, asserts
+  the source `beforeValues` remain unchanged, and asserts no empty-date/time
+  rendering occurs. Verify Audit includes
+  `beforeValues: [date=2026-04-11, time=10:00]` and `rawValues: []`; verify JSON
+  deep-equals the same two arrays. Run
   `rtk pnpm run qlty`, `rtk pnpm run build`, and the relevant compiled desktop
   suite.
 - Production Readiness: reuse the single existing projection, bound work to
   emitted run decisions, preserve half-open period semantics, retain all
   limitations, avoid date/time locale conversion, and verify representative
-  large-period behavior does not add a second projection or quadratic join.
+  large-period behavior does not add a second projection or quadratic join;
+  the Full mapping reads only the existing structured `beforeValues` and never
+  repurposes or populates `rawValues`.
 - Approval Boundary: mapping existing supported removed-run decisions and
-  zero-run evidence into the established structured-result/output contracts
-  plus named tests. New schedule interpretation or a new detail field requires
-  Replanning.
+  zero-run evidence into the established structured-result/output contracts,
+  plus the one ownership exception for the existing English
+  `calculated-schedule-run-removed` Full mapping in
+  `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`. That
+  mapping may extract `date=YYYY-MM-DD` and `time=HH:MM` from unchanged
+  `beforeValues` to render the exact English line described above; it must not
+  read, populate, or reinterpret `rawValues`. The named domain/application/
+  Full regression tests and Audit/JSON detail-preservation assertions are
+  included; Audit/JSON assertions are verification-only and require no
+  production or schema edit. All other renderer mappings, the structured
+  schema, Japanese, Audit, and JSON remain dependency-owned. New schedule
+  interpretation, a new detail field, a schema change, or any other ownership
+  exception requires Replanning.
 - Dependencies: approved and completed Slice 1; structured-output Full/Audit/
   JSON consumers available for the additive reason code; existing schedule
-  projector and comparison-period contract.
+  projector and comparison-period contract; current uncommitted pre-replan
+  Slice 2 implementation remains the baseline for the renderer correction.
 - Risks: duplicate confirmations, changed-time misclassification, unmatched
-  before-only jobnets with no valid after target, or unsupported evidence being
-  mistaken for a zero-run conclusion. Explicit supported-pair classification,
-  exact target/deduplication, and unsupported-only/mixed negative fixtures are
-  the gate.
+  before-only jobnets with no valid after target, unsupported evidence being
+  mistaken for a zero-run conclusion, or the Full renderer reading the wrong
+  detail field and silently omitting date/time. Explicit supported-pair
+  classification, exact target/deduplication, unsupported-only/mixed negative
+  fixtures, and cross-projection detail assertions are the gate.
 - Out of Scope: calendar, inheritance, 48-hour, cycle, shift, closed-day, and
   other schedule-semantics expansion; Schedule Impact Calendar.
 
@@ -579,8 +649,16 @@ not an implementation surface owned by this feature:
       `TRACEABILITY.md`.
 - [x] Production readiness, compatibility, approval boundaries, risks, and
       out-of-scope work recorded for every slice.
-- [x] Independent plan review returns `Ready`.
-- [x] Human Approval recorded; focused plan commit `806d2abd`.
+- [x] Historical baseline plan review returned `Ready` before the current Slice
+      2 replan; this verdict is superseded for the revised boundary.
+- [x] Historical baseline Human Approval was recorded and focused plan commit
+      `806d2abd` was created before the current Slice 2 replan; it does not
+      approve the revised renderer exception.
+- [x] Revised Slice 2 replan receives an independent plan-review `Ready`
+      verdict.
+- [x] Revised Slice 2 replan receives Human Approval for its exact boundary.
+- [ ] Revised planning documents (`TASKS.md` and `TRACEABILITY.md`) are
+      committed through the approval-committer plan/replan gate.
 - [ ] Slices 1-4 implemented, reviewed, completion-approved, and committed in
       order.
 - [ ] Feature Exit and durable-document propagation completed.
@@ -614,6 +692,63 @@ not an implementation surface owned by this feature:
 - Unresolved risks: none. Independent re-review confirmed the endpoint
   correspondence guard matches the approved relation evidence boundary and no
   additional topology or condition interpretation entered the slice.
+
+## Slice 2 Implementation Evidence
+
+- Status: Pre-replan implementation complete; P1 finding blocks independent
+  completion review and Completion Approval until the revised renderer scope
+  is implemented and validated.
+- Changed files are limited to the existing schedule domain projector,
+  application confirmation mapper, and focused schedule domain/application
+  tests in the current uncommitted implementation. No schedule
+  interpretation, structured-output schema, parser, adapter, or configuration
+  surface was added; the renderer correction is newly authorized by this
+  replan and remains outstanding.
+- Schedule evaluation now records per-jobnet supported-pair counts and
+  supported/mixed/unsupported-only evidence using the existing single run
+  projection. Zero-run candidates require a supported after-side pair;
+  removed-run confirmations require supported pairs on both correspondence-
+  matched sides, target the after jobnet, and use the fixed rule/date/time
+  detail with v13, runtime, and comparison-period constraints. Unsupported
+  records remain present, while changed-time, added, and before-only removed
+  jobnets do not gain this confirmation. Duplicate confirmation IDs are
+  collapsed without changing the underlying run comparison.
+- Focused coverage includes supported removed/changed/added runs, zero-run,
+  unsupported-only, supported-before/unsupported-after,
+  unsupported-before/supported-after, mixed zero-plus-removed evidence,
+  before-only removal, invalid periods, evidence classification, target/detail
+  projection, and deterministic confirmation ordering.
+- Validation: `rtk pnpm run test:compile`, the focused schedule suites
+  (14 passing) and structured contract/JSON suites (37 passing), `rtk pnpm run
+test:prepare:desktop`, compiled desktop suite, `rtk pnpm run build`,
+  `rtk pnpm run qlty`, and `rtk git diff --check` passed. Direct Markdown
+  projection launch remains dependent on the repository's existing
+  `@resource/i18n/message` runtime alias; the compiled desktop suite covers
+  the same Full/Audit paths successfully.
+- Replan validation required: rerun the focused Full renderer regression and
+  Audit/JSON detail-preservation assertions after the mapping correction, then
+  rerun the relevant compiled desktop suite, `rtk pnpm run qlty`,
+  `rtk pnpm run build`, and `rtk git diff --check`.
+- Replan implementation target: with `beforeValues` exactly
+  `["date=2026-04-11", "time=10:00"]` and `rawValues` exactly `[]`, English
+  Full must contain the exact string
+  `- schedule-job calculated schedule run 2026-04-11 10:00 removed`; the input
+  detail remains unchanged, Audit must show both exact arrays, and JSON must
+  deep-equal both arrays.
+- Compatibility: the pre-replan change remains pure, browser-safe
+  domain/application evaluation over normalized inputs; the revised mapping
+  is an existing browser-safe presentation projection over the same result.
+  Half-open period handling, VS Code engine compatibility, desktop/web
+  contracts, parser behavior, telemetry, and unsupported schedule limitations
+  remain unchanged.
+- Documentation/release: no README, use-case, or CHANGELOG update is needed
+  before Feature Exit; user-facing recommendation propagation remains owned by
+  the Feature Exit review.
+- Unresolved risks: P1 Full output omits the removed run's date/time because
+  the existing reason-specific English renderer reads empty `rawValues`.
+  The independent plan reviewer must confirm the revised boundary remains
+  limited to that mapping and regression coverage; the later implementation
+  reviewer must verify Full, Audit, and JSON agree on the exact detail.
 
 ## Notes
 
