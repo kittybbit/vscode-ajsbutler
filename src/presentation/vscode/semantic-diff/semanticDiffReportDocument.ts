@@ -32,6 +32,13 @@ type PendingReportEntry = ReportEntry & {
   rejectCommit: (error: unknown) => void;
 };
 
+type ReportWriteRequest = {
+  readonly record: ReportEntry;
+  readonly destination: vscode.Uri;
+  readonly writeFile: NonNullable<SemanticDiffReportDocumentDeps["writeFile"]>;
+  readonly operationEpoch: number;
+};
+
 export type SemanticDiffReportDocumentDeps = {
   openTextDocument: (uri: vscode.Uri) => Thenable<vscode.TextDocument>;
   showTextDocument: (
@@ -61,18 +68,13 @@ const fullMarkdownDocument = (content: string): SemanticDiffOutputDocument => ({
   content,
 });
 
-const suggestedFileName = (mode: SemanticDiffOutputMode): string => {
-  switch (mode) {
-    case "summary":
-      return "semantic-diff-summary.md";
-    case "full":
-      return "semantic-diff-full.md";
-    case "audit":
-      return "semantic-diff-audit.md";
-    case "json":
-      return "semantic-diff.json";
-  }
-};
+const suggestedFileName = (mode: SemanticDiffOutputMode): string =>
+  ({
+    summary: "semantic-diff-summary.md",
+    full: "semantic-diff-full.md",
+    audit: "semantic-diff-audit.md",
+    json: "semantic-diff.json",
+  })[mode];
 
 const disposedError = (): Error =>
   new Error("Semantic diff report documents are no longer available.");
@@ -115,73 +117,19 @@ export class SemanticDiffReportDocumentProvider
 
   provideTextDocumentContent(uri: vscode.Uri): string {
     if (this.disposed) return "";
-    const key = this.safeUriKey(uri);
-    const committed = key ? this.reports.get(key) : undefined;
-    if (committed) {
-      committed.lastAccessSequence = this.nextAccessSequence;
-      this.nextAccessSequence += 1;
-      return committed.document.content;
-    }
-    return key ? (this.pending.get(key)?.document.content ?? "") : "";
+    return this.contentForKey(this.safeUriKey(uri));
   }
 
   async openReport(
     document: SemanticDiffOutputDocument | string,
   ): Promise<vscode.Uri> {
-    if (this.disposed) throw disposedError();
-
-    const output =
-      typeof document === "string" ? fullMarkdownDocument(document) : document;
-    const uri = this.createReportUri(output.extension);
-    const key = this.safeUriKey(uri);
-    if (!key) throw new Error("Semantic diff report URI could not be created.");
-
-    const creationSequence = this.nextCreationSequence;
-    this.nextCreationSequence += 1;
-    let resolveCommit!: (resolvedUri: vscode.Uri) => void;
-    let rejectCommit!: (error: unknown) => void;
-    const commitPromise = new Promise<vscode.Uri>((resolve, reject) => {
-      resolveCommit = resolve;
-      rejectCommit = reject;
-    });
-    const entry: PendingReportEntry = {
-      key,
-      uri,
-      document: output,
-      creationSequence,
-      lastAccessSequence: this.nextAccessSequence,
-      state: "pending",
-      epoch: this.epoch,
-      commitPromise,
-      resolveCommit,
-      rejectCommit,
-    };
-    this.pending.set(key, entry);
-    this.commitEntries.set(creationSequence, entry);
-
-    try {
-      const opened = await this.deps.openTextDocument(uri);
-      if (
-        this.disposed ||
-        entry.epoch !== this.epoch ||
-        this.pending.get(key) !== entry
-      ) {
-        this.failEntry(entry, disposedError());
-        return await commitPromise;
-      }
-      await this.deps.showTextDocument(opened, { preview: false });
-    } catch (error) {
-      this.failEntry(entry, error);
-      return await commitPromise;
-    }
-
-    if (this.disposed || this.pending.get(key) !== entry) {
-      this.failEntry(entry, disposedError());
-    } else {
-      entry.state = "ready";
-      void this.drainCommits();
-    }
-    return await commitPromise;
+    this.assertOpenAllowed();
+    const output = this.normalizeDocument(document);
+    const entry = this.createPendingEntry(
+      output,
+      this.createReportUri(output.extension),
+    );
+    return await this.completeOpening(entry);
   }
 
   async copyReport(uri?: vscode.Uri): Promise<boolean> {
@@ -192,62 +140,11 @@ export class SemanticDiffReportDocumentProvider
       );
       return false;
     }
-    const operationEpoch = this.epoch;
-
-    try {
-      if (this.disposed || operationEpoch !== this.epoch) return false;
-      await this.deps.writeClipboard(record.document.content);
-      if (this.disposed || operationEpoch !== this.epoch) return false;
-      await this.notifyInformation(
-        "Semantic diff Markdown copied to clipboard.",
-      );
-      return true;
-    } catch {
-      await this.notifyError("Semantic diff Markdown could not be copied.");
-      return false;
-    }
+    return await this.copyContent(record, this.epoch);
   }
 
   async saveReport(uri?: vscode.Uri): Promise<boolean> {
-    const record = this.resolveReport(uri);
-    if (!record) {
-      await this.notifyError("Open a semantic diff report before saving.");
-      return false;
-    }
-    if (!this.deps.showSaveDialog || !this.deps.writeFile) {
-      await this.notifyError("Semantic diff output could not be saved.");
-      return false;
-    }
-    const operationEpoch = this.epoch;
-
-    let destination: vscode.Uri | undefined;
-    try {
-      destination = await this.deps.showSaveDialog({
-        defaultUri: this.deps.createUri({
-          scheme: "untitled",
-          path: `/${suggestedFileName(record.document.mode)}`,
-        }),
-        saveLabel: "Save Semantic Diff Output",
-      });
-    } catch {
-      await this.notifyError("Semantic diff output could not be saved.");
-      return false;
-    }
-    if (!destination) return false;
-    if (this.disposed || operationEpoch !== this.epoch) return false;
-
-    try {
-      await this.deps.writeFile(
-        destination,
-        new TextEncoder().encode(record.document.content),
-      );
-      if (this.disposed || operationEpoch !== this.epoch) return false;
-    } catch {
-      await this.notifyError("Semantic diff output could not be saved.");
-      return false;
-    }
-    await this.notifyInformation("Semantic diff output saved.");
-    return true;
+    return await this.saveResolvedReport(this.resolveReport(uri));
   }
 
   dispose(): void {
@@ -264,38 +161,274 @@ export class SemanticDiffReportDocumentProvider
     this.reports.clear();
   }
 
+  private assertOpenAllowed(): void {
+    if (this.disposed) throw disposedError();
+  }
+
+  private normalizeDocument(
+    document: SemanticDiffOutputDocument | string,
+  ): SemanticDiffOutputDocument {
+    return typeof document === "string"
+      ? fullMarkdownDocument(document)
+      : document;
+  }
+
+  private async completeOpening(
+    entry: PendingReportEntry,
+  ): Promise<vscode.Uri> {
+    const attempt = await this.attemptOpening(entry);
+    if (attempt.failed) {
+      this.failEntry(entry, attempt.error);
+      return await entry.commitPromise;
+    }
+    if (!this.isCurrentEntry(entry)) {
+      this.failEntry(entry, disposedError());
+    } else {
+      entry.state = "ready";
+      void this.drainCommits();
+    }
+    return await entry.commitPromise;
+  }
+
+  private async attemptOpening(
+    entry: PendingReportEntry,
+  ): Promise<{ readonly failed: boolean; readonly error?: unknown }> {
+    try {
+      await this.openAndShow(entry);
+      return { failed: false };
+    } catch (error) {
+      return { failed: true, error };
+    }
+  }
+
+  private async saveResolvedReport(
+    record: ReportEntry | undefined,
+  ): Promise<boolean> {
+    if (!record) {
+      await this.notifyError("Open a semantic diff report before saving.");
+      return false;
+    }
+    const dependencies = this.saveDependencies();
+    if (!dependencies) {
+      await this.notifyError("Semantic diff output could not be saved.");
+      return false;
+    }
+    return await this.saveContent(record, dependencies, this.epoch);
+  }
+
+  private saveDependencies():
+    | {
+        readonly showSaveDialog: NonNullable<
+          SemanticDiffReportDocumentDeps["showSaveDialog"]
+        >;
+        readonly writeFile: NonNullable<
+          SemanticDiffReportDocumentDeps["writeFile"]
+        >;
+      }
+    | undefined {
+    const { showSaveDialog, writeFile } = this.deps;
+    if (!showSaveDialog || !writeFile) return undefined;
+    return { showSaveDialog, writeFile };
+  }
+
+  private contentForKey(key: string | undefined): string {
+    const committed = key ? this.reports.get(key) : undefined;
+    if (committed) {
+      this.touchReport(committed);
+      return committed.document.content;
+    }
+    return key ? (this.pending.get(key)?.document.content ?? "") : "";
+  }
+
+  private createReportUri(extension: ".md" | ".json"): vscode.Uri {
+    const reportId = this.nextReportId;
+    this.nextReportId += 1;
+    return this.deps.createUri({
+      scheme: SEMANTIC_DIFF_REPORT_SCHEME,
+      path: `/semantic-diff-${reportId}${extension}`,
+      query: String(reportId),
+    });
+  }
+
+  private createPendingEntry(
+    document: SemanticDiffOutputDocument,
+    uri: vscode.Uri,
+  ): PendingReportEntry {
+    const key = this.safeUriKey(uri);
+    if (!key) throw new Error("Semantic diff report URI could not be created.");
+    const creationSequence = this.nextCreationSequence;
+    this.nextCreationSequence += 1;
+    let resolveCommit!: (resolvedUri: vscode.Uri) => void;
+    let rejectCommit!: (error: unknown) => void;
+    const commitPromise = new Promise<vscode.Uri>((resolve, reject) => {
+      resolveCommit = resolve;
+      rejectCommit = reject;
+    });
+    const entry: PendingReportEntry = {
+      key,
+      uri,
+      document,
+      creationSequence,
+      lastAccessSequence: this.nextAccessSequence,
+      state: "pending",
+      epoch: this.epoch,
+      commitPromise,
+      resolveCommit,
+      rejectCommit,
+    };
+    this.pending.set(key, entry);
+    this.commitEntries.set(creationSequence, entry);
+    return entry;
+  }
+
+  private async openAndShow(entry: PendingReportEntry): Promise<void> {
+    const opened = await this.deps.openTextDocument(entry.uri);
+    if (!this.isCurrentEntry(entry)) throw disposedError();
+    await this.deps.showTextDocument(opened, { preview: false });
+  }
+
+  private isCurrentEntry(entry: PendingReportEntry): boolean {
+    return (
+      !this.disposed &&
+      entry.epoch === this.epoch &&
+      this.pending.get(entry.key) === entry
+    );
+  }
+
+  private async copyContent(
+    record: ReportEntry,
+    operationEpoch: number,
+  ): Promise<boolean> {
+    let copied = false;
+    try {
+      if (!this.isStale(operationEpoch)) {
+        await this.deps.writeClipboard(record.document.content);
+        if (!this.isStale(operationEpoch)) {
+          await this.notifyInformation(
+            "Semantic diff Markdown copied to clipboard.",
+          );
+          copied = true;
+        }
+      }
+    } catch {
+      await this.notifyError("Semantic diff Markdown could not be copied.");
+    }
+    return copied;
+  }
+
+  private async saveContent(
+    record: ReportEntry,
+    dependencies: {
+      readonly showSaveDialog: NonNullable<
+        SemanticDiffReportDocumentDeps["showSaveDialog"]
+      >;
+      readonly writeFile: NonNullable<
+        SemanticDiffReportDocumentDeps["writeFile"]
+      >;
+    },
+    operationEpoch: number,
+  ): Promise<boolean> {
+    const destination = await this.requestSaveDestination(
+      record,
+      dependencies.showSaveDialog,
+    );
+    let saved = false;
+    if (destination && !this.isStale(operationEpoch)) {
+      saved = await this.writeReportFile({
+        record,
+        destination,
+        writeFile: dependencies.writeFile,
+        operationEpoch,
+      });
+    }
+    if (saved) await this.notifyInformation("Semantic diff output saved.");
+    return saved;
+  }
+
+  private async requestSaveDestination(
+    record: ReportEntry,
+    showSaveDialog: NonNullable<
+      SemanticDiffReportDocumentDeps["showSaveDialog"]
+    >,
+  ): Promise<vscode.Uri | undefined> {
+    let destination: vscode.Uri | undefined;
+    try {
+      destination = await showSaveDialog({
+        defaultUri: this.deps.createUri({
+          scheme: "untitled",
+          path: `/${suggestedFileName(record.document.mode)}`,
+        }),
+        saveLabel: "Save Semantic Diff Output",
+      });
+    } catch {
+      await this.notifyError("Semantic diff output could not be saved.");
+    }
+    return destination;
+  }
+
+  private async writeReportFile(request: ReportWriteRequest): Promise<boolean> {
+    let saved = false;
+    try {
+      await request.writeFile(
+        request.destination,
+        new TextEncoder().encode(request.record.document.content),
+      );
+      saved = !this.isStale(request.operationEpoch);
+    } catch {
+      await this.notifyError("Semantic diff output could not be saved.");
+    }
+    return saved;
+  }
+
+  private isStale(operationEpoch: number): boolean {
+    return this.disposed || operationEpoch !== this.epoch;
+  }
+
   private async drainCommits(): Promise<void> {
     if (this.draining) return;
     this.draining = true;
     try {
-      while (this.commitEntries.has(this.nextCommitSequence)) {
-        const sequence = this.nextCommitSequence;
-        const entry = this.commitEntries.get(sequence)!;
-        if (entry.state === "pending") break;
-        this.commitEntries.delete(sequence);
-        this.nextCommitSequence += 1;
-
-        if (entry.state === "failed") {
-          entry.rejectCommit(disposedError());
-          continue;
-        }
-        if (this.disposed || entry.epoch !== this.epoch) {
-          entry.state = "failed";
-          this.pending.delete(entry.key);
-          entry.rejectCommit(disposedError());
-          continue;
-        }
-
-        entry.lastAccessSequence = this.nextAccessSequence;
-        this.nextAccessSequence += 1;
-        this.pending.delete(entry.key);
-        this.reports.set(entry.key, entry);
-        this.evictIfNeeded(entry.key);
-        entry.resolveCommit(entry.uri);
-      }
+      this.drainReadyCommits();
     } finally {
       this.draining = false;
     }
+  }
+
+  private drainReadyCommits(): void {
+    let entry = this.nextReadyCommit();
+    while (entry) {
+      this.commitEntries.delete(this.nextCommitSequence);
+      this.nextCommitSequence += 1;
+      this.settleCommitEntry(entry);
+      entry = this.nextReadyCommit();
+    }
+  }
+
+  private nextReadyCommit(): PendingReportEntry | undefined {
+    const entry = this.commitEntries.get(this.nextCommitSequence);
+    return entry?.state === "pending" ? undefined : entry;
+  }
+
+  private settleCommitEntry(entry: PendingReportEntry): void {
+    if (entry.state === "failed") {
+      entry.rejectCommit(disposedError());
+      return;
+    }
+    if (this.disposed || entry.epoch !== this.epoch) {
+      entry.state = "failed";
+      this.pending.delete(entry.key);
+      entry.rejectCommit(disposedError());
+      return;
+    }
+    this.commitEntry(entry);
+  }
+
+  private commitEntry(entry: PendingReportEntry): void {
+    this.touchReport(entry);
+    this.pending.delete(entry.key);
+    this.reports.set(entry.key, entry);
+    this.evictIfNeeded(entry.key);
+    entry.resolveCommit(entry.uri);
   }
 
   private failEntry(entry: PendingReportEntry, error: unknown): void {
@@ -314,35 +447,25 @@ export class SemanticDiffReportDocumentProvider
           (left, right) =>
             left.lastAccessSequence - right.lastAccessSequence ||
             left.creationSequence - right.creationSequence,
-        )[0];
-      if (!candidate) return;
+        )[0]!;
       this.reports.delete(candidate.key);
     }
   }
 
-  private createReportUri(extension: ".md" | ".json"): vscode.Uri {
-    const reportId = this.nextReportId;
-    this.nextReportId += 1;
-    return this.deps.createUri({
-      scheme: SEMANTIC_DIFF_REPORT_SCHEME,
-      path: `/semantic-diff-${reportId}${extension}`,
-      query: String(reportId),
-    });
-  }
-
   private resolveReport(uri?: vscode.Uri): ReportEntry | undefined {
     if (this.disposed) return undefined;
+    const key = this.reportKey(uri);
+    const record = key ? this.reports.get(key) : undefined;
+    if (record) this.touchReport(record);
+    return record;
+  }
+
+  private reportKey(uri?: vscode.Uri): string | undefined {
     const explicitKey =
       uri?.scheme === SEMANTIC_DIFF_REPORT_SCHEME
         ? this.safeUriKey(uri)
         : undefined;
-    const activeKey = explicitKey ?? this.activeReportKey();
-    const record = activeKey ? this.reports.get(activeKey) : undefined;
-    if (record) {
-      record.lastAccessSequence = this.nextAccessSequence;
-      this.nextAccessSequence += 1;
-    }
-    return record;
+    return explicitKey ?? this.activeReportKey();
   }
 
   private activeReportKey(): string | undefined {
@@ -363,6 +486,11 @@ export class SemanticDiffReportDocumentProvider
     } catch {
       return undefined;
     }
+  }
+
+  private touchReport(entry: ReportEntry): void {
+    entry.lastAccessSequence = this.nextAccessSequence;
+    this.nextAccessSequence += 1;
   }
 
   private async notifyInformation(message: string): Promise<void> {

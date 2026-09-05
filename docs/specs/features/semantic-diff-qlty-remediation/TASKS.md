@@ -12,8 +12,10 @@
   and published at `a7a7ecbc`: structural 11, no hidden or replacement finding,
   fmt 0, and Verify/CodeQL pass. Slice 4 is complete and published at
   `2013778c`: structural 10, fmt 0, Verify/CodeQL pass, and only the expected
-  ten Slice 5 report-provider findings remain. Slice 5 is the active approved
-  runtime slice; its code waits for the two-document transition commit.
+  ten Slice 5 report-provider findings remain. Slice 5 implementation review
+  is `Ready` with no Findings; its exact three-path completion commit is
+  pending, followed by the published Cloud zero-blocker gate and final full
+  validation.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -23,11 +25,9 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: have `approval-committer` record the completed Slice 4 gate
-  transition in the exact two feature documents, then route the already
-  approved Slice 5 scope to `implementer`. No new plan review or approval is
-  required for this evidence-only transition; Slice 5 code must not start
-  before the transition commit.
+- Next decision: have `approval-committer` record the exact three-path Slice 5
+  completion package. After publication, wait for the Cloud zero-blocker gate,
+  then run the final full validation sequence before Feature Exit.
 
 ## Sync Rule
 
@@ -60,10 +60,10 @@
 ## Plan Status
 
 - Status: Slice 4 implementation and independent review are complete and
-  published at `2013778c`; structural 10, fmt 0, Verify/CodeQL pass, and only
-  the expected ten Slice 5 report-provider findings remain. Slice 5 is active
-  under the existing approval, gated by the exact two-document transition
-  commit.
+  published at `2013778c`; Slice 5 implementation review is `Ready` with no
+  Findings and its existing all-slice conditional Completion Approval is
+  applied. The exact three-path completion commit, published Cloud
+  zero-blocker gate, and final full validation remain pending.
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Slice 4 implementation review is `Ready` with no Findings;
@@ -87,8 +87,9 @@
   The four implementation-authorized paths were the two JSON helper sources
   and the two feature documents; the transition commit remains docs-only. This
   document does not grant a new approval.
-- Active implementation slice: Slice 5 runtime refactor, queued behind the
-  required transition commit. Slice 1 published head
+- Active implementation slice: Slice 5 runtime refactor has completed review
+  and conditional completion approval; its exact three-path completion commit
+  is pending. Slice 1 published head
   `29f34008` records 46 structural blockers, zero formatting blockers, and no
   replacement finding;
   Slice 2 published head `8ec1f070` records 35 structural blockers, zero
@@ -191,9 +192,9 @@ active implementation approval remains.
 
 ## Completion Approval
 
-- Status: Approved conditionally for corrected Slice 2, Slice 3, and Slice 4
-  completion; Slice 2, Slice 3, and Slice 4 gates are complete. Slice 5 is the
-  active approved slice after the published Slice 4 Cloud gate.
+- Status: Approved conditionally for corrected Slice 2, Slice 3, Slice 4, and
+  Slice 5 completion; Slices 2-4 gates are complete, and Slice 5 has an
+  independent `Ready` review with no Findings.
 - Approved at: existing user all-slice conditional authorization, activated
   after the corrected implementation review returned `Ready` with no Findings
 - Approved scope: the exact corrected implementation path and the two feature
@@ -203,6 +204,12 @@ active implementation approval remains.
   - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
   - `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`
   - `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`
+- Slice 5 Completion Approval: the existing all-slice conditional
+  authorization is applied after the independent implementation review
+  returned `Ready` with no Findings. The exact completion package paths are
+  `src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`,
+  `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`, and
+  `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`.
 - Original Slice 2 implementation review: `Ready`; Findings: none, published
   at `75add547`; its completion gate is superseded by the unexpected 36-blocker
   cloud result and must not be committed independently.
@@ -246,9 +253,10 @@ approved slice and its code starts only after the transition commit.
 Completion Approval was activated by the corrected independent implementation
 reviews returning `Ready` with no Findings and is consumed by the runtime
 completions published at `9e2c45a4`, `a7a7ecbc`, and `2013778c`; the Slice 2
-format-only package is complete at `8ec1f070`. The two-document transition
-commit must complete before Slice 5 runtime implementation or Feature Exit
-starts.
+format-only package is complete at `8ec1f070`. Slice 5's independent review is
+`Ready` with no Findings, so the existing all-slice conditional authorization
+applies to its exact three-path completion package. Its completion commit,
+published Cloud zero-blocker result, and final full validation remain pending.
 
 ## Closure Approval
 
@@ -920,9 +928,10 @@ src/presentation/vscode/commands/semanticDiffCommand.ts`. `qlty check` and
 
 ### Slice 5: Preserve Report Provider Concurrency And Lifetime
 
-- Status: Approved and active; the ten report-provider findings remain. Runtime
-  implementation starts only after the exact two-document Slice 4 transition
-  commit.
+- Status: Implementation complete; independent implementation review is
+  `Ready` with no Findings, and the existing all-slice conditional Completion
+  Approval is applied. The exact three-path completion commit is pending; the
+  published Cloud zero-blocker gate and final full validation remain pending.
 - Scope: decompose the report-document provider's filename selection, content
   lookup, open/commit state transition, copy/save workflows, commit draining,
   and report resolution in `semanticDiffReportDocument.ts`. Keep one provider
@@ -973,6 +982,36 @@ src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`.
 - Out of Scope: cache-policy or limit changes, persisted reports, background
   storage, command registration, wording, output-mode semantics, and new host
   capabilities.
+
+#### Slice 5 Implementation Evidence
+
+- Implementation result: the report-document provider keeps its public
+  commands, URI scheme and metadata, in-memory content, creation-order commit
+  queue, LRU access and tie ordering, failed-open rollback, stale-operation
+  invalidation, copy/save messages, UTF-8 save bytes, and idempotent disposal.
+  Its filename selection, content lookup, open/copy/save workflows, commit
+  draining, and report resolution are decomposed into small private helpers
+  without changing the state transitions or host-operation outcomes.
+- Exact implementation path: only
+  `src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts` was
+  changed. `src/test/suite/semanticDiffReportDocument.test.ts` remained
+  validation-only; no optional state module was added. The evidence paths are
+  exactly `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md` and
+  `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`.
+- Validation succeeded in order with `rtk pnpm run test:compile` and
+  `rtk pnpm run test:desktop:run`. The target `rtk pnpm exec qlty smells
+--no-snippets src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`
+  produced no smell output, target `qlty check` returned `No issues`, target
+  `qlty fmt` passed, and `rtk git diff --check` passed. The independent
+  reviewer also confirmed the compiled web test and the same no-smell/no-issue
+  Qlty results.
+- Production readiness: the provider retains browser-safe `TextEncoder`, no
+  Node built-in, VS Code `^1.75.0` APIs, and the existing desktop/web-safe
+  dependency boundary. No README, CHANGELOG, use-case, architecture, or
+  roadmap update is required. Independent implementation review is `Ready`
+  with no Findings; Main applied the existing all-slice conditional Completion
+  Approval to the exact three-path package. The completion commit is pending,
+  followed by the published Cloud zero-blocker check and final full sequence.
 
 ## Planning Inputs
 
@@ -1140,13 +1179,13 @@ src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`.
 
 ## Feature Exit
 
-- Definition of Done status: Slices 1-4 implementation reviews are complete,
-  and conditional Completion Approval is recorded. Slice 4 is published at
-  `2013778c` with structural 10, fmt 0, Verify/CodeQL passing, and no
-  replacement finding; the expected ten Slice 5 report-provider findings
-  remain. Slice 5 is the active approved slice and its code is gated only by
-  the exact two-document transition commit. Slices 1-3 published gates remain
-  complete with no replacement findings.
+- Definition of Done status: Slices 1-4 implementation reviews and completion
+  gates are complete. Slice 5 implementation review is `Ready` with no
+  Findings, and the existing conditional Completion Approval is applied to its
+  exact three-path completion package. The Slice 5 completion commit, the
+  published Cloud zero-blocker result, and the final full validation sequence
+  remain pending; Slices 1-4 published gates remain complete with no
+  replacement findings.
 - Durable documentation updates: none expected; re-evaluate only if an actual
   durable behavior or architecture decision changes.
 - Required exit evidence: five focused completion commits; every requirement
