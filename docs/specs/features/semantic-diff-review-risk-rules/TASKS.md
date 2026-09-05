@@ -4,8 +4,8 @@
 
 - Purpose: expand evidence-based review recommendations without presenting
   definition changes as verified runtime failures.
-- Approved or active slice: Slice 3; Slices 1 and 2 are completion-committed,
-  and the selected Slice 3 implementation scope is approved for the next
+- Approved or active slice: Slice 4; Slices 1-3 are completion-committed, and
+  the selected Slice 4 implementation scope is approved for the next
   implementation handoff.
 - Do not: add cycle or terminal-reachability analysis, schedule-semantics
   expansion, runtime or external probes, identity rules, a new confirmation
@@ -18,7 +18,7 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate Slice 3 implementation to `implementer` after this
+- Next decision: delegate Slice 4 implementation to `implementer` after this
   focused approval-state commit.
 
 ## Replanning Record
@@ -84,29 +84,30 @@
 
 ## Plan Status
 
-- Status: Slice 3 approved for implementation.
+- Status: Slice 4 approved for implementation.
 - Planning scope: revised complete four-slice plan covering supported
   start-condition evidence, supported-versus-unsupported calculated schedule
   opportunity loss, external wait constraints, and v13-backed non-assertive
   execution-user-type/resource-group recommendations, with the localized
   Slice 2 Full projection correction recorded below.
 - Review status: `Ready`; independent revised-plan review complete.
-- Human approval: Approved for Slice 3 implementation under the user's current
+- Human approval: Approved for Slice 4 implementation under the user's current
   conversation direction to continue all planned slices in order and apply
   conditional Completion Approval when independent review returns no findings.
-- Active implementation slice: Slice 3.
+- Active implementation slice: Slice 4.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: 2026-09-05, explicit user approval in current conversation
-- Approved scope: Slice 3 — existing supported wait-release, timeout, file,
-  and event evidence details and constraints across established output modes,
-  plus the named tests within the Slice 3 Approval Boundary.
+- Approved scope: Slice 4 — v13-applicable execution-user-type and raw JP1
+  resource-group evidence selectors, unit-type-aware defaults and exclusions,
+  established structured output consumption, and named tests within the Slice
+  4 Approval Boundary.
 - Approved paths:
   - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
 
-The approved Slice 3 implementation scope is recorded above. Main delegates
+The approved Slice 4 implementation scope is recorded above. Main delegates
 and completes one slice at a time in the order below. The user's standing
 direction permits Main to record Completion Approval after an independent
 `Ready` review with no findings and then activate the next planned slice. Any
@@ -114,22 +115,12 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: 2026-09-05, conditional approval granted by the user and applied
-  after the final independent implementation review returned `Ready` with no
-  findings
-- Approved scope: Slice 3 — supported wait-release, timeout, file, and event
-  evidence selection, exact structured details and constraints, complete
-  focused validation coverage, and implementation/traceability evidence.
-- Approved paths:
-  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
-  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
-  - `src/domain/services/semantic-diff/semanticDiffEvidenceRules.ts`
-  - `src/test/suite/semanticDiffConditions.test.ts`
-  - `src/test/suite/semanticDiffEvidenceRules.test.ts`
-- Implementation review verdict: `Ready`; final review found no remaining
-  findings after the coverage and evidence updates
-- Commit status: Eligible for the focused Slice 3 completion commit
+- Status: Pending
+- Approved at: none
+- Approved scope: none
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
 
 ## Closure Approval
 
@@ -479,8 +470,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 3: Make External Wait Constraints Complete And Structured
 
-- Status: Complete; independently reviewed `Ready`, Completion Approval
-  recorded, and focused completion commit pending.
+- Status: Complete; independently reviewed `Ready`, completion-approved, and
+  committed in `6a050df0`.
 - Scope: preserve supported wait-release, timeout, file, and event selections
   while completing their typed before/after evidence and mandatory runtime or
   external-state constraints across every output mode.
@@ -519,7 +510,7 @@ not an implementation surface owned by this feature:
 
 ### Slice 4: Recommend Review For Execution User Type And Resource Group Changes
 
-- Status: Planned; blocked on Slice 3 completion and approval.
+- Status: Approved; ready for implementation handoff.
 - Scope: generate definition-only recommendations for valid raw normalized
   `eu` execution user type and `jp1ResourceGroup` changes on their v13-
   applicable unit types, using the imported reason/detail/constraint contract;
