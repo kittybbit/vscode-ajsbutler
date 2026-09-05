@@ -13,6 +13,10 @@
   `jc` or containing-group context, closest `sdd`/`md`/`stt` values, and the
   documented defaults without consulting host or external calendars. Missing
   or invalid definition context remains explicit.
+- Expanded schedule comparison for fully qualified open-day and closed-day
+  forms by using complete definition-backed `op`/`cl` classifications, with
+  exact-date precedence, bounded operational-month counting, and no host or
+  external calendar fallback.
 - Improved Semantic Diff Markdown reports so English and Japanese output
   explains typed identity rules, strategies, canonical fields, and all
   ambiguous candidates while preserving raw JP1/AJS values safely.

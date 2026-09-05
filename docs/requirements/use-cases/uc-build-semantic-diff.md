@@ -209,6 +209,21 @@ Scenario: Calendar-relative schedule forms use normalized definition context
     `calendar-selection` item
   And units outside the comparison scope are not added to the result
 
+Scenario: Definition-backed open and closed schedule forms use explicit classifications
+  Given schedule comparison is requested for a period
+  And a jobnet uses a fully qualified open-day or closed-day `sd` value
+  And its selected `jc` or containing group provides normalized `op` and `cl`
+    calendar data
+  When semantic diff is built
+  Then `*DD` and `@DD` count qualifying days from the operational-month start
+  And `*b[-DD]` and `@b[-DD]` count qualifying days backward from its end
+  And exact-date classifications take precedence over weekday classifications
+  And duplicate values are idempotent while contradictory values remain an
+    explicit `calendar-selection` item
+  And every inspected date must be classified without host or external
+    calendar fallback
+  And units outside the comparison scope are not added to the result
+
 Scenario: A missing fifth weekday occurrence is a valid no-runs schedule
   Given schedule comparison is requested for a period
   And a fully qualified weekday rule has no fifth matching weekday in its month

@@ -7,6 +7,7 @@ import type {
 } from "../../domain/models/ajs/AjsDocument";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
 import {
+  classifyScheduleCalendarDay,
   createScheduleCalendarContextIndex,
   resolveOperationalMonth,
   resolveScheduleCalendarContext,
@@ -304,6 +305,41 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       [
         ["added", "2026-04-15"],
         ["removed", "2026-04-01"],
+      ],
+    );
+  });
+
+  test("keeps before and after explicit open-day calendars independent", () => {
+    const beforeMain = jobnet(
+      "/root/main",
+      { sd: "2026/04/*01", st: "09:00" },
+      "/root",
+    );
+    const afterMain = jobnet(
+      "/root/main",
+      { sd: "2026/04/*01", st: "09:00" },
+      "/root",
+    );
+    const beforeRoot = group("/root", [beforeMain], {
+      op: ["mo", "tu", "we", "th"],
+      cl: ["fr", "sa", "su", "2026/04/01"],
+    });
+    const afterRoot = group("/root", [afterMain], {
+      op: ["mo", "tu", "we", "th", "fr", "sa", "su"],
+    });
+    const result = compareSemanticDiff({
+      before: document([beforeRoot]),
+      after: document([afterRoot]),
+      options: { scheduleComparisonPeriod: period },
+    });
+    assert.deepStrictEqual(
+      result.scheduleComparison?.runChanges.map((change) => [
+        change.kind,
+        change.date,
+      ]),
+      [
+        ["added", "2026-04-01"],
+        ["removed", "2026-04-02"],
       ],
     );
   });
@@ -726,6 +762,42 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       ],
     );
 
+    const incomplete = jobnet("/root/incomplete", {
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    addCase(
+      "incomplete calendar",
+      incomplete,
+      group("/root", [incomplete], { op: "mo" }),
+      [
+        {
+          key: "sd",
+          value: "2026/04/*01",
+          reason: "calendar-selection",
+          rule: 1,
+        },
+      ],
+    );
+
+    const conflict = jobnet("/root/conflict", {
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    addCase(
+      "conflicting calendar",
+      conflict,
+      group("/root", [conflict], { op: "mo", cl: "mo" }),
+      [
+        {
+          key: "sd",
+          value: "2026/04/*01",
+          reason: "calendar-selection",
+          rule: 1,
+        },
+      ],
+    );
+
     cases.forEach(({ name, unit, root, expected }) => {
       const result = compareSemanticDiff({
         before: document([]),
@@ -806,5 +878,361 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       jobnet("/root/main", { sd: "2026/04/+01" }),
     );
     assert.strictEqual(duplicatePathContext.status, "invalid");
+  });
+
+  test("projects first, nth, and last open and closed days", () => {
+    const main = jobnet("/root/main", {
+      sd: [
+        "1,2026/04/*01",
+        "2,2026/04/*02",
+        "3,2026/04/*b",
+        "4,2026/04/*b-01",
+        "5,2026/04/@01",
+        "6,2026/04/@02",
+        "7,2026/04/@b",
+        "8,2026/04/@b-01",
+      ],
+      st: [
+        "1,09:00",
+        "2,09:00",
+        "3,09:00",
+        "4,09:00",
+        "5,09:00",
+        "6,09:00",
+        "7,09:00",
+        "8,09:00",
+      ],
+    });
+    const root = group("/root", [main], {
+      op: ["mo", "tu", "we", "th"],
+      cl: ["fr", "sa", "su", "2026/04/01"],
+    });
+    const context = resolveScheduleCalendarContext(document([root]), main);
+    assert.strictEqual(context.status, "supported");
+    assert.deepStrictEqual(
+      classifyScheduleCalendarDay(context, new Date("2026-04-01T00:00:00Z")),
+      { status: "closed" },
+    );
+    assert.deepStrictEqual(
+      classifyScheduleCalendarDay(context, new Date("2026-04-02T00:00:00Z")),
+      { status: "open" },
+    );
+
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [main],
+      matches: [],
+      period,
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [
+        decision.date,
+        decision.kind === "added" ? decision.after.rule : undefined,
+      ]),
+      [
+        ["2026-04-01", 5],
+        ["2026-04-02", 1],
+        ["2026-04-03", 6],
+        ["2026-04-06", 2],
+        ["2026-04-25", 8],
+        ["2026-04-26", 7],
+        ["2026-04-29", 4],
+        ["2026-04-30", 3],
+      ],
+    );
+    assert.deepStrictEqual(result.unsupportedDecisions, []);
+  });
+
+  test("supports 31 and 34 backward open and closed offsets in a 35-day month", () => {
+    const operationalMonth = {
+      sdd: "mo:1",
+      md: "th",
+    };
+    const open = jobnet("/root/open-boundary", {
+      sd: ["1,2026/06/*b-31", "2,2026/06/*b-34", "3,2026/06/*b-35"],
+      st: ["1,09:00", "2,09:00", "3,09:00"],
+    });
+    const openRoot = group("/root", [open], {
+      ...operationalMonth,
+      op: ["su", "mo", "tu", "we", "th", "fr", "sa"],
+    });
+    const openContext = resolveScheduleCalendarContext(
+      document([openRoot]),
+      open,
+    );
+    assert.strictEqual(openContext.status, "supported");
+    const openMonth = resolveOperationalMonth(openContext, 2026, 6);
+    assert.strictEqual(
+      openMonth?.start.toISOString().slice(0, 10),
+      "2026-06-01",
+    );
+    assert.strictEqual(
+      openMonth?.endExclusive.toISOString().slice(0, 10),
+      "2026-07-06",
+    );
+    const openResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [open],
+      matches: [],
+      period: { from: "2026-06-01", to: "2026-07-06" },
+      afterDocument: document([openRoot]),
+    });
+    assert.strictEqual(openResult.kind, "evaluated");
+    if (openResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      openResult.runDecisions.map((decision) => [
+        decision.date,
+        decision.kind === "added" ? decision.after.rule : undefined,
+      ]),
+      [
+        ["2026-06-01", 2],
+        ["2026-06-04", 1],
+      ],
+    );
+    assert.deepStrictEqual(
+      openResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.value,
+        decision.reason,
+      ]),
+      [["3,2026/06/*b-35", "invalid-calendar-day"]],
+    );
+
+    const closed = jobnet("/root/closed-boundary", {
+      sd: ["1,2026/06/@b-31", "2,2026/06/@b-34", "3,2026/06/@b-35"],
+      st: ["1,09:00", "2,09:00", "3,09:00"],
+    });
+    const closedRoot = group("/root", [closed], {
+      ...operationalMonth,
+      cl: ["su", "mo", "tu", "we", "th", "fr", "sa"],
+    });
+    const closedResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [closed],
+      matches: [],
+      period: { from: "2026-06-01", to: "2026-07-06" },
+      afterDocument: document([closedRoot]),
+    });
+    assert.strictEqual(closedResult.kind, "evaluated");
+    if (closedResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      closedResult.runDecisions.map((decision) => [
+        decision.date,
+        decision.kind === "added" ? decision.after.rule : undefined,
+      ]),
+      [
+        ["2026-06-01", 2],
+        ["2026-06-04", 1],
+      ],
+    );
+    assert.deepStrictEqual(
+      closedResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.value,
+        decision.reason,
+      ]),
+      [["3,2026/06/@b-35", "invalid-calendar-day"]],
+    );
+  });
+
+  test("uses Gregorian leap-day boundaries for open and closed projection", () => {
+    const main = jobnet("/root/leap", {
+      sd: ["1,2028/02/*b", "2,2028/02/@b"],
+      st: ["1,09:00", "2,09:00"],
+    });
+    const root = group("/root", [main], {
+      op: ["su", "mo", "tu", "we", "th", "fr", "sa"],
+      cl: "2028/02/29",
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [main],
+      matches: [],
+      period: { from: "2028-02-01", to: "2028-03-01" },
+      afterDocument: document([root]),
+    });
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      result.runDecisions.map((decision) => [
+        decision.date,
+        decision.kind === "added" ? decision.after.rule : undefined,
+      ]),
+      [
+        ["2028-02-28", 1],
+        ["2028-02-29", 2],
+      ],
+    );
+    assert.deepStrictEqual(result.zeroRunCandidates, []);
+    assert.deepStrictEqual(result.unsupportedDecisions, []);
+  });
+
+  test("uses the closest exact calendar selector and preserves duplicate semantics", () => {
+    const main = jobnet(
+      "/root/outer/main",
+      {
+        sd: ["1,2026/04/*01", "2,2026/04/@01"],
+        st: ["1,09:00", "2,09:00"],
+      },
+      "/root/outer",
+    );
+    const outer = group("/root/outer", [main], {
+      op: ["mo", "mo", "2026/04/01"],
+    });
+    const root = group("/root", [outer], {
+      cl: "we",
+    });
+    const context = resolveScheduleCalendarContext(document([root]), main);
+    assert.strictEqual(context.status, "supported");
+    assert.deepStrictEqual(
+      classifyScheduleCalendarDay(context, new Date("2026-04-01T00:00:00Z")),
+      { status: "open" },
+    );
+    assert.deepStrictEqual(
+      classifyScheduleCalendarDay(context, new Date("2026-04-08T00:00:00Z")),
+      { status: "closed" },
+    );
+
+    const duplicate = jobnet("/root/duplicate", {
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    const duplicateContext = resolveScheduleCalendarContext(
+      document([group("/root", [duplicate], { op: ["mo", "mo"] })]),
+      duplicate,
+    );
+    assert.strictEqual(duplicateContext.status, "supported");
+
+    const conflict = jobnet("/root/conflict", {
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    const conflictContext = resolveScheduleCalendarContext(
+      document([group("/root", [conflict], { op: "we", cl: "we" })]),
+      conflict,
+    );
+    assert.strictEqual(conflictContext.status, "invalid");
+    assert.strictEqual(
+      conflictContext.evidenceId,
+      "schedule:calendar:invalid-base-or-conflict:cl",
+    );
+  });
+
+  test("requires complete classification and keeps operational-month boundaries", () => {
+    const incomplete = jobnet("/root/incomplete", {
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    const incompleteRoot = group("/root", [incomplete], { op: "mo" });
+    const incompleteResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [incomplete],
+      matches: [],
+      period,
+      afterDocument: document([incompleteRoot]),
+    });
+    assert.strictEqual(incompleteResult.kind, "evaluated");
+    if (incompleteResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(incompleteResult.runDecisions, []);
+    assert.deepStrictEqual(
+      incompleteResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.key,
+        decision.reason,
+      ]),
+      [["sd", "calendar-selection"]],
+    );
+
+    const boundary = jobnet("/root/boundary", {
+      sd: ["1,2026/04/*01", "2,2026/04/*b"],
+      st: ["1,09:00", "2,09:00"],
+    });
+    const boundaryRoot = group("/root", [boundary], {
+      sdd: "1",
+      md: "ne",
+      op: ["mo", "tu", "we", "th", "fr", "sa", "su"],
+    });
+    const boundaryResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [boundary],
+      matches: [],
+      period: { from: "2026-02-01", to: "2026-04-02" },
+      afterDocument: document([boundaryRoot]),
+    });
+    assert.strictEqual(boundaryResult.kind, "evaluated");
+    if (boundaryResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      boundaryResult.runDecisions.map((decision) => decision.date),
+      ["2026-03-01", "2026-03-31"],
+    );
+
+    const noOpen = jobnet("/root/no-open", {
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    const noOpenRoot = group("/root", [noOpen], {
+      cl: ["mo", "tu", "we", "th", "fr", "sa", "su"],
+    });
+    const noOpenResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [noOpen],
+      matches: [],
+      period,
+      afterDocument: document([noOpenRoot]),
+    });
+    assert.strictEqual(noOpenResult.kind, "evaluated");
+    if (noOpenResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(noOpenResult.runDecisions, []);
+    assert.deepStrictEqual(
+      noOpenResult.zeroRunCandidates.map((candidate) => candidate.id),
+      [noOpen.id],
+    );
+  });
+
+  test("maps invalid open-day syntax and missing jc with existing evidence", () => {
+    const invalid = jobnet("/root/invalid", {
+      sd: "2026/04/*36",
+      st: "09:00",
+    });
+    const invalidResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [invalid],
+      matches: [],
+      period,
+      afterDocument: document([group("/root", [invalid])]),
+    });
+    assert.strictEqual(invalidResult.kind, "evaluated");
+    if (invalidResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      invalidResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.value,
+        decision.reason,
+      ]),
+      [["2026/04/*36", "invalid-calendar-day"]],
+    );
+
+    const missing = jobnet("/root/missing", {
+      jc: "/root/no-calendar",
+      sd: "2026/04/*01",
+      st: "09:00",
+    });
+    const missingResult = compareSemanticDiff({
+      before: document([]),
+      after: document([group("/root", [missing])]),
+      options: { scheduleComparisonPeriod: period },
+    });
+    assertCalendarUnsupportedItems(missingResult, missing, [
+      {
+        key: "jc",
+        value: "/root/no-calendar",
+        reason: "calendar-selection",
+      },
+      {
+        key: "sd",
+        value: "2026/04/*01",
+        reason: "calendar-selection",
+        rule: 1,
+      },
+    ]);
   });
 });

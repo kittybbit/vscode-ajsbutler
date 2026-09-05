@@ -11,6 +11,7 @@ import type {
   SemanticDiffScheduleRuleInterpretation,
 } from "./semanticDiffScheduleTypes";
 import {
+  classifyScheduleCalendarDay,
   operationalMonthDate,
   operationalMonthLength,
   isFullyQualifiedRelativeScheduleDate,
@@ -27,6 +28,8 @@ type DateCandidateResult = {
   invalid: boolean;
   deferred: boolean;
   contextInvalid?: boolean;
+  contextMissing?: boolean;
+  contextEvidenceId?: string;
 };
 
 const createGregorianDate = (
@@ -95,6 +98,113 @@ const relativeDateCandidates = (
     };
   }
   const length = operationalMonthLength(operationalMonth);
+  const classify = (
+    offset: number,
+  ):
+    | "open"
+    | "closed"
+    | { status: "missing-context" | "invalid"; evidenceId: string } => {
+    const result = classifyScheduleCalendarDay(
+      context,
+      operationalMonthDate(operationalMonth, offset),
+    );
+    return "evidenceId" in result
+      ? { status: result.status, evidenceId: result.evidenceId }
+      : result.status;
+  };
+  if (parsed.day.kind === "open" || parsed.day.kind === "closed") {
+    const kind = parsed.day.kind;
+    const count = parsed.day.value;
+    const countOffsets = Array.from({ length }, (_, offset) => offset);
+    const found = (() => {
+      let qualifying = 0;
+      for (const offset of countOffsets) {
+        const classification = classify(offset);
+        if (typeof classification !== "string") {
+          return classification.status === "invalid"
+            ? {
+                candidates: [],
+                invalid: true,
+                deferred: false,
+                contextInvalid: true,
+                contextEvidenceId: classification.evidenceId,
+              }
+            : {
+                candidates: [],
+                invalid: false,
+                deferred: false,
+                contextMissing: true,
+                contextEvidenceId: classification.evidenceId,
+              };
+        }
+        if (classification === kind) {
+          qualifying += 1;
+          if (qualifying === count) {
+            const date = operationalMonthDate(operationalMonth, offset);
+            return {
+              candidates: [
+                formatDate(
+                  date.getUTCFullYear(),
+                  date.getUTCMonth() + 1,
+                  date.getUTCDate(),
+                ),
+              ],
+              invalid: false,
+              deferred: false,
+            };
+          }
+        }
+      }
+      return { candidates: [], invalid: false, deferred: false };
+    })();
+    return found;
+  }
+  if (
+    parsed.day.kind === "backward" &&
+    (parsed.day.prefix === "*" || parsed.day.prefix === "@")
+  ) {
+    const kind = parsed.day.prefix === "*" ? "open" : "closed";
+    const targetOffset = parsed.day.offset ?? 0;
+    let qualifying = 0;
+    for (let offset = length - 1; offset >= 0; offset -= 1) {
+      const classification = classify(offset);
+      if (typeof classification !== "string") {
+        return classification.status === "invalid"
+          ? {
+              candidates: [],
+              invalid: true,
+              deferred: false,
+              contextInvalid: true,
+              contextEvidenceId: classification.evidenceId,
+            }
+          : {
+              candidates: [],
+              invalid: false,
+              deferred: false,
+              contextMissing: true,
+              contextEvidenceId: classification.evidenceId,
+            };
+      }
+      if (classification === kind) {
+        if (qualifying === targetOffset) {
+          const date = operationalMonthDate(operationalMonth, offset);
+          return {
+            candidates: [
+              formatDate(
+                date.getUTCFullYear(),
+                date.getUTCMonth() + 1,
+                date.getUTCDate(),
+              ),
+            ],
+            invalid: false,
+            deferred: false,
+          };
+        }
+        qualifying += 1;
+      }
+    }
+    return { candidates: [], invalid: false, deferred: false };
+  }
   if (parsed.day.kind === "relative") {
     const offset = parsed.day.value - 1;
     return offset < 0 || offset >= length
@@ -490,7 +600,25 @@ export function projectScheduleRuns(
         status: "invalid",
         reason: "calendar-selection",
         evidence: {
-          id: "schedule:calendar:invalid-base-or-conflict:sdd",
+          id:
+            candidateResult.contextEvidenceId ??
+            "schedule:calendar:invalid-base-or-conflict:sdd",
+          rawParameters: [
+            rule.parameter,
+            ...(calendarContext?.rawParameters ?? []),
+          ],
+          rule: rule.rule,
+        },
+      });
+    }
+    if (candidateResult.contextMissing) {
+      return cloneRule(rule, {
+        status: "missing-context",
+        reason: "calendar-selection",
+        evidence: {
+          id:
+            candidateResult.contextEvidenceId ??
+            "schedule:calendar:missing-context:calendar",
           rawParameters: [
             rule.parameter,
             ...(calendarContext?.rawParameters ?? []),

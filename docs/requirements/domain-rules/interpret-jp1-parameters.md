@@ -174,6 +174,33 @@ wording or a diagnostic message.
   does not consult host locale, timezone, clock, or external calendar data.
 - Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM); [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
+### `JP1-PARAM-SCHEDULE-OPEN-CLOSED-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/*DD`, `YYYY/MM/@DD`, `YYYY/MM/*b[-DD]`, and
+  `YYYY/MM/@b[-DD]`. `*` counts open days and `@` counts closed days.
+- The calendar source is the exact normalized job group named by one absolute
+  `jc` value, or the nearest containing group followed through its group
+  ancestors when `jc` is omitted. `op` entries are open and `cl` entries are
+  closed. The closest exact-date selector overrides the closest weekday
+  selector for a concrete date. Identical duplicate values are idempotent;
+  contradictory open/closed values for one selector in the same group are
+  invalid.
+- `*DD` and `@DD` count the `DD`th qualifying day inclusively from the
+  operational-month start (`DD` is `01` through `35`). `*b` and `@b` select
+  the last qualifying day, and `*b-DD` and `@b-DD` select the `DD`th
+  zero-based qualifying offset backward from the operational-month end
+  (`DD` is `00` through `34`). Every inspected date must have an explicit
+  `op` or `cl` classification. A missing qualifying date is a valid no-runs
+  result; incomplete classification is missing context, and invalid counts,
+  contradictory selectors, or impossible base settings remain invalid.
+- Omitted-year/month forms and unsupported substitution behavior remain
+  uncalculated. The rule uses only normalized definition data and proleptic
+  Gregorian arithmetic; it does not consult host locale, timezone, current
+  clock, filesystem, network, WebAPI, or external calendar data. Existing
+  application mapping and DTO shapes are unchanged.
+- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM); [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10 and §5(7)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in

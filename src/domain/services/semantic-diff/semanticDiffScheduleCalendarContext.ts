@@ -17,6 +17,32 @@ export type SemanticDiffScheduleBaseDay =
   | { kind: "numeric"; value: number }
   | { kind: "weekday"; weekday: ScheduleDateWeekday; occurrence: number };
 
+export type SemanticDiffScheduleCalendarDayClassification = "open" | "closed";
+
+type SemanticDiffScheduleCalendarSelector =
+  | {
+      kind: "exact";
+      year?: number;
+      month: number;
+      day: number;
+      key: string;
+    }
+  | {
+      kind: "weekday";
+      weekday: ScheduleDateWeekday;
+      key: string;
+    };
+
+type SemanticDiffScheduleCalendarEntry = {
+  selector: SemanticDiffScheduleCalendarSelector;
+  classification: SemanticDiffScheduleCalendarDayClassification;
+  parameter: AjsParameter;
+};
+
+type SemanticDiffScheduleCalendarGroup = {
+  entries: SemanticDiffScheduleCalendarEntry[];
+};
+
 export type SemanticDiffScheduleCalendarSelection = {
   status: SemanticDiffScheduleCalendarContextStatus;
   evidenceId: string;
@@ -32,6 +58,7 @@ export type SemanticDiffScheduleCalendarContext = {
   baseTime?: string;
   rawParameters: AjsParameter[];
   evidenceId: string;
+  calendarGroups?: SemanticDiffScheduleCalendarGroup[];
 };
 
 export type SemanticDiffScheduleCalendarContextIndex = {
@@ -151,6 +178,85 @@ const parseBaseDay = (
   };
 };
 
+const daysInGregorianMonth = (year: number, month: number): number => {
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  return [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][
+    month - 1
+  ];
+};
+
+const parseCalendarSelector = (
+  value: string,
+): SemanticDiffScheduleCalendarSelector | undefined => {
+  const exact = /^(?:(\d{4})\/)?(\d{2})\/(\d{2})$/.exec(value);
+  if (exact) {
+    const year = exact[1] === undefined ? undefined : Number(exact[1]);
+    const month = Number(exact[2]);
+    const day = Number(exact[3]);
+    if (
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31 ||
+      (year !== undefined && day > daysInGregorianMonth(year, month))
+    ) {
+      return undefined;
+    }
+    return {
+      kind: "exact",
+      ...(year === undefined ? {} : { year }),
+      month,
+      day,
+      key: `exact:${year ?? "*"}/${month}/${day}`,
+    };
+  }
+  const weekday = /^(su|mo|tu|we|th|fr|sa)(?::(?:[1-5]|b))?$/.exec(value);
+  return weekday
+    ? {
+        kind: "weekday",
+        weekday: weekday[1] as ScheduleDateWeekday,
+        key: `weekday:${weekday[1]}`,
+      }
+    : undefined;
+};
+
+const calendarParameters = (group: AjsUnit): AjsParameter[] =>
+  group.parameters.filter(
+    (parameter) => parameter.key === "op" || parameter.key === "cl",
+  );
+
+const resolveCalendarGroups = (
+  groups: AjsUnit[],
+): {
+  groups: SemanticDiffScheduleCalendarGroup[];
+  invalidKey?: string;
+} => {
+  const resolvedGroups: SemanticDiffScheduleCalendarGroup[] = [];
+  for (const group of groups) {
+    const entries: SemanticDiffScheduleCalendarEntry[] = [];
+    const classifications = new Map<
+      string,
+      SemanticDiffScheduleCalendarDayClassification
+    >();
+    for (const parameter of calendarParameters(group)) {
+      const selector = parseCalendarSelector(parameter.value);
+      if (!selector) {
+        return { groups: resolvedGroups, invalidKey: parameter.key };
+      }
+      const classification: SemanticDiffScheduleCalendarDayClassification =
+        parameter.key === "op" ? "open" : "closed";
+      const existing = classifications.get(selector.key);
+      if (existing !== undefined && existing !== classification) {
+        return { groups: resolvedGroups, invalidKey: parameter.key };
+      }
+      classifications.set(selector.key, classification);
+      entries.push({ selector, classification, parameter });
+    }
+    resolvedGroups.push({ entries });
+  }
+  return { groups: resolvedGroups };
+};
+
 const isValidBaseTime = (value: string): boolean => {
   const matched = /^(\d{2}):(\d{2})$/.exec(value);
   return matched !== null && Number(matched[1]) < 24 && Number(matched[2]) < 60;
@@ -180,6 +286,7 @@ const contextResult = (input: {
   baseTime?: string;
   rawParameters: AjsParameter[];
   evidenceId: string;
+  calendarGroups?: SemanticDiffScheduleCalendarGroup[];
 }): SemanticDiffScheduleCalendarContext => input;
 
 const invalidBaseContext = (
@@ -297,6 +404,7 @@ export const resolveScheduleCalendarContext = (
   const rawParameters = [
     ...rawSelector,
     ...baseParameters.flatMap(({ parameters }) => parameters),
+    ...groups.flatMap(calendarParameters),
   ];
   if (baseParameters.some(({ invalid }) => invalid)) {
     const invalidKey = ["sdd", "md", "stt"].find(
@@ -334,6 +442,14 @@ export const resolveScheduleCalendarContext = (
       evidenceId: "schedule:calendar:missing-context:stt",
     });
   }
+  const resolvedCalendarGroups = resolveCalendarGroups(groups);
+  if (resolvedCalendarGroups.invalidKey) {
+    return invalidBaseContext(
+      selection,
+      rawParameters,
+      resolvedCalendarGroups.invalidKey,
+    );
+  }
   return contextResult({
     status: "supported",
     selection,
@@ -343,6 +459,7 @@ export const resolveScheduleCalendarContext = (
     baseTime,
     rawParameters,
     evidenceId: "schedule:calendar:resolved",
+    calendarGroups: resolvedCalendarGroups.groups,
   });
 };
 
@@ -438,11 +555,86 @@ export const operationalMonthDate = (
   offset: number,
 ): Date => new Date(month.start.getTime() + offset * 86_400_000);
 
+export type SemanticDiffScheduleCalendarDayResult =
+  | {
+      status: SemanticDiffScheduleCalendarDayClassification;
+    }
+  | {
+      status: "missing-context" | "invalid";
+      evidenceId: string;
+    };
+
+const selectorMatchesDate = (
+  selector: SemanticDiffScheduleCalendarSelector,
+  date: Date,
+): boolean =>
+  selector.kind === "exact"
+    ? selector.month === date.getUTCMonth() + 1 &&
+      selector.day === date.getUTCDate() &&
+      (selector.year === undefined || selector.year === date.getUTCFullYear())
+    : selector.weekday ===
+      (["su", "mo", "tu", "we", "th", "fr", "sa"][
+        date.getUTCDay()
+      ] as ScheduleDateWeekday);
+
+const classifyCalendarSelector = (
+  context: SemanticDiffScheduleCalendarContext,
+  date: Date,
+  kind: "exact" | "weekday",
+): SemanticDiffScheduleCalendarDayResult | undefined => {
+  for (const group of context.calendarGroups ?? []) {
+    const matches = group.entries.filter(
+      (entry) =>
+        entry.selector.kind === kind &&
+        selectorMatchesDate(entry.selector, date),
+    );
+    if (matches.length === 0) {
+      continue;
+    }
+    const classifications = new Set(
+      matches.map((entry) => entry.classification),
+    );
+    if (classifications.size > 1) {
+      return {
+        status: "invalid",
+        evidenceId: `schedule:calendar:invalid-base-or-conflict:${matches[0].parameter.key}`,
+      };
+    }
+    return { status: matches[0].classification };
+  }
+  return undefined;
+};
+
+/** Resolve one operational-calendar day with exact-date precedence. */
+export const classifyScheduleCalendarDay = (
+  context: SemanticDiffScheduleCalendarContext,
+  date: Date,
+): SemanticDiffScheduleCalendarDayResult => {
+  if (context.status !== "supported") {
+    return {
+      status: context.status,
+      evidenceId: context.evidenceId,
+    };
+  }
+  return (
+    classifyCalendarSelector(context, date, "exact") ??
+    classifyCalendarSelector(context, date, "weekday") ?? {
+      status: "missing-context",
+      evidenceId: "schedule:calendar:missing-context:calendar",
+    }
+  );
+};
+
 export const relativeScheduleDateRequiresContext = (
   parsed: ScheduleDateInterpretation,
 ): boolean =>
   parsed.day.kind === "relative" ||
-  (parsed.day.kind === "backward" && parsed.day.prefix === "+") ||
+  parsed.day.kind === "open" ||
+  parsed.day.kind === "closed" ||
+  (parsed.day.kind === "backward" &&
+    (parsed.day.prefix === "+" ||
+      parsed.day.prefix === "*" ||
+      parsed.day.prefix === "@")) ||
   (parsed.day.kind === "weekday" && parsed.day.prefix === "+");
 
 export const isSyntacticallyInvalidRelativeScheduleDate = (
@@ -457,10 +649,22 @@ export const isSyntacticallyInvalidRelativeScheduleDate = (
   if (parsed.day.kind === "relative") {
     return parsed.day.value < 1 || parsed.day.value > 31;
   }
+  if (parsed.day.kind === "open" || parsed.day.kind === "closed") {
+    return parsed.day.value < 1 || parsed.day.value > 35;
+  }
   if (parsed.day.kind === "backward" && parsed.day.prefix === "+") {
     return (
       parsed.day.offset !== undefined &&
       (parsed.day.offset < 0 || parsed.day.offset > 30)
+    );
+  }
+  if (
+    parsed.day.kind === "backward" &&
+    (parsed.day.prefix === "*" || parsed.day.prefix === "@")
+  ) {
+    return (
+      parsed.day.offset !== undefined &&
+      (parsed.day.offset < 0 || parsed.day.offset > 34)
     );
   }
   if (parsed.day.kind === "weekday" && parsed.day.prefix === "+") {

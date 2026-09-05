@@ -62,6 +62,14 @@ const relativeDateEvidence = (
   if (!date || date.year === undefined || date.month === undefined) {
     return undefined;
   }
+  if (
+    date.day.kind === "open" ||
+    date.day.kind === "closed" ||
+    (date.day.kind === "backward" &&
+      (date.day.prefix === "*" || date.day.prefix === "@"))
+  ) {
+    return "JP1-PARAM-SCHEDULE-OPEN-CLOSED-001";
+  }
   return date.day.kind === "relative" ||
     (date.day.kind === "backward" && date.day.prefix === "+") ||
     (date.day.kind === "weekday" && date.day.prefix === "+")

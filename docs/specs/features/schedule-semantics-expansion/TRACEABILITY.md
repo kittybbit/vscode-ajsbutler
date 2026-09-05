@@ -204,9 +204,9 @@ and tests before it can pass its completion review.
 
 ## Slice 3 Implementation Evidence
 
-- Status: Slice 3 implementation complete; implementation-reviewer Ready with
-  no findings; Completion Approval granted automatically on 2026-09-06 under
-  the user's explicit per-slice instruction; completion commit pending.
+- Status: Slice 3 complete and committed as `e9f25f69`; implementation-reviewer
+  Ready with no findings; Completion Approval granted automatically on
+  2026-09-06 under the user's explicit per-slice instruction.
 - Context evidence: each side resolves an absolute `jc` target or nearest
   containing job group from the full normalized document. Closest explicit
   `sdd`, `md`, and `stt` values and defaults 1, `th`, and `00:00` are retained
@@ -260,9 +260,65 @@ and tests before it can pass its completion review.
   `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`.
 - Completion gate: implementation-reviewer returned Ready with no findings.
   Completion Approval was automatically granted on 2026-09-06 under the
-  user's explicit per-slice instruction. The exact 15-path Slice 3 diff is
-  approved for the completion commit; feature-level final/closure approval
+  user's explicit per-slice instruction, and the exact 15-path Slice 3 diff
+  was completion-committed as `e9f25f69`. Feature-level final/closure approval
   remains pending until Slices 4–5 complete for the requested bulk human
-  approval.
-- Recommended route: send the exact approved Slice 3 diff to
-  approval-committer for the completion commit.
+  approval. Slice 4's completion commit is pending.
+
+## Slice 4 Implementation Evidence
+
+- Status: Slice 4 implementation complete; implementation-reviewer Ready with
+  no findings; Completion Approval automatically granted on 2026-09-06 under
+  the user's explicit per-slice instruction; completion commit pending.
+- Dependency evidence: Slices 1 through 3 are complete and committed; the
+  Slice 3 dependency is `e9f25f69`.
+- Context evidence: normalized `op` and `cl` values are resolved from the
+  selected absolute `jc` group or containing group and its ancestors. Exact
+  date selectors and weekday selectors use their closest defining group, with
+  exact dates taking precedence for a concrete day. Identical duplicates are
+  idempotent; same-group open/closed conflicts remain invalid with stable
+  `schedule:calendar:invalid-base-or-conflict:<key>` evidence.
+- Projection evidence: fully qualified `*DD`/`@DD` values count explicit open
+  or closed days forward from the operational-month start, while
+  `*b[-DD]`/`@b[-DD]` count backward from the end with the open/closed
+  backward-offset range `0..34`. Every inspected day must be classified.
+  Incomplete classification maps to existing `missing-context`/
+  `calendar-selection` evidence, and a month with no qualifying day is a valid
+  no-runs result.
+- Application evidence: existing `calendar-selection` reason codes, dynamic
+  unsupported IDs, legacy messages, raw schedule details, run-change shape,
+  zero-run confirmation, and public/neutral DTOs remain unchanged. Before and
+  after contexts remain isolated; calendar groups outside the compared unit
+  scope do not widen the result.
+- Validation evidence: focused calendar/schedule/application tests,
+  `pnpm run test:compile`, desktop extension tests, the implementer-run
+  `rtk pnpm run qlty` (`qlty check`: No issues), `pnpm run lint:md`,
+  `pnpm run build`, and `git diff --check` are green. A reviewer-local qlty
+  rerun could not start because the external `~/.qlty` rolling-log file could
+  not be created under that environment's permissions; this is distinct from
+  the successful implementer run. In `pnpm run test:full`, the desktop portion
+  passes; Web execution remains blocked before tests load by the unchanged
+  host Chromium `MachPortRendezvousServer` permission failure. A complete
+  35-day operational month test covers open/closed backward offsets 31 and 34,
+  with offset 35 retained as invalid.
+- Compatibility and production readiness: projection uses pure Gregorian
+  arithmetic and normalized definition data only. No host locale, timezone,
+  clock, filesystem, network, WebAPI, or service-calendar dependency was
+  added. Invalid, incomplete, and no-run outcomes remain recoverable and
+  explicit. Substitution, omitted-`sh`, inheritance, cycles, 48-hour time,
+  and `cftd` remain deferred.
+- Changed paths (exact current Slice 4 diff): `CHANGELOG.md`, `README.md`,
+  `docs/requirements/domain-rules/interpret-jp1-parameters.md`,
+  `docs/requirements/use-cases/uc-build-semantic-diff.md`,
+  `docs/specs/features/schedule-semantics-expansion/TASKS.md`,
+  `docs/specs/features/schedule-semantics-expansion/TRACEABILITY.md`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleCalendarContext.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`, and
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`.
+- Implementation review: Ready with no findings. Completion Approval was
+  automatically granted on 2026-09-06 under the user's explicit per-slice
+  instruction; the exact 10-path Slice 4 diff is eligible for the completion
+  commit. Feature-level final/closure approval remains pending until all
+  slices are complete for the requested bulk human approval. Recommended
+  route: send the exact Slice 4 diff to approval-committer.
