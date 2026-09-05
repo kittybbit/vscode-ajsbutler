@@ -99,7 +99,8 @@ Application owns the host-neutral behavior and data contracts for:
 - syntax diagnostics and parameter hover results
 - stable list/flow navigation identity
 - WebAPI import through an application port
-- semantic diff and scalar report data
+- host-neutral semantic diff results, canonical summaries, and immutable output
+  contexts
 - validated telemetry events
 
 Presentation owns host and rendering concerns:
@@ -108,7 +109,8 @@ Presentation owns host and rendering concerns:
 - save dialogs, clipboard operations, active-editor checks, and message routing
 - React component state, table formatting, graph geometry, viewport behavior,
   search, selection, and expansion
-- localization and display of application results
+- localization and display of application results, including Summary, Full,
+  Audit, and JSON report projections and their mode selection
 
 UI components consume DTOs and view models. They do not parse AJS grammar
 output or import domain objects.

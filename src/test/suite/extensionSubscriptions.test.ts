@@ -20,7 +20,7 @@ suite("Extension subscriptions", () => {
       semanticDiff: {
         buildSemanticDiffReportData: () => ({
           ok: true,
-          changeSet: {
+          result: {
             inputs: {
               before: { side: "before", unitIds: [], relations: [] },
               after: { side: "after", unitIds: [], relations: [] },
@@ -30,7 +30,6 @@ suite("Extension subscriptions", () => {
             confirmationRequired: [],
             unsupportedItems: [],
             limitations: [],
-            reportSections: [],
           },
         }),
       },
@@ -48,7 +47,7 @@ suite("Extension subscriptions", () => {
 
     const subscriptions = createExtensionSubscriptions(context, dependencies);
 
-    assert.strictEqual(subscriptions.length, 10);
+    assert.strictEqual(subscriptions.length, 12);
     assert.strictEqual(new Set(subscriptions).size, subscriptions.length);
     assert.deepStrictEqual(
       context.subscriptions,

@@ -1,15 +1,17 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
-import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import {
   COPY_SEMANTIC_DIFF_MARKDOWN_COMMAND,
+  SAVE_SEMANTIC_DIFF_OUTPUT_COMMAND,
   SEMANTIC_DIFF_REPORT_SCHEME,
   SemanticDiffReportDocumentProvider,
 } from "../../presentation/vscode/semantic-diff/semanticDiffReportDocument";
+import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
+import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 
 export type SemanticDiffWiringDeps = {
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
@@ -28,6 +30,8 @@ export const createSemanticDiffSubscriptions = (
       vscode.window.showInformationMessage(message),
     showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     createUri: (components) => vscode.Uri.from(components),
+    showSaveDialog: (options) => vscode.window.showSaveDialog(options),
+    writeFile: (uri, content) => vscode.workspace.fs.writeFile(uri, content),
   });
 
   return [
@@ -38,18 +42,26 @@ export const createSemanticDiffSubscriptions = (
     vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
       executeCompareSemanticDiffCommand({
         getActiveEditor: () => vscode.window.activeTextEditor,
+        showQuickPick: (items, options) =>
+          vscode.window.showQuickPick(items, options),
         showOpenDialog: (options) => vscode.window.showOpenDialog(options),
         showErrorMessage: (message) => vscode.window.showErrorMessage(message),
         readFile: (uri) => vscode.workspace.fs.readFile(uri),
-        openReport: (report) => reportDocuments.openReport(report),
+        openReport: (output) => reportDocuments.openReport(output),
         language: vscode.env.language,
         buildSemanticDiffReportData: deps.buildSemanticDiffReportData,
-        renderSemanticDiffMarkdown,
+        buildSemanticDiffOutputContext,
+        presentSemanticDiffOutput,
       }),
     ),
     vscode.commands.registerCommand(
       COPY_SEMANTIC_DIFF_MARKDOWN_COMMAND,
       (uri?: vscode.Uri) => reportDocuments.copyReport(uri),
     ),
+    vscode.commands.registerCommand(
+      SAVE_SEMANTIC_DIFF_OUTPUT_COMMAND,
+      (uri?: vscode.Uri) => reportDocuments.saveReport(uri),
+    ),
+    reportDocuments,
   ];
 };

@@ -5,7 +5,7 @@ import {
   type BuildSemanticDiffReportDataInput,
 } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { CompareSemanticDiffInput } from "../../application/semantic-diff/compareSemanticDiff";
-import type { SemanticDiffChangeSet } from "../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 
 type BuildSemanticDiffReportDataObservations = {
@@ -41,7 +41,7 @@ const createParser = (
 
 const createCompare =
   (observations: BuildSemanticDiffReportDataObservations) =>
-  (input: CompareSemanticDiffInput): SemanticDiffChangeSet => {
+  (input: CompareSemanticDiffInput): SemanticDiffResult => {
     observations.comparedInputs.push(input);
     return {
       inputs: {
@@ -53,7 +53,6 @@ const createCompare =
       confirmationRequired: [],
       unsupportedItems: [],
       limitations: [],
-      reportSections: [],
     };
   };
 
@@ -86,7 +85,7 @@ suite("Build Semantic Diff Report Data", () => {
     assert.strictEqual(observations.comparedInputs.length, 1);
     assert.deepStrictEqual(result, {
       ok: true,
-      changeSet: {
+      result: {
         inputs: {
           before: { side: "before", unitIds: [], relations: [] },
           after: { side: "after", unitIds: [], relations: [] },
@@ -96,7 +95,6 @@ suite("Build Semantic Diff Report Data", () => {
         confirmationRequired: [],
         unsupportedItems: [],
         limitations: [],
-        reportSections: [],
       },
     });
   });

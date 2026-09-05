@@ -4,12 +4,14 @@ import type {
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import type {
-  SemanticDiffChangeSet,
+  SemanticDiffChange,
+  SemanticDiffResult,
   SemanticDiffTarget,
   SemanticDiffIdentityDecision,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
 import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
+import { localizedChangeSummary } from "../../presentation/semantic-diff/semanticDiffMarkdownLocalization";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
   Object.entries(values).map(([key, value]) => ({ key, value }));
@@ -61,9 +63,9 @@ const exactIdentityDecision = (
   },
 });
 
-const changeSet = (
-  overrides: Partial<SemanticDiffChangeSet> = {},
-): SemanticDiffChangeSet => ({
+const buildResult = (
+  overrides: Partial<SemanticDiffResult> = {},
+): SemanticDiffResult => ({
   inputs: {
     before: {
       side: "before",
@@ -83,13 +85,12 @@ const changeSet = (
   confirmationRequired: [],
   unsupportedItems: [],
   limitations: [],
-  reportSections: [],
   ...overrides,
 });
 
 suite("Render Semantic Diff Markdown", () => {
   test("renders deterministic no-change report", () => {
-    const input = changeSet();
+    const input = buildResult();
     const result = renderSemanticDiffMarkdown(input);
 
     assert.strictEqual(
@@ -167,13 +168,254 @@ suite("Render Semantic Diff Markdown", () => {
   });
 
   test("renders Japanese headings for ja and regional Japanese language tags", () => {
-    const japanese = renderSemanticDiffMarkdown(changeSet(), "ja");
-    const regionalJapanese = renderSemanticDiffMarkdown(changeSet(), "ja-JP");
-    const fallback = renderSemanticDiffMarkdown(changeSet(), "fr");
+    const japanese = renderSemanticDiffMarkdown(buildResult(), "ja");
+    const regionalJapanese = renderSemanticDiffMarkdown(buildResult(), "ja-JP");
+    const fallback = renderSemanticDiffMarkdown(buildResult(), "fr");
 
     assert.ok(japanese.includes("# 意味差分レポート"));
     assert.ok(regionalJapanese.includes("## 構造変更"));
     assert.ok(fallback.includes("# Semantic Diff Report"));
+  });
+
+  test("keeps attribute summary precedence language-specific for renamed units", () => {
+    const before = unit({
+      name: "before-name",
+      absolutePath: "/root/jobnet/before-name",
+    });
+    const after = unit({
+      name: "after-name",
+      absolutePath: "/root/jobnet/after-name",
+    });
+    const [change] = buildResult({
+      changes: [
+        {
+          id: "attribute:eu:before:after",
+          kind: "changed",
+          elementKind: "attribute",
+          confirmationLevel: "confirmed",
+          identityDecisionId: "identity:renamed-attribute",
+          before: {
+            kind: "attribute",
+            unit: unitReference(before),
+            parameterKey: "eu",
+            category: "execution-environment",
+            values: ["before"],
+          },
+          after: {
+            kind: "attribute",
+            unit: unitReference(after),
+            parameterKey: "eu",
+            category: "execution-environment",
+            values: ["after"],
+          },
+          attributeCategory: "execution-environment",
+          relationPair: null,
+        },
+      ],
+    }).changes as [SemanticDiffChange];
+
+    assert.strictEqual(
+      localizedChangeSummary(change),
+      "before-name eu changed",
+    );
+    assert.strictEqual(
+      localizedChangeSummary(change, "ja-JP"),
+      "after-name の eu を変更",
+    );
+    assert.ok(
+      renderSemanticDiffMarkdown(
+        buildResult({ changes: [change] }),
+        "ja-JP",
+      ).includes("after-name の eu を変更"),
+    );
+  });
+
+  test("derives English move wording from before and after references", () => {
+    const before = unit({
+      name: "moved-job",
+      absolutePath: "/root/before-jobnet/moved-job",
+    });
+    const after = unit({
+      name: "moved-job",
+      absolutePath: "/root/after-jobnet/moved-job",
+    });
+    const change: SemanticDiffChange = {
+      id: "unit:moved:before:after",
+      kind: "moved",
+      elementKind: "unit",
+      confirmationLevel: "confirmed",
+      identityDecisionId: "identity:moved",
+      before: { kind: "unit", unit: unitReference(before) },
+      after: { kind: "unit", unit: unitReference(after) },
+      relationPair: null,
+    };
+
+    assert.strictEqual(
+      localizedChangeSummary(change),
+      "moved-job moved from /root/before-jobnet to /root/after-jobnet",
+    );
+    assert.strictEqual(
+      localizedChangeSummary(change, "ja"),
+      "moved-job を移動",
+    );
+    assert.ok(
+      renderSemanticDiffMarkdown(buildResult({ changes: [change] })).includes(
+        "moved-job moved from /root/before-jobnet to /root/after-jobnet",
+      ),
+    );
+  });
+
+  test("keeps jobnet names in renamed, moved, added, and removed summaries", () => {
+    const beforeRenamed = unit({
+      name: "before-jobnet",
+      unitType: "n",
+      absolutePath: "/root/before-jobnet",
+    });
+    const afterRenamed = unit({
+      name: "after-jobnet",
+      unitType: "n",
+      absolutePath: "/root/after-jobnet",
+    });
+    const beforeMoved = unit({
+      name: "moved-jobnet",
+      unitType: "n",
+      absolutePath: "/root/before-parent/moved-jobnet",
+    });
+    const afterMoved = unit({
+      name: "moved-jobnet",
+      unitType: "n",
+      absolutePath: "/root/after-parent/moved-jobnet",
+    });
+    const added = unit({
+      name: "added-jobnet",
+      unitType: "n",
+      absolutePath: "/root/added-jobnet",
+    });
+    const removed = unit({
+      name: "removed-jobnet",
+      unitType: "n",
+      absolutePath: "/root/removed-jobnet",
+    });
+    const change = (
+      id: string,
+      kind: Extract<
+        SemanticDiffChange["kind"],
+        "renamed" | "moved" | "added" | "removed"
+      >,
+      before: AjsUnit | undefined,
+      after: AjsUnit | undefined,
+    ): SemanticDiffChange => ({
+      id,
+      kind,
+      elementKind: "jobnet",
+      confirmationLevel: "confirmed",
+      identityDecisionId: `identity:${id}`,
+      before: before
+        ? { kind: "jobnet", unit: unitReference(before) }
+        : undefined,
+      after: after ? { kind: "jobnet", unit: unitReference(after) } : undefined,
+      relationPair: null,
+    });
+    const cases = [
+      [
+        change("jobnet:renamed", "renamed", beforeRenamed, afterRenamed),
+        "before-jobnet renamed to after-jobnet",
+        "before-jobnet を after-jobnet に名前変更",
+      ],
+      [
+        change("jobnet:moved", "moved", beforeMoved, afterMoved),
+        "moved-jobnet moved from /root/before-parent to /root/after-parent",
+        "moved-jobnet を移動",
+      ],
+      [
+        change("jobnet:added", "added", undefined, added),
+        "added-jobnet added",
+        "added-jobnetを追加",
+      ],
+      [
+        change("jobnet:removed", "removed", removed, undefined),
+        "removed-jobnet removed",
+        "removed-jobnetを削除",
+      ],
+    ] as const;
+
+    cases.forEach(([jobnetChange, english, japanese]) => {
+      assert.strictEqual(localizedChangeSummary(jobnetChange), english);
+      assert.strictEqual(
+        localizedChangeSummary(jobnetChange, "ja-JP"),
+        japanese,
+      );
+      assert.ok(
+        renderSemanticDiffMarkdown(
+          buildResult({ changes: [jobnetChange] }),
+        ).includes(english),
+      );
+      assert.ok(
+        renderSemanticDiffMarkdown(
+          buildResult({ changes: [jobnetChange] }),
+          "ja-JP",
+        ).includes(japanese),
+      );
+    });
+  });
+
+  test("renders relation sides from relationPair rather than generic targets", () => {
+    const change: SemanticDiffChange = {
+      id: "relation:removed:canonical-source->canonical-target:seq",
+      kind: "removed",
+      elementKind: "relation",
+      confirmationLevel: "confirmed",
+      before: {
+        kind: "relation",
+        relation: {
+          sourceUnitId: "wrong-source",
+          targetUnitId: "wrong-target",
+          type: "con",
+          sourceUnitPath: "/wrong/source",
+          targetUnitPath: "/wrong/target",
+        },
+      },
+      after: {
+        kind: "relation",
+        relation: {
+          sourceUnitId: "wrong-after-source",
+          targetUnitId: "wrong-after-target",
+          type: "con",
+          sourceUnitPath: "/wrong/after-source",
+          targetUnitPath: "/wrong/after-target",
+        },
+      },
+      relationPair: {
+        canonicalPair: {
+          sourceUnitId: "canonical-source",
+          targetUnitId: "canonical-target",
+          type: "seq",
+        },
+        before: {
+          sourceUnitPath: "/pair/source",
+          sourceUnitId: "real-source",
+          targetUnitPath: "/pair/target",
+          targetUnitId: "real-target",
+          type: "seq",
+        },
+        after: null,
+      },
+    };
+
+    const report = renderSemanticDiffMarkdown(
+      buildResult({ changes: [change] }),
+    );
+
+    assert.ok(
+      report.includes("canonical-source-\\>canonical-target relation removed"),
+    );
+    assert.ok(
+      report.includes("relation /pair/source -\\> /pair/target \\(seq\\)"),
+    );
+    assert.strictEqual(report.includes("/wrong/source"), false);
+    assert.strictEqual(report.includes("wrong-source"), false);
+    assert.strictEqual(report.includes("/wrong/after-source"), false);
+    assert.strictEqual(report.includes("wrong-after-source"), false);
   });
 
   test("keeps no-change output when only an exact identity decision exists", () => {
@@ -182,7 +424,7 @@ suite("Render Semantic Diff Markdown", () => {
       absolutePath: "/root/jobnet/unchanged",
     });
     const report = renderSemanticDiffMarkdown(
-      changeSet({
+      buildResult({
         identityDecisions: [
           exactIdentityDecision(
             "identity:test:unchanged",
@@ -204,7 +446,7 @@ suite("Render Semantic Diff Markdown", () => {
     });
     const rawMessage = "relation target was not found";
     const result = renderSemanticDiffMarkdown(
-      changeSet({
+      buildResult({
         changes: [
           {
             id: "attribute:eu:/root/jobnet/LOAD",
@@ -220,8 +462,7 @@ suite("Render Semantic Diff Markdown", () => {
               values: ["jp1admin"],
             },
             attributeCategory: "execution-environment",
-            summary: "LOAD eu changed",
-            rationale: "exact identity match",
+            relationPair: null,
           },
         ],
         identityDecisions: [
@@ -231,7 +472,34 @@ suite("Render Semantic Diff Markdown", () => {
           {
             code: "missing_relation_target",
             kind: "normalization",
-            message: rawMessage,
+            side: "before",
+            unitPath: null,
+            detail: {
+              unitPath: null,
+              parameterKey: null,
+              relationPair: null,
+              scheduleRule: null,
+              period: null,
+              beforeValues: [],
+              afterValues: [],
+              rawValues: [],
+              removedSources: [],
+            },
+            warning: {
+              code: "missing_relation_target",
+              detail: {
+                unitPath: null,
+                parameterKey: null,
+                relationPair: null,
+                scheduleRule: null,
+                period: null,
+                beforeValues: [],
+                afterValues: [],
+                rawValues: [],
+                removedSources: [],
+              },
+              fallbackText: rawMessage,
+            },
           },
         ],
       }),
@@ -286,7 +554,7 @@ suite("Render Semantic Diff Markdown", () => {
       values: ["user-after"],
     };
 
-    const input = changeSet({
+    const input = buildResult({
       changes: [
         {
           id: "unit:renamed:/root/jobnet/job-a:/root/jobnet/job-b",
@@ -296,8 +564,7 @@ suite("Render Semantic Diff Markdown", () => {
           identityDecisionId: "identity:test:renamed",
           before: { kind: "unit", unit: unitReference(beforeJob) },
           after: { kind: "unit", unit: unitReference(afterJob) },
-          summary: "job-a renamed to job-b",
-          rationale: "one-to-one identity fingerprint match",
+          relationPair: null,
         },
         {
           id: "unit:changed:/root/jobnet/job-x:",
@@ -306,8 +573,7 @@ suite("Render Semantic Diff Markdown", () => {
           confirmationLevel: "candidate",
           identityDecisionId: "identity:test:candidate",
           before: { kind: "unit", unit: unitReference(beforeCandidate) },
-          summary: "job-x has ambiguous rename or move candidates",
-          rationale: "identity fingerprint matched 2 before and 2 after units",
+          relationPair: null,
         },
         {
           id: "attribute:eu:/root/jobnet/job-a:/root/jobnet/job-b",
@@ -324,8 +590,7 @@ suite("Render Semantic Diff Markdown", () => {
           },
           after: afterAttribute,
           attributeCategory: "execution-environment",
-          summary: "job-a eu changed",
-          rationale: "exact identity match",
+          relationPair: null,
         },
       ],
       identityDecisions: [
@@ -370,10 +635,37 @@ suite("Render Semantic Diff Markdown", () => {
         {
           id: "confirm:start:/root/jobnet/job-b",
           target: { kind: "unit", unit: unitReference(afterJob) },
-          changeContent: "start condition changed",
-          rationale: "previous branch path may no longer be available",
+          reasonCode: "condition-judgment-changed",
           relatedTargets: [{ kind: "unit", unit: unitReference(afterTail) }],
-          constraints: ["runtime history is not verified"],
+          constraints: [
+            {
+              code: "runtime-state-not-verified",
+              detail: {
+                unitPath: afterJob.absolutePath,
+                parameterKey: "cond",
+                relationPair: null,
+                scheduleRule: null,
+                period: null,
+                beforeValues: [],
+                afterValues: [],
+                rawValues: [],
+                removedSources: [],
+              },
+              warning: null,
+            },
+          ],
+          detail: {
+            unitPath: afterJob.absolutePath,
+            parameterKey: "cond",
+            relationPair: null,
+            scheduleRule: null,
+            period: null,
+            beforeValues: [],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          warning: null,
         },
       ],
       unsupportedItems: [
@@ -382,7 +674,33 @@ suite("Render Semantic Diff Markdown", () => {
           kind: "uninterpretable",
           side: "after",
           target: afterAttribute,
-          message: "condition expression is not supported",
+          reasonCode: "uninterpretable-file-monitoring-condition",
+          detail: {
+            unitPath: afterJob.absolutePath,
+            parameterKey: "flwc",
+            relationPair: null,
+            scheduleRule: null,
+            period: null,
+            beforeValues: [],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          warning: {
+            code: "uninterpretable-file-monitoring-condition",
+            detail: {
+              unitPath: afterJob.absolutePath,
+              parameterKey: "flwc",
+              relationPair: null,
+              scheduleRule: null,
+              period: null,
+              beforeValues: [],
+              afterValues: [],
+              rawValues: [],
+              removedSources: [],
+            },
+            fallbackText: "condition expression is not supported",
+          },
         },
       ],
       limitations: [
@@ -390,8 +708,33 @@ suite("Render Semantic Diff Markdown", () => {
           code: "missing_relation_target",
           kind: "normalization",
           side: "before",
-          message: "relation target was not found",
           unitPath: "/root/jobnet/job-a",
+          detail: {
+            unitPath: "/root/jobnet/job-a",
+            parameterKey: null,
+            relationPair: null,
+            scheduleRule: null,
+            period: null,
+            beforeValues: [],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          warning: {
+            code: "missing_relation_target",
+            detail: {
+              unitPath: "/root/jobnet/job-a",
+              parameterKey: null,
+              relationPair: null,
+              scheduleRule: null,
+              period: null,
+              beforeValues: [],
+              afterValues: [],
+              rawValues: [],
+              removedSources: [],
+            },
+            fallbackText: "relation target was not found",
+          },
         },
       ],
     });
@@ -448,11 +791,11 @@ suite("Render Semantic Diff Markdown", () => {
 
 ## Confirmation Required
 
-- start condition changed
+- job-b cond condition or judgment changed
   - Target: unit /root/jobnet/job-b
-  - Rationale: previous branch path may no longer be available
+  - Rationale: a previously established start, end, or branch path may no longer be available
   - Related: unit /root/jobnet/tail
-  - Constraint: runtime history is not verified
+  - Constraint: Runtime history and external conditions are not verified by this comparison.
 
 ## Unsupported Items
 
@@ -461,7 +804,7 @@ suite("Render Semantic Diff Markdown", () => {
 
 ## Limitations
 
-- [normalization:missing_relation_target] before /root/jobnet/job-a relation target was not found`,
+- \\[normalization:missing\\_relation\\_target\\] before /root/jobnet/job-a relation target was not found`,
     );
     assert.strictEqual(renderSemanticDiffMarkdown(input, "fr"), result);
     assert.strictEqual(
@@ -493,7 +836,7 @@ suite("Render Semantic Diff Markdown", () => {
       name: "missing",
       absolutePath: "/root/jobnet/missing",
     });
-    const input = changeSet({
+    const input = buildResult({
       changes: [
         {
           id: "unit:removed:/root/jobnet/removed:",
@@ -502,8 +845,7 @@ suite("Render Semantic Diff Markdown", () => {
           confirmationLevel: "confirmed",
           identityDecisionId: "identity:test:removed",
           before: { kind: "unit", unit: unitReference(removedUnit) },
-          summary: "removed removed",
-          rationale: "this stale rationale must not be rendered",
+          relationPair: null,
         },
         {
           id: "unit:added::/root/jobnet/added",
@@ -512,7 +854,7 @@ suite("Render Semantic Diff Markdown", () => {
           confirmationLevel: "confirmed",
           identityDecisionId: "identity:test:added",
           after: { kind: "unit", unit: unitReference(addedUnit) },
-          summary: "added added",
+          relationPair: null,
         },
         {
           id: "unit:changed:/root/jobnet/missing:",
@@ -521,8 +863,7 @@ suite("Render Semantic Diff Markdown", () => {
           confirmationLevel: "confirmed",
           identityDecisionId: "identity:test:missing",
           before: { kind: "unit", unit: unitReference(missingUnit) },
-          summary: "missing changed",
-          rationale: "missing typed evidence",
+          relationPair: null,
         },
       ],
       identityDecisions: [
@@ -593,7 +934,7 @@ suite("Render Semantic Diff Markdown", () => {
 
   test("renders schedule comparison period and run changes when present", () => {
     const result = renderSemanticDiffMarkdown(
-      changeSet({
+      buildResult({
         scheduleComparison: {
           period: {
             from: "2026-04-01",
@@ -619,8 +960,6 @@ suite("Render Semantic Diff Markdown", () => {
                 date: "2026-04-10",
                 time: "10:00",
               },
-              summary:
-                "/root/jobnet run on 2026-04-10 changed from 09:00 to 10:00",
             },
           ],
         },
@@ -629,7 +968,7 @@ suite("Render Semantic Diff Markdown", () => {
 
     assert.ok(
       result.includes(
-        "- Schedule comparison period: 2026-04-01 to 2026-05-01 (exclusive)",
+        "- Comparison period: 2026-04-01 to 2026-05-01 (exclusive)",
       ),
     );
     assert.ok(result.includes("- 1 schedule run change"));

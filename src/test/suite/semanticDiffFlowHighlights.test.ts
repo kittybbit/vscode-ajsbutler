@@ -5,12 +5,13 @@ import type {
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import type {
-  SemanticDiffChangeSet,
+  SemanticDiffResult,
   SemanticDiffRelationReference,
   SemanticDiffTarget,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
 import { buildSemanticDiffFlowHighlights } from "../../application/flow-graph/buildSemanticDiffFlowHighlights";
+import { createSemanticDiffDetail } from "../../application/semantic-diff/semanticDiffStructuredFacts";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
   Object.entries(values).map(([key, value]) => ({ key, value }));
@@ -62,11 +63,11 @@ const relationReference = (
     ?.absolutePath,
 });
 
-const changeSet = (
+const result = (
   before: AjsUnit[],
   after: AjsUnit[],
-  overrides: Partial<SemanticDiffChangeSet>,
-): SemanticDiffChangeSet => ({
+  overrides: Partial<SemanticDiffResult>,
+): SemanticDiffResult => ({
   inputs: {
     before: {
       side: "before",
@@ -90,7 +91,6 @@ const changeSet = (
   confirmationRequired: [],
   unsupportedItems: [],
   limitations: [],
-  reportSections: [],
   ...overrides,
 });
 
@@ -119,7 +119,7 @@ suite("Semantic diff flow highlights", () => {
     };
 
     const highlights = buildSemanticDiffFlowHighlights(
-      changeSet([beforeJob], [afterJob, afterTail], {
+      result([beforeJob], [afterJob, afterTail], {
         changes: [
           {
             id: "unit:renamed",
@@ -129,7 +129,7 @@ suite("Semantic diff flow highlights", () => {
             identityDecisionId: "identity:test:renamed",
             before: { kind: "unit", unit: unitReference(beforeJob) },
             after: afterJobTarget,
-            summary: "job renamed",
+            relationPair: null,
           },
           {
             id: "relation:added",
@@ -140,17 +140,30 @@ suite("Semantic diff flow highlights", () => {
               kind: "relation",
               relation: relationReference(afterRelation, [afterJob, afterTail]),
             },
-            summary: "relation added",
+            relationPair: {
+              canonicalPair: {
+                sourceUnitId: afterJob.id,
+                targetUnitId: afterTail.id,
+                type: "seq",
+              },
+              before: null,
+              after: {
+                ...relationReference(afterRelation, [afterJob, afterTail]),
+                sourceUnitPath: afterJob.absolutePath,
+                targetUnitPath: afterTail.absolutePath,
+              },
+            },
           },
         ],
         confirmationRequired: [
           {
             id: "confirm:job-after",
             target: afterJobTarget,
-            changeContent: "wait target changed",
-            rationale: "target changed",
+            reasonCode: "wait-target-changed",
             relatedTargets: [],
             constraints: [],
+            detail: createSemanticDiffDetail({ parameterKey: "flwf" }),
+            warning: null,
           },
         ],
       }),
@@ -184,7 +197,7 @@ suite("Semantic diff flow highlights", () => {
     });
 
     const highlights = buildSemanticDiffFlowHighlights(
-      changeSet([beforeJob], [afterJob], {
+      result([beforeJob], [afterJob], {
         changes: [
           {
             id: "unit:removed",
@@ -193,7 +206,7 @@ suite("Semantic diff flow highlights", () => {
             confirmationLevel: "confirmed",
             identityDecisionId: "identity:test:removed",
             before: { kind: "unit", unit: unitReference(beforeJob) },
-            summary: "job removed",
+            relationPair: null,
           },
           {
             id: "unit:candidate",
@@ -202,7 +215,7 @@ suite("Semantic diff flow highlights", () => {
             confirmationLevel: "candidate",
             identityDecisionId: "identity:test:candidate",
             before: { kind: "unit", unit: unitReference(beforeJob) },
-            summary: "candidate",
+            relationPair: null,
           },
         ],
       }),

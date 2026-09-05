@@ -19,14 +19,6 @@ entry conditions that make planning each item useful.
 
 ### Wave 1: Comparison Confidence And Review Contracts
 
-#### Add Structured Semantic Diff Outputs And Report Modes
-
-- Origin: proposals R-2, N-4, and F-3.
-- Separate neutral comparison facts from presentation wording and support
-  summary, full, audit, and structured JSON review outputs.
-- Entry condition: identity-evidence ownership and the neutral comparison-result
-  boundary are settled.
-
 #### Expand Semantic Diff Review-Risk Rules
 
 - Origin: proposal E-2.

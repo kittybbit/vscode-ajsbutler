@@ -48,7 +48,7 @@ JP1/AJS定義から、ジョブやジョブネットなどのユニットを一�
 
 ### Semantic Diff
 
-`JP1/AJS: Compare JP1/AJS Semantic Diff` で、現在の定義と選択した比較元の定義を意味単位で比較できます。比較結果はVS Code上のMarkdownレポートとして表示され、必要なときに `JP1/AJS: Copy Semantic Diff Markdown` で表示中のMarkdownを明示的にコピーできます。
+`JP1/AJS: Compare JP1/AJS Semantic Diff` で、現在の定義と選択した比較元の定義を意味単位で比較できます。比較後に Summary、Full、Audit、JSON の出力モードを選べます。Fullが既定の人向けレポートで、Summaryは概要、Auditは判断根拠、JSONはロケールに依存しない自動処理向けです。表示中のMarkdownは `JP1/AJS: Copy Semantic Diff Markdown` で明示的にコピーでき、MarkdownまたはJSONは `JP1/AJS: Save Semantic Diff Output` で保存できます。保存やコピーは自動では行われません。
 
 ### 診断とホバー
 
@@ -71,7 +71,7 @@ JP1/AJS定義から、ジョブやジョブネットなどのユニットを一�
 
 一覧画面では、ユニットの階層を確認しながら検索、列の表示、詳細の確認、CSV出力を行えます。フロー画面では、検索結果をたどり、関係するユニットを選び、ネストしたジョブネットを展開できます。
 
-Semantic Diffは `JP1/AJS: Compare JP1/AJS Semantic Diff` から起動します。
+Semantic Diffは `JP1/AJS: Compare JP1/AJS Semantic Diff` から起動します。モードを選ぶと、比較結果を一度だけ使って選択した出力を表示します。Markdownのコピーと出力の保存は、表示後の明示的な操作です。
 
 ## 対応範囲
 

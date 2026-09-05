@@ -7,21 +7,28 @@ import {
 import type {
   SemanticDiffComparisonPeriod,
   SemanticDiffChange,
-  SemanticDiffChangeSet,
+  SemanticDiffConstraint,
   SemanticDiffConfirmationRequiredItem,
+  SemanticDiffDetail,
   SemanticDiffElementKind,
   SemanticDiffIdentityDecision,
   SemanticDiffIdentityDecisionId,
   SemanticDiffInputPair,
   SemanticDiffLimitation,
+  SemanticDiffRelationEndpoint,
+  SemanticDiffRelationPair,
   SemanticDiffRelationReference,
-  SemanticDiffReportSection,
+  SemanticDiffResult,
   SemanticDiffScope,
   SemanticDiffSide,
   SemanticDiffTarget,
   SemanticDiffUnitReference,
   SemanticDiffUnsupportedItem,
 } from "./semanticDiffDto";
+import {
+  createSemanticDiffDetail,
+  createSemanticDiffWarning,
+} from "./semanticDiffStructuredFacts";
 import type { SemanticDiffIdentityDecision as DomainSemanticDiffIdentityDecision } from "../../domain/models/semantic-diff/SemanticDiff";
 import {
   evaluateSemanticDiffEvidence,
@@ -54,24 +61,16 @@ export type CompareSemanticDiffInput = {
 
 export type CompareSemanticDiff = (
   input: CompareSemanticDiffInput,
-) => SemanticDiffChangeSet;
+) => SemanticDiffResult;
 
-export type SemanticDiffChangeSetParts = {
+export type SemanticDiffResultParts = {
   changes?: SemanticDiffChange[];
   identityDecisions?: SemanticDiffIdentityDecision[];
   confirmationRequired?: SemanticDiffConfirmationRequiredItem[];
   unsupportedItems?: SemanticDiffUnsupportedItem[];
   limitations?: SemanticDiffLimitation[];
-  scheduleComparison?: SemanticDiffChangeSet["scheduleComparison"];
-  reportSections?: SemanticDiffReportSection[];
+  scheduleComparison?: SemanticDiffResult["scheduleComparison"];
 };
-
-const runtimeConstraint =
-  "Runtime history and external conditions are not verified by this comparison.";
-const externalConstraint =
-  "External files, events, hosts, users, permissions, and resource groups are not verified.";
-const manualBasisConstraint =
-  "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.";
 
 const sortStrings = (values: string[]): string[] => [...values].sort();
 
@@ -230,16 +229,12 @@ const createUnitChange = ({
   before,
   after,
   identityDecisionId,
-  summary,
-  rationale,
 }: {
   kind: SemanticDiffChange["kind"];
   confirmationLevel: SemanticDiffChange["confirmationLevel"];
   before?: AjsUnit;
   after?: AjsUnit;
   identityDecisionId: SemanticDiffIdentityDecisionId;
-  summary: string;
-  rationale?: string;
 }): SemanticDiffChange => ({
   id: changeId(
     "unit",
@@ -250,8 +245,7 @@ const createUnitChange = ({
   kind,
   elementKind: elementKindForUnit(before ?? after!),
   confirmationLevel,
-  summary,
-  rationale,
+  relationPair: null,
   identityDecisionId,
   ...(before ? { before: toUnitTarget(before) } : {}),
   ...(after ? { after: toUnitTarget(after) } : {}),
@@ -272,7 +266,6 @@ const createFingerprintMatchChanges = (
     );
     const renamed = match.before.name !== match.after.name;
     const moved = beforeParent !== afterParent;
-    const rationale = "one-to-one identity fingerprint match";
     const changes: SemanticDiffChange[] = [];
 
     if (renamed) {
@@ -285,8 +278,6 @@ const createFingerprintMatchChanges = (
           identityDecisionId: context.identityDecisionIndex.byPair.get(
             identityPairKey(match.before.id, match.after.id),
           )!,
-          summary: `${match.before.name} renamed to ${match.after.name}`,
-          rationale,
         }),
       );
     }
@@ -300,8 +291,6 @@ const createFingerprintMatchChanges = (
           identityDecisionId: context.identityDecisionIndex.byPair.get(
             identityPairKey(match.before.id, match.after.id),
           )!,
-          summary: `${match.before.name} moved from ${beforeParent} to ${afterParent}`,
-          rationale,
         }),
       );
     }
@@ -319,8 +308,6 @@ const createCandidateChanges = (
         confirmationLevel: "candidate",
         before: beforeUnit,
         identityDecisionId: identityDecisionIndex.byBefore.get(beforeUnit.id)!,
-        summary: `${beforeUnit.name} has ambiguous rename or move candidates`,
-        rationale: `identity fingerprint matched ${candidate.before.length} before and ${candidate.after.length} after units`,
       }),
     ),
   );
@@ -336,7 +323,6 @@ const createAddedRemovedChanges = (
       confirmationLevel: "confirmed",
       before: unit,
       identityDecisionId: identityDecisionIndex.byBefore.get(unit.id)!,
-      summary: `${unit.name} removed`,
     }),
   );
   const added = addedUnits.map((unit) =>
@@ -345,7 +331,6 @@ const createAddedRemovedChanges = (
       confirmationLevel: "confirmed",
       after: unit,
       identityDecisionId: identityDecisionIndex.byAfter.get(unit.id)!,
-      summary: `${unit.name} added`,
     }),
   );
   return [...removed, ...added];
@@ -389,11 +374,7 @@ const createAttributeChanges = (
             [],
         },
         attributeCategory: decision.category,
-        summary: `${match.before.name} ${decision.key} changed`,
-        rationale:
-          match.kind === "exact"
-            ? "exact identity match"
-            : "one-to-one identity fingerprint match",
+        relationPair: null,
       }),
     ),
   );
@@ -406,11 +387,90 @@ const relationTarget = (
   relation: toRelationReference(relation, unitById),
 });
 
-const createRelationChanges = (
-  decisions: SemanticDiffRelationDecision[],
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-): SemanticDiffChange[] =>
+const toRelationEndpoint = (
+  relation: AjsRelation,
+  unitById: Map<string, AjsUnit>,
+): SemanticDiffRelationEndpoint => ({
+  sourceUnitPath: unitById.get(relation.sourceUnitId)?.absolutePath ?? null,
+  sourceUnitId: relation.sourceUnitId,
+  targetUnitPath: unitById.get(relation.targetUnitId)?.absolutePath ?? null,
+  targetUnitId: relation.targetUnitId,
+  type: relation.type,
+});
+
+type SemanticDiffRelationPairContext = {
+  beforeUnitById: Map<string, AjsUnit>;
+  afterUnitById: Map<string, AjsUnit>;
+  correspondence: ReadonlyMap<string, string>;
+};
+
+type ToRelationPairInput = {
+  relation: AjsRelation;
+  kind: "added" | "removed";
+  context: SemanticDiffRelationPairContext;
+};
+
+type SemanticDiffRelationPairEndpoints = Pick<
+  SemanticDiffRelationPair,
+  "before" | "after"
+>;
+
+type RelationPairEndpointBuilder = (
+  relation: AjsRelation,
+  context: SemanticDiffRelationPairContext,
+) => SemanticDiffRelationPairEndpoints;
+
+const relationPairEndpointBuilders: Record<
+  "added" | "removed",
+  RelationPairEndpointBuilder
+> = {
+  added: (relation, context) => ({
+    before: null,
+    after: toRelationEndpoint(relation, context.afterUnitById),
+  }),
+  removed: (relation, context) => ({
+    before: toRelationEndpoint(relation, context.beforeUnitById),
+    after: null,
+  }),
+};
+
+const canonicalRelationUnitId = (
+  unitId: string,
+  kind: "added" | "removed",
+  correspondence: ReadonlyMap<string, string>,
+): string =>
+  kind === "removed" ? (correspondence.get(unitId) ?? unitId) : unitId;
+
+const toRelationPair = ({
+  relation,
+  kind,
+  context,
+}: ToRelationPairInput): SemanticDiffRelationPair => {
+  const sourceUnitId = canonicalRelationUnitId(
+    relation.sourceUnitId,
+    kind,
+    context.correspondence,
+  );
+  const targetUnitId = canonicalRelationUnitId(
+    relation.targetUnitId,
+    kind,
+    context.correspondence,
+  );
+  return {
+    canonicalPair: { sourceUnitId, targetUnitId, type: relation.type },
+    ...relationPairEndpointBuilders[kind](relation, context),
+  };
+};
+
+type CreateRelationChangesInput = {
+  decisions: SemanticDiffRelationDecision[];
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createRelationChanges = ({
+  decisions,
+  relationPairContext,
+}: CreateRelationChangesInput): SemanticDiffChange[] =>
   decisions.map((decision) => ({
     id: changeId(
       "relation",
@@ -423,37 +483,79 @@ const createRelationChanges = (
     confirmationLevel: "confirmed",
     before:
       decision.kind === "removed"
-        ? relationTarget(decision.relation, beforeUnitById)
+        ? relationTarget(decision.relation, relationPairContext.beforeUnitById)
         : undefined,
     after:
       decision.kind === "added"
-        ? relationTarget(decision.relation, afterUnitById)
+        ? relationTarget(decision.relation, relationPairContext.afterUnitById)
         : undefined,
-    summary: `${decision.pairKey} relation ${decision.kind}`,
+    relationPair: toRelationPair({
+      relation: decision.relation,
+      kind: decision.kind,
+      context: relationPairContext,
+    }),
   }));
 
 const createConfirmationRequiredItem = ({
   id,
   target,
-  changeContent,
-  rationale,
+  reasonCode,
   relatedTargets = [],
+  detail,
   constraints = [],
 }: {
   id: string;
   target: SemanticDiffTarget;
-  changeContent: string;
-  rationale: string;
+  reasonCode: SemanticDiffConfirmationRequiredItem["reasonCode"];
   relatedTargets?: SemanticDiffTarget[];
-  constraints?: string[];
+  detail: SemanticDiffDetail;
+  constraints?: SemanticDiffConstraint[];
 }): SemanticDiffConfirmationRequiredItem => ({
   id,
+  reasonCode,
   target,
-  changeContent,
-  rationale,
   relatedTargets,
-  constraints: [manualBasisConstraint, ...constraints],
+  detail,
+  constraints,
+  warning: null,
 });
+
+const createConstraint = (
+  code: SemanticDiffConstraint["code"],
+  detail: SemanticDiffDetail,
+): SemanticDiffConstraint => ({
+  code,
+  detail,
+  warning: null,
+});
+
+const parameterValues = (unit: AjsUnit, parameterKey: string): string[] =>
+  semanticDiffParameterValuesByKey(unit).get(parameterKey) ?? [];
+
+type ParameterDetailInput = {
+  before: AjsUnit;
+  after: AjsUnit;
+  parameterKey: string;
+  overrides?: {
+    rawValues?: string[];
+    removedSources?: string[];
+  };
+};
+
+const parameterDetail = ({
+  before,
+  after,
+  parameterKey,
+  overrides = {},
+}: ParameterDetailInput): SemanticDiffDetail =>
+  createSemanticDiffDetail({
+    unitPath: after.absolutePath,
+    parameterKey,
+    beforeValues: parameterValues(before, parameterKey),
+    afterValues: parameterValues(after, parameterKey),
+    rawValues: overrides.rawValues,
+    removedSources: overrides.removedSources,
+  });
 
 const unitConfirmationTarget = (unit: AjsUnit): SemanticDiffTarget =>
   toUnitTarget(unit);
@@ -470,98 +572,181 @@ const resolveRelatedUnitsByNames = (
     .map((relatedUnit) => toUnitTarget(relatedUnit));
 };
 
-const createEvidenceConfirmation = (
-  decision: SemanticDiffConfirmationEvidenceDecision,
-  beforeUnitById: Map<string, AjsUnit>,
-  afterUnitById: Map<string, AjsUnit>,
-): SemanticDiffConfirmationRequiredItem => {
-  if (decision.kind === "conditional-relation-removed") {
-    return createConfirmationRequiredItem({
-      id: changeId("confirm", "conditional-relation", decision.pairKey),
-      target: relationTarget(decision.relation, beforeUnitById),
-      changeContent: `${decision.pairKey} conditional relation removed or changed`,
-      rationale:
-        "a previously conditional branch path may no longer be available",
-      constraints: [runtimeConstraint],
-    });
-  }
+type UnitConfirmationEvidenceDecision = Exclude<
+  SemanticDiffConfirmationEvidenceDecision,
+  { kind: "conditional-relation-removed" }
+>;
 
-  const unit = decision.match.after;
-  const target = unitConfirmationTarget(unit);
-  switch (decision.kind) {
-    case "wait-release-source-changed":
-      return createConfirmationRequiredItem({
-        id: changeId(
-          "confirm",
-          "wait-release-source",
-          unit.id,
-          decision.parameterKey,
-        ),
-        target,
-        changeContent: `${unit.name} wait release source changed`,
-        rationale:
-          "a previously available within-job-group release source may no longer release this wait",
-        relatedTargets: resolveRelatedUnitsByNames(
-          decision.removedSources,
-          unit,
-          afterUnitById,
-        ),
-        constraints: [runtimeConstraint],
-      });
-    case "timeout-removed":
-      return createConfirmationRequiredItem({
-        id: changeId(
-          "confirm",
-          "timeout-removed",
-          unit.id,
-          decision.parameterKey,
-        ),
-        target,
-        changeContent: `${unit.name} explicit timeout ${decision.parameterKey} removed`,
-        rationale:
-          "removing a previously explicit wait timeout may leave a wait unresolved for longer than before",
-        constraints: [runtimeConstraint, externalConstraint],
-      });
-    case "condition-judgment-changed":
-      return createConfirmationRequiredItem({
-        id: changeId(
-          "confirm",
-          "condition-judgment",
-          unit.id,
-          decision.parameterKey,
-        ),
-        target,
-        changeContent: `${unit.name} ${decision.parameterKey} condition or judgment changed`,
-        rationale:
-          "a previously established start, end, or branch path may no longer be available",
-        constraints: [runtimeConstraint],
-      });
-    case "wait-target-changed":
-      return createConfirmationRequiredItem({
-        id: changeId("confirm", "wait-target", unit.id, decision.parameterKey),
-        target,
-        changeContent: `${unit.name} wait target ${decision.parameterKey} changed`,
-        rationale:
-          "the compared definition now waits for a different file, event, or event filter",
-        constraints: [runtimeConstraint, externalConstraint],
-      });
-  }
+type UnitConfirmationSpec = {
+  idSegment: string;
+  constraintCodes: SemanticDiffConstraint["code"][];
 };
+
+const unitConfirmationSpecs: Record<
+  UnitConfirmationEvidenceDecision["kind"],
+  UnitConfirmationSpec
+> = {
+  "wait-release-source-changed": {
+    idSegment: "wait-release-source",
+    constraintCodes: ["jp1-ajs3-v13-rule-basis", "runtime-state-not-verified"],
+  },
+  "timeout-removed": {
+    idSegment: "timeout-removed",
+    constraintCodes: [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ],
+  },
+  "condition-judgment-changed": {
+    idSegment: "condition-judgment",
+    constraintCodes: ["jp1-ajs3-v13-rule-basis", "runtime-state-not-verified"],
+  },
+  "wait-target-changed": {
+    idSegment: "wait-target",
+    constraintCodes: [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ],
+  },
+};
+
+type ParameterDetailOverrides = NonNullable<ParameterDetailInput["overrides"]>;
+
+const confirmationDetailOverrides = (
+  decision: UnitConfirmationEvidenceDecision,
+): ParameterDetailOverrides | undefined =>
+  "removedSources" in decision
+    ? {
+        rawValues: decision.removedSources,
+        removedSources: decision.removedSources,
+      }
+    : undefined;
+
+const confirmationRelatedTargets = (
+  decision: UnitConfirmationEvidenceDecision,
+  afterUnitById: Map<string, AjsUnit>,
+): SemanticDiffTarget[] | undefined =>
+  "removedSources" in decision
+    ? resolveRelatedUnitsByNames(
+        decision.removedSources,
+        decision.match.after,
+        afterUnitById,
+      )
+    : undefined;
+
+type CreateUnitConfirmationInput = {
+  decision: UnitConfirmationEvidenceDecision;
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createUnitConfirmation = ({
+  decision,
+  relationPairContext,
+}: CreateUnitConfirmationInput): SemanticDiffConfirmationRequiredItem => {
+  const unit = decision.match.after;
+  const before = decision.match.before;
+  const detailInput = {
+    before,
+    after: unit,
+    parameterKey: decision.parameterKey,
+  };
+  const detail = parameterDetail({
+    ...detailInput,
+    overrides: confirmationDetailOverrides(decision),
+  });
+  const constraintDetail = parameterDetail(detailInput);
+  const spec = unitConfirmationSpecs[decision.kind];
+  return createConfirmationRequiredItem({
+    id: changeId("confirm", spec.idSegment, unit.id, decision.parameterKey),
+    target: unitConfirmationTarget(unit),
+    reasonCode: decision.kind,
+    relatedTargets: confirmationRelatedTargets(
+      decision,
+      relationPairContext.afterUnitById,
+    ),
+    detail,
+    constraints: spec.constraintCodes.map((code) =>
+      createConstraint(code, constraintDetail),
+    ),
+  });
+};
+
+type CreateConditionalRelationConfirmationInput = {
+  decision: Extract<
+    SemanticDiffConfirmationEvidenceDecision,
+    { kind: "conditional-relation-removed" }
+  >;
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createConditionalRelationConfirmation = ({
+  decision,
+  relationPairContext,
+}: CreateConditionalRelationConfirmationInput): SemanticDiffConfirmationRequiredItem => {
+  const relationPair = toRelationPair({
+    relation: decision.relation,
+    kind: "removed",
+    context: relationPairContext,
+  });
+  const detail = createSemanticDiffDetail({ relationPair });
+  return createConfirmationRequiredItem({
+    id: changeId("confirm", "conditional-relation", decision.pairKey),
+    target: relationTarget(
+      decision.relation,
+      relationPairContext.beforeUnitById,
+    ),
+    reasonCode: "conditional-relation-removed",
+    detail,
+    constraints: [
+      createConstraint("jp1-ajs3-v13-rule-basis", detail),
+      createConstraint("runtime-state-not-verified", detail),
+    ],
+  });
+};
+
+type CreateEvidenceConfirmationInput = {
+  decision: SemanticDiffConfirmationEvidenceDecision;
+  relationPairContext: SemanticDiffRelationPairContext;
+};
+
+const createEvidenceConfirmation = ({
+  decision,
+  relationPairContext,
+}: CreateEvidenceConfirmationInput): SemanticDiffConfirmationRequiredItem =>
+  decision.kind === "conditional-relation-removed"
+    ? createConditionalRelationConfirmation({ decision, relationPairContext })
+    : createUnitConfirmation({ decision, relationPairContext });
 
 const createUnsupportedEvidenceItem = (
   decision: SemanticDiffUnsupportedEvidenceDecision,
-): SemanticDiffUnsupportedItem => ({
-  id: changeId(
-    "unsupported",
-    "file-monitoring-condition",
-    decision.match.after.id,
-  ),
-  kind: "uninterpretable",
-  side: "after",
-  target: unitConfirmationTarget(decision.match.after),
-  message:
-    "file monitoring condition flwc is not interpreted because it combines mutually exclusive conditions",
-});
+): SemanticDiffUnsupportedItem => {
+  const detail = createSemanticDiffDetail({
+    unitPath: decision.match.after.absolutePath,
+    parameterKey: "flwc",
+    beforeValues: parameterValues(decision.match.before, "flwc"),
+    afterValues: parameterValues(decision.match.after, "flwc"),
+  });
+  return {
+    id: changeId(
+      "unsupported",
+      "file-monitoring-condition",
+      decision.match.after.id,
+    ),
+    kind: "uninterpretable",
+    side: "after",
+    reasonCode: decision.kind,
+    target: unitConfirmationTarget(decision.match.after),
+    detail,
+    warning: createSemanticDiffWarning({
+      code: decision.kind,
+      detail,
+      fallbackText:
+        "file monitoring condition flwc is not interpreted because it combines mutually exclusive conditions",
+    }),
+  };
+};
 
 const toNormalizationLimitations = (
   side: SemanticDiffSide,
@@ -571,13 +756,18 @@ const toNormalizationLimitations = (
     code: warning.code,
     kind: "normalization",
     side,
-    message: warning.message,
-    unitPath: warning.unitPath,
+    unitPath: warning.unitPath ?? null,
+    detail: createSemanticDiffDetail({ unitPath: warning.unitPath }),
+    warning: createSemanticDiffWarning({
+      code: warning.code,
+      detail: createSemanticDiffDetail({ unitPath: warning.unitPath }),
+      fallbackText: warning.message,
+    }),
   }));
 
-export const createSemanticDiffChangeSet = (
+export const createSemanticDiffResult = (
   input: CompareSemanticDiffInput,
-  parts: SemanticDiffChangeSetParts = {},
+  parts: SemanticDiffResultParts = {},
   units: {
     before: AjsUnit[];
     after: AjsUnit[];
@@ -585,20 +775,24 @@ export const createSemanticDiffChangeSet = (
     before: scopedUnits(input.before, input.options?.jobGroupPath),
     after: scopedUnits(input.after, input.options?.jobGroupPath),
   },
-): SemanticDiffChangeSet => ({
-  inputs: toInputPair(input, units.before, units.after),
-  changes: parts.changes ?? [],
-  confirmationRequired: parts.confirmationRequired ?? [],
-  unsupportedItems: parts.unsupportedItems ?? [],
-  limitations: [
-    ...toNormalizationLimitations("before", input.before),
-    ...toNormalizationLimitations("after", input.after),
-    ...(parts.limitations ?? []),
-  ],
-  identityDecisions: parts.identityDecisions ?? [],
-  scheduleComparison: parts.scheduleComparison,
-  reportSections: parts.reportSections ?? [],
-});
+): SemanticDiffResult => {
+  const result: SemanticDiffResult = {
+    inputs: toInputPair(input, units.before, units.after),
+    changes: parts.changes ?? [],
+    identityDecisions: parts.identityDecisions ?? [],
+    confirmationRequired: parts.confirmationRequired ?? [],
+    unsupportedItems: parts.unsupportedItems ?? [],
+    limitations: [
+      ...toNormalizationLimitations("before", input.before),
+      ...toNormalizationLimitations("after", input.after),
+      ...(parts.limitations ?? []),
+    ],
+  };
+  if (parts.scheduleComparison) {
+    result.scheduleComparison = parts.scheduleComparison;
+  }
+  return result;
+};
 
 export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   const beforeUnits = scopedUnits(input.before, input.options?.jobGroupPath);
@@ -618,6 +812,9 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   );
   const identityDecisions =
     correspondence.identityDecisions.map(toIdentityDecision);
+  const correspondenceMap = new Map(
+    correspondence.matches.map((match) => [match.before.id, match.after.id]),
+  );
   const changes = [
     ...createFingerprintMatchChanges(correspondence.fingerprintMatches, {
       beforeUnitById,
@@ -631,17 +828,20 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
       identityDecisionIndex,
     ),
     ...createAttributeChanges(matches, identityDecisionIndex),
-    ...createRelationChanges(
-      compareSemanticDiffRelations({
+    ...createRelationChanges({
+      decisions: compareSemanticDiffRelations({
         beforeUnits,
         afterUnits,
         beforeUnitById,
         afterUnitById,
         matches,
       }),
-      beforeUnitById,
-      afterUnitById,
-    ),
+      relationPairContext: {
+        beforeUnitById,
+        afterUnitById,
+        correspondence: correspondenceMap,
+      },
+    }),
   ];
   const evidence = evaluateSemanticDiffEvidence({
     beforeUnits,
@@ -652,7 +852,14 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   });
   const confirmationRequired = evidence.confirmationDecisions
     .map((decision) =>
-      createEvidenceConfirmation(decision, beforeUnitById, afterUnitById),
+      createEvidenceConfirmation({
+        decision,
+        relationPairContext: {
+          beforeUnitById,
+          afterUnitById,
+          correspondence: correspondenceMap,
+        },
+      }),
     )
     .sort((left, right) => compareStrings(left.id, right.id));
   const unsupportedItems = evidence.unsupportedDecisions.map(
@@ -666,7 +873,7 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
     toUnitTarget,
   });
 
-  return createSemanticDiffChangeSet(
+  return createSemanticDiffResult(
     input,
     {
       changes: changes.sort((left, right) => compareStrings(left.id, right.id)),

@@ -6,6 +6,7 @@ import type {
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
+import { localizedChangeSummary } from "../../presentation/semantic-diff/semanticDiffMarkdownLocalization";
 
 const relation = (
   sourceUnitId: string,
@@ -83,7 +84,7 @@ const document = (rootChildren: AjsUnit[]): AjsDocument => ({
 
 const changeSummaries = (
   doc: ReturnType<typeof compareSemanticDiff>,
-): string[] => doc.changes.map((change) => change.summary);
+): string[] => doc.changes.map((change) => localizedChangeSummary(change));
 
 suite("Compare Semantic Diff", () => {
   test("ignores order-only definition changes", () => {
@@ -148,7 +149,7 @@ suite("Compare Semantic Diff", () => {
       !result.changes.some(
         (change) =>
           change.elementKind === "attribute" &&
-          change.summary.startsWith("LOAD"),
+          localizedChangeSummary(change).startsWith("LOAD"),
       ),
       "unmatched same-name units should not produce attribute changes",
     );
@@ -269,7 +270,10 @@ suite("Compare Semantic Diff", () => {
     });
 
     assert.deepStrictEqual(
-      result.changes.map((change) => [change.kind, change.summary]),
+      result.changes.map((change) => [
+        change.kind,
+        localizedChangeSummary(change),
+      ]),
       [
         ["changed", "job-b sc changed"],
         ["removed", "job-a removed"],
@@ -529,6 +533,97 @@ suite("Compare Semantic Diff", () => {
 
     assert.ok(relationChange);
     assert.strictEqual("identityDecisionId" in relationChange, false);
+    assert.deepStrictEqual(relationChange.relationPair, {
+      canonicalPair: {
+        sourceUnitId: beforeSource.id,
+        targetUnitId: beforeTarget.id,
+        type: "seq",
+      },
+      before: {
+        sourceUnitPath: beforeSource.absolutePath,
+        sourceUnitId: beforeSource.id,
+        targetUnitPath: beforeTarget.absolutePath,
+        targetUnitId: beforeTarget.id,
+        type: "seq",
+      },
+      after: null,
+    });
+  });
+
+  test("remaps relation canonical pairs through fingerprint correspondence", () => {
+    const beforeSource = unit({
+      id: "/root/jobnet/source-before",
+      name: "source-before",
+      absolutePath: "/root/jobnet/source-before",
+      parameters: params({ ty: "j", sc: "echo source" }),
+    });
+    const beforeTarget = unit({
+      id: "/root/jobnet/target-before",
+      name: "target-before",
+      absolutePath: "/root/jobnet/target-before",
+      parameters: params({ ty: "j", sc: "echo target" }),
+    });
+    const afterSource = unit({
+      id: "/root/jobnet/source-after",
+      name: "source-after",
+      absolutePath: "/root/jobnet/source-after",
+      parameters: params({ ty: "j", sc: "echo source" }),
+    });
+    const afterTarget = unit({
+      id: "/root/jobnet/target-after",
+      name: "target-after",
+      absolutePath: "/root/jobnet/target-after",
+      parameters: params({ ty: "j", sc: "echo target" }),
+    });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeTarget.id, "seq"),
+    ];
+
+    const result = compareSemanticDiff({
+      before: document([jobnet("jobnet", [beforeSource, beforeTarget])]),
+      after: document([jobnet("jobnet", [afterSource, afterTarget])]),
+      options: { jobGroupPath: "/root" },
+    });
+    const relationChanges = result.changes.filter(
+      (change) => change.elementKind === "relation",
+    );
+
+    assert.deepStrictEqual(
+      relationChanges.map((change) => [change.kind, change.relationPair]),
+      [
+        [
+          "removed",
+          {
+            canonicalPair: {
+              sourceUnitId: afterSource.id,
+              targetUnitId: afterTarget.id,
+              type: "seq",
+            },
+            before: {
+              sourceUnitPath: beforeSource.absolutePath,
+              sourceUnitId: beforeSource.id,
+              targetUnitPath: beforeTarget.absolutePath,
+              targetUnitId: beforeTarget.id,
+              type: "seq",
+            },
+            after: null,
+          },
+        ],
+      ],
+    );
+    const changedUnit = result.changes.find(
+      (change) =>
+        change.elementKind === "unit" &&
+        change.before?.kind === "unit" &&
+        change.after?.kind === "unit" &&
+        change.before.unit.id === beforeSource.id,
+    );
+    assert.ok(changedUnit?.identityDecisionId);
+    assert.ok(
+      result.identityDecisions.some(
+        (decision) => decision.id === changedUnit?.identityDecisionId,
+      ),
+    );
   });
 
   test("carries normalization warnings into comparison limitations", () => {
@@ -551,9 +646,33 @@ suite("Compare Semantic Diff", () => {
         code: "missing_relation_target",
         kind: "normalization",
         side: "before",
-        message: "relation target was not found",
         unitPath: "/root/jobnet/job",
-        warning: before.warnings[0],
+        detail: {
+          unitPath: "/root/jobnet/job",
+          parameterKey: null,
+          relationPair: null,
+          scheduleRule: null,
+          period: null,
+          beforeValues: [],
+          afterValues: [],
+          rawValues: [],
+          removedSources: [],
+        },
+        warning: {
+          code: "missing_relation_target",
+          detail: {
+            unitPath: "/root/jobnet/job",
+            parameterKey: null,
+            relationPair: null,
+            scheduleRule: null,
+            period: null,
+            beforeValues: [],
+            afterValues: [],
+            rawValues: [],
+            removedSources: [],
+          },
+          fallbackText: "relation target was not found",
+        },
       },
     ]);
   });

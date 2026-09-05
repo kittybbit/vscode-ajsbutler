@@ -1,5 +1,5 @@
 import type {
-  SemanticDiffChangeSet,
+  SemanticDiffResult,
   SemanticDiffConfirmationLevel,
   SemanticDiffRelationReference,
   SemanticDiffTarget,
@@ -124,16 +124,16 @@ const targetExistsInAfterDocument = (
 };
 
 export const buildSemanticDiffFlowHighlights = (
-  changeSet: SemanticDiffChangeSet,
+  result: SemanticDiffResult,
 ): FlowGraphSemanticDiffHighlights => {
-  const afterUnitIds = new Set(changeSet.inputs.after.unitIds);
+  const afterUnitIds = new Set(result.inputs.after.unitIds);
   const afterEdgeKeys = new Set(
-    changeSet.inputs.after.relations.map(relationEdgeKey),
+    result.inputs.after.relations.map(relationEdgeKey),
   );
   const nodeHighlights = new Map<string, MutableFlowHighlight>();
   const edgeHighlights = new Map<string, MutableFlowHighlight>();
 
-  changeSet.changes
+  result.changes
     .filter((change) => isRenderableAfterSideChange(change.confirmationLevel))
     .forEach((change) => {
       const target = change.after;
@@ -150,7 +150,7 @@ export const buildSemanticDiffFlowHighlights = (
       });
     });
 
-  changeSet.confirmationRequired.forEach((item) => {
+  result.confirmationRequired.forEach((item) => {
     if (
       !targetExistsInAfterDocument(item.target, afterUnitIds, afterEdgeKeys)
     ) {

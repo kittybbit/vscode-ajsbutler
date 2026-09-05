@@ -4,8 +4,8 @@ import {
   type CompareSemanticDiff,
 } from "./compareSemanticDiff";
 import type {
-  SemanticDiffChangeSet,
   SemanticDiffParserError,
+  SemanticDiffResult,
 } from "./semanticDiffDto";
 
 export type BuildSemanticDiffReportDataInput = {
@@ -16,7 +16,7 @@ export type BuildSemanticDiffReportDataInput = {
 export type BuildSemanticDiffReportDataResult =
   | {
       ok: true;
-      changeSet: SemanticDiffChangeSet;
+      result: SemanticDiffResult;
     }
   | {
       ok: false;
@@ -58,7 +58,7 @@ export const createBuildSemanticDiffReportData =
 
     return {
       ok: true,
-      changeSet: compare({
+      result: compare({
         before: beforeParse.document,
         after: afterParse.document,
       }),
