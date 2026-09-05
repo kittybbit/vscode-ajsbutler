@@ -10,6 +10,9 @@ import type { SemanticDiffUnitMatch } from "../../domain/services/semantic-diff/
 const parameters = (values: Record<string, string>): AjsParameter[] =>
   Object.entries(values).map(([key, value]) => ({ key, value }));
 
+const parameterList = (entries: Array<[string, string]>): AjsParameter[] =>
+  entries.map(([key, value]) => ({ key, value }));
+
 const unit = (overrides: Partial<AjsUnit> = {}): AjsUnit => ({
   id: "/root/jobnet/job",
   name: "job",
@@ -94,7 +97,6 @@ suite("Semantic Diff Evidence Rules", () => {
         ["wait-release-source-changed", "eun"],
         ["timeout-removed", "fd"],
         ["condition-judgment-changed", "jd"],
-        ["wait-target-changed", "flwc"],
         ["wait-target-changed", "flwf"],
       ],
     );
@@ -110,6 +112,209 @@ suite("Semantic Diff Evidence Rules", () => {
         decision.match.after.id,
       ]),
       [["uninterpretable-file-monitoring-condition", afterWait.id]],
+    );
+  });
+
+  test("selects every supported file and event target key", () => {
+    const fileTargetKeys = ["flwf", "flwc"];
+    const eventTargetKeys = [
+      "evwid",
+      "evwfr",
+      "evhst",
+      "evwms",
+      "evdet",
+      "evusr",
+      "evgrp",
+      "evuid",
+      "evgid",
+      "evpid",
+      "evipa",
+      "evesc",
+    ];
+    const matches = [...fileTargetKeys, ...eventTargetKeys].map(
+      (parameterKey, index) => {
+        const unitType = index < fileTargetKeys.length ? "flwj" : "evwj";
+        const before = unit({
+          id: `/root/jobnet/wait-${index}`,
+          name: `wait-${index}`,
+          absolutePath: `/root/jobnet/wait-${index}`,
+          unitType,
+          parameters: parameterList([
+            ["ty", unitType],
+            [parameterKey, `before-${index}`],
+          ]),
+        });
+        const after = unit({
+          ...before,
+          parameters: parameterList([
+            ["ty", unitType],
+            [parameterKey, `after-${index}`],
+          ]),
+        });
+        return {
+          before,
+          after,
+          parameterKey,
+          kind: "exact" as const,
+        };
+      },
+    );
+
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: matches.map(({ before }) => before),
+      afterUnits: matches.map(({ after }) => after),
+      beforeUnitById: unitMap(...matches.map(({ before }) => before)),
+      afterUnitById: unitMap(...matches.map(({ after }) => after)),
+      matches,
+    });
+
+    assert.deepStrictEqual(
+      result.confirmationDecisions
+        .filter((decision) => decision.kind === "wait-target-changed")
+        .map((decision) => decision.parameterKey)
+        .sort(),
+      [...fileTargetKeys, ...eventTargetKeys].sort(),
+    );
+  });
+
+  test("selects before-only and after-only supported target keys", () => {
+    const fileTargetKeys = ["flwf", "flwc"];
+    const eventTargetKeys = [
+      "evwid",
+      "evwfr",
+      "evhst",
+      "evwms",
+      "evdet",
+      "evusr",
+      "evgrp",
+      "evuid",
+      "evgid",
+      "evpid",
+      "evipa",
+      "evesc",
+    ];
+    const targetKeys = [...fileTargetKeys, ...eventTargetKeys];
+    const matches = targetKeys.flatMap((parameterKey, index) => {
+      const unitType: "flwj" | "evwj" =
+        index < fileTargetKeys.length ? "flwj" : "evwj";
+      return ["before-only", "after-only"].map((caseKind) => {
+        const before = unit({
+          id: `/root/jobnet/${caseKind}-${parameterKey}`,
+          name: `${caseKind}-${parameterKey}`,
+          absolutePath: `/root/jobnet/${caseKind}-${parameterKey}`,
+          unitType,
+          parameters: parameterList([
+            ["ty", unitType],
+            ...(caseKind === "before-only"
+              ? [[parameterKey, `before-${parameterKey}`] as [string, string]]
+              : []),
+          ]),
+        });
+        const after = unit({
+          ...before,
+          parameters: parameterList([
+            ["ty", unitType],
+            ...(caseKind === "after-only"
+              ? [[parameterKey, `after-${parameterKey}`] as [string, string]]
+              : []),
+          ]),
+        });
+        return {
+          before,
+          after,
+          parameterKey,
+          caseKind,
+          kind: "exact" as const,
+        };
+      });
+    });
+
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: matches.map(({ before }) => before),
+      afterUnits: matches.map(({ after }) => after),
+      beforeUnitById: unitMap(...matches.map(({ before }) => before)),
+      afterUnitById: unitMap(...matches.map(({ after }) => after)),
+      matches,
+    });
+    const decisionsByAfterId = new Map(
+      result.confirmationDecisions
+        .filter((decision) => decision.kind === "wait-target-changed")
+        .map((decision) => [decision.match.after.id, decision]),
+    );
+
+    assert.strictEqual(decisionsByAfterId.size, matches.length);
+    matches.forEach(({ before, after, parameterKey, caseKind }) => {
+      const decision = decisionsByAfterId.get(after.id);
+      assert.ok(decision);
+      assert.strictEqual(decision?.parameterKey, parameterKey);
+      assert.deepStrictEqual(
+        before.parameters
+          .filter((parameter) => parameter.key === parameterKey)
+          .map((parameter) => parameter.value),
+        caseKind === "before-only" ? [`before-${parameterKey}`] : [],
+      );
+      assert.deepStrictEqual(
+        after.parameters
+          .filter((parameter) => parameter.key === parameterKey)
+          .map((parameter) => parameter.value),
+        caseKind === "after-only" ? [`after-${parameterKey}`] : [],
+      );
+    });
+  });
+
+  test("does not confirm unsupported file conditions or non-wait parameters", () => {
+    const beforeUnsupported = unit({
+      id: "/root/jobnet/unsupported",
+      name: "unsupported",
+      absolutePath: "/root/jobnet/unsupported",
+      unitType: "flwj",
+      parameters: parameterList([
+        ["ty", "flwj"],
+        ["flwc", "s:m"],
+      ]),
+    });
+    const afterUnsupported = unit({
+      ...beforeUnsupported,
+      parameters: parameterList([
+        ["ty", "flwj"],
+        ["flwc", "s"],
+      ]),
+    });
+    const beforeJob = unit({
+      id: "/root/jobnet/job-with-wait-parameters",
+      name: "job-with-wait-parameters",
+      absolutePath: "/root/jobnet/job-with-wait-parameters",
+      parameters: parameterList([
+        ["ty", "j"],
+        ["eun", "release-before"],
+        ["flwf", "/before/file"],
+      ]),
+    });
+    const afterJob = unit({
+      ...beforeJob,
+      parameters: parameterList([
+        ["ty", "j"],
+        ["eun", "release-after"],
+        ["flwf", "/after/file"],
+      ]),
+    });
+    const matches: SemanticDiffUnitMatch[] = [
+      { before: beforeUnsupported, after: afterUnsupported, kind: "exact" },
+      { before: beforeJob, after: afterJob, kind: "exact" },
+    ];
+
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: matches.map(({ before }) => before),
+      afterUnits: matches.map(({ after }) => after),
+      beforeUnitById: unitMap(...matches.map(({ before }) => before)),
+      afterUnitById: unitMap(...matches.map(({ after }) => after)),
+      matches,
+    });
+
+    assert.deepStrictEqual(result.confirmationDecisions, []);
+    assert.deepStrictEqual(
+      result.unsupportedDecisions.map((decision) => decision.match.after.id),
+      [afterUnsupported.id],
     );
   });
 

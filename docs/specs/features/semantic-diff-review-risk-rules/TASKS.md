@@ -114,12 +114,22 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-05, conditional approval granted by the user and applied
+  after the final independent implementation review returned `Ready` with no
+  findings
+- Approved scope: Slice 3 — supported wait-release, timeout, file, and event
+  evidence selection, exact structured details and constraints, complete
+  focused validation coverage, and implementation/traceability evidence.
+- Approved paths:
+  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
+  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
+  - `src/domain/services/semantic-diff/semanticDiffEvidenceRules.ts`
+  - `src/test/suite/semanticDiffConditions.test.ts`
+  - `src/test/suite/semanticDiffEvidenceRules.test.ts`
+- Implementation review verdict: `Ready`; final review found no remaining
+  findings after the coverage and evidence updates
+- Commit status: Eligible for the focused Slice 3 completion commit
 
 ## Closure Approval
 
@@ -469,7 +479,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 3: Make External Wait Constraints Complete And Structured
 
-- Status: Approved; ready for implementation handoff.
+- Status: Complete; independently reviewed `Ready`, Completion Approval
+  recorded, and focused completion commit pending.
 - Scope: preserve supported wait-release, timeout, file, and event selections
   while completing their typed before/after evidence and mandatory runtime or
   external-state constraints across every output mode.
@@ -732,6 +743,79 @@ test:prepare:desktop` plus the compiled desktop suite (including Full and
   reviewer should verify that Full reads only the existing structured
   `beforeValues`, while Audit/JSON retain the exact arrays and all other
   reason/Japanese/schema mappings remain untouched.
+
+## Slice 3 Implementation Evidence
+
+- Status: Implementation complete for the approved Slice 3 boundary; pending
+  independent implementation review and Completion Approval.
+- Changed files are limited to the existing wait evidence selector and named
+  wait/condition, Full/Audit/JSON, and focused contract tests. No new wait
+  type, target key, structured field, diagnostic, runtime probe, filesystem
+  access, event access, telemetry, or host adapter was added.
+- Wait-release decisions remain limited to supported file/event wait pairs;
+  removed source values stay sorted with duplicates preserved, and related
+  targets resolve only through the matched after-side job group. Explicit
+  `etm`/`fd` removal remains review-recommended with its existing timeout
+  detail.
+- All supported file target keys (`flwf`, `flwc`) and event target keys
+  (`evwid`, `evwfr`, `evhst`, `evwms`, `evdet`, `evusr`, `evgrp`, `evuid`,
+  `evgid`, `evpid`, `evipa`, `evesc`) retain exact before/after values. File
+  and event confirmations carry `jp1-ajs3-v13-rule-basis`,
+  `runtime-state-not-verified`, and `external-state-not-verified` in the
+  existing structured result. Parameterized replacement, before-only, and
+  after-only cases cover every supported key through the Full, Audit, and JSON
+  projections. Uninterpretable `flwc` remains unsupported and does not create
+  a `wait-target-changed` confirmation; independent supported `flwf` evidence
+  remains reviewable.
+- Explicit event (`etm`) and file (`fd`) timeouts are covered in both retained
+  and removed cases. Retained values produce no timeout confirmation, while
+  removed values preserve exact details and the existing basis/runtime/external
+  constraints through the application and Full/Audit/JSON output paths.
+- Cross-mode evidence asserts the exact wait details and constraint codes in
+  Full, Audit, and JSON, including English/Japanese output. Raw quoted paths,
+  event values, duplicate release values, warnings, and browser-safe pure
+  evaluation remain unchanged.
+- Validation evidence from the implementer:
+
+  - `rtk pnpm run test:compile` exited 0.
+  - Focused command:
+
+    ```text
+    rtk pnpm exec mocha --ui tdd \
+      out/test/suite/semanticDiffEvidenceRules.test.js \
+      out/test/suite/semanticDiffContracts.test.js \
+      out/test/suite/semanticDiffJson.test.js
+    ```
+
+    It exited 0 with 32 passing tests.
+
+  - `rtk pnpm run test:prepare:desktop` and `node ./out/test/runTest.js` both
+    exited 0.
+  - `rtk pnpm run test:prepare:web` and `node ./out/test/runWebTest.js` both
+    exited 0, with transient EPIPE/premature-close teardown logs after the web
+    assertions.
+  - `rtk pnpm run qlty` exited 0 (`qlty fmt` and `qlty check`).
+  - `rtk pnpm run build`, `rtk pnpm run lint:md`, and `rtk git diff --check`
+    exited 0. The production build emitted only the existing webpack
+    asset-size recommendations. Direct raw-mocha Markdown/condition launches
+    retain the repository's existing `@resource/i18n/message` alias caveat;
+    the compiled desktop suite covers the same Full/Audit paths successfully.
+
+- Independent-reviewer environment caveats are not validation passes: the
+  reviewer's `node ./out/test/runWebTest.js` rerun was blocked before suite
+  assertions by Chromium MachPort permission, and the reviewer's
+  `rtk pnpm run qlty` rerun was blocked before the check by qlty rolling-log
+  permission. The implementer reran qlty successfully in the capable
+  environment as recorded above.
+- Compatibility: domain and application evaluation remain pure and
+  browser-safe; established output schemas, report modes, VS Code engine,
+  desktop/web contracts, parser behavior, and telemetry remain unchanged.
+- Documentation/release: no README, use-case, or CHANGELOG update is needed
+  before Feature Exit; user-facing recommendation propagation remains owned by
+  the Feature Exit review.
+- Unresolved risks: none requiring replanning. Independent review should verify
+  that unsupported `flwc` evidence remains separate from supported target
+  changes and that constraint/detail parity holds across Full, Audit, and JSON.
 
 ## Notes
 

@@ -58,6 +58,10 @@ export type EvaluateSemanticDiffEvidenceInput = {
 
 const eventReceivingWaitTypes = new Set<AjsUnitType>(["evwj", "revwj"]);
 const fileMonitoringWaitTypes = new Set<AjsUnitType>(["flwj", "rflwj"]);
+const supportedWaitTypes = new Set<AjsUnitType>([
+  ...eventReceivingWaitTypes,
+  ...fileMonitoringWaitTypes,
+]);
 const waitReleaseSourceKeys = new Set(["eun"]);
 const conditionJudgmentKeys = new Set([
   "cond",
@@ -113,9 +117,18 @@ const removedOrChangedValues = (
 const waitReleaseSourceDecisions = (
   matches: SemanticDiffUnitMatch[],
 ): SemanticDiffConfirmationEvidenceDecision[] =>
-  matches.flatMap((match) =>
-    changedSupportedKeys(match.before, match.after, waitReleaseSourceKeys).map(
-      (parameterKey) => ({
+  matches
+    .filter(
+      (match) =>
+        supportedWaitTypes.has(match.before.unitType) &&
+        supportedWaitTypes.has(match.after.unitType),
+    )
+    .flatMap((match) =>
+      changedSupportedKeys(
+        match.before,
+        match.after,
+        waitReleaseSourceKeys,
+      ).map((parameterKey) => ({
         kind: "wait-release-source-changed",
         match,
         parameterKey,
@@ -124,9 +137,8 @@ const waitReleaseSourceDecisions = (
           match.after,
           parameterKey,
         ),
-      }),
-    ),
-  );
+      })),
+    );
 
 const timeoutKeysForUnit = (unit: AjsUnit): string[] => {
   if (eventReceivingWaitTypes.has(unit.unitType)) {
@@ -186,13 +198,19 @@ const waitTargetDecisions = (
     if (!targetKeys) {
       return [];
     }
-    return changedSupportedKeys(match.before, match.after, targetKeys).map(
-      (parameterKey) => ({
+    return changedSupportedKeys(match.before, match.after, targetKeys)
+      .filter(
+        (parameterKey) =>
+          parameterKey !== "flwc" ||
+          ![match.before, match.after].some(
+            hasUninterpretableFileMonitoringCondition,
+          ),
+      )
+      .map((parameterKey) => ({
         kind: "wait-target-changed",
         match,
         parameterKey,
-      }),
-    );
+      }));
   });
 
 const conditionalRelationDecisions = (
@@ -233,6 +251,7 @@ const conditionalRelationDecisions = (
 };
 
 const hasUninterpretableFileMonitoringCondition = (unit: AjsUnit): boolean =>
+  fileMonitoringWaitTypes.has(unit.unitType) &&
   (semanticDiffParameterValuesByKey(unit).get("flwc") ?? []).some((value) => {
     const conditions = new Set(
       value.split(":").filter((condition) => condition.length > 0),
