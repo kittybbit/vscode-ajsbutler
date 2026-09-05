@@ -4,6 +4,7 @@ import type {
   AjsRelation,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
+import { TySymbols } from "../../domain/values/AjsType";
 import { evaluateSemanticDiffEvidence } from "../../domain/services/semantic-diff/semanticDiffEvidenceRules";
 import type { SemanticDiffUnitMatch } from "../../domain/services/semantic-diff/semanticDiffStructuralRules";
 
@@ -315,6 +316,253 @@ suite("Semantic Diff Evidence Rules", () => {
     assert.deepStrictEqual(
       result.unsupportedDecisions.map((decision) => decision.match.after.id),
       [afterUnsupported.id],
+    );
+  });
+
+  test("applies the closed v13 execution-user applicability and default matrix", () => {
+    const applicableTypes = new Set([
+      "j",
+      "rj",
+      "pj",
+      "rp",
+      "qj",
+      "rq",
+      "evsj",
+      "revsj",
+      "mlsj",
+      "rmlsj",
+      "mqsj",
+      "rmqsj",
+      "mssj",
+      "rmssj",
+      "cmsj",
+      "rcmsj",
+      "pwlj",
+      "rpwlj",
+      "pwrj",
+      "rpwrj",
+      "cj",
+      "rcj",
+      "cpj",
+      "rcpj",
+      "fxj",
+      "rfxj",
+      "htpj",
+      "rhtpj",
+    ]);
+    const matches = TySymbols.map((unitType) => {
+      const before = unit({
+        id: `/root/jobnet/eu-${unitType}`,
+        name: `eu-${unitType}`,
+        absolutePath: `/root/jobnet/eu-${unitType}`,
+        unitType,
+        parameters: parameterList([
+          ["ty", unitType],
+          ["eu", "ent"],
+        ]),
+      });
+      const after = unit({
+        ...before,
+        parameters: parameterList([
+          ["ty", unitType],
+          ["eu", "def"],
+        ]),
+      });
+      return { before, after, kind: "exact" as const };
+    });
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: matches.map(({ before }) => before),
+      afterUnits: matches.map(({ after }) => after),
+      beforeUnitById: unitMap(...matches.map(({ before }) => before)),
+      afterUnitById: unitMap(...matches.map(({ after }) => after)),
+      matches,
+    });
+
+    assert.deepStrictEqual(
+      result.confirmationDecisions
+        .filter((decision) => decision.kind === "execution-user-type-changed")
+        .map((decision) => decision.match.after.unitType)
+        .sort(),
+      [...applicableTypes].sort(),
+    );
+    assert.strictEqual(
+      result.confirmationDecisions.filter(
+        (decision) => decision.kind === "jp1-resource-group-changed",
+      ).length,
+      0,
+    );
+  });
+
+  test("uses unit-type defaults and ignores invalid execution-user evidence", () => {
+    const cases = [
+      ["ordinary-default-equal", "j", {}, { eu: "ent" }, false],
+      ["ordinary-default-different", "j", {}, { eu: "def" }, true],
+      ["http-default-equal", "htpj", {}, { eu: "def" }, false],
+      ["http-default-different", "htpj", {}, { eu: "ent" }, true],
+      ["recovery-http-default-equal", "rhtpj", {}, { eu: "def" }, false],
+      ["recovery-http-default-different", "rhtpj", {}, { eu: "ent" }, true],
+      ["invalid-before", "j", { eu: "invalid" }, { eu: "def" }, false],
+      ["invalid-after", "j", { eu: "ent" }, { eu: "invalid" }, false],
+      ["duplicate-before", "j", { eu: "ent" }, { eu: "def" }, false],
+    ] as const;
+    const matches = cases.map(
+      ([name, unitType, beforeValues, afterValues], index) => {
+        const before = unit({
+          id: `/root/jobnet/${name}`,
+          name,
+          absolutePath: `/root/jobnet/${name}`,
+          unitType,
+          parameters: parameterList([
+            ["ty", unitType],
+            ...Object.entries(beforeValues),
+            ...(index === cases.length - 1
+              ? [["eu", "ent"] as [string, string]]
+              : []),
+          ]),
+        });
+        const after = unit({
+          ...before,
+          parameters: parameterList([
+            ["ty", unitType],
+            ...Object.entries(afterValues),
+          ]),
+        });
+        return {
+          before,
+          after,
+          expected: cases[index][4],
+          kind: "exact" as const,
+        };
+      },
+    );
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: matches.map(({ before }) => before),
+      afterUnits: matches.map(({ after }) => after),
+      beforeUnitById: unitMap(...matches.map(({ before }) => before)),
+      afterUnitById: unitMap(...matches.map(({ after }) => after)),
+      matches,
+    });
+
+    matches.forEach(({ after, expected }) => {
+      assert.strictEqual(
+        result.confirmationDecisions.some(
+          (decision) =>
+            decision.kind === "execution-user-type-changed" &&
+            decision.match.after.id === after.id,
+        ),
+        expected,
+      );
+    });
+  });
+
+  test("does not elevate excluded environment keys", () => {
+    const before = unit({
+      permission: "r",
+      jp1Username: "jp1-before",
+      parameters: parameterList([
+        ["ty", "j"],
+        ["un", "user-before"],
+        ["qu", "queue-before"],
+        ["mqque", "mq-before"],
+        ["mqmgr", "manager-before"],
+        ["ntsrc", "host-before"],
+      ]),
+    });
+    const after = unit({
+      ...before,
+      permission: "w",
+      jp1Username: "jp1-after",
+      parameters: parameterList([
+        ["ty", "j"],
+        ["un", "user-after"],
+        ["qu", "queue-after"],
+        ["mqque", "mq-after"],
+        ["mqmgr", "manager-after"],
+        ["ntsrc", "host-after"],
+      ]),
+    });
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: [before],
+      afterUnits: [after],
+      beforeUnitById: unitMap(before),
+      afterUnitById: unitMap(after),
+      matches: [{ before, after, kind: "exact" }],
+    });
+
+    assert.deepStrictEqual(result.confirmationDecisions, []);
+  });
+
+  test("compares raw resource-group evidence without treating rg parameters as GR", () => {
+    const rawCases = [
+      ["undefined-to-empty", undefined, "", true],
+      ["empty-to-value", "", "group-a", true],
+      ["value-to-undefined", "group-a", undefined, true],
+      ["unchanged", "group-a", "group-a", false],
+    ] as const;
+    const matches = rawCases.map(
+      ([name, beforeGroup, afterGroup, expected]) => {
+        const before = unit({
+          id: `/root/jobnet/rg-${name}`,
+          name: `rg-${name}`,
+          absolutePath: `/root/jobnet/rg-${name}`,
+          jp1ResourceGroup: beforeGroup,
+        });
+        const after = unit({
+          ...before,
+          jp1ResourceGroup: afterGroup,
+        });
+        return { before, after, expected, kind: "exact" as const };
+      },
+    );
+    const parameterBefore = unit({
+      id: "/root/jobnet/rg-parameter",
+      name: "rg-parameter",
+      absolutePath: "/root/jobnet/rg-parameter",
+      parameters: parameterList([
+        ["ty", "j"],
+        ["rg", "1"],
+      ]),
+    });
+    const parameterAfter = unit({
+      ...parameterBefore,
+      parameters: parameterList([
+        ["ty", "j"],
+        ["rg", "2"],
+      ]),
+    });
+    const allMatches = [
+      ...matches,
+      {
+        before: parameterBefore,
+        after: parameterAfter,
+        kind: "exact" as const,
+      },
+    ];
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: allMatches.map(({ before }) => before),
+      afterUnits: allMatches.map(({ after }) => after),
+      beforeUnitById: unitMap(...allMatches.map(({ before }) => before)),
+      afterUnitById: unitMap(...allMatches.map(({ after }) => after)),
+      matches: allMatches,
+    });
+
+    matches.forEach(({ after, expected }) => {
+      assert.strictEqual(
+        result.confirmationDecisions.some(
+          (decision) =>
+            decision.kind === "jp1-resource-group-changed" &&
+            decision.match.after.id === after.id,
+        ),
+        expected,
+      );
+    });
+    assert.strictEqual(
+      result.confirmationDecisions.some(
+        (decision) =>
+          decision.kind !== "conditional-relation-removed" &&
+          decision.match.after.id === parameterAfter.id,
+      ),
+      false,
     );
   });
 

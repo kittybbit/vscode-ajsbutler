@@ -115,12 +115,25 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-05, conditional approval granted by the user and applied
+  after the final independent implementation review returned `Ready` with no
+  findings
+- Approved scope: Slice 4 — closed v13 execution-user applicability/default
+  evaluation, raw resource-group comparison, established structured output and
+  generic Flow consumption, focused boundary tests, and implementation/
+  traceability evidence.
+- Approved paths:
+  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
+  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
+  - `src/application/semantic-diff/compareSemanticDiff.ts`
+  - `src/domain/services/semantic-diff/semanticDiffEvidenceRules.ts`
+  - `src/test/suite/semanticDiffConditions.test.ts`
+  - `src/test/suite/semanticDiffEvidenceRules.test.ts`
+  - `src/test/suite/semanticDiffFlowHighlights.test.ts`
+- Implementation review verdict: `Ready`; final review found no remaining
+  findings after `rhtpj` and excluded-environment-key coverage was added
+- Commit status: Eligible for the focused Slice 4 completion commit
 
 ## Closure Approval
 
@@ -510,7 +523,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 4: Recommend Review For Execution User Type And Resource Group Changes
 
-- Status: Approved; ready for implementation handoff.
+- Status: Complete; independently reviewed `Ready`, Completion Approval
+  recorded, and focused completion commit pending.
 - Scope: generate definition-only recommendations for valid raw normalized
   `eu` execution user type and `jp1ResourceGroup` changes on their v13-
   applicable unit types, using the imported reason/detail/constraint contract;
@@ -582,6 +596,62 @@ not an implementation surface owned by this feature:
   excluded-key, privacy, exact-text, and insertion-order fixtures are the gate.
 - Out of Scope: host/user/resource probes, environment diagnostics, telemetry,
   new confirmation levels, comparison sources, or viewer workflows.
+
+## Slice 4 Implementation Evidence
+
+- The implementation adds only the approved rule selectors and their existing
+  structured-result mapping. The closed v13 applicability table covers every
+  current `TySymbol`; valid applicable units use `ent` by default, HTTP
+  connection jobs use the existing `Defaults.HttpConnectionJobEu` helper, and
+  ignored, invalid, duplicate, or unresolved evidence produces no execution
+  user confirmation.
+- Raw `AjsUnit.jp1ResourceGroup` changes are compared without inheritance or
+  profile traversal. Undefined, explicit empty, and non-empty values remain
+  distinct in confirmation details; a definition parameter named `rg` does
+  not activate the resource-group rule.
+- Both new confirmation kinds use `parameterKey: "eu"`/`"rg"`, preserve raw
+  before/after values, and carry the existing non-assertive
+  `jp1-ajs3-v13-rule-basis`, `runtime-state-not-verified`, and
+  `external-state-not-verified` constraints. Full/Audit/JSON consume the
+  existing mappings and Flow remains a generic after-side confirmation
+  highlight.
+- Follow-up coverage explicitly exercises both omitted/default-equal and
+  omitted/default-different `rhtpj` cases through the application outputs, and
+  changes to `un`, `qu`, `mqque`, `mqmgr`, `ntsrc`, `permission`,
+  `jp1Username`, and `unitAttribute` remain ordinary attribute changes without
+  either new confirmation reason.
+- Validation:
+
+  - `rtk pnpm run test:compile` exited 0.
+  - Focused command:
+
+    ```text
+    rtk pnpm exec mocha --ui tdd \
+      out/test/suite/semanticDiffEvidenceRules.test.js \
+      out/test/suite/semanticDiffFlowHighlights.test.js \
+      out/test/suite/semanticDiffContracts.test.js \
+      out/test/suite/semanticDiffJson.test.js
+    ```
+
+    It exited 0 with 39 passing tests.
+
+  - `rtk pnpm run test:prepare:desktop` and `node ./out/test/runTest.js`
+    exited 0; `rtk pnpm run test:prepare:web` and
+    `node ./out/test/runWebTest.js` exited 0.
+  - `rtk pnpm run qlty` exited 0; `rtk pnpm run build` exited 0 with only
+    existing webpack asset-size recommendations; `rtk pnpm run lint:md` and
+    `rtk git diff --check` exited 0. Direct raw-Mocha condition/Markdown
+    launches retain the existing `@resource/i18n/message` alias caveat; the
+    compiled desktop suite covers those Full/Audit paths.
+
+- Compatibility and production readiness: domain/application evaluation stays
+  pure and browser-safe, with no DTO, telemetry, host, filesystem, process,
+  or runtime-probe changes. No README, CHANGELOG, or use-case update is made
+  before Feature Exit; the user-facing recommendation propagation remains
+  owned by the Feature Exit review.
+- Unresolved risks: none requiring replanning. Independent review should
+  verify the complete closed `TySymbol` matrix, default-equal suppression,
+  raw undefined/empty preservation, and generic output-mode/Flow consumption.
 
 ## Cross-Slice Validation And Production Readiness
 

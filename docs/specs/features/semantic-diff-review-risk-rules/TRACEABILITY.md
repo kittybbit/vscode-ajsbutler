@@ -56,3 +56,34 @@
   Chromium MachPort permission, and `rtk pnpm run qlty` was blocked before the
   check by qlty rolling-log permission. The implementer reran qlty successfully
   in the capable environment above.
+
+## Slice 4 Validation Evidence
+
+- `rtk pnpm run test:compile` exited 0. The focused command covered
+  `semanticDiffEvidenceRules`, `semanticDiffFlowHighlights`,
+  `semanticDiffContracts`, and `semanticDiffJson`:
+
+  ```text
+  rtk pnpm exec mocha --ui tdd \
+    out/test/suite/semanticDiffEvidenceRules.test.js \
+    out/test/suite/semanticDiffFlowHighlights.test.js \
+    out/test/suite/semanticDiffContracts.test.js \
+    out/test/suite/semanticDiffJson.test.js
+  ```
+
+  It exited 0 with 39 passing tests.
+
+- The focused/application coverage includes explicit `rhtpj` omitted/default-
+  equal and omitted/default-different cases, plus ordinary-change negatives
+  for `un`, `qu`, `mqque`, `mqmgr`, `ntsrc`, `permission`, `jp1Username`, and
+  `unitAttribute`; none emits `execution-user-type-changed` or
+  `jp1-resource-group-changed`.
+- Desktop: `rtk pnpm run test:prepare:desktop` and
+  `node ./out/test/runTest.js` exited 0.
+- Web: `rtk pnpm run test:prepare:web` and
+  `node ./out/test/runWebTest.js` exited 0. These compiled suites cover
+  Full/Audit/JSON and desktop/web equivalence; the raw-Mocha condition/Markdown
+  alias caveat is unchanged.
+- `rtk pnpm run qlty` exited 0, including formatting and checks.
+  `rtk pnpm run build` exited 0 with only the existing webpack asset-size
+  recommendations; `rtk pnpm run lint:md` and `rtk git diff --check` exited 0.

@@ -48,6 +48,7 @@ const typedUnit = (
   name: string,
   unitType: AjsUnitType,
   parameters: Record<string, string>,
+  overrides: Partial<AjsUnit> = {},
 ): AjsUnit =>
   unit({
     id: `/root/jobnet/${name}`,
@@ -55,6 +56,7 @@ const typedUnit = (
     unitType,
     absolutePath: `/root/jobnet/${name}`,
     parameters: params({ ty: unitType, ...parameters }),
+    ...overrides,
   });
 
 const jobnet = (children: AjsUnit[]): AjsUnit =>
@@ -431,6 +433,361 @@ suite("Semantic diff condition checks", () => {
           ],
         },
       ],
+    );
+  });
+
+  test("reports v13 execution-user and raw resource-group evidence across outputs", () => {
+    const cases: Array<{
+      name: string;
+      unitType: AjsUnitType;
+      before: Record<string, string>;
+      after: Record<string, string>;
+      beforeOverrides?: Partial<AjsUnit>;
+      afterOverrides?: Partial<AjsUnit>;
+      beforeGroup?: string;
+      afterGroup?: string;
+      expected: "eu" | "rg" | null;
+    }> = [
+      {
+        name: "ordinary-default-different",
+        unitType: "j",
+        before: {},
+        after: { eu: "def" },
+        expected: "eu",
+      },
+      {
+        name: "http-default-different",
+        unitType: "htpj",
+        before: {},
+        after: { eu: "ent" },
+        expected: "eu",
+      },
+      {
+        name: "recovery-http-default-different",
+        unitType: "rhtpj",
+        before: {},
+        after: { eu: "ent" },
+        expected: "eu",
+      },
+      {
+        name: "ordinary-default-equal",
+        unitType: "j",
+        before: {},
+        after: { eu: "ent" },
+        expected: null,
+      },
+      {
+        name: "http-default-equal",
+        unitType: "htpj",
+        before: {},
+        after: { eu: "def" },
+        expected: null,
+      },
+      {
+        name: "recovery-http-default-equal",
+        unitType: "rhtpj",
+        before: {},
+        after: { eu: "def" },
+        expected: null,
+      },
+      {
+        name: "invalid-eu",
+        unitType: "j",
+        before: { eu: "invalid" },
+        after: { eu: "def" },
+        expected: null,
+      },
+      {
+        name: "ignored-eu",
+        unitType: "evwj",
+        before: { eu: "ent" },
+        after: { eu: "def" },
+        expected: null,
+      },
+      {
+        name: "excluded-environment-keys",
+        unitType: "j",
+        before: {
+          un: "user-before",
+          qu: "queue-before",
+          mqque: "mq-before",
+          mqmgr: "manager-before",
+          ntsrc: "host-before",
+        },
+        after: {
+          un: "user-after",
+          qu: "queue-after",
+          mqque: "mq-after",
+          mqmgr: "manager-after",
+          ntsrc: "host-after",
+        },
+        beforeOverrides: {
+          permission: "r",
+          jp1Username: "jp1-before",
+          unitAttribute: "job,r,jp1-before,",
+        },
+        afterOverrides: {
+          permission: "w",
+          jp1Username: "jp1-after",
+          unitAttribute: "job,w,jp1-after,",
+        },
+        expected: null,
+      },
+      {
+        name: "resource-undefined-empty",
+        unitType: "j",
+        before: {},
+        after: {},
+        beforeGroup: undefined,
+        afterGroup: "",
+        expected: "rg",
+      },
+      {
+        name: "resource-empty-value",
+        unitType: "j",
+        before: {},
+        after: {},
+        beforeGroup: "",
+        afterGroup: "group-a",
+        expected: "rg",
+      },
+      {
+        name: "resource-value-undefined",
+        unitType: "j",
+        before: {},
+        after: {},
+        beforeGroup: "group-a",
+        afterGroup: undefined,
+        expected: "rg",
+      },
+      {
+        name: "parameter-rg-only",
+        unitType: "j",
+        before: { rg: "1" },
+        after: { rg: "2" },
+        expected: null,
+      },
+    ];
+    const beforeUnits = cases.map((item) =>
+      typedUnit(item.name, item.unitType, item.before, {
+        ...item.beforeOverrides,
+        jp1ResourceGroup: item.beforeGroup,
+      }),
+    );
+    const afterUnits = cases.map((item) =>
+      typedUnit(item.name, item.unitType, item.after, {
+        ...item.afterOverrides,
+        jp1ResourceGroup: item.afterGroup,
+      }),
+    );
+    const result = compareChildren(beforeUnits, afterUnits);
+
+    const excludedEnvironmentChanges = result.changes
+      .filter(
+        (change) =>
+          change.elementKind === "attribute" &&
+          change.after?.kind === "attribute" &&
+          change.after.unit.absolutePath ===
+            "/root/jobnet/excluded-environment-keys",
+      )
+      .map((change) =>
+        change.after?.kind === "attribute" ? change.after.parameterKey : "",
+      )
+      .sort();
+    assert.deepStrictEqual(excludedEnvironmentChanges, [
+      "jp1Username",
+      "mqmgr",
+      "mqque",
+      "ntsrc",
+      "permission",
+      "qu",
+      "unitAttribute",
+      "un",
+    ]);
+    assert.strictEqual(
+      result.confirmationRequired.some(
+        (item) =>
+          item.detail.unitPath === "/root/jobnet/excluded-environment-keys" &&
+          (item.reasonCode === "execution-user-type-changed" ||
+            item.reasonCode === "jp1-resource-group-changed"),
+      ),
+      false,
+    );
+
+    assert.deepStrictEqual(
+      result.confirmationRequired.map((item) => [
+        item.detail.unitPath,
+        item.reasonCode,
+        item.detail.parameterKey,
+      ]),
+      [
+        [
+          "/root/jobnet/http-default-different",
+          "execution-user-type-changed",
+          "eu",
+        ],
+        [
+          "/root/jobnet/ordinary-default-different",
+          "execution-user-type-changed",
+          "eu",
+        ],
+        [
+          "/root/jobnet/recovery-http-default-different",
+          "execution-user-type-changed",
+          "eu",
+        ],
+        [
+          "/root/jobnet/resource-empty-value",
+          "jp1-resource-group-changed",
+          "rg",
+        ],
+        [
+          "/root/jobnet/resource-undefined-empty",
+          "jp1-resource-group-changed",
+          "rg",
+        ],
+        [
+          "/root/jobnet/resource-value-undefined",
+          "jp1-resource-group-changed",
+          "rg",
+        ],
+      ],
+    );
+    const expectedConstraintCodes = [
+      "jp1-ajs3-v13-rule-basis",
+      "runtime-state-not-verified",
+      "external-state-not-verified",
+    ];
+    cases.forEach((item) => {
+      const confirmation = result.confirmationRequired.find(
+        (candidate) =>
+          candidate.detail.unitPath === `/root/jobnet/${item.name}`,
+      );
+      if (item.expected === null) {
+        assert.strictEqual(confirmation, undefined);
+        return;
+      }
+      assert.ok(confirmation);
+      assert.strictEqual(confirmation?.detail.parameterKey, item.expected);
+      assert.deepStrictEqual(
+        confirmation?.detail.beforeValues,
+        item.expected === "eu"
+          ? Object.hasOwn(item.before, "eu")
+            ? [item.before.eu]
+            : []
+          : item.beforeGroup === undefined
+            ? []
+            : [item.beforeGroup],
+      );
+      assert.deepStrictEqual(
+        confirmation?.detail.afterValues,
+        item.expected === "eu"
+          ? Object.hasOwn(item.after, "eu")
+            ? [item.after.eu]
+            : []
+          : item.afterGroup === undefined
+            ? []
+            : [item.afterGroup],
+      );
+      assert.deepStrictEqual(confirmation?.detail.rawValues, []);
+      assert.deepStrictEqual(
+        confirmation?.constraints.map((constraint) => constraint.code),
+        expectedConstraintCodes,
+      );
+    });
+
+    const full = renderSemanticDiffMarkdown(result);
+    assert.ok(
+      full.includes("ordinary-default-different execution user type changed"),
+    );
+    assert.ok(
+      full.includes("http-default-different execution user type changed"),
+    );
+    assert.ok(
+      full.includes(
+        "recovery-http-default-different execution user type changed",
+      ),
+    );
+    assert.ok(
+      full.includes("resource-undefined-empty JP1 resource group changed"),
+    );
+    assert.ok(full.includes("Runtime history and external conditions"));
+    assert.ok(full.includes("External files, events, hosts"));
+
+    const context = buildSemanticDiffOutputContext(result);
+    const audit = renderSemanticDiffAuditMarkdown(context);
+    assert.ok(audit.includes("parameterKey: eu"));
+    assert.ok(audit.includes("parameterKey: rg"));
+    assert.ok(audit.includes("beforeValues: [group-a]"));
+    assert.ok(audit.includes("afterValues: [group-a]"));
+    assert.ok(audit.includes("runtime-state-not-verified"));
+    assert.ok(audit.includes("external-state-not-verified"));
+
+    const json = JSON.parse(renderSemanticDiffJson(context).content) as {
+      result: {
+        confirmationRequired: Array<{
+          reasonCode: string;
+          detail: {
+            unitPath: string | null;
+            parameterKey: string | null;
+            beforeValues: string[];
+            afterValues: string[];
+            rawValues: string[];
+          };
+          constraints: Array<{ code: string }>;
+        }>;
+      };
+    };
+    const jsonByPath = new Map(
+      json.result.confirmationRequired.map((item) => [
+        item.detail.unitPath,
+        item,
+      ]),
+    );
+    assert.deepStrictEqual(
+      jsonByPath.get("/root/jobnet/resource-undefined-empty")?.detail,
+      {
+        unitPath: "/root/jobnet/resource-undefined-empty",
+        parameterKey: "rg",
+        beforeValues: [],
+        afterValues: [""],
+        rawValues: [],
+      },
+    );
+    assert.deepStrictEqual(
+      jsonByPath.get("/root/jobnet/recovery-http-default-different")?.detail,
+      {
+        unitPath: "/root/jobnet/recovery-http-default-different",
+        parameterKey: "eu",
+        beforeValues: [],
+        afterValues: ["ent"],
+        rawValues: [],
+      },
+    );
+    json.result.confirmationRequired.forEach((item) => {
+      assert.deepStrictEqual(
+        item.constraints.map((constraint) => constraint.code),
+        [
+          "external-state-not-verified",
+          "jp1-ajs3-v13-rule-basis",
+          "runtime-state-not-verified",
+        ],
+      );
+    });
+
+    const japanese = renderSemanticDiffMarkdown(result, "ja-JP");
+    assert.ok(japanese.includes("変更内容を確認してください"));
+    assert.ok(
+      japanese.includes("定義比較だけでは実行時の条件を検証できません"),
+    );
+
+    const reordered = compareChildren(
+      [...beforeUnits].reverse(),
+      [...afterUnits].reverse(),
+    );
+    assert.deepStrictEqual(
+      reordered.confirmationRequired,
+      result.confirmationRequired,
     );
   });
 
