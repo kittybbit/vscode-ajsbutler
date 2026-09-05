@@ -626,6 +626,56 @@ suite("Compare Semantic Diff", () => {
     );
   });
 
+  test("does not treat a reused after fingerprint-match ID as a removed endpoint", () => {
+    const beforeSource = unit({
+      id: "/root/jobnet/source",
+      name: "source",
+      absolutePath: "/root/jobnet/source",
+      parameters: params({ ty: "j", sc: "echo source" }),
+    });
+    const beforeRemovedTarget = unit({
+      id: "/root/jobnet/target",
+      name: "removed-target",
+      absolutePath: "/root/jobnet/target",
+      parameters: params({ ty: "j", sc: "echo removed" }),
+    });
+    const beforeFingerprintMatch = unit({
+      id: "/root/jobnet/other",
+      name: "other",
+      absolutePath: "/root/jobnet/other",
+      parameters: params({ ty: "j", sc: "echo reused" }),
+    });
+    const afterSource = unit({ ...beforeSource });
+    const afterFingerprintMatch = unit({
+      ...beforeFingerprintMatch,
+      id: beforeRemovedTarget.id,
+      name: "reused-target-id",
+      absolutePath: beforeRemovedTarget.absolutePath,
+    });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeRemovedTarget.id, "con"),
+    ];
+
+    const result = compareSemanticDiff({
+      before: document([
+        jobnet("jobnet", [
+          beforeSource,
+          beforeRemovedTarget,
+          beforeFingerprintMatch,
+        ]),
+      ]),
+      after: document([jobnet("jobnet", [afterSource, afterFingerprintMatch])]),
+      options: { jobGroupPath: "/root" },
+    });
+
+    assert.deepStrictEqual(
+      result.confirmationRequired.filter(
+        (item) => item.reasonCode === "conditional-relation-removed",
+      ),
+      [],
+    );
+  });
+
   test("carries normalization warnings into comparison limitations", () => {
     const before = document([]);
     before.warnings = [

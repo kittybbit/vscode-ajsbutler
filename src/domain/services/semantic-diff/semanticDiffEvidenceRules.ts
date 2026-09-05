@@ -199,6 +199,9 @@ const conditionalRelationDecisions = (
   input: EvaluateSemanticDiffEvidenceInput,
 ): SemanticDiffConfirmationEvidenceDecision[] => {
   const relationPairs = buildSemanticDiffRelationPairMaps(input);
+  const correspondenceResolvedBeforeUnitIds = new Set(
+    input.matches.map((match) => match.before.id),
+  );
   return [...relationPairs.before.entries()].flatMap(
     ([pairKey, beforeRelations]) => {
       const afterTypes = new Set(
@@ -206,14 +209,25 @@ const conditionalRelationDecisions = (
           (relation) => relation.type,
         ),
       );
-      return beforeRelations
-        .filter((relation) => relation.type === "con")
-        .filter((relation) => !afterTypes.has(relation.type))
-        .map((relation) => ({
-          kind: "conditional-relation-removed" as const,
-          pairKey,
-          relation,
-        }));
+      return (
+        beforeRelations
+          // A removed relation is review evidence only when both endpoints
+          // still correspond to units in the after definition. A relation
+          // attached to a removed unit is covered by the structural removal;
+          // it is not evidence that an existing start path was tightened.
+          .filter((relation) =>
+            [relation.sourceUnitId, relation.targetUnitId].every((unitId) =>
+              correspondenceResolvedBeforeUnitIds.has(unitId),
+            ),
+          )
+          .filter((relation) => relation.type === "con")
+          .filter((relation) => !afterTypes.has(relation.type))
+          .map((relation) => ({
+            kind: "conditional-relation-removed" as const,
+            pairKey,
+            relation,
+          }))
+      );
     },
   );
 };

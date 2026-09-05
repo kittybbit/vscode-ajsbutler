@@ -90,12 +90,22 @@ finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-05, conditional approval granted by the user in the
+  current conversation and applied after the independent `Ready` re-review
+- Approved scope: Slice 1 — before-side correspondence-bounded conditional
+  relation evidence, preserved condition raw evidence, focused regression
+  tests, and Slice 1 implementation/traceability evidence.
+- Approved paths:
+  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
+  - `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
+  - `src/domain/services/semantic-diff/semanticDiffEvidenceRules.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `src/test/suite/semanticDiffConditions.test.ts`
+  - `src/test/suite/semanticDiffEvidenceRules.test.ts`
+- Implementation review verdict: `Ready` after the endpoint-ID reuse finding
+  was fixed and independently re-reviewed
+- Commit status: Eligible for the focused Slice 1 completion commit
 
 ## Closure Approval
 
@@ -321,7 +331,8 @@ not an implementation surface owned by this feature:
 
 ### Slice 1: Bound Start-Condition And Branch Recommendations
 
-- Status: Approved; ready for implementation handoff.
+- Status: Complete; independently reviewed `Ready`, Completion Approval
+  recorded, and focused completion commit pending.
 - Scope: preserve the supported condition/judgment baseline, make
   before/after evidence explicit, and lock the removed-conditional-relation
   rule as the only directional topology-based start-path recommendation.
@@ -581,10 +592,40 @@ not an implementation surface owned by this feature:
 - [x] Production readiness, compatibility, approval boundaries, risks, and
       out-of-scope work recorded for every slice.
 - [x] Independent plan review returns `Ready`.
-- [ ] Human Approval recorded; focused plan commit pending.
+- [x] Human Approval recorded; focused plan commit `806d2abd`.
 - [ ] Slices 1-4 implemented, reviewed, completion-approved, and committed in
       order.
 - [ ] Feature Exit and durable-document propagation completed.
+
+## Slice 1 Implementation Evidence
+
+- Status: Implementation complete; independent implementation review `Ready`.
+- Changed files are limited to the Slice 1 domain evidence selector and its
+  focused domain/comparison tests. No structured-output contract, renderer,
+  schedule, wait, execution-environment, parser, adapter, or configuration
+  files were changed.
+- Conditional-relation evidence now requires both relation endpoints to be
+  correspondence-resolved on the before side. Removed-unit topology stays
+  represented by structural changes and is not upgraded to a second start-path
+  confirmation, even when an after fingerprint match reuses the removed
+  endpoint's ID. Added `con` and unchanged/removed `seq` relations remain free
+  of confirmation-required records.
+- Reviewer finding resolved: added domain and application regression fixtures
+  for ID reuse by a fingerprint-matched after unit; neither emits
+  `conditional-relation-removed`.
+- Validation: `rtk pnpm run test:prepare:desktop` and the resulting desktop
+  test run passed; `rtk pnpm run build`, `rtk pnpm run qlty`, and
+  `rtk git diff --check` passed. Production build emitted only the existing
+  webpack asset-size recommendations.
+- Compatibility: the change remains in pure domain evidence evaluation and
+  browser-safe comparison data; VS Code engine, desktop/web entry points,
+  parser behavior, telemetry, and structured output contracts are unchanged.
+- Documentation/release: no README, use-case, or CHANGELOG update is needed
+  for this internal rule-boundary/test slice; user-facing documentation is
+  evaluated at Feature Exit after all slices.
+- Unresolved risks: none. Independent re-review confirmed the endpoint
+  correspondence guard matches the approved relation evidence boundary and no
+  additional topology or condition interpretation entered the slice.
 
 ## Notes
 

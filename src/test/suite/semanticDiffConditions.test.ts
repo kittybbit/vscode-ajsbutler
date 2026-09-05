@@ -126,6 +126,26 @@ suite("Semantic diff condition checks", () => {
         (constraint) => constraint.code === "jp1-ajs3-v13-rule-basis",
       ),
     );
+    assert.ok(
+      result.confirmationRequired[0].constraints.some(
+        (constraint) => constraint.code === "runtime-state-not-verified",
+      ),
+    );
+    assert.strictEqual(
+      renderSemanticDiffMarkdown(result).includes(
+        "a previously conditional branch path may no longer be available",
+      ),
+      true,
+    );
+
+    const reorderedResult = compareChildren(
+      [beforeTarget, beforeSource],
+      [afterTarget, afterSource],
+    );
+    assert.deepStrictEqual(
+      reorderedResult.confirmationRequired,
+      result.confirmationRequired,
+    );
   });
 
   test("does not treat plain predecessor removal as a confirmation-required problem", () => {
@@ -140,6 +160,76 @@ suite("Semantic diff condition checks", () => {
     const result = compareChildren(
       [beforeSource, beforeTarget],
       [afterSource, afterTarget],
+    );
+
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("does not treat an added conditional relation as a confirmation-required problem", () => {
+    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
+    const afterSource = typedUnit("source", "j", { sc: "echo source" });
+    const afterTarget = typedUnit("target", "j", { sc: "echo target" });
+    afterSource.relations = [relation(afterSource.id, afterTarget.id, "con")];
+
+    const result = compareChildren(
+      [beforeSource, beforeTarget],
+      [afterSource, afterTarget],
+    );
+
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("does not treat an endpoint removal as a tightened conditional path", () => {
+    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeTarget.id, "con"),
+    ];
+    const afterSource = typedUnit("source", "j", { sc: "echo source" });
+
+    const result = compareChildren([beforeSource, beforeTarget], [afterSource]);
+
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("does not treat a cycle-only topology change as a confirmation-required problem", () => {
+    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeTarget.id, "seq"),
+    ];
+    const afterSource = typedUnit("source", "j", { sc: "echo source" });
+    const afterTarget = typedUnit("target", "j", { sc: "echo target" });
+    afterSource.relations = [relation(afterSource.id, afterTarget.id, "seq")];
+    afterTarget.relations = [relation(afterTarget.id, afterSource.id, "seq")];
+
+    const result = compareChildren(
+      [beforeSource, beforeTarget],
+      [afterSource, afterTarget],
+    );
+
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("does not treat a reachability-only relation rewrite as a confirmation-required problem", () => {
+    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeMiddle = typedUnit("middle", "j", { sc: "echo middle" });
+    const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeMiddle.id, "seq"),
+    ];
+    beforeMiddle.relations = [
+      relation(beforeMiddle.id, beforeTarget.id, "seq"),
+    ];
+    const afterSource = typedUnit("source", "j", { sc: "echo source" });
+    const afterMiddle = typedUnit("middle", "j", { sc: "echo middle" });
+    const afterTarget = typedUnit("target", "j", { sc: "echo target" });
+    afterSource.relations = [relation(afterSource.id, afterTarget.id, "seq")];
+
+    const result = compareChildren(
+      [beforeSource, beforeMiddle, beforeTarget],
+      [afterSource, afterMiddle, afterTarget],
     );
 
     assert.deepStrictEqual(result.confirmationRequired, []);

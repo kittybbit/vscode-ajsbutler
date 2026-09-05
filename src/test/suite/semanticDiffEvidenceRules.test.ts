@@ -158,4 +158,80 @@ suite("Semantic Diff Evidence Rules", () => {
       ],
     );
   });
+
+  test("does not recommend a conditional relation when an endpoint is removed", () => {
+    const beforeSource = unit({
+      id: "/root/jobnet/source",
+      name: "source",
+      absolutePath: "/root/jobnet/source",
+    });
+    const beforeTarget = unit({
+      id: "/root/jobnet/target",
+      name: "target",
+      absolutePath: "/root/jobnet/target",
+    });
+    const afterSource = unit({ ...beforeSource });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeTarget.id, "con"),
+    ];
+
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: [beforeSource, beforeTarget],
+      afterUnits: [afterSource],
+      beforeUnitById: unitMap(beforeSource, beforeTarget),
+      afterUnitById: unitMap(afterSource),
+      matches: [{ before: beforeSource, after: afterSource, kind: "exact" }],
+    });
+
+    assert.deepStrictEqual(result.confirmationDecisions, []);
+  });
+
+  test("does not reuse an after fingerprint-match ID as a removed before endpoint", () => {
+    const beforeSource = unit({
+      id: "/root/jobnet/source",
+      name: "source",
+      absolutePath: "/root/jobnet/source",
+    });
+    const beforeRemovedTarget = unit({
+      id: "/root/jobnet/target",
+      name: "removed-target",
+      absolutePath: "/root/jobnet/target",
+    });
+    const beforeFingerprintMatch = unit({
+      id: "/root/jobnet/other",
+      name: "other",
+      absolutePath: "/root/jobnet/other",
+    });
+    const afterSource = unit({ ...beforeSource });
+    const afterFingerprintMatch = unit({
+      ...beforeFingerprintMatch,
+      id: beforeRemovedTarget.id,
+      name: "reused-target-id",
+      absolutePath: beforeRemovedTarget.absolutePath,
+    });
+    beforeSource.relations = [
+      relation(beforeSource.id, beforeRemovedTarget.id, "con"),
+    ];
+
+    const result = evaluateSemanticDiffEvidence({
+      beforeUnits: [beforeSource, beforeRemovedTarget, beforeFingerprintMatch],
+      afterUnits: [afterSource, afterFingerprintMatch],
+      beforeUnitById: unitMap(
+        beforeSource,
+        beforeRemovedTarget,
+        beforeFingerprintMatch,
+      ),
+      afterUnitById: unitMap(afterSource, afterFingerprintMatch),
+      matches: [
+        { before: beforeSource, after: afterSource, kind: "exact" },
+        {
+          before: beforeFingerprintMatch,
+          after: afterFingerprintMatch,
+          kind: "fingerprint",
+        },
+      ],
+    });
+
+    assert.deepStrictEqual(result.confirmationDecisions, []);
+  });
 });
