@@ -17,17 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Semantic Diff Roadmap
 
-### Wave 2: Schedule Semantics
-
-#### Expand Schedule Interpretation And Supported Semantics
-
-- Origin: proposals R-3 and E-3.
-- Separate interpretation, run projection, and comparison so calendar,
-  inheritance, 48-hour, cycle, shift, and closed-day behavior can be added in
-  reviewed slices.
-- Entry condition: current supported projections and uncalculated reasons are
-  captured as a regression baseline.
-
 ### Wave 3: Review Exploration And Comparison Entry
 
 #### Add A Semantic Diff Explorer
@@ -59,3 +48,32 @@ entry conditions that make planning each item useful.
   stable. Internal artifact and session support precedes the comparison
   workflow; the public calendar action follows the completed period-bearing
   workflow and Explorer handoff.
+
+### Deferred Schedule Semantics
+
+- Sequencing: complete Wave 3, then Wave 4, before selectively pursuing these
+  follow-ups. The completed schedule interpretation and projection contracts
+  are prerequisites; no new numbered wave is created by this section.
+- Parent schedule inheritance and `ln`: retain explicit uncalculated evidence.
+  Entry condition: a reviewed neutral contract distinguishes an inherited
+  execution-generation date from a guaranteed nested-jobnet start time, with
+  complete normalized parent context and explicit missing-parent and cycle
+  behavior. Coordinate with the structured-output owner before representing
+  inherited execution without claiming an exact start.
+- 48-hour and day-crossing start times: retain explicit uncalculated evidence.
+  Entry condition: normalized 24/48-hour mode and effective scheduler base-time
+  context are available. Any new adapter, timezone conversion, or comparison
+  option is a planning boundary.
+- Cycle schedules: retain explicit uncalculated evidence. Entry condition:
+  normalized execution-registration anchor and mode, valid term, first
+  recurrence, and comparison-period boundary semantics are source-backed.
+- `cftd` days-from-start: retain explicit uncalculated evidence and require a
+  separate product intake after cycle and substitution contracts are stable.
+- Omitted-`sh` Cancel default: preserve the current no-substitution behavior.
+  Entry condition: an explicit scheduler-service calendar source and an
+  approved compatibility migration establish the baseline; host or implicit
+  calendar fallback is not allowed.
+- Registration-relative `en` and generalized omitted-year/month schedule
+  forms: retain explicit uncalculated evidence. Entry condition: a
+  source-backed registration-date contract is available; comparison-period
+  start and host clock must not be used as a substitute.
