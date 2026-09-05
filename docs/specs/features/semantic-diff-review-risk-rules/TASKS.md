@@ -4,9 +4,9 @@
 
 - Purpose: expand evidence-based review recommendations without presenting
   definition changes as verified runtime failures.
-- Approved or active slice: none; the reviewed four-slice planning package is
-  approved for its focused plan commit. Implementation remains deferred until
-  a separate slice-level go-ahead.
+- Approved or active slice: Slice 1; the reviewed four-slice plan is committed,
+  and the selected Slice 1 implementation scope is approved for the next
+  implementation handoff.
 - Do not: add cycle or terminal-reachability analysis, schedule-semantics
   expansion, runtime or external probes, identity rules, a new confirmation
   level, or a competing structured-result DTO.
@@ -18,8 +18,8 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: delegate this approved planning package to
-  `approval-committer` for the focused plan commit.
+- Next decision: delegate Slice 1 implementation to `implementer` after this
+  focused approval-state commit.
 
 ## Replanning Record
 
@@ -58,35 +58,35 @@
 
 ## Plan Status
 
-- Status: Approved for plan commit.
+- Status: Slice 1 approved for implementation.
 - Planning scope: revised complete four-slice plan covering supported
   start-condition evidence, supported-versus-unsupported calculated schedule
   opportunity loss, external wait constraints, and v13-backed non-assertive
   execution-user-type/resource-group recommendations.
 - Review status: Ready; independent plan review complete.
-- Human approval: Approved for the complete reviewed planning package; this
-  does not authorize implementation.
-- Active implementation slice: none.
+- Human approval: Approved for Slice 1 implementation in the current
+  conversation. The user also directed Main to continue later slices in order
+  and to apply conditional Completion Approval when independent review returns
+  no findings.
+- Active implementation slice: Slice 1.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-08-31, current conversation
-- Approved scope: The complete reviewed four-slice planning package for this
-  feature, as part of the consolidated approval of all seven feature plans;
-  plan commits are authorized, while implementation remains deferred until a
-  separate slice-level go-ahead.
+- Approved at: 2026-09-05, explicit user approval in current conversation
+- Approved scope: Slice 1 — supported condition and relation evidence
+  selection, mapping to the existing structured confirmation contract, and
+  the named focused tests within the Slice 1 Approval Boundary. The user also
+  authorized sequential continuation through all planned slices; each later
+  slice is activated only after the preceding completion commit.
 - Approved paths:
-  `docs/specs/features/semantic-diff-review-risk-rules/SPECS.md`,
-  `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`,
-  `docs/specs/features/semantic-diff-review-risk-rules/TRACEABILITY.md`
+  - `docs/specs/features/semantic-diff-review-risk-rules/TASKS.md`
 
-This approval permits `approval-committer` to create the focused plan commit
-for the approved planning package. It does not authorize runtime code, tests,
-generated artifacts, configuration, or implementation work. After the plan
-commit, Main delegates and completes one approved slice at a time in the order
-below, with a separate implementation go-ahead and completion gate for each
-slice.
+The approved Slice 1 implementation scope is recorded above. Main delegates
+and completes one slice at a time in the order below. The user's standing
+direction permits Main to record Completion Approval after an independent
+`Ready` review with no findings and then activate the next planned slice. Any
+finding, scope change, or replan trigger pauses that automatic continuation.
 
 ## Completion Approval
 
@@ -321,8 +321,7 @@ not an implementation surface owned by this feature:
 
 ### Slice 1: Bound Start-Condition And Branch Recommendations
 
-- Status: Planned; blocked on the completed and committed structured-output
-  neutral-result contract and Human Approval.
+- Status: Approved; ready for implementation handoff.
 - Scope: preserve the supported condition/judgment baseline, make
   before/after evidence explicit, and lock the removed-conditional-relation
   rule as the only directional topology-based start-path recommendation.
