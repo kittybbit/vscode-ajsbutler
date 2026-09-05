@@ -532,11 +532,12 @@ const createConstraint = (
 const parameterValues = (unit: AjsUnit, parameterKey: string): string[] =>
   semanticDiffParameterValuesByKey(unit).get(parameterKey) ?? [];
 
+const resourceGroupValues = (unit: AjsUnit): string[] =>
+  unit.jp1ResourceGroup === undefined ? [] : [unit.jp1ResourceGroup];
+
 const evidenceValues = (unit: AjsUnit, parameterKey: string): string[] =>
   parameterKey === "rg"
-    ? unit.jp1ResourceGroup === undefined
-      ? []
-      : [unit.jp1ResourceGroup]
+    ? resourceGroupValues(unit)
     : parameterValues(unit, parameterKey);
 
 type ParameterDetailInput = {

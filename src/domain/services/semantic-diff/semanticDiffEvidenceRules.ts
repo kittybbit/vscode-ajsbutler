@@ -260,23 +260,26 @@ const waitTargetDecisions = (
       }));
   });
 
-const validExecutionUserTypes = new Set(["ent", "def"]);
+type ExecutionUserType = "ent" | "def";
+
+const validExecutionUserTypes = new Set<ExecutionUserType>(["ent", "def"]);
+
+const explicitExecutionUserType = (
+  values: string[],
+): ExecutionUserType | undefined =>
+  values.length === 1 &&
+  validExecutionUserTypes.has(values[0] as ExecutionUserType)
+    ? (values[0] as ExecutionUserType)
+    : undefined;
 
 const effectiveExecutionUserType = (
   unit: AjsUnit,
-): "ent" | "def" | undefined => {
+): ExecutionUserType | undefined => {
   const defaultValue = executionUserTypeDefaults.get(unit.unitType);
-  if (!defaultValue) {
-    return undefined;
-  }
   const values = semanticDiffParameterValuesByKey(unit).get("eu") ?? [];
-  if (values.length === 0) {
-    return defaultValue;
-  }
-  if (values.length !== 1 || !validExecutionUserTypes.has(values[0])) {
-    return undefined;
-  }
-  return values[0] as "ent" | "def";
+  const configuredValue =
+    values.length === 0 ? defaultValue : explicitExecutionUserType(values);
+  return defaultValue === undefined ? undefined : configuredValue;
 };
 
 const executionUserTypeDecisions = (
