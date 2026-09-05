@@ -10,9 +10,10 @@
   cloud gate is 35, no replacement finding exists, `qlty fmt` reports no
   formatting issues, and Verify/CodeQL pass. Slice 3 correction is complete
   and published at `a7a7ecbc`: structural 11, no hidden or replacement finding,
-  fmt 0, and Verify/CodeQL pass. Slice 4 implementation is complete with
-  independent review `Ready` and no Findings; its exact completion package is
-  pending the approval-committer and published Cloud 10/fmt 0 gates.
+  fmt 0, and Verify/CodeQL pass. Slice 4 is complete and published at
+  `2013778c`: structural 10, fmt 0, Verify/CodeQL pass, and only the expected
+  ten Slice 5 report-provider findings remain. Slice 5 is the active approved
+  runtime slice; its code waits for the two-document transition commit.
 - Do not: change Semantic Diff meaning, output contracts, localization, or
   command/report behavior.
 - Do not: change Qlty policy, VS Code compatibility, or desktop/web support.
@@ -22,11 +23,11 @@
   desktop/web and zero-blocker local/cloud evidence before Feature Exit.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: have `approval-committer` create the focused Slice 4
-  completion commit for the exact command source and two feature documents
-  after the independent review and existing conditional Completion Approval.
-  Then wait for the published Cloud structural count 10 and `qlty fmt` 0
-  before routing the already approved Slice 5 scope.
+- Next decision: have `approval-committer` record the completed Slice 4 gate
+  transition in the exact two feature documents, then route the already
+  approved Slice 5 scope to `implementer`. No new plan review or approval is
+  required for this evidence-only transition; Slice 5 code must not start
+  before the transition commit.
 
 ## Sync Rule
 
@@ -58,12 +59,11 @@
 
 ## Plan Status
 
-- Status: Slice 4 implementation and independent review are complete; the
-  exact completion package is pending its approval-committer commit and
-  published Cloud gate. Slice 3 remains complete and published at `a7a7ecbc`;
-  structural 11 (`function-complexity` 6, `return-statements` 4,
-  `file-complexity` 1), no hidden or replacement finding, fmt 0, and
-  Verify/CodeQL pass.
+- Status: Slice 4 implementation and independent review are complete and
+  published at `2013778c`; structural 10, fmt 0, Verify/CodeQL pass, and only
+  the expected ten Slice 5 report-provider findings remain. Slice 5 is active
+  under the existing approval, gated by the exact two-document transition
+  commit.
 - Planning scope: five ordered, behavior-preserving refactor slices covering
   every reported blocker in all eight production files.
 - Review status: Slice 4 implementation review is `Ready` with no Findings;
@@ -87,17 +87,18 @@
   The four implementation-authorized paths were the two JSON helper sources
   and the two feature documents; the transition commit remains docs-only. This
   document does not grant a new approval.
-- Active implementation slice: Slice 4 runtime refactor is complete pending
-  its focused completion commit and published gate. Slice 1 published head
+- Active implementation slice: Slice 5 runtime refactor, queued behind the
+  required transition commit. Slice 1 published head
   `29f34008` records 46 structural blockers, zero formatting blockers, and no
   replacement finding;
   Slice 2 published head `8ec1f070` records 35 structural blockers, zero
   formatting blockers, no replacement finding, and passing Verify/CodeQL.
   Slice 3 published head `a7a7ecbc` records 11 structural blockers, zero
   formatting blockers, no hidden or replacement finding, and passing
-  Verify/CodeQL. Slice 3 is complete and must not be reopened. Slice 4's exact
-  completion paths are the command source plus these two feature documents;
-  its test file remained validation-only.
+  Verify/CodeQL. Slice 4 published head `2013778c` records 10 structural
+  blockers, zero formatting blockers, and passing Verify/CodeQL; its test file
+  remained validation-only. Slice 3 and Slice 4 are complete and must not be
+  reopened.
 
 ## Human Approval
 
@@ -191,9 +192,8 @@ active implementation approval remains.
 ## Completion Approval
 
 - Status: Approved conditionally for corrected Slice 2, Slice 3, and Slice 4
-  completion; Slice 2 and Slice 3 gates are complete, and Slice 4 has an
-  independent `Ready` review with no Findings. The Slice 4 completion commit
-  and published Cloud gate remain pending
+  completion; Slice 2, Slice 3, and Slice 4 gates are complete. Slice 5 is the
+  active approved slice after the published Slice 4 Cloud gate.
 - Approved at: existing user all-slice conditional authorization, activated
   after the corrected implementation review returned `Ready` with no Findings
 - Approved scope: the exact corrected implementation path and the two feature
@@ -209,14 +209,10 @@ active implementation approval remains.
 - Corrected implementation review verdict: `Ready`; Findings: none
 - Commit status: Slice 2 runtime completion is published at `9e2c45a4` and its
   format-only package at `8ec1f070`; Slice 3 correction completion is published
-  at `a7a7ecbc`. Slice 4 implementation review is `Ready` with no Findings, and
-  the existing conditional Completion Approval is applied. Its exact pending
-  completion paths are:
-  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
-  `docs/specs/features/semantic-diff-qlty-remediation/TASKS.md`, and
-  `docs/specs/features/semantic-diff-qlty-remediation/TRACEABILITY.md`.
-  The approval-committer must record the completion commit; published Cloud
-  Qlty is expected to be structural 10 with `qlty fmt` 0 before Slice 5 starts.
+  at `a7a7ecbc`; and Slice 4 completion is published at `2013778c` with
+  structural 10, fmt 0, Verify/CodeQL passing, and only the expected ten Slice
+  5 findings remaining. The exact two-document transition commit is pending
+  before Slice 5 runtime implementation.
 
 The Slice 1-specific conditional clean-review authorization was consumed by its
 completed package. Separately, the user's one-time conditional authorization
@@ -240,17 +236,19 @@ the current plan. The corrected runtime was published at `9e2c45a4` with 35
 structural blockers and Verify/CodeQL passing; its format-only package was
 published at `8ec1f070` with no formatting issues and no replacement finding.
 
-For corrected Slice 2, corrected Slice 3, and each later approved slice, the
-user's all-slice conditional authorization applies only when the independent
+For corrected Slice 2, corrected Slice 3, corrected Slice 4, and each later
+approved slice, the user's all-slice conditional authorization applies only
+when the independent
 implementation review returns `Ready` with no Findings and the published Qlty
-gates are clean. Slice 2 and Slice 3 meet those conditions; Slice 4 is the
-active approved slice and its code starts only after the transition commit.
+gates are clean. Slices 2-4 meet those conditions; Slice 5 is the active
+approved slice and its code starts only after the transition commit.
 
 Completion Approval was activated by the corrected independent implementation
 reviews returning `Ready` with no Findings and is consumed by the runtime
-completions published at `9e2c45a4` and `a7a7ecbc`; the Slice 2 format-only
-package is complete at `8ec1f070`. The two-document transition commit must
-complete before Slice 4 runtime implementation or Feature Exit starts.
+completions published at `9e2c45a4`, `a7a7ecbc`, and `2013778c`; the Slice 2
+format-only package is complete at `8ec1f070`. The two-document transition
+commit must complete before Slice 5 runtime implementation or Feature Exit
+starts.
 
 ## Closure Approval
 
@@ -347,8 +345,10 @@ create the focused closure commit before the feature is closed.
   zero format blockers, no hidden or replacement finding, and passing
   Verify/CodeQL. Slice 3 is complete; the two-document transition commit is
   required before Slice 4 runtime implementation.
-- After Slice 4: 10 (`function-complexity` 6,
-  `return-statements` 3, `file-complexity` 1).
+- Published Slice 4 head `2013778c`: 10 structural blockers
+  (`function-complexity` 6, `return-statements` 3, `file-complexity` 1),
+  zero format blockers, no replacement finding, and passing Verify/CodeQL.
+  Slice 5's ten report-provider findings remain.
 - After Slice 5 / Feature Exit: 0; no replacement blocker.
 
 - The terminal cloud check is authoritative for the final zero-blocker gate;
@@ -844,9 +844,10 @@ create the focused closure commit before the feature is closed.
 
 ### Slice 4: Preserve Semantic Diff Command Orchestration
 
-- Status: Approved and active; the one command return-count finding remains.
-  Runtime implementation starts only after the exact two-document Slice 3
-  transition commit.
+- Status: Complete and published at `2013778c`; structural 10, fmt 0,
+  Verify/CodeQL pass, and only the expected ten Slice 5 report-provider
+  findings remain. Slice 5 runtime implementation starts only after the exact
+  two-document transition commit.
 - Scope: replace the return-heavy command workflow in
   `semanticDiffCommand.ts` with typed phase helpers or one explicit command
   outcome pipeline, preserving the current dependency interface and operation
@@ -909,16 +910,19 @@ src/presentation/vscode/commands/semanticDiffCommand.ts`. `qlty check` and
   3.3.3 and 3.6.2 checks passed, and `rtk git diff --check` passed.
 - Independent implementation review is `Ready` with no Findings. Existing
   user all-slice conditional Completion Approval is applied to the exact
-  three-path completion package; the approval-committer commit is pending.
-  The published Cloud gate is expected to move from structural 11 to 10 with
-  `qlty fmt` 0 and no replacement finding before Slice 5 starts.
+  three-path completion package. Published `2013778c` moves the Cloud gate
+  from structural 11 to 10 with `qlty fmt` 0, Verify/CodeQL passing, and no
+  unexpected finding; only the expected ten Slice 5 report-provider findings
+  remain. The two-document transition commit is pending before Slice 5 starts.
 - Production readiness: no VS Code engine, host, Node, desktop, web,
   telemetry, parser, JP1/AJS, or durable-document behavior changed. No
   README, CHANGELOG, use-case, architecture, or roadmap update is required.
 
 ### Slice 5: Preserve Report Provider Concurrency And Lifetime
 
-- Status: Approved; queued behind Slice 4 completion gate
+- Status: Approved and active; the ten report-provider findings remain. Runtime
+  implementation starts only after the exact two-document Slice 4 transition
+  commit.
 - Scope: decompose the report-document provider's filename selection, content
   lookup, open/commit state transition, copy/save workflows, commit draining,
   and report resolution in `semanticDiffReportDocument.ts`. Keep one provider
@@ -1136,12 +1140,13 @@ src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`.
 
 ## Feature Exit
 
-- Definition of Done status: Slices 1-3 implementation reviews are complete,
-  and conditional Completion Approval is recorded. Slice 3 correction is
-  published at `a7a7ecbc` with structural 11, fmt 0, Verify/CodeQL passing,
-  and no hidden or replacement finding. Slice 4 is the active approved slice;
-  its code is gated only by the exact two-document transition commit. Slice 1
-  and Slice 2 published gates remain complete with no replacement findings.
+- Definition of Done status: Slices 1-4 implementation reviews are complete,
+  and conditional Completion Approval is recorded. Slice 4 is published at
+  `2013778c` with structural 10, fmt 0, Verify/CodeQL passing, and no
+  replacement finding; the expected ten Slice 5 report-provider findings
+  remain. Slice 5 is the active approved slice and its code is gated only by
+  the exact two-document transition commit. Slices 1-3 published gates remain
+  complete with no replacement findings.
 - Durable documentation updates: none expected; re-evaluate only if an actual
   durable behavior or architecture decision changes.
 - Required exit evidence: five focused completion commits; every requirement
