@@ -164,6 +164,8 @@ suite("Evaluate schedule diagnostic violations", () => {
       { key: "sd", value: "8,2036/04/mo:6" },
       { key: "sd", value: "9,+mo" },
       { key: "sd", value: "10,04/+mo" },
+      { key: "sd", value: "11,2036/04/*mo" },
+      { key: "sd", value: "12,2036/13/mo" },
     ]);
 
     const violations = evaluateScheduleDiagnosticViolations(
@@ -196,6 +198,16 @@ suite("Evaluate schedule diagnostic violations", () => {
           ruleId: diagnosticRuleIds.scheduleStartDate,
           reason: scheduleStartDateViolationReasons.invalidStartDate,
           value: "8,2036/04/mo:6",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "11,2036/04/*mo",
+        },
+        {
+          ruleId: diagnosticRuleIds.scheduleStartDate,
+          reason: scheduleStartDateViolationReasons.invalidStartDate,
+          value: "12,2036/13/mo",
         },
       ],
     );

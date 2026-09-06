@@ -127,7 +127,8 @@ wording or a diagnostic message.
 - Omitted-year or omitted-month forms such as `MM/b` and `b` remain
   uncalculated; existing direct `YYYY/MM/DD`, `MM/DD`, and `DD` behavior is
   unchanged.
-- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
 ### `JP1-PARAM-SCHEDULE-WEEKDAY-001`
 
@@ -143,7 +144,8 @@ wording or a diagnostic message.
   values. Omitted-year or omitted-month weekday forms remain uncalculated.
 - This meaning uses only proleptic Gregorian date arithmetic and does not
   consult an operational calendar, host locale, timezone, or current clock.
-- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
 ### `JP1-PARAM-SCHEDULE-RELATIVE-001`
 
@@ -172,7 +174,9 @@ wording or a diagnostic message.
   `st`, day-crossing start times, and unresolved scheduler-service calendar
   data remain uncalculated. The rule uses proleptic Gregorian arithmetic and
   does not consult host locale, timezone, clock, or external calendar data.
-- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM); [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM);
+  [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
 ### `JP1-PARAM-SCHEDULE-OPEN-CLOSED-001`
 
@@ -199,7 +203,9 @@ wording or a diagnostic message.
   Gregorian arithmetic; it does not consult host locale, timezone, current
   clock, filesystem, network, WebAPI, or external calendar data. Existing
   application mapping and DTO shapes are unchanged.
-- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM); [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §4.5.1(3), Table 4-10 and §5(7)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM);
+  [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10 and §5(7)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
 ### `JP1-PARAM-SCHEDULE-SHIFT-001`
 
@@ -221,7 +227,8 @@ wording or a diagnostic message.
 - A rule that also contains `cy` or `cftd` remains unresolved as a whole;
   substitution does not project a partial predecessor result. Omitted `sh`
   preserves the existing no-substitution behavior.
-- Source: [Command Reference 5.2.4, `sh` and `shd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM); [Definition Assistant §5(8)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+- Source: [Command Reference 5.2.4, `sh` and `shd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §5(8)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
 
 ## Diagnostic Interpretation Rules
 

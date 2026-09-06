@@ -130,6 +130,27 @@ const isBackwardScheduleDateDayToken = (
   );
 };
 
+const isFullyQualifiedAbsoluteWeekday = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean =>
+  parsed.day.kind === "weekday" &&
+  parsed.day.prefix === "" &&
+  parsed.year !== undefined &&
+  parsed.month !== undefined;
+
+const isSupportedWeekdayScheduleDatePrefix = (
+  parsed: ParsedExplicitScheduleDateValue,
+): boolean =>
+  parsed.day.kind === "weekday" &&
+  (parsed.day.prefix === "+" || isFullyQualifiedAbsoluteWeekday(parsed));
+
+const isValidWeekdayOccurrence = (
+  occurrence: number | "b" | undefined,
+): boolean =>
+  occurrence === undefined ||
+  occurrence === "b" ||
+  (typeof occurrence === "number" && isNumberInRange(occurrence, 1, 5));
+
 const isWeekdayScheduleDateDayToken = (
   parsed: ParsedExplicitScheduleDateValue,
 ): boolean | undefined => {
@@ -137,21 +158,11 @@ const isWeekdayScheduleDateDayToken = (
     return undefined;
   }
 
-  const isRelativeWeekday = parsed.day.prefix === "+";
-  const isFullyQualifiedAbsoluteWeekday =
-    parsed.day.prefix === "" &&
-    parsed.year !== undefined &&
-    parsed.month !== undefined;
-  if (!isRelativeWeekday && !isFullyQualifiedAbsoluteWeekday) {
+  if (!isSupportedWeekdayScheduleDatePrefix(parsed)) {
     return undefined;
   }
 
-  const occurrence = parsed.day.occurrence;
-  return (
-    occurrence === undefined ||
-    occurrence === "b" ||
-    (typeof occurrence === "number" && isNumberInRange(occurrence, 1, 5))
-  );
+  return isValidWeekdayOccurrence(parsed.day.occurrence);
 };
 
 const scheduleDateDayTokenValidators: readonly ScheduleDateDayTokenValidator[] =

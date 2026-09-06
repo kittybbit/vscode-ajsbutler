@@ -3,16 +3,17 @@
 ## Agent Brief
 
 - Purpose: clear all 65 blocking PR #315 Qlty findings without behavior change.
-- Approved or active slice: none; the complete five-slice plan awaits review.
+- Approved or active slice: Slice 1; implementation review is Ready and the
+  completion gate is pending.
 - Do not: change schedule semantics, public DTOs, outputs, or compatibility.
 - Do not: suppress findings, weaken Qlty configuration, or do unrelated cleanup.
 - Read first: `SPECS.md`, this file, and the PR #315 Qlty finding inventory.
-- Read `TRACEABILITY.md` only when required for the planning decision.
+- Read `TRACEABILITY.md` for implementation and validation evidence.
 - Validate: local quality and regression gates plus Qlty Cloud differential.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: `approval-committer` plan-gate commit, then Slice 1
-  implementation within the approved scope.
+- Next decision: `approval-committer` creates the Slice 1 completion commit
+  within the exact approved boundary.
 
 ## Sync Rule
 
@@ -29,12 +30,13 @@
 
 ## Plan Status
 
-- Status: Approved; plan-gate commit pending
+- Status: Slice 1 implementation review Ready; completion gate pending
 - Planning scope: five ordered behavior-preserving slices covering the exact
   65-item Qlty Cloud finding set reported on PR #315 at `23112667`.
 - Review status: Ready; plan-reviewer reported no findings
 - Human approval: Approved on 2026-09-06
-- Active implementation slice: None
+- Active implementation slice: Slice 1
+- Implementation review verdict: Ready; no findings
 
 ## Intake Boundary
 
@@ -233,24 +235,32 @@ stop and replan rather than absorb unrelated cleanup.
   - `src/test/suite/semanticDiffScheduleCalendar.test.ts`
   - `src/test/suite/semanticDiffSchedule.test.ts`
   - `src/test/suite/semanticDiffScheduleRules.test.ts`
-- Plan-gate commit: Pending `approval-committer` after this recorded approval.
+- Plan-gate commit: `f8823220` (`docs: approve schedule semantics qlty
+hardening plan`)
 
-Implementation may start only after the approved plan package is committed by
-`approval-committer`. Each slice's completion approval and implementation
-review remain Pending until that slice is implemented and independently
-reviewed.
+The approved plan package is committed. Each slice's completion approval and
+implementation review are tracked individually; Slice 1 is now approved after
+its Ready review, while later slices remain Pending until implemented and
+independently reviewed.
 
 ## Completion Approval
 
-- Status: Pending for each slice
-- Approved at: none
-- Approved scope: none; each slice requires its own independent
-  implementation review before completion approval.
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
-- Slice completion gates: all five remain Pending until their corresponding
-  implementations are reviewed.
+- Status: Slice 1 Approved; Slices 2 through 5 Pending
+- Approved at: 2026-09-06, under the user's explicit approval of all slices
+  and instruction to proceed through feature completion.
+- Approved scope: completed Slice 1 implementation, validation evidence, and
+  SDD state synchronization after an implementation-reviewer Ready verdict
+  with no findings.
+- Approved paths:
+  - `src/domain/services/diagnostics/ScheduleDateRules.ts`
+  - `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts`
+  - `docs/requirements/domain-rules/interpret-jp1-parameters.md`
+  - `docs/specs/features/schedule-semantics-qlty-hardening/TASKS.md`
+  - `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`
+- Implementation review verdict: Slice 1 Ready; no findings
+- Commit status: Slice 1 eligible for the completion gate; commit pending
+- `package.json` remains excluded. Later slices remain approved by the plan
+  but pending their own implementation and review gates.
 
 ## Closure Approval
 
@@ -265,7 +275,7 @@ reviewed.
 
 ### Slice 1: Harden Diagnostic Token Classification And Wrap Sources
 
-- Status: Approved; awaiting plan-gate commit
+- Status: Implemented; review Ready; completion gate pending
 - Finding coverage: QH-001 through QH-006.
 - Scope: replace branching in `isWeekdayScheduleDateDayToken` with small named
   token-shape and occurrence checks while preserving every accepted and
@@ -297,6 +307,28 @@ reviewed.
   absolute weekday form.
 - Out of Scope: parser grammar, messages/reason IDs, interpretation, Qlty
   configuration, and prose changes beyond line wrapping.
+
+#### Slice 1 Implementation Evidence
+
+- Changed files are limited to the three approved paths: the weekday
+  diagnostic rule now delegates prefix and occurrence checks to named pure
+  predicates; the diagnostic suite adds malformed-prefix and impossible-month
+  characterization cases; and only the five reported source-reference lines
+  are wrapped without changing wording or link targets.
+- `rtk pnpm run test:compile` passed. The focused diagnostic suite ran through
+  the TDD Mocha interface with 7 passing tests. `rtk git diff --check` passed.
+- `rtk pnpm exec markdownlint-cli2
+docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
+  errors, and `rtk pnpm run lint:md` passed for 47 files with 0 errors.
+- `rtk pnpm run qlty` completed with `qlty:fmt` and `qlty:check` successful;
+  the smell report no longer includes `ScheduleDateRules.ts`. The formatter's
+  unrelated final-newline change to `package.json` was restored before this
+  evidence was recorded.
+- The touched production code remains pure domain TypeScript. No parser,
+  message, reason ID, public contract, host API, Node built-in, desktop/web
+  entry point, or schedule outcome changed.
+- Remaining work is the Slice 1 completion commit. QH-007 through QH-065
+  remain assigned to later approved slices.
 
 ### Slice 2: Decompose Calendar Context Resolution
 

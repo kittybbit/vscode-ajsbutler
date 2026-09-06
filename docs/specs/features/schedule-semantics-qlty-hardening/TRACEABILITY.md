@@ -41,7 +41,8 @@
 - Human Approval: Approved on 2026-09-06 for the complete reviewed plan. The
   user instructed Main to proceed through feature completion within this
   approved scope.
-- Plan-gate commit: Pending `approval-committer`.
+- Plan-gate commit: `f8823220` (`docs: approve schedule semantics qlty
+hardening plan`).
 - Approved path union (shared paths listed once):
   - `docs/requirements/domain-rules/interpret-jp1-parameters.md`
   - `src/domain/services/diagnostics/ScheduleDateRules.ts`
@@ -69,9 +70,9 @@
   - `src/test/suite/semanticDiffScheduleCalendar.test.ts`
   - `src/test/suite/semanticDiffSchedule.test.ts`
   - `src/test/suite/semanticDiffScheduleRules.test.ts`
-- Completion review gates: Pending for every slice until that slice's
-  implementation receives independent review; no completion commit is yet
-  eligible.
+- Completion review gates: Slice 1 is Ready with no findings and has Human
+  Completion Approval; its completion commit is pending. Slices 2 through 5
+  remain Pending until their implementations are independently reviewed.
 
 ### QH-3: Preserve Schedule Outcomes
 
@@ -102,6 +103,25 @@
   202, and 224. Verify with Markdown lint and a wording/link diff.
 - QH-006: complexity in `isWeekdayScheduleDateDayToken`. Verify with
   `evaluateScheduleDiagnosticViolations.test.ts`.
+- Implementation result: the weekday prefix and occurrence decisions are
+  named pure predicates, preserving accepted and rejected boundaries. The
+  diagnostic characterization matrix now includes malformed prefixes and an
+  impossible month; all five source-reference lines are wrapped with wording
+  and link targets unchanged.
+- Validation result: `rtk pnpm run test:compile`, the focused diagnostic suite
+  (7 passing tests), `rtk git diff --check`, direct Markdown lint for the
+  domain-rule file, repository Markdown lint (47 files, 0 errors), and the
+  aggregate local Qlty gate passed. The edited diagnostic source is absent
+  from the remaining smell report.
+- Compatibility result: no parser, message, reason ID, public contract,
+  host API, Node built-in, desktop/web entry point, or schedule outcome
+  changed. Implementation review is Ready with no findings. Human Completion
+  Approval was granted on 2026-09-06 under the user's explicit approval of all
+  slices; route next to `approval-committer` for the Slice 1 completion gate.
+- Completion paths are exactly the three implementation paths above plus
+  `docs/specs/features/schedule-semantics-qlty-hardening/TASKS.md` and
+  `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`.
+  `package.json` is excluded and later slices remain pending.
 
 ### Slice 2
 
