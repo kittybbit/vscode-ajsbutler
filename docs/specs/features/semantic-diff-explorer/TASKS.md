@@ -4,8 +4,9 @@
 
 - Purpose: turn one completed Semantic Diff result into an accessible,
   read-only review workspace.
-- Approved or active slice: the complete four-slice planning package is
-  Human Approved; no implementation slice is active.
+- Approved or active slice: Slice 1 is approved for implementation under the
+  explicit 2026-09-06 user instruction; Slices 2-4 remain planned in the
+  existing order.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -39,9 +40,11 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main delegates the approved planning package to
-  `approval-committer` for the plan-gate commit. Implementation still needs a
-  separate approved slice and completion/closure gates.
+- Next route: Main routes this approval-boundary replan through independent
+  `plan-reviewer`, then delegates the reviewed planning package to
+  `approval-committer` for the replan gate. After that commit, Main delegates
+  exactly Slice 1 to `implementer`; a `Ready` implementation review conditionally
+  authorizes its completion gate under the recorded user instruction.
 
 ## Sync Rule
 
@@ -54,10 +57,14 @@
 ## Current Replanning Boundary
 
 - Preserve the four slices, their order, user values, Flow and transport
-  contracts, approval gates, and the existing `AjsParserPort.parse(content)`
-  compatibility surface. The current revision tightens Slice 3's DTO,
-  ownership, host-source, and lifecycle contracts without adding a slice or
-  changing the feature purpose.
+  contracts, and the existing `AjsParserPort.parse(content)` compatibility
+  surface. This replan records only the explicit 2026-09-06 user change to the
+  completion-approval interaction: each slice still requires an independent
+  implementation review, but a `Ready` verdict conditionally pre-authorizes
+  that slice's completion approval; actionable Findings keep the approval
+  pending and stop progression. One final human approval is deferred until all
+  four slices are complete. No slice, feature requirement, design decision, or
+  implementation scope is added or reordered.
 - Slice 3 owns the application plain
   `AjsParserWithSourceIndexPort` result and scoped capture contract. Bootstrap
   first injects the scoped parser into the current file command's existing
@@ -77,15 +84,20 @@
 
 ## Plan Status
 
-- Status: Complete four-slice plan; Ready for the plan-gate commit.
+- Status: Slice 1 activated for implementation; approval-boundary replan
+  awaiting independent review and focused replan commit.
 - Planning scope: application projection, explorer surface, same-session
   Markdown, source reveal, Flow reveal/highlight/focus, accessibility,
   desktop/web compatibility, and failure handling for EXP-1 through EXP-10.
-- Review status: Ready (`plan-reviewer`); all findings closed.
-- Human approval: Approved.
-- Active implementation slice: none.
+- Review status: Ready (`plan-reviewer`) for commit `067d2189`; re-review
+  pending for this approval-boundary revision.
+- Human approval: Slice 1 implementation approval recorded from the explicit
+  2026-09-06 user instruction; aggregate final approval remains pending.
+- Active implementation slice: Slice 1.
 - Slice order: Slice 1, Slice 2, Slice 3, then Slice 4. Each slice needs its own
-  implementation review, Completion Approval, and focused commit.
+  implementation review and focused commit. Completion Approval is
+  conditionally automatic only after that slice's implementation review is
+  `Ready`; final human approval is requested once all four slices are complete.
 
 ## Human Approval
 
@@ -102,6 +114,24 @@ blocked until an individual implementation slice receives its own approval
 after the plan-gate commit; Completion Approval and Closure Approval remain
 separate gates.
 
+### Slice 1 Implementation Approval
+
+- Status: Approved
+- Approved at: 2026-09-06 (explicit user instruction in the current Codex
+  conversation)
+- Approved scope: Slice 1 — Project The Immutable Explorer Session, limited to
+  the application projection/filter/message contracts and named tests in its
+  recorded scope; no UI, host registry, source/Flow/report execution,
+  telemetry, or durable-document work.
+- Approved paths: the Slice 1 application projection/transport files and pure
+  tests named by the Slice 1 implementation plan; exact runtime and test paths
+  are selected by `implementer` within that boundary.
+- Gate condition: implementation starts only after this revised planning
+  package receives independent `plan-reviewer` `Ready` and the focused replan
+  commit. Completion approval for this exact slice is pre-authorized only if
+  `implementation-reviewer` returns `Ready`; Findings keep it pending and
+  return the slice to Main for remediation.
+
 ## Completion Approval
 
 - Status: Pending
@@ -110,6 +140,11 @@ separate gates.
 - Approved paths: none
 - Implementation review verdict: Pending
 - Commit status: Not eligible
+- User approval policy: after `implementation-reviewer` returns `Ready` for the
+  exact active slice, Main may record Completion Approval as automatic under the
+  2026-09-06 instruction and route that exact slice to `approval-committer`;
+  Findings do not qualify. Aggregate human approval remains pending until all
+  four slices are complete.
 
 ## Closure Approval
 
@@ -710,7 +745,8 @@ error: null}`. Success always has non-null payload/error null; failure always
 
 ### Slice 1: Project The Immutable Explorer Session
 
-- Status: Planned; blocked on predecessor completion and Human Approval.
+- Status: Approved for implementation; awaiting approval-boundary replan review
+  and focused commit, plus predecessor completion.
 - Scope: application session/view/action types referencing one immutable
   `SemanticDiffOutputContext`, canonical cards, hierarchy, closed target-side
   mapping, availability, confirmation filter, and strict plain message
@@ -1007,6 +1043,11 @@ dispose(): void }`; `WebviewPanel` remains host-only. Slice 2's private
 
 - Every slice runs focused tests, qlty, and build; Slice 4 runs complete
   compiled desktop and web suites. Architecture tests retain zero exceptions.
+- Every slice still receives an independent implementation review. Under the
+  explicit 2026-09-06 user instruction, a `Ready` verdict conditionally
+  authorizes that slice's Completion Approval automatically; actionable Findings
+  suspend the slice and require Main to route remediation. Main requests one
+  final human approval after all four slices are complete before Feature Exit.
 - Domain gains no responsibility; application imports no VS Code/UI/
   infrastructure; ANTLR stays in parser infrastructure; presentation consumes
   DTOs; bootstrap/presentation compose concrete adapters and own URI,
