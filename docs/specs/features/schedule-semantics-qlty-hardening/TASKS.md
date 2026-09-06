@@ -3,9 +3,11 @@
 ## Agent Brief
 
 - Purpose: clear all 65 blocking PR #315 Qlty findings without behavior change.
-- Approved or active slice: Slice 2; implementation review is Ready and
-  Completion Approval is granted, with its completion commit pending. Slice 1
-  remains recorded as Ready with its completion gate pending.
+- Approved or active slice: Slice 3; implementation review is Ready with no
+  findings, Completion Approval is granted, and its completion commit is
+  pending. Slice 2 is recorded as Ready with Completion Approval granted and
+  its completion commit pending. Slice 1 remains recorded as Ready with its
+  completion gate pending.
 - Do not: change schedule semantics, public DTOs, outputs, or compatibility.
 - Do not: suppress findings, weaken Qlty configuration, or do unrelated cleanup.
 - Read first: `SPECS.md`, this file, and the PR #315 Qlty finding inventory.
@@ -13,8 +15,8 @@
 - Validate: local quality and regression gates plus Qlty Cloud differential.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: `approval-committer` creates the Slice 2 completion commit
-  within the exact approved boundary. Slices 3 through 5 remain pending.
+- Next decision: `approval-committer` creates the Slice 3 completion commit
+  within the exact changed-path boundary. Slices 4 and 5 remain pending.
 
 ## Sync Rule
 
@@ -31,13 +33,13 @@
 
 ## Plan Status
 
-- Status: Slice 2 implementation review Ready; Completion Approval granted;
+- Status: Slice 3 implementation review Ready; Completion Approval granted;
   completion gate pending
 - Planning scope: five ordered behavior-preserving slices covering the exact
   65-item Qlty Cloud finding set reported on PR #315 at `23112667`.
 - Review status: Ready; plan-reviewer reported no findings
 - Human approval: Approved on 2026-09-06
-- Active implementation slice: Slice 2
+- Active implementation slice: Slice 3
 - Implementation review verdict: Ready; no findings
 
 ## Intake Boundary
@@ -241,18 +243,18 @@ stop and replan rather than absorb unrelated cleanup.
 hardening plan`)
 
 The approved plan package is committed. Each slice's completion approval and
-implementation review are tracked individually; Slice 1 is now approved after
-its Ready review, while later slices remain Pending until implemented and
-independently reviewed.
+implementation review are tracked individually; Slices 1 through 3 are now
+approved after their Ready reviews, while Slices 4 and 5 remain Pending until
+implemented and independently reviewed.
 
 ## Completion Approval
 
-- Status: Slice 1 Approved; Slices 2 through 5 Pending
+- Status: Slices 1 through 3 Approved; Slices 4 and 5 Pending
 - Approved at: 2026-09-06, under the user's explicit approval of all slices
   and instruction to proceed through feature completion.
-- Approved scope: completed Slice 1 implementation, validation evidence, and
-  SDD state synchronization after an implementation-reviewer Ready verdict
-  with no findings.
+- Approved scope: completed Slice 1 through Slice 3 implementations,
+  validation evidence, and SDD state synchronization after
+  implementation-reviewer Ready verdicts with no findings.
 - Approved paths:
   - `src/domain/services/diagnostics/ScheduleDateRules.ts`
   - `src/test/suite/evaluateScheduleDiagnosticViolations.test.ts`
@@ -261,8 +263,14 @@ independently reviewed.
   - `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`
 - Implementation review verdict: Slice 1 Ready; no findings
 - Commit status: Slice 1 eligible for the completion gate; commit pending
-- `package.json` remains excluded. Later slices remain approved by the plan
-  but pending their own implementation and review gates.
+- Slice 2 is also Ready with no findings and Completion Approval granted on
+  2026-09-06; its completion gate remains pending. `package.json` remains
+  excluded. Later slices remain approved by the plan but pending their own
+  implementation and review gates.
+- Slice 3 is Ready with no findings and Completion Approval granted on
+  2026-09-06; its completion gate remains pending. The exact changed paths
+  and the two approved-but-unchanged reviewed paths are recorded in its
+  implementation evidence below.
 
 ## Closure Approval
 
@@ -416,7 +424,8 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
 
 ### Slice 3: Simplify Interpretation And Collection Boundaries
 
-- Status: Approved; awaiting plan-gate commit
+- Status: Implemented; implementation review Ready; Completion Approval
+  granted on 2026-09-06; completion gate pending
 - Finding coverage: QH-027 through QH-038 and QH-063 through QH-065.
 - Scope: split evidence construction and per-parameter interpretation from the
   interpreter facade; replace nested parser selection with keyed handlers;
@@ -453,6 +462,34 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
   union; object inputs can change optional document/context behavior.
 - Out of Scope: projection algorithms, new semantics, output wording,
   application mappings, and pre-existing non-Cloud smells.
+
+#### Slice 3 Implementation Evidence
+
+- Changed paths are limited to the five approved Slice 3 code/test paths—the
+  interpreter facade, evidence builder, keyed rule interpreter, collection
+  facade, and schedule-rules suite—plus the two SDD evidence files,
+  `TASKS.md` and `TRACEABILITY.md`. The approved differ type boundary and
+  end-to-end schedule suite were reviewed and validated without content
+  changes; they were not staged.
+- `rtk pnpm run test:compile` passed. The focused calendar, schedule, and
+  schedule-rules suites passed with 54 tests, including the keyed
+  unsupported-parameter handler and facade object-input compatibility checks.
+  The architecture suite passed with 18 tests.
+- `rtk pnpm run build`, `rtk pnpm run test:prepare:desktop`, and
+  `rtk pnpm run test:prepare:web` passed. The desktop test run exited with
+  code 0. Aggregate `rtk pnpm run qlty` passed formatting and `qlty check`;
+  the Slice 3 modules have no differential smell findings. The remaining
+  smell report entries are pre-existing findings assigned to later slices.
+- The implementation preserves evidence IDs and raw-parameter order,
+  rule-zero `ud`, invalid and unpaired start times, keyed unsupported-rule
+  association, canonical run decisions, deterministic sorting, and bounded
+  document context indexing. Domain imports remain browser-safe and public
+  signatures and result shapes are unchanged.
+- Implementation review is Ready with no findings. Completion Approval was
+  granted on 2026-09-06 under the user's explicit approval of all slices. The
+  exact completion commit is pending; no commit or staging was performed.
+  Route this changed-path boundary to `approval-committer`. `package.json` is
+  excluded and Slices 4 and 5 remain pending.
 
 ### Slice 4: Decompose Schedule Date Candidate Projection
 

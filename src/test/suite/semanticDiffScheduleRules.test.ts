@@ -204,6 +204,7 @@ suite("Semantic Diff Schedule Rules", () => {
       st: "09:00",
     });
     const interpretation = interpretSchedule(after);
+    assert.deepStrictEqual(interpretSchedule({ unit: after }), interpretation);
     assert.strictEqual(interpretation.scheduleDateRules[0].status, "supported");
     assert.strictEqual(interpretation.startTimeRules[0].status, "supported");
     assert.strictEqual(
@@ -380,6 +381,37 @@ suite("Semantic Diff Schedule Rules", () => {
         ["+15", "unsupported-schedule-date", 1],
         ["malformed", "unsupported-schedule-date", undefined],
       ].sort(),
+    );
+  });
+
+  test("keeps keyed unsupported handlers associated with their rules", () => {
+    const after = jobnet("/root/main", {
+      sh: "2,be",
+      shd: "3,2",
+      jc: "/root/calendar",
+      cftd: "5,be,2,3",
+    });
+
+    assert.deepStrictEqual(
+      interpretSchedule(after)
+        .rules.filter((rule) => rule.reason !== undefined)
+        .map((rule) => [
+          rule.parameter.key,
+          rule.rule,
+          rule.reason,
+          rule.evidence.rawParameters,
+        ]),
+      [
+        ["sh", 2, "closed-day-substitution", [{ key: "sh", value: "2,be" }]],
+        ["shd", 3, "shift-days", [{ key: "shd", value: "3,2" }]],
+        [
+          "jc",
+          undefined,
+          "calendar-selection",
+          [{ key: "jc", value: "/root/calendar" }],
+        ],
+        ["cftd", 5, "days-from-start", [{ key: "cftd", value: "5,be,2,3" }]],
+      ],
     );
   });
 

@@ -8,6 +8,7 @@ import type {
   SemanticDiffScheduleRun,
 } from "../../models/semantic-diff/SemanticDiff";
 import { compareScheduleRuns } from "./semanticDiffScheduleDiffer";
+import type { SemanticDiffScheduleRunDecision } from "./semanticDiffScheduleDiffer";
 import { interpretSchedule } from "./semanticDiffScheduleInterpreter";
 import { projectScheduleRuns } from "./semanticDiffScheduleProjector";
 import {
@@ -51,26 +52,7 @@ export type SemanticDiffScheduleUnsupportedDecision = {
   scheduleRule?: number;
 };
 
-export type SemanticDiffScheduleRunDecision =
-  | {
-      kind: "changed-time";
-      unitPath: string;
-      date: string;
-      before: SemanticDiffScheduleRun;
-      after: SemanticDiffScheduleRun;
-    }
-  | {
-      kind: "removed";
-      unitPath: string;
-      date: string;
-      before: SemanticDiffScheduleRun;
-    }
-  | {
-      kind: "added";
-      unitPath: string;
-      date: string;
-      after: SemanticDiffScheduleRun;
-    };
+export type { SemanticDiffScheduleRunDecision } from "./semanticDiffScheduleDiffer";
 
 export type SemanticDiffScheduleEvidenceKind =
   | "supported"
@@ -209,59 +191,96 @@ type ScheduleUnitCollection = {
   unitEvaluation: SemanticDiffScheduleSideEvaluation;
 };
 
-const collectScheduleUnit = (
-  side: SemanticDiffScheduleSide,
-  unit: AjsUnit,
-  period: SemanticDiffComparisonPeriod,
-  document?: AjsDocument,
-  contextIndex?: SemanticDiffScheduleCalendarContextIndex,
-): ScheduleUnitCollection => {
-  const interpretation = interpretSchedule(unit);
-  const hasContextRelativeDate = interpretation.scheduleDateRules.some(
+type ScheduleUnitCollectionInput = {
+  side: SemanticDiffScheduleSide;
+  unit: AjsUnit;
+  period: SemanticDiffComparisonPeriod;
+  document?: AjsDocument;
+  contextIndex?: SemanticDiffScheduleCalendarContextIndex;
+};
+
+const hasContextRelativeDate = (
+  interpretation: SemanticDiffScheduleInterpretation,
+): boolean =>
+  interpretation.scheduleDateRules.some(
     (rule) =>
       rule.date !== undefined &&
       isFullyQualifiedRelativeScheduleDate(rule.date),
   );
-  const hasClosedDaySubstitution = interpretation.rules.some(
-    (rule) => rule.parameter.key === "sh",
-  );
-  const projection = projectScheduleRuns({
-    interpretation,
-    period,
-    ...(document &&
-    contextIndex &&
-    (hasContextRelativeDate || hasClosedDaySubstitution)
-      ? {
-          calendarContext: resolveScheduleCalendarContext(
-            document,
-            unit,
-            contextIndex,
-          ),
-        }
-      : {}),
-  });
-  const unsupportedDecisions = collectUnsupportedDecisions(
-    side,
-    interpretation,
-    projection,
-  );
-  const supportedPairCount = interpretation.hasRuleZeroUndefined
+
+const hasClosedDaySubstitution = (
+  interpretation: SemanticDiffScheduleInterpretation,
+): boolean => interpretation.rules.some((rule) => rule.parameter.key === "sh");
+
+const resolveUnitCalendarContext = (input: {
+  interpretation: SemanticDiffScheduleInterpretation;
+  unit: AjsUnit;
+  document?: AjsDocument;
+  contextIndex?: SemanticDiffScheduleCalendarContextIndex;
+}): ReturnType<typeof resolveScheduleCalendarContext> | undefined => {
+  const needsContext =
+    hasContextRelativeDate(input.interpretation) ||
+    hasClosedDaySubstitution(input.interpretation);
+  return input.document && input.contextIndex && needsContext
+    ? resolveScheduleCalendarContext(
+        input.document,
+        input.unit,
+        input.contextIndex,
+      )
+    : undefined;
+};
+
+const supportedSchedulePairCount = (
+  interpretation: SemanticDiffScheduleInterpretation,
+  projection: SemanticDiffScheduleProjection,
+): number =>
+  interpretation.hasRuleZeroUndefined
     ? 1
     : projection.rules.filter(
         (rule) =>
           rule.parameter.key === "sd" &&
           (rule.status === "supported" || rule.status === "no-runs"),
       ).length;
-  const zeroRunCandidates =
-    projection.completeness === "complete" && projection.runs.length === 0
-      ? [unit]
-      : [];
+
+const zeroRunCandidates = (
+  unit: AjsUnit,
+  projection: SemanticDiffScheduleProjection,
+): AjsUnit[] =>
+  projection.completeness === "complete" && projection.runs.length === 0
+    ? [unit]
+    : [];
+
+const collectScheduleUnit = (
+  input: ScheduleUnitCollectionInput,
+): ScheduleUnitCollection => {
+  const interpretation = interpretSchedule(input.unit);
+  const calendarContext = resolveUnitCalendarContext({
+    interpretation,
+    unit: input.unit,
+    document: input.document,
+    contextIndex: input.contextIndex,
+  });
+  const projection = projectScheduleRuns({
+    interpretation,
+    period: input.period,
+    ...(calendarContext === undefined ? {} : { calendarContext }),
+  });
+  const unsupportedDecisions = collectUnsupportedDecisions(
+    input.side,
+    interpretation,
+    projection,
+  );
+  const supportedPairCount = supportedSchedulePairCount(
+    interpretation,
+    projection,
+  );
+  const unitZeroRunCandidates = zeroRunCandidates(input.unit, projection);
   return {
     runs: projection.runs,
     unsupportedDecisions,
-    zeroRunCandidates,
+    zeroRunCandidates: unitZeroRunCandidates,
     unitEvaluation: {
-      unit,
+      unit: input.unit,
       evidence: sideEvaluationEvidence(
         supportedPairCount,
         unsupportedDecisions.length,
@@ -272,6 +291,13 @@ const collectScheduleUnit = (
   };
 };
 
+type ScheduleSideCollectionInput = {
+  side: SemanticDiffScheduleSide;
+  units: AjsUnit[];
+  period: SemanticDiffComparisonPeriod;
+  document?: AjsDocument;
+};
+
 type ScheduleCollection = {
   runs: SemanticDiffScheduleRun[];
   unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
@@ -280,19 +306,22 @@ type ScheduleCollection = {
 };
 
 const collectScheduleSide = (
-  side: SemanticDiffScheduleSide,
-  units: AjsUnit[],
-  period: SemanticDiffComparisonPeriod,
-  document?: AjsDocument,
+  input: ScheduleSideCollectionInput,
 ): ScheduleCollection => {
-  const contextIndex = document
-    ? createScheduleCalendarContextIndex(document)
+  const contextIndex = input.document
+    ? createScheduleCalendarContextIndex(input.document)
     : undefined;
-  const unitCollections = units
+  const unitCollections = input.units
     .filter(isJobnetUnit)
     .filter(hasDirectScheduleParameters)
     .map((unit) =>
-      collectScheduleUnit(side, unit, period, document, contextIndex),
+      collectScheduleUnit({
+        side: input.side,
+        unit,
+        period: input.period,
+        document: input.document,
+        contextIndex,
+      }),
     );
   return {
     runs: unitCollections
@@ -354,18 +383,18 @@ export const evaluateSemanticDiffSchedule = (
   if (!period) {
     return { kind: "invalid-period", period: input.period };
   }
-  const before = collectScheduleSide(
-    "before",
-    input.beforeUnits,
+  const before = collectScheduleSide({
+    side: "before",
+    units: input.beforeUnits,
     period,
-    input.beforeDocument,
-  );
-  const after = collectScheduleSide(
-    "after",
-    input.afterUnits,
+    document: input.beforeDocument,
+  });
+  const after = collectScheduleSide({
+    side: "after",
+    units: input.afterUnits,
     period,
-    input.afterDocument,
-  );
+    document: input.afterDocument,
+  });
   const afterPathByBeforePath = new Map(
     input.matches.map((match) => [
       match.before.absolutePath,

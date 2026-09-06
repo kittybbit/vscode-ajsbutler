@@ -74,7 +74,9 @@ hardening plan`).
   Completion Approval; its completion commit is pending. Slice 2 is Ready
   with no findings and has Completion Approval granted on 2026-09-06 under
   the user's explicit approval of all slices; its completion commit is
-  pending. Slices 3 through 5 remain Pending.
+  pending. Slice 3 is Ready with no findings and has Completion Approval
+  granted on 2026-09-06 under the user's explicit approval of all slices; its
+  completion commit is pending. Slices 4 and 5 remain Pending.
 
 ### QH-3: Preserve Schedule Outcomes
 
@@ -188,6 +190,38 @@ hardening plan`).
   context integration.
 - QH-064 and QH-065: parameter count in `collectScheduleUnit` and
   `collectScheduleSide`. Verify before/after documents and context indexes.
+
+- Implementation result: evidence construction and per-parameter
+  interpretation now live in dedicated domain collaborators. Unsupported
+  parameter parsing uses keyed handlers, the interpreter facade retains its
+  public overload, the differ owns the single run-decision union, and
+  collection uses object contexts with a separate calendar-context decision.
+  Evidence IDs, raw order, statuses, rule association, canonical sorting, and
+  result shapes are unchanged.
+- Validation result: `rtk pnpm run test:compile`; focused calendar, schedule,
+  and schedule-rules suites (54 passing); architecture suite (18 passing);
+  `rtk pnpm run build`; desktop and web preparation builds; desktop test run
+  (exit code 0); aggregate local `rtk pnpm run qlty`; and differential smell
+  analysis all completed. The assigned QH-027 through QH-038 and QH-063
+  through QH-065 findings are absent from the differential output; remaining
+  entries are pre-existing findings assigned to later slices.
+- Compatibility result: no parser, message, reason ID, application DTO,
+  projection algorithm, host API, Node built-in, configuration, or package
+  change was made. Domain imports remain browser-safe and document context
+  indexing remains bounded. Implementation review is Ready with no findings;
+  Completion Approval was granted on 2026-09-06 under the user's explicit
+  approval of all slices. No commit or staging was performed.
+- Exact changed Slice 3 paths are
+  `src/domain/services/semantic-diff/semanticDiffScheduleInterpreter.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRuleEvidence.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRuleInterpreter.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`,
+  `src/test/suite/semanticDiffScheduleRules.test.ts`, this
+  `TRACEABILITY.md`, and the feature `TASKS.md`. The approved
+  `semanticDiffScheduleDiffer.ts` type boundary and
+  `src/test/suite/semanticDiffSchedule.test.ts` were reviewed and validated
+  without content changes and were not staged. `package.json` is excluded;
+  Slices 4 and 5 remain pending.
 
 ### Slice 4
 
