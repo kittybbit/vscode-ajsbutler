@@ -26,3 +26,32 @@
 | Durable report/Flow/user docs reflect delivery                 | Impact Analysis; Acceptance                                                       | Feature Exit         | Update report/Flow use cases, README, CHANGELOG; evaluate build-semantic-diff                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 <!-- markdownlint-enable MD013 MD060 -->
+
+## Slice 1 Validation Result
+
+Slice 1 implementation evidence (2026-09-06): `semanticDiffExplorerDto.ts`,
+`semanticDiffExplorerProjection.ts`, `semanticDiffExplorerMessages.ts`, and
+their focused pure tests implement the application projection and closed
+transport boundary. The projection consumes the retained
+`SemanticDiffOutputContext` and `context.summary` directly, retains one leaf
+per upstream record, applies the exhaustive change/reason side table, orders
+paths with a locale-neutral UTF-16 comparator, and filters without changing
+cards or context identity. The transport parser rejects unknown or extra keys,
+invalid correlation IDs, wrong sessions/actions, invalid success/failure
+nullability, non-plain JSON values, and messages over the 8 MiB bound.
+
+Validation passed: `rtk pnpm run test:compile`; the focused compiled Mocha
+projection/message suite (15 tests); `rtk pnpm run qlty` (`qlty check` clean);
+`rtk git diff --check`; and `rtk pnpm run build` (desktop and web bundles,
+existing asset-size warnings only). The suite covers closed nested detail,
+relation, warning, constraint, unsupported-reason, and schedule contracts;
+immutable action lookup mutation attempts; card/tree/filter/root/target-side
+invariants; dense-array rejection; candidate and uncalculated fixtures;
+same-ID/different-fact deterministic tie-breaking; relationPair-side hierarchy
+and duplicate/shuffled/UTF-16 fixtures; no-recalculation access; malformed host
+session/failure/close messages; and a payload near the fixed 8 MiB bound. A
+broader direct semantic-diff Mocha attempt was not used as a gate
+because the repository's raw Node invocation does not configure its existing
+`@resource/*` TypeScript path aliases; no existing runtime files were
+changed. Independent implementation review and the completion gate remain
+pending.

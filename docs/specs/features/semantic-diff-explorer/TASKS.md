@@ -745,8 +745,9 @@ error: null}`. Success always has non-null payload/error null; failure always
 
 ### Slice 1: Project The Immutable Explorer Session
 
-- Status: Approved for implementation; awaiting approval-boundary replan review
-  and focused commit, plus predecessor completion.
+- Status: Slice 1 implementation complete; independent review Ready with no
+  findings; completion-approved automatically on 2026-09-06 under the explicit
+  user policy, eligible and pending the focused completion commit.
 - Scope: application session/view/action types referencing one immutable
   `SemanticDiffOutputContext`, canonical cards, hierarchy, closed target-side
   mapping, availability, confirmation filter, and strict plain message
@@ -777,6 +778,48 @@ error: null}`. Success always has non-null payload/error null; failure always
   handles, cross-brand ID confusion, inferred side fallback, and transport
   drift. Exact coverage, context-identity spies, strict opaque-handle
   validators, closed-union tests, and no-recalculation spies are the gate.
+- Implementation evidence (2026-09-06): application projection, immutable
+  session identity, deterministic UTF-16 hierarchy, closed target-side
+  mapping, action availability, confirmation filtering, and strict plain
+  request/reply/host message validators are implemented in the Slice 1
+  application files. Focused projection and transport tests cover all five
+  change kinds, all nine confirmation reasons across all target kinds,
+  candidate changes, uncalculated unsupported findings, true duplicate IDs
+  with different facts, deterministic same-ID tie-breaking under shuffle,
+  UTF-16 ordering, zero/filter-empty behavior, identity preservation, exact
+  nested contracts, correlation validation, malformed host lifecycle cases,
+  and payloads near the fixed 8 MiB limit. The session action registry is an
+  encapsulated immutable lookup;
+  card totals, tree leaf counts, status/filter invariants, and relationPair
+  endpoint hierarchy placement, top-level root shape, target-side consistency,
+  dense arrays, and no-recalculation access are covered by malformed and
+  side-mismatch fixtures. The `test:compile` command, 15 focused compiled
+  tests, `qlty`, and `git diff --check` passed; the production build also
+  passed. Existing semantic comparison and host wiring remain untouched; the
+  build retains the desktop/web bundles. Qlty smell output reports complexity
+  metrics for the new closed validators as a review signal; `qlty check` is
+  clean.
+- Production readiness status: ready for independent implementation review
+  within Slice 1. Source/Flow/report execution, host registry, UI, telemetry,
+  and durable user-document changes remain explicitly deferred to later
+  slices or Feature Exit.
+- Independent implementation review (2026-09-06): Ready; no findings.
+- Slice 1 Completion Approval (2026-09-06): Automatically Approved under the
+  explicit 2026-09-06 user policy because the independent review was Ready
+  with no findings. This approves only the Slice 1 completion scope recorded
+  above; aggregate final human approval remains pending until all four slices
+  are complete.
+- Completion commit status: eligible and pending commit; no commit or staging
+  has been performed.
+- Exact completion-commit scope and paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`,
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`,
+  `src/application/semantic-diff/semanticDiffExplorer.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerDto.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerMessages.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjection.ts`,
+  `src/test/suite/semanticDiffExplorerMessages.test.ts`, and
+  `src/test/suite/semanticDiffExplorerProjection.test.ts`.
 - Out of Scope: panel, source/Flow/report execution, telemetry, durable docs.
 
 ### Slice 2: Open And Operate The Accessible Explorer
@@ -1100,7 +1143,7 @@ dispose(): void }`; `WebviewPanel` remains host-only. Slice 2's private
 
 ## Validation
 
-- [ ] Slice 1 tests and checks complete
+- [x] Slice 1 tests and checks complete
 - [ ] Slice 2 tests and checks complete
 - [ ] Slice 3 tests and checks complete
 - [ ] Slice 4 tests and checks complete
