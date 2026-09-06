@@ -182,6 +182,37 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
   });
 
+  test("opens the default Explorer with the retained context", async () => {
+    const harness = new SemanticDiffCommandHarness();
+    const contexts: unknown[] = [];
+    const handle = {
+      sessionId: "sde-session-700" as never,
+      panel: {} as vscode.WebviewPanel,
+      dispose: () => undefined,
+    };
+
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      openExplorer: async (context) => {
+        contexts.push(context);
+        return handle;
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: true,
+      sessionId: "sde-session-700",
+      action: "explorer-opened",
+    });
+    assert.deepStrictEqual(contexts, harness.observed.builtContexts);
+    assert.deepStrictEqual(harness.observed.selectedModes, []);
+    assert.deepStrictEqual(harness.observed.openedReports, []);
+    assert.deepStrictEqual(harness.observed.reportSteps, [
+      "build-data",
+      "build-context",
+    ]);
+  });
+
   test("passes the VS Code display language only to presentation rendering", async () => {
     const harness = new SemanticDiffCommandHarness({ language: "ja-JP" });
 

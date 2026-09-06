@@ -12,8 +12,10 @@ import {
 } from "../../presentation/vscode/semantic-diff/semanticDiffReportDocument";
 import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
+import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
 
 export type SemanticDiffWiringDeps = {
+  extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
 };
 
@@ -34,6 +36,15 @@ export const createSemanticDiffSubscriptions = (
     writeFile: (uri, content) => vscode.workspace.fs.writeFile(uri, content),
   });
 
+  const openExplorer = createOpenSemanticDiffExplorer({
+    extensionContext: deps.extensionContext,
+    showQuickPick: (items, options) =>
+      vscode.window.showQuickPick(items, options),
+    openReport: (output) => reportDocuments.openReport(output),
+    presentOutput: presentSemanticDiffOutput,
+    language: vscode.env.language,
+  });
+
   return [
     vscode.workspace.registerTextDocumentContentProvider(
       SEMANTIC_DIFF_REPORT_SCHEME,
@@ -52,6 +63,7 @@ export const createSemanticDiffSubscriptions = (
         buildSemanticDiffReportData: deps.buildSemanticDiffReportData,
         buildSemanticDiffOutputContext,
         presentSemanticDiffOutput,
+        openExplorer,
       }),
     ),
     vscode.commands.registerCommand(

@@ -58,3 +58,53 @@ Completion Approval was automatically approved under the explicit 2026-09-06
 user policy, and the focused completion commit is
 `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`. Aggregate final human approval
 remains pending until all four slices are complete.
+
+## Slice 2 Validation Result
+
+Slice 2 implementation evidence (2026-09-07): the existing comparison command
+and bootstrap wiring now open the dedicated Semantic Diff Explorer with the
+single retained `SemanticDiffOutputContext`. The Explorer has separate
+desktop/web bundle wiring, host-owned context and action registries, idempotent
+panel disposal with unregister-before-release ordering, and a private no-op
+source-lifetime hook reserved for Slice 3. The webview waits for its
+session-ID-scoped `ready` request before receiving the session payload;
+disposal epochs revalidate asynchronous Output work and posts. Its React
+surface renders the summary cards and accessible hierarchical tree, supports
+confirmation filtering, full parent/child keyboard navigation, localized
+state/reason/detail labels, live announcements, high-contrast-safe labels,
+and a `react-virtuoso` path that scrolls before focusing offscreen rows. An
+initial nullable-correlation failure is rendered as an explicit status/live
+announcement, the tree uses one container tab stop with
+`aria-activedescendant`, and confirmation filtering preserves latent
+selection while exposing a deterministic visible entry for keyboard focus;
+`aria-selected` remains exclusive to the latent item and is restored when the
+filter is cleared.
+Output uses the shared picker and calls
+`presentSemanticDiffOutput(context, mode)` for all four modes without
+recomparison or reaggregation.
+
+Validation passed: full `tsc --noEmit`, `rtk pnpm run test:compile`, and the
+focused compiled DOM suite (`./node_modules/.bin/mocha --ui tdd
+out/test/suite/semanticDiffExplorerDom.test.js`, 7/7) covering localized
+change-kind/confirmation/unsupported-kind facts, initial host-failure status
+and live announcement, single-tree-tab-stop focus, latent confirmation
+selection and selected-state restoration, live keyboard selection
+announcements, Virtuoso `scrollToIndex`, and offscreen focus restoration.
+Focused compiled desktop tests also cover same-context four-mode Output
+handoff/cancellation, exact registry identity and release, ready/session
+handshake, strict correlation, nullable oversized initial-session failure,
+panel lifecycle and supersession, and disposal during Output. `rtk pnpm run
+qlty` passed (`qlty check` clean), as did `rtk git diff --check` and
+`rtk pnpm run lint:md`. `rtk pnpm run build` produced desktop and web
+production bundles (existing asset-size warnings only), and
+`rtk pnpm run test:prepare:desktop` followed by the compiled desktop smoke
+(`node ./out/test/runTest.js`) passed. Web development preparation passed with
+`rtk pnpm run test:prepare:web`; the browser smoke launcher then failed before
+test execution because Chromium terminated at
+`bootstrap_check_in org.chromium.Chromium.MachPortRendezvousServer.94808:
+Permission denied (1100)` and could not be killed (`EPERM`). This is an
+environment-only validation risk, not a source failure; desktop jsdom/axe
+coverage and both desktop/web bundle compilations provide the alternative
+evidence. Source/Flow execution remains out of scope for Slice 2. Independent
+implementation review and Completion Approval remain pending; Main should
+route this diff to `implementation-reviewer`.

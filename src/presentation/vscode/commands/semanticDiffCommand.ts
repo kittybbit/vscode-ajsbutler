@@ -4,6 +4,8 @@ import {
   buildSemanticDiffOutputContext,
   type SemanticDiffOutputContext,
 } from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
+import type { SemanticDiffExplorerSessionId } from "../../../application/semantic-diff/semanticDiffExplorerDto";
+import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/semanticDiffExplorerPanel";
 import {
   pickSemanticDiffOutputMode,
   presentSemanticDiffOutput,
@@ -17,6 +19,11 @@ export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 export type SemanticDiffReportAction = "displayed";
 
 export type SemanticDiffCommandResult =
+  | {
+      ok: true;
+      sessionId: SemanticDiffExplorerSessionId;
+      action: "explorer-opened";
+    }
   | {
       ok: true;
       report: string;
@@ -55,6 +62,9 @@ export type SemanticDiffCommandDeps = {
   buildSemanticDiffOutputContext?: (
     result: Parameters<typeof buildSemanticDiffOutputContext>[0],
   ) => SemanticDiffOutputContext;
+  openExplorer?: (
+    context: SemanticDiffOutputContext,
+  ) => Promise<SemanticDiffExplorerSessionHandle>;
   presentSemanticDiffOutput?: (
     context: SemanticDiffOutputContext,
     mode: SemanticDiffOutputMode,
@@ -362,6 +372,80 @@ type CommandReadyReport = Extract<
   { ok: true }
 >["result"];
 
+type CommandReadyExplorer = {
+  readonly result: CommandReadyReport;
+  readonly context: SemanticDiffOutputContext;
+};
+
+const buildExplorerContextStep = (
+  deps: SemanticDiffCommandDeps,
+  request: CommandReportData & { result: CommandReadyReport },
+): CommandStep<CommandReadyExplorer> => {
+  try {
+    const createContext =
+      deps.buildSemanticDiffOutputContext ?? buildSemanticDiffOutputContext;
+    const context = createContext(request.result);
+    return readyStep({ result: request.result, context });
+  } catch {
+    return failedStep(
+      "render-failed",
+      "Semantic diff report could not be prepared.",
+      true,
+    );
+  }
+};
+
+const openExplorerStep = async (
+  deps: SemanticDiffCommandDeps,
+  request: CommandReadyExplorer,
+): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
+  if (!deps.openExplorer) {
+    return failedStep(
+      "display-failed",
+      "Semantic diff Explorer could not be opened.",
+      true,
+    );
+  }
+  try {
+    return readyStep(await deps.openExplorer(request.context));
+  } catch {
+    return failedStep(
+      "display-failed",
+      "Semantic diff Explorer could not be opened.",
+      true,
+    );
+  }
+};
+
+const runExplorerCommand = async (
+  deps: SemanticDiffCommandDeps,
+): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
+  const activeEditor = readActiveEditorStep(deps);
+  const beforeDefinition = await continueCommandStep(activeEditor, (editor) =>
+    readBeforeDefinitionStep(deps).then((beforeContent) =>
+      beforeContent.kind === "failed"
+        ? beforeContent
+        : readyStep({
+            activeEditor: editor,
+            mode: "full" as SemanticDiffOutputMode,
+            beforeContent: beforeContent.value,
+          }),
+    ),
+  );
+  const reportInput = await continueCommandStep(beforeDefinition, (request) =>
+    readReportInputStep(request),
+  );
+  const reportData = await continueCommandStep(reportInput, (request) =>
+    buildReportDataStep(deps, request),
+  );
+  const context = await continueCommandStep(reportData, (request) =>
+    buildExplorerContextStep(deps, request),
+  );
+  return continueCommandStep(context, (request) =>
+    openExplorerStep(deps, request),
+  );
+};
+
 const renderReportStep = (
   deps: SemanticDiffCommandDeps,
   request: CommandReportData & { result: CommandReadyReport },
@@ -444,7 +528,21 @@ const finalizeSemanticDiffCommand = async (
     ? finalizeCommandFailure(deps, step.error)
     : { ok: true, report: step.value.content, action: "displayed" };
 
+const finalizeExplorerCommand = async (
+  deps: SemanticDiffCommandDeps,
+  step: CommandStep<SemanticDiffExplorerSessionHandle>,
+): Promise<SemanticDiffCommandResult> =>
+  step.kind === "failed"
+    ? finalizeCommandFailure(deps, step.error)
+    : {
+        ok: true,
+        action: "explorer-opened",
+        sessionId: step.value.sessionId,
+      };
+
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
 ): Promise<SemanticDiffCommandResult> =>
-  finalizeSemanticDiffCommand(deps, await runSemanticDiffCommand(deps));
+  deps.openExplorer
+    ? finalizeExplorerCommand(deps, await runExplorerCommand(deps))
+    : finalizeSemanticDiffCommand(deps, await runSemanticDiffCommand(deps));

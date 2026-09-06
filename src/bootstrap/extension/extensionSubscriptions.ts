@@ -23,7 +23,10 @@ export const createExtensionSubscriptions = (
     importCapability: dependencies.webApiImport,
     telemetry: dependencies.telemetry,
   }),
-  ...createSemanticDiffSubscriptions(dependencies.semanticDiff),
+  ...createSemanticDiffSubscriptions({
+    extensionContext: context,
+    ...dependencies.semanticDiff,
+  }),
   ...createViewerSubscriptions({
     context,
     telemetry: dependencies.telemetry,

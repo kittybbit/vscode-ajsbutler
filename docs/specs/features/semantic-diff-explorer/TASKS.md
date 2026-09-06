@@ -160,19 +160,49 @@ separate gates.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-07 (automatic under the explicit user policy after
+  independent implementation review)
+- Approved scope: Slice 2 — Open And Operate The Accessible Explorer: the
+  dedicated panel and bundle, existing command success handoff,
+  cards/tree/filter/actions, UI state and virtualization, same-session
+  four-mode Output handoff, host-owned registries, panel lifecycle, private
+  no-op source-lifetime hook, localization/accessibility behavior, and the
+  named focused tests; no source/Flow execution, Git/WebAPI/period input,
+  persistence, or later-slice work.
+- Approved paths:
+  - `TASKS.md`
+  - `TRACEABILITY.md`
+  - `src/bootstrap/extension/extensionSubscriptions.ts`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/presentation/vscode/webview/constant.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerReportAction.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
+  - `src/test/suite/semanticDiffExplorerRegistry.test.ts`
+  - `src/test/suite/semanticDiffExplorerReportAction.test.ts`
+  - `webpack.config.js`
+- Implementation review verdict: Ready; no findings
+- Commit status: Eligible; completion commit pending
 - Active completion gate: Slice 2. Slice 1 completion is already automatically
   approved and committed as `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
-- User approval policy: after `implementation-reviewer` returns `Ready` for the
-  exact active slice, Main may record Completion Approval as automatic under the
-  2026-09-06 instruction and route that exact slice to `approval-committer`;
-  Findings do not qualify. Aggregate human approval remains pending until all
-  four slices are complete.
+- User approval policy: `implementation-reviewer` returned `Ready` with no
+  findings, so Main recorded Completion Approval automatically on 2026-09-07
+  under the explicit user instruction and may route these exact paths to
+  `approval-committer`. Findings do not qualify. Aggregate final human
+  approval remains pending until all four slices are complete.
+- Environment note: web smoke preparation passed, but the browser smoke
+  launcher was blocked before test execution by Chromium Mach-port
+  `Permission denied (1100)` and `EPERM` termination in the managed
+  environment; desktop smoke and desktop/web bundle validation passed.
 
 ## Closure Approval
 
@@ -894,6 +924,36 @@ error: null}`. Success always has non-null payload/error null; failure always
   races. Identity/lifecycle, unregister-order, and payload-boundary tests are
   the gate.
 - Out of Scope: source/Flow execution, Git/WebAPI/period, persistence, docs.
+
+Implementation evidence (2026-09-07): Slice 2 implementation is complete and
+ready for independent review. The existing comparison command now hands the
+single retained output context to the default Explorer opener; the report
+provider remains the shared output document provider. The dedicated desktop
+and web Explorer bundle renders cards, an expandable accessible tree,
+confirmation filtering, four-mode Output selection, keyboard/focus/live-region
+feedback, separate localized change-kind/confirmation/unsupported-kind facts,
+and a virtualized path for large trees. The webview uses a reliable
+session-ID-in-HTML ready handshake, and virtualized Home/End/arrow navigation
+scrolls before restoring focus and announcing the newly selected leaf.
+Host-owned context/action registries enforce session ownership and
+unregister-before-release panel cleanup; disposal epochs suppress late output
+operations/posts, and the private source-lifetime hook remains a no-op until
+Slice 3. Focused tests cover same-context four-mode Output handoff,
+registry identity/release, ready/session handshake, strict unknown-action
+correlation, oversized initial-session nullable failure, panel
+lifecycle/supersession, disposal during Output, DOM/ARIA, keyboard semantics,
+localization/axe, initial host-failure status/live announcement, the single
+tree tab stop with `aria-activedescendant`, confirmation-filter latent
+selection with visible `aria-selected` kept empty until the latent item is
+visible again, Virtuoso `scrollToIndex`, offscreen focus restoration, and
+10,000-leaf scale. Validation passed full `tsc --noEmit`,
+`rtk pnpm run test:compile`, the focused DOM Mocha suite (7/7),
+`rtk pnpm run build`, `rtk pnpm run test:prepare:desktop` plus compiled
+desktop smoke, `rtk pnpm run test:prepare:web`, `rtk pnpm run qlty`,
+`rtk pnpm run lint:md`, and `rtk git diff --check`. The web launcher reached
+the Chromium startup boundary but was blocked by
+`bootstrap_check_in ... Permission denied (1100)` in the managed environment;
+see TRACEABILITY.md. No completion approval or commit is recorded here.
 
 ### Slice 3: Reveal Exact Before And After Source Targets
 

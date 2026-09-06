@@ -205,6 +205,8 @@ const editorConfig = (env, argv) => {
         entry: {
             tableViewer: "./src/presentation/webview/editor/tableViewer.tsx",
             flowViewer: "./src/presentation/webview/editor/flowViewer.tsx",
+            semanticDiffExplorer:
+                "./src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx",
         },
         libraryType: "umd",
         externals: {
