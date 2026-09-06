@@ -99,6 +99,137 @@ wording or a diagnostic message.
 - Other unit types receive no default from this rule.
 - Source: [Command Reference 5.2.16, execution-interval control job definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0231.HTM).
 
+### `JP1-PARAM-SCHEDULE-UD-001`
+
+- Applies to a jobnet schedule rule whose effective schedule date is
+  `sd=0,ud`.
+- `0,ud` is an intentional undefined schedule and therefore produces no
+  execution dates. It is a valid complete no-runs result, including when an
+  `st` value or other schedule parameters are present; those raw values remain
+  evidence but do not override the rule-zero result.
+- `ud` attached to a non-zero schedule rule is not a valid rule-zero form and
+  remains contextually invalid for schedule comparison.
+- Interpretation retains the raw `sd` and contributing schedule parameters;
+  application consumers map a complete no-runs result through the existing
+  schedule confirmation shape rather than exposing an additional status field.
+- Source: [Command Reference 5.2.4, `sd=0,ud`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM).
+
+### `JP1-PARAM-SCHEDULE-MONTH-END-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/b` and `YYYY/MM/b-DD`.
+- `b` selects the last calendar day of the specified month. `b-00` is the
+  same value, and each additional offset selects the preceding calendar day.
+  Leap years use Gregorian rules, including the 400-year century boundary.
+- An offset outside the specified month's calendar-day range, or an
+  impossible year/month, is invalid. This meaning is calendar-independent and
+  does not require a normalized operational calendar or host locale.
+- Omitted-year or omitted-month forms such as `MM/b` and `b` remain
+  uncalculated; existing direct `YYYY/MM/DD`, `MM/DD`, and `DD` behavior is
+  unchanged.
+- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
+### `JP1-PARAM-SCHEDULE-WEEKDAY-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/{su|mo|tu|we|th|fr|sa}`, `YYYY/MM/{weekday}:n`, and
+  `YYYY/MM/{weekday}:b`.
+- An omitted occurrence selects the first matching weekday. `:n` selects the
+  nth matching weekday (`1` through `5`), and `:b` selects the last matching
+  weekday in the specified month. A valid fifth occurrence that is absent is a
+  valid no-runs result for that period.
+- Occurrence `0` or an occurrence above `5`, an impossible year/month, and
+  prefixed relative weekday forms are not calendar-independent supported
+  values. Omitted-year or omitted-month weekday forms remain uncalculated.
+- This meaning uses only proleptic Gregorian date arithmetic and does not
+  consult an operational calendar, host locale, timezone, or current clock.
+- Source: [Command Reference 5.2.4, `sd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
+### `JP1-PARAM-SCHEDULE-RELATIVE-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/+DD`, `YYYY/MM/+b`, `YYYY/MM/+b-DD`, and
+  `YYYY/MM/+{su|mo|tu|we|th|fr|sa}` with optional `:n` or `:b`.
+- The calendar source is the exact normalized job group named by one absolute
+  `jc` value, or the nearest `unitType=g` ancestor when `jc` is omitted. A
+  missing or non-group `jc` target, a non-absolute or duplicated `jc`, and an
+  ambiguous normalized hierarchy remain explicit context errors.
+- The closest explicit `sdd`, `md`, and `stt` values in the selected group and
+  its group ancestors are effective. Defaults are `sdd=1`, `md=th`, and
+  `stt=00:00`. Duplicate or invalid base values are invalid; a non-zero valid
+  `stt` is missing context until a clock-context rule is available.
+- With `md=th`, an operational month starts on its base day in the named month
+  and ends immediately before the same base day in the next month. With
+  `md=ne`, it starts on the base day in the previous month and ends immediately
+  before the base day in the named month. Numeric or weekday base days must
+  exist at both boundaries and are never clamped.
+- `+DD` counts inclusively from the operational-month start, `+b` and
+  `+b-DD` count backward from its final calendar day, and relative weekdays
+  select the first, nth, or last matching weekday in the interval. An absent
+  valid occurrence is a no-run result; an out-of-range count or impossible
+  base boundary is invalid.
+- Omitted-year/month relative forms, non-zero base time, relative or omitted
+  `st`, day-crossing start times, and unresolved scheduler-service calendar
+  data remain uncalculated. The rule uses proleptic Gregorian arithmetic and
+  does not consult host locale, timezone, clock, or external calendar data.
+- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM);
+  [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
+### `JP1-PARAM-SCHEDULE-OPEN-CLOSED-001`
+
+- Applies to fully qualified Gregorian jobnet schedule dates in the forms
+  `YYYY/MM/*DD`, `YYYY/MM/@DD`, `YYYY/MM/*b[-DD]`, and
+  `YYYY/MM/@b[-DD]`. `*` counts open days and `@` counts closed days.
+- The calendar source is the exact normalized job group named by one absolute
+  `jc` value, or the nearest containing group followed through its group
+  ancestors when `jc` is omitted. `op` entries are open and `cl` entries are
+  closed. The closest exact-date selector overrides the closest weekday
+  selector for a concrete date. Identical duplicate values are idempotent;
+  contradictory open/closed values for one selector in the same group are
+  invalid.
+- `*DD` and `@DD` count the `DD`th qualifying day inclusively from the
+  operational-month start (`DD` is `01` through `35`). `*b` and `@b` select
+  the last qualifying day, and `*b-DD` and `@b-DD` select the `DD`th
+  zero-based qualifying offset backward from the operational-month end
+  (`DD` is `00` through `34`). Every inspected date must have an explicit
+  `op` or `cl` classification. A missing qualifying date is a valid no-runs
+  result; incomplete classification is missing context, and invalid counts,
+  contradictory selectors, or impossible base settings remain invalid.
+- Omitted-year/month forms and unsupported substitution behavior remain
+  uncalculated. The rule uses only normalized definition data and proleptic
+  Gregorian arithmetic; it does not consult host locale, timezone, current
+  clock, filesystem, network, WebAPI, or external calendar data. Existing
+  application mapping and DTO shapes are unchanged.
+- Source: [Command Reference 5.2.3, job group definition](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0218.HTM);
+  [Command Reference 5.2.4, `sd` and `jc`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §4.5.1(3), Table 4-10 and §5(7)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
+### `JP1-PARAM-SCHEDULE-SHIFT-001`
+
+- Applies to a fully qualified Gregorian `sd` date with a matching explicit
+  `sh=be`, `sh=af`, or `sh=ca` value for the same schedule-rule number.
+- `be` and `af` keep an open base date unchanged. A closed base date moves to
+  the nearest open date before or after it, respectively, inspecting no more
+  than the effective `shd` number of days. `ca` keeps an open base date and
+  suppresses a closed base date. The omitted `shd` value defaults to `2` for
+  `be` and `af`; an explicit value is limited to `1` through `31`.
+- No open date within the effective bound is a valid no-runs result. The
+  candidate period may be expanded by at most 31 days on either side, and
+  final runs remain filtered to the requested half-open comparison period.
+- Repeated identical `sh` or `shd` values are idempotent. Conflicting values,
+  invalid values, and an unpaired `shd` remain explicit errors with their raw
+  parameters. `sh=no` remains missing context because its result depends on
+  scheduler Manager service state. Incomplete or conflicting normalized
+  calendar data never falls back to a host or external calendar.
+- A rule that also contains `cy` or `cftd` remains unresolved as a whole;
+  substitution does not project a partial predecessor result. Omitted `sh`
+  preserves the existing no-substitution behavior.
+- Source: [Command Reference 5.2.4, `sh` and `shd`](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L4920e/AJSO0219.HTM);
+  [Definition Assistant §5(8)](https://itpfdoc.hitachi.co.jp/manuals/3021/30213L5200e/H03L5200.PDF).
+
 ## Diagnostic Interpretation Rules
 
 The unique normative bodies for all diagnostic rule IDs are in

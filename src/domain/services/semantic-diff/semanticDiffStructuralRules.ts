@@ -1,5 +1,4 @@
 import type {
-  AjsParameter,
   AjsRelation,
   AjsUnit,
   AjsUnitType,
@@ -105,7 +104,19 @@ const externalIntegrationKeys = new Set([
   "mladr",
   "ntsrc",
 ]);
-const scheduleKeys = new Set(["sd", "st", "cy", "sh", "sc"]);
+// `sc` is the script-file parameter.  `jc` selects the job-group calendar
+// and therefore changes schedule context even when the calendar is not yet
+// resolved by the schedule projector.
+const scheduleKeys = new Set([
+  "sd",
+  "st",
+  "cy",
+  "sh",
+  "shd",
+  "jc",
+  "ln",
+  "cftd",
+]);
 
 const sortStrings = (values: string[]): string[] => [...values].sort();
 

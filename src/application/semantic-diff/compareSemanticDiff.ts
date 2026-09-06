@@ -890,6 +890,8 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
     createUnsupportedEvidenceItem,
   );
   const scheduleDiff = compareScheduleDiff({
+    beforeDocument: input.before,
+    afterDocument: input.after,
     beforeUnits,
     afterUnits,
     matches,

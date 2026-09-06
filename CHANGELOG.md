@@ -5,6 +5,23 @@
 - Added Summary, Full, Audit, and deterministic JSON Semantic Diff outputs,
   with Full as the default human-readable mode and explicit Markdown copy and
   output save actions.
+- Expanded Semantic Diff schedule comparison to calculate fully qualified
+  Gregorian month-end (`YYYY/MM/b`, `YYYY/MM/b-DD`) and absolute weekday
+  (`YYYY/MM/{weekday}`, `:n`, `:b`) forms while preserving existing
+  omitted-component and calendar-dependent limitations.
+- Expanded schedule comparison for fully qualified relative dates by resolving
+  `jc` or containing-group context, closest `sdd`/`md`/`stt` values, and the
+  documented defaults without consulting host or external calendars. Missing
+  or invalid definition context remains explicit.
+- Expanded schedule comparison for fully qualified open-day and closed-day
+  forms by using complete definition-backed `op`/`cl` classifications, with
+  exact-date precedence, bounded operational-month counting, and no host or
+  external calendar fallback.
+- Expanded schedule comparison with deterministic closed-day substitution for
+  `sh=be`, `sh=af`, and `sh=ca`, including rule-associated `shd`, the v13
+  default of two days, and a bounded 31-day lookaround. Invalid or incomplete
+  definitions, `sh=no`, and `cy`/`cftd` interactions remain explicit rather
+  than being resolved from external service state.
 - Improved Semantic Diff Markdown reports so English and Japanese output
   explains typed identity rules, strategies, canonical fields, and all
   ambiguous candidates while preserving raw JP1/AJS values safely.

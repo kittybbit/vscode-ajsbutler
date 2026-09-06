@@ -258,6 +258,118 @@ suite("Semantic Diff Schedule", () => {
     assert.strictEqual(zeroRunConfirmation?.warning, null);
   });
 
+  test("keeps one zero-run confirmation with removed runs for after-side 0,ud", () => {
+    const beforeRoot = jobnet("/root/main", [], {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    const afterRoot = jobnet("/root/main", [], {
+      sd: "0,ud",
+      st: "09:00",
+    });
+    const result = compareSemanticDiff({
+      before: document([beforeRoot]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-04-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+    assert.deepStrictEqual(
+      result.scheduleComparison?.runChanges.map((change) => change.kind),
+      ["removed"],
+    );
+    assert.deepStrictEqual(
+      result.confirmationRequired.map((item) => item.id),
+      [
+        "confirm:schedule-run-removed:/root/main:2026-04-10:09:00:1",
+        "confirm:schedule-zero-runs:/root/main",
+      ],
+    );
+    assert.deepStrictEqual(result.unsupportedItems, []);
+  });
+
+  test("does not turn a missing start-time context into a zero-run confirmation", () => {
+    const afterRoot = jobnet("/root/main", [], {
+      sd: "2026/04/10",
+    });
+    const result = compareSemanticDiff({
+      before: document([]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-04-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+    assert.deepStrictEqual(result.confirmationRequired, []);
+    assert.deepStrictEqual(
+      result.unsupportedItems.map((item) => item.reasonCode),
+      ["missing-start-time"],
+    );
+  });
+
+  test("calculates calendar-independent month-end and weekday schedules", () => {
+    const afterRoot = jobnet("/root/main", [], {
+      sd: ["1,2024/02/b-00", "2,2026/04/mo:2"],
+      st: ["1,09:00", "2,10:00"],
+    });
+    const result = compareSemanticDiff({
+      before: document([]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2024-02-01",
+          to: "2026-05-01",
+        },
+      },
+    });
+
+    assert.deepStrictEqual(
+      result.scheduleComparison?.runChanges.map((change) => [
+        change.date,
+        change.after?.time,
+      ]),
+      [
+        ["2024-02-29", "09:00"],
+        ["2026-04-13", "10:00"],
+      ],
+    );
+    assert.deepStrictEqual(result.unsupportedItems, []);
+    assert.deepStrictEqual(result.confirmationRequired, []);
+  });
+
+  test("treats a missing fifth weekday occurrence as a complete zero-run", () => {
+    const afterRoot = jobnet("/root/main", [], {
+      sd: "2026/02/su:5",
+      st: "09:00",
+    });
+    const result = compareSemanticDiff({
+      before: document([]),
+      after: document([afterRoot]),
+      options: {
+        jobGroupPath: "/root",
+        scheduleComparisonPeriod: {
+          from: "2026-02-01",
+          to: "2026-03-01",
+        },
+      },
+    });
+
+    assert.deepStrictEqual(result.scheduleComparison?.runChanges, []);
+    assert.deepStrictEqual(
+      result.confirmationRequired.map((item) => item.id),
+      ["confirm:schedule-zero-runs:/root/main"],
+    );
+    assert.deepStrictEqual(result.unsupportedItems, []);
+  });
+
   test("reports unsupported schedule elements as uncalculated instead of guessing", () => {
     const afterRoot = jobnet("/root/main", [], {
       cy: "(1,d)",
@@ -297,6 +409,12 @@ suite("Semantic Diff Schedule", () => {
           item.warning?.code === item.reasonCode &&
           item.warning?.fallbackText !== null,
       ),
+    );
+    assert.strictEqual(
+      result.unsupportedItems.find(
+        (item) => item.reasonCode === "unpaired-start-time",
+      )?.detail.scheduleRule,
+      3,
     );
     assert.deepStrictEqual(result.confirmationRequired, []);
   });
@@ -353,7 +471,7 @@ suite("Semantic Diff Schedule", () => {
     );
   });
 
-  test("keeps mixed unsupported evidence while reporting supported zero and removed runs", () => {
+  test("keeps mixed unsupported evidence while suppressing a partial zero-run conclusion", () => {
     const beforeRoot = jobnet("/root/main", [], {
       sd: "2026/04/10",
       st: "09:00",
@@ -377,7 +495,7 @@ suite("Semantic Diff Schedule", () => {
 
     assert.deepStrictEqual(
       result.confirmationRequired.map((item) => item.reasonCode),
-      ["calculated-schedule-run-removed", "no-calculated-schedule-run"],
+      ["calculated-schedule-run-removed"],
     );
     assert.ok(
       result.unsupportedItems.some(

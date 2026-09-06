@@ -172,6 +172,92 @@ Scenario: Schedule comparison reports no calculated runs
   Then the result includes a confirmation-required schedule item
   And the comparison period is included
 
+Scenario: Schedule comparison distinguishes complete no-runs from unresolved evidence
+  Given schedule comparison is requested for a period
+  And a schedule-defined jobnet has a complete supported projection with no run
+  When semantic diff is built
+  Then the existing zero-run confirmation is included exactly once
+  But an unsupported-only, partial, or missing-context projection does not
+    become a zero-run conclusion
+
+Scenario: Schedule comparison calculates fully qualified Gregorian dates
+  Given schedule comparison is requested for a period
+  And a jobnet contains a fully qualified month-end or absolute weekday `sd`
+    value with a matching normal `st` value
+  When semantic diff is built
+  Then month-end uses the Gregorian last day and zero-based `b-DD` offset
+  And an absolute weekday uses its first, nth, or last occurrence in that month
+  And the existing schedule comparison run shape and half-open period are used
+  And no operational calendar or host locale is consulted
+
+Scenario: Calendar-independent schedule forms remain explicit when unsupported
+  Given schedule comparison is requested for a period
+  And a jobnet uses an omitted-component or relative calendar-dependent date
+  When semantic diff is built
+  Then the existing uncalculated schedule item is returned
+  And it is not treated as a valid no-runs conclusion
+
+Scenario: Calendar-relative schedule forms use normalized definition context
+  Given schedule comparison is requested for a period
+  And a jobnet uses a fully qualified relative `sd` value
+  And its selected `jc` or containing group provides normalized `sdd`, `md`,
+    and `stt` context
+  When semantic diff is built
+  Then the operational month and relative date are calculated from that
+    definition context
+  And a missing, invalid, or ambiguous context remains an explicit
+    `calendar-selection` item
+  And units outside the comparison scope are not added to the result
+
+Scenario: Definition-backed open and closed schedule forms use explicit classifications
+  Given schedule comparison is requested for a period
+  And a jobnet uses a fully qualified open-day or closed-day `sd` value
+  And its selected `jc` or containing group provides normalized `op` and `cl`
+    calendar data
+  When semantic diff is built
+  Then `*DD` and `@DD` count qualifying days from the operational-month start
+  And `*b[-DD]` and `@b[-DD]` count qualifying days backward from its end
+  And exact-date classifications take precedence over weekday classifications
+  And duplicate values are idempotent while contradictory values remain an
+    explicit `calendar-selection` item
+  And every inspected date must be classified without host or external
+    calendar fallback
+  And units outside the comparison scope are not added to the result
+
+Scenario: Closed-day substitution uses bounded definition-backed calendar data
+  Given schedule comparison is requested for a period
+  And a jobnet uses a fully qualified `sd` value with `sh=be`, `sh=af`, or
+    `sh=ca` for the same schedule rule
+  And its selected `jc` or containing group provides complete normalized
+    `op` and `cl` calendar data
+  When semantic diff is built
+  Then `be` and `af` select the nearest open day within effective `shd`
+  And omitted `shd` uses two days while explicit `shd` is limited to 31 days
+  And `ca` suppresses a closed base date while preserving an open base date
+  And a shift across the requested-period boundary is filtered to the
+    half-open comparison period after at most 31 days of lookaround
+  And invalid, conflicting, or unpaired values remain existing uncalculated
+    items with their raw parameter evidence
+  And `sh=no`, incomplete calendar data, and rules containing `cy` or `cftd`
+    are not resolved from host or external service state
+
+Scenario: A missing fifth weekday occurrence is a valid no-runs schedule
+  Given schedule comparison is requested for a period
+  And a fully qualified weekday rule has no fifth matching weekday in its month
+  When semantic diff is built
+  Then the complete supported projection has no calculated runs
+  And the existing zero-run confirmation is included exactly once
+
+Scenario: Rule-zero undefined schedule is a complete no-runs result
+  Given schedule comparison is requested for a period
+  And a jobnet contains `sd=0,ud`
+  When semantic diff is built
+  Then the existing zero-run confirmation is included exactly once
+  And raw ineffective schedule parameters remain domain evidence
+  And a supported before-side run changed to after-side `0,ud` retains the
+    existing removed-run fact alongside that one confirmation
+  And review-risk and Flow policy are unchanged
+
 Scenario: One result supports multiple report projections
   Given a successful semantic comparison has produced structured facts
   When a consumer requests summary, full, audit, or JSON output
