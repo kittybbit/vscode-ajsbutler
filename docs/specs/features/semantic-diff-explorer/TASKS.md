@@ -4,9 +4,9 @@
 
 - Purpose: turn one completed Semantic Diff result into an accessible,
   read-only review workspace.
-- Approved or active slice: Slice 2 is approved and active after the Slice 1
-  completion commit `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`; Slice 1 is
-  complete, and Slices 3-4 remain dependency-blocked in the existing order.
+- Approved or active slice: Slice 3 is approved and active after the Slice 2
+  completion commit `01349376da1a76fa0c91a0311b3ab1659f5dc521`; Slices 1-2 are
+  complete, and Slice 4 remains dependency-blocked in the existing order.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -42,9 +42,9 @@
 - Approval policy and document roles: `docs/specs/README.md`.
 - Next route: Main sends this current-state revision through independent
   `plan-reviewer`, then routes the reviewed update to `approval-committer` for
-  the focused current-state commit. Main then delegates exactly Slice 2 to
+  the focused current-state commit. Main then delegates exactly Slice 3 to
   `implementer`; its independent implementation review remains mandatory, and
-  a `Ready` review with no findings conditionally authorizes the Slice 2
+  a `Ready` review with no findings conditionally authorizes the Slice 3
   completion gate under the recorded user instruction.
 
 ## Sync Rule
@@ -67,10 +67,10 @@
   four slices are complete. No slice, feature requirement, design decision, or
   implementation scope is added or reordered.
 - This current-state update advances only the active implementation pointer
-  from completed Slice 1 to Slice 2 after commit
-  `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`; it does not alter Slice 2's
-  design, scope, validation, or approval boundary, and it leaves Slices 3-4
-  blocked on their recorded predecessors.
+  from completed Slice 2 to Slice 3 after commit
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`; it does not alter Slice 3's
+  design, scope, validation, or approval boundary, and it leaves Slice 4
+  blocked on its recorded predecessor.
 - Slice 3 owns the application plain
   `AjsParserWithSourceIndexPort` result and scoped capture contract. Bootstrap
   first injects the scoped parser into the current file command's existing
@@ -90,16 +90,17 @@
 
 ## Plan Status
 
-- Status: Slice 1 complete and committed; Slice 2 activated for implementation.
+- Status: Slices 1-2 complete and committed; Slice 3 activated for
+  implementation.
 - Planning scope: application projection, explorer surface, same-session
   Markdown, source reveal, Flow reveal/highlight/focus, accessibility,
   desktop/web compatibility, and failure handling for EXP-1 through EXP-10.
 - Review status: Existing plan review `Ready` for commit `067d2189`; this
   current-state activation changes no feature design, scope, dependency, or
   approval boundary, and claims no new plan-review verdict.
-- Human approval: Slice 2 implementation approval recorded from the explicit
+- Human approval: Slice 3 implementation approval recorded from the explicit
   2026-09-06 user instruction; aggregate final approval remains pending.
-- Active implementation slice: Slice 2.
+- Active implementation slice: Slice 3.
 - Slice order: Slice 1, Slice 2, Slice 3, then Slice 4. Each slice needs its own
   implementation review and focused commit. Completion Approval is
   conditionally automatic only after that slice's implementation review is
@@ -158,51 +159,42 @@ separate gates.
   pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
   keep it pending and return the slice to Main for remediation.
 
-## Completion Approval
+### Slice 3 Implementation Approval
 
 - Status: Approved
-- Approved at: 2026-09-07 (automatic under the explicit user policy after
-  independent implementation review)
-- Approved scope: Slice 2 — Open And Operate The Accessible Explorer: the
-  dedicated panel and bundle, existing command success handoff,
-  cards/tree/filter/actions, UI state and virtualization, same-session
-  four-mode Output handoff, host-owned registries, panel lifecycle, private
-  no-op source-lifetime hook, localization/accessibility behavior, and the
-  named focused tests; no source/Flow execution, Git/WebAPI/period input,
-  persistence, or later-slice work.
-- Approved paths:
-  - `TASKS.md`
-  - `TRACEABILITY.md`
-  - `src/bootstrap/extension/extensionSubscriptions.ts`
-  - `src/bootstrap/extension/semanticDiffWiring.ts`
-  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
-  - `src/presentation/vscode/webview/constant.ts`
-  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`
-  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`
-  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerReportAction.ts`
-  - `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`
-  - `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`
-  - `src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx`
-  - `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`
-  - `src/test/suite/semanticDiffCommand.test.ts`
-  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
-  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
-  - `src/test/suite/semanticDiffExplorerRegistry.test.ts`
-  - `src/test/suite/semanticDiffExplorerReportAction.test.ts`
-  - `webpack.config.js`
-- Implementation review verdict: Ready; no findings
-- Commit status: Eligible; completion commit pending
-- Active completion gate: Slice 2. Slice 1 completion is already automatically
-  approved and committed as `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
-- User approval policy: `implementation-reviewer` returned `Ready` with no
-  findings, so Main recorded Completion Approval automatically on 2026-09-07
-  under the explicit user instruction and may route these exact paths to
-  `approval-committer`. Findings do not qualify. Aggregate final human
-  approval remains pending until all four slices are complete.
-- Environment note: web smoke preparation passed, but the browser smoke
-  launcher was blocked before test execution by Chromium Mach-port
-  `Permission denied (1100)` and `EPERM` termination in the managed
-  environment; desktop smoke and desktop/web bundle validation passed.
+- Approved at: 2026-09-07 (explicit user instruction in the current Codex
+  conversation)
+- Approved scope: Slice 3 — Reveal Exact Before And After Source Targets,
+  limited to the application-owned browser-safe source-index DTO/port, the
+  same-pass enriched parser result and scoped capture state machine, ANTLR
+  locator adapter, private lookup API, source registry/snapshot verification,
+  VS Code reveal, typed outcomes, action completion/focus, and named tests;
+  no Flow, editing, diagnostics, arbitrary sources, or durable-document work.
+- Approved paths: the application source-index/capture contracts, parser
+  adapter, VS Code/source-navigation wiring, Explorer routing, and focused
+  parser/navigation tests named by the Slice 3 implementation plan; exact
+  runtime and test paths are selected by `implementer` within that boundary.
+- Gate condition: implementation starts only after this current-state plan
+  update is focused-committed. Completion approval for this exact slice is
+  pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
+  keep it pending and return the slice to Main for remediation.
+
+## Completion Approval
+
+- Status: Pending
+- Approved at: none
+- Approved scope: none
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
+- Active completion gate: Slice 3. Slice 2 Completion Approval was
+  automatically approved after its `Ready` review and committed as
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
+- User approval policy: after `implementation-reviewer` returns `Ready` for the
+  exact active slice, Main may record Completion Approval as automatic under the
+  2026-09-06 instruction and route that exact slice to `approval-committer`;
+  Findings do not qualify. Aggregate final approval remains pending until all
+  four slices are complete.
 
 ## Closure Approval
 
@@ -881,8 +873,10 @@ error: null}`. Success always has non-null payload/error null; failure always
 
 ### Slice 2: Open And Operate The Accessible Explorer
 
-- Status: Active; implementation approved after Slice 1 completion commit
-  `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
+- Status: Slice 2 implementation complete; independent review Ready with no
+  findings; completion-approved automatically on 2026-09-07 under the explicit
+  user policy and committed as
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
 - Scope: panel/bundle, command success migration to the default Explorer,
   cards/tree/filter/actions, UI state/virtualization, same-session four-mode
   Output handoff, host-owned registries, and panel lifecycle.
@@ -926,10 +920,10 @@ error: null}`. Success always has non-null payload/error null; failure always
 - Out of Scope: source/Flow execution, Git/WebAPI/period, persistence, docs.
 
 Implementation evidence (2026-09-07): Slice 2 implementation is complete and
-ready for independent review. The existing comparison command now hands the
-single retained output context to the default Explorer opener; the report
-provider remains the shared output document provider. The dedicated desktop
-and web Explorer bundle renders cards, an expandable accessible tree,
+was independently reviewed with no findings. The existing comparison command
+now hands the single retained output context to the default Explorer opener;
+the shared report provider remains the output document provider. The dedicated
+desktop and web Explorer bundle renders cards, an expandable accessible tree,
 confirmation filtering, four-mode Output selection, keyboard/focus/live-region
 feedback, separate localized change-kind/confirmation/unsupported-kind facts,
 and a virtualized path for large trees. The webview uses a reliable
@@ -953,11 +947,37 @@ desktop smoke, `rtk pnpm run test:prepare:web`, `rtk pnpm run qlty`,
 `rtk pnpm run lint:md`, and `rtk git diff --check`. The web launcher reached
 the Chromium startup boundary but was blocked by
 `bootstrap_check_in ... Permission denied (1100)` in the managed environment;
-see TRACEABILITY.md. No completion approval or commit is recorded here.
+see TRACEABILITY.md. Slice 2 Completion Approval was automatically approved
+under the explicit 2026-09-06 user policy because the independent review was
+Ready with no findings, and the focused completion commit is
+`01349376da1a76fa0c91a0311b3ab1659f5dc521`. Aggregate final human approval
+remains pending until all four slices are complete.
+
+- Exact completion-commit scope and paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`,
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`,
+  `src/bootstrap/extension/extensionSubscriptions.ts`,
+  `src/bootstrap/extension/semanticDiffWiring.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/webview/constant.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerReportAction.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`,
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffExplorerDom.test.tsx`,
+  `src/test/suite/semanticDiffExplorerPanel.test.ts`,
+  `src/test/suite/semanticDiffExplorerRegistry.test.ts`,
+  `src/test/suite/semanticDiffExplorerReportAction.test.ts`, and
+  `webpack.config.js`.
 
 ### Slice 3: Reveal Exact Before And After Source Targets
 
-- Status: Planned; blocked on Slice 2 completion and approval.
+- Status: Active; implementation approved after Slice 2 completion commit
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
 - Scope: application-owned browser-safe source-index DTO/port, the explicit
   same-pass `AjsParserWithSourceIndexPort` result and scoped capture state
   machine, ANTLR adapter from `unitAttribute`/`unitParameter` token ranges,
@@ -1083,7 +1103,8 @@ dispose(): void }`; `WebviewPanel` remains host-only. Slice 2's private
   and named tests. Workflow source selection/Git, calendar public action,
   grammar/generated-parser redesign, normalized-domain meaning, fuzzy or
   relation matching, editing, and a changed public Explorer signature replan.
-- Dependencies: completed Slice 2 and existing raw parser/workspace APIs.
+- Dependencies: completed Slice 2 (`01349376da1a76fa0c91a0311b3ab1659f5dc521`)
+  and existing raw parser/workspace APIs.
   The current file command supplies the scoped-parser/output-context seam, so
   Slice 3 does not depend on calendar/workflow completion. A later workflow
   implementation may consume this contract after the Explorer completion
@@ -1233,7 +1254,7 @@ dispose(): void }`; `WebviewPanel` remains host-only. Slice 2's private
 ## Validation
 
 - [x] Slice 1 tests and checks complete
-- [ ] Slice 2 tests and checks complete
+- [x] Slice 2 tests and checks complete
 - [ ] Slice 3 tests and checks complete
 - [ ] Slice 4 tests and checks complete
 - [ ] README, CHANGELOG, durable use cases, and final traceability complete
