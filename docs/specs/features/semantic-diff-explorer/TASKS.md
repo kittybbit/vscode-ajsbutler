@@ -4,9 +4,9 @@
 
 - Purpose: turn one completed Semantic Diff result into an accessible,
   read-only review workspace.
-- Approved or active slice: Slice 1 is approved for implementation under the
-  explicit 2026-09-06 user instruction; Slices 2-4 remain planned in the
-  existing order.
+- Approved or active slice: Slice 2 is approved and active after the Slice 1
+  completion commit `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`; Slice 1 is
+  complete, and Slices 3-4 remain dependency-blocked in the existing order.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -40,11 +40,12 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main routes this approval-boundary replan through independent
-  `plan-reviewer`, then delegates the reviewed planning package to
-  `approval-committer` for the replan gate. After that commit, Main delegates
-  exactly Slice 1 to `implementer`; a `Ready` implementation review conditionally
-  authorizes its completion gate under the recorded user instruction.
+- Next route: Main sends this current-state revision through independent
+  `plan-reviewer`, then routes the reviewed update to `approval-committer` for
+  the focused current-state commit. Main then delegates exactly Slice 2 to
+  `implementer`; its independent implementation review remains mandatory, and
+  a `Ready` review with no findings conditionally authorizes the Slice 2
+  completion gate under the recorded user instruction.
 
 ## Sync Rule
 
@@ -65,6 +66,11 @@
   pending and stop progression. One final human approval is deferred until all
   four slices are complete. No slice, feature requirement, design decision, or
   implementation scope is added or reordered.
+- This current-state update advances only the active implementation pointer
+  from completed Slice 1 to Slice 2 after commit
+  `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`; it does not alter Slice 2's
+  design, scope, validation, or approval boundary, and it leaves Slices 3-4
+  blocked on their recorded predecessors.
 - Slice 3 owns the application plain
   `AjsParserWithSourceIndexPort` result and scoped capture contract. Bootstrap
   first injects the scoped parser into the current file command's existing
@@ -84,16 +90,16 @@
 
 ## Plan Status
 
-- Status: Slice 1 activated for implementation; approval-boundary replan
-  awaiting independent review and focused replan commit.
+- Status: Slice 1 complete and committed; Slice 2 activated for implementation.
 - Planning scope: application projection, explorer surface, same-session
   Markdown, source reveal, Flow reveal/highlight/focus, accessibility,
   desktop/web compatibility, and failure handling for EXP-1 through EXP-10.
-- Review status: Ready (`plan-reviewer`) for commit `067d2189`; re-review
-  pending for this approval-boundary revision.
-- Human approval: Slice 1 implementation approval recorded from the explicit
+- Review status: Existing plan review `Ready` for commit `067d2189`; this
+  current-state activation changes no feature design, scope, dependency, or
+  approval boundary, and claims no new plan-review verdict.
+- Human approval: Slice 2 implementation approval recorded from the explicit
   2026-09-06 user instruction; aggregate final approval remains pending.
-- Active implementation slice: Slice 1.
+- Active implementation slice: Slice 2.
 - Slice order: Slice 1, Slice 2, Slice 3, then Slice 4. Each slice needs its own
   implementation review and focused commit. Completion Approval is
   conditionally automatic only after that slice's implementation review is
@@ -132,6 +138,26 @@ separate gates.
   `implementation-reviewer` returns `Ready`; Findings keep it pending and
   return the slice to Main for remediation.
 
+### Slice 2 Implementation Approval
+
+- Status: Approved
+- Approved at: 2026-09-06 (explicit user instruction in the current Codex
+  conversation)
+- Approved scope: Slice 2 — Open And Operate The Accessible Explorer, limited
+  to the dedicated panel and bundle, existing command success handoff,
+  cards/tree/filter/actions, UI state and virtualization, same-session
+  four-mode Output handoff, host-owned registries, panel lifecycle, and the
+  named tests in its recorded scope; no source/Flow execution,
+  Git/WebAPI/period input, persistence, or durable-document work.
+- Approved paths: the command/bootstrap, panel/session, React/localization,
+  report-action, webpack-entry, and focused test files named by the Slice 2
+  implementation plan; exact runtime and test paths are selected by
+  `implementer` within that boundary.
+- Gate condition: implementation starts only after this current-state plan
+  update is focused-committed. Completion approval for this exact slice is
+  pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
+  keep it pending and return the slice to Main for remediation.
+
 ## Completion Approval
 
 - Status: Pending
@@ -140,6 +166,8 @@ separate gates.
 - Approved paths: none
 - Implementation review verdict: Pending
 - Commit status: Not eligible
+- Active completion gate: Slice 2. Slice 1 completion is already automatically
+  approved and committed as `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
 - User approval policy: after `implementation-reviewer` returns `Ready` for the
   exact active slice, Main may record Completion Approval as automatic under the
   2026-09-06 instruction and route that exact slice to `approval-committer`;
@@ -747,7 +775,7 @@ error: null}`. Success always has non-null payload/error null; failure always
 
 - Status: Slice 1 implementation complete; independent review Ready with no
   findings; completion-approved automatically on 2026-09-06 under the explicit
-  user policy, eligible and pending the focused completion commit.
+  user policy and committed in `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
 - Scope: application session/view/action types referencing one immutable
   `SemanticDiffOutputContext`, canonical cards, hierarchy, closed target-side
   mapping, availability, confirmation filter, and strict plain message
@@ -799,18 +827,17 @@ error: null}`. Success always has non-null payload/error null; failure always
   build retains the desktop/web bundles. Qlty smell output reports complexity
   metrics for the new closed validators as a review signal; `qlty check` is
   clean.
-- Production readiness status: ready for independent implementation review
-  within Slice 1. Source/Flow/report execution, host registry, UI, telemetry,
-  and durable user-document changes remain explicitly deferred to later
-  slices or Feature Exit.
+- Production readiness status: complete for Slice 1; source/Flow/report
+  execution, host registry, UI, telemetry, and durable user-document changes
+  remain explicitly deferred to later slices or Feature Exit.
 - Independent implementation review (2026-09-06): Ready; no findings.
 - Slice 1 Completion Approval (2026-09-06): Automatically Approved under the
   explicit 2026-09-06 user policy because the independent review was Ready
   with no findings. This approves only the Slice 1 completion scope recorded
   above; aggregate final human approval remains pending until all four slices
   are complete.
-- Completion commit status: eligible and pending commit; no commit or staging
-  has been performed.
+- Completion commit status: committed as
+  `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
 - Exact completion-commit scope and paths:
   `docs/specs/features/semantic-diff-explorer/TASKS.md`,
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`,
@@ -824,7 +851,8 @@ error: null}`. Success always has non-null payload/error null; failure always
 
 ### Slice 2: Open And Operate The Accessible Explorer
 
-- Status: Planned; blocked on Slice 1 completion and approval.
+- Status: Active; implementation approved after Slice 1 completion commit
+  `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`.
 - Scope: panel/bundle, command success migration to the default Explorer,
   cards/tree/filter/actions, UI state/virtualization, same-session four-mode
   Output handoff, host-owned registries, and panel lifecycle.
@@ -859,7 +887,8 @@ error: null}`. Success always has non-null payload/error null; failure always
 - Approval Boundary: Explorer panel and existing command success handoff,
   Full report action, localization/bundle/tests. New command/mode/input/copy/
   persistence replans.
-- Dependencies: completed Slice 1 and structured report dispatcher/provider.
+- Dependencies: completed Slice 1 (`e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`)
+  and structured report dispatcher/provider.
 - Risks: virtual tree semantics, stale focus, explicit-copy regression, context
   cloning, oversized initial payload, borrowed-registry lifetime, and close
   races. Identity/lifecycle, unregister-order, and payload-boundary tests are
