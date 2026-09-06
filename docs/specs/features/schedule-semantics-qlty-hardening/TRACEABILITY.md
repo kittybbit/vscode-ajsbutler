@@ -76,7 +76,10 @@ hardening plan`).
   the user's explicit approval of all slices; its completion commit is
   pending. Slice 3 is Ready with no findings and has Completion Approval
   granted on 2026-09-06 under the user's explicit approval of all slices; its
-  completion commit is pending. Slices 4 and 5 remain Pending.
+  completion commit is pending. Slice 4 is Ready with no findings and has
+  Completion Approval granted on 2026-09-06 under the user's explicit
+  approval of all slices; its completion commit is pending. Slice 5 remains
+  Pending.
 
 ### QH-3: Preserve Schedule Outcomes
 
@@ -237,6 +240,42 @@ hardening plan`).
   Verify first/nth/last and classified-day cases. Slice 4 may reduce the
   surrounding date-generation complexity as preparation only; it does not
   own the projector file-complexity finding.
+
+- Implementation result: the projector retains its overloads and final
+  substitution/orchestration flow while pure candidate projection is split
+  into canonical date math, typed candidate results, absolute Gregorian,
+  operational-month, and definition-classified day modules. Existing tests
+  and public imports remain unchanged; the two approved schedule test paths
+  were reviewed and run without content changes.
+- Validation result: `rtk pnpm run test:compile`; focused calendar, schedule,
+  and schedule-rules suites (54 passing); architecture suite (18 passing);
+  production build; desktop and web preparation builds; desktop test run
+  (exit code 0); repository Markdown lint (47 files, 0 errors); direct domain
+  rule Markdown lint (0 errors); aggregate local Qlty; and differential
+  `rtk pnpm exec qlty smells --upstream main --no-snippets` all completed.
+  QH-039 through QH-048 are absent from the differential output. The
+  remaining projector findings are QH-049 through QH-062 and remain Slice 5
+  scope; unrelated baseline findings remain outside this feature.
+- Compatibility result: candidate outputs, order, status distinctions,
+  Gregorian and operational-month boundaries, bounded classification scans,
+  and host-neutral domain behavior are preserved. No parser, message, reason
+  ID, public contract, application, configuration, package, or desktop/web
+  entry-point change was made. `package.json` remains excluded.
+- Implementation review is Ready with no findings, and Completion Approval
+  was granted on 2026-09-06 under the user's explicit approval of all slices.
+  The exact changed Slice 4 production paths are
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleDateMath.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleCandidateTypes.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleDateCandidates.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleOperationalCandidates.ts`,
+  and
+  `src/domain/services/semantic-diff/semanticDiffScheduleClassifiedDayCandidates.ts`.
+  The approved `semanticDiffScheduleCalendar.test.ts` and
+  `semanticDiffScheduleRules.test.ts` paths were run without content changes.
+  The SDD evidence paths are this `TRACEABILITY.md` and `TASKS.md`; no commit
+  or staging was performed. Route to `approval-committer` for the completion
+  gate. Slice 5 remains pending.
 
 ### Slice 5
 

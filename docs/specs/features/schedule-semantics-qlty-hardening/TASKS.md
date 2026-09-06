@@ -3,11 +3,10 @@
 ## Agent Brief
 
 - Purpose: clear all 65 blocking PR #315 Qlty findings without behavior change.
-- Approved or active slice: Slice 3; implementation review is Ready with no
+- Approved or active slice: Slice 4; implementation review is Ready with no
   findings, Completion Approval is granted, and its completion commit is
-  pending. Slice 2 is recorded as Ready with Completion Approval granted and
-  its completion commit pending. Slice 1 remains recorded as Ready with its
-  completion gate pending.
+  pending. Slices 1 through 3 are recorded as Ready with Completion Approval
+  granted and their completion gates pending.
 - Do not: change schedule semantics, public DTOs, outputs, or compatibility.
 - Do not: suppress findings, weaken Qlty configuration, or do unrelated cleanup.
 - Read first: `SPECS.md`, this file, and the PR #315 Qlty finding inventory.
@@ -15,8 +14,8 @@
 - Validate: local quality and regression gates plus Qlty Cloud differential.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: `approval-committer` creates the Slice 3 completion commit
-  within the exact changed-path boundary. Slices 4 and 5 remain pending.
+- Next decision: `approval-committer` creates the Slice 4 completion commit
+  within the exact changed-path boundary. Slice 5 remains pending.
 
 ## Sync Rule
 
@@ -33,13 +32,13 @@
 
 ## Plan Status
 
-- Status: Slice 3 implementation review Ready; Completion Approval granted;
+- Status: Slice 4 implementation review Ready; Completion Approval granted;
   completion gate pending
 - Planning scope: five ordered behavior-preserving slices covering the exact
   65-item Qlty Cloud finding set reported on PR #315 at `23112667`.
 - Review status: Ready; plan-reviewer reported no findings
 - Human approval: Approved on 2026-09-06
-- Active implementation slice: Slice 3
+- Active implementation slice: Slice 4
 - Implementation review verdict: Ready; no findings
 
 ## Intake Boundary
@@ -249,10 +248,10 @@ implemented and independently reviewed.
 
 ## Completion Approval
 
-- Status: Slices 1 through 3 Approved; Slices 4 and 5 Pending
+- Status: Slices 1 through 4 Approved; Slice 5 Pending
 - Approved at: 2026-09-06, under the user's explicit approval of all slices
   and instruction to proceed through feature completion.
-- Approved scope: completed Slice 1 through Slice 3 implementations,
+- Approved scope: completed Slice 1 through Slice 4 implementations,
   validation evidence, and SDD state synchronization after
   implementation-reviewer Ready verdicts with no findings.
 - Approved paths:
@@ -271,6 +270,10 @@ implemented and independently reviewed.
   2026-09-06; its completion gate remains pending. The exact changed paths
   and the two approved-but-unchanged reviewed paths are recorded in its
   implementation evidence below.
+- Slice 4 is implemented within its approved boundary and independently
+  reviewed Ready with no findings. Completion Approval was granted on
+  2026-09-06 under the user's explicit approval of all slices. Its completion
+  commit remains pending.
 
 ## Closure Approval
 
@@ -493,7 +496,8 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
 
 ### Slice 4: Decompose Schedule Date Candidate Projection
 
-- Status: Approved; awaiting plan-gate commit
+- Status: Implemented; implementation review Ready; Completion Approval
+  granted on 2026-09-06; completion gate pending
 - Finding coverage: QH-039 through QH-048. This slice may prepare the
   projector file for the later file-complexity review, but does not own or
   clear QH-049.
@@ -532,6 +536,45 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
   invalid, deferred, and valid-empty results.
 - Out of Scope: `sh`/`shd`, final status, new date forms, registration context,
   QH-049 final clearance, and public API changes.
+
+#### Slice 4 Implementation Evidence
+
+- Changed production paths are exactly the six approved candidate-projection
+  paths: `semanticDiffScheduleProjector.ts` remains the compatibility facade;
+  `semanticDiffScheduleDateMath.ts` owns canonical UTC parsing/formatting;
+  and the candidate result, absolute-date, operational-month, and
+  definition-classified candidate modules own their respective pure helpers.
+  The two approved test paths were reviewed and run without content changes;
+  no other runtime or test path changed. The only additional changed paths
+  are this `TASKS.md` and `TRACEABILITY.md` evidence.
+- `rtk pnpm run test:compile` passed. The focused calendar, schedule, and
+  schedule-rules suites passed with 54 tests, covering Gregorian/leap and
+  century boundaries, relative and operational dates, open/closed first,
+  nth, last, backward, invalid, missing-context, no-run, bounded half-open
+  periods, and long-document scenarios. The architecture suite passed with
+  18 tests.
+- `rtk pnpm run build`, `rtk pnpm run test:prepare:desktop`, and
+  `rtk pnpm run test:prepare:web` passed; the desktop test run exited with
+  code 0. Repository Markdown lint passed for 47 files, and direct lint of
+  `docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with
+  0 errors.
+- Aggregate `rtk pnpm run qlty` completed with formatter and `qlty:check`
+  successful. Differential
+  `rtk pnpm exec qlty smells --upstream main --no-snippets` completed after
+  the sandbox log-permission fallback: no Slice 4 module appears in the
+  findings. Remaining projector substitution/orchestration findings are
+  QH-049 through QH-062 and remain reserved for Slice 5; unrelated baseline
+  findings remain outside this feature. The formatter's transient
+  `package.json` newline was restored, and `package.json` is excluded.
+- Candidate ordering, output strings, status flags, invalid/deferred versus
+  valid-empty outcomes, half-open bounds, bounded scans, Gregorian leap
+  arithmetic, and host-neutral domain imports are preserved by the existing
+  regression matrix. No parser, message, reason ID, public DTO, application,
+  configuration, or desktop/web entry point changed.
+- Implementation review is Ready with no findings. Completion Approval was
+  granted on 2026-09-06 under the user's explicit approval of all slices.
+  The completion commit remains pending; route this exact boundary to
+  `approval-committer`. Do not stage or commit outside that gate.
 
 ### Slice 5: Decompose Substitution And Final Projection
 
