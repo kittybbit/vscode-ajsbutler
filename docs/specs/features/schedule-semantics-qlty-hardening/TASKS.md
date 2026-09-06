@@ -3,8 +3,9 @@
 ## Agent Brief
 
 - Purpose: clear all 65 blocking PR #315 Qlty findings without behavior change.
-- Approved or active slice: Slice 1; implementation review is Ready and the
-  completion gate is pending.
+- Approved or active slice: Slice 2; implementation review is Ready and
+  Completion Approval is granted, with its completion commit pending. Slice 1
+  remains recorded as Ready with its completion gate pending.
 - Do not: change schedule semantics, public DTOs, outputs, or compatibility.
 - Do not: suppress findings, weaken Qlty configuration, or do unrelated cleanup.
 - Read first: `SPECS.md`, this file, and the PR #315 Qlty finding inventory.
@@ -12,8 +13,8 @@
 - Validate: local quality and regression gates plus Qlty Cloud differential.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: `approval-committer` creates the Slice 1 completion commit
-  within the exact approved boundary.
+- Next decision: `approval-committer` creates the Slice 2 completion commit
+  within the exact approved boundary. Slices 3 through 5 remain pending.
 
 ## Sync Rule
 
@@ -30,12 +31,13 @@
 
 ## Plan Status
 
-- Status: Slice 1 implementation review Ready; completion gate pending
+- Status: Slice 2 implementation review Ready; Completion Approval granted;
+  completion gate pending
 - Planning scope: five ordered behavior-preserving slices covering the exact
   65-item Qlty Cloud finding set reported on PR #315 at `23112667`.
 - Review status: Ready; plan-reviewer reported no findings
 - Human approval: Approved on 2026-09-06
-- Active implementation slice: Slice 1
+- Active implementation slice: Slice 2
 - Implementation review verdict: Ready; no findings
 
 ## Intake Boundary
@@ -330,9 +332,17 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
 - Remaining work is the Slice 1 completion commit. QH-007 through QH-065
   remain assigned to later approved slices.
 
+- Slice 1 implementation review was Ready with no findings, and Completion
+  Approval was granted on 2026-09-06 under the user's explicit approval of all
+  slices. Its completion commit remains pending. The exact completion paths
+  are the three implementation paths above plus this TASKS file and
+  `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`;
+  `package.json` is excluded.
+
 ### Slice 2: Decompose Calendar Context Resolution
 
-- Status: Approved; awaiting plan-gate commit
+- Status: Implemented; implementation review Ready; Completion Approval
+  granted on 2026-09-06; completion gate pending
 - Finding coverage: QH-007 through QH-026.
 - Scope: keep `semanticDiffScheduleCalendarContext.ts` as the compatibility
   facade and extract types, hierarchy indexing, selector parsing and
@@ -371,6 +381,38 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
   index construction, or create a runtime import cycle.
 - Out of Scope: projection, substitution, new calendar semantics, external
   calendars, DTOs, and application/presentation changes.
+
+#### Slice 2 Implementation Evidence
+
+- Changed paths are exactly the eight approved Slice 2 paths: the retained
+  compatibility facade, the six extracted calendar/date modules, and
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`. The facade continues
+  to re-export the existing public contracts; no parser, message, reason ID,
+  projection, application, configuration, or `package.json` path changed.
+- `rtk pnpm run test:compile` passed. The focused calendar, schedule, and
+  schedule-rules suites passed with 53 tests. The architecture suite passed
+  with 18 tests. `rtk pnpm run build`, `rtk pnpm run test:prepare:desktop`,
+  and `rtk pnpm run test:prepare:web` all passed; the desktop suite exited
+  with code 0.
+- `rtk pnpm run qlty` passed its formatter and `qlty check` stages with no
+  issues. The Slice 2 modules have no differential smell findings; the
+  remaining report entries are pre-existing findings assigned to later
+  slices. The formatter's transient final-newline change to `package.json`
+  was restored and that file remains outside the diff.
+- The implementation preserves bounded indexing, ancestor and closest-group
+  precedence, `jc` selection, defaults, duplicate/conflict/missing/cyclic
+  handling, exact-before-weekday classification, Gregorian arithmetic, raw
+  evidence order, and browser-safe domain-only imports. The added test covers
+  Gregorian century leap boundaries.
+- Implementation review is Ready with no findings. Completion Approval was
+  granted on 2026-09-06 under the user's explicit approval of all slices.
+  The completion commit remains pending and no commit or staging was
+  performed. Route this exact completed slice to `approval-committer`.
+- Exact current completion paths are the eight approved Slice 2 implementation
+  and test paths above plus
+  `docs/specs/features/schedule-semantics-qlty-hardening/TASKS.md` and
+  `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`.
+  `package.json` is excluded; Slices 3 through 5 remain pending.
 
 ### Slice 3: Simplify Interpretation And Collection Boundaries
 

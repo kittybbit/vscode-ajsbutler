@@ -71,8 +71,10 @@ hardening plan`).
   - `src/test/suite/semanticDiffSchedule.test.ts`
   - `src/test/suite/semanticDiffScheduleRules.test.ts`
 - Completion review gates: Slice 1 is Ready with no findings and has Human
-  Completion Approval; its completion commit is pending. Slices 2 through 5
-  remain Pending until their implementations are independently reviewed.
+  Completion Approval; its completion commit is pending. Slice 2 is Ready
+  with no findings and has Completion Approval granted on 2026-09-06 under
+  the user's explicit approval of all slices; its completion commit is
+  pending. Slices 3 through 5 remain Pending.
 
 ### QH-3: Preserve Schedule Outcomes
 
@@ -139,6 +141,34 @@ hardening plan`).
   Verify boundary and malformed-context cases.
 - QH-026: calendar-context file complexity. Verify every extracted module with
   differential smells and the complete calendar suite.
+- Implementation result: `semanticDiffScheduleCalendarContext.ts` remains a
+  compatibility facade while the approved types, bounded hierarchy index,
+  selector/classification, operational-month, relative-date, and Gregorian
+  date-math responsibilities are isolated in the six approved modules.
+  Typed intermediate results preserve selector precedence, evidence order,
+  closest-group and `jc` resolution, duplicate/conflict/cycle handling, and
+  the public facade exports.
+- Validation result: `rtk pnpm run test:compile`; the focused calendar,
+  schedule, and schedule-rules suites (53 passing); the architecture suite
+  (18 passing); `rtk pnpm run build`; desktop and web preparation builds;
+  desktop test run (exit code 0); aggregate local `rtk pnpm run qlty`; and
+  differential `qlty smells --upstream main --no-snippets` all completed.
+  The retained facade and all six extracted modules are absent from the
+  differential smell findings; remaining output is pre-existing work owned by
+  later slices.
+- Compatibility result: no parser, message, reason ID, application DTO,
+  public contract, host API, Node built-in, configuration, or package change
+  was made. Domain imports remain browser-safe, index construction remains
+  bounded, and the added century-boundary characterization preserves
+  Gregorian behavior. Implementation review is Ready with no findings, and
+  Completion Approval was granted on 2026-09-06 under the user's explicit
+  approval of all slices. The completion commit remains pending; no commit or
+  staging was performed.
+- Exact current completion paths for Slice 2 are the eight approved
+  implementation and test paths listed in its TASKS block plus
+  `docs/specs/features/schedule-semantics-qlty-hardening/TASKS.md` and
+  `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`.
+  `package.json` remains excluded and Slices 3 through 5 remain pending.
 
 ### Slice 3
 

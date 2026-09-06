@@ -1069,6 +1069,39 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     assert.deepStrictEqual(result.unsupportedDecisions, []);
   });
 
+  test("keeps Gregorian century boundaries for operational months", () => {
+    const nonLeapMain = jobnet("/root/non-leap", {
+      sd: "2100/02/+01",
+      st: "09:00",
+    });
+    const nonLeapContext = resolveScheduleCalendarContext(
+      document([group("/root", [nonLeapMain], { sdd: "29" })]),
+      nonLeapMain,
+    );
+    assert.strictEqual(
+      resolveOperationalMonth(nonLeapContext, 2100, 2),
+      undefined,
+    );
+
+    const leapMain = jobnet("/root/leap-century", {
+      sd: "2000/02/+01",
+      st: "09:00",
+    });
+    const leapContext = resolveScheduleCalendarContext(
+      document([group("/root", [leapMain], { sdd: "29" })]),
+      leapMain,
+    );
+    const leapMonth = resolveOperationalMonth(leapContext, 2000, 2);
+    assert.strictEqual(
+      leapMonth?.start.toISOString().slice(0, 10),
+      "2000-02-29",
+    );
+    assert.strictEqual(
+      leapMonth?.endExclusive.toISOString().slice(0, 10),
+      "2000-03-29",
+    );
+  });
+
   test("uses the closest exact calendar selector and preserves duplicate semantics", () => {
     const main = jobnet(
       "/root/outer/main",
