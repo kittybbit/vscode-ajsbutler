@@ -3,10 +3,11 @@
 ## Agent Brief
 
 - Purpose: clear all 65 blocking PR #315 Qlty findings without behavior change.
-- Approved or active slice: Slice 4; implementation review is Ready with no
-  findings, Completion Approval is granted, and its completion commit is
-  pending. Slices 1 through 3 are recorded as Ready with Completion Approval
-  granted and their completion gates pending.
+- Approved or active slice: Slice 5; implementation review is Ready with no
+  findings, Completion Approval was granted on 2026-09-06 under the user's
+  all-slices approval, and the completion commit is pending. Slices 1 through
+  4 are recorded as Ready with Completion Approval granted and their
+  completion gates pending.
 - Do not: change schedule semantics, public DTOs, outputs, or compatibility.
 - Do not: suppress findings, weaken Qlty configuration, or do unrelated cleanup.
 - Read first: `SPECS.md`, this file, and the PR #315 Qlty finding inventory.
@@ -14,8 +15,9 @@
 - Validate: local quality and regression gates plus Qlty Cloud differential.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: `approval-committer` creates the Slice 4 completion commit
-  within the exact changed-path boundary. Slice 5 remains pending.
+- Next decision: `approval-committer` creates the Slice 5 completion commit
+  within the exact changed-path boundary. The Feature Exit gate remains
+  pending until all completion commits and Cloud re-evaluation are recorded.
 
 ## Sync Rule
 
@@ -32,13 +34,13 @@
 
 ## Plan Status
 
-- Status: Slice 4 implementation review Ready; Completion Approval granted;
-  completion gate pending
+- Status: Slice 5 implementation review Ready with no findings; Completion
+  Approval granted on 2026-09-06; completion gate pending
 - Planning scope: five ordered behavior-preserving slices covering the exact
   65-item Qlty Cloud finding set reported on PR #315 at `23112667`.
 - Review status: Ready; plan-reviewer reported no findings
 - Human approval: Approved on 2026-09-06
-- Active implementation slice: Slice 4
+- Active implementation slice: Slice 5
 - Implementation review verdict: Ready; no findings
 
 ## Intake Boundary
@@ -242,16 +244,16 @@ stop and replan rather than absorb unrelated cleanup.
 hardening plan`)
 
 The approved plan package is committed. Each slice's completion approval and
-implementation review are tracked individually; Slices 1 through 3 are now
-approved after their Ready reviews, while Slices 4 and 5 remain Pending until
-implemented and independently reviewed.
+implementation review are tracked individually; Slices 1 through 5 are now
+approved after their Ready reviews, while their exact completion commits
+remain pending.
 
 ## Completion Approval
 
-- Status: Slices 1 through 4 Approved; Slice 5 Pending
+- Status: Slices 1 through 5 Approved; completion commits pending
 - Approved at: 2026-09-06, under the user's explicit approval of all slices
   and instruction to proceed through feature completion.
-- Approved scope: completed Slice 1 through Slice 4 implementations,
+- Approved scope: completed Slice 1 through Slice 5 implementations,
   validation evidence, and SDD state synchronization after
   implementation-reviewer Ready verdicts with no findings.
 - Approved paths:
@@ -274,6 +276,21 @@ implemented and independently reviewed.
   reviewed Ready with no findings. Completion Approval was granted on
   2026-09-06 under the user's explicit approval of all slices. Its completion
   commit remains pending.
+- Slice 5 is implemented within its approved boundary and independently
+  reviewed Ready with no findings. Completion Approval was granted on
+  2026-09-06 under the user's explicit approval of all slices. Its exact
+  completion paths are:
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionAnalysis.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionProjection.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRuleProjection.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts` (the only approved
+  test path changed), `src/test/suite/semanticDiffScheduleRules.test.ts`,
+  `src/test/suite/semanticDiffSchedule.test.ts` (approved but unchanged),
+  `docs/specs/features/schedule-semantics-qlty-hardening/TASKS.md`, and
+  `docs/specs/features/schedule-semantics-qlty-hardening/TRACEABILITY.md`.
+  Its completion commit remains pending; intentional package commits
+  `68ea29bd` and `3008489c` are preserved and `package.json` is excluded.
 
 ## Closure Approval
 
@@ -578,7 +595,8 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
 
 ### Slice 5: Decompose Substitution And Final Projection
 
-- Status: Approved; awaiting plan-gate commit
+- Status: Implemented; implementation review Ready with no findings;
+  Completion Approval granted on 2026-09-06; completion gate pending
 - Finding coverage: QH-049 through QH-062; Slice 5 exclusively owns QH-049
   final clearance.
 - Scope: separate `sh`/`shd` association and state analysis, bounded candidate
@@ -618,6 +636,49 @@ docs/requirements/domain-rules/interpret-jp1-parameters.md` passed with 0
   valid-empty as failure, or change unresolved-rule substitution behavior.
 - Out of Scope: new semantics, presentation/report work, application messages,
   Qlty policy changes, and unrelated cleanup.
+
+#### Slice 5 Implementation Evidence
+
+- Implementation is limited to the four approved domain collaborators:
+  `semanticDiffScheduleProjector.ts` retains overloads and final summary
+  orchestration; `semanticDiffScheduleSubstitutionAnalysis.ts` owns typed
+  `sh`/`shd` association, state, and per-candidate classification;
+  `semanticDiffScheduleSubstitutionProjection.ts` owns date preflight and
+  bounded substitution resolution; and
+  `semanticDiffScheduleRuleProjection.ts` owns per-rule projection. The
+  approved calendar schedule test adds regression coverage for explicit and
+  implicit malformed `shd` evidence identity; the other two approved schedule
+  test paths were reviewed and run without content changes.
+- `rtk pnpm run test:compile` passed; direct focused schedule, calendar, rules,
+  diagnostics, and architecture suites passed with 80 tests, and the desktop
+  runner exited with code 0. Production build and desktop/web preparation
+  builds passed. The unprivileged web runner stopped before Chromium startup
+  with the known macOS `bootstrap_check_in ... Permission denied`; the same
+  runner under the required host permission exited with code 0 after its
+  existing `EPIPE`/`Premature close` logs. `rtk pnpm run qlty` passed formatting
+  and checks; the Slice 5 modules are absent from the differential smell
+  report. The remaining differential entries are the documented pre-existing
+  baseline findings outside QH-049 through QH-062.
+- `rtk git diff --check` passed. Intentional package commits `68ea29bd` and
+  `3008489c` are preserved; their `package.json` baseline is unchanged and
+  excluded. No parser, message, reason ID, public DTO, application,
+  configuration, host API, Node built-in, or desktop/web entry point changed.
+  Candidate order, short-circuit behavior, lookaround, status, evidence order,
+  duplicates, conflicts, unresolved whole rules, zero-run behavior, explicit
+  versus implicit malformed `shd` evidence IDs, and host-independent output
+  remain covered by the existing expectations.
+- Differential reconciliation found QH-001 through QH-065 absent locally. The
+  only six reported findings are excluded pre-existing baseline smells outside
+  this feature: `unsupportedScheduleMessage` and `toScheduleRunChange` in
+  `compareScheduleDiff.ts`, `createFingerprintMatchChanges` and
+  `createRelationChanges` in `compareSemanticDiff.ts`, `toUtcDate` in
+  `semanticDiffScheduleRules.ts`, and `matchFingerprintUnits` in
+  `semanticDiffStructuralRules.ts`.
+- Implementation review is Ready with no findings. Completion Approval was
+  granted on 2026-09-06 under the user's all-slices approval. The exact
+  changed-path boundary is complete and the completion commit remains
+  pending; route it to `approval-committer`. Do not stage or commit outside
+  that gate.
 
 ## Cloud Re-evaluation Gate
 

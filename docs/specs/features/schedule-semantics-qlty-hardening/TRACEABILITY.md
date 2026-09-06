@@ -78,8 +78,9 @@ hardening plan`).
   granted on 2026-09-06 under the user's explicit approval of all slices; its
   completion commit is pending. Slice 4 is Ready with no findings and has
   Completion Approval granted on 2026-09-06 under the user's explicit
-  approval of all slices; its completion commit is pending. Slice 5 remains
-  Pending.
+  approval of all slices; its completion commit is pending. Slice 5 is Ready
+  with no findings; its Completion Approval was granted on 2026-09-06 under
+  the user's all-slices approval, and its completion commit remains pending.
 
 ### QH-3: Preserve Schedule Outcomes
 
@@ -294,6 +295,53 @@ hardening plan`).
   `projectScheduleRuns`.
 - Verify these findings with substitution, status, shift, period-crossing,
   unresolved-rule, and end-to-end schedule scenarios.
+
+- Implementation result: the projector facade now delegates typed substitution
+  association/state analysis, bounded candidate resolution, per-rule date
+  projection, and final summary calculation to the approved collaborators.
+  The overloads, candidate order and bounds, short-circuit behavior, status
+  distinctions, raw evidence order, duplicate/conflict handling, unresolved
+  whole-rule blocking, and 31-day lookaround remain unchanged. Malformed `shd`
+  state keeps the baseline rule-number evidence ID for explicit prefixes and
+  the raw-value evidence ID only when the prefix is absent.
+- Validation result: `rtk pnpm run test:compile`; direct focused schedule,
+  calendar, schedule-rules, diagnostics, and architecture suites passed with
+  80 tests, and the desktop runner exited with code 0. Production build and
+  desktop/web preparation builds passed. The unprivileged web runner stopped
+  before Chromium startup with the known macOS `bootstrap_check_in ...
+Permission denied`; the same runner under the required host permission
+  exited with code 0 after its existing `EPIPE`/`Premature close` logs. `rtk
+pnpm run qlty` passed formatting and `qlty:check`; differential `qlty smells
+--upstream main --no-snippets` contains no Slice 5 module or QH-049 through
+  QH-062 finding. QH-001 through QH-065 are absent locally. Its only six
+  remaining entries are excluded pre-existing baseline smells outside this
+  feature: `unsupportedScheduleMessage` and `toScheduleRunChange` in
+  `compareScheduleDiff.ts`, `createFingerprintMatchChanges` and
+  `createRelationChanges` in `compareSemanticDiff.ts`, `toUtcDate` in
+  `semanticDiffScheduleRules.ts`, and `matchFingerprintUnits` in
+  `semanticDiffStructuralRules.ts`.
+- Compatibility result: only the four approved domain collaborator paths were
+  changed, plus the approved calendar schedule regression path. The other two
+  approved schedule test paths were run without content changes. No parser,
+  message, reason ID, public DTO, application,
+  configuration, package, host API, Node built-in, or desktop/web entry-point
+  change was made. Intentional package commits `68ea29bd` and `3008489c` are
+  preserved; their `package.json` baseline remains excluded and byte-for-byte
+  unchanged.
+- Exact current Slice 5 implementation paths are
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionAnalysis.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionProjection.ts`,
+  `src/domain/services/semantic-diff/semanticDiffScheduleRuleProjection.ts`,
+  plus the approved schedule test paths
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`,
+  `src/test/suite/semanticDiffScheduleRules.test.ts`, and
+  `src/test/suite/semanticDiffSchedule.test.ts` (only the calendar path
+  changed), and these SDD evidence files.
+  Implementation review is Ready with no findings. Completion Approval was
+  granted on 2026-09-06 under the user's all-slices approval. The completion
+  commit remains pending; route this exact boundary to `approval-committer`.
+  No commit or staging was performed.
 
 ## Acceptance-Criterion Evidence
 

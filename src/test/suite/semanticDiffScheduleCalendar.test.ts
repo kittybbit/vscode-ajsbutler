@@ -1515,6 +1515,45 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     );
   });
 
+  test("preserves explicit and implicit malformed shd evidence identity", () => {
+    const explicit = jobnet("/root/explicit-invalid-shd", {
+      sd: "1,2026/04/04",
+      st: "1,09:00",
+      sh: "1,be",
+      shd: "1,abc",
+    });
+    const implicit = jobnet("/root/implicit-invalid-shd", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "be",
+      shd: "abc",
+    });
+    const root = group("/root", [explicit, implicit], {
+      op: ["mo", "tu", "we", "th", "fr"],
+      cl: ["sa", "su"],
+    });
+    const expected = new Map([
+      [explicit, "schedule:shd:invalid:1"],
+      [implicit, "schedule:shd:invalid:abc"],
+    ]);
+
+    expected.forEach((evidenceId, unitUnderTest) => {
+      const context = resolveScheduleCalendarContext(
+        document([root]),
+        unitUnderTest,
+      );
+      const projection = projectScheduleRuns({
+        interpretation: interpretSchedule(unitUnderTest),
+        period,
+        calendarContext: context,
+      });
+      const shdRule = projection.rules.find(
+        (rule) => rule.parameter.key === "shd",
+      );
+      assert.strictEqual(shdRule?.evidence.id, evidenceId);
+    });
+  });
+
   test("does not partially substitute rules that still contain cy or cftd", () => {
     const main = jobnet("/root/mixed-stage", {
       sd: "2026/04/04",
