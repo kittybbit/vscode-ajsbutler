@@ -61,18 +61,27 @@ const mergeRelationHighlights = (
   };
 };
 
-const expandRelationHighlightsToDocument = (
-  result: SemanticDiffResult,
-  side: SemanticDiffSide,
-  document: UnitListDocumentDto,
-  highlights: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>,
-): ReadonlyMap<string, FlowGraphSemanticDiffHighlight> => {
+type RelationHighlightExpansion = {
+  result: SemanticDiffResult;
+  side: SemanticDiffSide;
+  document: UnitListDocumentDto;
+  highlights: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
+};
+
+const buildResultRelationHighlightsByTuple = ({
+  result,
+  side,
+  highlights,
+}: Pick<
+  RelationHighlightExpansion,
+  "result" | "side" | "highlights"
+>): ReadonlyMap<string, FlowGraphSemanticDiffHighlight> => {
   const resultHighlightsByTuple = new Map<
     string,
     FlowGraphSemanticDiffHighlight
   >();
   const ordinals = new Map<string, number>();
-  for (const relation of result.inputs[side].relations) {
+  const appendHighlight = (relation: SemanticDiffRelationReference): void => {
     const tuple = relationTupleKey(relation);
     const ordinal = ordinals.get(tuple) ?? 0;
     ordinals.set(tuple, ordinal + 1);
@@ -92,7 +101,25 @@ const expandRelationHighlightsToDocument = (
         mergeRelationHighlights(resultHighlightsByTuple.get(tuple), highlight),
       );
     }
-  }
+  };
+  result.inputs[side].relations.forEach(appendHighlight);
+  return resultHighlightsByTuple;
+};
+
+const expandRelationHighlightsToDocument = ({
+  result,
+  side,
+  document,
+  highlights,
+}: RelationHighlightExpansion): ReadonlyMap<
+  string,
+  FlowGraphSemanticDiffHighlight
+> => {
+  const resultHighlightsByTuple = buildResultRelationHighlightsByTuple({
+    result,
+    side,
+    highlights,
+  });
   return new Map(
     collectRelationOccurrences(document).flatMap((occurrence) => {
       const highlight = resultHighlightsByTuple.get(
@@ -111,32 +138,32 @@ export type SemanticDiffFlowRelationOccurrence = Readonly<{
   occurrenceOrdinal: number;
 }>;
 
+const collectUnitRelationOccurrences = (
+  unit: UnitListDocumentDto["rootUnits"][number],
+): SemanticDiffFlowRelationOccurrence[] => {
+  const ordinals = new Map<string, number>();
+  return unit.relations.map((relation) => {
+    const ordinal = ordinals.get(relationTupleKey(relation)) ?? 0;
+    ordinals.set(relationTupleKey(relation), ordinal + 1);
+    const edge = {
+      source: relation.sourceUnitId,
+      target: relation.targetUnitId,
+      type: relation.type,
+    } as const;
+    return {
+      id: flowGraphEdgeId(edge, ordinal),
+      sourceUnitId: relation.sourceUnitId,
+      targetUnitId: relation.targetUnitId,
+      type: relation.type,
+      occurrenceOrdinal: ordinal,
+    };
+  });
+};
+
 const collectRelationOccurrences = (
   document: UnitListDocumentDto,
-): SemanticDiffFlowRelationOccurrence[] => {
-  const occurrences: SemanticDiffFlowRelationOccurrence[] = [];
-  for (const unit of collectUnits(document)) {
-    const ordinals = new Map<string, number>();
-    for (const relation of unit.relations) {
-      const key = `${relation.sourceUnitId}\u0000${relation.targetUnitId}\u0000${relation.type}`;
-      const ordinal = ordinals.get(key) ?? 0;
-      ordinals.set(key, ordinal + 1);
-      const edge = {
-        source: relation.sourceUnitId,
-        target: relation.targetUnitId,
-        type: relation.type,
-      } as const;
-      occurrences.push({
-        id: flowGraphEdgeId(edge, ordinal),
-        sourceUnitId: relation.sourceUnitId,
-        targetUnitId: relation.targetUnitId,
-        type: relation.type,
-        occurrenceOrdinal: ordinal,
-      });
-    }
-  }
-  return occurrences;
-};
+): SemanticDiffFlowRelationOccurrence[] =>
+  collectUnits(document).flatMap(collectUnitRelationOccurrences);
 
 export const findSemanticDiffFlowRelationOccurrences = (
   document: UnitListDocumentDto,
@@ -152,19 +179,33 @@ export const findSemanticDiffFlowRelationOccurrences = (
       candidate.type === relation.type,
   );
 
+const toOverlayEntry = (
+  id: string,
+  highlight: FlowGraphSemanticDiffHighlight,
+): FlowGraphSemanticDiffOverlayEntry => ({
+  id,
+  kind: highlight.kind,
+  changeIds: [...highlight.changeIds],
+  confirmationIds: [...highlight.confirmationIds],
+});
+
+const sortOverlayEntries = (
+  entries: [string, FlowGraphSemanticDiffHighlight][],
+): [string, FlowGraphSemanticDiffHighlight][] =>
+  entries.sort(compareOverlayEntryIds);
+
+const compareOverlayEntryIds = (
+  [left]: [string, FlowGraphSemanticDiffHighlight],
+  [right]: [string, FlowGraphSemanticDiffHighlight],
+): number => Number(left > right) - Number(left < right);
+
 const toEntries = (
   entries: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>,
   ids: ReadonlySet<string>,
 ): FlowGraphSemanticDiffOverlayEntry[] =>
-  [...entries.entries()]
-    .filter(([id]) => ids.has(id))
-    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
-    .map(([id, highlight]) => ({
-      id,
-      kind: highlight.kind,
-      changeIds: [...highlight.changeIds],
-      confirmationIds: [...highlight.confirmationIds],
-    }));
+  sortOverlayEntries([...entries.entries()].filter(([id]) => ids.has(id))).map(
+    ([id, highlight]) => toOverlayEntry(id, highlight),
+  );
 
 /** Build the state-only overlay for one concrete before/after Flow document. */
 export const buildSemanticDiffFlowOverlay = (
@@ -174,12 +215,12 @@ export const buildSemanticDiffFlowOverlay = (
 ): FlowGraphSemanticDiffOverlay => {
   const highlights = buildSemanticDiffFlowHighlights(result)[side];
   const unitIds = new Set(collectUnits(document).map((unit) => unit.id));
-  const relationHighlights = expandRelationHighlightsToDocument(
+  const relationHighlights = expandRelationHighlightsToDocument({
     result,
     side,
     document,
-    highlights.edges,
-  );
+    highlights: highlights.edges,
+  });
   return {
     nodes: toEntries(highlights.nodes, unitIds),
     relations: toEntries(relationHighlights, collectRelationIds(document)),
