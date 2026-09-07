@@ -4,10 +4,12 @@
 
 - Purpose: turn one completed Semantic Diff result into an accessible,
   read-only review workspace.
-- Approved or active slice: Slice 4 is implementation-approved after the
-  Slice 3 completion commit `a25d674c67b3e6a9fb03c89a12a745a579bfd655`;
-  Slices 1-3 are complete and committed, and Slice 4 is the sole active slice
-  in the existing order.
+- Approved or active slice: the original four implementation slices are
+  complete, independently reviewed `Ready`, automatically
+  completion-approved under the recorded user policy, and focused-committed.
+  The 2026-09-07 user requirements reopened Feature Exit and require a
+  replanned quality/accessibility/filter verification sequence before closure.
+  New slices 5-13 are planned below; no new slice is approved or implemented.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -41,37 +43,47 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main sends this current-state revision through independent
-  `plan-reviewer`, then routes the reviewed update to `approval-committer` for
-  the focused current-state commit. Main then delegates exactly Slice 4 to
-  `implementer`; its independent implementation review remains mandatory, and
-  a `Ready` review with no findings conditionally authorizes the Slice 4
-  completion gate under the recorded user instruction.
+- Next route: Main sends this replan through independent `plan-reviewer`
+  review. After the revised plan receives Human Approval, each new slice is
+  plan-gate committed, implemented, independently reviewed, and completion-
+  approved according to the recorded automatic-approval policy when its
+  review is `Ready`. Feature Exit and Closure Approval are deferred until all
+  new slices are complete and committed.
 
 ## Sync Rule
 
 - This file is the sole plan and current-state owner for this feature.
 - Update it only when a slice, dependency, approval boundary, validation need,
   risk, or production-readiness decision changes.
-- Other feature folders remain outside this feature. Roadmap ordering and
-  entry conditions are unchanged, so `roadmap.md` is not edited.
+- Other feature folders remain outside this feature. The completed Wave 3
+  Explorer item is removed from `roadmap.md`; the remaining comparison-workflow
+  and schedule entries retain their existing ordering and entry conditions.
 
 ## Current Replanning Boundary
 
-- Preserve the four slices, their order, user values, Flow and transport
+- Preserve Slices 1-4, their commits, user values, Flow/transport/source
   contracts, and the existing `AjsParserPort.parse(content)` compatibility
-  surface. This replan records only the explicit 2026-09-06 user change to the
-  completion-approval interaction: each slice still requires an independent
-  implementation review, but a `Ready` verdict conditionally pre-authorizes
-  that slice's completion approval; actionable Findings keep the approval
-  pending and stop progression. One final human approval is deferred until all
-  four slices are complete. No slice, feature requirement, design decision, or
-  implementation scope is added or reordered.
-- This current-state update advances only the active implementation pointer
-  from completed Slice 3 to Slice 4 after commit
-  `a25d674c67b3e6a9fb03c89a12a745a579bfd655`; it does not alter Slice 4's
-  design, scope, validation, or approval boundary, and Slice 4 is now the sole
-  active slice with no later slice to unblock.
+  surface. Their implementation evidence remains historical and is not
+  reopened unless a new slice finds a regression.
+- The 2026-09-07 user requirements are an explicit replanning trigger because
+  the existing Feature Exit evidence does not establish an MUI-based Explorer,
+  WCAG 2.2 AA evidence, clean qlty-smell output, or actual-session proof that
+  the `変更を絞り込む` → `確認が必要` path removes ordinary leaves while
+  retaining confirmation records and confirmation-required changes.
+- The new plan adds only the smallest bounded work needed to close those gaps:
+  MUI/WCAG surface work, real-session filter verification, application and
+  host/Flow complexity refactors that preserve behavior, and corresponding
+  qlty/test evidence. No comparison rule, source/period input, report schema,
+  Flow wire variant, renderer replacement, persistence, editing, or telemetry
+  behavior is added.
+- `@mui/material` and `@mui/icons-material` 7.3.5 plus Emotion are already
+  declared. The plan does not add or upgrade them, raise `engines.vscode`, or
+  change desktop/web entry compatibility. MUI styling must remain compatible
+  with the existing webview CSP and use no remote assets.
+- The prior Feature Exit `Close` recommendation is superseded for now. The
+  closure-draft durable documents remain uncommitted and are preserved; no
+  feature-folder removal or durable-doc closure commit is authorized by this
+  replan.
 - Slice 3 owns the application plain
   `AjsParserWithSourceIndexPort` result and scoped capture contract. Bootstrap
   first injects the scoped parser into the current file command's existing
@@ -85,29 +97,31 @@
   borrowed references. Composite cleanup unregisters the context entry before
   releasing the scope exactly once; all direct, cancelled, failed, and late
   paths are stale-safe and idempotent.
-- Re-review route: independent `plan-reviewer` review of the revised
-  `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`; this role does not grant Human
-  Approval or commit the plan.
+- Feature Exit route: independent review is complete; Main owns aggregate
+  human approval and Closure Approval, and `approval-committer` owns the later
+  approved closure commit.
 
 ## Plan Status
 
-- Status: Slices 1-3 complete and committed; Slice 4 is active and
-  implementation-approved.
-- Planning scope: application projection, explorer surface, same-session
-  Markdown, source reveal, Flow reveal/highlight/focus, accessibility,
-  desktop/web compatibility, and failure handling for EXP-1 through EXP-10.
-- Review status: Existing plan review `Ready` for commit `067d2189`; this
-  current-state activation changes no feature design, scope, dependency, or
-  approval boundary, and claims no new plan-review verdict.
-- Human approval: Slice 4 implementation approval recorded from the explicit
-  2026-09-06 user instruction; aggregate final approval remains pending.
-- Active implementation slice: Slice 4.
-- Slice order: Slice 1, Slice 2, Slice 3, then Slice 4. Each slice needs its own
-  implementation review and focused commit. Completion Approval is
-  conditionally automatic only after that slice's implementation review is
-  `Ready`; final human approval is requested once all four slices are complete.
+- Status: replanning required; Slices 1-4 complete and focused-committed;
+  Feature Exit reopened; Slices 5-13 planned but not approved or implemented.
+- Planning scope: preserve EXP-1 through EXP-10 while adding the MUI/WCAG 2.2
+  AA surface contract, actual-session confirmation-filter proof, and qlty-smell
+  remediation across the changed application, parser, host, Flow, and webview
+  files.
+- Review status: Existing four-slice plan review `Ready` for commit `067d2189`;
+  this replan changes acceptance, validation, dependencies, and approval scope
+  and therefore requires a fresh independent `plan-reviewer` verdict.
+- Human approval: the historical approvals below are limited to Slices 1-4
+  only and are superseded as the active gate. Replanning Human Approval for
+  the revised Slices 5-13 plan is pending and is the sole active gate.
+- Active implementation slice: none; Replanning Mode.
+- Slice order: Slices 1-4 remain complete. After revised-plan approval, execute
+  Slices 5, 6, 7, 8, 9, 10, 11, 12, and 13 in that order. Each new slice has
+  an independent review and the recorded automatic Completion Approval rule
+  applies only when that review is `Ready` with no findings.
 
-## Human Approval
+## Historical Human Approval (Slices 1-4 Only; Superseded)
 
 - Status: Approved
 - Approved at: 2026-08-31 (explicit user approval in Codex)
@@ -116,6 +130,9 @@
 - Approved paths: `docs/specs/features/semantic-diff-explorer/SPECS.md`,
   `docs/specs/features/semantic-diff-explorer/TASKS.md`, and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`.
+- Current gate meaning: this approval authorized only the original Slices 1-4
+  plan and is superseded for current work. It does not authorize Slices 5-13,
+  implementation, or the replan commit.
 
 This approval authorizes only the plan-gate commit. Implementation remains
 blocked until an individual implementation slice receives its own approval
@@ -204,22 +221,58 @@ separate gates.
   pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
   keep it pending and return the slice to Main for remediation.
 
-## Completion Approval
+## Replanning Human Approval (Sole Active Gate)
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
-- Active completion gate: Slice 4. Slice 3 Completion Approval was
-  automatically approved after its `Ready` review with no findings and
-  committed as `a25d674c67b3e6a9fb03c89a12a745a579bfd655`.
-- User approval policy: the exact Slice 4 `Ready` verdict with no findings
-  qualifies for automatic Completion Approval under the 2026-09-06
-  instruction; Main may route that exact scope to `approval-committer`.
-  Findings do not qualify. Aggregate final human approval remains pending
-  until all four slices are complete.
+- Status: Approved; eligible for focused replan commit
+- Approved at: 2026-09-07
+- Plan-review verdict: `Ready` with no findings from the final independent
+  `plan-reviewer` review.
+- Approved scope: the revised MUI/WCAG, confirmation-filter verification, and
+  qlty-smell remediation slices 5-13 described below, approved by the user's
+  explicit request for an MUI Semantic Explorer, WCAG 2.2 coverage, qlty
+  smells resolution, and confirmation-required filter verification under the
+  existing proceed-through-slices policy.
+- Approved paths: `docs/specs/features/semantic-diff-explorer/SPECS.md`,
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`, and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md` only. No
+  runtime, test, or configuration path is authorized by this replan approval.
+- Sole active gate: the historical Slices 1-4 approval and completion
+  approval below cannot authorize this replan or any Slices 5-13 work.
+- Replan commit scope: only `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`.
+  The uncommitted Feature Exit drafts
+  (`CHANGELOG.md`, `README.en.md`, `README.md`,
+  `docs/requirements/use-cases/uc-explore-flow-graph.md`,
+  `docs/requirements/use-cases/uc-present-semantic-diff-report.md`, and
+  `docs/specs/roadmap.md`) are preserved and explicitly excluded; no feature
+  folder removal is part of this gate.
+- Commit status: Eligible; pending one focused replan commit by
+  `approval-committer`. The closure-draft documents listed above remain
+  excluded, and no feature-folder removal is part of this commit.
+- Gate condition: the revised plan commit is required before Slice 5
+  implementation begins.
+- Automatic completion policy: a new slice's Completion Approval is
+  automatically approved only after its independent implementation review is
+  `Ready` with no findings. Actionable Findings suspend that slice and require
+  Main to route remediation or another replan; they never silently grant
+  approval.
+
+## Historical Completion Approval (Slices 1-4 Only; Superseded)
+
+- Status: Historical Approved for Slices 1-4 only; superseded as the active
+  gate
+- Approved at: 2026-09-07 (automatic under the explicit user policy after each
+  independent implementation review returned `Ready` with no findings)
+- Approved scope: the exact reviewed implementation scope of Slices 1-4
+- Approved paths: each slice's focused runtime/test/evidence paths recorded in
+  its completion section
+- Implementation review verdict: `Ready` with no findings for Slices 1-4
+- Commit status: focused completion commits recorded as
+  `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`,
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`,
+  `a25d674c67b3e6a9fb03c89a12a745a579bfd655`, and
+  `aa972a293e34f645d3580fee6234d606e161602b`
+- Aggregate human approval is still required before Closure Approval; this
+  section does not authorize closure propagation or deletion.
 
 ## Closure Approval
 
@@ -227,8 +280,84 @@ separate gates.
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Pending
+- Feature Exit verdict: previous `Close` recommendation is superseded by the
+  reopened Feature Exit; Closure Approval remains pending and is ineligible
+  until Slices 5-13 complete.
 - Commit status: Not eligible
+
+## Feature Exit Review (2026-09-07)
+
+- Feature: Semantic Diff Explorer
+- Completed slices: Slices 1-4 are complete, independently reviewed `Ready`
+  with no findings, automatically completion-approved under the recorded user
+  policy, and focused-committed in `e85d012a8cf475a7ae22fc1401c13a7dc91c82a2`,
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`,
+  `a25d674c67b3e6a9fb03c89a12a745a579bfd655`, and
+  `aa972a293e34f645d3580fee6234d606e161602b`.
+- Acceptance status: EXP-1 through EXP-10, N-1, and E-4 are satisfied by the
+  recorded implementation and traceability evidence. The Explorer is
+  read-only, preserves one immutable comparison context, and keeps source,
+  Flow, report, keyboard, accessibility, and strict-transport boundaries.
+- Validation: focused projection, transport, DOM/axe, source-index, capture,
+  Flow, overlay, duplicate-ID, and host lifecycle suites passed; TypeScript
+  checks, `rtk pnpm run test:compile`, `rtk pnpm run qlty:check`, build,
+  desktop preparation and smoke, web preparation, Markdown lint, and diff
+  checks passed. Direct Chromium web smoke remains blocked before test
+  execution by the managed environment's
+  `bootstrap_check_in ... Permission denied (1100)` failure; desktop smoke and
+  both production bundles passed.
+- Traceability: `TRACEABILITY.md` maps every requirement, predecessor,
+  compatibility, lifecycle, and durable-document obligation to slices and
+  validation, with this exit evidence added.
+- Production readiness: failure, stale/disposed, malformed, large, duplicate,
+  accessibility, desktop/web, VS Code `^1.75.0`, JP1/AJS compatibility, and
+  telemetry-privacy evidence is complete. Existing Flow behavior remains
+  unchanged without a diff session.
+- Durable documentation: updated the report and Flow use cases, Japanese and
+  English README product guidance, `CHANGELOG.md`, and removed the completed
+  Explorer item from `docs/specs/roadmap.md`. `uc-build-semantic-diff.md` and
+  architecture/glossary/context documents required no update because their
+  neutral comparison and boundary contracts remain current.
+- Roadmap propagation: updated; the completed Wave 3 Explorer item is no
+  longer unfinished roadmap work, and the two repository-level verification
+  follow-ups have explicit owners and entry conditions. Remaining workflow and
+  schedule entries are unchanged.
+- Remaining risks: (1) managed Chromium web smoke is an environment-owned
+  rerun follow-up for the CI/host owner; (2) the existing expanded-graph
+  node-order golden mismatch remains with the Flow graph test owner; and (3)
+  the architecture aggregate still reports the two documented
+  Slice-3-originating composition-root violations, owned by
+  architecture/bootstrap maintainers. These are recorded follow-ups in
+  `docs/specs/roadmap.md`, were not broadened by Slice 4, and require no new
+  feature design or scope decision.
+- Closure recommendation: `Close`
+
+This recommendation is not Closure Approval. After aggregate human approval
+and explicit Closure Approval, the proposed focused closure commit scope is
+the durable propagation paths `docs/requirements/use-cases/uc-present-semantic-
+diff-report.md`, `docs/requirements/use-cases/uc-explore-flow-graph.md`,
+`README.md`, `README.en.md`, `CHANGELOG.md`, and `docs/specs/roadmap.md`, plus
+the selected feature-folder evidence/removal under
+`docs/specs/features/semantic-diff-explorer/`.
+
+## Feature Exit Reopened (2026-09-07)
+
+- Trigger: the user requires an MUI-based Semantic Explorer with WCAG 2.2 AA
+  coverage, elimination of the fresh qlty-smell findings, and verification of
+  the `変更を絞り込む` → `確認が必要` behavior.
+- Gap: existing DOM coverage asserted only that a filtered tree had at least
+  one row; it did not assert ordinary record exclusion, confirmation-record
+  retention, confirmation-level change retention, zero-match status, or the
+  actual host session message path. Existing cards intentionally remain
+  canonical, so unchanged card counts can make a working filter appear
+  inactive.
+- Required evidence: Slice 5 supplies MUI/CSP/theme/WCAG 2.2 AA evidence;
+  Slice 6 supplies exact record-level actual-session DOM evidence; Slices 7-13
+  remove the qlty smell report across the changed application, parser, host,
+  Flow, and webview surfaces without suppression.
+- Status: `Close` recommendation superseded; closure-draft durable documents
+  remain uncommitted and the feature folder remains. A new Feature Exit review
+  is required after Slices 5-13 are independently reviewed and committed.
 
 ## Predecessor Contract Decisions
 
@@ -507,6 +636,13 @@ error: null}`. Success always has non-null payload/error null; failure always
   roving-tab-stop tree implement `tree`/`treeitem`, level/expanded/selected/
   position metadata, Arrow navigation/expansion, Home/End, Enter selection,
   and Tab access to row actions.
+- MUI supplies the Explorer visual primitives, spacing, typography, controls,
+  cards, status/feedback, and theme provider. The theme maps to VS Code CSS
+  variables and explicitly handles `forced-colors: active`; it must preserve
+  visible focus, AA contrast, 44 CSS-pixel targets where applicable, 200%
+  zoom/reflow, and status semantics without depending on color or hover.
+  Emotion style insertion is checked against the existing panel CSP and both
+  production bundles.
 - Visible focus, text/icon labels, and a live status announce filtering,
   progress, success, failure, and unavailability. Color, position, animation,
   and hover are never sole signals; forced colors/high contrast are explicit.
@@ -515,6 +651,11 @@ error: null}`. Success always has non-null payload/error null; failure always
   Projection is memoized and no action rebuilds comparison or Flow data.
 - A 10,000-leaf fixture keeps bounded DOM, deterministic order/counts, and
   keyboard first/last/filter access without truncating records.
+- The confirmation filter is validated through the actual host session
+  message path. The DOM assertions identify ordinary leaves, confirmation
+  records, and confirmation-required change leaves by stable record IDs; they
+  also assert canonical card counts, explicit zero-match status, visible MUI
+  feedback, and exact latent-selection restoration after clearing the filter.
 - Failed actions refocus the invoking button. Successful source, Flow, or
   report actions focus their destination. Refresh restores a visible selected
   row, otherwise tree root, otherwise filter. The focused Explorer leaf and
@@ -802,15 +943,20 @@ error: null}`. Success always has non-null payload/error null; failure always
   source-action lookup.
 - Webview: add Explorer bundle/components/localization and closed Explorer
   messages; reuse the existing Flow `changeDocument`, `revealUnit`, and
-  `ready`/`onReady` host contract for highlighted documents and focus; extend
-  overlay controller state, badges/status, legend, patterns, DOM semantics,
-  and high contrast without adding a Flow wire variant or reason details.
+  `ready`/`onReady` host contract for highlighted documents and focus; render
+  the Explorer with the existing MUI/Emotion foundation and a VS Code-aware
+  theme; extend overlay controller state, badges/status, legend, patterns, DOM
+  semantics, and high contrast without adding a Flow wire variant or reason
+  details.
 - Configuration: add only the Explorer webpack entry/bundle. Keep
   `package.json` commands, activation, custom editors, and engine unchanged.
 - Tests: add explorer projection/filter/message/DOM/accessibility/scale and
-  source locator/navigation; update command/report, Flow highlight/message/
-  controller/view/accessibility, viewer wiring, bundle, architecture, and
-  desktop/web regressions.
+  source locator/navigation; add actual-session filter assertions and WCAG
+  2.2 AA manual/axe/reflow/contrast/target-size evidence; update
+  command/report, Flow highlight/message/controller/view/accessibility, viewer
+  wiring, bundle, architecture, and desktop/web regressions. Every qlty-smell
+  slice retains focused behavior tests and runs the smell report to ensure
+  findings are removed rather than suppressed.
 - Durable docs: at Feature Exit update semantic report and Flow exploration
   use cases, README, and CHANGELOG; update build-semantic-diff only if its
   consumer wording becomes stale. No architecture/glossary/context/roadmap
@@ -1199,8 +1345,9 @@ approval remains pending until all four slices are complete.
 
 ### Slice 4: Focus Existing Flow Views With Semantic Overlays
 
-- Status: Active; implementation approved after Slice 3 completion commit
-  `a25d674c67b3e6a9fb03c89a12a745a579bfd655`.
+- Status: Complete; independently reviewed `Ready`, automatically
+  completion-approved, and committed as
+  `aa972a293e34f645d3580fee6234d606e161602b`.
 - Scope: explicit stable `FlowGraphEdgeDto.id` and shared semantic-diff key,
   before/after additive highlight states, canonicalPair-to-side-specific edge
   IDs, the optional `semanticDiffOverlay` augmentation in the existing
@@ -1336,11 +1483,11 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
 - Baseline evidence is unchanged from Slice 3: one pre-existing expanded
   node-order golden aggregate failure and one architecture aggregate failure
   containing two pre-existing composition-root violations. Chromium web smoke
-  remains environment-blocked at `bootstrap_check_in ... Permission denied
-  (1100)`.
-- Completion commit status: eligible for the focused Slice 4 completion
-  commit; commit remains pending the approval-committer gate. No stage or
-  commit was performed.
+  remains environment-blocked at
+  `bootstrap_check_in ... Permission denied (1100)`.
+- Completion commit status: focused completion commit recorded as
+  `aa972a293e34f645d3580fee6234d606e161602b`; this historical Slice 4 gate is
+  complete. No new implementation scope is authorized by that commit.
 - Exact current paths from `git status --porcelain=v1` (36 paths):
 
   ```text
@@ -1382,17 +1529,476 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
   src/test/suite/semanticDiffExplorerFlow.test.ts
   ```
 
+### Slice 5: Adopt The MUI Explorer Surface And WCAG 2.2 AA Baseline
+
+- Status: Planned; blocked until revised-plan review, Human Approval, and the
+  replan commit.
+- Scope: replace the Explorer's ad-hoc HTML controls/layout with MUI 7
+  components and a VS Code-aware theme; split the Explorer app/view into
+  cohesive presentational and host-message helpers; deduplicate localized
+  label construction without dropping Japanese/English facts; preserve the
+  existing tree roles, action IDs, transport, and desktop/web bundle entry.
+  Slice 5 owns the canonical helper
+  `src/presentation/webview/shared/muiTheme.ts` and its public theme tokens,
+  `ThemeProvider`, `GlobalStyles`, focus-ring, forced-colors, and target-size
+  policy. Slice 13 may consume that helper but may not create a second theme,
+  redefine its tokens, or change its API.
+  The panel HTML/CSP is adjusted only as needed for Emotion/MUI style
+  injection, with no remote assets or new wire data.
+- User / Domain Value: reviewers receive a consistent MUI design that remains
+  readable and operable in VS Code light/dark, high-contrast, forced-colors,
+  keyboard, zoom, and narrow/reflowed layouts.
+- Cohesive Change Group: `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`,
+  `src/presentation/webview/shared/muiTheme.ts` (new canonical owner), the
+  optional `semanticDiffExplorerTree.tsx`/`semanticDiffExplorerHostState.ts`
+  presentation helpers, the panel HTML/CSP seam only if required, and
+  `src/test/suite/semanticDiffExplorerDom.test.tsx` plus
+  `src/test/suite/semanticDiffExplorerPanel.test.ts`.
+- Acceptance: MUI `ThemeProvider`/components render the cards, filter,
+  status, tree rows, and actions; theme values use VS Code CSS variables and
+  do not assume a fixed light palette. The complete applicable WCAG 2.2 AA
+  matrix in `SPECS.md` (1.1.1, 1.3.1, 1.3.2, 1.3.4, 1.4.1, 1.4.3,
+  1.4.4, 1.4.10, 1.4.11, 1.4.12, 2.1.1, 2.1.2, 2.4.1, 2.4.2, 2.4.3,
+  2.4.6, 2.4.7, 2.4.11, 2.4.13, 2.5.2, 2.5.3, 2.5.7, 2.5.8, 3.1.1,
+  3.1.2, 3.2.1, 3.2.2, 3.2.4, 3.3.1, 3.3.2, 4.1.2, and 4.1.3) is
+  evidenced by automated assertions plus the specified manual checks; the
+  matrix's explicit N/A rationale remains part of the contract. Primary
+  controls target 44 by 44 CSS px; every smaller control is at least 24 by 24
+  CSS px and records an allowed WCAG exception. The existing strict Explorer
+  transport and Flow message contract are unchanged.
+- Validation: focused compiled DOM tests with real MUI controls; `axe-core`
+  with color-contrast limitations documented for jsdom; manual keyboard,
+  focus-visible, target-size, contrast, forced-colors, 200% text resize,
+  400% reflow at the 320 CSS px equivalent, text-spacing, focus-obscured,
+  status-announcement, meaningful-sequence, label-in-name, and error-state
+  checks against every matrix row; MUI/Emotion production bundle and CSP
+  smoke for desktop and web;
+  `rtk pnpm run test:compile`, focused DOM tests, `rtk pnpm run qlty`,
+  `rtk pnpm run build`, and `rtk git diff --check`.
+- Production Readiness: no external fonts/assets/eval, no Node built-ins in
+  webview code, no CSP weakening beyond the existing style policy, bounded
+  rendering for the 10,000-leaf path, preserved panel disposal, localized
+  status/error text, and no contrast or focus regression in existing Flow/
+  table viewers.
+- Approval Boundary: Explorer MUI/theme/layout/accessibility and its tests;
+  no semantic filtering correction, Flow renderer redesign, transport change,
+  engine change, or dependency upgrade.
+- Dependencies: completed Slice 4 and existing MUI/Emotion dependencies in
+  `package.json`.
+- Risks: Emotion styles blocked by CSP, VS Code CSS variable contrast drift,
+  nested MUI interactive semantics, focus loss during virtualization, and
+  bundle-size regression. Mandatory static CSP assertions must prove
+  `default-src 'none'`, nonce-bound scripts, the existing `cspSource`/inline
+  style policy only, no remote origins/fonts/connect/eval, and no weakened
+  policy. The CSP/bundle/axe/manual matrix is the gate; a required CSP policy
+  change triggers Replanning rather than silent weakening.
+- Out of Scope: changing semantic facts, confirmation predicates, source or
+  Flow actions, qlty refactors outside Explorer presentation, and durable docs.
+
+### Slice 6: Prove Confirmation Filtering In A Real Explorer Session
+
+- Status: Planned; blocked until Slice 5 is complete and reviewed.
+- Scope: verify and, only where the actual-session path requires it, correct
+  `変更を絞り込む` → `確認が必要` behavior across the projected session,
+  host session message, MUI filter control, tree, status, and latent selection.
+  Keep canonical summary cards unchanged while the tree is filtered.
+- Evidence is split into two independently asserted seams:
+  - **6A host exact context/session identity:**
+    `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` and
+    `src/test/suite/semanticDiffExplorerPanel.test.ts` prove that the exact
+    `SemanticDiffOutputContext` object is handed to the session, the retained
+    registry entry is the same context, and the emitted `session.sessionId`
+    is the one used by the host message. Tests must reject a cloned/rebuilt
+    context or a mismatched session ID.
+  - **6B real session-message App/DOM:**
+    `src/test/suite/semanticDiffExplorerDom.test.tsx` sends
+    `createSemanticDiffExplorerSessionMessage` with that same session ID to
+    the actual `SemanticDiffExplorerApp`, selects the localized MUI option,
+    and asserts the rendered record contract rather than only row counts.
+- Every rendered record row has stable test semantics: unique
+  `data-row-id` occurrence ID, `data-record-kind` in
+  `change|confirmation|unsupported|limitation|schedule`, and
+  `data-record-id` equal to the upstream record ID. Group rows expose
+  `data-row-kind="group"`; duplicate upstream IDs remain distinguishable by
+  occurrence row ID. Tests query exact `(data-record-kind, data-record-id)`
+  tuples.
+- User / Domain Value: selecting `確認が必要` visibly removes ordinary
+  confirmed leaves while retaining confirmation records and changes whose
+  `confirmationLevel` is `confirmation-required`; reviewers can trust and
+  reverse the filter in the same session.
+- Cohesive Change Group: the panel-local filter path in
+  `semanticDiffExplorerProjection.ts`, Explorer app/view state, and focused
+  projection/DOM integration tests. No comparison or summary builder changes.
+- Acceptance: a real `SemanticDiffOutputContext` containing ordinary changes,
+  confirmation records, and confirmation-required changes is projected and
+  delivered through the actual Explorer session message. After selecting the
+  localized MUI filter option, ordinary leaves are absent by exact record ID,
+  both confirmation categories remain, cards retain canonical counts, and
+  the same session/context identity is preserved. A zero-match fixture shows
+  an explicit visible MUI status/live feedback while retaining the filter
+  control. Clearing the filter restores the original tree and latent
+  `aria-activedescendant`/`aria-selected` selection; repeated toggles do not
+  accumulate stale tree state.
+- Validation: compiled projection tests for ordinary/confirmation/zero-match
+  fixtures; 6A host assertions and 6B `semanticDiffExplorerDom.test.tsx`
+  integration through `createSemanticDiffExplorerSessionMessage` and the
+  actual app; assertions by exact row tuples, canonical card counts, status
+  role/live region, active descendant, same session ID, and exact context
+  identity; focused qlty and diff checks. Add a regression for the Japanese
+  labels `変更を絞り込む` and `確認が必要`.
+- Production Readiness: filter remains read-only and O(n) over the already
+  projected tree, does not reparse/recompare/reaggregate, keeps action IDs
+  scoped to the same session, and fails visibly rather than presenting stale
+  ordinary rows.
+- Approval Boundary: confirmation filter projection/UI behavior and exact
+  integration evidence. New filters, changed summary semantics, persistence,
+  or review-decision mutation replans.
+- Dependencies: Slice 5 MUI controls and the completed Slice 1/2 projection
+  and session contracts.
+- Risks: cards appearing unchanged may mask a correct tree filter, stale
+  `viewModel.filter` state may rehydrate ordinary rows, latent selection may
+  select an invisible row, and a zero-match view may look like loading. Exact
+  record-level DOM assertions and visible status feedback are the gate.
+- Out of Scope: qlty decomposition of the large application validators (Slice
+  7), report/source/Flow actions, and durable docs.
+
+### Slice 7: Decompose Explorer Application Projection And Transport
+
+- Status: Planned; blocked until Slice 6 is complete and reviewed.
+- Scope: eliminate qlty smells in `semanticDiffExplorerMessages.ts`,
+  `semanticDiffExplorerProjection.ts`, and
+  `semanticDiffRecordOccurrence.ts` through cohesive table-driven guards,
+  small closed-union decoders, record-occurrence helpers, and action/leaf
+  builders. Preserve every exact key/nullability/brand/payload limit and the
+  filter behavior proven by Slice 6.
+- User / Domain Value: application contracts remain easier to audit and less
+  likely to drift while exposing the same immutable semantic facts.
+- Cohesive Change Group: application projection/transport/occurrence helpers
+  and their pure tests; no host or UI framework imports.
+- Acceptance: `qlty smells` reports no function/file complexity, boolean,
+  return-count, parameter-count, nested-control-flow, or duplication finding
+  in the touched application files. All closed unions reject the same
+  malformed, extra-key, wrong-session, non-finite, and oversized payloads;
+  target-side/reason mappings, deterministic order, duplicate records, and
+  zero/confirmation filtering remain byte-for-byte behavior compatible.
+- Validation: existing focused message/projection suites plus exact malformed
+  matrix and property/determinism tests; `rtk pnpm run test:compile`, focused
+  compiled Mocha, `rtk pnpm run qlty:smells`, `rtk pnpm run qlty:check`,
+  `rtk pnpm run build`, and `rtk git diff --check`.
+- Production Readiness: no localized comparator or host-content leakage,
+  no new allocation of semantic IDs, linear/linearithmic projection behavior,
+  and validation before state mutation.
+- Approval Boundary: only application projection/transport/occurrence
+  refactoring and tests. Any contract, schema, summary, comparison, or UI
+  behavior change replans.
+- Dependencies: Slices 5-6 for preserved UI/filter evidence; completed
+  Slice 1 contracts and predecessor DTOs.
+- Risks: table-driven validation may accidentally widen a closed union, action
+  lookup may lose duplicate occurrence identity, and filter refactoring may
+  reaggregate cards. Existing contract tests and Slice 6 exact DOM evidence
+  are required.
+- Out of Scope: source capture/parser, host lifecycle, Flow graph/document,
+  MUI styling, and durable docs.
+
+### Slice 8: Simplify Source Capture And Parser Locator Boundaries
+
+- Status: Planned; blocked until Slice 7 is complete and reviewed.
+- Scope: remove qlty smells from `AjsParserWithSourceIndexPort.ts`,
+  `semanticDiffSourceCapture.ts`, `AntlrAjsParser.ts`, and
+  `buildSemanticDiffReportData.ts` by extracting closed validators, explicit
+  capture state transitions, target-kind lookup strategies, token-range
+  mapping helpers, and report-data side steps. Preserve the existing
+  enriched-parser result, same-pass capture, binding, ownership, and
+  `AjsParserPort.parse(content)` compatibility contracts.
+- User / Domain Value: exact source navigation remains safe while parser and
+  capture lifecycle code is reviewable and maintainable.
+- Cohesive Change Group: application source-index/capture contracts, parser
+  infrastructure adapter, report-data composition seam, and existing parser/
+  capture tests.
+- Acceptance: `qlty smells` is clear for the touched source/parser files;
+  before/after still parse exactly once in fixed order, both parser errors are
+  preserved, exact context binding and unregister-before-release ownership are
+  unchanged, lookup remains strict/UTF-16/CRLF/duplicate-safe, and no parser,
+  URI, TextDocument, snapshot, or Node type crosses the application boundary.
+- Validation: all Slice 3 parser/source/capture/command suites, malformed and
+  stale revalidation matrices, architecture dependency tests, desktop/web
+  builds, `rtk pnpm run qlty:smells`, `rtk pnpm run qlty:check`, and diff
+  checks. No action-time parse or global last-parse cache regression.
+- Production Readiness: parser performance remains one enriched pass per
+  side, source snapshots remain bounded/immutable, rollback/idempotent release
+  paths are explicit, and malformed JP1/AJS input fails closed.
+- Approval Boundary: application source-index/capture and parser/report-data
+  refactoring only. Any normalized-domain, grammar, encoding policy, or
+  workflow source-selection change replans.
+- Dependencies: completed Slice 3 and Slice 7's shared occurrence helpers.
+- Risks: state-machine helpers can accept an invalid transition, token range
+  fallback can select a wrong unit, and report-data extraction can alter error
+  ordering. Existing identity/range/capture call-count tests are the gate.
+- Out of Scope: panel/UI, Flow, comparison semantics, WebAPI/Git sources, and
+  durable docs.
+
+### Slice 9: Simplify Flow Graph Construction And Highlight Projection
+
+- Status: Planned; blocked until Slice 8 is complete and reviewed.
+- Scope: resolve qlty smells in `buildExpandedFlowGraph.ts`,
+  `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, and
+  `buildSemanticDiffFlowHighlights.ts` using traversal contexts, small
+  relation/node projection helpers, and explicit option objects. Preserve
+  formal edge IDs, occurrence ordinals, expanded/nested graph ordering, target
+  side mapping, duplicate highlighting, and normal Flow graph output.
+- User / Domain Value: Flow focus/highlight remains correct and the existing
+  graph foundation is easier to verify without a second renderer.
+- Cohesive Change Group: application graph builders/highlight projection and
+  their focused graph/use-case/highlight tests.
+- Acceptance: qlty reports no smell findings for the graph/highlight files;
+  all existing node/edge IDs, relation order, expanded graph boundaries,
+  canonical-pair duplicate mapping, and semantic state precedence are stable.
+  No new Flow message or renderer is introduced.
+- Validation: compiled graph, expanded-graph, highlight, and Explorer Flow
+  suites; representative large/nested graphs; existing golden comparison with
+  its documented baseline distinction; `rtk pnpm run qlty:smells`, qlty check,
+  build, desktop/web preparation, and diff checks.
+- Production Readiness: no quadratic relation lookup or per-selection graph
+  rebuild, bounded nested traversal, deterministic output, and unchanged
+  ordinary Flow behavior without a diff overlay.
+- Approval Boundary: graph builders and semantic highlight projection only.
+  Overlay wire/document validation, host lifecycle, and renderer changes are
+  separate slices.
+- Dependencies: Slice 8 and completed Slice 4 graph contracts.
+- Risks: helper extraction may change deterministic ordering or duplicate
+  ordinal assignment; graph golden, ID, and large-fixture tests are required.
+- Out of Scope: overlay transport/document validation, Flow host adapters,
+  MUI webview presentation, and durable docs.
+
+### Slice 10: Simplify Flow Overlay, Document Validation, And Viewer Messages
+
+- Status: Planned; blocked until Slice 9 is complete and reviewed.
+- Scope: resolve qlty smells in `buildSemanticDiffFlowOverlay.ts`,
+  `flowGraphDocument.ts`, `unitListDocument.ts`, and
+  `viewerHostMessages.ts` by splitting exact-key readers, overlay membership
+  validation, relation expansion, base-document clearing, and closed viewer
+  message parsing. Preserve `{ type: "changeDocument", data }`,
+  `{ type: "revealUnit", data }`, ready/onReady, null/absent overlay
+  semantics, and atomic rejection.
+- User / Domain Value: Flow overlays remain state-only and fail closed without
+  corrupting an ordinary viewer document.
+- Cohesive Change Group: application Flow document/overlay validators and the
+  existing viewer transport tests.
+- Acceptance: qlty is clear for the touched validator/overlay files; exact
+  keys, actual graph node/edge membership, cross-kind rejection, stale/missing
+  record errors, overlay replacement/clear semantics, and existing normal
+  viewer message compatibility remain unchanged.
+- Validation: overlay/document/viewer-host-message suites, malformed/extra-key/
+  cross-kind/oversized tests, normal Flow goldens, desktop/web build and smoke
+  preparation, qlty smells/check, and diff checks.
+- Production Readiness: validate before mutation, no reason/detail wire fields,
+  no new Flow response variant, bounded overlay serialization, and safe base
+  restore under late/failed operations.
+- Approval Boundary: Flow overlay/document/viewer message application code and
+  tests only. Host ownership and Flow UI are separate.
+- Dependencies: Slice 9 and Slice 4 overlay contract.
+- Risks: validator decomposition can permit extra keys or clear a newer base;
+  atomic malformed-message and owner-supersession tests are the gate.
+- Out of Scope: Explorer panel, source/report actions, Flow renderer styling,
+  comparison semantics, and durable docs.
+
+### Slice 11: Simplify Explorer Host Lifecycle And Action Adapters
+
+- Status: Planned; blocked until Slice 10 is complete and reviewed.
+- Scope: resolve qlty smells in `semanticDiffExplorerPanel.ts`,
+  `semanticDiffExplorerRegistry.ts`, `semanticDiffExplorerReportAction.ts`,
+  `semanticDiffExplorerSourceAction.ts`, and
+  `semanticDiffCommand.ts` by extracting lifecycle guards, request/action
+  dispatchers, strict record lookup, disposal phases, and command steps. Keep
+  the one-argument opener, same-context report handoff, exact source reveal,
+  action correlation, and unregister-before-release ordering.
+- User / Domain Value: panel close, report, source, and command failures stay
+  predictable while host code becomes auditable and qlty-clean.
+- Cohesive Change Group: VS Code Explorer host panel/registry/action adapters,
+  comparison command seam, and their panel/command/report/source tests.
+- Acceptance: qlty reports no findings in these host files; all existing
+  action outcomes, stale/disposed epochs, payload-size failure, context/action
+  registry ownership, source revalidation, four-mode output identity, and
+  display-failed mapping remain behavior-compatible.
+- Validation: focused compiled panel/registry/report/source/command suites,
+  disposal/supersession/late completion tests, desktop smoke, web build,
+  qlty smells/check, and diff checks.
+- Production Readiness: no resource leak or late focus/post, no raw URI/content
+  transport, idempotent cleanup, and unchanged VS Code `^1.75.0` behavior.
+- Approval Boundary: Explorer host lifecycle and source/report/command action
+  refactoring. Flow bridge/wiring and webview presentation are separate.
+- Dependencies: Slices 7-10 contracts and completed Slices 2-3.
+- Risks: extraction may change error mapping or disposal order; exact action
+  correlation and release-order tests are mandatory.
+- Out of Scope: MUI surface, Flow overlay graph/document logic, telemetry,
+  new commands, and durable docs.
+
+### Slice 12: Simplify Flow Host Wiring And Viewer Lifecycle Adapters
+
+- Status: Planned; blocked until Slice 11 is complete and reviewed.
+- Scope: resolve qlty smells in `semanticDiffExplorerFlow.ts`,
+  `semanticDiffFlowViewerBridge.ts`, `semanticDiffWiring.ts`,
+  `viewerWiring.ts`, `extensionDependencies.ts`, and `ajsDocument.ts` by
+  splitting host factories, source-current checks, operation ownership,
+  readiness/reveal steps, and panel disposal helpers. Preserve composition
+  boundaries, one overlay per URI, operation guards, normal viewer wiring,
+  parser performance telemetry privacy, and desktop/web parity.
+- User / Domain Value: Explorer-to-Flow navigation remains side-correct and
+  lifecycle-safe without making the host adapter a second Flow protocol.
+- Cohesive Change Group: bootstrap/presentation host adapters and their Flow,
+  wiring, lifecycle, and integration tests.
+- Acceptance: qlty is clear for the touched host/wiring files; all existing
+  ready/focus/reveal, stale source, supersession/late clear, unregister/
+  release, normal viewer wiring, and telemetry privacy tests pass. No new
+  viewer message variant or architecture exception appears.
+- Validation: focused Flow host/wiring/viewer lifecycle suites, architecture
+  dependency test, desktop smoke, web preparation/build, qlty smells/check,
+  and diff checks.
+- Production Readiness: concrete infrastructure remains composed only in
+  bootstrap, host resources are scoped/idempotent, late operations cannot
+  mutate newer sessions, and web code remains browser-safe.
+- Approval Boundary: bootstrap/presentation Flow host and viewer lifecycle
+  refactoring only. Flow UI components and durable docs are separate.
+- Dependencies: Slice 11 and Slice 10 viewer contracts.
+- Risks: factory extraction may move a concrete dependency across an
+  architecture boundary or weaken owner-token checks; architecture and late
+  operation tests are the gate.
+- Out of Scope: parser/domain changes, MUI Explorer, graph algorithms, Flow
+  component styling, and release/closure docs.
+
+### Slice 13: Simplify Flow/Shared MUI Presentation Components
+
+- Status: Planned; blocked until Slice 12 is complete and reviewed.
+- Scope: resolve remaining qlty smells in `FlowContents.tsx`,
+  `FlowGraphCanvas.tsx`, `flowGraphView.ts`, `flowMiniMap.ts`,
+  `AjsNode.tsx`, and the related `TableContents.tsx` duplication by extracting
+  cohesive render/state helpers and shared MUI theme/style utilities. Preserve
+  Flow keyboard/focus, node/edge semantics, high-contrast/pattern/legend
+  states, MiniMap behavior, ordinary table rendering, and the new Explorer
+  accessibility baseline.
+- User / Domain Value: existing Flow/table surfaces remain readable and
+  accessible while feature-touched presentation code has no qlty smells or
+  duplicated theme logic.
+- Cohesive Change Group: webview Flow/table presentation helpers, shared MUI
+  theme/style helper, and Flow view/node/component tests.
+- Acceptance: qlty reports no smell or duplication findings for the touched
+  Flow/table components; all Flow state labels, patterns, badges, relation
+  non-focusability, keyboard navigation, high contrast, MiniMap colors, and
+  table regressions remain unchanged. Shared MUI helpers do not import host or
+  parser contracts.
+- Validation: Flow component/view/accessibility/axe tests, table regression
+  tests, manual keyboard/focus/forced-colors checks, desktop/web bundles and
+  smoke, `rtk pnpm run qlty:smells`, qlty check, and diff checks.
+- Production Readiness: no color-only state, no unbounded render work, no
+  bundle/CSP regression, and unchanged non-diff Flow/table behavior.
+- Approval Boundary: webview presentation/refactoring and shared MUI style
+  helpers only. No semantic model, viewer wire, layout/search redesign, or
+  telemetry change.
+- Dependencies: Slices 5 and 12 plus completed Flow overlay/document work.
+- Risks: shared style extraction can alter existing table/Flow theme tokens,
+  and render helper boundaries can change focus timing; existing Flow/table
+  DOM/axe and desktop/web tests are the gate.
+- Out of Scope: new product behavior, source/report actions, comparison rules,
+  qlty suppression/allowlisting, and durable docs.
+
+## Auditable qlty Smell Baseline (2026-09-07)
+
+The replanning baseline was captured from Main's successful escalated run of
+`rtk pnpm run qlty:smells` against `origin/main`. The installed tool reported
+`qlty 0.500.0 macos-arm64 (5945e00 2025-03-18)`. It analyzed 45 files and
+reported findings in 31 files. The repository qlty configuration and all
+thresholds are unchanged. In the table, `P` = many parameters, `R` = many
+returns, `F` = function complexity, `T` = total/file complexity, `B` = complex
+binary logic, `N` = nested control flow, and `D` = duplication; omitted cells
+are zero findings. Counts are findings, not a suppression or a score.
+
+<!-- markdownlint-disable MD013 -->
+
+| Baseline file                                                                |   P |   R |   F |   T |   B |   N |   D |
+| ---------------------------------------------------------------------------- | --: | --: | --: | --: | --: | --: | --: |
+| `src/application/flow-graph/buildExpandedFlowGraph.ts`                       |   1 |   0 |   6 |   1 |   0 |   0 |   0 |
+| `src/application/flow-graph/buildFlowGraph.ts`                               |   0 |   0 |   2 |   0 |   0 |   0 |   0 |
+| `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`              |   2 |   0 |   3 |   0 |   0 |   0 |   0 |
+| `src/application/flow-graph/buildSemanticDiffFlowOverlay.ts`                 |   1 |   0 |   3 |   0 |   0 |   0 |   0 |
+| `src/application/flow-graph/flowGraphDocument.ts`                            |   1 |   3 |   8 |   1 |   2 |   0 |   0 |
+| `src/application/parsing/AjsParserWithSourceIndexPort.ts`                    |   0 |   3 |   4 |   1 |   4 |   0 |   0 |
+| `src/application/semantic-diff/buildSemanticDiffReportData.ts`               |   0 |   0 |   1 |   0 |   0 |   0 |   0 |
+| `src/application/semantic-diff/semanticDiffExplorerMessages.ts`              |   6 |  11 |  19 |   1 |  42 |   0 |   0 |
+| `src/application/semantic-diff/semanticDiffExplorerProjection.ts`            |   2 |   7 |  14 |   1 |   1 |   0 |   0 |
+| `src/application/semantic-diff/semanticDiffRecordOccurrence.ts`              |   0 |   0 |   2 |   0 |   0 |   0 |   0 |
+| `src/application/semantic-diff/semanticDiffSourceCapture.ts`                 |   0 |   3 |   4 |   1 |   2 |   0 |   0 |
+| `src/bootstrap/extension/extensionDependencies.ts`                           |   0 |   0 |   1 |   0 |   0 |   0 |   0 |
+| `src/bootstrap/extension/semanticDiffFlowViewerBridge.ts`                    |   0 |   0 |   3 |   0 |   0 |   0 |   0 |
+| `src/bootstrap/extension/semanticDiffWiring.ts`                              |   1 |   1 |   2 |   0 |   1 |   0 |   0 |
+| `src/bootstrap/extension/viewerWiring.ts`                                    |   0 |   1 |   4 |   0 |   0 |   0 |   0 |
+| `src/infrastructure/parser/AntlrAjsParser.ts`                                |   0 |   0 |   1 |   0 |   0 |   0 |   0 |
+| `src/presentation/vscode/commands/semanticDiffCommand.ts`                    |   0 |   1 |   4 |   1 |   0 |   0 |   0 |
+| `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts`          |   1 |   5 |   7 |   1 |   1 |   0 |   0 |
+| `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`         |   3 |   2 |   7 |   1 |   1 |   1 |   0 |
+| `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`      |   0 |   0 |   1 |   0 |   0 |   0 |   0 |
+| `src/presentation/vscode/semantic-diff/semanticDiffExplorerReportAction.ts`  |   0 |   1 |   1 |   0 |   0 |   0 |   0 |
+| `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceAction.ts`  |   0 |   2 |   2 |   0 |   0 |   0 |   0 |
+| `src/presentation/vscode/webview/ajsDocument.ts`                             |   2 |   2 |   4 |   0 |   0 |   0 |   0 |
+| `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`                   |   0 |   2 |   3 |   1 |   0 |   0 |   1 |
+| `src/presentation/webview/editor/ajsFlow/FlowGraphCanvas.tsx`                |   0 |   0 |   2 |   0 |   0 |   0 |   0 |
+| `src/presentation/webview/editor/ajsFlow/flowGraphView.ts`                   |   0 |   1 |   3 |   0 |   0 |   0 |   0 |
+| `src/presentation/webview/editor/ajsFlow/nodes/AjsNode.tsx`                  |   0 |   0 |   4 |   0 |   0 |   0 |   0 |
+| `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`            |   0 |   1 |   3 |   1 |   0 |   1 |   0 |
+| `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts` |   0 |   0 |   0 |   0 |   0 |   0 |   8 |
+| `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`        |   3 |   4 |  12 |   1 |   0 |   0 |   0 |
+| `src/presentation/webview/viewerHostMessages.ts`                             |   0 |   0 |   4 |   0 |   1 |   0 |   0 |
+
+<!-- markdownlint-enable MD013 -->
+
+The aggregate is `P=23`, `R=50`, `F=134`, `T=12`, `B=55`, `N=2`, and
+`D=9`. Slice 5's Explorer files are intentionally included in this baseline;
+the new `src/presentation/webview/shared/muiTheme.ts` is included in the
+post-slice clean check even though it did not exist in the baseline. The exit
+definition is zero qlty-smell findings in every feature-delta file (including
+new helpers and any file touched by Slices 5-13), a passing `qlty check`, and
+no suppression, allowlist, threshold, generated-ignore, or metrics-only
+waiver change. If a repository-baseline finding is outside this feature delta,
+the final report must identify it by path and prove zero new findings in the
+changed delta; it may not be hidden.
+
 ## Cross-Slice Readiness And Approval Boundaries
 
-- Every slice runs focused tests, qlty, and build; Slice 4 runs complete
-  compiled desktop and web suites. The architecture suite retains the two
-  documented pre-existing composition-root violations and no Slice 4
-  architecture regression.
-- Every slice still receives an independent implementation review. Under the
-  explicit 2026-09-06 user instruction, a `Ready` verdict conditionally
-  authorizes that slice's Completion Approval automatically; actionable Findings
-  suspend the slice and require Main to route remediation. Main requests one
-  final human approval after all four slices are complete before Feature Exit.
+- Slices 1-4 remain complete and focused-committed. Slices 5-13 each require
+  focused tests, qlty smell/check evidence, and a build whenever the changed
+  surface affects compilation/bundling; parser, host, Flow, and webview slices
+  add the relevant desktop/web/architecture checks.
+- Slice 5 and every later webview slice require mandatory static CSP assertions
+  in `semanticDiffExplorerPanel.test.ts`: the generated Explorer HTML keeps
+  `default-src 'none'`, nonce-bound scripts, the existing `cspSource` plus
+  inline-style policy only, and no remote origin, font, `connect-src`, `eval`,
+  or new relaxation. The assertion also checks that MUI/Emotion does not emit
+  an external asset dependency. A policy change is a Replanning trigger.
+- Cross-platform smoke ownership is explicit: the implementation reviewer
+  owns the desktop Electron/webview smoke entry after
+  `rtk pnpm run test:prepare:desktop` and the compiled desktop runner
+  `node ./out/test/runTest.js`; the web bundle owner runs
+  `rtk pnpm run test:prepare:web` and `rtk pnpm run build`, then inspects the
+  browser-safe bundle and CSP. A real Chromium/browser smoke is claimable only
+  when the CI/permissive-host owner has a Chromium host whose
+  `bootstrap_check_in` permission succeeds and the app starts with the same
+  session-message fixture. Until that entry condition is met, the evidence is
+  explicitly `blocked-before-execution` and desktop smoke, web build, static
+  CSP, and DOM evidence must not be reported as browser-smoke success.
+- The qlty baseline is explicit: the fresh 2026-09-07 smell report found
+  complexity, return-count, parameter-count, nested-control-flow, boolean,
+  and duplication findings across the changed Explorer application/parser,
+  host/wiring, Flow graph/overlay, and webview files. The new slices must
+  remove those findings by extracting cohesive behavior and preserving tests;
+  no suppression, allowlist, threshold relaxation, or metrics-only waiver is
+  permitted.
+- Every new slice still receives an independent implementation review. Under
+  the explicit user policy, a `Ready` verdict with no findings conditionally
+  authorizes that slice's Completion Approval automatically; actionable
+  Findings suspend the slice and require Main to route remediation. Main
+  requests one aggregate human approval only after Slices 5-13 are complete
+  and committed, then reopens Feature Exit for the final closure review.
 - Domain gains no responsibility; application imports no VS Code/UI/
   infrastructure; ANTLR stays in parser infrastructure; presentation consumes
   DTOs; bootstrap/presentation compose concrete adapters and own URI,
@@ -1404,7 +2010,10 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
   browser-safe index. The existing `AjsParserPort` remains the compatibility
   seam for unrelated consumers and the current/future builder injection.
 - Parser, comparison, identity, risk, structured output, normal Flow, report,
-  clipboard, desktop, and web regressions remain passing.
+  clipboard, desktop, and web regressions remain passing. The managed
+  Chromium startup limitation remains an environment risk and must be recorded
+  for any slice whose web smoke cannot run; it is not silently treated as
+  source evidence.
 - JP1/AJS syntax/normalization/identity/schedule/risk meaning is unchanged.
   Malformed input fails before Explorer; unsupported/uncalculated remains
   visible and non-assertive.
@@ -1433,20 +2042,35 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
   incompatible `AjsParserWithSourceIndexPort`/capture binding, missing target
   evidence, source/period/command/calendar/persistence/edit/fuzzy mapping,
   grammar/domain expansion, reverse Flow-report, telemetry, replacement
-  renderer, or engine increase. Unverifiable actions become unavailable.
+  renderer, engine/dependency-floor increase, or any qlty remediation that
+  changes behavior or an approval boundary. Unverifiable actions become
+  unavailable.
 
 ## Traceability And Feature Exit
 
-- `TRACEABILITY.md` maps EXP-1 through EXP-10, N-1, E-4, compatibility,
-  readiness, and durable follow-up to slices and validation.
-- Exit requires four reviewed/approved/committed slices, desktop/web/a11y
-  evidence, use-case/README/CHANGELOG updates, final traceability, and no
-  reusable behavior left only here. Roadmap change is not expected.
+- `TRACEABILITY.md` maps EXP-1 through EXP-11, N-1, E-4, filter verification,
+  qlty-smell remediation, compatibility, readiness, and durable follow-up to
+  Slices 1-13.
+- Exit now requires the original four plus nine reviewed/approved/committed
+  remediation slices, MUI/WCAG 2.2 AA evidence, actual-session filter evidence,
+  a clean qlty-smell report without suppression, desktop/web/a11y evidence,
+  durable-document review, and final traceability. The prior `Close`
+  recommendation is reopened until those conditions are met.
 
 ## Validation
 
 - [x] Slice 1 tests and checks complete
 - [x] Slice 2 tests and checks complete
 - [x] Slice 3 tests and checks complete
-- [ ] Slice 4 tests and checks complete
-- [ ] README, CHANGELOG, durable use cases, and final traceability complete
+- [x] Slice 4 tests and checks complete
+- [ ] Slice 5 MUI/WCAG 2.2 AA implementation and evidence complete
+- [ ] Slice 6 actual-session confirmation-filter proof complete
+- [ ] Slice 7 application projection/transport qlty remediation complete
+- [ ] Slice 8 source capture/parser qlty remediation complete
+- [ ] Slice 9 Flow graph/highlight qlty remediation complete
+- [ ] Slice 10 Flow overlay/document/message qlty remediation complete
+- [ ] Slice 11 Explorer host/action qlty remediation complete
+- [ ] Slice 12 Flow host/wiring qlty remediation complete
+- [ ] Slice 13 Flow/shared MUI presentation qlty remediation complete
+- [ ] README, CHANGELOG, durable use cases, roadmap, and final traceability
+      revalidated at the reopened Feature Exit

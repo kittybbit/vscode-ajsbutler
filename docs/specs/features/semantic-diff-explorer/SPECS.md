@@ -93,6 +93,92 @@ or Flow Viewer target, and explicitly open the applicable Markdown report.
 - EXP-10: The explorer remains read-only. It does not edit either definition,
   choose identity matches, dismiss confirmation requirements, or persist
   review decisions.
+- EXP-11: The Explorer webview uses the repository's MUI component and theme
+  foundation (currently `@mui/material` and `@mui/icons-material` 7.3.x)
+  without changing the VS Code engine floor or introducing remote assets. Its
+  interactive review surface satisfies WCAG 2.2 AA for keyboard operation,
+  visible focus, target size, reflow, text and non-text contrast, status
+  announcements, forced-colors/high-contrast themes, and non-color state
+  communication. MUI styling remains compatible with the existing webview CSP
+  and desktop/web bundles.
+
+## WCAG 2.2 AA Explorer Matrix
+
+The following matrix is the acceptance contract for the Explorer webview. The
+product target for primary controls is 44 by 44 CSS pixels; the WCAG 2.2 AA
+minimum for Target Size (Minimum) is 24 by 24 CSS pixels. Any control below
+the product target must still meet the 24 by 24 AA minimum and have its reason
+recorded as an intentional inline, user-agent, equivalent-control, or
+essential-layout exception. The 24 by 24 minimum is never waived merely for
+icon styling. Text contrast is at least 4.5:1 for normal text and 3:1 for
+large text (18 point, or 14 point bold). Non-text controls and state
+indicators have at least 3:1 contrast against adjacent colors. Focus
+indicators have at least 3:1 contrast between focused and unfocused states and
+an indicator area equivalent to a 2 CSS-pixel perimeter. Reflow is verified
+at 400% text/viewport magnification, equivalent to 320 CSS pixels for a
+vertical viewport; text resizing is separately verified at 200%.
+
+<!-- markdownlint-disable MD013 -->
+
+| WCAG 2.2 criterion                  | Affected Explorer UI                                                                                               | Automated evidence                                                                                               | Manual evidence                                                                                           | Exception / boundary                                                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1.1 Non-text Content              | MUI icons, expand/collapse indicators, state badges, and action symbols                                            | `axe-core` alternative/name checks; `aria-hidden`/accessible-name assertions for decorative and functional icons | Inspect the accessibility tree and magnification view for equivalent text/state                           | Decorative icons are hidden from assistive technology; every functional icon has a localized accessible name                    |
+| 1.3.1 Info and Relationships        | Headings, summary-card labels, filter label, tree/group/row roles, action groups, and status relationships         | `axe-core` landmark/label checks; DOM role, heading-level, `aria-*`, and form-association assertions             | Inspect the accessibility tree and reading order in Japanese and English                                  | CSS is not the sole carrier of hierarchy; data attributes are test hooks, not semantics                                         |
+| 1.3.2 Meaningful Sequence           | DOM order of toolbar, cards, tree groups, rows, details, and actions                                               | DOM order and keyboard-order regression assertions                                                               | Screen-reader reading order and visual-to-source order inspection                                         | Virtualized rows may mount lazily, but logical order and accessible traversal remain deterministic                              |
+| 1.3.4 Orientation                   | Explorer shell, cards, filter, tree, and action groups in portrait/landscape-capable webviews                      | Viewport/orientation smoke asserts no orientation lock or hidden functionality                                   | Rotate or resize the host surface and verify equivalent content/action access                             | VS Code host may constrain the window; the webview itself must not require one orientation                                      |
+| 1.4.1 Use of Color                  | Added/removed/changed/confirmation state, selected rows, error/status feedback, and Flow-linked badges             | Assertions for text/icon/pattern/state attributes in addition to color                                           | Grayscale, high-contrast, forced-colors, and color-vision simulation inspection                           | No state or action may be conveyed by color, position, or hover alone                                                           |
+| 1.4.3 Contrast (Minimum)            | MUI text, headings, cards, Chips, Buttons, Select, status and error feedback                                       | Browser/DOM token assertions; `axe-core` where computed styles are available                                     | Light/dark VS Code themes, high contrast, and forced-colors contrast inspection                           | Normal text ≥4.5:1; large text ≥3:1; jsdom cannot prove computed contrast, so browser/manual evidence is required               |
+| 1.4.4 Resize Text                   | Labels, details, cards, filter, status/live text, and row actions at 200% text resize                              | CSS/text-resize smoke checks for clipping, overlap, and reachable controls                                       | Apply 200% text resize (not only browser zoom) in light/dark/high-contrast modes                          | Content and functionality remain available; visual ellipsis is allowed only with a complete accessible name                     |
+| 1.4.10 Reflow                       | App shell, summary cards, toolbar/filter, tree rows, details, and row actions at 400% / 320 CSS px equivalent      | Responsive DOM/layout smoke at 320 CSS px-equivalent viewport; no horizontal-overflow assertion                  | 400% zoom/reflow and narrow webview inspection                                                            | Vertical scrolling is allowed; content and actions remain available without two-dimensional reading                             |
+| 1.4.11 Non-text Contrast            | Visible focus ring, MUI Button/Select boundaries, status borders, tree selection, and Flow-linked state indicators | CSS/static token assertions and `axe-core` structural checks                                                     | Inspect focus, selected, disabled, error, and state affordances in light/dark/high-contrast/forced-colors | Required non-text graphics and control/state boundaries ≥3:1 against adjacent colors; native focus fallback must remain visible |
+| 1.4.12 Text Spacing                 | Explorer labels, details, cards, filter, status/live text and row actions                                          | CSS/static assertions that custom styles do not clip or force fixed text metrics                                 | Apply WCAG text-spacing overrides and inspect clipping, overlap, truncation, and action reachability      | Ellipsis may shorten a visual preview only when the full accessible name/details remain available                               |
+| 2.1.1 Keyboard                      | Output, filter, tree container/treeitems, expand/collapse, source/Flow actions and status recovery                 | Testing Library key matrix and focus/active-descendant assertions                                                | Complete task flow with keyboard only, including virtualization and failure recovery                      | Pointer-only convenience interactions are not required; every available action has a keyboard path                              |
+| 2.1.2 No Keyboard Trap              | MUI controls, tree and action group                                                                                | Automated Tab/Shift+Tab escape and focus-loop regression tests                                                   | Enter/escape/Tab traversal through every control and virtualized row                                      | No intentional trap; webview/panel focus transfer follows VS Code host behavior                                                 |
+| 2.4.1 Bypass Blocks                 | Repeated toolbar/header before the main tree and status region                                                     | Landmark/skip-link or heading bypass assertions                                                                  | Keyboard-only bypass of repeated controls to the main review tree                                         | A single-panel landmark/skip target is sufficient; no hidden bypass control is required when no repeated block exists           |
+| 2.4.2 Page Titled                   | Explorer webview document/panel title                                                                              | Static HTML/title assertion and localized title test                                                             | Confirm the panel title identifies the Explorer and comparison context where available                    | VS Code panel title may be host-owned; generated webview HTML still has a meaningful title                                      |
+| 2.4.3 Focus Order                   | Toolbar, filter, cards, tree groups/rows, row actions, status, and recovery controls                               | Tab/Shift+Tab order and roving-focus assertions                                                                  | Keyboard traversal follows the meaningful visual/reading sequence                                         | Virtualization may move a row into view, but must not reorder focus unexpectedly                                                |
+| 2.4.6 Headings and Labels           | Explorer title, summary-card headings, filter label, tree groups, action labels, and status                        | Heading-level, accessible-name, and duplicate-label assertions                                                   | Inspect headings/labels in both locales and with a screen reader                                          | Labels describe purpose; icon-only controls require an accessible name                                                          |
+| 2.4.7 Focus Visible                 | Toolbar, filter, tree, row actions and asynchronous return focus                                                   | DOM `:focus-visible`/class/style assertions and keyboard tests                                                   | Visible focus inspection in all theme modes and at 200% zoom                                              | Browser default focus is acceptable only when it remains visible and meets the contrast contract                                |
+| 2.4.11 Focus Not Obscured (Minimum) | Tree active row, filter, row actions, status and virtualized focus restoration                                     | Scroll/focus tests assert the active element is within the visible scroll region                                 | Keyboard traversal at narrow width, 200% zoom, and with status feedback present                           | Virtualization may scroll the row into view before focus; focus must not remain behind toolbar/status overlays                  |
+| 2.4.13 Focus Appearance             | MUI Button/Select, tree container and row actions                                                                  | Static focus-ring area/contrast token assertions and bounding-box checks                                         | Verify focus indicator is at least a 2 CSS-pixel perimeter and ≥3:1 against the unfocused state           | Native UA focus is acceptable only when it meets both numeric AA thresholds; otherwise the MUI theme supplies it                |
+| 2.5.2 Pointer Cancellation          | MUI Buttons, Select, expand/collapse, source/Flow, and recovery actions                                            | Pointer-down/up/cancel tests assert no irreversible action before activation                                     | Press, move away, release, and cancel each pointer interaction                                            | Actions activate on click/up; no pointer-down-only irreversible behavior                                                        |
+| 2.5.3 Label in Name                 | Visible text on filter, output, expand/collapse, source, Flow, and recovery controls                               | Testing Library accessible-name assertions include the complete visible label                                    | Speech-input/assistive-technology inspection of visible label activation                                  | Accessible name starts with or contains the visible label; icon-only controls use a localized visible/hidden label              |
+| 2.5.7 Dragging Movements            | Explorer tree and cards (which provide no drag operation)                                                          | Static interaction inventory asserts no drag-only command exists                                                 | Verify every available operation has a click/tap/keyboard alternative                                     | No dragging interaction is exposed; a future drag feature must add dedicated evidence                                           |
+| 2.5.8 Target Size (Minimum)         | Output, filter, expand/collapse, source/Flow, and recovery controls                                                | DOM bounding-box/static style assertions for 24x24 minimum and 44x44 product target                              | Measure primary controls and dense row actions in rendered desktop/webview surfaces                       | AA floor is 24x24 CSS px; product target is 44x44; inline/equivalent/essential exceptions are recorded per control              |
+| 3.1.1 Language of Page              | Root Explorer document and localized panel title/content                                                           | `lang` attribute and locale bootstrap assertions                                                                 | Screen-reader language detection in Japanese and English                                                  | The active locale is declared on the root; no locale is inferred from color or typography                                       |
+| 3.1.2 Language of Parts             | Any intentionally mixed-language code, record label, or status text                                                | Per-part `lang` assertions for known mixed-language spans                                                        | Verify pronunciation switches correctly for mixed-language content                                        | Most content follows the root locale; a mixed-language part is marked only when its language differs                            |
+| 3.2.1 On Focus                      | Filter, tree rows, and action controls                                                                             | Focus-only tests assert no navigation, submission, filter change, or panel replacement                           | Tab through controls without activating them                                                              | Focus may reveal an already-associated focus ring/status, but must not change context                                           |
+| 3.2.2 On Input                      | MUI filter selection and tree state                                                                                | Selection tests assert only the intended tree/status update; session ID, focus, and panel remain stable          | Change filter by keyboard and pointer, including clearing it                                              | The filter update is an expected task-local content change, not an unexpected change of context                                 |
+| 3.2.4 Consistent Identification     | Repeated source/Flow/output/expand/error action labels and icons                                                   | Cross-fixture accessible-name and icon-role consistency assertions                                               | Compare equivalent actions across groups, locales, and failure states                                     | Equivalent functions keep equivalent names and icon semantics                                                                   |
+| 3.3.1 Error Identification          | Invalid/stale action, zero-match, unavailable target, and failed navigation status                                 | Error/status role, text, and association assertions                                                              | Trigger failure and verify the problem and recovery are announced clearly                                 | No color-only error; read-only surface has no form-submission error flow                                                        |
+| 3.3.2 Labels or Instructions        | Filter, output, tree action, source/Flow action, and recovery controls                                             | Accessible-name, helper-text, and required-state assertions                                                      | Inspect labels/instructions before interaction in both locales                                            | Every interactive control has a visible or programmatically associated purpose label                                            |
+| 4.1.2 Name, Role, Value             | MUI controls, tree/treeitems, selected/expanded state and row action groups                                        | `axe-core`, Testing Library role/name/state assertions, exact `aria-*` contract tests                            | Inspect accessibility tree for localized names and state updates                                          | MUI-generated IDs/classes are not relied on as semantic identity; stable row data attributes remain test hooks only             |
+| 4.1.3 Status Messages               | Loading, filter changes, zero-match, action success/unavailable/failure, duplicate relation announcements          | `role=status`, `aria-live`, atomicity and announcement-content tests                                             | Screen-reader/manual announcement check during filter, navigation, and failure flows                      | Status must not steal focus or replace the invoking control's accessible name                                                   |
+
+<!-- markdownlint-enable MD013 -->
+
+The following criteria are explicitly outside the Explorer's product surface:
+
+- 1.2.1–1.2.5 (time-based media): the webview has no prerecorded or live audio
+  or video.
+- 1.3.3 (sensory characteristics), 1.3.5 (identify input purpose), 1.4.2
+  (audio control), 1.4.5 (images of text), and 1.4.13 (content on hover or
+  focus): the Explorer has no sensory-only instructions, personal-data input,
+  audio, text images, or transient hover/focus content. Introducing any such
+  surface requires adding its criterion before implementation.
+- 2.1.4 (character key shortcuts), 2.2.1–2.2.2 (timing and moving content),
+  2.3.1 (flashing), and 2.5.1/2.5.4 (pointer gestures and motion actuation):
+  the Explorer has no single-key shortcut, time limit, moving/flashing content,
+  multipoint/path gesture, or motion-only action. Its no-drag boundary is
+  covered explicitly by the applicable 2.5.7 row above.
+- 2.4.4–2.4.5 and 2.4.8 (link purpose, multiple ways, and location): the
+  Explorer is one read-only panel with no navigational links or page set.
+- 3.2.3 and 3.2.6 (consistent navigation and consistent help): the Explorer
+  has one panel and provides no repeated cross-page navigation or help channel.
+- 3.3.3–3.3.4 and 3.3.7–3.3.8 (error suggestion, error prevention,
+  redundant entry, and accessible authentication): it accepts no user-authored
+  transaction, personal-data form, or authentication; stale/unavailable
+  actions are covered by 3.3.1 and status-message evidence above.
 
 ## Closed Target-Side And Relation Contract
 
@@ -584,6 +670,9 @@ Scenario: Filter confirmation-required items
   Given the explorer contains ordinary and confirmation-required changes
   When the reviewer enables the confirmation-required filter
   Then only confirmation-required review items remain in the tree
+  And ordinary confirmed changes are absent while confirmation records and
+      confirmation-required change records remain
+  And a zero-match result exposes an explicit status without hiding the filter
   And disabling the filter restores the same comparison session
 
 Scenario: Reveal a changed target in its source definition
@@ -724,7 +813,10 @@ Scenario: Navigate the explorer without pointer or color dependence
 - One completed existing file comparison can be reviewed through summary
   cards and a deterministic hierarchical change tree.
 - Confirmation filtering preserves counts, selection rules, and the immutable
-  comparison session.
+  comparison session. An actual host-session/DOM path proves that ordinary
+  leaves disappear, confirmation records and confirmation-required change
+  leaves remain, zero matches expose a visible status, and clearing the filter
+  restores the latent selection and original visible tree.
 - Available source and Flow actions navigate to the correct side and target;
   unavailable or stale targets have a stable, accessible failure outcome.
 - The closed target-side table is applied for all five change kinds and all
@@ -759,6 +851,12 @@ Scenario: Navigate the explorer without pointer or color dependence
   high-contrast themes. The focused leaf and `aria-live` status announce
   endpoint/state details; source and Flow operations revalidate immediately
   before host execution.
+- The Explorer surface is rendered with MUI components and a VS Code-aware
+  theme. WCAG 2.2 AA evidence covers keyboard and visible focus, minimum
+  pointer/keyboard target size, 200% zoom and narrow reflow, text/non-text
+  contrast, forced-colors/high-contrast styling, status/live-region semantics,
+  and `axe-core` plus manual keyboard/contrast/reflow checks. MUI styles do not
+  add external network requirements or violate the existing webview CSP.
 - Closed request, reply, and host-message unions reject unknown or extra keys,
   wrong-session/non-finite correlation values, and payloads over the fixed
   limit. Panel close releases snapshots, report/action handles, context, and
@@ -766,7 +864,11 @@ Scenario: Navigate the explorer without pointer or color dependence
   late completions cannot restore state.
 - Focused application, presentation, message-contract, source/Flow navigation,
   Markdown handoff, desktop, web, accessibility, malformed-message, and large-
-  comparison tests pass with repository quality checks.
+  comparison tests pass with repository quality checks. The feature delta has
+  no remaining `qlty smells` findings; complexity is reduced by extracting
+  cohesive validators, state transitions, graph/document readers, host action
+  handlers, and webview presentation components rather than suppressing or
+  allowlisting metrics.
 
 ## Non-Goals
 
