@@ -270,10 +270,10 @@ Slice 5 is complete and focused-committed as
 was focused-committed as `1ede39bb`; Slice 6 is complete and focused-committed
 as `6af753e7`. Slice 7 is complete and focused-committed as
 `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`. Full `qlty check` then reported
-14 committed Slice 7 files as unformatted. Slice 7A is now the sole active
-approved formatter-only reconciliation; its focused docs-only replan commit is
-pending. Slice 8 activation is held and Slices 9-13 remain planned and
-dependency-blocked until their predecessors are complete, reviewed, and
+14 committed Slice 7 files as unformatted. Slice 7A completed its approved
+formatter-only reconciliation and focused-committed as `c9b97b0d`. Slice 8 is
+now the sole active implementation-approved slice; Slices 9-13 remain planned
+and dependency-blocked until their predecessors are complete, reviewed, and
 focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
@@ -358,14 +358,15 @@ environment-owned validation risk whenever web smoke is attempted.
   review, automatic Completion Approval, and focused commit
   `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`.
 - The exact assigned qlty families were resolved without suppression,
-  allowlisting, threshold changes, or configuration edits. Slice 7A addresses
-  only the committed formatter output; Slice 8 activation is held and Slices
-  9-13 remain dependency-blocked.
+  allowlisting, threshold changes, or configuration edits. Slice 7A addressed
+  only the committed formatter output and focused-committed as `c9b97b0d`;
+  Slice 8 is now active and Slices 9-13 remain dependency-blocked.
 
 ### Slice 7A Activation (2026-09-07)
 
-- Slice 7A is the sole active approved replan, with focused plan commit
-  `aa13b73e` present. The trigger was
+- Slice 7A was the sole active approved replan, with focused plan commit
+  `aa13b73e` present. Its formatter-only implementation is complete and
+  focused-committed as `c9b97b0d`. The trigger was
   the full `rtk pnpm run qlty:check` result after Slice 7 commit
   `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`, which reported exactly 14
   committed Slice 7 paths as unformatted by `prettier:fmt`.
@@ -384,7 +385,7 @@ environment-owned validation risk whenever web smoke is attempted.
   `src/test/suite/semanticDiffExplorerMessages.test.ts`, and
   `src/test/suite/semanticDiffExplorerProjection.test.ts` (the first 12
   application paths are under `src/application/semantic-diff/`).
-- Required evidence is a mechanical-only diff review, full `rtk pnpm run
+- Required evidence was a mechanical-only diff review, full `rtk pnpm run
 qlty:check` pass, targeted qlty smells, and Slice 7 message/projection/
   DOM/Flow tests. No suppression, exclusion, threshold, generated-ignore, or
   qlty configuration change is allowed. Final independent plan review is
@@ -393,10 +394,9 @@ qlty:check` pass, targeted qlty smells, and Slice 7 message/projection/
 - Exact approved replan commit paths were only
   `docs/specs/features/semantic-diff-explorer/TASKS.md` and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`; that focused
-  docs-only commit is `aa13b73e`. Formatter implementation evidence is
-  recorded below, with no implementation commit or staging performed here.
-  Slice 8 activation remains held until the later Slice 7A implementation
-  review/completion gate; Slices 9-13 remain blocked.
+  docs-only commit is `aa13b73e`. Formatter implementation commit
+  `c9b97b0d` is recorded below. Slice 8 is now active; Slices 9-13 remain
+  blocked.
 
 ### Slice 7A Implementation Evidence (2026-09-07)
 
@@ -413,16 +413,17 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `rtk pnpm run lint:md` all passed.
 - The six closure drafts remain untouched. Existing production bundle-size
   warnings are unchanged; no browser smoke result is inferred from the build.
-  Slice 8 activation remains held and Slices 9-13 remain dependency-blocked.
-- Implementation status: complete and ready for independent implementation
-  review; focused completion commit and the automatic Completion Approval gate
-  remain pending.
+  Slice 8 is now active and Slices 9-13 remain dependency-blocked.
+- Implementation status: complete; independent implementation review is
+  `Ready` with no findings, Completion Approval was automatic, and focused
+  completion commit `c9b97b0d` is recorded.
 
 ### Slice 8 Activation (2026-09-07)
 
-- Slice 8's implementation-approved scope remains held after Slice 7
-  completion commit `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`; Slice 7A
-  must complete first. Its scope is source capture, parser locator, and
+- Slice 8 is the sole active implementation-approved slice after Slice 7A
+  completion commit `c9b97b0d` (following Slice 7 completion commit
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`). Its scope is source capture,
+  parser locator, and
   report-data composition refactoring only; same-pass capture, parser/source
   DTO behavior, ownership, errors, and the `AjsParserPort.parse(content)`
   compatibility seam remain fixed.
@@ -433,9 +434,9 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `AntlrAjsParser.ts` has `functionComplexity=1`; and
   `buildSemanticDiffReportData.ts` has `functionComplexity=1`.
 - Remediation must use cohesive extraction only: no suppression, allowlist,
-  threshold, generated-ignore, or qlty configuration change. Slice 8 remains
-  held until Slice 7A is independently reviewed and focused-committed; Slices
-  9-13 remain dependency-blocked.
+  threshold, generated-ignore, or qlty configuration change. Slices 9-13
+  remain dependency-blocked until Slice 8 is independently reviewed and
+  focused-committed.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
@@ -516,6 +517,44 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   re-aggregating cards. The independent reviewer should verify the exact
   entry-point/export compatibility and malformed-payload matrix before the
   pending automatic Completion Approval gate.
+
+### Slice 8 Implementation Evidence (2026-09-07)
+
+- Slice 8 refactors the approved source-index/capture/parser/report-data
+  boundaries only. The four approved entry points retain their public APIs;
+  cohesive application helpers own closed source-index guards, strict lookup
+  strategies, immutable freezing, capture validation, binding registry, and
+  explicit state transitions. ANTLR range mapping and report-data parse/error
+  steps are similarly extracted without moving parser or host types across
+  the application boundary.
+- Same-pass identity and fixed before-then-after capture remain unchanged.
+  Both parser errors remain independently reported; capture order, extra-call,
+  release, exact-context binding, borrowed registration, unregister-before-
+  release cleanup, UTF-16/CRLF/Unicode ranges, duplicate paths/parameters,
+  malformed lookup, and the `AjsParserPort.parse(content)` seam remain
+  covered by the existing parser/capture/report tests.
+- Validation passed `pnpm run test:compile`, the compiled desktop suite and
+  Electron runner (exit 0), web preparation, production desktop/web builds,
+  `qlty check --no-fix --no-formatters`, targeted `qlty smells --no-snippets`
+  over all Slice 8 entry points/helpers (zero findings), and
+  `git diff --check`. The existing production bundle-size warnings are
+  unchanged. No qlty policy/configuration or suppression was edited.
+- Compatibility impact is none by design: VS Code `^1.75.0`, desktop/web
+  composition, architecture boundaries, browser-safe DTOs, normalized-domain
+  behavior, and telemetry privacy remain unchanged. Browser smoke is not
+  claimed for this application/parser slice; the known managed Chromium
+  permission limitation remains a broader feature environment risk.
+- Implementation feedback: the source-index and capture helpers must remain
+  application-owned and imported type-only from the public contracts to avoid
+  a parser/domain or host lifetime leak. The independent reviewer should
+  verify the public export surface and the exact lifecycle/error-order matrix.
+  No completion commit was created by the implementer.
+- Review follow-up: `qlty fmt` was applied only to the ten assigned Slice 8
+  runtime paths: four source-index helpers, the capture facade, four capture
+  helpers/registry/scope paths, and `AntlrAjsParser.ts`. The resulting diff is
+  mechanical formatter output only. The final targeted smell scan is clean,
+  `qlty check --no-fix --no-formatters` passes, and the parser/capture/report/
+  architecture desktop suite plus desktop/web builds remain passing.
 
 ## Replan Compatibility, Lifecycle, And Predecessor Traceability
 

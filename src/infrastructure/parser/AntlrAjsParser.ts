@@ -79,68 +79,87 @@ const toRange = (range: AjsRawSourceRange): SemanticDiffSourceRange => ({
 const flattenRawUnits = (units: readonly AjsRawUnit[]): AjsRawUnit[] =>
   units.flatMap((unit) => [unit, ...flattenRawUnits(unit.children)]);
 
+const toParameterRange = (
+  parameter: AjsRawUnit["parameters"][number],
+  fallback: AjsRawSourceRange,
+): AjsRawSourceRange => ({
+  startLine: parameter.line ?? fallback.startLine,
+  startColumn: parameter.column ?? fallback.startColumn,
+  endLine: parameter.line ?? fallback.startLine,
+  endColumn:
+    (parameter.column ?? fallback.startColumn) +
+    (parameter.length ?? parameter.key.length),
+});
+
+const toParameterOccurrence = (
+  parameter: AjsRawUnit["parameters"][number],
+  source: AjsRawSourceRange,
+  occurrenceOrdinals: Map<string, number>,
+): SemanticDiffSourceParameterOccurrence => {
+  const ordinal = occurrenceOrdinals.get(parameter.key) ?? 0;
+  occurrenceOrdinals.set(parameter.key, ordinal + 1);
+  return {
+    parameterKey: parameter.key,
+    occurrenceOrdinal: ordinal,
+    range: toRange(toParameterRange(parameter, source)),
+  };
+};
+
+const freezePosition = (
+  position: SemanticDiffSourceRange["start"],
+): SemanticDiffSourceRange["start"] => Object.freeze({ ...position });
+
+const freezeRange = (range: SemanticDiffSourceRange): SemanticDiffSourceRange =>
+  Object.freeze({
+    start: freezePosition(range.start),
+    end: freezePosition(range.end),
+  });
+
+const freezeEntry = (
+  entry: SemanticDiffSourceUnitEntry,
+): SemanticDiffSourceUnitEntry =>
+  Object.freeze({
+    ...entry,
+    headerRange: freezeRange(entry.headerRange),
+    nameRange: entry.nameRange === null ? null : freezeRange(entry.nameRange),
+    parameterOccurrences: Object.freeze(
+      entry.parameterOccurrences.map((occurrence) =>
+        Object.freeze({
+          ...occurrence,
+          range: freezeRange(occurrence.range),
+        }),
+      ),
+    ),
+  });
+
+const buildUnitEntry = (
+  unit: AjsRawUnit,
+): SemanticDiffSourceUnitEntry | undefined => {
+  const source = unit.source;
+  if (source === undefined) return undefined;
+  const occurrenceOrdinals = new Map<string, number>();
+  return {
+    unitId: unit.absolutePath(),
+    headerRange: toRange(source.headerRange),
+    nameRange: source.nameRange === null ? null : toRange(source.nameRange),
+    parameterOccurrences: unit.parameters.map((parameter) =>
+      toParameterOccurrence(parameter, source.headerRange, occurrenceOrdinals),
+    ),
+  };
+};
+
 const buildSourceIndex = (
   rootUnits: readonly AjsRawUnit[],
   sourceIndexId: SemanticDiffSourceIndex["sourceIndexId"],
 ): SemanticDiffSourceIndex => {
-  const unitEntries: SemanticDiffSourceUnitEntry[] = [];
-  flattenRawUnits(rootUnits).forEach((unit) => {
-    const source = unit.source;
-    if (source === undefined) return;
-    const occurrenceOrdinals = new Map<string, number>();
-    const parameterOccurrences: SemanticDiffSourceParameterOccurrence[] =
-      unit.parameters.map((parameter) => {
-        const ordinal = occurrenceOrdinals.get(parameter.key) ?? 0;
-        occurrenceOrdinals.set(parameter.key, ordinal + 1);
-        return {
-          parameterKey: parameter.key,
-          occurrenceOrdinal: ordinal,
-          range: toRange({
-            startLine: parameter.line ?? source.headerRange.startLine,
-            startColumn: parameter.column ?? source.headerRange.startColumn,
-            endLine: parameter.line ?? source.headerRange.startLine,
-            endColumn:
-              (parameter.column ?? source.headerRange.startColumn) +
-              (parameter.length ?? parameter.key.length),
-          }),
-        };
-      });
-    unitEntries.push({
-      unitId: unit.absolutePath(),
-      headerRange: toRange(source.headerRange),
-      nameRange: source.nameRange === null ? null : toRange(source.nameRange),
-      parameterOccurrences,
-    });
-  });
-  const frozenEntries = unitEntries.map((entry) =>
-    Object.freeze({
-      ...entry,
-      headerRange: Object.freeze({
-        start: Object.freeze({ ...entry.headerRange.start }),
-        end: Object.freeze({ ...entry.headerRange.end }),
-      }),
-      nameRange:
-        entry.nameRange === null
-          ? null
-          : Object.freeze({
-              start: Object.freeze({ ...entry.nameRange.start }),
-              end: Object.freeze({ ...entry.nameRange.end }),
-            }),
-      parameterOccurrences: Object.freeze(
-        entry.parameterOccurrences.map((occurrence) =>
-          Object.freeze({
-            ...occurrence,
-            range: Object.freeze({
-              start: Object.freeze({ ...occurrence.range.start }),
-              end: Object.freeze({ ...occurrence.range.end }),
-            }),
-          }),
-        ),
-      ),
-    }),
-  );
+  const entries = flattenRawUnits(rootUnits)
+    .map(buildUnitEntry)
+    .filter(
+      (entry): entry is SemanticDiffSourceUnitEntry => entry !== undefined,
+    )
+    .map(freezeEntry);
   return Object.freeze({
     sourceIndexId,
-    unitEntries: Object.freeze(frozenEntries),
+    unitEntries: Object.freeze(entries),
   });
 };

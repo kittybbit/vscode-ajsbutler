@@ -1,5 +1,15 @@
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import type { AjsParserError, ParseAjsResult } from "./AjsParserPort";
+import {
+  hasExactKeys,
+  isPlainRecord,
+  validateSourceIndexShape,
+} from "./semanticDiffSourceIndexGuards";
+import {
+  freezeSourceIndexValue,
+  getRequestSourceIndexId,
+  lookupSemanticDiffSourceIndex as lookupSourceIndex,
+} from "./semanticDiffSourceIndexLookup";
 
 export type SemanticDiffSourceIndexId = string & {
   readonly __semanticDiffSourceIndexId: unique symbol;
@@ -167,120 +177,12 @@ export type SemanticDiffSourceLookupPort = {
   ): SemanticDiffSourceLookupResult;
 };
 
-const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const hasExactKeys = (
-  value: unknown,
-  keys: readonly string[],
-): value is Record<string, unknown> =>
-  isPlainRecord(value) &&
-  Object.keys(value).length === keys.length &&
-  keys.every((key) => Object.prototype.hasOwnProperty.call(value, key));
-
-const isNonNegativeInteger = (value: unknown): value is number =>
-  typeof value === "number" &&
-  Number.isFinite(value) &&
-  Number.isInteger(value) &&
-  value >= 0;
-
-const isPosition = (value: unknown): value is SemanticDiffSourcePosition =>
-  hasExactKeys(value, ["line", "character"]) &&
-  isNonNegativeInteger(value.line) &&
-  isNonNegativeInteger(value.character);
-
-const comparePositions = (
-  left: SemanticDiffSourcePosition,
-  right: SemanticDiffSourcePosition,
-): number => left.line - right.line || left.character - right.character;
-
-const isRange = (value: unknown): value is SemanticDiffSourceRange =>
-  hasExactKeys(value, ["start", "end"]) &&
-  isPosition(value.start) &&
-  isPosition(value.end) &&
-  comparePositions(value.start, value.end) <= 0;
-
-const isParameterOccurrence = (
-  value: unknown,
-): value is SemanticDiffSourceParameterOccurrence =>
-  hasExactKeys(value, ["parameterKey", "occurrenceOrdinal", "range"]) &&
-  typeof value.parameterKey === "string" &&
-  value.parameterKey.length > 0 &&
-  isNonNegativeInteger(value.occurrenceOrdinal) &&
-  isRange(value.range);
-
-const areParameterOccurrencesValid = (
-  value: unknown,
-): value is readonly SemanticDiffSourceParameterOccurrence[] => {
-  if (!Array.isArray(value)) return false;
-  const nextOrdinals = new Map<string, number>();
-  let previous: SemanticDiffSourceParameterOccurrence | undefined;
-  for (const occurrence of value) {
-    if (!isParameterOccurrence(occurrence)) return false;
-    const expectedOrdinal = nextOrdinals.get(occurrence.parameterKey) ?? 0;
-    if (
-      occurrence.occurrenceOrdinal !== expectedOrdinal ||
-      (previous !== undefined &&
-        comparePositions(previous.range.start, occurrence.range.start) > 0)
-    ) {
-      return false;
-    }
-    nextOrdinals.set(occurrence.parameterKey, expectedOrdinal + 1);
-    previous = occurrence;
-  }
-  return true;
-};
-
-const isUnitEntry = (value: unknown): value is SemanticDiffSourceUnitEntry =>
-  hasExactKeys(value, [
-    "unitId",
-    "headerRange",
-    "nameRange",
-    "parameterOccurrences",
-  ]) &&
-  typeof value.unitId === "string" &&
-  value.unitId.length > 0 &&
-  isRange(value.headerRange) &&
-  (value.nameRange === null || isRange(value.nameRange)) &&
-  areParameterOccurrencesValid(value.parameterOccurrences);
-
 export const validateSemanticDiffSourceIndex = (
   value: unknown,
   expectedId?: SemanticDiffSourceIndexId,
 ): value is SemanticDiffSourceIndex =>
-  hasExactKeys(value, ["sourceIndexId", "unitEntries"]) &&
-  isSemanticDiffSourceIndexId(value.sourceIndexId) &&
-  (expectedId === undefined || value.sourceIndexId === expectedId) &&
-  Array.isArray(value.unitEntries) &&
-  value.unitEntries.every(isUnitEntry);
-
-const freezePosition = (
-  position: SemanticDiffSourcePosition,
-): SemanticDiffSourcePosition => Object.freeze({ ...position });
-
-const freezeRange = (range: SemanticDiffSourceRange): SemanticDiffSourceRange =>
-  Object.freeze({
-    start: freezePosition(range.start),
-    end: freezePosition(range.end),
-  });
-
-const freezeUnitEntry = (
-  entry: SemanticDiffSourceUnitEntry,
-): SemanticDiffSourceUnitEntry =>
-  Object.freeze({
-    unitId: entry.unitId,
-    headerRange: freezeRange(entry.headerRange),
-    nameRange: entry.nameRange === null ? null : freezeRange(entry.nameRange),
-    parameterOccurrences: Object.freeze(
-      entry.parameterOccurrences.map((occurrence) =>
-        Object.freeze({
-          parameterKey: occurrence.parameterKey,
-          occurrenceOrdinal: occurrence.occurrenceOrdinal,
-          range: freezeRange(occurrence.range),
-        }),
-      ),
-    ),
-  });
+  validateSourceIndexShape(value, expectedId) &&
+  isSemanticDiffSourceIndexId(value.sourceIndexId);
 
 /**
  * Validates and detaches a parser-owned DTO before a capture scope retains it.
@@ -289,113 +191,17 @@ const freezeUnitEntry = (
  */
 export const freezeSemanticDiffSourceIndex = (
   value: unknown,
-): SemanticDiffSourceIndex | undefined => {
-  if (!validateSemanticDiffSourceIndex(value)) return undefined;
-  return Object.freeze({
-    sourceIndexId: value.sourceIndexId,
-    unitEntries: Object.freeze(value.unitEntries.map(freezeUnitEntry)),
-  });
-};
-
-const isLookupRequest = (
-  value: unknown,
-): value is SemanticDiffSourceLookupRequest => {
-  if (!isPlainRecord(value)) return false;
-  if (
-    typeof value.sourceIndexId !== "string" ||
-    typeof value.unitId !== "string" ||
-    typeof value.targetKind !== "string"
-  ) {
-    return false;
-  }
-  if (value.targetKind === "attribute") {
-    const parameterKey = value.parameterKey;
-    return (
-      hasExactKeys(value, [
-        "sourceIndexId",
-        "unitId",
-        "targetKind",
-        "parameterKey",
-      ]) &&
-      typeof parameterKey === "string" &&
-      parameterKey.length > 0
-    );
-  }
-  return (
-    hasExactKeys(value, ["sourceIndexId", "unitId", "targetKind"]) &&
-    (value.targetKind === "unit" ||
-      value.targetKind === "jobnet" ||
-      value.targetKind === "jobgroup")
-  );
-};
-
-const isAttributeRequestMissingParameterKey = (value: unknown): boolean => {
-  if (!isPlainRecord(value) || value.targetKind !== "attribute") return false;
-  if (
-    typeof value.sourceIndexId !== "string" ||
-    typeof value.unitId !== "string"
-  ) {
-    return false;
-  }
-  const hasBaseKeys = hasExactKeys(value, [
-    "sourceIndexId",
-    "unitId",
-    "targetKind",
-  ]);
-  const hasParameterKey = hasExactKeys(value, [
-    "sourceIndexId",
-    "unitId",
-    "targetKind",
-    "parameterKey",
-  ]);
-  return (
-    (hasBaseKeys || hasParameterKey) &&
-    (typeof value.parameterKey !== "string" || value.parameterKey.length === 0)
-  );
-};
+): SemanticDiffSourceIndex | undefined =>
+  validateSemanticDiffSourceIndex(value)
+    ? freezeSourceIndexValue(value)
+    : undefined;
 
 export const lookupSemanticDiffSourceIndex = (
   index: SemanticDiffSourceIndex | undefined,
   request: unknown,
   expiredIds: ReadonlySet<SemanticDiffSourceIndexId> = new Set(),
-): SemanticDiffSourceLookupResult => {
-  if (isAttributeRequestMissingParameterKey(request)) {
-    return { code: "parameter-key-missing" };
-  }
-  if (!isLookupRequest(request)) return { code: "unsupported-target-kind" };
-  if (!isSemanticDiffSourceIndexId(request.sourceIndexId)) {
-    return { code: "source-index-missing" };
-  }
-  if (index === undefined) {
-    return {
-      code: expiredIds.has(request.sourceIndexId)
-        ? "expired-source-index"
-        : "source-index-missing",
-    };
-  }
-  if (!validateSemanticDiffSourceIndex(index, request.sourceIndexId)) {
-    return { code: "malformed-source" };
-  }
-  const matches = index.unitEntries.filter(
-    (entry) => entry.unitId === request.unitId,
-  );
-  if (matches.length !== 1) return { code: "unit-missing" };
-  const entry = matches[0]!;
-  if (request.targetKind !== "attribute") {
-    const hasName =
-      entry.nameRange !== null &&
-      comparePositions(entry.nameRange.start, entry.nameRange.end) < 0;
-    return {
-      primaryRange: hasName ? entry.nameRange! : entry.headerRange,
-      occurrences: [],
-    };
-  }
-  const occurrences = entry.parameterOccurrences
-    .filter((occurrence) => occurrence.parameterKey === request.parameterKey)
-    .map((occurrence) => occurrence.range);
-  if (occurrences.length === 0) return { code: "parameter-occurrence-missing" };
-  return { primaryRange: occurrences[0]!, occurrences };
-};
+): SemanticDiffSourceLookupResult =>
+  lookupSourceIndex(index, request, expiredIds);
 
 export class SemanticDiffSourceIndexRegistry
   implements SemanticDiffSourceLookupPort
@@ -430,12 +236,8 @@ export class SemanticDiffSourceIndexRegistry
   public lookup(
     request: SemanticDiffSourceLookupRequest,
   ): SemanticDiffSourceLookupResult {
-    const sourceIndexId =
-      isPlainRecord(request) &&
-      isSemanticDiffSourceIndexId(request.sourceIndexId)
-        ? request.sourceIndexId
-        : undefined;
-    return lookupSemanticDiffSourceIndex(
+    const sourceIndexId = getRequestSourceIndexId(request);
+    return lookupSourceIndex(
       sourceIndexId === undefined
         ? undefined
         : this.#indexes.get(sourceIndexId),
@@ -457,3 +259,5 @@ export class SemanticDiffSourceIndexRegistry
 export const isAjsParserError = (
   value: ParseAjsWithSourceIndexResult,
 ): value is { ok: false; errors: AjsParserError[] } => value.ok === false;
+
+export { hasExactKeys, isPlainRecord };

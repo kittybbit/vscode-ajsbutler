@@ -36,6 +36,14 @@ const toParserErrors = (
 ): SemanticDiffParserError[] =>
   errors.map(({ line, column, message }) => ({ line, column, message }));
 
+const parseContent = (parser: AjsParserPort, content: string) =>
+  parser.parse(content);
+
+const parseErrors = (
+  parseResult: ReturnType<AjsParserPort["parse"]>,
+): SemanticDiffParserError[] =>
+  parseResult.ok === true ? [] : toParserErrors(parseResult.errors);
+
 export const createBuildSemanticDiffReportData =
   (
     parser: AjsParserPort,
@@ -43,17 +51,15 @@ export const createBuildSemanticDiffReportData =
   ): BuildSemanticDiffReportData =>
   ({ beforeContent, afterContent }, scopedParser) => {
     const activeParser = scopedParser ?? parser;
-    const beforeParse = activeParser.parse(beforeContent);
-    const afterParse = activeParser.parse(afterContent);
+    const beforeParse = parseContent(activeParser, beforeContent);
+    const afterParse = parseContent(activeParser, afterContent);
 
     if (beforeParse.ok === false || afterParse.ok === false) {
       return {
         ok: false,
         errors: {
-          before:
-            beforeParse.ok === true ? [] : toParserErrors(beforeParse.errors),
-          after:
-            afterParse.ok === true ? [] : toParserErrors(afterParse.errors),
+          before: parseErrors(beforeParse),
+          after: parseErrors(afterParse),
         },
       };
     }
