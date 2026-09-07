@@ -4,6 +4,7 @@ import {
   buildFlowGraphResult,
   type FlowGraphBuildResult,
 } from "../../application/flow-graph/buildFlowGraph";
+import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 import {
   type FlowGraphUnitDto,
   toFlowGraphDocumentDto,
@@ -64,6 +65,69 @@ suite("Flow Graph Document", () => {
     assert.deepStrictEqual(
       JSON.parse(JSON.stringify(result.document)),
       result.document,
+    );
+  });
+
+  test("retains only exact graph-member overlay IDs and supports clear semantics", () => {
+    const document = cloneDocument();
+    const jobnet = document.rootUnits[0].children[0];
+    const relation = jobnet.relations[0];
+    const relationId = flowGraphEdgeId({
+      source: relation.sourceUnitId,
+      target: relation.targetUnitId,
+      type: relation.type,
+    });
+    document.semanticDiffOverlay = {
+      nodes: [
+        {
+          id: jobnet.children[0].id,
+          kind: "changed",
+          changeIds: ["change:1"],
+          confirmationIds: [],
+        },
+      ],
+      relations: [
+        {
+          id: relationId,
+          kind: "added",
+          changeIds: ["relation:1"],
+          confirmationIds: [],
+        },
+      ],
+    };
+    const available = validateFlowGraphDocument(document);
+    assert.strictEqual(available.status, "available");
+    if (available.status !== "available") return;
+    assert.deepStrictEqual(
+      available.document.semanticDiffOverlay,
+      document.semanticDiffOverlay,
+    );
+
+    const clear = cloneDocument();
+    clear.semanticDiffOverlay = null;
+    const cleared = validateFlowGraphDocument(clear);
+    assert.strictEqual(cleared.status, "available");
+    if (cleared.status !== "available") return;
+    assert.strictEqual(cleared.document.semanticDiffOverlay, null);
+
+    const crossKind = cloneDocument();
+    crossKind.semanticDiffOverlay = {
+      nodes: [
+        {
+          id: relationId,
+          kind: "changed",
+          changeIds: [],
+          confirmationIds: [],
+        },
+      ],
+      relations: [],
+    };
+    const invalid = validateFlowGraphDocument(crossKind);
+    assert.strictEqual(invalid.status, "unavailable");
+    assert.ok(
+      invalid.issues.some(
+        ({ code }) => code === "invalid_semantic_diff_overlay",
+      ),
     );
   });
 
@@ -145,6 +209,11 @@ suite("Flow Graph Document", () => {
     assert.strictEqual(result.graph.nodes.length, 4);
     assert.deepStrictEqual(result.graph.edges, [
       {
+        id: flowGraphEdgeId({
+          source: jobnet.children[0].id,
+          target: jobnet.children[1].id,
+          type: "seq",
+        }),
         source: jobnet.children[0].id,
         target: jobnet.children[1].id,
         type: "seq",

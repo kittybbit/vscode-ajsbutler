@@ -180,6 +180,8 @@ export const en = {
   "a11y.announce.csvCopied": "Unit list copied as CSV.",
   "a11y.announce.expanded": "Expanded {unit}.",
   "a11y.announce.collapsed": "Collapsed {unit}.",
+  "a11y.announce.semanticDiffRelations":
+    "Semantic diff relation from {source} to {target} matches {count} relations.",
   "a11y.direction.left": "left",
   "a11y.direction.right": "right",
   "a11y.direction.up": "up",
@@ -324,4 +326,14 @@ export const en = {
   "semanticDiff.audit.before": "Before",
   "semanticDiff.audit.after": "After",
   "semanticDiff.audit.none": "None",
+  "a11y.flow.semanticDiff.legend": "Semantic diff legend",
+  "semanticDiff.flow.badge.added": "ADDED",
+  "semanticDiff.flow.badge.removed": "REMOVED",
+  "semanticDiff.flow.badge.changed": "CHANGED",
+  "semanticDiff.flow.badge.confirmationRequired": "REVIEW",
+  "semanticDiff.flow.title.added": "Semantic diff: added",
+  "semanticDiff.flow.title.removed": "Semantic diff: removed",
+  "semanticDiff.flow.title.changed": "Semantic diff: changed",
+  "semanticDiff.flow.title.confirmationRequired":
+    "Semantic diff: confirmation required",
 };

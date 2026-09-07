@@ -11,6 +11,7 @@ import type {
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
 import { buildSemanticDiffFlowHighlights } from "../../application/flow-graph/buildSemanticDiffFlowHighlights";
+import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 import { createSemanticDiffDetail } from "../../application/semantic-diff/semanticDiffStructuredFacts";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
@@ -112,7 +113,7 @@ suite("Semantic diff flow highlights", () => {
       absolutePath: "/root/jobnet/tail",
     });
     const afterRelation = relation(afterJob, afterTail);
-    afterJob.relations = [afterRelation];
+    afterJob.relations = [afterRelation, { ...afterRelation }];
     const afterJobTarget: SemanticDiffTarget = {
       kind: "unit",
       unit: unitReference(afterJob),
@@ -174,14 +175,32 @@ suite("Semantic diff flow highlights", () => {
       changeIds: ["unit:renamed"],
       confirmationIds: ["confirm:job-after"],
     });
-    assert.deepStrictEqual(
-      highlights.edges.get("/root/jobnet/job-after->/root/jobnet/tail:seq"),
+    const firstRelationId = flowGraphEdgeId(
       {
-        kind: "changed",
-        changeIds: ["relation:added"],
-        confirmationIds: [],
+        source: afterJob.id,
+        target: afterTail.id,
+        type: "seq",
       },
+      0,
     );
+    const secondRelationId = flowGraphEdgeId(
+      {
+        source: afterJob.id,
+        target: afterTail.id,
+        type: "seq",
+      },
+      1,
+    );
+    assert.deepStrictEqual(highlights.edges.get(firstRelationId), {
+      kind: "added",
+      changeIds: ["relation:added"],
+      confirmationIds: [],
+    });
+    assert.deepStrictEqual(highlights.edges.get(secondRelationId), {
+      kind: "added",
+      changeIds: ["relation:added"],
+      confirmationIds: [],
+    });
   });
 
   test("keeps before-only removals and ambiguous candidates report-only", () => {

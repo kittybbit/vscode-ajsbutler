@@ -2,6 +2,7 @@ import {
   buildFlowGraphFromValidatedDocument,
   type FlowGraphBuildIssue,
 } from "./buildFlowGraph";
+import { flowGraphEdgeId } from "./buildFlowGraphCore";
 import type {
   FlowGraphDto,
   FlowGraphEdgeDto,
@@ -173,7 +174,10 @@ const nodeTypeByUnitType: Partial<Record<string, FlowGraphNodeType>> = {
   rc: "condition",
 };
 
-const toExpandedNode = (unit: FlowGraphUnitDto): FlowGraphNodeDto => ({
+const toExpandedNode = (
+  unit: FlowGraphUnitDto,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
+): FlowGraphNodeDto => ({
   id: unit.id,
   label: unit.name,
   type: nodeTypeByUnitType[unit.unitType] ?? "job",
@@ -187,6 +191,7 @@ const toExpandedNode = (unit: FlowGraphUnitDto): FlowGraphNodeDto => ({
     isRootJobnet: unit.isRootJobnet,
     hasSchedule: unit.hasSchedule,
     hasWaitedFor: unit.hasWaitedFor,
+    semanticDiffHighlight: semanticDiffHighlights?.nodes.get(unit.id),
     layout:
       unit.unitType === "rc"
         ? { kind: "ancestor", depth: unit.depth }
@@ -194,16 +199,33 @@ const toExpandedNode = (unit: FlowGraphUnitDto): FlowGraphNodeDto => ({
   },
 });
 
-const toExpandedEdges = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] =>
-  unit.relations.map((relation) => ({
-    source: relation.sourceUnitId,
-    target: relation.targetUnitId,
-    type: relation.type,
-  }));
+const toExpandedEdges = (
+  unit: FlowGraphUnitDto,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
+): FlowGraphEdgeDto[] => {
+  const ordinals = new Map<string, number>();
+  return unit.relations.map((relation) => {
+    const edge = {
+      source: relation.sourceUnitId,
+      target: relation.targetUnitId,
+      type: relation.type,
+    } as const;
+    const key = `${edge.source}\u0000${edge.target}\u0000${edge.type}`;
+    const occurrenceOrdinal = ordinals.get(key) ?? 0;
+    ordinals.set(key, occurrenceOrdinal + 1);
+    return {
+      ...edge,
+      id: flowGraphEdgeId(edge, occurrenceOrdinal),
+      semanticDiffHighlight: semanticDiffHighlights?.edges.get(
+        flowGraphEdgeId(edge, occurrenceOrdinal),
+      ),
+    };
+  });
+};
 
 const edgeIdentity = (
-  edge: Pick<FlowGraphEdgeDto, "source" | "target">,
-): string => `${edge.source}-${edge.target}`;
+  edge: Pick<FlowGraphEdgeDto, "id" | "source" | "target" | "type">,
+): string => edge.id ?? flowGraphEdgeId(edge);
 
 type ExpandedGraphBuildState = {
   graph: FlowGraphDto;
@@ -231,6 +253,7 @@ const createBuildState = (
 const appendExpandedUnitContent = (
   state: ExpandedGraphBuildState,
   expandedUnit: FlowGraphUnitDto,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): void => {
   const conditionUnit = expandedUnit.children.find(
     (child) => child.unitType === "rc",
@@ -242,7 +265,7 @@ const appendExpandedUnitContent = (
 
   for (const child of visibleChildren) {
     if (state.nodeIds.has(child.id)) continue;
-    state.graph.nodes.push(toExpandedNode(child));
+    state.graph.nodes.push(toExpandedNode(child, semanticDiffHighlights));
     state.nodeIds.add(child.id);
     state.nodePlacements.push({
       unitId: child.id,
@@ -250,7 +273,7 @@ const appendExpandedUnitContent = (
       kind: child.unitType === "rc" ? "nested_condition" : "nested_grid",
     });
   }
-  for (const edge of toExpandedEdges(expandedUnit)) {
+  for (const edge of toExpandedEdges(expandedUnit, semanticDiffHighlights)) {
     const identity = edgeIdentity(edge);
     if (state.edgeIds.has(identity)) continue;
     state.graph.edges.push(edge);
@@ -279,13 +302,14 @@ const buildExpandedStructure = (
   state: ExpandedGraphBuildState,
   activeScope: FlowGraphUnitDto,
   requestedIds: ReadonlySet<string>,
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): void => {
   const pending: TraversalFrame[] = [{ kind: "scope", container: activeScope }];
   while (pending.length > 0) {
     const frame = pending.pop() as TraversalFrame;
     if (frame.kind === "expand") {
       state.realizedExpandedUnitIds.push(frame.unit.id);
-      appendExpandedUnitContent(state, frame.unit);
+      appendExpandedUnitContent(state, frame.unit, semanticDiffHighlights);
       pending.push({ kind: "scope", container: frame.unit });
       continue;
     }
@@ -423,7 +447,12 @@ export const buildExpandedFlowGraphResult = ({
     document.index,
   );
   const state = createBuildState(baseResult.graph);
-  buildExpandedStructure(state, activeScope, normalized.ids);
+  buildExpandedStructure(
+    state,
+    activeScope,
+    normalized.ids,
+    semanticDiffHighlights,
+  );
   const containment = buildContainment(activeScopeUnitId, state.scopes);
 
   return {

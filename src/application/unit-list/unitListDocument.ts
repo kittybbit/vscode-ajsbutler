@@ -6,6 +6,7 @@ import {
   type FlowGraphUnitDto,
   toFlowGraphUnitDto,
 } from "../flow-graph/flowGraphDocument";
+import type { FlowGraphSemanticDiffOverlay } from "../flow-graph/buildFlowGraphCore";
 import {
   buildUnitDefinitions,
   type UnitDefinitionDialogDto,
@@ -24,6 +25,7 @@ export type UnitListDocumentDto = {
   warnings: AjsNormalizationWarning[];
   unitDefinitions: UnitDefinitionDialogDto[];
   unitList: UnitListProjectionDto;
+  semanticDiffOverlay?: FlowGraphSemanticDiffOverlay | null;
 };
 
 export type UnitListTableDataDto = UnitListProjectionDto & {

@@ -33,6 +33,7 @@ import {
 } from "../../presentation/vscode/webview/ajsDocument";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 import { saveText } from "../../presentation/vscode/webview/messageHandlers";
+import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 
 type ViewerConfig = {
   viewType: string;
@@ -48,6 +49,7 @@ export type ViewerWiringDeps = {
   context: vscode.ExtensionContext;
   telemetry: TelemetryPort;
   buildUnitList: BuildUnitList;
+  flowBridge?: SemanticDiffFlowViewerBridge;
 };
 
 const createPreviewCommandDependencies = (
@@ -295,19 +297,28 @@ const createViewerBundle = ({
   viewType,
   saveHandler,
   pendingRevealByPanel,
+  flowBridge,
 }: ViewerWiringDeps & {
   previewDeps: OpenPreviewCommandDependencies;
   factoryByViewType: Map<string, ViewerFactory>;
   viewType: string;
   saveHandler?: (content: string) => Promise<void>;
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
+  flowBridge?: SemanticDiffFlowViewerBridge;
 }): vscode.Disposable[] => {
   const store = new WebviewStore(viewType);
   const mediator = new WebviewMediator({
     context,
     viewType,
     store,
-    change: createDebouncedAjsDocumentChange(buildUnitList, 300, telemetry),
+    change: createDebouncedAjsDocumentChange(
+      buildUnitList,
+      300,
+      telemetry,
+      viewType === AJS_FLOW_VIEWER_TYPE
+        ? (document, panel) => flowBridge?.onDocumentChanged(document, panel)
+        : undefined,
+    ),
   });
   const registerPanel: ViewerPanelRegistration = (registration) => {
     registerViewerPanel({
@@ -325,6 +336,9 @@ const createViewerBundle = ({
         createReadyAjsDocument(buildUnitList, telemetry),
         pendingRevealByPanel,
         (_document, _panel, source) => {
+          if (flowBridge && viewType === AJS_FLOW_VIEWER_TYPE) {
+            flowBridge.onReady(_document, _panel);
+          }
           const event = createViewerReadyEvent({
             viewType,
             source,
@@ -350,6 +364,9 @@ const createViewerBundle = ({
       registerPanel,
     },
   });
+  if (viewType === AJS_FLOW_VIEWER_TYPE) {
+    flowBridge?.setFactory(factory);
+  }
   factoryByViewType.set(viewType, factory);
 
   return [
@@ -381,6 +398,7 @@ export const createViewerSubscriptions = (
       previewDeps,
       factoryByViewType,
       pendingRevealByPanel,
+      flowBridge: deps.flowBridge,
       ...config,
     }),
   );

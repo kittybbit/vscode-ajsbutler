@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -16,17 +17,39 @@ import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semant
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import { createSemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
+import {
+  createSemanticDiffFlowAction,
+  SemanticDiffFlowOverlayRegistry,
+  type SemanticDiffFlowSourceSnapshot,
+} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
 
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
   beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
+  flowBridge?: SemanticDiffFlowViewerBridge;
 };
 
 export const createSemanticDiffSubscriptions = (
   deps: SemanticDiffWiringDeps,
 ): vscode.Disposable[] => {
   const contextRegistry = new SemanticDiffExplorerContextRegistry();
+  const flowOverlayRegistry = new SemanticDiffFlowOverlayRegistry();
+  const getSourceSnapshot = (
+    side: "before" | "after",
+    context: SemanticDiffOutputContext,
+  ): SemanticDiffFlowSourceSnapshot | undefined => {
+    const source = contextRegistry.sourceCapture(context)?.sources[side];
+    return source
+      ? {
+          sourceHandleId: source.sourceHandleId,
+          version: source.version,
+          text: source.text,
+          uri: source.uri.toString(),
+        }
+      : undefined;
+  };
   const reportDocuments = new SemanticDiffReportDocumentProvider({
     openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
     showTextDocument: (document, options) =>
@@ -52,6 +75,46 @@ export const createSemanticDiffSubscriptions = (
     showTextDocument: (document, options) =>
       vscode.window.showTextDocument(document, options),
     contextRegistry,
+    flowAction: deps.flowBridge
+      ? createSemanticDiffFlowAction({
+          host: {
+            getSourceSnapshot,
+            isSourceCurrent: (side, context, snapshot) => {
+              const current = getSourceSnapshot(side, context);
+              if (
+                current === undefined ||
+                current.sourceHandleId !== snapshot.sourceHandleId ||
+                current.uri !== snapshot.uri
+              ) {
+                return false;
+              }
+              const currentDocument = vscode.workspace.textDocuments.find(
+                (document) => document.uri.toString() === snapshot.uri,
+              );
+              return (
+                current !== undefined &&
+                (snapshot.version === null ||
+                  current.version === snapshot.version) &&
+                current.text === snapshot.text &&
+                currentDocument !== undefined &&
+                (snapshot.version === null ||
+                  currentDocument.version === snapshot.version) &&
+                currentDocument.getText() === snapshot.text
+              );
+            },
+            open: async (side, targetUnitId, context) => {
+              const source =
+                contextRegistry.sourceCapture(context)?.sources[side];
+              if (!source)
+                throw new Error("Semantic Diff source is unavailable.");
+              return deps.flowBridge!.open(source.uri, targetUnitId);
+            },
+          },
+          registry: flowOverlayRegistry,
+        })
+      : undefined,
+    disposeFlowSession: (sessionId) =>
+      flowOverlayRegistry.clearSession(sessionId),
   });
 
   return [

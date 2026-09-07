@@ -7,6 +7,7 @@ import type {
   FlowGraphNodeDto,
   FlowGraphSemanticDiffHighlight,
 } from "../../../../application/flow-graph/buildFlowGraphCore";
+import { flowGraphEdgeId } from "../../../../application/flow-graph/buildFlowGraphCore";
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import type {
   CurrentUnitIdStateType,
@@ -95,6 +96,12 @@ const edgeStrokeColor = (
   if (highlight?.kind === "confirmation-required") {
     return theme.palette.warning.main;
   }
+  if (highlight?.kind === "removed") {
+    return theme.palette.error.main;
+  }
+  if (highlight?.kind === "added") {
+    return theme.palette.success.main;
+  }
   if (highlight?.kind === "changed") {
     return theme.palette.info.main;
   }
@@ -103,7 +110,10 @@ const edgeStrokeColor = (
 
 const toEdgeData = (edge: FlowGraphEdgeDto): Edge["data"] =>
   edge.semanticDiffHighlight
-    ? { semanticDiffHighlight: edge.semanticDiffHighlight }
+    ? {
+        flowRelationType: edge.type,
+        semanticDiffHighlight: edge.semanticDiffHighlight,
+      }
     : undefined;
 
 const toEdgeStyle = (edge: FlowGraphEdgeDto, theme: Theme): Edge["style"] => {
@@ -112,6 +122,12 @@ const toEdgeStyle = (edge: FlowGraphEdgeDto, theme: Theme): Edge["style"] => {
   return {
     stroke: edgeStrokeColor(highlight, theme),
     strokeWidth: highlight.kind === "confirmation-required" ? 4 : 3,
+    strokeDasharray:
+      highlight.kind === "removed" || highlight.kind === "added"
+        ? "7 4"
+        : highlight.kind === "confirmation-required"
+          ? "10 3 2 3"
+          : "2 4",
   };
 };
 
@@ -123,7 +139,15 @@ const toArrowMarker = (color?: string): Edge["markerEnd"] => ({
 });
 
 const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
-  id: `${edge.source}-${edge.target}`,
+  id: edge.id ?? flowGraphEdgeId(edge),
+  className: edge.semanticDiffHighlight
+    ? `semantic-diff-edge semantic-diff-edge-${edge.semanticDiffHighlight.kind}`
+    : undefined,
+  domAttributes: edge.semanticDiffHighlight
+    ? {
+        "aria-hidden": "true",
+      }
+    : undefined,
   type: "smoothstep",
   source: edge.source,
   target: edge.target,
@@ -137,7 +161,8 @@ const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
   markerEnd: toArrowMarker(edgeStrokeColor(edge.semanticDiffHighlight, theme)),
   animated:
     edge.type === "con" ||
-    edge.semanticDiffHighlight?.kind === "confirmation-required",
+    edge.semanticDiffHighlight?.kind === "confirmation-required" ||
+    edge.semanticDiffHighlight?.kind === "added",
 });
 
 const toNodePosition = (

@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef } from "react";
+import Box from "@mui/material/Box";
 import {
   Background,
   BackgroundVariant,
@@ -14,6 +15,7 @@ import JobNetNode from "./nodes/JobNetNode";
 import JobGroupNode from "./nodes/JobGroupNode";
 import ConditionNode from "./nodes/ConditionNode";
 import type { FlowNodeData } from "./flowNodePresentationModel";
+import type { FlowGraphSemanticDiffHighlightKind } from "../../../../application/flow-graph/buildFlowGraphCore";
 import {
   type FlowMiniMapColors,
   resolveFlowMiniMapNodeFill,
@@ -30,6 +32,13 @@ import type {
 
 const defaultViewport = { x: 0, y: 0, zoom: 1.0 };
 const minimumViewportZoom = 0.02;
+
+const semanticDiffLegendLabelKey = (
+  state: FlowGraphSemanticDiffHighlightKind,
+): string =>
+  state === "confirmation-required"
+    ? "semanticDiff.flow.badge.confirmationRequired"
+    : `semanticDiff.flow.badge.${state}`;
 
 const nodeTypes: NodeTypes = {
   job: JobNode,
@@ -110,6 +119,29 @@ const FlowGraphCanvas: FC<FlowGraphCanvasProps> = ({
     selectedUnitId,
   });
 
+  const semanticDiffStates: FlowGraphSemanticDiffHighlightKind[] = Array.from(
+    new Set(
+      nodes
+        .map((node) => node.data.semanticDiffHighlight?.kind)
+        .concat(
+          edges.map((edge) => {
+            const data = edge.data as
+              | {
+                  semanticDiffHighlight?: {
+                    kind: FlowGraphSemanticDiffHighlightKind;
+                  };
+                }
+              | undefined;
+            return data?.semanticDiffHighlight?.kind;
+          }),
+        )
+        .filter(
+          (state): state is FlowGraphSemanticDiffHighlightKind =>
+            state !== undefined,
+        ),
+    ),
+  );
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -171,6 +203,51 @@ const FlowGraphCanvas: FC<FlowGraphCanvasProps> = ({
             boxShadow: theme.shadows[3],
           }}
         />
+      )}
+      {semanticDiffStates.length > 0 && (
+        <Box
+          component="aside"
+          role="note"
+          aria-label={unitInformationMessage(
+            "a11y.flow.semanticDiff.legend",
+            language,
+          )}
+          data-semantic-diff-legend="true"
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            zIndex: 5,
+            display: "flex",
+            gap: 0.75,
+            flexWrap: "wrap",
+            padding: "0.35rem 0.5rem",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+            backgroundColor: "background.paper",
+            fontSize: "0.72rem",
+            "@media (forced-colors: active)": {
+              color: "CanvasText",
+              backgroundColor: "Canvas",
+              borderColor: "CanvasText",
+            },
+            "body.vscode-high-contrast &": {
+              color: "var(--vscode-foreground, CanvasText)",
+              backgroundColor: "var(--vscode-editor-background, Canvas)",
+              borderColor: "var(--vscode-foreground, CanvasText)",
+            },
+          }}
+        >
+          {semanticDiffStates.map((state) => (
+            <span key={state} data-semantic-diff-legend-state={state}>
+              {unitInformationMessage(
+                semanticDiffLegendLabelKey(state),
+                language,
+              )}
+            </span>
+          ))}
+        </Box>
       )}
     </ReactFlow>
   );

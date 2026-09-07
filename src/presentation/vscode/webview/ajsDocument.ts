@@ -3,6 +3,7 @@ import { createPerformanceTelemetryEvent } from "../../../application/telemetry/
 import { toDurationBucket } from "../../../application/telemetry/telemetryBuckets";
 import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import type { BuildUnitList } from "../../../application/unit-list/buildUnitList";
+import type { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
 import { createViewerDocumentChangedMessage } from "../../webview/viewerHostMessages";
 import { getTelemetryHost } from "../telemetryHost";
 
@@ -29,7 +30,7 @@ const postAjsDocument = (
   document: vscode.TextDocument,
   panel: vscode.WebviewPanel,
   telemetry?: TelemetryPort,
-): void => {
+): UnitListDocumentDto | null => {
   const startedAt = performance.now();
   const result = buildUnitList(document.getText());
   reportUnitListBuildPerformance(
@@ -40,7 +41,13 @@ const postAjsDocument = (
   panel.webview.postMessage(
     createViewerDocumentChangedMessage(result.document),
   );
+  return result.document ?? null;
 };
+
+export type AjsDocumentPostedListener = (
+  document: UnitListDocumentDto | null,
+  panel: vscode.WebviewPanel,
+) => void;
 
 export const createReadyAjsDocument =
   (buildUnitList: BuildUnitList, telemetry?: TelemetryPort) =>
@@ -53,6 +60,7 @@ export function createDebouncedAjsDocumentChange(
   buildUnitList: BuildUnitList,
   delay: number = 300,
   telemetry?: TelemetryPort,
+  onDocumentPosted?: AjsDocumentPostedListener,
 ) {
   type PendingChange = {
     document: vscode.TextDocument;
@@ -132,7 +140,13 @@ export function createDebouncedAjsDocumentChange(
           return;
         }
         console.log(`post a message of changeDocument. ${key}`);
-        postAjsDocument(buildUnitList, document, panel, telemetry);
+        const nextDocument = postAjsDocument(
+          buildUnitList,
+          document,
+          panel,
+          telemetry,
+        );
+        onDocumentPosted?.(nextDocument, panel);
       }, delay),
     };
     pendingByDocument.set(key, pending);

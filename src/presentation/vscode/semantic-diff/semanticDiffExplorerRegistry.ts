@@ -6,7 +6,11 @@ import type {
   SemanticDiffExplorerSessionId,
   SemanticDiffExplorerTreeNode,
 } from "../../../application/semantic-diff/semanticDiffExplorer";
-import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
+import type {
+  SemanticDiffOutputContext,
+  SemanticDiffTarget,
+} from "../../../application/semantic-diff/semanticDiffDto";
+import { parseSemanticDiffRecordOccurrence } from "../../../application/semantic-diff/semanticDiffRecordOccurrence";
 import type {
   ImmutableSourceDescriptor,
   SemanticDiffSourceCaptureBinding,
@@ -20,6 +24,10 @@ export type SemanticDiffExplorerActionMetadata = Readonly<{
   kind: "source" | "flow" | "output";
   side: "before" | "after" | null;
   targetId: string | null;
+  recordId: string | null;
+  recordKind: "change" | "confirmation" | "unsupported" | null;
+  recordOccurrence: number | null;
+  recordTarget: SemanticDiffTarget | null;
   targetKind: "unit" | "jobnet" | "attribute" | null;
   parameterKey: string | null;
 }>;
@@ -179,6 +187,10 @@ export class SemanticDiffExplorerActionRegistry {
         kind: "output",
         side: null,
         targetId: null,
+        recordId: null,
+        recordKind: null,
+        recordOccurrence: null,
+        recordTarget: null,
         targetKind: null,
         parameterKey: null,
       },
@@ -265,7 +277,30 @@ export class SemanticDiffExplorerActionRegistry {
       if (action.actionId !== null) {
         this.actions.set(action.actionId, {
           sessionId,
-          metadata: { kind, side, targetId, targetKind, parameterKey },
+          metadata: {
+            kind,
+            side,
+            targetId,
+            recordId:
+              leaf.kind === "limitation" || leaf.kind === "schedule"
+                ? null
+                : leaf.recordId,
+            recordKind:
+              leaf.kind === "change" ||
+              leaf.kind === "confirmation" ||
+              leaf.kind === "unsupported"
+                ? leaf.kind
+                : null,
+            recordOccurrence:
+              leaf.kind === "change" ||
+              leaf.kind === "confirmation" ||
+              leaf.kind === "unsupported"
+                ? parseSemanticDiffRecordOccurrence(leaf.id)
+                : null,
+            recordTarget: target,
+            targetKind,
+            parameterKey,
+          },
         });
       }
     }

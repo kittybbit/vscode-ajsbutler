@@ -597,15 +597,34 @@ suite("Semantic Diff Explorer projection", () => {
     );
     const stableKeys = (view: typeof duplicateView): readonly string[] =>
       leavesInTree(view.tree).map((leaf) => leaf.id);
-    assert.deepStrictEqual(
-      stableKeys(
-        buildSemanticDiffExplorerViewModel(
-          Object.freeze({ result: original, summary: confirmationSummary(2) }),
-          { actionIdAllocator: createSemanticDiffExplorerActionIdAllocator() },
-        ),
-      ),
-      stableKeys(shuffledView),
+    const originalView = buildSemanticDiffExplorerViewModel(
+      Object.freeze({ result: original, summary: confirmationSummary(2) }),
+      { actionIdAllocator: createSemanticDiffExplorerActionIdAllocator() },
     );
+    assert.deepStrictEqual(
+      leavesInTree(originalView.tree).map((leaf) =>
+        leaf.kind === "confirmation" && leaf.target.value?.kind === "unit"
+          ? leaf.target.value.unit.id
+          : undefined,
+      ),
+      ["first-duplicate", "second-duplicate"],
+    );
+    assert.deepStrictEqual(
+      leavesInTree(shuffledView.tree).map((leaf) =>
+        leaf.kind === "confirmation" && leaf.target.value?.kind === "unit"
+          ? leaf.target.value.unit.id
+          : undefined,
+      ),
+      ["first-duplicate", "second-duplicate"],
+    );
+    assert.deepStrictEqual(stableKeys(originalView), [
+      "confirmation:duplicate:0",
+      "confirmation:duplicate:1",
+    ]);
+    assert.deepStrictEqual(stableKeys(shuffledView), [
+      "confirmation:duplicate:1",
+      "confirmation:duplicate:0",
+    ]);
   });
 
   test("retains candidate changes and uncalculated unsupported findings", () => {

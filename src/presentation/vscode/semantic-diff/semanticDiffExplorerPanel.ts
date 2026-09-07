@@ -24,6 +24,7 @@ import type {
   SemanticDiffOutputContext,
   SemanticDiffSide,
 } from "../../../application/semantic-diff/semanticDiffDto";
+import { recordAtSourceOccurrence } from "../../../application/semantic-diff/semanticDiffRecordOccurrence";
 import {
   presentSemanticDiffOutput,
   type SemanticDiffOutputDocument,
@@ -31,6 +32,7 @@ import {
 } from "../../semantic-diff/semanticDiffOutput";
 import { executeSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportAction";
 import { executeSemanticDiffExplorerSourceAction } from "./semanticDiffExplorerSourceAction";
+import type { SemanticDiffFlowActionRequest } from "./semanticDiffExplorerFlow";
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
@@ -70,6 +72,20 @@ export type SemanticDiffExplorerPanelDeps = Readonly<{
   ) => Thenable<vscode.TextEditor>;
   contextRegistry?: SemanticDiffExplorerContextRegistry;
   actionRegistry?: SemanticDiffExplorerActionRegistry;
+  /** Host-owned Flow adapter; viewer transport remains unchanged. */
+  flowAction?: (
+    request: SemanticDiffFlowActionRequest,
+    context: SemanticDiffOutputContext,
+    isCurrent: () => boolean,
+  ) => Promise<
+    | Readonly<{ ok: true }>
+    | Readonly<{
+        ok: false;
+        code: "flow-not-ready" | "flow-target-missing";
+        targetId?: string;
+      }>
+  >;
+  disposeFlowSession?: (sessionId: SemanticDiffExplorerSessionId) => void;
 }>;
 
 type PanelEntry = {
@@ -142,6 +158,46 @@ const actionOutcome = (
 
 const isThenableBoolean = (value: unknown): value is Thenable<boolean> =>
   typeof value === "object" && value !== null && "then" in value;
+
+const hasContextRecord = (
+  context: SemanticDiffOutputContext,
+  kind: "change" | "confirmation" | "unsupported" | null,
+  id: string | null,
+  occurrence: number | null,
+): boolean => {
+  if (
+    id === null ||
+    kind === null ||
+    occurrence === null ||
+    !Number.isSafeInteger(occurrence) ||
+    occurrence < 0
+  ) {
+    return false;
+  }
+  switch (kind) {
+    case "change":
+      return (
+        recordAtSourceOccurrence(context.result.changes, id, occurrence) !==
+        undefined
+      );
+    case "confirmation":
+      return (
+        recordAtSourceOccurrence(
+          context.result.confirmationRequired,
+          id,
+          occurrence,
+        ) !== undefined
+      );
+    case "unsupported":
+      return (
+        recordAtSourceOccurrence(
+          context.result.unsupportedItems,
+          id,
+          occurrence,
+        ) !== undefined
+      );
+  }
+};
 
 /**
  * Creates the one-argument Explorer opener consumed by the comparison command.
@@ -259,6 +315,11 @@ export const createOpenSemanticDiffExplorer = (
       const sourceEntry = contextRegistry.sourceCapture(context);
       contextRegistry.unregisterSourceCapture(context);
       actionRegistry.remove(session.sessionId);
+      try {
+        deps.disposeFlowSession?.(session.sessionId);
+      } catch {
+        // A stale overlay cannot replace panel disposal.
+      }
       try {
         (sourceEntry?.release ?? releaseSourceLifetime)();
       } catch {
@@ -422,6 +483,95 @@ export const createOpenSemanticDiffExplorer = (
       }
       if (metadata.kind !== "output") {
         if (disposed || requestEpoch !== disposeEpoch) return;
+        if (metadata.kind === "flow") {
+          if (
+            !hasContextRecord(
+              session.context,
+              metadata.recordKind,
+              metadata.recordId,
+              metadata.recordOccurrence,
+            )
+          ) {
+            await post(
+              createSemanticDiffExplorerActionResultMessage(
+                session.sessionId,
+                request.requestId,
+                request.actionId,
+                null,
+                createSemanticDiffExplorerError("record-not-found", {
+                  side: metadata.side,
+                  targetId: metadata.targetId,
+                }),
+              ),
+              requestEpoch,
+            );
+            return;
+          }
+          if (!deps.flowAction) {
+            await post(
+              createSemanticDiffExplorerActionResultMessage(
+                session.sessionId,
+                request.requestId,
+                request.actionId,
+                actionOutcome(
+                  "flow",
+                  "unavailable",
+                  metadata.side,
+                  metadata.targetId,
+                ),
+              ),
+              requestEpoch,
+            );
+            return;
+          }
+          const flowResult = await deps.flowAction(
+            {
+              sessionId: session.sessionId,
+              disposeEpoch: requestEpoch,
+              side: metadata.side,
+              targetId: metadata.targetId,
+              targetKind: metadata.targetKind,
+              recordId: metadata.recordId,
+              recordKind: metadata.recordKind,
+              recordOccurrence: metadata.recordOccurrence,
+              recordTarget: metadata.recordTarget,
+            },
+            session.context,
+            () => !disposed && requestEpoch === disposeEpoch,
+          );
+          if (disposed || requestEpoch !== disposeEpoch) return;
+          if (flowResult.ok === false) {
+            await post(
+              createSemanticDiffExplorerActionResultMessage(
+                session.sessionId,
+                request.requestId,
+                request.actionId,
+                null,
+                createSemanticDiffExplorerError(flowResult.code, {
+                  side: metadata.side,
+                  targetId: flowResult.targetId ?? metadata.targetId,
+                }),
+              ),
+              requestEpoch,
+            );
+            return;
+          }
+          await post(
+            createSemanticDiffExplorerActionResultMessage(
+              session.sessionId,
+              request.requestId,
+              request.actionId,
+              actionOutcome(
+                "flow",
+                "completed",
+                metadata.side,
+                metadata.targetId,
+              ),
+            ),
+            requestEpoch,
+          );
+          return;
+        }
         await post(
           createSemanticDiffExplorerActionResultMessage(
             session.sessionId,

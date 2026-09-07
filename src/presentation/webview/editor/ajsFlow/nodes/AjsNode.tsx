@@ -270,6 +270,80 @@ const NodeStatusIndicators: FC<{ data: FlowNodePresentationModel }> = ({
   );
 };
 
+const semanticDiffPresentation = {
+  added: {
+    label: "semanticDiff.flow.badge.added",
+    title: "semanticDiff.flow.title.added",
+  },
+  removed: {
+    label: "semanticDiff.flow.badge.removed",
+    title: "semanticDiff.flow.title.removed",
+  },
+  changed: {
+    label: "semanticDiff.flow.badge.changed",
+    title: "semanticDiff.flow.title.changed",
+  },
+  "confirmation-required": {
+    label: "semanticDiff.flow.badge.confirmationRequired",
+    title: "semanticDiff.flow.title.confirmationRequired",
+  },
+} as const;
+
+const NodeSemanticDiffIndicator: FC<{
+  data: FlowNodePresentationModel;
+}> = ({ data }) => {
+  const { lang = "en" } = useMyAppContext();
+  const highlight = data.semanticDiffHighlight;
+  if (!highlight) return null;
+  const presentation = semanticDiffPresentation[highlight.kind];
+  const label = unitInformationMessage(presentation.label, lang);
+  const title = unitInformationMessage(presentation.title, lang);
+  return (
+    <Tooltip title={title}>
+      <Box
+        component="span"
+        role="img"
+        aria-label={title}
+        data-semantic-diff-state={highlight.kind}
+        sx={{
+          ...nodeBadgeSxProps,
+          minWidth: "auto",
+          color: (theme) =>
+            highlight.kind === "confirmation-required"
+              ? theme.palette.warning.contrastText
+              : theme.palette.getContrastText(
+                  highlight.kind === "removed"
+                    ? theme.palette.error.main
+                    : highlight.kind === "added"
+                      ? theme.palette.success.main
+                      : theme.palette.info.main,
+                ),
+          backgroundColor: (theme) =>
+            highlight.kind === "confirmation-required"
+              ? theme.palette.warning.main
+              : highlight.kind === "removed"
+                ? theme.palette.error.main
+                : highlight.kind === "added"
+                  ? theme.palette.success.main
+                  : theme.palette.info.main,
+          "@media (forced-colors: active)": {
+            color: "CanvasText",
+            backgroundColor: "Canvas",
+            borderColor: "CanvasText",
+          },
+          "body.vscode-high-contrast &": {
+            color: "var(--vscode-foreground, CanvasText)",
+            backgroundColor: "var(--vscode-editor-background, Canvas)",
+            borderColor: "var(--vscode-foreground, CanvasText)",
+          },
+        }}
+      >
+        {label}
+      </Box>
+    </Tooltip>
+  );
+};
+
 export const FlowNodeCard: FC<{
   data: FlowNodeData;
   kind: FlowNodeKind;
@@ -304,6 +378,7 @@ export const FlowNodeCard: FC<{
       <TyTitle ty={data.ty} gty={data.gty} />
       <Box sx={{ display: "flex", alignItems: "center", gap: "0.25em" }}>
         {data.isRootJobnet && <Box sx={nodeBadgeSxProps}>ROOT</Box>}
+        <NodeSemanticDiffIndicator data={data} />
         <NodeStatusIndicators data={data} />
         {headerAction}
       </Box>

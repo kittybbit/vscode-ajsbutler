@@ -6,12 +6,14 @@ import type {
 
 export type FlowMiniMapColors = {
   both: string;
+  added?: string;
   changed: string;
   confirmationRequired: string;
   currentSearchResult: string;
   downstream: string;
   hidden: string;
   normal: string;
+  removed?: string;
   searchMatch: string;
   selected: string;
   selectedFocus: string;
@@ -53,6 +55,14 @@ const resolveVisibleFlowMiniMapNodeColor = (
     colorWhen(node.data.isCurrentSearchResult, colors.currentSearchResult),
     colorWhen(node.selected || node.data.isSelected, colors.selected),
     resolveRelationshipFocusColor(node.data.relationshipFocusRole, colors),
+    colorWhen(
+      node.data.semanticDiffHighlight?.kind === "removed",
+      colors.removed ?? colors.changed,
+    ),
+    colorWhen(
+      node.data.semanticDiffHighlight?.kind === "added",
+      colors.added ?? colors.changed,
+    ),
     colorWhen(
       node.data.semanticDiffHighlight?.kind === "confirmation-required",
       colors.confirmationRequired,

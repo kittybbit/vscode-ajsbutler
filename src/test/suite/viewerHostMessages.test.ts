@@ -73,6 +73,36 @@ suite("Viewer host messages", () => {
     assert.deepStrictEqual(parseViewerHostMessage(message), message);
   });
 
+  test("round-trips a state-only semantic diff overlay through changeDocument", () => {
+    const base = toUnitListDocumentDto(document);
+    const overlayDocument = {
+      ...base,
+      semanticDiffOverlay: {
+        nodes: [
+          {
+            id: "root-id",
+            kind: "changed" as const,
+            changeIds: ["change:1"],
+            confirmationIds: [],
+          },
+        ],
+        relations: [],
+      },
+    };
+    const message = createViewerDocumentChangedMessage(overlayDocument);
+    assert.deepStrictEqual(parseViewerHostMessage(message), message);
+    assert.strictEqual(
+      parseViewerHostMessage({
+        ...message,
+        data: {
+          ...message.data!,
+          semanticDiffOverlay: { nodes: [], relations: [], extra: true },
+        },
+      }),
+      undefined,
+    );
+  });
+
   test("round-trips a bounded large document as plain JSON", () => {
     const childCount = 500;
     const rootUnit = document.rootUnits[0]!;

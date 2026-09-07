@@ -13,6 +13,7 @@ import type {
   SemanticDiffWarning,
 } from "./semanticDiffDto";
 import type { SemanticDiffOutputContext } from "./semanticDiffDto";
+import { withSourceOrderOccurrences } from "./semanticDiffRecordOccurrence";
 import {
   COMPARISON_LEVEL_FINDINGS_GROUP,
   createSemanticDiffExplorerActionIdAllocator,
@@ -761,43 +762,45 @@ const createLeaves = (
         ? identifierDifference
         : compareUtf16(stableValueKey(left), stableValueKey(right));
     });
+  const sortByIdentifierWithSourceOccurrences = <T>(
+    records: readonly (T & { id: string })[],
+    identifier: (record: T & { id: string }) => string,
+  ): Array<{ record: T & { id: string }; occurrence: number }> =>
+    withSourceOrderOccurrences(records).sort((left, right) => {
+      const identifierDifference = compareUtf16(
+        identifier(left.record),
+        identifier(right.record),
+      );
+      return identifierDifference !== 0
+        ? identifierDifference
+        : compareUtf16(
+            stableValueKey(left.record),
+            stableValueKey(right.record),
+          );
+    });
   const occurrences = new Map<string, number>();
   const nextOccurrence = (key: string): number => {
     const occurrence = occurrences.get(key) ?? 0;
     occurrences.set(key, occurrence + 1);
     return occurrence;
   };
-  sortByIdentifier(context.result.changes, (change) => change.id).forEach(
-    (change) =>
-      leaves.push(
-        changeLeaf(
-          change,
-          nextOccurrence(`change:${change.id}`),
-          actionIdAllocator,
-        ),
-      ),
+  sortByIdentifierWithSourceOccurrences(
+    context.result.changes,
+    (change) => change.id,
+  ).forEach(({ record: change, occurrence }) =>
+    leaves.push(changeLeaf(change, occurrence, actionIdAllocator)),
   );
-  sortByIdentifier(
+  sortByIdentifierWithSourceOccurrences(
     context.result.confirmationRequired,
     (item) => item.id,
-  ).forEach((item) =>
-    leaves.push(
-      confirmationLeaf(
-        item,
-        nextOccurrence(`confirmation:${item.id}`),
-        actionIdAllocator,
-      ),
-    ),
+  ).forEach(({ record: item, occurrence }) =>
+    leaves.push(confirmationLeaf(item, occurrence, actionIdAllocator)),
   );
-  sortByIdentifier(context.result.unsupportedItems, (item) => item.id).forEach(
-    (item) =>
-      leaves.push(
-        unsupportedLeaf(
-          item,
-          nextOccurrence(`unsupported:${item.id}`),
-          actionIdAllocator,
-        ),
-      ),
+  sortByIdentifierWithSourceOccurrences(
+    context.result.unsupportedItems,
+    (item) => item.id,
+  ).forEach(({ record: item, occurrence }) =>
+    leaves.push(unsupportedLeaf(item, occurrence, actionIdAllocator)),
   );
   sortByIdentifier(context.result.limitations, (item) => item.code).forEach(
     (item) =>

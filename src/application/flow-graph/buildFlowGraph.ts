@@ -1,5 +1,6 @@
 import {
   buildFlowGraphFromInput,
+  flowGraphEdgeId,
   type FlowGraphDto,
   type FlowGraphEdgeDto,
   type FlowGraphInput,
@@ -69,12 +70,23 @@ const toAncestorNodes = (
   return ancestors;
 };
 
-const toEdgeDtos = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] =>
-  unit.relations.map((relation) => ({
-    source: relation.sourceUnitId,
-    target: relation.targetUnitId,
-    type: relation.type,
-  }));
+const toEdgeDtos = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] => {
+  const ordinals = new Map<string, number>();
+  return unit.relations.map((relation) => {
+    const edge = {
+      source: relation.sourceUnitId,
+      target: relation.targetUnitId,
+      type: relation.type,
+    } as const;
+    const key = `${edge.source}\u0000${edge.target}\u0000${edge.type}`;
+    const occurrenceOrdinal = ordinals.get(key) ?? 0;
+    ordinals.set(key, occurrenceOrdinal + 1);
+    return {
+      ...edge,
+      id: flowGraphEdgeId(edge, occurrenceOrdinal),
+    };
+  });
+};
 
 const toInput = (
   index: FlowGraphDocumentIndex,

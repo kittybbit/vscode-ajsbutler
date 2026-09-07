@@ -13,7 +13,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
-import { type Node, ReactFlowProvider } from "@xyflow/react";
+import { type Edge, type Node, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { createViewerOperationRequest } from "../../viewerRequestMessages";
@@ -61,6 +61,62 @@ import {
   formatUnitInformationMessage,
   unitInformationMessage,
 } from "../unitInformationLocalization";
+
+export type SemanticDiffRelationDuplicateGroup = Readonly<{
+  sourceUnitId: string;
+  targetUnitId: string;
+  relationType: "seq" | "con";
+  count: number;
+}>;
+
+/** Count every highlighted formal relation in a concrete graph pair. */
+export const collectSemanticDiffRelationDuplicateGroups = (
+  edges: readonly Edge[],
+): SemanticDiffRelationDuplicateGroup[] => {
+  const counts = new Map<string, SemanticDiffRelationDuplicateGroup>();
+  for (const edge of edges) {
+    const data = edge.data as
+      | {
+          flowRelationType?: "seq" | "con";
+          semanticDiffHighlight?: unknown;
+        }
+      | undefined;
+    if (!data?.semanticDiffHighlight || !data.flowRelationType) continue;
+    const key = `${edge.source}\u0000${edge.target}\u0000${data.flowRelationType}`;
+    const previous = counts.get(key);
+    counts.set(
+      key,
+      previous
+        ? { ...previous, count: previous.count + 1 }
+        : {
+            sourceUnitId: edge.source,
+            targetUnitId: edge.target,
+            relationType: data.flowRelationType,
+            count: 1,
+          },
+    );
+  }
+  return [...counts.values()]
+    .filter((group) => group.count > 1)
+    .sort(
+      (left, right) =>
+        (left.sourceUnitId < right.sourceUnitId
+          ? -1
+          : left.sourceUnitId > right.sourceUnitId
+            ? 1
+            : 0) ||
+        (left.targetUnitId < right.targetUnitId
+          ? -1
+          : left.targetUnitId > right.targetUnitId
+            ? 1
+            : 0) ||
+        (left.relationType < right.relationType
+          ? -1
+          : left.relationType > right.relationType
+            ? 1
+            : 0),
+    );
+};
 
 type FlowViewerController = ReturnType<typeof useFlowViewerController>;
 
@@ -630,6 +686,7 @@ const useSelectedNodeUnitListAction = (
 const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
   useMemo(
     () => ({
+      added: theme.palette.success.main,
       both: theme.palette.warning.main,
       changed: theme.palette.info.main,
       confirmationRequired: theme.palette.warning.main,
@@ -637,6 +694,7 @@ const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
       downstream: theme.palette.success.main,
       hidden: "transparent",
       normal: theme.palette.action.disabled,
+      removed: theme.palette.error.main,
       searchMatch: theme.palette.success.light,
       selected: theme.palette.secondary.main,
       selectedFocus: theme.palette.primary.main,
@@ -816,6 +874,10 @@ const FlowContents: FC = () => {
     (unitId: string): string => unitById.get(unitId)?.name ?? unitId,
     [unitById],
   );
+  const semanticDiffRelationDuplicateGroups = useMemo(
+    () => collectSemanticDiffRelationDuplicateGroups(edges),
+    [edges],
+  );
   const announceFlowSelection = useCallback(
     (unitId: string) => {
       announceFlow(
@@ -855,6 +917,34 @@ const FlowContents: FC = () => {
     },
     [announceFlow, getFlowUnitName, lang],
   );
+  useEffect(() => {
+    if (semanticDiffRelationDuplicateGroups.length === 0) return;
+    const signature = semanticDiffRelationDuplicateGroups
+      .map(
+        ({ sourceUnitId, targetUnitId, relationType, count }) =>
+          `${sourceUnitId}:${targetUnitId}:${relationType}:${count}`,
+      )
+      .join("|");
+    const message = semanticDiffRelationDuplicateGroups
+      .map(({ sourceUnitId, targetUnitId, count }) =>
+        formatUnitInformationMessage(
+          "a11y.announce.semanticDiffRelations",
+          lang,
+          {
+            source: getFlowUnitName(sourceUnitId),
+            target: getFlowUnitName(targetUnitId),
+            count,
+          },
+        ),
+      )
+      .join(" ");
+    announceFlow(`flow:semantic-diff-relations:${signature}`, message);
+  }, [
+    announceFlow,
+    getFlowUnitName,
+    lang,
+    semanticDiffRelationDuplicateGroups,
+  ]);
   const selectTreeUnitWithAnnouncement = useCallback(
     (unitId: string) => {
       selectTreeUnitWithTelemetry(unitId);

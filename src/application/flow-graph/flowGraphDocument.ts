@@ -7,6 +7,11 @@ import type {
   AjsUnitType,
 } from "../../domain/models/ajs/AjsDocument";
 import { isTySymbol } from "../../domain/values/AjsType";
+import {
+  flowGraphEdgeId,
+  type FlowGraphSemanticDiffOverlay,
+  type FlowGraphSemanticDiffOverlayEntry,
+} from "./buildFlowGraphCore";
 
 export type FlowGraphParameterDto = AjsParameter;
 export type FlowGraphRelationDto = AjsRelation;
@@ -35,7 +40,11 @@ export type FlowGraphUnitDto = {
   children: FlowGraphUnitDto[];
 };
 
-export type FlowGraphDocumentDto = { rootUnits: FlowGraphUnitDto[] };
+export type FlowGraphDocumentDto = {
+  rootUnits: FlowGraphUnitDto[];
+  /** Optional additive semantic-diff state; null clears only the overlay. */
+  semanticDiffOverlay?: FlowGraphSemanticDiffOverlay | null;
+};
 
 export type FlowGraphDocumentIssueCode =
   | "invalid_document"
@@ -45,7 +54,8 @@ export type FlowGraphDocumentIssueCode =
   | "duplicate_absolute_path"
   | "inconsistent_parent"
   | "parent_cycle"
-  | "invalid_relation";
+  | "invalid_relation"
+  | "invalid_semantic_diff_overlay";
 
 export type FlowGraphDocumentIssue = {
   code: FlowGraphDocumentIssueCode;
@@ -149,6 +159,69 @@ const isOptionalBoolean = (value: unknown): value is boolean | undefined =>
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
+
+const semanticDiffHighlightKinds = new Set([
+  "added",
+  "removed",
+  "changed",
+  "confirmation-required",
+]);
+
+const isSemanticDiffOverlayEntry = (
+  value: unknown,
+): value is FlowGraphSemanticDiffOverlayEntry => {
+  if (!isRecord(value)) return false;
+  const keys = Object.keys(value).sort();
+  if (
+    keys.join("\u0000") !==
+    ["changeIds", "confirmationIds", "id", "kind"].join("\u0000")
+  ) {
+    return false;
+  }
+  return (
+    typeof value.id === "string" &&
+    value.id.length > 0 &&
+    typeof value.kind === "string" &&
+    semanticDiffHighlightKinds.has(value.kind) &&
+    Array.isArray(value.changeIds) &&
+    value.changeIds.every((id) => typeof id === "string") &&
+    Array.isArray(value.confirmationIds) &&
+    value.confirmationIds.every((id) => typeof id === "string")
+  );
+};
+
+const cloneOverlayEntry = (
+  entry: FlowGraphSemanticDiffOverlayEntry,
+): FlowGraphSemanticDiffOverlayEntry => ({
+  id: entry.id,
+  kind: entry.kind,
+  changeIds: [...entry.changeIds],
+  confirmationIds: [...entry.confirmationIds],
+});
+
+const parseSemanticDiffOverlay = (
+  value: unknown,
+): FlowGraphSemanticDiffOverlay | null | undefined => {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (!isRecord(value)) return undefined;
+  const keys = Object.keys(value).sort();
+  if (keys.join("\u0000") !== ["nodes", "relations"].join("\u0000")) {
+    return undefined;
+  }
+  if (
+    !Array.isArray(value.nodes) ||
+    !Array.isArray(value.relations) ||
+    !value.nodes.every(isSemanticDiffOverlayEntry) ||
+    !value.relations.every(isSemanticDiffOverlayEntry)
+  ) {
+    return undefined;
+  }
+  return {
+    nodes: value.nodes.map(cloneOverlayEntry),
+    relations: value.relations.map(cloneOverlayEntry),
+  };
+};
 
 const isParameter = (value: unknown): value is FlowGraphParameterDto =>
   isRecord(value) &&
@@ -497,9 +570,40 @@ export const validateFlowGraphDocument = (
     owner.relations.push(relation);
   });
 
+  const hasSemanticDiffOverlay = Object.prototype.hasOwnProperty.call(
+    value,
+    "semanticDiffOverlay",
+  );
+  const semanticDiffOverlay = parseSemanticDiffOverlay(
+    (value as Record<string, unknown>).semanticDiffOverlay,
+  );
+  if (
+    (hasSemanticDiffOverlay && semanticDiffOverlay === undefined) ||
+    (semanticDiffOverlay !== null &&
+      semanticDiffOverlay !== undefined &&
+      !validateSemanticDiffOverlayMembership(
+        semanticDiffOverlay,
+        state.unitById,
+        rootUnits,
+      ))
+  ) {
+    state.fatal = true;
+    state.issues.push({
+      code: "invalid_semantic_diff_overlay",
+      message:
+        "A semantic diff overlay must contain only current graph node and edge IDs.",
+    });
+  }
+  if (state.fatal) {
+    return { status: "unavailable", issues: state.issues };
+  }
+
   const available: FlowGraphDocumentValidationResult = {
     status: "available",
-    document: { rootUnits },
+    document: {
+      rootUnits,
+      ...(!hasSemanticDiffOverlay ? {} : { semanticDiffOverlay }),
+    },
     index: {
       unitById: state.unitById,
       unitByAbsolutePath: state.unitByAbsolutePath,
@@ -507,4 +611,44 @@ export const validateFlowGraphDocument = (
     issues: state.issues,
   };
   return available;
+};
+
+const validateSemanticDiffOverlayMembership = (
+  overlay: FlowGraphSemanticDiffOverlay,
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+  rootUnits: readonly FlowGraphUnitDto[],
+): boolean => {
+  const nodeIds = new Set(unitById.keys());
+  const edgeIds = new Set<string>();
+  const pending = [...rootUnits];
+  while (pending.length > 0) {
+    const unit = pending.pop() as FlowGraphUnitDto;
+    const ordinals = new Map<string, number>();
+    unit.relations.forEach((relation) => {
+      const tuple = `${relation.sourceUnitId}\u0000${relation.targetUnitId}\u0000${relation.type}`;
+      const ordinal = ordinals.get(tuple) ?? 0;
+      ordinals.set(tuple, ordinal + 1);
+      edgeIds.add(
+        flowGraphEdgeId(
+          {
+            source: relation.sourceUnitId,
+            target: relation.targetUnitId,
+            type: relation.type,
+          },
+          ordinal,
+        ),
+      );
+    });
+    pending.push(...unit.children);
+  }
+  const validateEntries = (
+    entries: readonly FlowGraphSemanticDiffOverlayEntry[],
+    ids: ReadonlySet<string>,
+    oppositeIds: ReadonlySet<string>,
+  ): boolean =>
+    entries.every((entry) => ids.has(entry.id) && !oppositeIds.has(entry.id));
+  return (
+    validateEntries(overlay.nodes, nodeIds, edgeIds) &&
+    validateEntries(overlay.relations, edgeIds, nodeIds)
+  );
 };

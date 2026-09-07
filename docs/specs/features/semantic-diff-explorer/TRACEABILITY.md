@@ -151,3 +151,62 @@ recorded user policy, and the focused completion commit is
 `a25d674c67b3e6a9fb03c89a12a745a579bfd655`. Aggregate final human approval
 remains pending until all four slices are complete; Slice 4 is now the sole
 active implementation slice.
+
+## Slice 4 Validation Result
+
+Slice 4 implementation evidence (2026-09-07): existing Flow graph producers
+now emit collision-free UTF-16 length-prefixed relation IDs with per-owner
+occurrence ordinals, and semantic-diff mapping resolves actual before/after
+node IDs plus every matching side-specific relation ID. The existing
+`changeDocument`, `revealUnit`, and `ready`/`onReady` paths carry a validated
+state-only `semanticDiffOverlay`; malformed, cross-kind, missing, stale, and
+superseded overlays fail closed. The host adapter reuses `ViewerFactory`,
+existing Flow scope/reveal behavior, and one-overlay-per-URI owner tokens.
+Flow nodes and relations expose textual states, visible legend/patterns,
+forced-colors/high-contrast styling, MiniMap colors, non-focusable relation
+edges, and duplicate-relation `aria-live` announcements. No new Flow wire
+variant, reason/detail field, renderer, layout, search, comparison, or
+telemetry behavior was added.
+
+Validation passed `rtk pnpm run test:compile`, `rtk pnpm run qlty` (`qlty check`
+clean), `rtk git diff --check`, `rtk pnpm run build`, desktop/web production
+preparation, and the desktop smoke launcher. Focused compiled tests passed for
+formal IDs/duplicate mapping, Flow projection/non-focusable edges, semantic
+highlight states, overlay validator and viewer-message round trips, Flow host
+apply/reveal/revalidation, owner supersession/late clear, Flow accessibility
+labels/MiniMap, and Explorer DOM/axe coverage (41 tests across the focused
+runs). The representative expanded-graph use-case suite retains one
+pre-existing node-order golden mismatch (the implementation's deterministic
+order is unchanged by this slice); it is recorded for independent review and
+was not broadened into a runtime change. Web browser smoke preparation passed,
+but the launcher remains blocked before test execution by the managed
+Chromium `bootstrap_check_in ... Permission denied (1100)` environment
+failure. VS Code `^1.75.0`, desktop/web composition, architecture boundaries,
+and telemetry privacy remain unchanged. The architecture dependency suite also
+retains two pre-existing composition-root violations: the existing
+`src/infrastructure/parser/AntlrAjsParser.ts` calls the source-index allocator
+and `src/presentation/vscode/commands/semanticDiffCommand.ts` calls the source
+handle allocator outside bootstrap; Slice 4 does not change either boundary.
+Completion Approval remains pending; this evidence is handed to Main for
+independent implementation review.
+
+Finding remediation evidence (2026-09-07): nested expanded graph propagation,
+all active formal duplicate relation IDs, lowest-ordinal Flow reveal,
+host-private duplicate occurrence/target validation, source freshness checks,
+latest-base clearing, and per-URI operation guards were added within the
+approved Slice 4 boundary. The focused host/Flow/a11y run passed 25 tests;
+the expanded-graph suite passed 8 tests with the same pre-existing node-order
+golden mismatch. Flow state badges, tooltips, legend, and accessibility labels
+now resolve through the active language resources.
+
+P1 occurrence remediation evidence (2026-09-07): a shared application helper
+assigns duplicate ordinals in source order before presentation sorting, and
+the same ordinal plus exact target is carried through projection, panel
+metadata, registry extraction, Flow action resolution, and canonical relation
+lookup for changes, confirmations, and unsupported findings. The reversed
+same-ID relation regression passed in the 35-test focused projection/Flow/
+graph/highlight/host run. Final `rtk pnpm run build`, desktop/web preparation,
+and desktop smoke passed; web smoke remains blocked before test execution by
+the managed Chromium `bootstrap_check_in ... Permission denied (1100)`
+environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
+`rtk pnpm run lint:md` also passed.

@@ -17,6 +17,7 @@ import {
   toDurationBucket,
 } from "../../../../application/telemetry/telemetryBuckets";
 import type { FlowGraphSemanticDiffHighlights } from "../../../../application/flow-graph/buildFlowGraphCore";
+import { flowGraphSemanticDiffHighlightsFromOverlay } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { createViewerPerformanceRequest } from "../../viewerRequestMessages";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
@@ -76,7 +77,11 @@ const buildExpandedGraphResult = (
     currentUnitId: graphScopeUnitId,
     expandedUnitIds: params.expandedUnitIds,
     basePx: params.theme.typography.htmlFontSize,
-    semanticDiffHighlights: params.semanticDiffHighlights,
+    semanticDiffHighlights:
+      params.semanticDiffHighlights ??
+      flowGraphSemanticDiffHighlightsFromOverlay(
+        params.flowDocument.document.semanticDiffOverlay,
+      ),
   });
 
 const createReactFlowDataOptions = ({

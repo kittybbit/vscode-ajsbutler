@@ -1273,10 +1273,121 @@ approval remains pending until all four slices are complete.
   overlay. Side/lifecycle/a11y/host matrix is the gate.
 - Out of Scope: reverse Flow-to-Markdown, layout/search, calendar, editing.
 
+Implementation evidence (2026-09-07): Slice 4 implements formal graph-edge
+IDs, before/after state mapping, exact graph-membership validation for the
+state-only overlay, existing Flow message/readiness/reveal integration, URI
+overlay ownership with stale-clear protection, and accessible node/relation
+states. Added focused coverage includes delimiter/supplementary-Unicode and
+duplicate IDs, all matching canonical relation occurrences, overlay
+null/absent/cross-kind semantics, viewer message round trips, host apply and
+reveal, stale session/owner behavior, relation non-focusability, MiniMap,
+high-contrast/pattern/legend labels, duplicate relation announcements, and
+Explorer axe/DOM behavior. `rtk pnpm run test:compile`, `rtk pnpm run qlty`,
+`rtk git diff --check`, `rtk pnpm run build`, desktop preparation/runner, and
+web preparation passed. The managed Chromium web smoke launcher remains
+environment-blocked at `bootstrap_check_in ... Permission denied (1100)`;
+desktop smoke exited successfully. The architecture suite retains two
+pre-existing composition-root violations: `src/infrastructure/parser/AntlrAjsParser.ts`
+calls the existing source-index allocator and
+`src/presentation/vscode/commands/semanticDiffCommand.ts` calls the existing
+source-handle allocator outside bootstrap; this slice does not alter either
+boundary. One existing expanded-graph node-order golden mismatch remains
+outside this slice's runtime scope and is provided to independent review.
+Completion Approval is still pending; no commit was created.
+
+Finding remediation evidence (2026-09-07): nested expanded nodes and formal
+relations now retain semantic highlights; canonical relation endpoints are
+checked against the active graph's formal edge IDs before lowest-ordinal
+reveal; host-private `(kind, id, occurrence, target)` metadata is validated
+in source order; retained source snapshots are rechecked before Flow host
+operations; ordinary Flow replacement updates the clear base; and per-URI
+operation IDs prevent late same-owner clears. The focused host/Flow/a11y run
+passed 25 tests. The expanded-graph suite passed 8 tests with the same
+pre-existing node-order golden mismatch. The architecture suite reports the
+two pre-existing composition-root violations named above.
+
+P1 occurrence remediation evidence (2026-09-07): a shared application helper
+assigns duplicate ordinals in source order before presentation sorting, and
+the same ordinal plus exact target is carried through projection, panel
+metadata, registry extraction, Flow action resolution, and canonical relation
+lookup for changes, confirmations, and unsupported findings. The reversed
+same-ID relation regression passed in the 35-test focused projection/Flow/
+graph/highlight/host run. Final `rtk pnpm run build`, desktop/web preparation,
+and desktop smoke passed; web smoke remains blocked before test execution by
+the managed Chromium `bootstrap_check_in ... Permission denied (1100)`
+environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
+`rtk pnpm run lint:md` also passed.
+
+## Slice 4 Completion-Gate Evidence (2026-09-07)
+
+- Independent implementation review: `Ready`, with no findings.
+- Completion Approval: automatically approved under the explicit user policy
+  after the `Ready` verdict on 2026-09-07.
+- Approved scope: formal collision-free Flow edge IDs and semantic-diff
+  states; actual graph node/edge membership and canonical side-specific
+  relation mapping; existing `changeDocument`, `revealUnit`, and `ready` Flow
+  paths; one-overlay-per-URI owner and stale-clear lifecycle; nested
+  highlight propagation; source-order duplicate occurrence/target metadata;
+  Flow badges, tooltips, legend, patterns, high-contrast, MiniMap,
+  accessibility, duplicate announcements, and non-focusable relation edges;
+  focused host/Flow/a11y tests and production-readiness evidence. No new Flow
+  wire variant, renderer, layout/search, comparison/edit, reason/detail
+  fields, synthetic IDs, or telemetry changes.
+- Baseline evidence is unchanged from Slice 3: one pre-existing expanded
+  node-order golden aggregate failure and one architecture aggregate failure
+  containing two pre-existing composition-root violations. Chromium web smoke
+  remains environment-blocked at `bootstrap_check_in ... Permission denied
+  (1100)`.
+- Completion commit status: eligible for the focused Slice 4 completion
+  commit; commit remains pending the approval-committer gate. No stage or
+  commit was performed.
+- Exact current paths from `git status --porcelain=v1` (36 paths):
+
+  ```text
+  docs/specs/features/semantic-diff-explorer/TASKS.md
+  docs/specs/features/semantic-diff-explorer/TRACEABILITY.md
+  src/application/flow-graph/buildExpandedFlowGraph.ts
+  src/application/flow-graph/buildFlowGraph.ts
+  src/application/flow-graph/buildFlowGraphCore.ts
+  src/application/flow-graph/buildSemanticDiffFlowHighlights.ts
+  src/application/flow-graph/flowGraphDocument.ts
+  src/application/semantic-diff/semanticDiffExplorerProjection.ts
+  src/application/unit-list/unitListDocument.ts
+  src/bootstrap/extension/extensionSubscriptions.ts
+  src/bootstrap/extension/semanticDiffWiring.ts
+  src/bootstrap/extension/viewerWiring.ts
+  src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts
+  src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts
+  src/presentation/vscode/webview/ajsDocument.ts
+  src/presentation/webview/editor/ajsFlow/FlowContents.tsx
+  src/presentation/webview/editor/ajsFlow/FlowGraphCanvas.tsx
+  src/presentation/webview/editor/ajsFlow/flowGraphView.ts
+  src/presentation/webview/editor/ajsFlow/flowMiniMap.ts
+  src/presentation/webview/editor/ajsFlow/nodes/AjsNode.tsx
+  src/presentation/webview/editor/ajsFlow/useFlowGraphState.ts
+  src/presentation/webview/viewerHostMessages.ts
+  src/resource/i18n/message_en.ts
+  src/resource/i18n/message_ja.ts
+  src/test/suite/buildExpandedFlowGraphUseCase.test.ts
+  src/test/suite/buildFlowGraph.test.ts
+  src/test/suite/flowGraphDocument.test.ts
+  src/test/suite/flowGraphView.test.ts
+  src/test/suite/semanticDiffExplorerProjection.test.ts
+  src/test/suite/semanticDiffFlowHighlights.test.ts
+  src/test/suite/viewerHostMessages.test.ts
+  src/application/flow-graph/buildSemanticDiffFlowOverlay.ts
+  src/application/semantic-diff/semanticDiffRecordOccurrence.ts
+  src/bootstrap/extension/semanticDiffFlowViewerBridge.ts
+  src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts
+  src/test/suite/semanticDiffExplorerFlow.test.ts
+  ```
+
 ## Cross-Slice Readiness And Approval Boundaries
 
 - Every slice runs focused tests, qlty, and build; Slice 4 runs complete
-  compiled desktop and web suites. Architecture tests retain zero exceptions.
+  compiled desktop and web suites. The architecture suite retains the two
+  documented pre-existing composition-root violations and no Slice 4
+  architecture regression.
 - Every slice still receives an independent implementation review. Under the
   explicit 2026-09-06 user instruction, a `Ready` verdict conditionally
   authorizes that slice's Completion Approval automatically; actionable Findings

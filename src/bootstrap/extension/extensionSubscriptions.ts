@@ -5,6 +5,7 @@ import type { ExtensionDependencies } from "./extensionDependencies";
 import { createWebApiImportSubscriptions } from "./webapiImportWiring";
 import { createViewerSubscriptions } from "./viewerWiring";
 import { createSemanticDiffSubscriptions } from "./semanticDiffWiring";
+import { createSemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 
 export const createExtensionSubscriptions = (
   context: vscode.ExtensionContext,
@@ -23,13 +24,23 @@ export const createExtensionSubscriptions = (
     importCapability: dependencies.webApiImport,
     telemetry: dependencies.telemetry,
   }),
-  ...createSemanticDiffSubscriptions({
-    extensionContext: context,
-    ...dependencies.semanticDiff,
-  }),
-  ...createViewerSubscriptions({
-    context,
-    telemetry: dependencies.telemetry,
-    buildUnitList: dependencies.buildUnitList,
-  }),
+  ...(() => {
+    const flowBridge = createSemanticDiffFlowViewerBridge({
+      buildUnitList: dependencies.buildUnitList,
+      context,
+    });
+    return [
+      ...createSemanticDiffSubscriptions({
+        extensionContext: context,
+        ...dependencies.semanticDiff,
+        flowBridge,
+      }),
+      ...createViewerSubscriptions({
+        context,
+        telemetry: dependencies.telemetry,
+        buildUnitList: dependencies.buildUnitList,
+        flowBridge,
+      }),
+    ];
+  })(),
 ];

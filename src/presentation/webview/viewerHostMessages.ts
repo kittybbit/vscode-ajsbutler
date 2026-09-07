@@ -114,7 +114,13 @@ const isPlainJsonValue = (root: unknown): boolean => {
 const isViewerDocumentData = (data: unknown): data is UnitListDocumentDto => {
   if (
     !isPlainRecord(data) ||
-    !hasOnlyKeys(data, ["rootUnits", "warnings", "unitDefinitions", "unitList"])
+    !hasOnlyKeys(data, [
+      "rootUnits",
+      "warnings",
+      "unitDefinitions",
+      "unitList",
+      "semanticDiffOverlay",
+    ])
   ) {
     return false;
   }
@@ -170,6 +176,9 @@ const parseViewerDocumentChangedMessage = (
 const parseViewerRevealUnitMessage = (
   data: unknown,
 ): ViewerRevealUnitMessage | undefined => {
+  if (!isPlainRecord(data) || !hasOnlyKeys(data, ["absolutePath"])) {
+    return undefined;
+  }
   const result = parseNavigationRequest(data);
   return result.status === "available"
     ? { type: REVEAL_UNIT, data: result.request }

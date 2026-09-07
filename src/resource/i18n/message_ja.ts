@@ -168,6 +168,7 @@ const jaValues = [
   "ユニット一覧をCSVとしてコピーしました。",
   "{unit}を展開しました。",
   "{unit}を折りたたみました。",
+  "セマンティック差分の{source}から{target}への関係は{count}件一致します。",
   "左",
   "右",
   "上",
@@ -282,6 +283,15 @@ const jaValues = [
   "変更前",
   "変更後",
   "なし",
+  "意味差分の凡例",
+  "追加",
+  "削除",
+  "変更",
+  "確認",
+  "意味差分: 追加",
+  "意味差分: 削除",
+  "意味差分: 変更",
+  "意味差分: 確認が必要",
 ] as const;
 
 const messageKeys = Object.keys(en) as Array<keyof typeof en>;
