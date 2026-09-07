@@ -265,9 +265,12 @@ the selected `docs/specs/features/semantic-diff-explorer/` folder.
 
 The prior `Close` recommendation is superseded. The replan received final
 independent `Ready` review, Human Approval, and focused commit `54ca4005`.
-Slice 5 is the sole active implementation-approved slice; Slices 6-13 remain
-planned and dependency-blocked until their predecessors are complete,
-reviewed, and focused-committed.
+Slice 5 is complete and focused-committed as
+`ee76722d0628d2d4e223f6faf13751a7a16a3a35`. Slice 6 implementation is
+complete, but its independent review is blocked by a narrow replan adding the
+omitted `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`
+path; Slices 7-13 remain planned and dependency-blocked until their
+predecessors are complete, reviewed, and focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -275,7 +278,7 @@ reviewed, and focused-committed.
 | ------------------------------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Slice 5: MUI/WCAG Explorer surface               | EXP-11; EXP-9; CSP/theme/high-contrast/reflow/accessibility evidence  | `src/presentation/webview/shared/muiTheme.ts` is the canonical Slice-5-owned theme helper; `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`, `semanticDiffExplorer.tsx`, `semanticDiffExplorerLocalization.ts`, optional Explorer tree/state helpers, `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` static CSP assertions, and `src/test/suite/semanticDiffExplorerDom.test.tsx`/`semanticDiffExplorerPanel.test.ts`; complete applicable WCAG 2.2 AA matrix plus explicit N/A rationale, including 200% text resize, 400%/320 CSS px reflow, numeric contrast/focus/target thresholds, 1.1.1/1.3.4/2.4.1/2.4.2/2.5.2/2.5.7/3.1.1/3.1.2/3.2.4, axe/manual, and desktop/web bundle evidence |
 | Slice 6A: host identity evidence                 | EXP-3; immutable context/session lifecycle                            | `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` and `src/test/suite/semanticDiffExplorerPanel.test.ts`; exact `SemanticDiffOutputContext` object identity, retained registry context, emitted session ID, and no clone/rebuild proof                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Slice 6B: actual-session confirmation filter     | EXP-3; filter scenario; visible zero-match feedback                   | `src/test/suite/semanticDiffExplorerDom.test.tsx` sends `createSemanticDiffExplorerSessionMessage` with the 6A session ID to the actual App; exact `(data-record-kind,data-record-id,data-row-id)` tuples prove ordinary exclusion, confirmation retention, zero-match status, cards, and latent selection restore                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Slice 6B: actual-session confirmation filter     | EXP-3; filter scenario; visible zero-match feedback                   | `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx` renders the approved stable row/group attributes; `src/test/suite/semanticDiffExplorerDom.test.tsx` sends `createSemanticDiffExplorerSessionMessage` with the 6A session ID to the actual App; exact `(data-record-kind,data-record-id,data-row-id)` tuples prove ordinary exclusion, confirmation retention, zero-match status, cards, and latent selection restore                                                                                                                                                                                                                                                                                             |
 | Slice 7: application projection/transport smells | qlty findings in closed validators/projection/occurrence helpers      | `semanticDiffExplorerMessages.ts`, `semanticDiffExplorerProjection.ts`, `semanticDiffRecordOccurrence.ts`; strict-union/property/focused regression suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | Slice 8: source capture/parser smells            | qlty findings in source-index/capture/report-data composition         | `AjsParserWithSourceIndexPort.ts`, `semanticDiffSourceCapture.ts`, `AntlrAjsParser.ts`, `buildSemanticDiffReportData.ts`; parser/capture/architecture/desktop-web suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Slice 9: Flow graph/highlight smells             | qlty findings in graph builders/highlight projection                  | `buildExpandedFlowGraph.ts`, `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, `buildSemanticDiffFlowHighlights.ts`; graph IDs/order/large-fixture suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -295,6 +298,7 @@ environment-owned validation risk whenever web smoke is attempted.
 
 ### Slice 5 Implementation Evidence (2026-09-07)
 
+- Completion commit: `ee76722d0628d2d4e223f6faf13751a7a16a3a35`.
 - Delivered the canonical MUI 7 theme and VS Code-token/forced-colors/focus/
   target-size policy in `src/presentation/webview/shared/muiTheme.ts`, then
   migrated only the Semantic Diff Explorer presentation surface and its
@@ -324,6 +328,54 @@ environment-owned validation risk whenever web smoke is attempted.
   eslint-disable directive in `src/test/suite/index.ts`. Targeted Slice 5
   qlty check and smells remain clean; no unrelated baseline file was changed.
 
+### Slice 6 Activation (2026-09-07)
+
+- Slice 6 is the sole active implementation-approved slice after the Slice 5
+  completion commit above. Its 6A host identity and 6B real
+  `createSemanticDiffExplorerSessionMessage` → MUI App/DOM evidence are
+  mandatory; Slices 7-13 remain dependency-blocked.
+- Narrow replan trigger: the implementation review is blocked until the
+  reviewed replan adds `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`
+  to Slice 6's approved/cohesive scope. No behavior, design, or slice-order
+  change is introduced; the uncommitted implementation and six closure drafts
+  remain preserved.
+- The required DOM contract is stable `data-row-id`, `data-record-kind`,
+  `data-record-id`, and group `data-row-kind="group"`. Acceptance preserves
+  canonical cards, removes ordinary leaves only under `確認が必要`, retains
+  confirmation records and confirmation-required changes, exposes visible
+  zero-match status, and restores latent selection in the same session.
+
+### Slice 6 Implementation Evidence (2026-09-07)
+
+- 6A host identity is proven by `semanticDiffExplorerPanel.test.ts`: the
+  registry entry and session retain the exact `SemanticDiffOutputContext`
+  object, including its `result` and `summary`, and the emitted session
+  message carries that session's ID and view model.
+- 6B actual-session behavior is proven by `semanticDiffExplorerDom.test.tsx`,
+  which sends `createSemanticDiffExplorerSessionMessage` with the host session
+  ID to the real `SemanticDiffExplorerApp`. Exact record tuples show ordinary
+  leaves disappear while confirmation records and confirmation-required
+  changes remain; canonical cards are unchanged, zero-match feedback is
+  visible, and latent selection returns after clearing the filter.
+- Groups expose `data-row-kind="group"`; leaf rows expose stable
+  `data-row-id`, `data-record-kind`, and `data-record-id` test hooks. No
+  transport, summary, comparison, or accessibility role contract changed.
+- Validation passed: `rtk pnpm run test:compile`, desktop and web test
+  preparation, compiled Electron runner, focused qlty check, formatter check,
+  and `rtk git diff --check`. The focused qlty smells run retains only the
+  pre-existing projection/panel complexity findings assigned to later Slice
+  7/11 decomposition; no suppressions or thresholds changed.
+- Managed Chromium smoke remains `blocked-before-execution` because the host
+  reports `bootstrap_check_in ... Permission denied (1100)`; desktop smoke
+  and both production bundles pass, and no browser pass is claimed.
+- Implementation feedback: record-level DOM tuples are necessary because
+  canonical summary cards intentionally do not change when the tree filter
+  changes. The existing projection predicate was correct; the apparent
+  no-op was caused by relying on unchanged cards and lacking actual
+  App/session-message record evidence. The identity test prevents the
+  integration proof from silently using a cloned or rebuilt comparison
+  context.
+
 ## Replan Compatibility, Lifecycle, And Predecessor Traceability
 
 <!-- markdownlint-disable MD013 MD060 -->
@@ -332,7 +384,7 @@ environment-owned validation risk whenever web smoke is attempted.
 | ----- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 5     | Slice 2's closed Explorer messages, tree roles, action IDs, and existing webview entry                   | `src/presentation/webview/shared/muiTheme.ts` is the sole MUI theme owner; `semanticDiffExplorerView.tsx`, `semanticDiffExplorer.tsx`, `semanticDiffExplorerLocalization.ts`, optional tree/state helpers, and `src/test/suite/semanticDiffExplorerDom.test.tsx` preserve DTO-only presentation; `semanticDiffExplorerPanel.test.ts` statically proves CSP; VS Code `^1.75.0`, desktop/web bundles, and no remote assets remain. |
 | 6A    | Slice 3's exact immutable `SemanticDiffOutputContext` and Slice 2's session registry                     | `semanticDiffExplorerPanel.ts` plus `semanticDiffExplorerPanel.test.ts` prove same-object host handoff, borrowed registry identity, exact session ID, disposal epoch, and no clone/rebuild before message emission.                                                                                                                                                                                                              |
-| 6B    | Slice 1's projection predicate and Slice 2's App/session-message contract                                | `semanticDiffExplorerDom.test.tsx` uses the exact host-emitted session ID and `createSemanticDiffExplorerSessionMessage`; stable `data-row-id`, `data-record-kind`, and `data-record-id` are presentation test hooks only, with cards sourced from the retained summary.                                                                                                                                                         |
+| 6B    | Slice 1's projection predicate and Slice 2's App/session-message contract                                | `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx` renders stable `data-row-id`, `data-record-kind`, `data-record-id`, and group attributes; `semanticDiffExplorerDom.test.tsx` uses the exact host-emitted session ID and `createSemanticDiffExplorerSessionMessage`, with cards sourced from the retained summary.                                                                                          |
 | 7     | Structured-output summary/result, risk reason union, strict browser-safe DTOs                            | `src/application/semantic-diff/semanticDiffExplorerMessages.ts`, `semanticDiffExplorerProjection.ts`, and `semanticDiffRecordOccurrence.ts` remain application-only and preserve extra-key rejection, nullability, IDs, payload limits, and O(n) filtering.                                                                                                                                                                      |
 | 8     | Slice 3's `AjsParserWithSourceIndexPort`, same-pass capture, and existing `AjsParserPort.parse(content)` | `src/application/parsing/AjsParserWithSourceIndexPort.ts`, `semanticDiffSourceCapture.ts`, `src/infrastructure/parser/AntlrAjsParser.ts`, and `buildSemanticDiffReportData.ts` retain normalized document/index identity, scoped ownership, parser-infrastructure ANTLR boundary, and desktop/web-safe application contracts.                                                                                                    |
 | 9     | Slice 4's formal Flow node/edge IDs, canonical-pair mapping, deterministic order                         | `buildExpandedFlowGraph.ts`, `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, and `buildSemanticDiffFlowHighlights.ts` preserve duplicate ordinal IDs, side-specific mapping, non-focusable relation edges, large-graph bounds, and existing Flow goldens.                                                                                                                                                                          |
