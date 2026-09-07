@@ -48,13 +48,31 @@ const mergeHighlightKind = (
 ): FlowGraphSemanticDiffHighlightKind =>
   highlightRank[next] > highlightRank[current] ? next : current;
 
-const addHighlight = (
-  highlights: Map<string, MutableFlowHighlight>,
-  key: string | undefined,
-  kind: FlowGraphSemanticDiffHighlightKind,
+type AddHighlightOptions = {
+  highlights: Map<string, MutableFlowHighlight>;
+  key: string | undefined;
+  kind: FlowGraphSemanticDiffHighlightKind;
+  id: string;
+  idType: "change" | "confirmation";
+};
+
+const addHighlightId = (
+  highlight: MutableFlowHighlight,
   id: string,
-  idType: "change" | "confirmation",
+  idType: AddHighlightOptions["idType"],
 ): void => {
+  const ids =
+    idType === "change" ? highlight.changeIds : highlight.confirmationIds;
+  ids.add(id);
+};
+
+const addHighlight = ({
+  highlights,
+  key,
+  kind,
+  id,
+  idType,
+}: AddHighlightOptions): void => {
   if (key === undefined) return;
   const current = highlights.get(key) ?? {
     kind,
@@ -62,8 +80,7 @@ const addHighlight = (
     confirmationIds: new Set<string>(),
   };
   current.kind = mergeHighlightKind(current.kind, kind);
-  if (idType === "change") current.changeIds.add(id);
-  else current.confirmationIds.add(id);
+  addHighlightId(current, id, idType);
   highlights.set(key, current);
 };
 
@@ -122,22 +139,40 @@ const relationEdgeIdsByCanonicalPair = (
   return idsByPair;
 };
 
-const relationIdsForTarget = (
-  result: SemanticDiffResult,
-  side: SemanticDiffSide,
+const relationForTarget = (
   target: SemanticDiffTarget | undefined,
   endpoint: SemanticDiffRelationEndpoint | null | undefined,
-  idsByPair: ReadonlyMap<string, readonly string[]>,
-): readonly string[] => {
-  const relation =
-    endpoint === null || endpoint === undefined
-      ? relationFromTarget(target)
-      : endpoint;
+): SemanticDiffRelationReference | undefined =>
+  endpoint ?? relationFromTarget(target);
+
+type RelationIdsForTargetOptions = {
+  result: SemanticDiffResult;
+  side: SemanticDiffSide;
+  target: SemanticDiffTarget | undefined;
+  endpoint: SemanticDiffRelationEndpoint | null | undefined;
+  idsByPair: ReadonlyMap<string, readonly string[]>;
+};
+
+const relationIdsForTarget = ({
+  result,
+  side,
+  target,
+  endpoint,
+  idsByPair,
+}: RelationIdsForTargetOptions): readonly string[] => {
+  const relation = relationForTarget(target, endpoint);
   if (!relation) return [];
-  const exact = idsByPair.get(relationTupleKey(relation));
-  if (exact && exact.length > 0) return exact;
-  // A remapped endpoint still resolves only against concrete side relations.
-  return result.inputs[side].relations
+  return relationIdsForPair(
+    idsByPair.get(relationTupleKey(relation)),
+    () => concreteRelationIds(result.inputs[side].relations, relation),
+  );
+};
+
+const concreteRelationIds = (
+  relations: readonly SemanticDiffRelationReference[],
+  relation: SemanticDiffRelationReference,
+): readonly string[] =>
+  relations
     .filter(
       (candidate) =>
         candidate.sourceUnitId === relation.sourceUnitId &&
@@ -147,7 +182,11 @@ const relationIdsForTarget = (
     .map((candidate, ordinal) =>
       flowGraphEdgeId(toFlowRelation(candidate), ordinal),
     );
-};
+
+const relationIdsForPair = (
+  exact: readonly string[] | undefined,
+  fallback: () => readonly string[],
+): readonly string[] => (exact && exact.length > 0 ? exact : fallback());
 
 const targetExistsOnSide = (
   result: SemanticDiffResult,
@@ -193,15 +232,27 @@ const addTargetHighlight = ({
   relationEndpoint?: SemanticDiffRelationEndpoint | null;
 }): void => {
   if (!targetExistsOnSide(result, side, target)) return;
-  addHighlight(set.nodes, unitTargetId(target), kind, id, idType);
-  for (const edgeId of relationIdsForTarget(
+  addHighlight({
+    highlights: set.nodes,
+    key: unitTargetId(target),
+    kind,
+    id,
+    idType,
+  });
+  for (const edgeId of relationIdsForTarget({
     result,
     side,
     target,
-    relationEndpoint,
+    endpoint: relationEndpoint,
     idsByPair,
-  )) {
-    addHighlight(set.edges, edgeId, kind, id, idType);
+  })) {
+    addHighlight({
+      highlights: set.edges,
+      key: edgeId,
+      kind,
+      id,
+      idType,
+    });
   }
 };
 
@@ -222,38 +273,56 @@ const freezeSet = (
   ),
 });
 
-/** Project immutable semantic records into concrete before/after Flow IDs. */
-export const buildSemanticDiffFlowHighlights = (
-  result: SemanticDiffResult,
-): FlowGraphSemanticDiffHighlights => {
-  const sets = { before: createHighlightSet(), after: createHighlightSet() };
-  const edgeIds = {
-    before: relationEdgeIdsByCanonicalPair(result, "before"),
-    after: relationEdgeIdsByCanonicalPair(result, "after"),
-  };
+const changeHighlightKind = (
+  kind: SemanticDiffChange["kind"],
+): FlowGraphSemanticDiffHighlightKind => {
+  if (kind === "added") return "added";
+  if (kind === "removed") return "removed";
+  return "changed";
+};
 
+type HighlightSideContext = {
+  result: SemanticDiffResult;
+  sets: Record<SemanticDiffSide, ReturnType<typeof createHighlightSet>>;
+  edgeIds: Record<SemanticDiffSide, ReadonlyMap<string, readonly string[]>>;
+};
+
+const addChangeHighlights = ({
+  result,
+  sets,
+  edgeIds,
+}: HighlightSideContext): void => {
   for (const change of result.changes) {
-    if (!renderable(change.confirmationLevel)) continue;
-    const side = targetSideForChange(change.kind);
-    const target = side === "before" ? change.before : change.after;
-    addTargetHighlight({
-      idsByPair: edgeIds[side],
-      result,
-      side,
-      id: change.id,
-      idType: "change",
-      kind:
-        change.kind === "added"
-          ? "added"
-          : change.kind === "removed"
-            ? "removed"
-            : "changed",
-      set: sets[side],
-      target,
-      relationEndpoint: change.relationPair?.[side] ?? null,
-    });
+    addChangeHighlight({ result, sets, edgeIds, change });
   }
+};
 
+const addChangeHighlight = ({
+  result,
+  sets,
+  edgeIds,
+  change,
+}: HighlightSideContext & { change: SemanticDiffChange }): void => {
+  if (!renderable(change.confirmationLevel)) return;
+  const side = targetSideForChange(change.kind);
+  addTargetHighlight({
+    idsByPair: edgeIds[side],
+    result,
+    side,
+    id: change.id,
+    idType: "change",
+    kind: changeHighlightKind(change.kind),
+    set: sets[side],
+    target: side === "before" ? change.before : change.after,
+    relationEndpoint: change.relationPair?.[side] ?? null,
+  });
+};
+
+const addConfirmationHighlights = ({
+  result,
+  sets,
+  edgeIds,
+}: HighlightSideContext): void => {
   for (const item of result.confirmationRequired) {
     const side = targetSideForConfirmation(item.reasonCode);
     addTargetHighlight({
@@ -268,6 +337,20 @@ export const buildSemanticDiffFlowHighlights = (
       relationEndpoint: item.detail.relationPair?.[side] ?? null,
     });
   }
+};
+
+/** Project immutable semantic records into concrete before/after Flow IDs. */
+export const buildSemanticDiffFlowHighlights = (
+  result: SemanticDiffResult,
+): FlowGraphSemanticDiffHighlights => {
+  const sets = { before: createHighlightSet(), after: createHighlightSet() };
+  const edgeIds = {
+    before: relationEdgeIdsByCanonicalPair(result, "before"),
+    after: relationEdgeIdsByCanonicalPair(result, "after"),
+  };
+  const context = { result, sets, edgeIds };
+  addChangeHighlights(context);
+  addConfirmationHighlights(context);
 
   const before = freezeSet(sets.before);
   const after = freezeSet(sets.after);

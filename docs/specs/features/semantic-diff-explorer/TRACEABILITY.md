@@ -271,9 +271,11 @@ was focused-committed as `1ede39bb`; Slice 6 is complete and focused-committed
 as `6af753e7`. Slice 7 is complete and focused-committed as
 `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`. Full `qlty check` then reported
 14 committed Slice 7 files as unformatted. Slice 7A completed its approved
-formatter-only reconciliation and focused-committed as `c9b97b0d`. Slice 8 is
-now the sole active implementation-approved slice; Slices 9-13 remain planned
-and dependency-blocked until their predecessors are complete, reviewed, and
+formatter-only reconciliation and focused-committed as `c9b97b0d`. Slice 8
+completed and focused-committed as
+`792842b9d82dfa728f7742fc1ea1fb11e4623bc9`. Slice 9 is now the sole active
+implementation-approved slice; Slices 10-13 remain planned and
+dependency-blocked until their predecessors are complete, reviewed, and
 focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
@@ -360,7 +362,9 @@ environment-owned validation risk whenever web smoke is attempted.
 - The exact assigned qlty families were resolved without suppression,
   allowlisting, threshold changes, or configuration edits. Slice 7A addressed
   only the committed formatter output and focused-committed as `c9b97b0d`;
-  Slice 8 is now active and Slices 9-13 remain dependency-blocked.
+  Slice 8 completed and focused-committed as
+  `792842b9d82dfa728f7742fc1ea1fb11e4623bc9`; Slice 9 is now active and
+  Slices 10-13 remain dependency-blocked.
 
 ### Slice 7A Activation (2026-09-07)
 
@@ -420,9 +424,9 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 
 ### Slice 8 Activation (2026-09-07)
 
-- Slice 8 is the sole active implementation-approved slice after Slice 7A
+- Slice 8 was the sole active implementation-approved slice after Slice 7A
   completion commit `c9b97b0d` (following Slice 7 completion commit
-  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`). Its scope is source capture,
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`). Its scope was source capture,
   parser locator, and
   report-data composition refactoring only; same-pass capture, parser/source
   DTO behavior, ownership, errors, and the `AjsParserPort.parse(content)`
@@ -433,9 +437,31 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `functionComplexity=4`, `totalComplexity=1`, and `complexBinary=2`;
   `AntlrAjsParser.ts` has `functionComplexity=1`; and
   `buildSemanticDiffReportData.ts` has `functionComplexity=1`.
+- Remediation used cohesive extraction only: no suppression, allowlist,
+  threshold, generated-ignore, or qlty configuration change. Slice 8's
+  completion commit is `792842b9d82dfa728f7742fc1ea1fb11e4623bc9`; Slices
+  10-13 remain dependency-blocked until Slice 9 is complete.
+
+### Slice 9 Activation (2026-09-07)
+
+- Slice 9 is the sole active implementation-approved slice after Slice 8
+  completion commit `792842b9d82dfa728f7742fc1ea1fb11e4623bc9`. Its scope is
+  Flow graph construction and semantic highlight projection only; formal IDs,
+  duplicate ordinals, deterministic order, side mapping, relation-edge
+  non-focusability, large-graph bounds, and ordinary Flow behavior remain
+  fixed.
+- Exact paths are `src/application/flow-graph/buildExpandedFlowGraph.ts`,
+  `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, and
+  `buildSemanticDiffFlowHighlights.ts`, with the focused graph/use-case/
+  highlight tests recorded in `TASKS.md`. Baseline qlty assignments are
+  `buildExpandedFlowGraph.ts`: `manyParameters=1`,
+  `functionComplexity=6`, `totalComplexity=1`; `buildFlowGraph.ts`:
+  `functionComplexity=2`; `buildFlowGraphCore.ts`: zero assigned findings;
+  and `buildSemanticDiffFlowHighlights.ts`: `manyParameters=2`,
+  `functionComplexity=3`. Other rule families are zero for these files.
 - Remediation must use cohesive extraction only: no suppression, allowlist,
-  threshold, generated-ignore, or qlty configuration change. Slices 9-13
-  remain dependency-blocked until Slice 8 is independently reviewed and
+  threshold, generated-ignore, or qlty configuration change. Slices 10-13
+  remain dependency-blocked until Slice 9 is independently reviewed and
   focused-committed.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
@@ -520,6 +546,7 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 
 ### Slice 8 Implementation Evidence (2026-09-07)
 
+- Completion commit: `792842b9d82dfa728f7742fc1ea1fb11e4623bc9`.
 - Slice 8 refactors the approved source-index/capture/parser/report-data
   boundaries only. The four approved entry points retain their public APIs;
   cohesive application helpers own closed source-index guards, strict lookup
@@ -548,13 +575,51 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   application-owned and imported type-only from the public contracts to avoid
   a parser/domain or host lifetime leak. The independent reviewer should
   verify the public export surface and the exact lifecycle/error-order matrix.
-  No completion commit was created by the implementer.
+  Focused completion commit `792842b9d82dfa728f7742fc1ea1fb11e4623bc9` is
+  recorded.
 - Review follow-up: `qlty fmt` was applied only to the ten assigned Slice 8
   runtime paths: four source-index helpers, the capture facade, four capture
   helpers/registry/scope paths, and `AntlrAjsParser.ts`. The resulting diff is
   mechanical formatter output only. The final targeted smell scan is clean,
   `qlty check --no-fix --no-formatters` passes, and the parser/capture/report/
   architecture desktop suite plus desktop/web builds remain passing.
+
+### Slice 9 Implementation Evidence (2026-09-08)
+
+- Slice 9 implementation is complete within its approved Flow graph and
+  semantic-highlight boundary; independent implementation review and the
+  conditional Completion Approval remain pending. No commit was created by
+  the implementer.
+- `buildExpandedFlowGraph.ts` now separates request validation, ancestor
+  collection, expanded node/edge appends, iterative expansion frames,
+  containment frames, and sibling-impact constraints. `buildFlowGraph.ts`
+  now isolates ancestor and scope validation. `buildSemanticDiffFlowHighlights.ts`
+  now uses option objects and cohesive relation/change/confirmation projection
+  helpers. `buildFlowGraphCore.ts` required no source change because it had no
+  assigned baseline smell.
+- The public graph/highlight behavior remains unchanged: formal IDs and
+  duplicate ordinals remain generated at the same scope, canonical relation
+  pairs resolve to concrete side-specific edges, relation targets do not gain
+  node focusability, confirmation-required state still outranks change state,
+  and expanded/nested/ordinary Flow traversal remains deterministic and
+  bounded.
+- Targeted `qlty smells --no-snippets` over all four approved production paths
+  returned zero findings. The approved paths were formatted without changing
+  qlty policy, and `git diff --check` passed. No suppression, allowlist,
+  threshold relaxation, generated-ignore, or configuration edit was made.
+- Validation passed `pnpm run test:compile`, desktop test preparation, the
+  compiled Electron runner (`node ./out/test/runTest.js`, exit 0), web test
+  preparation, and the production desktop/web build. Existing production
+  bundle-size warnings remain unchanged; browser smoke was not claimed.
+- Compatibility impact is none by design: VS Code `^1.75.0`, desktop/web
+  bundles, application architecture, browser-safe DTOs, and telemetry remain
+  unchanged. Slice 10 overlay/document/message paths, host/wiring, renderer,
+  webview, and closure-draft documents remain outside this implementation.
+- Review package: run the existing graph, expanded-graph, graph-use-case, and
+  semantic-diff-highlight suites and verify the Slice 4 ID/order/side-mapping
+  contracts. Recommended route is independent `implementation-reviewer`;
+  Completion Approval is conditionally automatic only after a `Ready` verdict
+  with no findings.
 
 ## Replan Compatibility, Lifecycle, And Predecessor Traceability
 

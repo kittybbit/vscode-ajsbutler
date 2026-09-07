@@ -93,21 +93,126 @@ const isDescendantOf = (
   unit: FlowGraphUnitDto,
   ancestorUnitId: string,
   index: FlowGraphDocumentIndex,
-): boolean => {
+): boolean => collectAncestorIds(unit, index).includes(ancestorUnitId);
+
+const collectAncestorIds = (
+  unit: FlowGraphUnitDto,
+  index: FlowGraphDocumentIndex,
+): string[] => {
   const visited = new Set<string>();
-  let parentId = unit.parentId;
-  while (parentId && !visited.has(parentId)) {
-    if (parentId === ancestorUnitId) return true;
+  const ancestorIds: string[] = [];
+  for (
+    let parentId = unit.parentId;
+    parentId && !visited.has(parentId);
+    parentId = index.unitById.get(parentId)?.parentId
+  ) {
     visited.add(parentId);
-    parentId = index.unitById.get(parentId)?.parentId;
+    ancestorIds.push(parentId);
   }
-  return false;
+  return ancestorIds;
 };
 
 type NormalizedExpandedUnitIds = {
   ids: Set<string>;
   orderedIds: string[];
   issues: ExpandedFlowGraphIssue[];
+};
+
+type RequestedExpandedUnitValidation =
+  | { unit: FlowGraphUnitDto }
+  | { issue: ExpandedFlowGraphIssue };
+
+type RequestedExpandedUnitIssue = {
+  code:
+    | "missing_visible_unit"
+    | "out_of_scope_visible_unit"
+    | "invalid_visible_unit";
+  message: string;
+  unitId: string;
+};
+
+const requestedExpandedUnitIssue = ({
+  unitId,
+  activeScopeUnitId,
+  index,
+}: {
+  unitId: string;
+  activeScopeUnitId: string;
+  index: FlowGraphDocumentIndex;
+}): RequestedExpandedUnitValidation => {
+  const unit = index.unitById.get(unitId);
+  const issue = unit
+    ? requestedExpandedUnitScopeIssue({
+        unit,
+        unitId,
+        activeScopeUnitId,
+        index,
+      })
+    : {
+        code: "missing_visible_unit" as const,
+        message: `Visible nested unit was not found: ${unitId}`,
+        unitId,
+      };
+  return issue ? { issue } : { unit: unit as FlowGraphUnitDto };
+};
+
+const requestedExpandedUnitScopeIssue = ({
+  unit,
+  unitId,
+  activeScopeUnitId,
+  index,
+}: {
+  unit: FlowGraphUnitDto;
+  unitId: string;
+  activeScopeUnitId: string;
+  index: FlowGraphDocumentIndex;
+}): RequestedExpandedUnitIssue | undefined => {
+  if (isOutsideExpandedScope(unit, activeScopeUnitId, index)) {
+    return {
+      code: "out_of_scope_visible_unit",
+      message: `Visible nested unit is outside the active scope: ${unitId}`,
+      unitId,
+    };
+  }
+  if (!isExpandableNestedUnit(unit)) {
+    return {
+      code: "invalid_visible_unit",
+      message: `Unit is not an expandable nested jobnet: ${unitId}`,
+      unitId,
+    };
+  }
+  return undefined;
+};
+
+const isOutsideExpandedScope = (
+  unit: FlowGraphUnitDto,
+  activeScopeUnitId: string,
+  index: FlowGraphDocumentIndex,
+): boolean =>
+  unit.id === activeScopeUnitId ||
+  !isDescendantOf(unit, activeScopeUnitId, index);
+
+const normalizeRequestedExpandedUnit = ({
+  unitId,
+  activeScopeUnitId,
+  index,
+  seen,
+}: {
+  unitId: string;
+  activeScopeUnitId: string;
+  index: FlowGraphDocumentIndex;
+  seen: ReadonlySet<string>;
+}): RequestedExpandedUnitValidation => {
+  if (seen.has(unitId)) {
+    return {
+      issue: {
+        code: "duplicate_visible_unit",
+        message: `Duplicate visible nested unit was omitted: ${unitId}`,
+        unitId,
+      },
+    };
+  }
+  return requestedExpandedUnitIssue({ unitId, activeScopeUnitId, index });
 };
 
 const normalizeRequestedExpandedUnitIds = (
@@ -120,49 +225,28 @@ const normalizeRequestedExpandedUnitIds = (
   const issues: ExpandedFlowGraphIssue[] = [];
 
   for (const unitId of requestedUnitIds) {
-    if (seen.has(unitId)) {
-      issues.push({
-        code: "duplicate_visible_unit",
-        message: `Duplicate visible nested unit was omitted: ${unitId}`,
-        unitId,
-      });
-      continue;
-    }
+    const validation = normalizeRequestedExpandedUnit({
+      unitId,
+      activeScopeUnitId,
+      index,
+      seen,
+    });
     seen.add(unitId);
-    const unit = index.unitById.get(unitId);
-    if (!unit) {
-      issues.push({
-        code: "missing_visible_unit",
-        message: `Visible nested unit was not found: ${unitId}`,
-        unitId,
-      });
-      continue;
-    }
-    if (
-      unit.id === activeScopeUnitId ||
-      !isDescendantOf(unit, activeScopeUnitId, index)
-    ) {
-      issues.push({
-        code: "out_of_scope_visible_unit",
-        message: `Visible nested unit is outside the active scope: ${unitId}`,
-        unitId,
-      });
-      continue;
-    }
-    if (!isExpandableNestedUnit(unit)) {
-      issues.push({
-        code: "invalid_visible_unit",
-        message: `Unit is not an expandable nested jobnet: ${unitId}`,
-        unitId,
-      });
-      continue;
-    }
-    units.push(unit);
+    recordNormalizedExpandedUnit(validation, units, issues);
   }
 
   units.sort(compareUnits);
   const orderedIds = units.map((unit) => unit.id);
   return { ids: new Set(orderedIds), orderedIds, issues };
+};
+
+const recordNormalizedExpandedUnit = (
+  validation: RequestedExpandedUnitValidation,
+  units: FlowGraphUnitDto[],
+  issues: ExpandedFlowGraphIssue[],
+): void => {
+  if ("issue" in validation) issues.push(validation.issue);
+  else units.push(validation.unit);
 };
 
 const nodeTypeByUnitType: Partial<Record<string, FlowGraphNodeType>> = {
@@ -255,30 +339,100 @@ const appendExpandedUnitContent = (
   expandedUnit: FlowGraphUnitDto,
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): void => {
-  const conditionUnit = expandedUnit.children.find(
-    (child) => child.unitType === "rc",
-  );
-  const visibleChildren = expandedUnit.children.filter(
+  const visibleChildren = expandedVisibleChildren(expandedUnit);
+  appendExpandedNodes({
+    state,
+    expandedUnit,
+    visibleChildren,
+    semanticDiffHighlights,
+  });
+  appendExpandedEdges({ state, expandedUnit, semanticDiffHighlights });
+};
+
+const expandedVisibleChildren = (
+  unit: FlowGraphUnitDto,
+): FlowGraphUnitDto[] => {
+  const visibleChildren = unit.children.filter(
     (child) => child.unitType !== "rc",
   );
+  const conditionUnit = unit.children.find((child) => child.unitType === "rc");
   if (conditionUnit) visibleChildren.push(conditionUnit);
+  return visibleChildren;
+};
 
+type ExpandedNodeAppendContext = {
+  state: ExpandedGraphBuildState;
+  expandedUnit: FlowGraphUnitDto;
+  visibleChildren: readonly FlowGraphUnitDto[];
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
+};
+
+const appendExpandedNodes = ({
+  state,
+  expandedUnit,
+  visibleChildren,
+  semanticDiffHighlights,
+}: ExpandedNodeAppendContext): void => {
   for (const child of visibleChildren) {
-    if (state.nodeIds.has(child.id)) continue;
-    state.graph.nodes.push(toExpandedNode(child, semanticDiffHighlights));
-    state.nodeIds.add(child.id);
-    state.nodePlacements.push({
-      unitId: child.id,
-      parentAnchorUnitId: expandedUnit.id,
-      kind: child.unitType === "rc" ? "nested_condition" : "nested_grid",
+    appendExpandedNode({
+      state,
+      expandedUnit,
+      child,
+      semanticDiffHighlights,
     });
   }
+};
+
+const appendExpandedNode = ({
+  state,
+  expandedUnit,
+  child,
+  semanticDiffHighlights,
+}: {
+  state: ExpandedGraphBuildState;
+  expandedUnit: FlowGraphUnitDto;
+  child: FlowGraphUnitDto;
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
+}): void => {
+  if (state.nodeIds.has(child.id)) return;
+  state.graph.nodes.push(toExpandedNode(child, semanticDiffHighlights));
+  state.nodeIds.add(child.id);
+  state.nodePlacements.push({
+    unitId: child.id,
+    parentAnchorUnitId: expandedUnit.id,
+    kind: expandedNodePlacementKind(child),
+  });
+};
+
+const expandedNodePlacementKind = (
+  unit: FlowGraphUnitDto,
+): ExpandedFlowGraphNodePlacementDto["kind"] =>
+  unit.unitType === "rc" ? "nested_condition" : "nested_grid";
+
+type ExpandedEdgeAppendContext = {
+  state: ExpandedGraphBuildState;
+  expandedUnit: FlowGraphUnitDto;
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
+};
+
+const appendExpandedEdges = ({
+  state,
+  expandedUnit,
+  semanticDiffHighlights,
+}: ExpandedEdgeAppendContext): void => {
   for (const edge of toExpandedEdges(expandedUnit, semanticDiffHighlights)) {
-    const identity = edgeIdentity(edge);
-    if (state.edgeIds.has(identity)) continue;
-    state.graph.edges.push(edge);
-    state.edgeIds.add(identity);
+    appendExpandedEdge(state, edge);
   }
+};
+
+const appendExpandedEdge = (
+  state: ExpandedGraphBuildState,
+  edge: FlowGraphEdgeDto,
+): void => {
+  const identity = edgeIdentity(edge);
+  if (state.edgeIds.has(identity)) return;
+  state.graph.edges.push(edge);
+  state.edgeIds.add(identity);
 };
 
 const sortedVisibleChildren = (unit: FlowGraphUnitDto): FlowGraphUnitDto[] =>
@@ -298,39 +452,103 @@ type TraversalFrame =
   | { kind: "scope"; container: FlowGraphUnitDto }
   | { kind: "expand"; unit: FlowGraphUnitDto };
 
-const buildExpandedStructure = (
-  state: ExpandedGraphBuildState,
-  activeScope: FlowGraphUnitDto,
+type ExpandedTraversalContext = {
+  state: ExpandedGraphBuildState;
+  activeScope: FlowGraphUnitDto;
+  requestedIds: ReadonlySet<string>;
+  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
+};
+
+const expandedScopeFrames = (
+  container: FlowGraphUnitDto,
   requestedIds: ReadonlySet<string>,
-  semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
-): void => {
-  const pending: TraversalFrame[] = [{ kind: "scope", container: activeScope }];
+): TraversalFrame[] => {
+  const expanded = expandedChildren(container, requestedIds);
+  return expanded
+    .slice()
+    .reverse()
+    .map((unit) => ({ kind: "expand", unit }) as const);
+};
+
+const visitExpandedScope = (
+  context: ExpandedTraversalContext,
+  container: FlowGraphUnitDto,
+): TraversalFrame[] => {
+  const expanded = expandedChildren(container, context.requestedIds);
+  context.state.scopes.push({
+    containerUnitId: container.id,
+    expandedChildUnitIds: expanded.map((unit) => unit.id),
+    visibleChildUnitIds: sortedVisibleChildren(container).map(
+      (unit) => unit.id,
+    ),
+  });
+  return expandedScopeFrames(container, context.requestedIds);
+};
+
+const visitExpandedUnit = (
+  context: ExpandedTraversalContext,
+  unit: FlowGraphUnitDto,
+): TraversalFrame[] => {
+  context.state.realizedExpandedUnitIds.push(unit.id);
+  appendExpandedUnitContent(
+    context.state,
+    unit,
+    context.semanticDiffHighlights,
+  );
+  return [{ kind: "scope", container: unit }];
+};
+
+const visitExpandedFrame = (
+  context: ExpandedTraversalContext,
+  frame: TraversalFrame,
+): TraversalFrame[] =>
+  frame.kind === "expand"
+    ? visitExpandedUnit(context, frame.unit)
+    : visitExpandedScope(context, frame.container);
+
+const buildExpandedStructure = (context: ExpandedTraversalContext): void => {
+  const pending: TraversalFrame[] = [
+    { kind: "scope", container: context.activeScope },
+  ];
   while (pending.length > 0) {
     const frame = pending.pop() as TraversalFrame;
-    if (frame.kind === "expand") {
-      state.realizedExpandedUnitIds.push(frame.unit.id);
-      appendExpandedUnitContent(state, frame.unit, semanticDiffHighlights);
-      pending.push({ kind: "scope", container: frame.unit });
-      continue;
-    }
-
-    const expanded = expandedChildren(frame.container, requestedIds);
-    state.scopes.push({
-      containerUnitId: frame.container.id,
-      expandedChildUnitIds: expanded.map((unit) => unit.id),
-      visibleChildUnitIds: sortedVisibleChildren(frame.container).map(
-        (unit) => unit.id,
-      ),
-    });
-    for (let index = expanded.length - 1; index >= 0; index--) {
-      pending.push({ kind: "expand", unit: expanded[index] });
-    }
+    pending.push(...visitExpandedFrame(context, frame));
   }
 };
 
 type ContainmentFrame =
   | { kind: "enter"; unitId: string }
   | { kind: "exit"; unitId: string };
+
+type ContainmentBuildContext = {
+  childrenByContainer: ReadonlyMap<string, readonly string[]>;
+  order: string[];
+  rangeByUnitId: Map<string, { start: number; end: number }>;
+  startByUnitId: Map<string, number>;
+};
+
+const visitContainmentFrame = (
+  context: ContainmentBuildContext,
+  frame: ContainmentFrame,
+): ContainmentFrame[] => {
+  if (frame.kind === "exit") {
+    context.rangeByUnitId.set(frame.unitId, {
+      start: context.startByUnitId.get(frame.unitId) ?? 0,
+      end: context.order.length,
+    });
+    return [];
+  }
+  context.startByUnitId.set(frame.unitId, context.order.length);
+  context.order.push(frame.unitId);
+  const children = context.childrenByContainer.get(frame.unitId) ?? [];
+  return [
+    { kind: "exit", unitId: frame.unitId },
+    ...children
+      .slice()
+      .reverse()
+      .map((unitId) => ({ kind: "enter", unitId }) as const),
+  ];
+};
 
 const buildContainment = (
   activeScopeUnitId: string,
@@ -345,25 +563,18 @@ const buildContainment = (
   const order: string[] = [];
   const rangeByUnitId = new Map<string, { start: number; end: number }>();
   const startByUnitId = new Map<string, number>();
+  const context: ContainmentBuildContext = {
+    childrenByContainer,
+    order,
+    rangeByUnitId,
+    startByUnitId,
+  };
   const pending: ContainmentFrame[] = [
     { kind: "enter", unitId: activeScopeUnitId },
   ];
   while (pending.length > 0) {
     const frame = pending.pop() as ContainmentFrame;
-    if (frame.kind === "exit") {
-      rangeByUnitId.set(frame.unitId, {
-        start: startByUnitId.get(frame.unitId) ?? 0,
-        end: order.length,
-      });
-      continue;
-    }
-    startByUnitId.set(frame.unitId, order.length);
-    order.push(frame.unitId);
-    pending.push({ kind: "exit", unitId: frame.unitId });
-    const children = childrenByContainer.get(frame.unitId) ?? [];
-    for (let index = children.length - 1; index >= 0; index--) {
-      pending.push({ kind: "enter", unitId: children[index] });
-    }
+    pending.push(...visitContainmentFrame(context, frame));
   }
   return { order, rangeByUnitId };
 };
@@ -373,56 +584,118 @@ const buildExpandedUnitConstraints = (
   containment: ReturnType<typeof buildContainment>,
   index: FlowGraphDocumentIndex,
 ): ExpandedUnitPlacementConstraintDto[] => {
+  const scopeByExpandedChild = indexExpandedScopes(state.scopes);
+  return state.realizedExpandedUnitIds.map((unitId) =>
+    buildExpandedUnitConstraint({
+      unitId,
+      scope: scopeByExpandedChild.get(
+        unitId,
+      ) as ExpandedFlowGraphScopeConstraintDto,
+      containment,
+      index,
+    }),
+  );
+};
+
+const indexExpandedScopes = (
+  scopes: readonly ExpandedFlowGraphScopeConstraintDto[],
+): ReadonlyMap<string, ExpandedFlowGraphScopeConstraintDto> => {
   const scopeByExpandedChild = new Map<
     string,
     ExpandedFlowGraphScopeConstraintDto
   >();
-  for (const scope of state.scopes) {
-    for (const expandedChildUnitId of scope.expandedChildUnitIds) {
-      scopeByExpandedChild.set(expandedChildUnitId, scope);
-    }
+  for (const scope of scopes) {
+    indexExpandedScope(scopeByExpandedChild, scope);
   }
-  return state.realizedExpandedUnitIds.map((unitId) => {
-    const scope = scopeByExpandedChild.get(
-      unitId,
-    ) as ExpandedFlowGraphScopeConstraintDto;
-    const expandedUnit = index.unitById.get(unitId) as FlowGraphUnitDto;
-    const siblingUnits = scope.visibleChildUnitIds
-      .filter((siblingUnitId) => siblingUnitId !== unitId)
-      .map((siblingUnitId) => index.unitById.get(siblingUnitId))
-      .filter((unit): unit is FlowGraphUnitDto => !!unit);
-    const horizontalAffectedSiblingUnitIds = siblingUnits
-      .filter(
-        (sibling) =>
-          sibling.layout.h > expandedUnit.layout.h &&
-          sibling.layout.v >= expandedUnit.layout.v,
-      )
-      .map((sibling) => sibling.id);
-    const verticalAffectedSiblingUnitIds = siblingUnits
-      .filter(
-        (sibling) =>
-          sibling.layout.v > expandedUnit.layout.v &&
-          sibling.layout.h >= expandedUnit.layout.h,
-      )
-      .map((sibling) => sibling.id);
-    const affectedUnitIds = new Set([
-      ...horizontalAffectedSiblingUnitIds,
-      ...verticalAffectedSiblingUnitIds,
-    ]);
-    return {
-      unitId,
-      containerUnitId: scope.containerUnitId,
-      affectedSiblingUnitIds: scope.visibleChildUnitIds.filter(
-        (siblingUnitId) => affectedUnitIds.has(siblingUnitId),
-      ),
-      horizontalAffectedSiblingUnitIds,
-      verticalAffectedSiblingUnitIds,
-      subtreeRange: containment.rangeByUnitId.get(unitId) ?? {
-        start: 0,
-        end: 0,
-      },
-    };
-  });
+  return scopeByExpandedChild;
+};
+
+const indexExpandedScope = (
+  scopeByExpandedChild: Map<string, ExpandedFlowGraphScopeConstraintDto>,
+  scope: ExpandedFlowGraphScopeConstraintDto,
+): void => {
+  for (const expandedChildUnitId of scope.expandedChildUnitIds) {
+    scopeByExpandedChild.set(expandedChildUnitId, scope);
+  }
+};
+
+type ExpandedUnitConstraintContext = {
+  unitId: string;
+  scope: ExpandedFlowGraphScopeConstraintDto;
+  containment: ReturnType<typeof buildContainment>;
+  index: FlowGraphDocumentIndex;
+};
+
+const siblingUnitsFor = (
+  scope: ExpandedFlowGraphScopeConstraintDto,
+  unitId: string,
+  index: FlowGraphDocumentIndex,
+): FlowGraphUnitDto[] =>
+  scope.visibleChildUnitIds
+    .filter((siblingUnitId) => siblingUnitId !== unitId)
+    .map((siblingUnitId) => index.unitById.get(siblingUnitId))
+    .filter((unit): unit is FlowGraphUnitDto => !!unit);
+
+type SiblingImpact = {
+  affectedSiblingUnitIds: string[];
+  horizontalAffectedSiblingUnitIds: string[];
+  verticalAffectedSiblingUnitIds: string[];
+};
+
+const siblingImpactFor = (
+  expandedUnit: FlowGraphUnitDto,
+  siblingUnits: readonly FlowGraphUnitDto[],
+  visibleChildUnitIds: readonly string[],
+): SiblingImpact => {
+  const horizontalAffectedSiblingUnitIds = siblingUnits
+    .filter(
+      (sibling) =>
+        sibling.layout.h > expandedUnit.layout.h &&
+        sibling.layout.v >= expandedUnit.layout.v,
+    )
+    .map((sibling) => sibling.id);
+  const verticalAffectedSiblingUnitIds = siblingUnits
+    .filter(
+      (sibling) =>
+        sibling.layout.v > expandedUnit.layout.v &&
+        sibling.layout.h >= expandedUnit.layout.h,
+    )
+    .map((sibling) => sibling.id);
+  const affectedUnitIds = new Set([
+    ...horizontalAffectedSiblingUnitIds,
+    ...verticalAffectedSiblingUnitIds,
+  ]);
+  return {
+    affectedSiblingUnitIds: visibleChildUnitIds.filter((id) =>
+      affectedUnitIds.has(id),
+    ),
+    horizontalAffectedSiblingUnitIds,
+    verticalAffectedSiblingUnitIds,
+  };
+};
+
+const buildExpandedUnitConstraint = ({
+  unitId,
+  scope,
+  containment,
+  index,
+}: ExpandedUnitConstraintContext): ExpandedUnitPlacementConstraintDto => {
+  const expandedUnit = index.unitById.get(unitId) as FlowGraphUnitDto;
+  const siblingUnits = siblingUnitsFor(scope, unitId, index);
+  const siblingImpact = siblingImpactFor(
+    expandedUnit,
+    siblingUnits,
+    scope.visibleChildUnitIds,
+  );
+  return {
+    unitId,
+    containerUnitId: scope.containerUnitId,
+    ...siblingImpact,
+    subtreeRange: containment.rangeByUnitId.get(unitId) ?? {
+      start: 0,
+      end: 0,
+    },
+  };
 };
 
 export const buildExpandedFlowGraphResult = ({
@@ -447,12 +720,12 @@ export const buildExpandedFlowGraphResult = ({
     document.index,
   );
   const state = createBuildState(baseResult.graph);
-  buildExpandedStructure(
+  buildExpandedStructure({
     state,
     activeScope,
-    normalized.ids,
+    requestedIds: normalized.ids,
     semanticDiffHighlights,
-  );
+  });
   const containment = buildContainment(activeScopeUnitId, state.scopes);
 
   return {
