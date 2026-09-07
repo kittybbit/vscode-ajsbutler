@@ -266,11 +266,11 @@ the selected `docs/specs/features/semantic-diff-explorer/` folder.
 The prior `Close` recommendation is superseded. The replan received final
 independent `Ready` review, Human Approval, and focused commit `54ca4005`.
 Slice 5 is complete and focused-committed as
-`ee76722d0628d2d4e223f6faf13751a7a16a3a35`. Slice 6 implementation is
-complete, but its independent review is blocked by a narrow replan adding the
-omitted `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`
-path; Slices 7-13 remain planned and dependency-blocked until their
-predecessors are complete, reviewed, and focused-committed.
+`ee76722d0628d2d4e223f6faf13751a7a16a3a35`. The narrow Slice 6 path replan
+was focused-committed as `1ede39bb`; Slice 6 is complete and focused-committed
+as `6af753e7`. Slice 7 is the sole active implementation-approved slice;
+Slices 8-13 remain planned and dependency-blocked until their predecessors are
+complete, reviewed, and focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -330,23 +330,34 @@ environment-owned validation risk whenever web smoke is attempted.
 
 ### Slice 6 Activation (2026-09-07)
 
-- Slice 6 is the sole active implementation-approved slice after the Slice 5
+- Slice 6 was the active implementation-approved slice after the Slice 5
   completion commit above. Its 6A host identity and 6B real
   `createSemanticDiffExplorerSessionMessage` → MUI App/DOM evidence are
-  mandatory; Slices 7-13 remain dependency-blocked.
-- Narrow replan trigger: the implementation review is blocked until the
-  reviewed replan adds `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`
-  to Slice 6's approved/cohesive scope. No behavior, design, or slice-order
-  change is introduced; the uncommitted implementation and six closure drafts
-  remain preserved.
+  complete and committed as `6af753e7`; Slices 7-13 remain
+  dependency-blocked.
+- The narrow replan added
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx` to
+  Slice 6's approved/cohesive scope without behavior, design, or slice-order
+  change. The replan commit is `1ede39bb`.
 - The required DOM contract is stable `data-row-id`, `data-record-kind`,
   `data-record-id`, and group `data-row-kind="group"`. Acceptance preserves
   canonical cards, removes ordinary leaves only under `確認が必要`, retains
   confirmation records and confirmation-required changes, exposes visible
   zero-match status, and restores latent selection in the same session.
 
+### Slice 7 Activation (2026-09-07)
+
+- Slice 7 is the sole active implementation-approved slice after Slice 6
+  completion commit `6af753e7`. Its scope is the application projection,
+  transport, and occurrence refactoring only; Slice 6 behavior, DTO/message
+  compatibility, and the recorded qlty baseline assignments remain fixed.
+- The exact assigned qlty families are resolved without suppression,
+  allowlisting, threshold changes, or configuration edits. Slices 8-13 remain
+  dependency-blocked until Slice 7 is independently reviewed and committed.
+
 ### Slice 6 Implementation Evidence (2026-09-07)
 
+- Completion commit: `6af753e7`.
 - 6A host identity is proven by `semanticDiffExplorerPanel.test.ts`: the
   registry entry and session retain the exact `SemanticDiffOutputContext`
   object, including its `result` and `summary`, and the emitted session
@@ -378,6 +389,50 @@ environment-owned validation risk whenever web smoke is attempted.
   App/session-message record evidence. The identity test prevents the
   integration proof from silently using a cloned or rebuilt comparison
   context.
+
+### Slice 7 Implementation Evidence (2026-09-07)
+
+- Slice 7 implementation is complete within the approved application-only
+  boundary. `semanticDiffExplorerMessages.ts` now delegates strict primitives,
+  record/leaf/view guards, request/reply/host parsers, and payload validation
+  to cohesive browser-safe helpers. `semanticDiffExplorerProjection.ts` now
+  delegates immutable cloning/action construction, path placement, tree
+  ordering, and leaf/card construction to application helpers. The existing
+  `semanticDiffRecordOccurrence.ts` lookup keeps source-order ordinals and
+  fails closed for invalid occurrence inputs.
+- The public entry points and transport schemas are unchanged. Exact keys,
+  closed unions, branded session/action IDs, nullability, extra-key rejection,
+  wrong-session/action/stale-request handling, malformed nested detail/risk/
+  target validation, and the fixed 8 MiB UTF-8 limit remain covered by the
+  existing message suite. Summary cards still consume only `context.summary`,
+  deterministic UTF-16 tree ordering is retained, duplicate occurrences are
+  carried through projection and host lookup, and confirmation filtering
+  retains Slice 6's actual-session behavior.
+- Validation passed: the focused compiled message/projection/DOM/Flow suites
+  report 42 passing tests; `rtk pnpm run test:compile`, desktop/web test
+  preparation, `rtk pnpm run build`, compiled Electron smoke (exit 0),
+  `rtk git diff --check`, targeted `qlty smells --no-snippets` for all 13
+  changed application paths, and `qlty check --no-fix --no-formatters` all
+  pass. No qlty suppression, allowlist, threshold, generated-ignore, DTO,
+  or configuration edit was introduced.
+- The independent-review finding for prototype-looking dynamic-dispatch keys
+  is resolved within the approved application boundary: record, leaf, view,
+  projection-support, path, and tree lookup tables use `Map`, and focused
+  regressions verify malformed target/card/message/leaf/path/side values with
+  `toString`, `constructor`, and `__proto__` fail closed without throwing;
+  relation-side property access also validates the closed side union first.
+- The attempted Chromium web smoke is explicitly
+  `blocked-before-execution`: the managed host fails at
+  `bootstrap_check_in ... Permission denied (1100)` before the fixture starts.
+  Web preparation/build and DOM/axe coverage pass; no browser-smoke success
+  is claimed. VS Code `^1.75.0`, desktop/web composition, architecture
+  boundaries, and telemetry privacy are unchanged.
+- Implementation feedback: validator decomposition kept closed-union checks
+  auditable without widening accepted payloads, while projection helpers keep
+  source-order occurrence assignment ahead of presentation sorting and avoid
+  re-aggregating cards. The independent reviewer should verify the exact
+  entry-point/export compatibility and malformed-payload matrix before the
+  pending automatic Completion Approval gate.
 
 ## Replan Compatibility, Lifecycle, And Predecessor Traceability
 

@@ -22,21 +22,30 @@ export const recordAtSourceOccurrence = <T extends { id: string }>(
   recordId: string | null,
   occurrence: number | null,
 ): T | undefined => {
-  if (
-    recordId === null ||
-    occurrence === null ||
-    !Number.isSafeInteger(occurrence) ||
-    occurrence < 0
-  ) {
-    return undefined;
-  }
-  let matchingOccurrence = 0;
-  for (const record of records) {
-    if (record.id !== recordId) continue;
-    if (matchingOccurrence === occurrence) return record;
-    matchingOccurrence += 1;
-  }
-  return undefined;
+  if (!isValidOccurrenceLookup(recordId, occurrence)) return undefined;
+  return findOccurrence(records, recordId, occurrence);
+};
+
+const isValidOccurrenceLookup = (
+  recordId: string | null,
+  occurrence: number | null,
+): occurrence is number =>
+  recordId !== null &&
+  occurrence !== null &&
+  Number.isSafeInteger(occurrence) &&
+  occurrence >= 0;
+
+const findOccurrence = <T extends { id: string }>(
+  records: readonly T[],
+  recordId: string,
+  occurrence: number,
+): T | undefined => records.filter((record) => record.id === recordId)[occurrence];
+
+const parseOccurrenceSuffix = (suffix: string): number | null => {
+  const occurrence = Number(suffix);
+  return Number.isSafeInteger(occurrence) && occurrence >= 0
+    ? occurrence
+    : null;
 };
 
 /** Parse the host-private occurrence suffix from a projected leaf ID. */
@@ -44,9 +53,5 @@ export const parseSemanticDiffRecordOccurrence = (
   leafId: string,
 ): number | null => {
   const separator = leafId.lastIndexOf(":");
-  if (separator < 0) return null;
-  const occurrence = Number(leafId.slice(separator + 1));
-  return Number.isSafeInteger(occurrence) && occurrence >= 0
-    ? occurrence
-    : null;
+  return separator < 0 ? null : parseOccurrenceSuffix(leafId.slice(separator + 1));
 };

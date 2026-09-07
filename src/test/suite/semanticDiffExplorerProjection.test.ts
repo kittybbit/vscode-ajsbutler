@@ -16,6 +16,12 @@ import {
   type SemanticDiffExplorerTreeNode,
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
 import { isSemanticDiffExplorerViewModel } from "../../application/semantic-diff/semanticDiffExplorerMessages";
+import { isSemanticDiffExplorerLeaf } from "../../application/semantic-diff/semanticDiffExplorerLeafGuards";
+import { placementForTarget, placementForLeaf } from "../../application/semantic-diff/semanticDiffExplorerProjectionPaths";
+import {
+  cloneTarget,
+  createActionSet,
+} from "../../application/semantic-diff/semanticDiffExplorerProjectionSupport";
 import { createSemanticDiffDetail } from "../../application/semantic-diff/semanticDiffStructuredFacts";
 import type {
   SemanticDiffChange,
@@ -420,6 +426,37 @@ suite("Semantic Diff Explorer projection", () => {
       "after",
       "after",
     ]);
+  });
+
+  test("fails closed for prototype-looking projection and leaf keys", () => {
+    const reservedKeys = ["toString", "constructor", "__proto__"] as const;
+    for (const key of reservedKeys) {
+      const malformedTarget = { kind: key } as unknown as SemanticDiffTarget;
+      assert.doesNotThrow(() => cloneTarget(malformedTarget));
+      assert.strictEqual(cloneTarget(malformedTarget), null);
+      assert.doesNotThrow(() => placementForTarget(malformedTarget));
+      assert.strictEqual(placementForTarget(malformedTarget), null);
+      const actionSet = createActionSet({
+        side: key as "before",
+        target: relationTarget,
+        actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+        relationPair,
+      });
+      assert.strictEqual(actionSet.flow.available, false);
+      assert.strictEqual(
+        semanticDiffChangeTargetSide(key as SemanticDiffChange["kind"]),
+        undefined,
+      );
+      assert.strictEqual(
+        semanticDiffConfirmationTargetSide(key as SemanticDiffConfirmationReason),
+        undefined,
+      );
+      const malformedLeaf = { kind: key } as unknown as SemanticDiffExplorerLeaf;
+      assert.doesNotThrow(() => isSemanticDiffExplorerLeaf(malformedLeaf));
+      assert.strictEqual(isSemanticDiffExplorerLeaf(malformedLeaf), false);
+      assert.doesNotThrow(() => placementForLeaf(malformedLeaf));
+      assert.strictEqual(placementForLeaf(malformedLeaf), null);
+    }
   });
 
   test("filters confirmation records without changing cards or context identity", () => {

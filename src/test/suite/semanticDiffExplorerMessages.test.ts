@@ -17,6 +17,8 @@ import {
   validateSemanticDiffExplorerMessage,
 } from "../../application/semantic-diff/semanticDiffExplorerMessages";
 import type { SemanticDiffExplorerViewModel } from "../../application/semantic-diff/semanticDiffExplorerDto";
+import { isSemanticDiffExplorerCard } from "../../application/semantic-diff/semanticDiffExplorerViewGuards";
+import { isSemanticDiffTarget } from "../../application/semantic-diff/semanticDiffExplorerRecordGuards";
 
 const sessionId = createSemanticDiffExplorerSessionId(1);
 const actionId = createSemanticDiffExplorerActionId(1);
@@ -567,5 +569,26 @@ suite("Semantic Diff Explorer messages", () => {
       ok: false,
       error: { code: "payload-too-large", detail: null },
     });
+  });
+
+  test("fails closed for prototype-looking target, card, and message keys", () => {
+    const reservedKeys = ["toString", "constructor", "__proto__"] as const;
+    for (const key of reservedKeys) {
+      assert.doesNotThrow(() => isSemanticDiffTarget({ kind: key }));
+      assert.strictEqual(isSemanticDiffTarget({ kind: key }), false);
+      assert.doesNotThrow(() =>
+        isSemanticDiffExplorerCard({ id: key, count: 0, counts: {} }),
+      );
+      assert.strictEqual(
+        isSemanticDiffExplorerCard({ id: key, count: 0, counts: {} }),
+        false,
+      );
+      const malformedMessage = {
+        ...validSessionMessage(),
+        type: key,
+      };
+      assert.doesNotThrow(() => parseSemanticDiffExplorerHostMessage(malformedMessage));
+      assert.strictEqual(parseSemanticDiffExplorerHostMessage(malformedMessage), undefined);
+    }
   });
 });
