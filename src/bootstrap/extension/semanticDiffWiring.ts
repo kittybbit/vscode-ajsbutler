@@ -4,6 +4,7 @@ import type { SemanticDiffOutputContext } from "../../application/semantic-diff/
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
+  type SemanticDiffCommandDeps,
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import {
   COPY_SEMANTIC_DIFF_MARKDOWN_COMMAND,
@@ -31,12 +32,13 @@ export type SemanticDiffWiringDeps = {
   flowBridge?: SemanticDiffFlowViewerBridge;
 };
 
-export const createSemanticDiffSubscriptions = (
-  deps: SemanticDiffWiringDeps,
-): vscode.Disposable[] => {
-  const contextRegistry = new SemanticDiffExplorerContextRegistry();
-  const flowOverlayRegistry = new SemanticDiffFlowOverlayRegistry();
-  const getSourceSnapshot = (
+type SourceCaptureRegistration = NonNullable<
+  SemanticDiffCommandDeps["registerSemanticDiffSourceCapture"]
+>;
+
+const createSourceSnapshotGetter =
+  (contextRegistry: SemanticDiffExplorerContextRegistry) =>
+  (
     side: "before" | "after",
     context: SemanticDiffOutputContext,
   ): SemanticDiffFlowSourceSnapshot | undefined => {
@@ -50,7 +52,120 @@ export const createSemanticDiffSubscriptions = (
         }
       : undefined;
   };
-  const reportDocuments = new SemanticDiffReportDocumentProvider({
+
+const sourceIdentityMatches = (
+  current: SemanticDiffFlowSourceSnapshot,
+  snapshot: SemanticDiffFlowSourceSnapshot,
+): boolean =>
+  current.sourceHandleId === snapshot.sourceHandleId &&
+  current.uri === snapshot.uri;
+
+const sourceVersionMatches = (
+  currentVersion: number | null,
+  snapshotVersion: number | null,
+): boolean => snapshotVersion === null || currentVersion === snapshotVersion;
+
+const sourceSnapshotMatches = (
+  current: SemanticDiffFlowSourceSnapshot,
+  snapshot: SemanticDiffFlowSourceSnapshot,
+): boolean =>
+  sourceVersionMatches(current.version, snapshot.version) &&
+  current.text === snapshot.text;
+
+const documentSnapshotMatches = (
+  document: vscode.TextDocument | undefined,
+  snapshot: SemanticDiffFlowSourceSnapshot,
+): boolean =>
+  document !== undefined &&
+  sourceVersionMatches(document.version, snapshot.version) &&
+  document.getText() === snapshot.text;
+
+const isSourceCurrent = ({
+  getSourceSnapshot,
+  side,
+  context,
+  snapshot,
+}: Readonly<{
+  getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
+  side: "before" | "after";
+  context: SemanticDiffOutputContext;
+  snapshot: SemanticDiffFlowSourceSnapshot;
+}>): boolean => {
+  const current = getSourceSnapshot(side, context);
+  if (current === undefined || !sourceIdentityMatches(current, snapshot)) {
+    return false;
+  }
+  const currentDocument = vscode.workspace.textDocuments.find(
+    (document) => document.uri.toString() === snapshot.uri,
+  );
+  return (
+    sourceSnapshotMatches(current, snapshot) &&
+    documentSnapshotMatches(currentDocument, snapshot)
+  );
+};
+
+const openFlowSource = async ({
+  flowBridge,
+  contextRegistry,
+  side,
+  targetUnitId,
+  context,
+}: Readonly<{
+  flowBridge: SemanticDiffFlowViewerBridge;
+  contextRegistry: SemanticDiffExplorerContextRegistry;
+  side: "before" | "after";
+  targetUnitId: string;
+  context: SemanticDiffOutputContext;
+}>) => {
+  const source = contextRegistry.sourceCapture(context)?.sources[side];
+  if (!source) throw new Error("Semantic Diff source is unavailable.");
+  return flowBridge.open(source.uri, targetUnitId);
+};
+
+const createFlowHost = ({
+  flowBridge,
+  contextRegistry,
+  getSourceSnapshot,
+}: Readonly<{
+  flowBridge: SemanticDiffFlowViewerBridge;
+  contextRegistry: SemanticDiffExplorerContextRegistry;
+  getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
+}>) => ({
+  getSourceSnapshot,
+  isSourceCurrent: (
+    side: "before" | "after",
+    context: SemanticDiffOutputContext,
+    snapshot: SemanticDiffFlowSourceSnapshot,
+  ) => isSourceCurrent({ getSourceSnapshot, side, context, snapshot }),
+  open: (
+    side: "before" | "after",
+    targetUnitId: string,
+    context: SemanticDiffOutputContext,
+  ) =>
+    openFlowSource({
+      flowBridge,
+      contextRegistry,
+      side,
+      targetUnitId,
+      context,
+    }),
+});
+
+const createSourceCaptureRegistrar =
+  (
+    contextRegistry: SemanticDiffExplorerContextRegistry,
+  ): SourceCaptureRegistration =>
+  (...args) => {
+    const [context, binding, sources, release] = args;
+    contextRegistry.registerSourceCapture(context, {
+      binding,
+      sources,
+      release,
+    });
+  };
+
+const createReportDocuments = (): SemanticDiffReportDocumentProvider =>
+  new SemanticDiffReportDocumentProvider({
     openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
     showTextDocument: (document, options) =>
       vscode.window.showTextDocument(document, options),
@@ -64,7 +179,20 @@ export const createSemanticDiffSubscriptions = (
     writeFile: (uri, content) => vscode.workspace.fs.writeFile(uri, content),
   });
 
-  const openExplorer = createOpenSemanticDiffExplorer({
+const createOpenExplorer = ({
+  deps,
+  reportDocuments,
+  contextRegistry,
+  flowOverlayRegistry,
+  getSourceSnapshot,
+}: Readonly<{
+  deps: SemanticDiffWiringDeps;
+  reportDocuments: SemanticDiffReportDocumentProvider;
+  contextRegistry: SemanticDiffExplorerContextRegistry;
+  flowOverlayRegistry: SemanticDiffFlowOverlayRegistry;
+  getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
+}>) =>
+  createOpenSemanticDiffExplorer({
     extensionContext: deps.extensionContext,
     showQuickPick: (items, options) =>
       vscode.window.showQuickPick(items, options),
@@ -77,39 +205,11 @@ export const createSemanticDiffSubscriptions = (
     contextRegistry,
     flowAction: deps.flowBridge
       ? createSemanticDiffFlowAction({
-          host: {
+          host: createFlowHost({
+            flowBridge: deps.flowBridge,
+            contextRegistry,
             getSourceSnapshot,
-            isSourceCurrent: (side, context, snapshot) => {
-              const current = getSourceSnapshot(side, context);
-              if (
-                current === undefined ||
-                current.sourceHandleId !== snapshot.sourceHandleId ||
-                current.uri !== snapshot.uri
-              ) {
-                return false;
-              }
-              const currentDocument = vscode.workspace.textDocuments.find(
-                (document) => document.uri.toString() === snapshot.uri,
-              );
-              return (
-                current !== undefined &&
-                (snapshot.version === null ||
-                  current.version === snapshot.version) &&
-                current.text === snapshot.text &&
-                currentDocument !== undefined &&
-                (snapshot.version === null ||
-                  currentDocument.version === snapshot.version) &&
-                currentDocument.getText() === snapshot.text
-              );
-            },
-            open: async (side, targetUnitId, context) => {
-              const source =
-                contextRegistry.sourceCapture(context)?.sources[side];
-              if (!source)
-                throw new Error("Semantic Diff source is unavailable.");
-              return deps.flowBridge!.open(source.uri, targetUnitId);
-            },
-          },
+          }),
           registry: flowOverlayRegistry,
         })
       : undefined,
@@ -117,43 +217,69 @@ export const createSemanticDiffSubscriptions = (
       flowOverlayRegistry.clearSession(sessionId),
   });
 
+const createCompareCommand = ({
+  deps,
+  reportDocuments,
+  openExplorer,
+  contextRegistry,
+}: Readonly<{
+  deps: SemanticDiffWiringDeps;
+  reportDocuments: SemanticDiffReportDocumentProvider;
+  openExplorer: ReturnType<typeof createOpenExplorer>;
+  contextRegistry: SemanticDiffExplorerContextRegistry;
+}>): vscode.Disposable => {
+  const commandDeps: SemanticDiffCommandDeps = {
+    getActiveEditor: () => vscode.window.activeTextEditor,
+    showQuickPick: (items, options) =>
+      vscode.window.showQuickPick(items, options),
+    showOpenDialog: (options) => vscode.window.showOpenDialog(options),
+    showErrorMessage: (message) => vscode.window.showErrorMessage(message),
+    readFile: (uri) => vscode.workspace.fs.readFile(uri),
+    openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
+    openReport: (output) => reportDocuments.openReport(output),
+    language: vscode.env.language,
+    buildSemanticDiffReportData: deps.buildSemanticDiffReportData,
+    buildSemanticDiffOutputContext,
+    presentSemanticDiffOutput,
+    openExplorer,
+    beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
+    sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
+    registerSemanticDiffSourceCapture:
+      createSourceCaptureRegistrar(contextRegistry),
+    unregisterSemanticDiffSourceCapture: (context) =>
+      contextRegistry.unregisterSourceCapture(context),
+  };
+  return vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
+    executeCompareSemanticDiffCommand(commandDeps),
+  );
+};
+
+export const createSemanticDiffSubscriptions = (
+  deps: SemanticDiffWiringDeps,
+): vscode.Disposable[] => {
+  const contextRegistry = new SemanticDiffExplorerContextRegistry();
+  const flowOverlayRegistry = new SemanticDiffFlowOverlayRegistry();
+  const getSourceSnapshot = createSourceSnapshotGetter(contextRegistry);
+  const reportDocuments = createReportDocuments();
+  const openExplorer = createOpenExplorer({
+    deps,
+    reportDocuments,
+    contextRegistry,
+    flowOverlayRegistry,
+    getSourceSnapshot,
+  });
+
   return [
     vscode.workspace.registerTextDocumentContentProvider(
       SEMANTIC_DIFF_REPORT_SCHEME,
       reportDocuments,
     ),
-    vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
-      executeCompareSemanticDiffCommand({
-        getActiveEditor: () => vscode.window.activeTextEditor,
-        showQuickPick: (items, options) =>
-          vscode.window.showQuickPick(items, options),
-        showOpenDialog: (options) => vscode.window.showOpenDialog(options),
-        showErrorMessage: (message) => vscode.window.showErrorMessage(message),
-        readFile: (uri) => vscode.workspace.fs.readFile(uri),
-        openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
-        openReport: (output) => reportDocuments.openReport(output),
-        language: vscode.env.language,
-        buildSemanticDiffReportData: deps.buildSemanticDiffReportData,
-        buildSemanticDiffOutputContext,
-        presentSemanticDiffOutput,
-        openExplorer,
-        beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
-        sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
-        registerSemanticDiffSourceCapture: (
-          context,
-          binding,
-          sources,
-          release,
-        ) =>
-          contextRegistry.registerSourceCapture(context, {
-            binding,
-            sources,
-            release,
-          }),
-        unregisterSemanticDiffSourceCapture: (context) =>
-          contextRegistry.unregisterSourceCapture(context),
-      }),
-    ),
+    createCompareCommand({
+      deps,
+      reportDocuments,
+      openExplorer,
+      contextRegistry,
+    }),
     vscode.commands.registerCommand(
       COPY_SEMANTIC_DIFF_MARKDOWN_COMMAND,
       (uri?: vscode.Uri) => reportDocuments.copyReport(uri),

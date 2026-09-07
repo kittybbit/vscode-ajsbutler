@@ -54,24 +54,43 @@ type ExtensionDependencyFactories = {
   ) => ImportAjsDefinitionCapability;
 };
 
-export const instrumentParserPerformance = (
-  parser: AjsParserPort,
-  telemetry: TelemetryPort,
-): AjsParserPort => ({
-  parse: (content) => {
-    const startedAt = performance.now();
-    const result = parser.parse(content);
-    const errorCount = result.ok === true ? 0 : result.errors.length;
-    const event = createPerformanceTelemetryEvent({
+const reportParserPerformance = ({
+  result,
+  startedAt,
+  telemetry,
+}: Readonly<{
+  result: ReturnType<AjsParserPort["parse"]>;
+  startedAt: number;
+  telemetry: TelemetryPort;
+}>): void => {
+  const errorCount = result.ok === true ? 0 : result.errors.length;
+  telemetry.report(
+    createPerformanceTelemetryEvent({
       operation: "parse",
       result: result.ok ? "success" : "failed",
       host: getTelemetryHost(),
       durationBucket: toDurationBucket(performance.now() - startedAt),
       diagnosticCountBucket: toCountBucket(errorCount),
-    });
-    telemetry.report(event);
-    return result;
-  },
+    }),
+  );
+};
+
+const parseWithPerformance = (
+  parser: AjsParserPort,
+  telemetry: TelemetryPort,
+  content: string,
+): ReturnType<AjsParserPort["parse"]> => {
+  const startedAt = performance.now();
+  const result = parser.parse(content);
+  reportParserPerformance({ result, startedAt, telemetry });
+  return result;
+};
+
+export const instrumentParserPerformance = (
+  parser: AjsParserPort,
+  telemetry: TelemetryPort,
+): AjsParserPort => ({
+  parse: (content) => parseWithPerformance(parser, telemetry, content),
 });
 
 const createDesktopWebApiImportCapability = (

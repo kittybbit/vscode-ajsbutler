@@ -354,18 +354,18 @@ suite("Semantic diff Explorer Flow integration", () => {
     const ownerA = Object.freeze({ sessionId: "session-a", disposeEpoch: 0 });
     const ownerB = Object.freeze({ sessionId: "session-b", disposeEpoch: 0 });
     const document = createFlowDocument();
-    registry.replace(
-      "file:///flow.ajs",
-      panel("file:///flow.ajs", messagesA),
-      ownerA,
+    registry.replace({
+      flowUri: "file:///flow.ajs",
+      panel: panel("file:///flow.ajs", messagesA),
+      owner: ownerA,
       document,
-    );
-    registry.replace(
-      "file:///flow.ajs",
-      panel("file:///flow.ajs", messagesB),
-      ownerB,
+    });
+    registry.replace({
+      flowUri: "file:///flow.ajs",
+      panel: panel("file:///flow.ajs", messagesB),
+      owner: ownerB,
       document,
-    );
+    });
     registry.clear("file:///flow.ajs", ownerA);
     assert.strictEqual(messagesA.length, 0);
     assert.strictEqual(messagesB.length, 0);
@@ -390,8 +390,18 @@ suite("Semantic diff Explorer Flow integration", () => {
     };
     const owner = Object.freeze({ sessionId: "session", disposeEpoch: 0 });
     const document = createFlowDocument();
-    const first = registry.replace("file:///flow.ajs", panel, owner, document);
-    const second = registry.replace("file:///flow.ajs", panel, owner, document);
+    const first = registry.replace({
+      flowUri: "file:///flow.ajs",
+      panel,
+      owner,
+      document,
+    });
+    const second = registry.replace({
+      flowUri: "file:///flow.ajs",
+      panel,
+      owner,
+      document,
+    });
     registry.clear("file:///flow.ajs", owner, first);
     assert.deepStrictEqual(messages, []);
     registry.clear("file:///flow.ajs", owner, second);
@@ -413,7 +423,12 @@ suite("Semantic diff Explorer Flow integration", () => {
       },
     };
     const owner = Object.freeze({ sessionId: "session", disposeEpoch: 0 });
-    registry.replace("file:///flow.ajs", panel, owner, original);
+    registry.replace({
+      flowUri: "file:///flow.ajs",
+      panel,
+      owner,
+      document: original,
+    });
     registry.clear("file:///flow.ajs", owner);
     assert.deepStrictEqual(messages, [
       {
@@ -666,6 +681,45 @@ suite("Semantic diff Explorer Flow integration", () => {
       targetId: "/root/target",
     });
     assert.deepStrictEqual(messages, []);
+  });
+
+  test("returns not-ready before validating a target after ready becomes stale", async () => {
+    let freshnessChecks = 0;
+    const sourceSnapshot = {
+      sourceHandleId: "source-after",
+      version: 1,
+      text: "after",
+      uri: "file:///after.ajs",
+    };
+    const panel: SemanticDiffFlowPanel = {
+      flowUri: "file:///after.ajs",
+      ready: Promise.resolve({ document: createRelationFlowDocument(0) }),
+      postMessage: () => Promise.resolve(true),
+    };
+    const action = createSemanticDiffFlowAction({
+      host: {
+        getSourceSnapshot: () => sourceSnapshot,
+        isSourceCurrent: () => {
+          freshnessChecks += 1;
+          return freshnessChecks < 2;
+        },
+        open: async () => panel,
+      },
+    });
+    const result = await action(
+      {
+        ...request(createSemanticDiffExplorerSessionId(8)),
+        targetId: null,
+        targetKind: null,
+        recordId: "relation-added",
+        recordKind: "change",
+        recordTarget: relationTarget,
+      },
+      createRelationContext(),
+      () => true,
+    );
+    assert.deepStrictEqual(result, { ok: false, code: "flow-not-ready" });
+    assert.strictEqual(freshnessChecks, 2);
   });
 
   test("fails closed when the retained source snapshot is stale", async () => {

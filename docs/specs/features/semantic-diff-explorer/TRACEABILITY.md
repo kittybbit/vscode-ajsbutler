@@ -281,9 +281,11 @@ unformatted. Slice 9A completed its formatter-only implementation and
 focused-committed as `d19a38ce` after final `Ready`/no-findings review and
 automatic Completion Approval. Slice 10 completed and focused-committed as
 `9acfb577` after final `Ready`/no-findings review and automatic Completion
-Approval. Slice 11 is now the sole active implementation-approved slice, and
-Slices 12-13 remain planned and
-dependency-blocked until their predecessors are complete, reviewed, and
+Approval. Slice 11 completed and focused-committed as
+`628cc9333ed10d540665cb23329a8e7e3c6af6df` after independent `Ready`/
+no-findings review and automatic Completion Approval. Slice 12 is now the sole
+active implementation-approved slice; Slice 13 remains planned and
+dependency-blocked until its predecessor is complete, reviewed, and
 focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
@@ -615,14 +617,14 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 - Compatibility and readiness remain unchanged: VS Code `^1.75.0`, desktop/web
   parity, ordinary Flow behavior, browser-safe transport, architecture
   boundaries, and telemetry privacy are preserved. The six closure drafts
-  remain excluded and untouched. Slice 11 is the next approved route;
+  remain excluded and untouched. Slice 12 is the next approved route;
   conditional automatic Completion Approval applies only after its independent
   implementation review returns `Ready` with no findings.
 
-### Slice 11 Activation (2026-09-08)
+### Slice 11 Activation (2026-09-08; completed)
 
-- Slice 11 is the sole active implementation-approved slice after Slice 10
-  focused completion commit `9acfb577`. Its exact host/action paths are
+- Slice 11 was the sole active implementation-approved slice after Slice 10
+  focused completion commit `9acfb577`. Its exact host/action paths were
   `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`,
   `semanticDiffExplorerRegistry.ts`, `semanticDiffExplorerReportAction.ts`,
   `semanticDiffExplorerSourceAction.ts`, and
@@ -645,14 +647,16 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `manyReturns=1`, `functionComplexity=4`, `totalComplexity=1`.
   Remediation must use cohesive extraction only, with no suppression,
   allowlist, threshold, generated-ignore, or qlty configuration change.
-- Slices 12-13 remain dependency-blocked until Slice 11 is independently
-  reviewed `Ready` with no findings and focused-committed; closure drafts
-  remain excluded and untouched.
+- Slice 11 is independently reviewed `Ready` with no findings, automatically
+  completion-approved, and focused-committed as
+  `628cc9333ed10d540665cb23329a8e7e3c6af6df`. Slice 12 is now the sole active
+  implementation-approved slice; Slice 13 remains dependency-blocked and the
+  closure drafts remain excluded and untouched.
 
 ### Slice 11 Implementation Evidence (2026-09-08)
 
-- Slice 11 implementation is complete within the approved VS Code Explorer
-  host/action boundary and is pending independent implementation review. The
+- Slice 11 implementation was complete within the approved VS Code Explorer
+  host/action boundary and passed independent implementation review. The
   public panel opener remains one-argument and still returns the host-only
   session handle. Panel installation, request validation/dispatch, transport,
   action routing, lifecycle disposal, report execution, source execution, and
@@ -684,9 +688,101 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 - Production-readiness evidence remains positive for VS Code `^1.75.0`,
   desktop/web parity, browser-safe transport, privacy, registry ownership,
   source lifetime, and telemetry boundaries. Closure drafts remain excluded
-  and untouched. The next route is independent implementation review; Slices
-  12-13 remain dependency-blocked until Slice 11 is reviewed `Ready` and
-  focused-committed.
+  and untouched. Slice 11's focused completion commit is
+  `628cc9333ed10d540665cb23329a8e7e3c6af6df`; Slice 12 is now the next
+  approved route and Slice 13 remains dependency-blocked.
+
+### Slice 12 Activation (2026-09-08)
+
+- Slice 12 is the sole implementation-approved active slice after Slice 11's
+  focused completion commit `628cc9333ed10d540665cb23329a8e7e3c6af6df`.
+  Its exact approved paths are
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts`,
+  `src/bootstrap/extension/semanticDiffFlowViewerBridge.ts`,
+  `src/bootstrap/extension/semanticDiffWiring.ts`,
+  `src/bootstrap/extension/viewerWiring.ts`,
+  `src/bootstrap/extension/extensionDependencies.ts`, and
+  `src/presentation/vscode/webview/ajsDocument.ts`.
+- Focused evidence remains
+  `src/test/suite/semanticDiffExplorerFlow.test.ts`,
+  `src/test/suite/flowViewerController.test.ts`,
+  `src/test/suite/flowViewerEffects.test.ts`,
+  `src/test/suite/viewerWiring.test.ts`,
+  `src/test/suite/AjsDocument.test.ts`, and
+  `src/test/suite/architectureDependencyRules.test.ts`. Slice 13's Flow/
+  shared-MUI presentation paths, configuration, and closure drafts remain
+  excluded and blocked.
+- The recorded qlty baseline is preserved: `semanticDiffExplorerFlow.ts`
+  `P=1,R=5,F=7,T=1,B=1`; `semanticDiffFlowViewerBridge.ts` `F=3`;
+  `semanticDiffWiring.ts` `P=1,R=1,F=2,B=1`; `viewerWiring.ts` `R=1,F=4`;
+  `extensionDependencies.ts` `F=1`; and `ajsDocument.ts`
+  `P=2,R=2,F=4`. Remediation is cohesive extraction only; no suppression,
+  allowlist, threshold, generated-ignore, or qlty configuration change.
+- Preserve the existing composition and lifecycle contracts: concrete
+  infrastructure is constructed only in bootstrap; the Flow viewer bridge
+  remains the single overlay owner with one overlay per URI; source-current
+  checks, owner-token/operation guards, ready/focus/reveal, stale-source,
+  supersession/late-clear, unregister-before-release, normal viewer wiring,
+  and privacy-preserving parser performance telemetry remain unchanged.
+  Desktop/web parity and browser-safe imports are mandatory. No new viewer
+  message variant or architecture exception is authorized.
+- Validation is the focused Flow host/wiring/viewer lifecycle suites,
+  architecture dependency rules, desktop smoke, web preparation/build,
+  targeted smells, full qlty check, and diff checks. Slice 13 remains blocked
+  until Slice 12 is independently reviewed `Ready` with no findings and
+  focused-committed; closure drafts remain excluded and untouched.
+
+### Slice 12 Implementation Evidence (2026-09-08)
+
+- The approved Flow host/wiring boundary is implemented and remains uncommitted
+  for independent review. Public Flow action types remain in
+  `semanticDiffExplorerFlow.ts`; same-boundary helpers own target resolution,
+  action preparation, overlay ownership, freshness checks, and post/reveal
+  sequencing without adding a viewer message variant or architecture
+  exception. The bootstrap-owned Flow bridge preserves ready/reveal/error
+  behavior and panel/document identity.
+- `semanticDiffWiring.ts` isolates source snapshots, source/document freshness,
+  Flow opening, report providers, Explorer composition, and command
+  registration. `viewerWiring.ts` preserves the shared WebviewStore, normal
+  table/Flow factory lifecycle, pending reveal, navigation telemetry, and
+  Flow bridge callbacks. `extensionDependencies.ts` retains
+  application-catalog-only parser performance telemetry. `ajsDocument.ts`
+  retains debounce, panel-disposal cancellation, callback disposal, and
+  posted-document behavior through an internal lifecycle state object.
+- Same-boundary extraction helpers are
+  `semanticDiffExplorerFlowAction.ts`,
+  `semanticDiffExplorerFlowActionPreparation.ts`,
+  `semanticDiffExplorerFlowOverlayRegistry.ts`, and
+  `semanticDiffExplorerFlowTargets.ts`. The focused Flow test updates registry
+  calls to the cohesive options form and adds the reviewed stale-after-ready
+  regression; no transport or UI contract changed.
+- The implementation-review freshness finding is resolved: the Flow action
+  passes its source-freshness guard into `openReadyFlowTarget`, which checks
+  immediately after `panel.ready` before relation/target validation. A stale
+  source therefore returns `flow-not-ready` even when the ready document also
+  lacks the target; the existing final pre-overlay freshness guard remains.
+  `semanticDiffExplorerFlow.test.ts` covers this stale-after-ready plus
+  missing-target race and asserts no messages are posted.
+- Targeted `pnpm exec qlty smells --no-snippets` over all six approved files,
+  same-boundary helpers, and the focused Flow test returned zero findings.
+  `pnpm exec qlty check` returned `No issues`; no suppression, allowlist,
+  threshold, generated-ignore, configuration, or architecture exception was
+  changed. Repository-wide smell output retains only pre-existing Flow
+  webview findings outside this slice.
+- Validation passed `rtk pnpm run test:compile`, desktop preparation and the
+  compiled desktop runner (exit 0), web preparation, the escalated web runner
+  (exit 0), production `rtk pnpm run build`, and `git diff --check`. The web
+  runner emitted transient stream-close warnings after smoke; existing
+  webpack bundle-size warnings remain unchanged. Every changed runtime,
+  helper, and focused-test path was formatted with `qlty fmt`.
+- Production-readiness remains positive for VS Code `^1.75.0`, desktop/web
+  bundles, browser-safe imports, bootstrap-only concrete construction,
+  one-overlay-per-URI ownership, owner/operation stale guards, source
+  freshness, unregister-before-release, normal viewer wiring, and
+  privacy-preserving telemetry. Independent review should verify the
+  lifecycle/concurrency matrix and shared WebviewStore identity. No unresolved
+  scope or design change was discovered; completion review and focused commit
+  remain pending.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
