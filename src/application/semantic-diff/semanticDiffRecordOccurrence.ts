@@ -39,7 +39,8 @@ const findOccurrence = <T extends { id: string }>(
   records: readonly T[],
   recordId: string,
   occurrence: number,
-): T | undefined => records.filter((record) => record.id === recordId)[occurrence];
+): T | undefined =>
+  records.filter((record) => record.id === recordId)[occurrence];
 
 const parseOccurrenceSuffix = (suffix: string): number | null => {
   const occurrence = Number(suffix);
@@ -53,5 +54,7 @@ export const parseSemanticDiffRecordOccurrence = (
   leafId: string,
 ): number | null => {
   const separator = leafId.lastIndexOf(":");
-  return separator < 0 ? null : parseOccurrenceSuffix(leafId.slice(separator + 1));
+  return separator < 0
+    ? null
+    : parseOccurrenceSuffix(leafId.slice(separator + 1));
 };

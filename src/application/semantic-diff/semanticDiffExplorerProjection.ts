@@ -1,6 +1,4 @@
-import type {
-  SemanticDiffOutputContext,
-} from "./semanticDiffDto";
+import type { SemanticDiffOutputContext } from "./semanticDiffDto";
 import type {
   SemanticDiffExplorerActionId,
   SemanticDiffExplorerActionIdAllocator,
@@ -30,12 +28,12 @@ import { freeze } from "./semanticDiffExplorerProjectionSupport";
 
 const defaultSessionIds = createSemanticDiffExplorerSessionIdAllocator();
 const defaultActionIds = createSemanticDiffExplorerActionIdAllocator();
-const unfilteredViewByFilteredView = new WeakMap<object, SemanticDiffExplorerViewModel>();
+const unfilteredViewByFilteredView = new WeakMap<
+  object,
+  SemanticDiffExplorerViewModel
+>();
 
-export {
-  semanticDiffChangeTargetSide,
-  semanticDiffConfirmationTargetSide,
-};
+export { semanticDiffChangeTargetSide, semanticDiffConfirmationTargetSide };
 export const resolveSemanticDiffChangeTargetSide = semanticDiffChangeTargetSide;
 export const resolveSemanticDiffConfirmationTargetSide =
   semanticDiffConfirmationTargetSide;
@@ -63,7 +61,8 @@ const isEmptyFilteredGroup = (
   node: SemanticDiffExplorerTreeNode,
   leaves: readonly SemanticDiffExplorerLeaf[],
   children: readonly SemanticDiffExplorerTreeNode[],
-): boolean => node.kind !== "root" && leaves.length === 0 && children.length === 0;
+): boolean =>
+  node.kind !== "root" && leaves.length === 0 && children.length === 0;
 
 const filterTree = (
   node: SemanticDiffExplorerTreeNode,
@@ -72,7 +71,11 @@ const filterTree = (
   const leaves = filterTreeLeaves(node, filter);
   const children = filterTreeChildren(node, filter);
   if (isEmptyFilteredGroup(node, leaves, children)) return null;
-  return freeze({ ...node, leaves: freeze(leaves), children: freeze(children) });
+  return freeze({
+    ...node,
+    leaves: freeze(leaves),
+    children: freeze(children),
+  });
 };
 
 const countLeaves = (node: SemanticDiffExplorerTreeNode): number =>
@@ -166,7 +169,9 @@ const collectLeafActionIds = (
 ): void => {
   [leaf.actions.source, leaf.actions.flow]
     .map((action) => action.actionId)
-    .filter((actionId): actionId is SemanticDiffExplorerActionId => actionId !== null)
+    .filter(
+      (actionId): actionId is SemanticDiffExplorerActionId => actionId !== null,
+    )
     .forEach((actionId) => ids.add(actionId));
 };
 
@@ -186,7 +191,8 @@ const createActionLookup = (
   return Object.freeze({
     size: values.length,
     has: (value: unknown): value is SemanticDiffExplorerActionId =>
-      typeof value === "string" && membership.has(value as SemanticDiffExplorerActionId),
+      typeof value === "string" &&
+      membership.has(value as SemanticDiffExplorerActionId),
     toArray: (): readonly SemanticDiffExplorerActionId[] => values,
   });
 };
@@ -217,7 +223,10 @@ export const setSemanticDiffExplorerFilter = (
     ? session
     : freeze({
         ...session,
-        viewModel: filterSemanticDiffExplorerViewModel(session.allViewModel, filter),
+        viewModel: filterSemanticDiffExplorerViewModel(
+          session.allViewModel,
+          filter,
+        ),
       });
 
 export const getSemanticDiffExplorerActionIds = (

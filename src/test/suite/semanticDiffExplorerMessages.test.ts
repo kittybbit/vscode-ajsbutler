@@ -587,8 +587,13 @@ suite("Semantic Diff Explorer messages", () => {
         ...validSessionMessage(),
         type: key,
       };
-      assert.doesNotThrow(() => parseSemanticDiffExplorerHostMessage(malformedMessage));
-      assert.strictEqual(parseSemanticDiffExplorerHostMessage(malformedMessage), undefined);
+      assert.doesNotThrow(() =>
+        parseSemanticDiffExplorerHostMessage(malformedMessage),
+      );
+      assert.strictEqual(
+        parseSemanticDiffExplorerHostMessage(malformedMessage),
+        undefined,
+      );
     }
   });
 });

@@ -32,7 +32,9 @@ const hasDenseArrayIndexes = (value: readonly unknown[]): boolean =>
 
 export const isDenseArray = (value: unknown): value is unknown[] => {
   if (!Array.isArray(value)) return false;
-  return Object.keys(value).length === value.length && hasDenseArrayIndexes(value);
+  return (
+    Object.keys(value).length === value.length && hasDenseArrayIndexes(value)
+  );
 };
 
 const isJsonScalar = (value: unknown): boolean => {
@@ -95,9 +97,7 @@ export const isStringArray = (value: unknown): value is string[] =>
 export const isNullableString = (value: unknown): value is string | null =>
   value === null || typeof value === "string";
 
-export const isSide = (
-  value: unknown,
-): value is "before" | "after" | null =>
+export const isSide = (value: unknown): value is "before" | "after" | null =>
   value === null || value === "before" || value === "after";
 
 export const isRelationType = (value: unknown): value is "seq" | "con" =>

@@ -13,7 +13,10 @@ import type {
   SemanticDiffExplorerLeaf,
 } from "./semanticDiffExplorerDto";
 import { withSourceOrderOccurrences } from "./semanticDiffRecordOccurrence";
-import { compareUtf16, stableValueKey } from "./semanticDiffExplorerProjectionTree";
+import {
+  compareUtf16,
+  stableValueKey,
+} from "./semanticDiffExplorerProjectionTree";
 import {
   changeLeaf,
   confirmationLeaf,
@@ -103,7 +106,10 @@ export const createLeaves = (
 ): readonly SemanticDiffExplorerLeaf[] =>
   freeze([
     ...changeLeaves(context.result.changes, actionIdAllocator),
-    ...confirmationLeaves(context.result.confirmationRequired, actionIdAllocator),
+    ...confirmationLeaves(
+      context.result.confirmationRequired,
+      actionIdAllocator,
+    ),
     ...unsupportedLeaves(context.result.unsupportedItems, actionIdAllocator),
     ...limitationLeaves(context.result.limitations),
     ...scheduleLeaves(context.result.scheduleComparison?.runChanges ?? []),
@@ -116,24 +122,42 @@ const card = (
   id: SemanticDiffExplorerCardId,
   count: number,
   counts: Readonly<Record<string, number>>,
-): SemanticDiffExplorerCard => freeze({ id, count, counts: freeze({ ...counts }) });
+): SemanticDiffExplorerCard =>
+  freeze({ id, count, counts: freeze({ ...counts }) });
 
 export const buildCards = (
   context: SemanticDiffOutputContext,
 ): readonly SemanticDiffExplorerCard[] => {
   const summary = context.summary;
   return freeze([
-    card("changes", total(summary.changeCountsByKind), summary.changeCountsByKind),
-    card("elements", total(summary.changeCountsByElementKind), summary.changeCountsByElementKind),
-    card("attributes", total(summary.changeCountsByAttributeCategory), summary.changeCountsByAttributeCategory),
+    card(
+      "changes",
+      total(summary.changeCountsByKind),
+      summary.changeCountsByKind,
+    ),
+    card(
+      "elements",
+      total(summary.changeCountsByElementKind),
+      summary.changeCountsByElementKind,
+    ),
+    card(
+      "attributes",
+      total(summary.changeCountsByAttributeCategory),
+      summary.changeCountsByAttributeCategory,
+    ),
     card("confirmation-required", summary.confirmationRequiredCount, {
       required: summary.confirmationRequiredCount,
     }),
-    card("unsupported", total(summary.unsupportedCountsByKind), summary.unsupportedCountsByKind),
-    card("limitations", summary.limitationCount, { total: summary.limitationCount }),
+    card(
+      "unsupported",
+      total(summary.unsupportedCountsByKind),
+      summary.unsupportedCountsByKind,
+    ),
+    card("limitations", summary.limitationCount, {
+      total: summary.limitationCount,
+    }),
     card("schedule-run-changes", summary.scheduleRunChangeCount, {
       total: summary.scheduleRunChangeCount,
     }),
   ]);
 };
-

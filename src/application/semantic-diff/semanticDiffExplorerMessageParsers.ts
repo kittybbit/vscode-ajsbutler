@@ -86,8 +86,7 @@ const isRequestEnvelope = (
   type: string;
   sessionId: SemanticDiffExplorerSessionId;
   requestId: number;
-} =>
-  hasExactKeys(record, messageKeys) && isRequestIdentity(record, options);
+} => hasExactKeys(record, messageKeys) && isRequestIdentity(record, options);
 
 const isRequestIdentity = (
   record: MessageRecord,
@@ -128,7 +127,8 @@ const buildReadyRequest = (
 const isActionRequest = (
   record: MessageRecord,
   options: SemanticDiffExplorerMessageValidationOptions,
-): boolean => record.type === "action" && actionMatches(record.actionId, options);
+): boolean =>
+  record.type === "action" && actionMatches(record.actionId, options);
 
 const buildActionRequest = (
   record: MessageRecord,
@@ -156,8 +156,7 @@ const isResponseEnvelope = (
   sessionId: SemanticDiffExplorerSessionId;
   requestId: number;
   ok: boolean;
-} =>
-  hasExactKeys(record, responseKeys) && isResponseIdentity(record, options);
+} => hasExactKeys(record, responseKeys) && isResponseIdentity(record, options);
 
 const isResponseIdentity = (
   record: MessageRecord,
@@ -186,9 +185,7 @@ const isFailedResponse = ({ payload, error }: ResponsePair): boolean =>
   payload === null && isSemanticDiffExplorerError(error);
 
 const responsePairIsValid = (response: ResponsePair): boolean =>
-  response.ok
-    ? isSuccessfulResponse(response)
-    : isFailedResponse(response);
+  response.ok ? isSuccessfulResponse(response) : isFailedResponse(response);
 
 const parseReadyReply = (
   record: MessageRecord & {
@@ -256,15 +253,11 @@ export const parseSemanticDiffExplorerReply = (
 ): SemanticDiffExplorerReply | undefined => {
   const record = asJsonRecord(value);
   if (record === null || !isResponseEnvelope(record, options)) return undefined;
-  return (
-    parseReadyReply(record) ??
-    parseActionReply(record, options)
-  );
+  return parseReadyReply(record) ?? parseActionReply(record, options);
 };
 
-const hostEnvelope = (
-  value: unknown,
-): MessageRecord | null => asJsonRecord(value);
+const hostEnvelope = (value: unknown): MessageRecord | null =>
+  asJsonRecord(value);
 
 const isSessionMessage = (
   record: MessageRecord,
@@ -281,8 +274,12 @@ const isSessionMessageBody = (
   const session = sessionMatches(record.sessionId, options);
   const controlFields =
     record.requestId === null && record.actionId === null && record.ok === true;
-  return session && controlFields && record.error === null &&
-    isSemanticDiffExplorerViewModel(record.payload);
+  return (
+    session &&
+    controlFields &&
+    record.error === null &&
+    isSemanticDiffExplorerViewModel(record.payload)
+  );
 };
 
 const isCloseMessage = (
@@ -300,7 +297,9 @@ const isCloseMessageBody = (
   const session = sessionMatches(record.sessionId, options);
   const controlFields =
     record.requestId === null && record.actionId === null && record.ok === true;
-  return session && controlFields && record.payload === null && record.error === null;
+  return (
+    session && controlFields && record.payload === null && record.error === null
+  );
 };
 
 const isFailureMessage = (
@@ -313,7 +312,8 @@ const isFailureMessage = (
     record.sessionId === null || sessionMatches(record.sessionId, options);
   const actionValid =
     record.actionId === null || actionMatches(record.actionId, options);
-  const envelope = hasExactKeys(record, responseKeys) && record.type === "failure";
+  const envelope =
+    hasExactKeys(record, responseKeys) && record.type === "failure";
   const failure = record.ok === false && record.payload === null;
   return all([
     envelope,
@@ -329,7 +329,8 @@ const isActionResultMessage = (
   record: MessageRecord,
   options: SemanticDiffExplorerMessageValidationOptions,
 ): boolean => {
-  const envelope = hasExactKeys(record, responseKeys) &&
+  const envelope =
+    hasExactKeys(record, responseKeys) &&
     isActionResultIdentity(record, options);
   return all([
     envelope,
@@ -362,7 +363,8 @@ const buildSessionMessage = (
   requestId: null,
   actionId: null,
   ok: true,
-  payload: record.payload as import("./semanticDiffExplorerDto").SemanticDiffExplorerViewModel,
+  payload:
+    record.payload as import("./semanticDiffExplorerDto").SemanticDiffExplorerViewModel,
   error: null,
 });
 

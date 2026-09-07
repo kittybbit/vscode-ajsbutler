@@ -364,8 +364,8 @@ environment-owned validation risk whenever web smoke is attempted.
 
 ### Slice 7A Activation (2026-09-07)
 
-- Slice 7A is the sole active approved replan, with its focused plan commit
-  pending. The trigger was
+- Slice 7A is the sole active approved replan, with focused plan commit
+  `aa13b73e` present. The trigger was
   the full `rtk pnpm run qlty:check` result after Slice 7 commit
   `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`, which reported exactly 14
   committed Slice 7 paths as unformatted by `prettier:fmt`.
@@ -390,12 +390,33 @@ qlty:check` pass, targeted qlty smells, and Slice 7 message/projection/
   qlty configuration change is allowed. Final independent plan review is
   `Ready` with no findings; Human Approval was granted through the trusted
   user messages `承認します。` and `継続して。` on 2026-09-07.
-- Exact approved replan commit paths are only
+- Exact approved replan commit paths were only
   `docs/specs/features/semantic-diff-explorer/TASKS.md` and
-  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`. The focused
-  docs-only commit is eligible/pending; no implementation or formatting has
-  started. Slice 8 activation remains held until that commit and the later
-  Slice 7A implementation gate; Slices 9-13 remain blocked.
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`; that focused
+  docs-only commit is `aa13b73e`. Formatter implementation evidence is
+  recorded below, with no implementation commit or staging performed here.
+  Slice 8 activation remains held until the later Slice 7A implementation
+  review/completion gate; Slices 9-13 remain blocked.
+
+### Slice 7A Implementation Evidence (2026-09-07)
+
+- The repository formatter `qlty fmt` formatted exactly the 14 approved Slice
+  7 application/test paths. Mechanical diff inspection found only import
+  grouping, line wrapping, trailing-comma, and equivalent parenthesization
+  changes; behavior, assertions, exports, DTO/message schemas, and qlty
+  policy/configuration are unchanged.
+- Full `qlty check --no-fix --no-formatters` passed with no issues. Targeted
+  `qlty smells --no-snippets` analyzed the 14 paths cleanly. `rtk pnpm run
+test:compile`, production desktop/web `rtk pnpm run build`, the focused
+  messages/projection/DOM/Flow suites (42 passing), compiled desktop smoke
+  (`node ./out/test/runTest.js`, exit 0), `rtk git diff --check`, and
+  `rtk pnpm run lint:md` all passed.
+- The six closure drafts remain untouched. Existing production bundle-size
+  warnings are unchanged; no browser smoke result is inferred from the build.
+  Slice 8 activation remains held and Slices 9-13 remain dependency-blocked.
+- Implementation status: complete and ready for independent implementation
+  review; focused completion commit and the automatic Completion Approval gate
+  remain pending.
 
 ### Slice 8 Activation (2026-09-07)
 

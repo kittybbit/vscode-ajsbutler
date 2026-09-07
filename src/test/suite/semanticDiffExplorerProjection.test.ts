@@ -17,7 +17,10 @@ import {
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
 import { isSemanticDiffExplorerViewModel } from "../../application/semantic-diff/semanticDiffExplorerMessages";
 import { isSemanticDiffExplorerLeaf } from "../../application/semantic-diff/semanticDiffExplorerLeafGuards";
-import { placementForTarget, placementForLeaf } from "../../application/semantic-diff/semanticDiffExplorerProjectionPaths";
+import {
+  placementForTarget,
+  placementForLeaf,
+} from "../../application/semantic-diff/semanticDiffExplorerProjectionPaths";
 import {
   cloneTarget,
   createActionSet,
@@ -448,10 +451,14 @@ suite("Semantic Diff Explorer projection", () => {
         undefined,
       );
       assert.strictEqual(
-        semanticDiffConfirmationTargetSide(key as SemanticDiffConfirmationReason),
+        semanticDiffConfirmationTargetSide(
+          key as SemanticDiffConfirmationReason,
+        ),
         undefined,
       );
-      const malformedLeaf = { kind: key } as unknown as SemanticDiffExplorerLeaf;
+      const malformedLeaf = {
+        kind: key,
+      } as unknown as SemanticDiffExplorerLeaf;
       assert.doesNotThrow(() => isSemanticDiffExplorerLeaf(malformedLeaf));
       assert.strictEqual(isSemanticDiffExplorerLeaf(malformedLeaf), false);
       assert.doesNotThrow(() => placementForLeaf(malformedLeaf));

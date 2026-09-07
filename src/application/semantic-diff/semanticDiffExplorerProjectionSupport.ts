@@ -85,7 +85,9 @@ export const cloneRelationPair = (
         after: cloneEndpoint(pair.after),
       });
 
-const cloneJobGroupTarget = (target: SemanticDiffTarget & { kind: "job-group" }) =>
+const cloneJobGroupTarget = (
+  target: SemanticDiffTarget & { kind: "job-group" },
+) =>
   freeze({
     kind: target.kind,
     ...(target.path === undefined ? {} : { path: target.path }),
@@ -93,8 +95,9 @@ const cloneJobGroupTarget = (target: SemanticDiffTarget & { kind: "job-group" })
 const cloneUnitTarget = (
   target: SemanticDiffTarget & { kind: "unit" | "jobnet" },
 ) => freeze({ kind: target.kind, unit: freeze({ ...target.unit }) });
-const cloneRelationTarget = (target: SemanticDiffTarget & { kind: "relation" }) =>
-  freeze({ kind: target.kind, relation: freeze({ ...target.relation }) });
+const cloneRelationTarget = (
+  target: SemanticDiffTarget & { kind: "relation" },
+) => freeze({ kind: target.kind, relation: freeze({ ...target.relation }) });
 const cloneAttributeTarget = (
   target: SemanticDiffTarget & { kind: "attribute" },
 ) =>
@@ -106,12 +109,30 @@ const cloneAttributeTarget = (
     values: freezeArray(target.values),
   });
 
-const targetCloners = new Map<string, (target: SemanticDiffTarget) => SemanticDiffTarget>([
-  ["job-group", cloneJobGroupTarget as (target: SemanticDiffTarget) => SemanticDiffTarget],
-  ["unit", cloneUnitTarget as (target: SemanticDiffTarget) => SemanticDiffTarget],
-  ["jobnet", cloneUnitTarget as (target: SemanticDiffTarget) => SemanticDiffTarget],
-  ["relation", cloneRelationTarget as (target: SemanticDiffTarget) => SemanticDiffTarget],
-  ["attribute", cloneAttributeTarget as (target: SemanticDiffTarget) => SemanticDiffTarget],
+const targetCloners = new Map<
+  string,
+  (target: SemanticDiffTarget) => SemanticDiffTarget
+>([
+  [
+    "job-group",
+    cloneJobGroupTarget as (target: SemanticDiffTarget) => SemanticDiffTarget,
+  ],
+  [
+    "unit",
+    cloneUnitTarget as (target: SemanticDiffTarget) => SemanticDiffTarget,
+  ],
+  [
+    "jobnet",
+    cloneUnitTarget as (target: SemanticDiffTarget) => SemanticDiffTarget,
+  ],
+  [
+    "relation",
+    cloneRelationTarget as (target: SemanticDiffTarget) => SemanticDiffTarget,
+  ],
+  [
+    "attribute",
+    cloneAttributeTarget as (target: SemanticDiffTarget) => SemanticDiffTarget,
+  ],
 ]);
 
 export const cloneTarget = (
@@ -154,7 +175,11 @@ export const semanticDiffConfirmationTargetSide = (
 };
 
 const targetUnitId = (target: SemanticDiffTarget): string | null => {
-  if (target.kind === "unit" || target.kind === "jobnet" || target.kind === "attribute") {
+  if (
+    target.kind === "unit" ||
+    target.kind === "jobnet" ||
+    target.kind === "attribute"
+  ) {
     return target.unit.id;
   }
   return null;
@@ -192,22 +217,33 @@ type ActionSetInput = {
 const missingActionSet = (
   reason: "missing-target-side" | "missing-target",
 ): SemanticDiffExplorerActionSet =>
-  freeze({ source: unavailableAction(reason), flow: unavailableAction(reason) });
+  freeze({
+    source: unavailableAction(reason),
+    flow: unavailableAction(reason),
+  });
 
 const relationFlowAvailable = (
   pair: SemanticDiffRelationPair | null | undefined,
   side: SemanticDiffSide,
 ): boolean => {
-  if (pair === null || pair === undefined || (side !== "before" && side !== "after")) {
+  if (
+    pair === null ||
+    pair === undefined ||
+    (side !== "before" && side !== "after")
+  ) {
     return false;
   }
   const endpoint = pair[side];
-  return endpoint !== null && endpoint !== undefined && [
-    endpoint.sourceUnitId.length > 0,
-    endpoint.targetUnitId.length > 0,
-    endpoint.sourceUnitPath !== null,
-    endpoint.targetUnitPath !== null,
-  ].every(Boolean);
+  return (
+    endpoint !== null &&
+    endpoint !== undefined &&
+    [
+      endpoint.sourceUnitId.length > 0,
+      endpoint.targetUnitId.length > 0,
+      endpoint.sourceUnitPath !== null,
+      endpoint.targetUnitPath !== null,
+    ].every(Boolean)
+  );
 };
 
 const relationActionSet = (
@@ -215,7 +251,10 @@ const relationActionSet = (
 ): SemanticDiffExplorerActionSet =>
   freeze({
     source: unavailableAction("unsupported-target"),
-    flow: relationFlowAvailable(input.relationPair, input.side as SemanticDiffSide)
+    flow: relationFlowAvailable(
+      input.relationPair,
+      input.side as SemanticDiffSide,
+    )
       ? availableAction(input.actionIdAllocator)
       : unavailableAction("missing-target"),
   });
@@ -225,19 +264,23 @@ const targetActionSet = (
   id: string | null,
 ): SemanticDiffExplorerActionSet =>
   freeze({
-    source: id === null
-      ? unavailableAction("unsupported-target")
-      : availableAction(input.actionIdAllocator),
-    flow: id === null
-      ? unavailableAction("unsupported-target")
-      : availableAction(input.actionIdAllocator),
+    source:
+      id === null
+        ? unavailableAction("unsupported-target")
+        : availableAction(input.actionIdAllocator),
+    flow:
+      id === null
+        ? unavailableAction("unsupported-target")
+        : availableAction(input.actionIdAllocator),
   });
 
 export const createActionSet = (
   input: ActionSetInput,
 ): SemanticDiffExplorerActionSet => actionSetForInput(input);
 
-const actionSetForInput = (input: ActionSetInput): SemanticDiffExplorerActionSet => {
+const actionSetForInput = (
+  input: ActionSetInput,
+): SemanticDiffExplorerActionSet => {
   const missing = missingActionReason(input);
   if (missing !== null) return missingActionSet(missing);
   return input.target.kind === "relation"
@@ -259,7 +302,8 @@ export const changeLeaf = (
   actionIdAllocator: SemanticDiffExplorerActionIdAllocator,
 ): SemanticDiffExplorerChangeLeaf => {
   const side = semanticDiffChangeTargetSide(change.kind);
-  if (side === undefined) throw new TypeError("Unknown Semantic Diff change kind.");
+  if (side === undefined)
+    throw new TypeError("Unknown Semantic Diff change kind.");
   const before = cloneTarget(change.before);
   const after = cloneTarget(change.after);
   const target = side === "before" ? before : after;
@@ -295,7 +339,8 @@ export const confirmationLeaf = (
   actionIdAllocator: SemanticDiffExplorerActionIdAllocator,
 ): SemanticDiffExplorerConfirmationLeaf => {
   const side = semanticDiffConfirmationTargetSide(item.reasonCode);
-  if (side === undefined) throw new TypeError("Unknown Semantic Diff confirmation reason.");
+  if (side === undefined)
+    throw new TypeError("Unknown Semantic Diff confirmation reason.");
   const target = cloneTarget(item.target);
   return freeze({
     kind: "confirmation",
@@ -304,7 +349,11 @@ export const confirmationLeaf = (
     reasonCode: item.reasonCode,
     targetSide: side,
     target: explorerTarget(side, target),
-    relatedTargets: freeze(item.relatedTargets.map((related) => cloneTarget(related) as SemanticDiffTarget)),
+    relatedTargets: freeze(
+      item.relatedTargets.map(
+        (related) => cloneTarget(related) as SemanticDiffTarget,
+      ),
+    ),
     detail: cloneDetail(item.detail),
     constraints: freeze(item.constraints.map(cloneConstraint)),
     warning: cloneWarning(item.warning),

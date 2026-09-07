@@ -1,7 +1,14 @@
-import type { SemanticDiffExplorerLeaf, SemanticDiffExplorerTreeNode } from "./semanticDiffExplorerDto";
+import type {
+  SemanticDiffExplorerLeaf,
+  SemanticDiffExplorerTreeNode,
+} from "./semanticDiffExplorerDto";
 import { COMPARISON_LEVEL_FINDINGS_GROUP } from "./semanticDiffExplorerDto";
 import { freeze, freezeArray } from "./semanticDiffExplorerProjectionSupport";
-import { placementForLeaf, pathFromSegments, type PathPlacement } from "./semanticDiffExplorerProjectionPaths";
+import {
+  placementForLeaf,
+  pathFromSegments,
+  type PathPlacement,
+} from "./semanticDiffExplorerProjectionPaths";
 
 export type MutableTreeNode = {
   id: string;
@@ -112,8 +119,10 @@ const stablePrimitiveKey = (value: unknown): string | null => {
     ["boolean", (item) => `boolean:${String(item)}`],
     ["undefined", () => "undefined"],
   ]);
-  return primitiveKeys.get(type)?.(value) ??
-    (type === "object" ? null : `${type}:${String(value)}`);
+  return (
+    primitiveKeys.get(type)?.(value) ??
+    (type === "object" ? null : `${type}:${String(value)}`)
+  );
 };
 
 const stableArrayKey = (value: readonly unknown[]): string =>
@@ -159,7 +168,10 @@ const compareChildren = (
 const comparisonRank = (node: MutableTreeNode): number =>
   node.path === null ? 1 : 0;
 
-const compareLabels = (left: MutableTreeNode, right: MutableTreeNode): number => {
+const compareLabels = (
+  left: MutableTreeNode,
+  right: MutableTreeNode,
+): number => {
   const labelDifference = compareUtf16(left.label, right.label);
   return labelDifference !== 0
     ? labelDifference
@@ -175,12 +187,12 @@ const compareLeaves = (
   const kindDifference = leftRank - rightRank;
   if (kindDifference !== 0) return kindDifference;
   const keyDifference = compareUtf16(leafSortKey(left), leafSortKey(right));
-  return keyDifference !== 0
-    ? keyDifference
-    : compareUtf16(left.id, right.id);
+  return keyDifference !== 0 ? keyDifference : compareUtf16(left.id, right.id);
 };
 
-export const freezeTree = (node: MutableTreeNode): SemanticDiffExplorerTreeNode =>
+export const freezeTree = (
+  node: MutableTreeNode,
+): SemanticDiffExplorerTreeNode =>
   freeze({
     id: node.id,
     kind: node.kind,

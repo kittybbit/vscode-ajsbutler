@@ -25,7 +25,9 @@ const commonSegments = (
 ): string[] => {
   const limit = Math.min(source.length, destination.length);
   const indexes = Array.from({ length: limit }, (_, index) => index);
-  const mismatch = indexes.find((index) => source[index] !== destination[index]);
+  const mismatch = indexes.find(
+    (index) => source[index] !== destination[index],
+  );
   return source.slice(0, mismatch ?? limit);
 };
 
@@ -64,8 +66,11 @@ const relationPlacement = (
   relationSide: SemanticDiffSide | null,
 ): PathPlacement | null => {
   const paths = relationPaths(relationPair, relationSide);
-  const relationPath = paths === null ? null : commonParentPath(paths.source, paths.target);
-  return relationPath === null ? null : pathPlacement(relationPath, "job-group");
+  const relationPath =
+    paths === null ? null : commonParentPath(paths.source, paths.target);
+  return relationPath === null
+    ? null
+    : pathPlacement(relationPath, "job-group");
 };
 
 const relationPaths = (
@@ -99,10 +104,25 @@ type TargetPlacement = (
 ) => PathPlacement | null;
 
 const targetPlacements = new Map<string, TargetPlacement>([
-  ["job-group", (target) => jobGroupPlacement(target as SemanticDiffTarget & { kind: "job-group" })],
-  ["unit", (target) => unitPlacement(target as SemanticDiffTarget & { kind: "unit" })],
-  ["jobnet", (target) => unitPlacement(target as SemanticDiffTarget & { kind: "jobnet" })],
-  ["attribute", (target) => unitPlacement(target as SemanticDiffTarget & { kind: "attribute" })],
+  [
+    "job-group",
+    (target) =>
+      jobGroupPlacement(target as SemanticDiffTarget & { kind: "job-group" }),
+  ],
+  [
+    "unit",
+    (target) => unitPlacement(target as SemanticDiffTarget & { kind: "unit" }),
+  ],
+  [
+    "jobnet",
+    (target) =>
+      unitPlacement(target as SemanticDiffTarget & { kind: "jobnet" }),
+  ],
+  [
+    "attribute",
+    (target) =>
+      unitPlacement(target as SemanticDiffTarget & { kind: "attribute" }),
+  ],
   ["relation", (_target, pair, side) => relationPlacement(pair, side)],
 ]);
 
@@ -112,7 +132,10 @@ export const placementForTarget = (
   relationSide: SemanticDiffSide | null = null,
 ): PathPlacement | null => {
   if (target === null) return null;
-  return targetPlacements.get(target.kind)?.(target, relationPair, relationSide) ?? null;
+  return (
+    targetPlacements.get(target.kind)?.(target, relationPair, relationSide) ??
+    null
+  );
 };
 
 export const placementForLimitation = (
@@ -127,22 +150,53 @@ export const placementForSchedule = (
 ): PathPlacement | null =>
   item.unitPath.length === 0 ? null : pathPlacement(item.unitPath, "unit");
 
-const leafPlacements = new Map<string, (leaf: SemanticDiffExplorerLeaf) => PathPlacement | null>([
-  ["change", (leaf) => leaf.kind === "change"
-    ? placementForTarget(leaf.target.value, leaf.relationPair, leaf.targetSide)
-    : null],
-  ["confirmation", (leaf) => leaf.kind === "confirmation"
-    ? placementForTarget(leaf.target.value, leaf.detail.relationPair, leaf.targetSide)
-    : null],
-  ["unsupported", (leaf) => leaf.kind === "unsupported"
-    ? placementForTarget(leaf.target.value, leaf.detail.relationPair, leaf.targetSide)
-    : null],
-  ["limitation", (leaf) => leaf.kind === "limitation"
-    ? placementForLimitation(leaf)
-    : null],
-  ["schedule", (leaf) => leaf.kind === "schedule"
-    ? placementForSchedule(leaf.change)
-    : null],
+const leafPlacements = new Map<
+  string,
+  (leaf: SemanticDiffExplorerLeaf) => PathPlacement | null
+>([
+  [
+    "change",
+    (leaf) =>
+      leaf.kind === "change"
+        ? placementForTarget(
+            leaf.target.value,
+            leaf.relationPair,
+            leaf.targetSide,
+          )
+        : null,
+  ],
+  [
+    "confirmation",
+    (leaf) =>
+      leaf.kind === "confirmation"
+        ? placementForTarget(
+            leaf.target.value,
+            leaf.detail.relationPair,
+            leaf.targetSide,
+          )
+        : null,
+  ],
+  [
+    "unsupported",
+    (leaf) =>
+      leaf.kind === "unsupported"
+        ? placementForTarget(
+            leaf.target.value,
+            leaf.detail.relationPair,
+            leaf.targetSide,
+          )
+        : null,
+  ],
+  [
+    "limitation",
+    (leaf) =>
+      leaf.kind === "limitation" ? placementForLimitation(leaf) : null,
+  ],
+  [
+    "schedule",
+    (leaf) =>
+      leaf.kind === "schedule" ? placementForSchedule(leaf.change) : null,
+  ],
 ]);
 
 export const placementForLeaf = (

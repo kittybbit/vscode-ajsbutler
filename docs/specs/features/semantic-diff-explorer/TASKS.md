@@ -2212,11 +2212,69 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
 - Exact approved replan commit paths:
   `docs/specs/features/semantic-diff-explorer/TASKS.md` and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md` only.
-- Commit status: eligible/pending one focused docs-only replan commit by
-  `approval-committer`; no implementation or formatting has started, and the
-  six closure drafts remain excluded and untouched.
-- Next route: `approval-committer` handles only the two approved documentation
-  paths. After that commit, Main may delegate Slice 7A implementation.
+- Commit status: focused docs-only replan commit `aa13b73e` is present;
+  formatter implementation is complete and its focused completion commit is
+  pending after independent implementation review. The six closure drafts
+  remain excluded and untouched.
+- Next route: Main delegates the completed formatter-only Slice 7A package to
+  `implementation-reviewer`; no staging or commit is performed by the
+  implementer.
+
+### Slice 7A Implementation Evidence (2026-09-07)
+
+- `qlty fmt` was run against exactly the 14 approved Slice 7 application/test
+  paths listed above. Diff inspection found only mechanical formatter changes:
+  import grouping, line wrapping, trailing commas, and equivalent
+  parenthesization. No behavior, assertion, export, DTO/message/schema, or
+  qlty policy/configuration change was made.
+- Validation passed: full `qlty check --no-fix --no-formatters`, targeted
+  `qlty smells --no-snippets` across the 14 paths, `rtk pnpm run test:compile`,
+  production desktop/web `rtk pnpm run build`, the focused messages/
+  projection/DOM/Flow suites (42 passing), compiled desktop smoke
+  (`node ./out/test/runTest.js`, exit 0), `rtk git diff --check`, and
+  `rtk pnpm run lint:md`.
+- Production/build output retains the existing bundle-size warnings only.
+  The six closure drafts remain untouched; Slice 8 activation remains held,
+  and Slices 9-13 remain blocked.
+- Status: implementation complete; independent implementation review is
+  `Ready` and the automatic Completion Approval is recorded in the completion
+  gate below. No focused commit was created by the implementer.
+
+### Slice 7A Completion Gate (2026-09-07)
+
+- Independent implementation review: `Ready`; no findings.
+- Completion Approval: automatically approved on 2026-09-07 under the
+  approved proceed-through-slices policy.
+- AST semantic-equivalence evidence: TypeScript AST fingerprints matched before
+  and after formatter output for all 14 implementation/test paths. The
+  comparison ignored source positions, trivia, formatter-only parentheses, and
+  trailing-comma metadata while retaining node kinds, semantic child order,
+  literal text, identifier names, and relevant type-only/multiline flags.
+- Full `rtk pnpm run qlty:check` passed with no issues; targeted smells,
+  focused tests, compilation, desktop/web builds, smoke, diff, and Markdown
+  lint evidence remain passing as recorded above.
+- Exact completion commit paths (16):
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`;
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`;
+  `src/application/semantic-diff/semanticDiffExplorerLeafGuards.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerMessageParsers.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerMessagePrimitives.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerMessages.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerProjection.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerProjectionLeaves.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerProjectionPaths.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerProjectionSupport.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerProjectionTree.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerRecordGuards.ts`;
+  `src/application/semantic-diff/semanticDiffRecordOccurrence.ts`;
+  `src/application/semantic-diff/semanticDiffExplorerViewGuards.ts`;
+  `src/test/suite/semanticDiffExplorerMessages.test.ts`;
+  `src/test/suite/semanticDiffExplorerProjection.test.ts`.
+- Commit status: eligible and pending one focused completion commit; this
+  implementer has not staged or committed any path.
+- Scope exclusions remain explicit: the six closure drafts are excluded and
+  untouched; Slice 8 activation remains held; Slices 9-13 remain blocked;
+  aggregate approval and Feature Exit remain pending.
 
 ### Slice 8 Implementation Approval — Held
 

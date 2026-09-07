@@ -15,16 +15,19 @@ import { isSemanticDiffExplorerLeaf } from "./semanticDiffExplorerLeafGuards";
 const cardKeys = new Map<string, readonly string[]>([
   ["changes", ["added", "removed", "changed", "renamed", "moved"]],
   ["elements", ["job-group", "jobnet", "unit", "relation", "attribute"]],
-  ["attributes", [
-    "execution-environment",
-    "execution-definition",
-    "start-condition",
-    "end-control",
-    "abnormal-end-control",
-    "wait-condition",
-    "external-integration",
-    "schedule",
-  ]],
+  [
+    "attributes",
+    [
+      "execution-environment",
+      "execution-definition",
+      "start-condition",
+      "end-control",
+      "abnormal-end-control",
+      "wait-condition",
+      "external-integration",
+      "schedule",
+    ],
+  ],
   ["confirmation-required", ["required"]],
   ["unsupported", ["unsupported", "uninterpretable", "uncalculated"]],
   ["limitations", ["total"]],
@@ -101,7 +104,9 @@ const isTreeKind = (value: unknown): value is "root" | "job-group" | "unit" =>
   value === "root" || value === "job-group" || value === "unit";
 
 const isRootShape = (record: Record<string, unknown>): boolean =>
-  record.kind === "root" && record.id === "root" && record.path === null &&
+  record.kind === "root" &&
+  record.id === "root" &&
+  record.path === null &&
   isEmptyArray(record.leaves);
 
 const isEmptyArray = (value: unknown): boolean =>
@@ -169,7 +174,9 @@ const isCardList = (value: unknown): boolean => {
 };
 
 const isViewShape = (record: Record<string, unknown>): boolean =>
-  hasViewKeys(record) && isExplorerFilter(record.filter) && isCardList(record.cards);
+  hasViewKeys(record) &&
+  isExplorerFilter(record.filter) &&
+  isCardList(record.cards);
 
 const isRootTree = (tree: SemanticDiffExplorerTreeNode): boolean =>
   tree.kind === "root" &&

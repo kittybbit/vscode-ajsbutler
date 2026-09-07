@@ -67,8 +67,15 @@ const errorCodes = new Set([
 const isUnitReference = (value: unknown): boolean => {
   const record = asPlainRecord(value);
   if (record === null) return false;
-  const shape = hasExactKeys(record, ["id", "name", "absolutePath", "unitType"]);
-  const values = Object.values(record).every((entry) => typeof entry === "string");
+  const shape = hasExactKeys(record, [
+    "id",
+    "name",
+    "absolutePath",
+    "unitType",
+  ]);
+  const values = Object.values(record).every(
+    (entry) => typeof entry === "string",
+  );
   return shape && values;
 };
 
@@ -110,8 +117,10 @@ const hasRelationReferenceValues = (
 
 const isRelationReference = (value: unknown): boolean => {
   const record = asPlainRecord(value);
-  return record !== null &&
-    all([hasRelationReferenceKeys(record), hasRelationReferenceValues(record)]);
+  return (
+    record !== null &&
+    all([hasRelationReferenceKeys(record), hasRelationReferenceValues(record)])
+  );
 };
 
 const relationEndpointKeys = [
@@ -234,34 +243,44 @@ export const isSemanticDiffDetail = (
   value: unknown,
 ): value is SemanticDiffDetail => {
   const record = asPlainRecord(value);
-  return record !== null &&
-    all([hasExactKeys(record, detailKeys), hasDetailScalars(record), hasDetailArrays(record)]);
+  return (
+    record !== null &&
+    all([
+      hasExactKeys(record, detailKeys),
+      hasDetailScalars(record),
+      hasDetailArrays(record),
+    ])
+  );
 };
 
 export const isSemanticDiffWarning = (
   value: unknown,
 ): value is SemanticDiffWarning => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["code", "detail", "fallbackText"]),
       typeof record.code === "string",
       isSemanticDiffDetail(record.detail),
       isNullableString(record.fallbackText),
-    ]);
+    ])
+  );
 };
 
 export const isSemanticDiffConstraint = (
   value: unknown,
 ): value is SemanticDiffConstraint => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["code", "detail", "warning"]),
       isKnown(constraintCodes, record.code),
       isSemanticDiffDetail(record.detail),
       record.warning === null || isSemanticDiffWarning(record.warning),
-    ]);
+    ])
+  );
 };
 
 const isJobGroupTarget = (record: Record<string, unknown>): boolean =>
@@ -270,17 +289,27 @@ const isJobGroupTarget = (record: Record<string, unknown>): boolean =>
 const isUnitTarget = (record: Record<string, unknown>): boolean =>
   hasExactKeys(record, ["kind", "unit"]) && isUnitReference(record.unit);
 const isRelationTarget = (record: Record<string, unknown>): boolean =>
-  hasExactKeys(record, ["kind", "relation"]) && isRelationReference(record.relation);
+  hasExactKeys(record, ["kind", "relation"]) &&
+  isRelationReference(record.relation);
 const isAttributeTarget = (record: Record<string, unknown>): boolean =>
   all([
-    hasExactKeys(record, ["kind", "unit", "parameterKey", "category", "values"]),
+    hasExactKeys(record, [
+      "kind",
+      "unit",
+      "parameterKey",
+      "category",
+      "values",
+    ]),
     isUnitReference(record.unit),
     typeof record.parameterKey === "string",
     isKnown(attributeCategories, record.category),
     isStringArray(record.values),
   ]);
 
-const targetChecks = new Map<string, (record: Record<string, unknown>) => boolean>([
+const targetChecks = new Map<
+  string,
+  (record: Record<string, unknown>) => boolean
+>([
   ["job-group", isJobGroupTarget],
   ["unit", isUnitTarget],
   ["jobnet", isUnitTarget],
@@ -304,47 +333,54 @@ const unavailableReasons = new Set([
 ]);
 
 const isAvailableAction = (record: Record<string, unknown>): boolean =>
-  isSemanticDiffExplorerActionId(record.actionId) && record.unavailableReason === null;
+  isSemanticDiffExplorerActionId(record.actionId) &&
+  record.unavailableReason === null;
 const isUnavailableAction = (record: Record<string, unknown>): boolean =>
-  record.actionId === null && isKnown(unavailableReasons, record.unavailableReason);
+  record.actionId === null &&
+  isKnown(unavailableReasons, record.unavailableReason);
 
 const isActionAvailabilityShape = (record: Record<string, unknown>): boolean =>
   hasExactKeys(record, ["available", "actionId", "unavailableReason"]) &&
   typeof record.available === "boolean";
 
 const isActionAvailabilityValue = (record: Record<string, unknown>): boolean =>
-  record.available
-    ? isAvailableAction(record)
-    : isUnavailableAction(record);
+  record.available ? isAvailableAction(record) : isUnavailableAction(record);
 
 export const isSemanticDiffExplorerActionAvailability = (
   value: unknown,
 ): value is SemanticDiffExplorerActionAvailability => {
   const record = asPlainRecord(value);
   if (record === null) return false;
-  return all([isActionAvailabilityShape(record), isActionAvailabilityValue(record)]);
+  return all([
+    isActionAvailabilityShape(record),
+    isActionAvailabilityValue(record),
+  ]);
 };
 
 export const isSemanticDiffExplorerActionSet = (
   value: unknown,
 ): value is SemanticDiffExplorerActionSet => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["source", "flow"]),
       isSemanticDiffExplorerActionAvailability(record.source),
       isSemanticDiffExplorerActionAvailability(record.flow),
-    ]);
+    ])
+  );
 };
 
 const isTargetProjection = (value: unknown): boolean => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["side", "value"]),
       isSide(record.side),
       record.value === null || isSemanticDiffTarget(record.value),
-    ]);
+    ])
+  );
 };
 
 export const targetProjectionMatchesSide = (
@@ -355,9 +391,12 @@ export const targetProjectionMatchesSide = (
   return record !== null && isTargetProjection(record) && record.side === side;
 };
 
-export const isScheduleRun = (value: unknown): value is SemanticDiffScheduleRun => {
+export const isScheduleRun = (
+  value: unknown,
+): value is SemanticDiffScheduleRun => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["unitPath", "unitName", "rule", "date", "time"]),
       typeof record.unitPath === "string",
@@ -365,7 +404,8 @@ export const isScheduleRun = (value: unknown): value is SemanticDiffScheduleRun 
       isFiniteNumber(record.rule),
       typeof record.date === "string",
       typeof record.time === "string",
-    ]);
+    ])
+  );
 };
 
 const isScheduleKind = (value: unknown): boolean =>
@@ -378,7 +418,10 @@ const removedSides = (record: Record<string, unknown>): boolean =>
 const changedSides = (record: Record<string, unknown>): boolean =>
   record.before !== null && record.after !== null;
 
-const scheduleSideChecks = new Map<string, (record: Record<string, unknown>) => boolean>([
+const scheduleSideChecks = new Map<
+  string,
+  (record: Record<string, unknown>) => boolean
+>([
   ["added", addedSides],
   ["removed", removedSides],
   ["changed-time", changedSides],
@@ -391,7 +434,10 @@ export const isScheduleRunChange = (
   value: unknown,
 ): value is SemanticDiffScheduleRunChange => {
   const record = asPlainRecord(value);
-  if (record === null || !hasExactKeys(record, ["id", "kind", "unitPath", "date", "before", "after"])) {
+  if (
+    record === null ||
+    !hasExactKeys(record, ["id", "kind", "unitPath", "date", "before", "after"])
+  ) {
     return false;
   }
   const beforeValid = record.before === null || isScheduleRun(record.before);
@@ -411,24 +457,28 @@ export const isSemanticDiffExplorerActionOutcome = (
   value: unknown,
 ): value is SemanticDiffExplorerActionOutcome => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["kind", "status", "side", "targetId"]),
       isKnown(actionKinds, record.kind),
       record.status === "completed" || record.status === "unavailable",
       isSide(record.side),
       isNullableString(record.targetId),
-    ]);
+    ])
+  );
 };
 
 const isErrorDetail = (value: unknown): boolean => {
   const record = asPlainRecord(value);
-  return record !== null &&
+  return (
+    record !== null &&
     all([
       hasExactKeys(record, ["side", "targetId"]),
       isSide(record.side),
       isNullableString(record.targetId),
-    ]);
+    ])
+  );
 };
 
 export const isSemanticDiffExplorerError = (

@@ -1,5 +1,11 @@
 import type { SemanticDiffExplorerLeaf } from "./semanticDiffExplorerDto";
-import { asPlainRecord, hasExactKeys, isDenseArray, isNullableString, isSide } from "./semanticDiffExplorerMessagePrimitives";
+import {
+  asPlainRecord,
+  hasExactKeys,
+  isDenseArray,
+  isNullableString,
+  isSide,
+} from "./semanticDiffExplorerMessagePrimitives";
 import {
   isRelationPair,
   isScheduleRunChange,
@@ -15,8 +21,20 @@ const all = (checks: readonly boolean[]): boolean => checks.every(Boolean);
 const isKnown = (set: ReadonlySet<string>, value: unknown): boolean =>
   typeof value === "string" && set.has(value);
 
-const changeKinds = new Set(["added", "removed", "changed", "renamed", "moved"]);
-const elementKinds = new Set(["job-group", "jobnet", "unit", "relation", "attribute"]);
+const changeKinds = new Set([
+  "added",
+  "removed",
+  "changed",
+  "renamed",
+  "moved",
+]);
+const elementKinds = new Set([
+  "job-group",
+  "jobnet",
+  "unit",
+  "relation",
+  "attribute",
+]);
 const confirmationLevels = new Set([
   "confirmed",
   "candidate",
@@ -34,7 +52,11 @@ const confirmationReasons = new Set([
   "execution-user-type-changed",
   "jp1-resource-group-changed",
 ]);
-const unsupportedKinds = new Set(["unsupported", "uninterpretable", "uncalculated"]);
+const unsupportedKinds = new Set([
+  "unsupported",
+  "uninterpretable",
+  "uncalculated",
+]);
 const unsupportedReasons = new Set([
   "uninterpretable-file-monitoring-condition",
   "cycle-schedule",
@@ -89,15 +111,18 @@ const isChangeFacts = (record: Record<string, unknown>): boolean =>
     isKnown(changeKinds, record.changeKind),
     isKnown(elementKinds, record.elementKind),
     isKnown(confirmationLevels, record.confirmationLevel),
-    record.attributeCategory === null || typeof record.attributeCategory === "string",
-    record.identityDecisionId === null || typeof record.identityDecisionId === "string",
+    record.attributeCategory === null ||
+      typeof record.attributeCategory === "string",
+    record.identityDecisionId === null ||
+      typeof record.identityDecisionId === "string",
     isSide(record.targetSide),
     targetProjectionMatchesSide(record.target, record.targetSide),
   ]);
 
 const isChangeDetails = (record: Record<string, unknown>): boolean => {
   const constraints = isDenseArray(record.constraints);
-  const constraintValues = constraints &&
+  const constraintValues =
+    constraints &&
     (record.constraints as unknown[]).every(isSemanticDiffConstraint);
   return all([
     record.before === null || isSemanticDiffTarget(record.before),
@@ -209,7 +234,15 @@ const isLimitationLeaf = (record: Record<string, unknown>): boolean =>
 const isScheduleLeaf = (record: Record<string, unknown>): boolean => {
   const target = asPlainRecord(record.target);
   return all([
-    hasExactKeys(record, ["kind", "id", "recordId", "change", "targetSide", "target", "actions"]),
+    hasExactKeys(record, [
+      "kind",
+      "id",
+      "recordId",
+      "change",
+      "targetSide",
+      "target",
+      "actions",
+    ]),
     isScheduleRunChange(record.change),
     record.targetSide === null,
     targetProjectionMatchesSide(record.target, null),
@@ -217,7 +250,10 @@ const isScheduleLeaf = (record: Record<string, unknown>): boolean => {
   ]);
 };
 
-const leafChecks = new Map<string, (record: Record<string, unknown>) => boolean>([
+const leafChecks = new Map<
+  string,
+  (record: Record<string, unknown>) => boolean
+>([
   ["change", isChangeLeaf],
   ["confirmation", isConfirmationLeaf],
   ["unsupported", isUnsupportedLeaf],
@@ -233,6 +269,10 @@ export const isSemanticDiffExplorerLeaf = (
   const record = asPlainRecord(value);
   if (record === null || typeof record.kind !== "string") return false;
   const check = leafChecks.get(record.kind);
-  return check !== undefined && leafKinds.has(record.kind) &&
-    isLeafEnvelope(record) && check(record);
+  return (
+    check !== undefined &&
+    leafKinds.has(record.kind) &&
+    isLeafEnvelope(record) &&
+    check(record)
+  );
 };

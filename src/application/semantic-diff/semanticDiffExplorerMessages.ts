@@ -172,9 +172,7 @@ export type SemanticDiffExplorerMessageValidationResult =
         | "payload-too-large";
     }>;
 
-export {
-  isSemanticDiffExplorerViewModel,
-} from "./semanticDiffExplorerViewGuards";
+export { isSemanticDiffExplorerViewModel } from "./semanticDiffExplorerViewGuards";
 export {
   parseSemanticDiffExplorerHostMessage,
   parseSemanticDiffExplorerReply,
@@ -296,7 +294,9 @@ type ActionReplyArgs = [
 const createActionReply = (
   type: "action" | "action-result",
   ...args: ActionReplyArgs
-): SemanticDiffExplorerActionReply | SemanticDiffExplorerActionResultMessage => {
+):
+  | SemanticDiffExplorerActionReply
+  | SemanticDiffExplorerActionResultMessage => {
   const [sessionId, requestId, actionId, payload, error = null] = args;
   assertResponsePayload(payload, error);
   return {
@@ -331,7 +331,10 @@ export const createSemanticDiffExplorerSessionMessage = (
 export const createSemanticDiffExplorerActionResultMessage = (
   ...args: ActionReplyArgs
 ): SemanticDiffExplorerActionResultMessage =>
-  createActionReply("action-result", ...args) as SemanticDiffExplorerActionResultMessage;
+  createActionReply(
+    "action-result",
+    ...args,
+  ) as SemanticDiffExplorerActionResultMessage;
 
 type FailureArgs = [
   SemanticDiffExplorerSessionId | null,
