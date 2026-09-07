@@ -162,9 +162,8 @@ const relationIdsForTarget = ({
 }: RelationIdsForTargetOptions): readonly string[] => {
   const relation = relationForTarget(target, endpoint);
   if (!relation) return [];
-  return relationIdsForPair(
-    idsByPair.get(relationTupleKey(relation)),
-    () => concreteRelationIds(result.inputs[side].relations, relation),
+  return relationIdsForPair(idsByPair.get(relationTupleKey(relation)), () =>
+    concreteRelationIds(result.inputs[side].relations, relation),
   );
 };
 

@@ -2586,8 +2586,11 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
 ### Slice 9A: Reconcile Slice 9 Flow Highlight Formatting
 
 - Status: Human Approved; final independent plan review is `Ready` with no
-  findings; focused docs-only replan commit is eligible and pending. No
-  implementation, formatting, staging, or runtime commit is authorized yet.
+  findings; the focused docs-only replan commit `5185ec18` is present. The
+  formatter-only implementation is complete, independently reviewed `Ready`
+  with no findings on 2026-09-08, and automatically completion-approved. The
+  focused completion commit is eligible and pending; no staging or commit was
+  performed here.
 - Approved at: 2026-09-08 under the trusted user messages `承認します。` and
   `継続して。`, using the existing proceed-through-slices policy.
 - Exact approved replan paths: `docs/specs/features/semantic-diff-explorer/TASKS.md`
@@ -2636,6 +2639,59 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
 - Out of Scope: all other runtime/test files, graph/highlight behavior,
   overlay/document validation, host/wiring, MUI presentation, configuration,
   suppression/allowlisting, and durable closure documents.
+
+### Slice 9A Implementation Evidence (2026-09-08)
+
+- Status: Implementation complete; independent implementation review returned
+  `Ready` with no findings on 2026-09-08. Completion Approval was automatic
+  under the recorded proceed-through-slices policy. The focused completion
+  commit is eligible and pending; no staging or commit was performed here.
+- The repository formatter changed exactly one approved runtime path:
+  `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`. The diff
+  is a single callback-call wrapping change; no tests, exports, DTOs, IDs,
+  ordering, highlight logic, configuration, or qlty policy changed.
+- AST semantic-equivalence comparison against the Slice 9 committed blob
+  passed while ignoring source positions, trivia, and parenthesized-expression
+  wrappers. Targeted `qlty smells --no-snippets` returned zero findings, full
+  `qlty check --no-fix` passed with formatters enabled, and `git diff --check`
+  passed.
+- `pnpm run test:compile`, desktop test preparation and compiled desktop
+  runner (`node ./out/test/runTest.js`, exit 0), web test preparation, and
+  production desktop/web build passed. Existing bundle-size warnings are
+  unchanged; no browser-smoke claim is added.
+- Compatibility impact is none by design. Slice 9 Flow IDs, occurrence
+  ordinals, side mapping, relation-edge non-focusability, deterministic
+  ordering, ordinary Flow output, desktop/web composition, and VS Code
+  `^1.75.0` compatibility remain unchanged.
+- The six closure drafts remain excluded and untouched. Slice 10 remains held
+  until this formatter-only slice is focused-committed; Slices 11-13 remain
+  dependency-blocked, and aggregate human approval, Feature Exit, and Closure
+  Approval remain pending until the approved slices are complete and
+  committed.
+
+### Slice 9A Completion Gate (2026-09-08)
+
+- Independent implementation review: `Ready` with no findings on 2026-09-08.
+- Completion Approval: automatically approved on 2026-09-08 because the
+  independent review returned `Ready` with no findings.
+- Exact focused completion paths (3):
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`;
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`; and
+  `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`.
+- `buildFlowGraphCore.ts` and all focused graph/highlight tests are unchanged;
+  they remain validation-only because the review found no required contract
+  or assertion changes. The formatter-only source diff is AST-equivalent to
+  the Slice 9 committed blob.
+- Targeted qlty smells returned zero findings. Full qlty check, TypeScript
+  compilation, focused graph/highlight and normal Flow coverage through the
+  desktop runner, desktop/web preparation, production desktop/web builds,
+  Markdown lint, and `git diff --check` passed. Existing bundle-size warnings
+  are unchanged; browser smoke remains unclaimed.
+- Completion status: the focused completion commit is eligible and pending;
+  this gate update does not stage or commit any path. The six closure drafts
+  remain excluded and untouched. Slice 10 is held until Slice 9A is focused-
+  committed; Slices 11-13 remain blocked, and aggregate human approval,
+  Feature Exit, and Closure Approval remain pending.
 
 ### Slice 10: Simplify Flow Overlay, Document Validation, And Viewer Messages
 

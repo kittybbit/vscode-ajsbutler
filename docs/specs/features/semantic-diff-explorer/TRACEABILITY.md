@@ -509,6 +509,36 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   focused-committed. Slices 11-13 remain blocked and closure drafts remain
   excluded.
 
+### Slice 9A Implementation Evidence (2026-09-08)
+
+- Slice 9A implementation is complete within the approved formatter-only
+  boundary; independent implementation review and conditional Completion
+  Approval remain pending. No commit was created by the implementer.
+- The repository formatter changed exactly
+  `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`. The
+  resulting diff is limited to wrapping the existing lazy fallback callback in
+  `relationIdsForTarget`; no semantic source, test, export, DTO, ID, order,
+  highlight, configuration, or qlty-policy change was made.
+- AST semantic equivalence against the Slice 9 committed blob passed after
+  normalizing away source positions, trivia, and parenthesized-expression
+  wrappers. Targeted `qlty smells --no-snippets` returned zero findings; full
+  `qlty check --no-fix` passed with formatters enabled; and `git diff --check`
+  passed.
+- Validation passed `pnpm run test:compile`, desktop test preparation, the
+  compiled Electron runner (`node ./out/test/runTest.js`, exit 0), web test
+  preparation, and the production desktop/web build. Existing production
+  bundle-size warnings remain unchanged. Browser smoke is not claimed.
+- The Slice 9 graph/highlight contracts remain preserved: formal Flow IDs,
+  duplicate relation ordinals, canonical side mapping, relation-edge
+  non-focusability, confirmation precedence, deterministic order, and
+  ordinary Flow output are unchanged. No focused tests were edited; they
+  remain validation-only as approved.
+- Review package: verify the one-file mechanical diff, AST-equivalence output,
+  targeted smells, full qlty formatter gate, and existing graph/highlight and
+  normal Flow coverage. Slice 10 remains held; Slices 11-13 remain blocked;
+  the six closure drafts remain excluded and untouched. Recommended next route
+  is independent `implementation-reviewer`.
+
 ### Slice 10 Activation (2026-09-08)
 
 - Slice 10 remains planned but held after Slice 9 completion commit
