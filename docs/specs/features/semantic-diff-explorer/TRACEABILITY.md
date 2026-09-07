@@ -283,27 +283,32 @@ automatic Completion Approval. Slice 10 completed and focused-committed as
 `9acfb577` after final `Ready`/no-findings review and automatic Completion
 Approval. Slice 11 completed and focused-committed as
 `628cc9333ed10d540665cb23329a8e7e3c6af6df` after independent `Ready`/
-no-findings review and automatic Completion Approval. Slice 12 is now the sole
-active implementation-approved slice; Slice 13 remains planned and
-dependency-blocked until its predecessor is complete, reviewed, and
-focused-committed.
+no-findings review and automatic Completion Approval. Slice 12 then completed
+and focused-committed as
+`a7905e8fdd905c506627a83d6c86ed1246255298` after independent `Ready`/
+no-findings review and automatic Completion Approval. Slice 13's narrow
+canonical-theme replan received final independent plan review `Ready` with no
+findings and Human Approval on 2026-09-08 under the trusted messages
+`承認します。` and repeated `継続して。`; its focused replan commit is
+eligible and pending. Implementation remains blocked until that commit. The
+closure drafts remain excluded.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Replanned slice                                  | Gap or requirement                                                       | Planned evidence and affected boundary                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Slice 5: MUI/WCAG Explorer surface               | EXP-11; EXP-9; CSP/theme/high-contrast/reflow/accessibility evidence     | `src/presentation/webview/shared/muiTheme.ts` is the canonical Slice-5-owned theme helper; `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`, `semanticDiffExplorer.tsx`, `semanticDiffExplorerLocalization.ts`, optional Explorer tree/state helpers, `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` static CSP assertions, and `src/test/suite/semanticDiffExplorerDom.test.tsx`/`semanticDiffExplorerPanel.test.ts`; complete applicable WCAG 2.2 AA matrix plus explicit N/A rationale, including 200% text resize, 400%/320 CSS px reflow, numeric contrast/focus/target thresholds, 1.1.1/1.3.4/2.4.1/2.4.2/2.5.2/2.5.7/3.1.1/3.1.2/3.2.4, axe/manual, and desktop/web bundle evidence |
-| Slice 6A: host identity evidence                 | EXP-3; immutable context/session lifecycle                               | `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` and `src/test/suite/semanticDiffExplorerPanel.test.ts`; exact `SemanticDiffOutputContext` object identity, retained registry context, emitted session ID, and no clone/rebuild proof                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Slice 6B: actual-session confirmation filter     | EXP-3; filter scenario; visible zero-match feedback                      | `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx` renders the approved stable row/group attributes; `src/test/suite/semanticDiffExplorerDom.test.tsx` sends `createSemanticDiffExplorerSessionMessage` with the 6A session ID to the actual App; exact `(data-record-kind,data-record-id,data-row-id)` tuples prove ordinary exclusion, confirmation retention, zero-match status, cards, and latent selection restore                                                                                                                                                                                                                                                                                             |
-| Slice 7: application projection/transport smells | qlty findings in closed validators/projection/occurrence helpers         | `semanticDiffExplorerMessages.ts`, `semanticDiffExplorerProjection.ts`, `semanticDiffRecordOccurrence.ts`; strict-union/property/focused regression suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Slice 7A: Slice 7 formatter reconciliation       | full qlty check found 14 committed Slice 7 paths unformatted             | Exact 14 committed Slice 7 application/test paths listed in `TASKS.md`; mechanical-only diff review, full `rtk pnpm run qlty:check`, targeted smells, and Slice 7 message/projection/DOM/Flow regression evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Slice 8: source capture/parser smells            | qlty findings in source-index/capture/report-data composition            | `AjsParserWithSourceIndexPort.ts`, `semanticDiffSourceCapture.ts`, `AntlrAjsParser.ts`, `buildSemanticDiffReportData.ts`; parser/capture/architecture/desktop-web suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| Slice 9: Flow graph/highlight smells             | qlty findings in graph builders/highlight projection                     | `buildExpandedFlowGraph.ts`, `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, `buildSemanticDiffFlowHighlights.ts`; graph IDs/order/large-fixture suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Slice 9A: Slice 9 formatter reconciliation       | full qlty check reports the committed Flow-highlight path as unformatted | Exactly `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`; formatter-only diff inspection, AST semantic equivalence, targeted smells, graph/highlight and normal Flow suites, and full qlty check with formatters                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Slice 10: Flow overlay/document/message smells   | qlty findings in overlay/document/viewer validation                      | `buildSemanticDiffFlowOverlay.ts`, `flowGraphDocument.ts`, `unitListDocument.ts`, `viewerHostMessages.ts`; exact-key/atomic-rejection/normal viewer suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Slice 11: Explorer host/action smells            | qlty findings in panel/registry/actions/command                          | `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`, `semanticDiffExplorerRegistry.ts`, `semanticDiffExplorerReportAction.ts`, `semanticDiffExplorerSourceAction.ts`, `src/presentation/vscode/commands/semanticDiffCommand.ts`; lifecycle/correlation/reveal/output/desktop suites                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Slice 12: Flow host/wiring smells                | qlty findings in bridge/bootstrap/viewer lifecycle                       | `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts`, `src/bootstrap/extension/semanticDiffFlowViewerBridge.ts`, `src/bootstrap/extension/semanticDiffWiring.ts`, `src/bootstrap/extension/viewerWiring.ts`, `src/bootstrap/extension/extensionDependencies.ts`, `src/presentation/vscode/webview/ajsDocument.ts`; owner/readiness/architecture/desktop-web suites                                                                                                                                                                                                                                                                                                                                                      |
-| Slice 13: Flow/shared MUI presentation smells    | qlty complexity/duplication in Flow components and shared theme paths    | `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`, `FlowGraphCanvas.tsx`, `flowGraphView.ts`, `flowMiniMap.ts`, `nodes/AjsNode.tsx`, `src/presentation/webview/editor/ajsTable/TableContents.tsx`; consumes (does not own) `src/presentation/webview/shared/muiTheme.ts`; Flow/table DOM/axe/manual and bundle suites                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Replanned slice                                  | Gap or requirement                                                                | Planned evidence and affected boundary                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------ | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slice 5: MUI/WCAG Explorer surface               | EXP-11; EXP-9; CSP/theme/high-contrast/reflow/accessibility evidence              | `src/presentation/webview/shared/muiTheme.ts` is the canonical Slice-5-owned theme helper; `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`, `semanticDiffExplorer.tsx`, `semanticDiffExplorerLocalization.ts`, optional Explorer tree/state helpers, `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` static CSP assertions, and `src/test/suite/semanticDiffExplorerDom.test.tsx`/`semanticDiffExplorerPanel.test.ts`; complete applicable WCAG 2.2 AA matrix plus explicit N/A rationale, including 200% text resize, 400%/320 CSS px reflow, numeric contrast/focus/target thresholds, 1.1.1/1.3.4/2.4.1/2.4.2/2.5.2/2.5.7/3.1.1/3.1.2/3.2.4, axe/manual, and desktop/web bundle evidence |
+| Slice 6A: host identity evidence                 | EXP-3; immutable context/session lifecycle                                        | `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` and `src/test/suite/semanticDiffExplorerPanel.test.ts`; exact `SemanticDiffOutputContext` object identity, retained registry context, emitted session ID, and no clone/rebuild proof                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Slice 6B: actual-session confirmation filter     | EXP-3; filter scenario; visible zero-match feedback                               | `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx` renders the approved stable row/group attributes; `src/test/suite/semanticDiffExplorerDom.test.tsx` sends `createSemanticDiffExplorerSessionMessage` with the 6A session ID to the actual App; exact `(data-record-kind,data-record-id,data-row-id)` tuples prove ordinary exclusion, confirmation retention, zero-match status, cards, and latent selection restore                                                                                                                                                                                                                                                                                             |
+| Slice 7: application projection/transport smells | qlty findings in closed validators/projection/occurrence helpers                  | `semanticDiffExplorerMessages.ts`, `semanticDiffExplorerProjection.ts`, `semanticDiffRecordOccurrence.ts`; strict-union/property/focused regression suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Slice 7A: Slice 7 formatter reconciliation       | full qlty check found 14 committed Slice 7 paths unformatted                      | Exact 14 committed Slice 7 application/test paths listed in `TASKS.md`; mechanical-only diff review, full `rtk pnpm run qlty:check`, targeted smells, and Slice 7 message/projection/DOM/Flow regression evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Slice 8: source capture/parser smells            | qlty findings in source-index/capture/report-data composition                     | `AjsParserWithSourceIndexPort.ts`, `semanticDiffSourceCapture.ts`, `AntlrAjsParser.ts`, `buildSemanticDiffReportData.ts`; parser/capture/architecture/desktop-web suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Slice 9: Flow graph/highlight smells             | qlty findings in graph builders/highlight projection                              | `buildExpandedFlowGraph.ts`, `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, `buildSemanticDiffFlowHighlights.ts`; graph IDs/order/large-fixture suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Slice 9A: Slice 9 formatter reconciliation       | full qlty check reports the committed Flow-highlight path as unformatted          | Exactly `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts`; formatter-only diff inspection, AST semantic equivalence, targeted smells, graph/highlight and normal Flow suites, and full qlty check with formatters                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Slice 10: Flow overlay/document/message smells   | qlty findings in overlay/document/viewer validation                               | `buildSemanticDiffFlowOverlay.ts`, `flowGraphDocument.ts`, `unitListDocument.ts`, `viewerHostMessages.ts`; exact-key/atomic-rejection/normal viewer suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Slice 11: Explorer host/action smells            | qlty findings in panel/registry/actions/command                                   | `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`, `semanticDiffExplorerRegistry.ts`, `semanticDiffExplorerReportAction.ts`, `semanticDiffExplorerSourceAction.ts`, `src/presentation/vscode/commands/semanticDiffCommand.ts`; lifecycle/correlation/reveal/output/desktop suites                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Slice 12: Flow host/wiring smells                | qlty findings in bridge/bootstrap/viewer lifecycle                                | `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts`, `src/bootstrap/extension/semanticDiffFlowViewerBridge.ts`, `src/bootstrap/extension/semanticDiffWiring.ts`, `src/bootstrap/extension/viewerWiring.ts`, `src/bootstrap/extension/extensionDependencies.ts`, `src/presentation/vscode/webview/ajsDocument.ts`; owner/readiness/architecture/desktop-web suites                                                                                                                                                                                                                                                                                                                                                      |
+| Slice 13: Flow/shared MUI presentation smells    | qlty complexity/duplication in Flow components plus canonical theme API ownership | `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`, `FlowGraphCanvas.tsx`, `flowGraphView.ts`, `flowMiniMap.ts`, `nodes/AjsNode.tsx`, `src/presentation/webview/editor/ajsTable/TableContents.tsx`, and existing `src/presentation/webview/shared/muiTheme.ts`; adds only a backward-compatible mode-aware factory/options API while preserving `semanticDiffExplorerTheme`; Flow/table/Explorer DOM/axe/manual, focused theme, CSP, and bundle suites                                                                                                                                                                                                                                                                         |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -649,9 +654,10 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   allowlist, threshold, generated-ignore, or qlty configuration change.
 - Slice 11 is independently reviewed `Ready` with no findings, automatically
   completion-approved, and focused-committed as
-  `628cc9333ed10d540665cb23329a8e7e3c6af6df`. Slice 12 is now the sole active
-  implementation-approved slice; Slice 13 remains dependency-blocked and the
-  closure drafts remain excluded and untouched.
+  `628cc9333ed10d540665cb23329a8e7e3c6af6df`. Slice 12 then completed and
+  focused-committed as `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13 is
+  now the sole active implementation-approved slice, and the closure drafts
+  remain excluded and untouched.
 
 ### Slice 11 Implementation Evidence (2026-09-08)
 
@@ -689,12 +695,13 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   desktop/web parity, browser-safe transport, privacy, registry ownership,
   source lifetime, and telemetry boundaries. Closure drafts remain excluded
   and untouched. Slice 11's focused completion commit is
-  `628cc9333ed10d540665cb23329a8e7e3c6af6df`; Slice 12 is now the next
-  approved route and Slice 13 remains dependency-blocked.
+  `628cc9333ed10d540665cb23329a8e7e3c6af6df`; Slice 12 then completed and
+  focused-committed as `a7905e8fdd905c506627a83d6c86ed1246255298`. Slice 13
+  is now the sole approved route.
 
-### Slice 12 Activation (2026-09-08)
+### Slice 12 Activation (2026-09-08; completed)
 
-- Slice 12 is the sole implementation-approved active slice after Slice 11's
+- Slice 12 was the sole implementation-approved active slice after Slice 11's
   focused completion commit `628cc9333ed10d540665cb23329a8e7e3c6af6df`.
   Its exact approved paths are
   `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts`,
@@ -710,8 +717,8 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `src/test/suite/viewerWiring.test.ts`,
   `src/test/suite/AjsDocument.test.ts`, and
   `src/test/suite/architectureDependencyRules.test.ts`. Slice 13's Flow/
-  shared-MUI presentation paths, configuration, and closure drafts remain
-  excluded and blocked.
+  shared-MUI presentation paths were then dependency-blocked; configuration
+  and closure drafts remain excluded and untouched.
 - The recorded qlty baseline is preserved: `semanticDiffExplorerFlow.ts`
   `P=1,R=5,F=7,T=1,B=1`; `semanticDiffFlowViewerBridge.ts` `F=3`;
   `semanticDiffWiring.ts` `P=1,R=1,F=2,B=1`; `viewerWiring.ts` `R=1,F=4`;
@@ -728,14 +735,14 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   message variant or architecture exception is authorized.
 - Validation is the focused Flow host/wiring/viewer lifecycle suites,
   architecture dependency rules, desktop smoke, web preparation/build,
-  targeted smells, full qlty check, and diff checks. Slice 13 remains blocked
-  until Slice 12 is independently reviewed `Ready` with no findings and
-  focused-committed; closure drafts remain excluded and untouched.
+  targeted smells, full qlty check, and diff checks. These gates passed for
+  Slice 12; Slice 13 is held pending its narrow plan review and focused replan
+  commit, and closure drafts remain excluded and untouched.
 
 ### Slice 12 Implementation Evidence (2026-09-08)
 
-- The approved Flow host/wiring boundary is implemented and remains uncommitted
-  for independent review. Public Flow action types remain in
+- The approved Flow host/wiring boundary was implemented and focused-committed
+  after independent review. Public Flow action types remain in
   `semanticDiffExplorerFlow.ts`; same-boundary helpers own target resolution,
   action preparation, overlay ownership, freshness checks, and post/reveal
   sequencing without adding a viewer message variant or architecture
@@ -779,10 +786,81 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   bundles, browser-safe imports, bootstrap-only concrete construction,
   one-overlay-per-URI ownership, owner/operation stale guards, source
   freshness, unregister-before-release, normal viewer wiring, and
-  privacy-preserving telemetry. Independent review should verify the
+  privacy-preserving telemetry. Independent review verified the
   lifecycle/concurrency matrix and shared WebviewStore identity. No unresolved
-  scope or design change was discovered; completion review and focused commit
-  remain pending.
+  scope or design change was discovered; focused completion commit
+  `a7905e8fdd905c506627a83d6c86ed1246255298` is recorded.
+
+### Slice 13 Activation — Plan Approved; Focused Replan Commit Pending (2026-09-08)
+
+- Slice 13's narrow canonical-theme replan is plan-approved after Slice 12's
+  focused completion commit `a7905e8fdd905c506627a83d6c86ed1246255298`.
+  Independent plan review returned `Ready` with no findings and Human Approval
+  was granted on 2026-09-08 under the trusted messages `承認します。` and
+  repeated `継続して。`. The focused replan commit is eligible and pending;
+  implementation remains blocked until it is present.
+  Its exact webview implementation paths are
+  `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`,
+  `src/presentation/webview/editor/ajsFlow/FlowGraphCanvas.tsx`,
+  `src/presentation/webview/editor/ajsFlow/flowGraphView.ts`,
+  `src/presentation/webview/editor/ajsFlow/flowMiniMap.ts`,
+  `src/presentation/webview/editor/ajsFlow/nodes/AjsNode.tsx`, and
+  `src/presentation/webview/editor/ajsTable/TableContents.tsx`, plus the
+  existing canonical theme path
+  `src/presentation/webview/shared/muiTheme.ts`.
+- The canonical MUI helper remains owned by Slice 5 at
+  `src/presentation/webview/shared/muiTheme.ts`. The narrow replan authorizes
+  only a backward-compatible `createSemanticDiffTheme(options)` factory with
+  typed light/dark mode options for Flow/Table; the existing
+  `semanticDiffExplorerTheme` export and behavior remain unchanged. Slice 13
+  may not create a second theme, redefine tokens, or break its API. Explorer
+  localization, `確認が必要` filtering,
+  stable tree row/record attributes, latent selection restoration, cards,
+  zero-match status, keyboard/focus behavior, and the WCAG 2.2 AA contract
+  remain unchanged while Flow/table presentation smells are removed.
+- Focused evidence remains `src/test/suite/flowGraphView.test.ts`,
+  `src/test/suite/flowMiniMap.test.ts`,
+  `src/test/suite/ajsTableGlobalFilter.test.ts`,
+  `src/test/suite/ajsTableHeader.test.ts`,
+  `src/test/suite/muiTheme.test.ts` (new focused factory/export tests),
+  `src/test/suite/semanticDiffExplorerDom.test.tsx`, and
+  `src/test/suite/architectureDependencyRules.test.ts`.
+- The recorded qlty assignments are `FlowContents.tsx`:
+  `R=2,F=3,T=1,D=1`; `FlowGraphCanvas.tsx`: `F=2`;
+  `flowGraphView.ts`: `R=1,F=3`; `AjsNode.tsx`: `F=4`. No standalone
+  baseline finding is recorded for `flowMiniMap.ts` or `TableContents.tsx`,
+  but their touched-delta duplication/style checks remain mandatory. No
+  suppression, allowlist, threshold, generated-ignore, or qlty configuration
+  change is authorized. The new `muiTheme.ts` path has no historical baseline
+  count and must be qlty-clean with the touched delta. Validation is the
+  focused Flow component/view,
+  Explorer DOM/axe, table regression, architecture dependency, manual
+  keyboard/focus/forced-colors/contrast, target-size, reflow, status, and WCAG
+  checks, MUI/Emotion bundle and static CSP smoke, desktop/web bundles and
+  smoke, targeted qlty smells, full qlty check, and diff checks. Slice 13
+  completion is the final implementation gate after the focused replan commit
+  is present and implementation is independently reviewed. Aggregate human
+  approval and Feature Exit approval remain pending. No implementation may
+  start before the focused replan commit; its exact paths are only TASKS.md
+  and TRACEABILITY.md.
+
+### Slice 13 Theme API Replan Review and Human Approval (2026-09-08)
+
+- Final independent plan review returned `Ready` with no findings.
+- Human Approval was granted through the trusted messages `承認します。`
+  and repeated `継続して。` for the narrow backward-compatible mode-aware
+  canonical theme API replan.
+- The approved plan extends only the existing
+  `src/presentation/webview/shared/muiTheme.ts` with typed
+  `createSemanticDiffTheme(options)` mode options, preserves the existing
+  `semanticDiffExplorerTheme` export/API, and adds focused
+  `src/test/suite/muiTheme.test.ts` coverage. No second theme, qlty
+  suppression/configuration change, or broad design change is authorized.
+- The focused replan commit is eligible and pending with exact paths only
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`. Slice 13
+  implementation remains blocked until that commit; closure drafts remain
+  excluded and untouched.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
