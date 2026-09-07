@@ -145,5 +145,9 @@ one-argument Explorer opener seam are covered as well. Direct web browser
 smoke remains blocked before test execution by the managed Chromium
 `bootstrap_check_in ... Permission denied (1100)` failure; this is an
 environment-only risk, while the desktop runner and both bundles passed.
-Independent implementation review and Slice 3 Completion Approval remain
-pending; no commit was created.
+Independent implementation review was `Ready` with no findings. Slice 3
+Completion Approval was automatically approved on 2026-09-07 under the
+recorded user policy, and the focused completion commit is
+`a25d674c67b3e6a9fb03c89a12a745a579bfd655`. Aggregate final human approval
+remains pending until all four slices are complete; Slice 4 is now the sole
+active implementation slice.

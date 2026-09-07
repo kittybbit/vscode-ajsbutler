@@ -4,11 +4,10 @@
 
 - Purpose: turn one completed Semantic Diff result into an accessible,
   read-only review workspace.
-- Approved or active slice: Slice 3 implementation review is Ready with no
-  findings, and its Completion Approval is automatic and eligible for the
-  focused commit after the Slice 2 completion commit
-  `01349376da1a76fa0c91a0311b3ab1659f5dc521`; Slices 1-2 are complete, and
-  Slice 4 remains dependency-blocked in the existing order.
+- Approved or active slice: Slice 4 is implementation-approved after the
+  Slice 3 completion commit `a25d674c67b3e6a9fb03c89a12a745a579bfd655`;
+  Slices 1-3 are complete and committed, and Slice 4 is the sole active slice
+  in the existing order.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -44,9 +43,9 @@
 - Approval policy and document roles: `docs/specs/README.md`.
 - Next route: Main sends this current-state revision through independent
   `plan-reviewer`, then routes the reviewed update to `approval-committer` for
-  the focused current-state commit. Main then delegates exactly Slice 3 to
+  the focused current-state commit. Main then delegates exactly Slice 4 to
   `implementer`; its independent implementation review remains mandatory, and
-  a `Ready` review with no findings conditionally authorizes the Slice 3
+  a `Ready` review with no findings conditionally authorizes the Slice 4
   completion gate under the recorded user instruction.
 
 ## Sync Rule
@@ -69,10 +68,10 @@
   four slices are complete. No slice, feature requirement, design decision, or
   implementation scope is added or reordered.
 - This current-state update advances only the active implementation pointer
-  from completed Slice 2 to Slice 3 after commit
-  `01349376da1a76fa0c91a0311b3ab1659f5dc521`; it does not alter Slice 3's
-  design, scope, validation, or approval boundary, and it leaves Slice 4
-  blocked on its recorded predecessor.
+  from completed Slice 3 to Slice 4 after commit
+  `a25d674c67b3e6a9fb03c89a12a745a579bfd655`; it does not alter Slice 4's
+  design, scope, validation, or approval boundary, and Slice 4 is now the sole
+  active slice with no later slice to unblock.
 - Slice 3 owns the application plain
   `AjsParserWithSourceIndexPort` result and scoped capture contract. Bootstrap
   first injects the scoped parser into the current file command's existing
@@ -92,18 +91,17 @@
 
 ## Plan Status
 
-- Status: Slices 1-2 complete and committed; Slice 3 implementation is
-  complete and its completion gate is approved, with the focused commit
-  pending.
+- Status: Slices 1-3 complete and committed; Slice 4 is active and
+  implementation-approved.
 - Planning scope: application projection, explorer surface, same-session
   Markdown, source reveal, Flow reveal/highlight/focus, accessibility,
   desktop/web compatibility, and failure handling for EXP-1 through EXP-10.
 - Review status: Existing plan review `Ready` for commit `067d2189`; this
   current-state activation changes no feature design, scope, dependency, or
   approval boundary, and claims no new plan-review verdict.
-- Human approval: Slice 3 implementation approval recorded from the explicit
+- Human approval: Slice 4 implementation approval recorded from the explicit
   2026-09-06 user instruction; aggregate final approval remains pending.
-- Active completion slice: Slice 3 focused commit pending.
+- Active implementation slice: Slice 4.
 - Slice order: Slice 1, Slice 2, Slice 3, then Slice 4. Each slice needs its own
   implementation review and focused commit. Completion Approval is
   conditionally automatic only after that slice's implementation review is
@@ -182,50 +180,46 @@ separate gates.
   pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
   keep it pending and return the slice to Main for remediation.
 
+### Slice 4 Implementation Approval
+
+- Status: Approved
+- Approved at: 2026-09-06 (explicit user instruction in the current Codex
+  conversation)
+- Approved scope: Slice 4 — Focus Existing Flow Views With Semantic Overlays,
+  limited to the formal stable `FlowGraphEdgeDto.id` and semantic-diff key,
+  additive before/after highlight states, canonical-pair to side-specific
+  edge IDs, optional `semanticDiffOverlay` augmentation in the existing
+  `changeDocument` data, existing `revealUnit`/`ready` Flow integration,
+  `useFlowDocumentSubscription` → controller → `useFlowGraphState` handoff,
+  one-overlay-per-Flow-URI ownership, exact-side panel ready/scope/reveal,
+  accessible Flow labels, and the named tests; no new Flow overlay wire
+  variant, renderer, layout, search, reverse report, editing, telemetry,
+  comparison, reason/detail wire fields, or synthetic-ID behavior.
+- Approved paths: the existing Flow graph/highlight/message/controller/
+  presentation files and focused tests named by the Slice 4 implementation
+  plan; exact runtime and test paths are selected by `implementer` within
+  that boundary.
+- Gate condition: implementation starts only after this current-state plan
+  update is focused-committed. Completion approval for this exact slice is
+  pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
+  keep it pending and return the slice to Main for remediation.
+
 ## Completion Approval
 
-- Status: Automatically Approved
-- Approved at: 2026-09-07 (Main recorded the final independent
-  `implementation-reviewer` `Ready` verdict with no findings under the
-  explicit user completion-approval policy)
-- Approved scope: Slice 3 — Reveal Exact Before And After Source Targets,
-  limited to the application-owned browser-safe source-index DTO/port, the
-  same-pass enriched parser result and scoped capture state machine, ANTLR
-  locator adapter, private lookup API, source registry/snapshot verification,
-  VS Code reveal, typed outcomes, action completion/focus, and named tests;
-  no Flow, editing, diagnostics, arbitrary sources, or durable-document work.
-- Approved paths (exact current worktree set):
-  - `docs/specs/features/semantic-diff-explorer/TASKS.md`
-  - `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`
-  - `src/application/semantic-diff/buildSemanticDiffReportData.ts`
-  - `src/bootstrap/extension/extensionDependencies.ts`
-  - `src/bootstrap/extension/semanticDiffWiring.ts`
-  - `src/infrastructure/parser/AjsEvaluator.ts`
-  - `src/infrastructure/parser/AntlrAjsParser.ts`
-  - `src/infrastructure/parser/raw/AjsRawUnit.ts`
-  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
-  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`
-  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`
-  - `src/test/suite/AntlrAjsParser.test.ts`
-  - `src/test/suite/semanticDiffCommand.test.ts`
-  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
-  - `src/test/suite/semanticDiffExplorerRegistry.test.ts`
-  - `src/application/parsing/AjsParserWithSourceIndexPort.ts`
-  - `src/application/semantic-diff/semanticDiffSourceCapture.ts`
-  - `src/application/semantic-diff/semanticDiffSourceIndex.ts`
-  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceAction.ts`
-  - `src/test/suite/semanticDiffExplorerSourceAction.test.ts`
-  - `src/test/suite/semanticDiffSourceCapture.test.ts`
-- Implementation review verdict: Ready; no findings
-- Commit status: Eligible; focused completion commit pending
-- Active completion gate: Slice 3. Slice 2 Completion Approval was
-  automatically approved after its `Ready` review and committed as
-  `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
-- User approval policy: the exact Slice 3 `Ready` verdict with no findings
-  qualifies for the automatic Completion Approval recorded above under the
-  2026-09-06 instruction; Main may route this exact scope to
-  `approval-committer`. Aggregate final human approval remains pending until
-  all four slices are complete.
+- Status: Pending
+- Approved at: none
+- Approved scope: none
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
+- Active completion gate: Slice 4. Slice 3 Completion Approval was
+  automatically approved after its `Ready` review with no findings and
+  committed as `a25d674c67b3e6a9fb03c89a12a745a579bfd655`.
+- User approval policy: the exact Slice 4 `Ready` verdict with no findings
+  qualifies for automatic Completion Approval under the 2026-09-06
+  instruction; Main may route that exact scope to `approval-committer`.
+  Findings do not qualify. Aggregate final human approval remains pending
+  until all four slices are complete.
 
 ## Closure Approval
 
@@ -1007,10 +1001,9 @@ remains pending until all four slices are complete.
 
 ### Slice 3: Reveal Exact Before And After Source Targets
 
-- Status: Implementation complete; independent review Ready with no findings
-  and Completion Approval automatically approved on 2026-09-07; focused
-  completion commit pending after Slice 2 completion commit
-  `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
+- Status: Implementation complete; independent review Ready with no findings,
+  Completion Approval automatically approved on 2026-09-07, and focused
+  completion commit `a25d674c67b3e6a9fb03c89a12a745a579bfd655` recorded.
 - Scope: application-owned browser-safe source-index DTO/port, the explicit
   same-pass `AjsParserWithSourceIndexPort` result and scoped capture state
   machine, ANTLR adapter from `unitAttribute`/`unitParameter` token ranges,
@@ -1178,12 +1171,36 @@ remains blocked by the managed Chromium
 desktop runner and both bundle validations passed. Independent implementation
 review was Ready with no findings; Completion Approval was automatically
 approved on 2026-09-07 under the recorded user policy. The focused completion
-commit is eligible and pending; no commit was created. Aggregate final human
+commit is `a25d674c67b3e6a9fb03c89a12a745a579bfd655`. Aggregate final human
 approval remains pending until all four slices are complete.
+
+- Exact completion-commit scope and paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`,
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`,
+  `src/application/parsing/AjsParserWithSourceIndexPort.ts`,
+  `src/application/semantic-diff/buildSemanticDiffReportData.ts`,
+  `src/application/semantic-diff/semanticDiffSourceCapture.ts`,
+  `src/application/semantic-diff/semanticDiffSourceIndex.ts`,
+  `src/bootstrap/extension/extensionDependencies.ts`,
+  `src/bootstrap/extension/semanticDiffWiring.ts`,
+  `src/infrastructure/parser/AjsEvaluator.ts`,
+  `src/infrastructure/parser/AntlrAjsParser.ts`,
+  `src/infrastructure/parser/raw/AjsRawUnit.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceAction.ts`,
+  `src/test/suite/AntlrAjsParser.test.ts`,
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffExplorerPanel.test.ts`,
+  `src/test/suite/semanticDiffExplorerRegistry.test.ts`,
+  `src/test/suite/semanticDiffExplorerSourceAction.test.ts`, and
+  `src/test/suite/semanticDiffSourceCapture.test.ts`.
 
 ### Slice 4: Focus Existing Flow Views With Semantic Overlays
 
-- Status: Planned; blocked on Slice 3 completion and approval.
+- Status: Active; implementation approved after Slice 3 completion commit
+  `a25d674c67b3e6a9fb03c89a12a745a579bfd655`.
 - Scope: explicit stable `FlowGraphEdgeDto.id` and shared semantic-diff key,
   before/after additive highlight states, canonicalPair-to-side-specific edge
   IDs, the optional `semanticDiffOverlay` augmentation in the existing
@@ -1248,7 +1265,9 @@ approval remains pending until all four slices are complete.
   accessibility, and named tests. A new Flow message variant, renderer/layout/
   search/reverse-report/edit/telemetry/comparison behavior, or synthetic ID
   scheme replans.
-- Dependencies: completed Slice 3 and existing highlight/Flow/focus/a11y base.
+- Dependencies: completed Slice 3
+  (`a25d674c67b3e6a9fb03c89a12a745a579bfd655`) and existing
+  highlight/Flow/focus/a11y base.
 - Risks: side ID mismatch, scope races, lost IDs, inaccessible relations,
   overlay leakage, stale ready, and a late old-owner clear removing a new
   overlay. Side/lifecycle/a11y/host matrix is the gate.
