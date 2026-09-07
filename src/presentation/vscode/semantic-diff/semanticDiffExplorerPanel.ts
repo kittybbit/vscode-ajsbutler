@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { v4 as uuid } from "uuid";
 import {
   createSemanticDiffExplorerActionIdAllocator,
   createSemanticDiffExplorerSessionIdAllocator,
@@ -8,36 +7,21 @@ import {
   type SemanticDiffExplorerSession,
   type SemanticDiffExplorerSessionId,
 } from "../../../application/semantic-diff/semanticDiffExplorer";
-import {
-  createSemanticDiffExplorerActionResultMessage,
-  createSemanticDiffExplorerError,
-  createSemanticDiffExplorerFailureMessage,
-  createSemanticDiffExplorerSessionMessage,
-  parseSemanticDiffExplorerRequest,
-  serializeSemanticDiffExplorerMessage,
-  validateSemanticDiffExplorerMessage,
-  type SemanticDiffExplorerActionOutcome,
-  type SemanticDiffExplorerHostMessage,
-  type SemanticDiffExplorerRequest,
-} from "../../../application/semantic-diff/semanticDiffExplorerMessages";
-import type {
-  SemanticDiffOutputContext,
-  SemanticDiffSide,
-} from "../../../application/semantic-diff/semanticDiffDto";
-import { recordAtSourceOccurrence } from "../../../application/semantic-diff/semanticDiffRecordOccurrence";
+import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
 import {
   presentSemanticDiffOutput,
   type SemanticDiffOutputDocument,
   type SemanticDiffOutputModeItem,
 } from "../../semantic-diff/semanticDiffOutput";
-import { executeSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportAction";
-import { executeSemanticDiffExplorerSourceAction } from "./semanticDiffExplorerSourceAction";
 import type { SemanticDiffFlowActionRequest } from "./semanticDiffExplorerFlow";
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
   type SemanticDiffExplorerContextEntry,
 } from "./semanticDiffExplorerRegistry";
+import { installSemanticDiffExplorerPanel } from "./semanticDiffExplorerPanelInstall";
+import { postSemanticDiffExplorerMessage } from "./semanticDiffExplorerPanelTransport";
+import { disposeSemanticDiffExplorerPanel } from "./semanticDiffExplorerPanelLifecycle";
 
 export const SEMANTIC_DIFF_EXPLORER_VIEW_TYPE =
   "ajsbutler.semanticDiffExplorer";
@@ -111,92 +95,206 @@ const hostActionIds = (
   };
 };
 
-const htmlEscape = (value: string): string =>
-  value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+const panelTitle = (language: string): string =>
+  language.toLowerCase().startsWith("ja")
+    ? "セマンティック差分エクスプローラー"
+    : "Semantic Diff Explorer";
 
-const explorerHtml = (
-  context: vscode.ExtensionContext,
-  panel: vscode.WebviewPanel,
-  sessionId: SemanticDiffExplorerSessionId,
-  outputActionId: SemanticDiffExplorerActionId,
-): string => {
-  const nonce = uuid();
-  const bundleUri = panel.webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, "out", "semanticDiffExplorer.js"),
-  );
-  const title = htmlEscape(panel.title);
-  const session = htmlEscape(sessionId);
-  const actionId = htmlEscape(outputActionId);
-  return `<!DOCTYPE html>
-<html lang="${htmlEscape(vscode.env.language)}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src ${panel.webview.cspSource} 'nonce-${nonce}'; style-src ${panel.webview.cspSource} 'unsafe-inline';">
-<style>
-html,body,#root{width:100%;height:100%;margin:0;padding:0}body{box-sizing:border-box;background:transparent;font-family:var(--vscode-font-family);color:var(--vscode-foreground)}*,*:before,*:after{box-sizing:inherit}
-</style>
-</head>
-<body data-semantic-diff-session-id="${session}" data-semantic-diff-output-action-id="${actionId}">
-<div id="root"></div>
-<script nonce="${nonce}" src="${bundleUri}"></script>
-</body>
-</html>`;
+const releaseFailedPanelSource = (
+  context: SemanticDiffOutputContext,
+  contextRegistry: SemanticDiffExplorerContextRegistry,
+  releaseSourceLifetime: () => void,
+): void => {
+  const sourceEntry = contextRegistry.sourceCapture(context);
+  contextRegistry.unregisterSourceCapture(context);
+  try {
+    (sourceEntry?.release ?? releaseSourceLifetime)();
+  } catch {
+    // A panel creation failure must not hide the original host error.
+  }
 };
 
-const actionOutcome = (
-  kind: SemanticDiffExplorerActionOutcome["kind"],
-  status: SemanticDiffExplorerActionOutcome["status"],
-  side: SemanticDiffSide | null,
-  targetId: string | null,
-): SemanticDiffExplorerActionOutcome => ({ kind, status, side, targetId });
+type ExplorerOpenerResources = Readonly<{
+  deps: SemanticDiffExplorerPanelDeps;
+  createWebviewPanel: typeof vscode.window.createWebviewPanel;
+  contextRegistry: SemanticDiffExplorerContextRegistry;
+  actionRegistry: SemanticDiffExplorerActionRegistry;
+  releaseSourceLifetime: () => void;
+}>;
 
-const isThenableBoolean = (value: unknown): value is Thenable<boolean> =>
-  typeof value === "object" && value !== null && "then" in value;
+const createExplorerOpenerResources = (
+  deps: SemanticDiffExplorerPanelDeps,
+): ExplorerOpenerResources => ({
+  deps,
+  createWebviewPanel:
+    deps.createWebviewPanel ?? vscode.window.createWebviewPanel,
+  contextRegistry:
+    deps.contextRegistry ?? new SemanticDiffExplorerContextRegistry(),
+  actionRegistry:
+    deps.actionRegistry ?? new SemanticDiffExplorerActionRegistry(),
+  releaseSourceLifetime: deps.sourceLifetimeRelease ?? (() => undefined),
+});
 
-const hasContextRecord = (
+const createExplorerPanel = (
+  resources: ExplorerOpenerResources,
   context: SemanticDiffOutputContext,
-  kind: "change" | "confirmation" | "unsupported" | null,
-  id: string | null,
-  occurrence: number | null,
-): boolean => {
-  if (
-    id === null ||
-    kind === null ||
-    occurrence === null ||
-    !Number.isSafeInteger(occurrence) ||
-    occurrence < 0
-  ) {
-    return false;
+  language: string,
+): vscode.WebviewPanel => {
+  try {
+    return resources.createWebviewPanel(
+      SEMANTIC_DIFF_EXPLORER_VIEW_TYPE,
+      panelTitle(language),
+      vscode.ViewColumn.Active,
+      { enableScripts: true, retainContextWhenHidden: true },
+    );
+  } catch (error) {
+    releaseFailedPanelSource(
+      context,
+      resources.contextRegistry,
+      resources.releaseSourceLifetime,
+    );
+    throw error;
   }
-  switch (kind) {
-    case "change":
-      return (
-        recordAtSourceOccurrence(context.result.changes, id, occurrence) !==
-        undefined
-      );
-    case "confirmation":
-      return (
-        recordAtSourceOccurrence(
-          context.result.confirmationRequired,
-          id,
-          occurrence,
-        ) !== undefined
-      );
-    case "unsupported":
-      return (
-        recordAtSourceOccurrence(
-          context.result.unsupportedItems,
-          id,
-          occurrence,
-        ) !== undefined
-      );
-  }
+};
+
+type ExplorerPanelRuntimeOptions = Readonly<{
+  resources: ExplorerOpenerResources;
+  context: SemanticDiffOutputContext;
+  session: SemanticDiffExplorerSession;
+  outputActionId: SemanticDiffExplorerActionId;
+  panel: vscode.WebviewPanel;
+}>;
+
+const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
+  const { resources, context, session, outputActionId, panel } = options;
+  const { deps, contextRegistry, actionRegistry, releaseSourceLifetime } =
+    resources;
+  const entry: PanelEntry = {
+    context,
+    session,
+    panel,
+    outputActionId,
+    dispose: () => undefined,
+  };
+  let disposed = false;
+  let disposeEpoch = 0;
+  let latestRequestId = 0;
+  let receiveMessageDisposable: vscode.Disposable | undefined;
+  let panelDisposeDisposable: vscode.Disposable | undefined;
+  const registeredActionIds = hostActionIds(session, outputActionId);
+  const sourceCapture = contextRegistry.sourceCapture(context);
+  const post = (
+    message: Parameters<typeof postSemanticDiffExplorerMessage>[0],
+    expectedEpoch = disposeEpoch,
+  ) =>
+    postSemanticDiffExplorerMessage(
+      message,
+      {
+        panel,
+        session,
+        actionIds: registeredActionIds,
+        isDisposed: () => disposed,
+        disposeEpoch: () => disposeEpoch,
+      },
+      expectedEpoch,
+    );
+  const disposeEntry = (disposePanel: boolean): void =>
+    disposeSemanticDiffExplorerPanel(
+      {
+        context,
+        entry: entry as SemanticDiffExplorerContextEntry,
+        session,
+        panel,
+        contextRegistry,
+        actionRegistry,
+        deps,
+        sourceEntry: contextRegistry.sourceCapture(context),
+        releaseSourceLifetime,
+        receiveMessageDisposable,
+        panelDisposeDisposable,
+        isDisposed: () => disposed,
+        markDisposed: () => {
+          disposed = true;
+        },
+        advanceEpoch: () => {
+          disposeEpoch += 1;
+        },
+      },
+      disposePanel,
+    );
+  entry.dispose = () => disposeEntry(true);
+  const actionOptions = {
+    session,
+    context,
+    actionRegistry,
+    sourceCapture,
+    deps,
+    post,
+    isCurrent: (epoch: number) => !disposed && epoch === disposeEpoch,
+  };
+  const requestOptions = {
+    session,
+    actionIds: registeredActionIds,
+    isDisposed: () => disposed,
+    disposeEpoch: () => disposeEpoch,
+    latestRequestId: () => latestRequestId,
+    setLatestRequestId: (requestId: number) => {
+      latestRequestId = requestId;
+    },
+    post,
+    actionOptions,
+  };
+  const install = (): void =>
+    installSemanticDiffExplorerPanel({
+      context,
+      entry: entry as SemanticDiffExplorerContextEntry,
+      session,
+      outputActionId,
+      panel,
+      deps,
+      contextRegistry,
+      actionRegistry,
+      requestOptions,
+      setReceiveMessageDisposable: (disposable) => {
+        receiveMessageDisposable = disposable;
+      },
+      setPanelDisposeDisposable: (disposable) => {
+        panelDisposeDisposable = disposable;
+      },
+      disposeEntry,
+    });
+  return {
+    install,
+    dispose: () => disposeEntry(true),
+  };
+};
+
+const openExplorerSession = async (
+  resources: ExplorerOpenerResources,
+  context: SemanticDiffOutputContext,
+  outputActionId: SemanticDiffExplorerActionId,
+): Promise<SemanticDiffExplorerSessionHandle> => {
+  resources.contextRegistry.get(context)?.dispose();
+  const language = resources.deps.language ?? vscode.env.language;
+  const session = createSemanticDiffExplorerSession(context, {
+    displayLanguage: language,
+    sessionIdAllocator: sessionIds,
+    actionIdAllocator: actionIds,
+  });
+  const panel = createExplorerPanel(resources, context, language);
+  const runtime = createExplorerPanelRuntime({
+    resources,
+    context,
+    session,
+    outputActionId,
+    panel,
+  });
+  runtime.install();
+  return {
+    sessionId: session.sessionId,
+    panel,
+    dispose: runtime.dispose,
+  };
 };
 
 /**
@@ -208,449 +306,14 @@ export const createOpenSemanticDiffExplorer = (
 ): ((
   context: SemanticDiffOutputContext,
 ) => Promise<SemanticDiffExplorerSessionHandle>) => {
-  const createWebviewPanel =
-    deps.createWebviewPanel ?? vscode.window.createWebviewPanel;
-  const contextRegistry =
-    deps.contextRegistry ?? new SemanticDiffExplorerContextRegistry();
-  const actionRegistry =
-    deps.actionRegistry ?? new SemanticDiffExplorerActionRegistry();
-  const releaseSourceLifetime = deps.sourceLifetimeRelease ?? (() => undefined);
+  const resources = createExplorerOpenerResources(deps);
   let nextOutputAction = 1_000_000_000;
-
-  return async (context: SemanticDiffOutputContext) => {
-    const previous = contextRegistry.get(context);
-    previous?.dispose();
-    const outputActionId =
-      `sde-action-${nextOutputAction++}` as SemanticDiffExplorerActionId;
-    const session = createSemanticDiffExplorerSession(context, {
-      displayLanguage: deps.language ?? vscode.env.language,
-      sessionIdAllocator: sessionIds,
-      actionIdAllocator: actionIds,
-    });
-    let panel: vscode.WebviewPanel;
-    try {
-      panel = createWebviewPanel(
-        SEMANTIC_DIFF_EXPLORER_VIEW_TYPE,
-        (deps.language ?? vscode.env.language).toLowerCase().startsWith("ja")
-          ? "セマンティック差分エクスプローラー"
-          : "Semantic Diff Explorer",
-        vscode.ViewColumn.Active,
-        { enableScripts: true, retainContextWhenHidden: true },
-      );
-    } catch (error) {
-      const sourceEntry = contextRegistry.sourceCapture(context);
-      contextRegistry.unregisterSourceCapture(context);
-      try {
-        (sourceEntry?.release ?? releaseSourceLifetime)();
-      } catch {
-        // A panel creation failure must not hide the original host error.
-      }
-      throw error;
-    }
-    const entry: PanelEntry = {
+  return (context: SemanticDiffOutputContext) =>
+    openExplorerSession(
+      resources,
       context,
-      session,
-      panel,
-      outputActionId,
-      dispose: () => undefined,
-    };
-    let disposed = false;
-    let disposeEpoch = 0;
-    let latestRequestId = 0;
-    let receiveMessageDisposable: vscode.Disposable | undefined;
-    let panelDisposeDisposable: vscode.Disposable | undefined;
-    const registeredActionIds = hostActionIds(session, outputActionId);
-    const sourceCapture = contextRegistry.sourceCapture(context);
-
-    const post = async (
-      message: SemanticDiffExplorerHostMessage,
-      expectedEpoch = disposeEpoch,
-    ): Promise<void> => {
-      if (disposed || expectedEpoch !== disposeEpoch) return;
-      const serialized = serializeSemanticDiffExplorerMessage(message, {
-        expectedSessionId: session.sessionId,
-        actionIds: registeredActionIds,
-      });
-      if ("error" in serialized) {
-        if (serialized.error.code === "payload-too-large") {
-          // A large session cannot carry correlation fields safely. Send one
-          // tiny, nullable-correlation failure and never recurse through post.
-          const fallback = serializeSemanticDiffExplorerMessage(
-            createSemanticDiffExplorerFailureMessage(
-              null,
-              null,
-              null,
-              createSemanticDiffExplorerError("payload-too-large"),
-            ),
-          );
-          if ("error" in fallback) return;
-          const fallbackPosted = panel.webview.postMessage(
-            JSON.parse(fallback.json),
-          );
-          if (
-            isThenableBoolean(fallbackPosted) &&
-            (await fallbackPosted) === false
-          ) {
-            throw new Error("Explorer message could not be posted.");
-          }
-          return;
-        }
-        throw new Error(`Explorer message rejected: ${serialized.error.code}`);
-      }
-      const posted = panel.webview.postMessage(JSON.parse(serialized.json));
-      if (isThenableBoolean(posted) && (await posted) === false) {
-        throw new Error("Explorer message could not be posted.");
-      }
-    };
-
-    const disposeEntry = (disposePanel: boolean): void => {
-      if (disposed) return;
-      disposed = true;
-      disposeEpoch += 1;
-      // The borrowed context entry must disappear before the source hook runs.
-      contextRegistry.unregister(
-        context,
-        entry as SemanticDiffExplorerContextEntry,
-      );
-      const sourceEntry = contextRegistry.sourceCapture(context);
-      contextRegistry.unregisterSourceCapture(context);
-      actionRegistry.remove(session.sessionId);
-      try {
-        deps.disposeFlowSession?.(session.sessionId);
-      } catch {
-        // A stale overlay cannot replace panel disposal.
-      }
-      try {
-        (sourceEntry?.release ?? releaseSourceLifetime)();
-      } catch {
-        // Resource release is best effort during panel disposal.
-      }
-      receiveMessageDisposable?.dispose();
-      receiveMessageDisposable = undefined;
-      panelDisposeDisposable?.dispose();
-      panelDisposeDisposable = undefined;
-      if (disposePanel) {
-        try {
-          panel.dispose();
-        } catch {
-          // A host disposal failure must not escape the idempotent handle.
-        }
-      }
-    };
-    entry.dispose = () => disposeEntry(true);
-
-    const handleExplorerRequest = async (value: unknown): Promise<void> => {
-      if (disposed) return;
-      const validation = validateSemanticDiffExplorerMessage(value, {
-        expectedSessionId: session.sessionId,
-        actionIds: registeredActionIds,
-        minimumRequestId: latestRequestId,
-      });
-      const request = parseSemanticDiffExplorerRequest(value, {
-        expectedSessionId: session.sessionId,
-        actionIds: registeredActionIds,
-        minimumRequestId: latestRequestId,
-      });
-      if (!request) {
-        const errorCode =
-          "code" in validation ? validation.code : "invalid-request";
-        const failure = createSemanticDiffExplorerFailureMessage(
-          null,
-          null,
-          null,
-          createSemanticDiffExplorerError(errorCode),
-        );
-        await post(failure);
-        return;
-      }
-      latestRequestId = request.requestId;
-      await processExplorerRequest(request);
-    };
-
-    const processExplorerRequest = async (
-      request: SemanticDiffExplorerRequest,
-    ): Promise<void> => {
-      const requestEpoch = disposeEpoch;
-      if (disposed) return;
-      if (request.type === "ready" || request.type === "refresh") {
-        await post(
-          createSemanticDiffExplorerSessionMessage(
-            session.sessionId,
-            session.viewModel,
-          ),
-          requestEpoch,
-        );
-        return;
-      }
-      await processActionRequest(request, requestEpoch);
-    };
-
-    const processActionRequest = async (
-      request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-      requestEpoch: number,
-    ): Promise<void> => {
-      if (disposed || requestEpoch !== disposeEpoch) return;
-      const metadata = actionRegistry.metadata(
-        request.actionId,
-        session.sessionId,
-      );
-      if (!metadata) {
-        await post(
-          createSemanticDiffExplorerActionResultMessage(
-            session.sessionId,
-            request.requestId,
-            request.actionId,
-            null,
-            createSemanticDiffExplorerError("unknown-action"),
-          ),
-          requestEpoch,
-        );
-        return;
-      }
-      if (metadata.kind === "source") {
-        if (
-          sourceCapture === undefined ||
-          deps.openTextDocument === undefined ||
-          deps.showTextDocument === undefined
-        ) {
-          await post(
-            createSemanticDiffExplorerActionResultMessage(
-              session.sessionId,
-              request.requestId,
-              request.actionId,
-              null,
-              createSemanticDiffExplorerError("source-lookup-failed", {
-                side: metadata.side,
-                targetId: metadata.targetId,
-              }),
-            ),
-            requestEpoch,
-          );
-          return;
-        }
-        const sourceResult = await executeSemanticDiffExplorerSourceAction(
-          {
-            side: metadata.side,
-            targetId: metadata.targetId,
-            targetKind: metadata.targetKind,
-            parameterKey: metadata.parameterKey,
-          },
-          {
-            sourceCapture,
-            openTextDocument: deps.openTextDocument,
-            showTextDocument: deps.showTextDocument,
-            isCurrent: () => !disposed && requestEpoch === disposeEpoch,
-          },
-        );
-        if (disposed || requestEpoch !== disposeEpoch) return;
-        if (sourceResult.ok === true) {
-          await post(
-            createSemanticDiffExplorerActionResultMessage(
-              session.sessionId,
-              request.requestId,
-              request.actionId,
-              actionOutcome(
-                "source",
-                "completed",
-                metadata.side,
-                metadata.targetId,
-              ),
-            ),
-            requestEpoch,
-          );
-        } else {
-          const errorCode =
-            sourceResult.code === "stale-source"
-              ? "stale-source"
-              : sourceResult.code === "unavailable-target"
-                ? "unavailable-target"
-                : "source-lookup-failed";
-          await post(
-            createSemanticDiffExplorerActionResultMessage(
-              session.sessionId,
-              request.requestId,
-              request.actionId,
-              null,
-              createSemanticDiffExplorerError(errorCode, {
-                side: metadata.side,
-                targetId: metadata.targetId,
-              }),
-            ),
-            requestEpoch,
-          );
-        }
-        return;
-      }
-      if (metadata.kind !== "output") {
-        if (disposed || requestEpoch !== disposeEpoch) return;
-        if (metadata.kind === "flow") {
-          if (
-            !hasContextRecord(
-              session.context,
-              metadata.recordKind,
-              metadata.recordId,
-              metadata.recordOccurrence,
-            )
-          ) {
-            await post(
-              createSemanticDiffExplorerActionResultMessage(
-                session.sessionId,
-                request.requestId,
-                request.actionId,
-                null,
-                createSemanticDiffExplorerError("record-not-found", {
-                  side: metadata.side,
-                  targetId: metadata.targetId,
-                }),
-              ),
-              requestEpoch,
-            );
-            return;
-          }
-          if (!deps.flowAction) {
-            await post(
-              createSemanticDiffExplorerActionResultMessage(
-                session.sessionId,
-                request.requestId,
-                request.actionId,
-                actionOutcome(
-                  "flow",
-                  "unavailable",
-                  metadata.side,
-                  metadata.targetId,
-                ),
-              ),
-              requestEpoch,
-            );
-            return;
-          }
-          const flowResult = await deps.flowAction(
-            {
-              sessionId: session.sessionId,
-              disposeEpoch: requestEpoch,
-              side: metadata.side,
-              targetId: metadata.targetId,
-              targetKind: metadata.targetKind,
-              recordId: metadata.recordId,
-              recordKind: metadata.recordKind,
-              recordOccurrence: metadata.recordOccurrence,
-              recordTarget: metadata.recordTarget,
-            },
-            session.context,
-            () => !disposed && requestEpoch === disposeEpoch,
-          );
-          if (disposed || requestEpoch !== disposeEpoch) return;
-          if (flowResult.ok === false) {
-            await post(
-              createSemanticDiffExplorerActionResultMessage(
-                session.sessionId,
-                request.requestId,
-                request.actionId,
-                null,
-                createSemanticDiffExplorerError(flowResult.code, {
-                  side: metadata.side,
-                  targetId: flowResult.targetId ?? metadata.targetId,
-                }),
-              ),
-              requestEpoch,
-            );
-            return;
-          }
-          await post(
-            createSemanticDiffExplorerActionResultMessage(
-              session.sessionId,
-              request.requestId,
-              request.actionId,
-              actionOutcome(
-                "flow",
-                "completed",
-                metadata.side,
-                metadata.targetId,
-              ),
-            ),
-            requestEpoch,
-          );
-          return;
-        }
-        await post(
-          createSemanticDiffExplorerActionResultMessage(
-            session.sessionId,
-            request.requestId,
-            request.actionId,
-            actionOutcome(
-              metadata.kind,
-              "unavailable",
-              metadata.side,
-              metadata.targetId,
-            ),
-          ),
-          requestEpoch,
-        );
-        return;
-      }
-      const output = await executeSemanticDiffExplorerReportAction(
-        session.context,
-        {
-          showQuickPick: (items, options) => deps.showQuickPick(items, options),
-          openReport: deps.openReport,
-          presentOutput: deps.presentOutput,
-          language: deps.language,
-          isCurrent: () => !disposed && requestEpoch === disposeEpoch,
-        },
-      );
-      if (disposed || requestEpoch !== disposeEpoch) return;
-      if (output.ok) {
-        await post(
-          createSemanticDiffExplorerActionResultMessage(
-            session.sessionId,
-            request.requestId,
-            request.actionId,
-            actionOutcome("output", "completed", null, null),
-          ),
-          requestEpoch,
-        );
-      } else {
-        await post(
-          createSemanticDiffExplorerActionResultMessage(
-            session.sessionId,
-            request.requestId,
-            request.actionId,
-            null,
-            createSemanticDiffExplorerError("output-failed"),
-          ),
-          requestEpoch,
-        );
-      }
-    };
-
-    try {
-      contextRegistry.register(entry as SemanticDiffExplorerContextEntry);
-      actionRegistry.register(session, outputActionId);
-      panel.webview.options = {
-        enableScripts: true,
-        localResourceRoots: [deps.extensionContext.extensionUri],
-      };
-      receiveMessageDisposable = panel.webview.onDidReceiveMessage((value) => {
-        void handleExplorerRequest(value).catch(() => undefined);
-      });
-      panelDisposeDisposable = panel.onDidDispose(() => disposeEntry(false));
-      panel.webview.html = explorerHtml(
-        deps.extensionContext,
-        panel,
-        session.sessionId,
-        outputActionId,
-      );
-    } catch (error) {
-      disposeEntry(true);
-      throw error;
-    }
-
-    return {
-      sessionId: session.sessionId,
-      panel,
-      dispose: () => disposeEntry(true),
-    };
-  };
+      `sde-action-${nextOutputAction++}` as SemanticDiffExplorerActionId,
+    );
 };
 
 export const openSemanticDiffExplorer = createOpenSemanticDiffExplorer;

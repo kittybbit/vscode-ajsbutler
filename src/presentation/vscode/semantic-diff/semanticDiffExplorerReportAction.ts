@@ -1,11 +1,11 @@
 import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
 import {
-  pickSemanticDiffOutputMode,
   presentSemanticDiffOutput,
   type SemanticDiffOutputDocument,
   type SemanticDiffOutputMode,
   type SemanticDiffOutputModeItem,
 } from "../../semantic-diff/semanticDiffOutput";
+import { runSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportActionRunner";
 
 export type SemanticDiffExplorerReportActionDeps = Readonly<{
   showQuickPick: (
@@ -35,38 +35,7 @@ export const executeSemanticDiffExplorerReportAction = async (
   context: SemanticDiffOutputContext,
   deps: SemanticDiffExplorerReportActionDeps,
 ): Promise<SemanticDiffExplorerReportActionResult> => {
-  let mode: SemanticDiffOutputMode | undefined;
-  try {
-    mode = await pickSemanticDiffOutputMode((items, options) =>
-      deps.showQuickPick(items, options),
-    );
-  } catch {
-    return { ok: false, code: "output-failed" };
-  }
-  if (deps.isCurrent && !deps.isCurrent()) {
-    return { ok: false, code: "cancelled" };
-  }
-  if (!mode) return { ok: false, code: "cancelled" };
-  try {
-    if (deps.isCurrent && !deps.isCurrent()) {
-      return { ok: false, code: "cancelled" };
-    }
-    const document = (deps.presentOutput ?? presentSemanticDiffOutput)(
-      context,
-      mode,
-      deps.language,
-    );
-    if (deps.isCurrent && !deps.isCurrent()) {
-      return { ok: false, code: "cancelled" };
-    }
-    await deps.openReport(document);
-    if (deps.isCurrent && !deps.isCurrent()) {
-      return { ok: false, code: "cancelled" };
-    }
-    return { ok: true, mode, document };
-  } catch {
-    return { ok: false, code: "output-failed" };
-  }
+  return runSemanticDiffExplorerReportAction(context, deps);
 };
 
 export const runSemanticDiffExplorerOutputAction =

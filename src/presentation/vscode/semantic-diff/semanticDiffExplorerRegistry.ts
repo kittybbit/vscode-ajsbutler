@@ -168,6 +168,76 @@ type ActionEntry = Readonly<{
   metadata: SemanticDiffExplorerActionMetadata;
 }>;
 
+type ActionLeaf = Extract<
+  SemanticDiffExplorerLeaf,
+  {
+    kind: "change" | "confirmation" | "unsupported" | "limitation" | "schedule";
+  }
+>;
+
+const leafTarget = (leaf: ActionLeaf): SemanticDiffTarget | null =>
+  leaf.kind === "limitation" || leaf.kind === "schedule"
+    ? null
+    : leaf.target.value;
+
+const leafTargetKind = (
+  target: SemanticDiffTarget | null,
+): "unit" | "jobnet" | "attribute" | null =>
+  target?.kind === "unit" ||
+  target?.kind === "jobnet" ||
+  target?.kind === "attribute"
+    ? target.kind
+    : null;
+
+const leafRecordKind = (
+  leaf: ActionLeaf,
+): "change" | "confirmation" | "unsupported" | null =>
+  leaf.kind === "change" ||
+  leaf.kind === "confirmation" ||
+  leaf.kind === "unsupported"
+    ? leaf.kind
+    : null;
+
+const leafRecordId = (leaf: ActionLeaf): string | null =>
+  leafRecordKind(leaf) === null ? null : leaf.recordId;
+
+const leafRecordOccurrence = (leaf: ActionLeaf): number | null => {
+  const recordKind = leafRecordKind(leaf);
+  return recordKind === null
+    ? null
+    : parseSemanticDiffRecordOccurrence(leaf.id);
+};
+
+const leafTargetId = (target: SemanticDiffTarget | null): string | null =>
+  target?.kind === "unit" ||
+  target?.kind === "jobnet" ||
+  target?.kind === "attribute"
+    ? target.unit.id
+    : null;
+
+const actionMetadataForLeaf = (
+  leaf: ActionLeaf,
+  kind: "source" | "flow",
+  sessionId: SemanticDiffExplorerSessionId,
+): ActionEntry => {
+  const target = leafTarget(leaf);
+  const side = leaf.kind === "schedule" ? null : leaf.targetSide;
+  return {
+    sessionId,
+    metadata: {
+      kind,
+      side,
+      targetId: leafTargetId(target),
+      recordId: leafRecordId(leaf),
+      recordKind: leafRecordKind(leaf),
+      recordOccurrence: leafRecordOccurrence(leaf),
+      recordTarget: target,
+      targetKind: leafTargetKind(target),
+      parameterKey: target?.kind === "attribute" ? target.parameterKey : null,
+    },
+  };
+};
+
 /** Host-only action membership and metadata. The collection is never exposed. */
 export class SemanticDiffExplorerActionRegistry {
   private readonly actions = new Map<
@@ -256,75 +326,16 @@ export class SemanticDiffExplorerActionRegistry {
     leaf: SemanticDiffExplorerLeaf,
     sessionId: SemanticDiffExplorerSessionId,
   ): void {
-    const targetId = this.targetIdForLeaf(leaf);
-    const side = this.sideForLeaf(leaf);
-    const target =
-      leaf.kind === "limitation" || leaf.kind === "schedule"
-        ? null
-        : leaf.target.value;
-    const targetKind =
-      target?.kind === "unit" ||
-      target?.kind === "jobnet" ||
-      target?.kind === "attribute"
-        ? target.kind
-        : null;
-    const parameterKey =
-      target?.kind === "attribute" ? target.parameterKey : null;
     for (const [kind, action] of [
       ["source", leaf.actions.source],
       ["flow", leaf.actions.flow],
     ] as const) {
       if (action.actionId !== null) {
-        this.actions.set(action.actionId, {
-          sessionId,
-          metadata: {
-            kind,
-            side,
-            targetId,
-            recordId:
-              leaf.kind === "limitation" || leaf.kind === "schedule"
-                ? null
-                : leaf.recordId,
-            recordKind:
-              leaf.kind === "change" ||
-              leaf.kind === "confirmation" ||
-              leaf.kind === "unsupported"
-                ? leaf.kind
-                : null,
-            recordOccurrence:
-              leaf.kind === "change" ||
-              leaf.kind === "confirmation" ||
-              leaf.kind === "unsupported"
-                ? parseSemanticDiffRecordOccurrence(leaf.id)
-                : null,
-            recordTarget: target,
-            targetKind,
-            parameterKey,
-          },
-        });
+        this.actions.set(
+          action.actionId,
+          actionMetadataForLeaf(leaf as ActionLeaf, kind, sessionId),
+        );
       }
-    }
-  }
-
-  private sideForLeaf(
-    leaf: SemanticDiffExplorerLeaf,
-  ): "before" | "after" | null {
-    return leaf.kind === "schedule" ? null : leaf.targetSide;
-  }
-
-  private targetIdForLeaf(leaf: SemanticDiffExplorerLeaf): string | null {
-    const target =
-      leaf.kind === "limitation" || leaf.kind === "schedule"
-        ? null
-        : leaf.target.value;
-    if (!target) return null;
-    switch (target.kind) {
-      case "unit":
-      case "jobnet":
-      case "attribute":
-        return target.unit.id;
-      default:
-        return null;
     }
   }
 }

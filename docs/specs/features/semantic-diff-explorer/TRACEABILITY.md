@@ -279,8 +279,10 @@ independent review and focused commit
 reported `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts` as
 unformatted. Slice 9A completed its formatter-only implementation and
 focused-committed as `d19a38ce` after final `Ready`/no-findings review and
-automatic Completion Approval. Slice 10 is now the sole active
-implementation-approved slice, and Slices 11-13 remain planned and
+automatic Completion Approval. Slice 10 completed and focused-committed as
+`9acfb577` after final `Ready`/no-findings review and automatic Completion
+Approval. Slice 11 is now the sole active implementation-approved slice, and
+Slices 12-13 remain planned and
 dependency-blocked until their predecessors are complete, reviewed, and
 focused-committed.
 
@@ -374,7 +376,9 @@ environment-owned validation risk whenever web smoke is attempted.
   focused-committed as
   `52166c1aef52dca4510bf6e374ba0923317c7135`; Slice 9A completed and focused-
   committed as `d19a38ce` after final `Ready`/no-findings review and automatic
-  Completion Approval. Slice 10 is now active, and Slices 11-13
+  Completion Approval. Slice 10 completed and focused-committed as `9acfb577`
+  after final `Ready`/no-findings review and automatic Completion Approval.
+  Slice 11 is now active, and Slices 12-13
   remain dependency-blocked.
 
 ### Slice 7A Activation (2026-09-07)
@@ -454,7 +458,9 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   focused completion commit is
   `52166c1aef52dca4510bf6e374ba0923317c7135`; Slice 9A completed and focused-
   committed as `d19a38ce` after final `Ready`/no-findings review and automatic
-  Completion Approval. Slice 10 is now active, and Slices 11-13
+  Completion Approval. Slice 10 completed and focused-committed as `9acfb577`
+  after final `Ready`/no-findings review and automatic Completion Approval.
+  Slice 11 is now active, and Slices 12-13
   remain dependency-blocked.
 
 ### Slice 9 Activation (2026-09-07; completed)
@@ -482,7 +488,8 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `src/application/flow-graph/buildSemanticDiffFlowHighlights.ts` as
   unformatted. Slice 9A completed and focused-committed as `d19a38ce` after
   final `Ready`/no-findings review and automatic Completion Approval. Slice 10
-  is now active and Slices 11-13 remain
+  completed and focused-committed as `9acfb577`; Slice 11 is now active and
+  Slices 12-13 remain
   dependency-blocked.
 
 ### Slice 9A Activation (2026-09-08; completed)
@@ -536,14 +543,16 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   one-file mechanical diff, AST-equivalence output, targeted smells, full
   qlty formatter gate, and existing graph/highlight and normal Flow coverage.
   The review returned `Ready` with no findings; Completion Approval was
-  automatic. Slice 10 may now activate; Slices 11-13 remain blocked and the
-  six closure drafts remain excluded and untouched.
+  automatic. Slice 10 is complete; Slice 11 may now activate. Slices 12-13
+  remain blocked and the six closure drafts remain excluded and untouched.
 
-### Slice 10 Activation (2026-09-08)
+### Slice 10 Activation (2026-09-08; completed)
 
-- Slice 10 is now the sole active implementation-approved slice after Slice 9A
+- Slice 10 was the sole active implementation-approved slice after Slice 9A
   completion commit `d19a38ce` (with Slice 9 completion commit
-  `52166c1aef52dca4510bf6e374ba0923317c7135`). Its exact
+  `52166c1aef52dca4510bf6e374ba0923317c7135`). It completed and focused-
+  committed as `9acfb577` after independent `Ready`/no-findings review and
+  automatic Completion Approval. Its exact
   application/presentation paths are
   `src/application/flow-graph/buildSemanticDiffFlowOverlay.ts`,
   `src/application/flow-graph/flowGraphDocument.ts`,
@@ -565,16 +574,17 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `viewerHostMessages.ts`: `functionComplexity=4`, `complexBinary=1`.
   Remediation must use cohesive extraction only, with no suppression,
   allowlist, threshold, generated-ignore, or qlty configuration change.
-- Slice 10 may now resume under its existing approval boundary. Slices 11-13
-  remain dependency-blocked until Slice 10 is independently reviewed `Ready`
+- Slice 11 is now the sole active implementation-approved slice. Slices 12-13
+  remain dependency-blocked until Slice 11 is independently reviewed `Ready`
   with no findings and focused-committed; closure drafts remain excluded and
   untouched.
 
 ### Slice 10 Implementation Evidence (2026-09-08)
 
 - Slice 10 implementation is complete within the approved Flow
-  overlay/document/viewer-message boundary; no commit was created by the
-  implementer and independent review is pending. The public type/export
+  overlay/document/viewer-message boundary; independent review returned
+  `Ready` with no findings, Completion Approval was automatic, and focused
+  completion commit `9acfb577` is recorded. The public type/export
   surface remains in `flowGraphDocument.ts`; same-boundary helpers split
   projection, overlay parsing and membership, unit/tree reading, and document
   validation without changing the existing DTO contract. `unitListDocument.ts`
@@ -605,9 +615,78 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 - Compatibility and readiness remain unchanged: VS Code `^1.75.0`, desktop/web
   parity, ordinary Flow behavior, browser-safe transport, architecture
   boundaries, and telemetry privacy are preserved. The six closure drafts
-  remain excluded and untouched. Independent implementation review is the next
-  route; conditional automatic Completion Approval applies only after a
-  `Ready` verdict with no findings.
+  remain excluded and untouched. Slice 11 is the next approved route;
+  conditional automatic Completion Approval applies only after its independent
+  implementation review returns `Ready` with no findings.
+
+### Slice 11 Activation (2026-09-08)
+
+- Slice 11 is the sole active implementation-approved slice after Slice 10
+  focused completion commit `9acfb577`. Its exact host/action paths are
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`,
+  `semanticDiffExplorerRegistry.ts`, `semanticDiffExplorerReportAction.ts`,
+  `semanticDiffExplorerSourceAction.ts`, and
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`, with focused
+  existing panel, registry, report-action, source-action, and command tests.
+- Preserve the one-argument opener, same-context report handoff, exact source
+  reveal and current-source revalidation, session/action correlation,
+  stale/disposed epochs, payload-size failure, context/action registry
+  ownership, unregister-before-release ordering, four-mode output identity,
+  display-failed mapping, idempotent disposal, and VS Code `^1.75.0` desktop
+  behavior. No new command, wire variant, raw URI/content transport, Flow
+  bridge, webview UI, or telemetry behavior is authorized.
+- The baseline qlty assignment is `semanticDiffExplorerPanel.ts`:
+  `manyParameters=3`, `manyReturns=2`, `functionComplexity=7`,
+  `totalComplexity=1`, `complexBinary=1`, `nestedControlFlow=1`;
+  `semanticDiffExplorerRegistry.ts`: `functionComplexity=1`;
+  `semanticDiffExplorerReportAction.ts`: `manyReturns=1`,
+  `functionComplexity=1`; `semanticDiffExplorerSourceAction.ts`:
+  `manyReturns=2`, `functionComplexity=2`; and `semanticDiffCommand.ts`:
+  `manyReturns=1`, `functionComplexity=4`, `totalComplexity=1`.
+  Remediation must use cohesive extraction only, with no suppression,
+  allowlist, threshold, generated-ignore, or qlty configuration change.
+- Slices 12-13 remain dependency-blocked until Slice 11 is independently
+  reviewed `Ready` with no findings and focused-committed; closure drafts
+  remain excluded and untouched.
+
+### Slice 11 Implementation Evidence (2026-09-08)
+
+- Slice 11 implementation is complete within the approved VS Code Explorer
+  host/action boundary and is pending independent implementation review. The
+  public panel opener remains one-argument and still returns the host-only
+  session handle. Panel installation, request validation/dispatch, transport,
+  action routing, lifecycle disposal, report execution, source execution, and
+  command step/read/selection/build helpers were extracted into same-boundary
+  modules without introducing a new wire variant, command, UI, Flow bridge,
+  telemetry event, or configuration path.
+- The implementation preserves the exact immutable context handoff for report
+  output, four-mode report identity, action/session correlation, strict record
+  occurrence lookup, source document/version revalidation before and after
+  reveal, stale/disposed epoch guards, fixed payload-size failures, and
+  `display-failed` command mapping. Disposal remains idempotent and performs
+  context/action unregister before source-lifetime release, including panel
+  installation rollback and late completion paths.
+- Targeted `pnpm exec qlty smells --no-snippets` over the five approved host
+  files and all same-boundary extraction helpers returned zero findings. The
+  full `pnpm exec qlty check` gate returned `No issues`; no suppression,
+  allowlist, threshold, generated-ignore, or configuration change was made.
+  The repository-wide smell report still contains only pre-existing findings
+  in the out-of-scope Slice 12-13 boundaries.
+- Validation passed `pnpm run test:compile`, `pnpm run build` (desktop and web
+  production composition), the compiled desktop runner
+  (`pnpm run test:desktop:run`, exit 0), the web runner
+  (`pnpm run test:web:run`, exit 0 under the approved host escalation),
+  `pnpm run lint:md`, and `git diff --check`. The web runner emitted transient
+  stream-close warnings after browser smoke; no source failure was reported.
+  Existing webpack bundle-size warnings remain unchanged. No focused tests
+  were edited; the approved panel, registry, report-action, source-action,
+  and command suites remain the regression evidence.
+- Production-readiness evidence remains positive for VS Code `^1.75.0`,
+  desktop/web parity, browser-safe transport, privacy, registry ownership,
+  source lifetime, and telemetry boundaries. Closure drafts remain excluded
+  and untouched. The next route is independent implementation review; Slices
+  12-13 remain dependency-blocked until Slice 11 is reviewed `Ready` and
+  focused-committed.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
