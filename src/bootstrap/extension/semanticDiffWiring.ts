@@ -13,15 +13,20 @@ import {
 import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
+import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
+import { createSemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
 
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
+  beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
 };
 
 export const createSemanticDiffSubscriptions = (
   deps: SemanticDiffWiringDeps,
 ): vscode.Disposable[] => {
+  const contextRegistry = new SemanticDiffExplorerContextRegistry();
   const reportDocuments = new SemanticDiffReportDocumentProvider({
     openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
     showTextDocument: (document, options) =>
@@ -43,6 +48,10 @@ export const createSemanticDiffSubscriptions = (
     openReport: (output) => reportDocuments.openReport(output),
     presentOutput: presentSemanticDiffOutput,
     language: vscode.env.language,
+    openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
+    showTextDocument: (document, options) =>
+      vscode.window.showTextDocument(document, options),
+    contextRegistry,
   });
 
   return [
@@ -58,12 +67,28 @@ export const createSemanticDiffSubscriptions = (
         showOpenDialog: (options) => vscode.window.showOpenDialog(options),
         showErrorMessage: (message) => vscode.window.showErrorMessage(message),
         readFile: (uri) => vscode.workspace.fs.readFile(uri),
+        openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
         openReport: (output) => reportDocuments.openReport(output),
         language: vscode.env.language,
         buildSemanticDiffReportData: deps.buildSemanticDiffReportData,
         buildSemanticDiffOutputContext,
         presentSemanticDiffOutput,
         openExplorer,
+        beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
+        sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
+        registerSemanticDiffSourceCapture: (
+          context,
+          binding,
+          sources,
+          release,
+        ) =>
+          contextRegistry.registerSourceCapture(context, {
+            binding,
+            sources,
+            release,
+          }),
+        unregisterSemanticDiffSourceCapture: (context) =>
+          contextRegistry.unregisterSourceCapture(context),
       }),
     ),
     vscode.commands.registerCommand(

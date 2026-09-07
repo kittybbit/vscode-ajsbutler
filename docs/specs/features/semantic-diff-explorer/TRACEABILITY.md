@@ -111,3 +111,39 @@ automatically approved under the explicit 2026-09-06 user policy, and the
 focused completion commit is
 `01349376da1a76fa0c91a0311b3ab1659f5dc521`. Aggregate final human approval
 remains pending until all four slices are complete.
+
+## Slice 3 Validation Result
+
+Slice 3 implementation evidence (2026-09-07): the application now owns the
+browser-safe source-index DTO/port and an explicit collecting→bound→registered
+→released capture scope. The ANTLR adapter constructs the normalized document
+and source index in one raw parse, retaining exact `unitAttribute` headers,
+declaration-name ranges, and duplicate parameter-key occurrences with
+UTF-16/CRLF/Unicode positions. The current file command supplies the scoped
+parser to the existing report builder, binds the exact output context after
+successful construction, and the VS Code host retains only opaque side
+handles plus immutable decoded snapshots. Source actions use the retained
+index and revalidate document text/version, session epoch, and scope activity
+before reveal; panel disposal unregisters borrowed context/source entries
+before releasing the capture exactly once.
+
+Validation passed full TypeScript checks, compiled tests, the full desktop
+extension runner, desktop and web production/build preparation, `qlty`,
+markdown lint, and `git diff --check`. Focused coverage includes same-pass
+identity and exactly-two-call/order behavior, exact enriched-index runtime
+validation and capture-scope membership, parser-error continuation, content
+mismatch/extra/post-release rejection, deep-frozen index/binding/host
+snapshots, bind/release lifecycle, duplicate normalized IDs and parameter
+occurrences, CRLF/Unicode ranges, strict scope-authoritative lookup including
+foreign/unregistered indexes, direct-release invalidation, source-capture
+registration/Explorer-open exception mapping to current-command
+`display-failed`, and the retained-range source action with stale/pre-reveal
+revalidation. Partial registration that inserts then throws now performs
+idempotent `unregister` before `release`, and its stale registry lookup is
+asserted absent. Panel creation rollback, ownership/disposal, and the existing
+one-argument Explorer opener seam are covered as well. Direct web browser
+smoke remains blocked before test execution by the managed Chromium
+`bootstrap_check_in ... Permission denied (1100)` failure; this is an
+environment-only risk, while the desktop runner and both bundles passed.
+Independent implementation review and Slice 3 Completion Approval remain
+pending; no commit was created.

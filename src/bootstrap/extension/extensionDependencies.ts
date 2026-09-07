@@ -23,6 +23,8 @@ import {
   createBuildSemanticDiffReportData,
   type BuildSemanticDiffReportData,
 } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import { createBeginSemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
+import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
@@ -41,6 +43,7 @@ export type ExtensionDependencies = {
   findParameterHover: FindParameterHover;
   semanticDiff: {
     buildSemanticDiffReportData: BuildSemanticDiffReportData;
+    beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
   };
   webApiImport: ImportAjsDefinitionCapability;
 };
@@ -106,6 +109,7 @@ export const createExtensionDependencies = (
 ): ExtensionDependencies => {
   const telemetry = createTelemetry();
   const parser = instrumentParserPerformance(new AntlrAjsParser(), telemetry);
+  const enrichedParser = new AntlrAjsParser();
   const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
   const webApiImport = createWebApiImportCapability(host, () =>
     factories.createDesktopWebApiImportCapability(context),
@@ -119,6 +123,8 @@ export const createExtensionDependencies = (
     findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {
       buildSemanticDiffReportData: createBuildSemanticDiffReportData(parser),
+      beginSemanticDiffSourceCapture:
+        createBeginSemanticDiffSourceCapture(enrichedParser),
     },
     webApiImport,
   };

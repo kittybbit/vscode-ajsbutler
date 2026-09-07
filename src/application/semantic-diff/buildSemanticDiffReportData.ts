@@ -28,6 +28,7 @@ export type BuildSemanticDiffReportDataResult =
 
 export type BuildSemanticDiffReportData = (
   input: BuildSemanticDiffReportDataInput,
+  parser?: AjsParserPort,
 ) => BuildSemanticDiffReportDataResult;
 
 const toParserErrors = (
@@ -40,9 +41,10 @@ export const createBuildSemanticDiffReportData =
     parser: AjsParserPort,
     compare: CompareSemanticDiff = compareSemanticDiff,
   ): BuildSemanticDiffReportData =>
-  ({ beforeContent, afterContent }) => {
-    const beforeParse = parser.parse(beforeContent);
-    const afterParse = parser.parse(afterContent);
+  ({ beforeContent, afterContent }, scopedParser) => {
+    const activeParser = scopedParser ?? parser;
+    const beforeParse = activeParser.parse(beforeContent);
+    const afterParse = activeParser.parse(afterContent);
 
     if (beforeParse.ok === false || afterParse.ok === false) {
       return {

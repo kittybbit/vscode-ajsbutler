@@ -4,9 +4,11 @@
 
 - Purpose: turn one completed Semantic Diff result into an accessible,
   read-only review workspace.
-- Approved or active slice: Slice 3 is approved and active after the Slice 2
-  completion commit `01349376da1a76fa0c91a0311b3ab1659f5dc521`; Slices 1-2 are
-  complete, and Slice 4 remains dependency-blocked in the existing order.
+- Approved or active slice: Slice 3 implementation review is Ready with no
+  findings, and its Completion Approval is automatic and eligible for the
+  focused commit after the Slice 2 completion commit
+  `01349376da1a76fa0c91a0311b3ab1659f5dc521`; Slices 1-2 are complete, and
+  Slice 4 remains dependency-blocked in the existing order.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -90,8 +92,9 @@
 
 ## Plan Status
 
-- Status: Slices 1-2 complete and committed; Slice 3 activated for
-  implementation.
+- Status: Slices 1-2 complete and committed; Slice 3 implementation is
+  complete and its completion gate is approved, with the focused commit
+  pending.
 - Planning scope: application projection, explorer surface, same-session
   Markdown, source reveal, Flow reveal/highlight/focus, accessibility,
   desktop/web compatibility, and failure handling for EXP-1 through EXP-10.
@@ -100,7 +103,7 @@
   approval boundary, and claims no new plan-review verdict.
 - Human approval: Slice 3 implementation approval recorded from the explicit
   2026-09-06 user instruction; aggregate final approval remains pending.
-- Active implementation slice: Slice 3.
+- Active completion slice: Slice 3 focused commit pending.
 - Slice order: Slice 1, Slice 2, Slice 3, then Slice 4. Each slice needs its own
   implementation review and focused commit. Completion Approval is
   conditionally automatic only after that slice's implementation review is
@@ -181,20 +184,48 @@ separate gates.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Automatically Approved
+- Approved at: 2026-09-07 (Main recorded the final independent
+  `implementation-reviewer` `Ready` verdict with no findings under the
+  explicit user completion-approval policy)
+- Approved scope: Slice 3 — Reveal Exact Before And After Source Targets,
+  limited to the application-owned browser-safe source-index DTO/port, the
+  same-pass enriched parser result and scoped capture state machine, ANTLR
+  locator adapter, private lookup API, source registry/snapshot verification,
+  VS Code reveal, typed outcomes, action completion/focus, and named tests;
+  no Flow, editing, diagnostics, arbitrary sources, or durable-document work.
+- Approved paths (exact current worktree set):
+  - `docs/specs/features/semantic-diff-explorer/TASKS.md`
+  - `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`
+  - `src/application/semantic-diff/buildSemanticDiffReportData.ts`
+  - `src/bootstrap/extension/extensionDependencies.ts`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/infrastructure/parser/AjsEvaluator.ts`
+  - `src/infrastructure/parser/AntlrAjsParser.ts`
+  - `src/infrastructure/parser/raw/AjsRawUnit.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`
+  - `src/test/suite/AntlrAjsParser.test.ts`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
+  - `src/test/suite/semanticDiffExplorerRegistry.test.ts`
+  - `src/application/parsing/AjsParserWithSourceIndexPort.ts`
+  - `src/application/semantic-diff/semanticDiffSourceCapture.ts`
+  - `src/application/semantic-diff/semanticDiffSourceIndex.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceAction.ts`
+  - `src/test/suite/semanticDiffExplorerSourceAction.test.ts`
+  - `src/test/suite/semanticDiffSourceCapture.test.ts`
+- Implementation review verdict: Ready; no findings
+- Commit status: Eligible; focused completion commit pending
 - Active completion gate: Slice 3. Slice 2 Completion Approval was
   automatically approved after its `Ready` review and committed as
   `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
-- User approval policy: after `implementation-reviewer` returns `Ready` for the
-  exact active slice, Main may record Completion Approval as automatic under the
-  2026-09-06 instruction and route that exact slice to `approval-committer`;
-  Findings do not qualify. Aggregate final approval remains pending until all
-  four slices are complete.
+- User approval policy: the exact Slice 3 `Ready` verdict with no findings
+  qualifies for the automatic Completion Approval recorded above under the
+  2026-09-06 instruction; Main may route this exact scope to
+  `approval-committer`. Aggregate final human approval remains pending until
+  all four slices are complete.
 
 ## Closure Approval
 
@@ -976,7 +1007,9 @@ remains pending until all four slices are complete.
 
 ### Slice 3: Reveal Exact Before And After Source Targets
 
-- Status: Active; implementation approved after Slice 2 completion commit
+- Status: Implementation complete; independent review Ready with no findings
+  and Completion Approval automatically approved on 2026-09-07; focused
+  completion commit pending after Slice 2 completion commit
   `01349376da1a76fa0c91a0311b3ab1659f5dc521`.
 - Scope: application-owned browser-safe source-index DTO/port, the explicit
   same-pass `AjsParserWithSourceIndexPort` result and scoped capture state
@@ -1119,6 +1152,35 @@ dispose(): void }`; `WebviewPanel` remains host-only. Slice 2's private
   and revalidation matrices are the gate.
 - Out of Scope: Flow, editing, diagnostics, arbitrary sources, durable docs.
 
+Implementation evidence (2026-09-07): Slice 3 adds the browser-safe source
+index and same-pass capture contracts, ANTLR token-derived UTF-16 ranges,
+context-keyed host source bindings, exact-side VS Code reveal with decoded
+snapshot/version revalidation, and idempotent unregister-before-release
+cleanup. The current file command injects the scoped parser into the existing
+report builder and binds only after the retained output context is built; no
+calendar/workflow dependency, global last-parse cache, action-time parse, or
+Flow overlay was introduced. Focused tests cover fixed before/after capture
+ordering, exact enriched-index validation and capture-scope membership,
+parser-error continuation, immutable index/binding/host snapshots,
+bind/release lifecycle, duplicate IDs and parameter occurrences,
+CRLF/Unicode ranges, foreign/unregistered/stale lookups, source-capture
+registration failure mapping, retained-range source actions with
+stale/pre-reveal revalidation, direct-release invalidation, panel-creation
+rollback, partial-registration insert-then-throw rollback ordering with stale
+lookup absence, and exact command/registry seams. Validation passed TypeScript,
+compiled tests, the full desktop extension smoke suite, desktop and web
+production/build preparation, qlty, markdown lint, and diff checks. Source
+bind/registration and Explorer-open exceptions are classified as current
+command `display-failed`; registration rejects released bindings and the host
+registry drops direct-release entries immediately. A direct web browser smoke
+remains blocked by the managed Chromium
+`bootstrap_check_in ... Permission denied (1100)` environment failure; the
+desktop runner and both bundle validations passed. Independent implementation
+review was Ready with no findings; Completion Approval was automatically
+approved on 2026-09-07 under the recorded user policy. The focused completion
+commit is eligible and pending; no commit was created. Aggregate final human
+approval remains pending until all four slices are complete.
+
 ### Slice 4: Focus Existing Flow Views With Semantic Overlays
 
 - Status: Planned; blocked on Slice 3 completion and approval.
@@ -1255,6 +1317,6 @@ dispose(): void }`; `WebviewPanel` remains host-only. Slice 2's private
 
 - [x] Slice 1 tests and checks complete
 - [x] Slice 2 tests and checks complete
-- [ ] Slice 3 tests and checks complete
+- [x] Slice 3 tests and checks complete
 - [ ] Slice 4 tests and checks complete
 - [ ] README, CHANGELOG, durable use cases, and final traceability complete

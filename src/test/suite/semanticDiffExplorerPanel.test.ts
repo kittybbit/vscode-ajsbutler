@@ -1,6 +1,14 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
+import {
+  createSemanticDiffSourceHandleIdAllocator,
+  createSemanticDiffSourceIndexIdAllocator,
+} from "../../application/parsing/AjsParserWithSourceIndexPort";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
+import {
+  beginSemanticDiffSourceCapture,
+  isSemanticDiffSourceCaptureBindingActive,
+} from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import {
   createSemanticDiffExplorerActionRequest,
@@ -102,6 +110,71 @@ const createHarness = () => {
     language: "en",
   });
   return { opener, panels, contextRegistry, actionRegistry };
+};
+
+const createSourceEntry = (context: ReturnType<typeof emptyContext>) => {
+  const indexIds = createSemanticDiffSourceIndexIdAllocator();
+  const handleIds = createSemanticDiffSourceHandleIdAllocator();
+  const capture = beginSemanticDiffSourceCapture(
+    {
+      before: {
+        side: "before",
+        sourceHandleId: handleIds(),
+        text: "before",
+        version: null,
+      },
+      after: {
+        side: "after",
+        sourceHandleId: handleIds(),
+        text: "after",
+        version: null,
+      },
+    },
+    {
+      parseWithSourceIndex: (text) => ({
+        ok: true,
+        document: { rootUnits: [], warnings: [] },
+        sourceIndex: {
+          sourceIndexId: indexIds(),
+          unitEntries: [
+            {
+              unitId: text,
+              headerRange: {
+                start: { line: 0, character: 0 },
+                end: { line: 0, character: 1 },
+              },
+              nameRange: null,
+              parameterOccurrences: [],
+            },
+          ],
+        },
+      }),
+    },
+  );
+  capture.parser.parse("before");
+  capture.parser.parse("after");
+  const binding = capture.bind(context);
+  if (!binding.ok) throw new Error("Expected source binding.");
+  return {
+    capture,
+    binding,
+    sources: {
+      before: {
+        side: "before" as const,
+        sourceHandleId: binding.before.sourceHandleId,
+        text: "before",
+        version: null,
+        uri: vscode.Uri.parse("untitled:before.ajs"),
+      },
+      after: {
+        side: "after" as const,
+        sourceHandleId: binding.after.sourceHandleId,
+        text: "after",
+        version: null,
+        uri: vscode.Uri.parse("untitled:after.ajs"),
+      },
+    },
+  };
 };
 
 suite("Semantic diff Explorer panel", () => {
@@ -220,6 +293,42 @@ suite("Semantic diff Explorer panel", () => {
     assert.strictEqual(releases, 1);
     assert.strictEqual(harness.contextRegistry.size, 0);
     assert.strictEqual(harness.actionRegistry.size, 0);
+  });
+
+  test("rolls back a registered source capture when panel creation fails", async () => {
+    const context = emptyContext();
+    const contextRegistry = new SemanticDiffExplorerContextRegistry();
+    const actionRegistry = new SemanticDiffExplorerActionRegistry();
+    const source = createSourceEntry(context);
+    let releases = 0;
+    contextRegistry.registerSourceCapture(context, {
+      binding: source.binding,
+      sources: source.sources,
+      release: () => {
+        releases += 1;
+        source.capture.release();
+      },
+    });
+    const opener = createOpenSemanticDiffExplorer({
+      extensionContext: {
+        extensionUri: vscode.Uri.file("/tmp/ajsbutler-test-extension"),
+      } as vscode.ExtensionContext,
+      createWebviewPanel: () => {
+        throw new Error("panel failed");
+      },
+      showQuickPick: async () => undefined,
+      openReport: async () => undefined,
+      contextRegistry,
+      actionRegistry,
+    });
+
+    await assert.rejects(() => opener(context), /panel failed/);
+    assert.strictEqual(contextRegistry.sourceCapture(context), undefined);
+    assert.strictEqual(releases, 1);
+    assert.strictEqual(
+      isSemanticDiffSourceCaptureBindingActive(source.binding),
+      false,
+    );
   });
 
   test("supersedes an older same-context panel without clearing the newer one", async () => {

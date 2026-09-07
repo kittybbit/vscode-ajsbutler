@@ -30,6 +30,7 @@ import {
   type SemanticDiffOutputModeItem,
 } from "../../semantic-diff/semanticDiffOutput";
 import { executeSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportAction";
+import { executeSemanticDiffExplorerSourceAction } from "./semanticDiffExplorerSourceAction";
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
@@ -62,6 +63,11 @@ export type SemanticDiffExplorerPanelDeps = Readonly<{
   presentOutput?: typeof presentSemanticDiffOutput;
   language?: string;
   sourceLifetimeRelease?: () => void;
+  openTextDocument?: (uri: vscode.Uri) => Thenable<vscode.TextDocument>;
+  showTextDocument?: (
+    document: vscode.TextDocument,
+    options?: vscode.TextDocumentShowOptions,
+  ) => Thenable<vscode.TextEditor>;
   contextRegistry?: SemanticDiffExplorerContextRegistry;
   actionRegistry?: SemanticDiffExplorerActionRegistry;
 }>;
@@ -165,14 +171,26 @@ export const createOpenSemanticDiffExplorer = (
       sessionIdAllocator: sessionIds,
       actionIdAllocator: actionIds,
     });
-    const panel = createWebviewPanel(
-      SEMANTIC_DIFF_EXPLORER_VIEW_TYPE,
-      (deps.language ?? vscode.env.language).toLowerCase().startsWith("ja")
-        ? "セマンティック差分エクスプローラー"
-        : "Semantic Diff Explorer",
-      vscode.ViewColumn.Active,
-      { enableScripts: true, retainContextWhenHidden: true },
-    );
+    let panel: vscode.WebviewPanel;
+    try {
+      panel = createWebviewPanel(
+        SEMANTIC_DIFF_EXPLORER_VIEW_TYPE,
+        (deps.language ?? vscode.env.language).toLowerCase().startsWith("ja")
+          ? "セマンティック差分エクスプローラー"
+          : "Semantic Diff Explorer",
+        vscode.ViewColumn.Active,
+        { enableScripts: true, retainContextWhenHidden: true },
+      );
+    } catch (error) {
+      const sourceEntry = contextRegistry.sourceCapture(context);
+      contextRegistry.unregisterSourceCapture(context);
+      try {
+        (sourceEntry?.release ?? releaseSourceLifetime)();
+      } catch {
+        // A panel creation failure must not hide the original host error.
+      }
+      throw error;
+    }
     const entry: PanelEntry = {
       context,
       session,
@@ -186,6 +204,7 @@ export const createOpenSemanticDiffExplorer = (
     let receiveMessageDisposable: vscode.Disposable | undefined;
     let panelDisposeDisposable: vscode.Disposable | undefined;
     const registeredActionIds = hostActionIds(session, outputActionId);
+    const sourceCapture = contextRegistry.sourceCapture(context);
 
     const post = async (
       message: SemanticDiffExplorerHostMessage,
@@ -237,9 +256,11 @@ export const createOpenSemanticDiffExplorer = (
         context,
         entry as SemanticDiffExplorerContextEntry,
       );
+      const sourceEntry = contextRegistry.sourceCapture(context);
+      contextRegistry.unregisterSourceCapture(context);
       actionRegistry.remove(session.sessionId);
       try {
-        releaseSourceLifetime();
+        (sourceEntry?.release ?? releaseSourceLifetime)();
       } catch {
         // Resource release is best effort during panel disposal.
       }
@@ -323,6 +344,80 @@ export const createOpenSemanticDiffExplorer = (
           ),
           requestEpoch,
         );
+        return;
+      }
+      if (metadata.kind === "source") {
+        if (
+          sourceCapture === undefined ||
+          deps.openTextDocument === undefined ||
+          deps.showTextDocument === undefined
+        ) {
+          await post(
+            createSemanticDiffExplorerActionResultMessage(
+              session.sessionId,
+              request.requestId,
+              request.actionId,
+              null,
+              createSemanticDiffExplorerError("source-lookup-failed", {
+                side: metadata.side,
+                targetId: metadata.targetId,
+              }),
+            ),
+            requestEpoch,
+          );
+          return;
+        }
+        const sourceResult = await executeSemanticDiffExplorerSourceAction(
+          {
+            side: metadata.side,
+            targetId: metadata.targetId,
+            targetKind: metadata.targetKind,
+            parameterKey: metadata.parameterKey,
+          },
+          {
+            sourceCapture,
+            openTextDocument: deps.openTextDocument,
+            showTextDocument: deps.showTextDocument,
+            isCurrent: () => !disposed && requestEpoch === disposeEpoch,
+          },
+        );
+        if (disposed || requestEpoch !== disposeEpoch) return;
+        if (sourceResult.ok === true) {
+          await post(
+            createSemanticDiffExplorerActionResultMessage(
+              session.sessionId,
+              request.requestId,
+              request.actionId,
+              actionOutcome(
+                "source",
+                "completed",
+                metadata.side,
+                metadata.targetId,
+              ),
+            ),
+            requestEpoch,
+          );
+        } else {
+          const errorCode =
+            sourceResult.code === "stale-source"
+              ? "stale-source"
+              : sourceResult.code === "unavailable-target"
+                ? "unavailable-target"
+                : "source-lookup-failed";
+          await post(
+            createSemanticDiffExplorerActionResultMessage(
+              session.sessionId,
+              request.requestId,
+              request.actionId,
+              null,
+              createSemanticDiffExplorerError(errorCode, {
+                side: metadata.side,
+                targetId: metadata.targetId,
+              }),
+            ),
+            requestEpoch,
+          );
+        }
         return;
       }
       if (metadata.kind !== "output") {

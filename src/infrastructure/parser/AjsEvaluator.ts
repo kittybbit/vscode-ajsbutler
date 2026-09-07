@@ -6,6 +6,15 @@ import {
 } from "@generate/parser/AjsParser";
 import { AjsRawUnit } from "./raw/AjsRawUnit";
 
+const tokenEnd = (token: {
+  line: number;
+  charPositionInLine: number;
+  text?: string;
+}) => ({
+  line: token.line,
+  column: token.charPositionInLine + (token.text?.length ?? 0),
+});
+
 export class Ajs3v12Evaluator implements AjsParserListener {
   /** parsed definition */
   #allUnits: Array<AjsRawUnit> = [];
@@ -34,10 +43,40 @@ export class Ajs3v12Evaluator implements AjsParserListener {
   };
 
   enterUnitAttribute = (ctx: UnitAttributeContext) => {
-    const newUnit = new AjsRawUnit(
-      ctx._value.text as string,
-      this.#currentUnit,
-    );
+    const key = ctx._key;
+    const value = ctx._value;
+    const newUnit = new AjsRawUnit(value?.text ?? "", this.#currentUnit);
+    const semi = ctx.SEMI()?.symbol;
+    if (key !== undefined && value !== undefined && semi !== undefined) {
+      const headerStart = {
+        line: key.line,
+        column: key.charPositionInLine,
+      };
+      const headerEnd = tokenEnd(semi);
+      const valueStart = {
+        line: value.line,
+        column: value.charPositionInLine,
+      };
+      const valueText = value.text ?? "";
+      const nameLength = Math.max(
+        0,
+        valueText.indexOf(",") < 0 ? valueText.length : valueText.indexOf(","),
+      );
+      newUnit.source = {
+        headerRange: {
+          startLine: headerStart.line,
+          startColumn: headerStart.column,
+          endLine: headerEnd.line,
+          endColumn: headerEnd.column,
+        },
+        nameRange: {
+          startLine: valueStart.line,
+          startColumn: valueStart.column,
+          endLine: valueStart.line,
+          endColumn: valueStart.column + nameLength,
+        },
+      };
+    }
     this.#currentUnit?.children.push(newUnit);
     this.#currentUnit = newUnit;
     this.#unitStack.push(newUnit);
@@ -45,13 +84,16 @@ export class Ajs3v12Evaluator implements AjsParserListener {
   };
 
   enterUnitParameter = (ctx: UnitParameterContext) => {
+    const key = ctx._key?.text;
+    const value = ctx._value?.text;
+    if (key === undefined || value === undefined) return;
     this.#currentUnit?.parameters.push({
-      key: ctx._key.text as string,
-      value: ctx._value.text as string,
+      key,
+      value,
       position: this.#currentUnit.parameters.length,
       line: ctx._key.line,
       column: ctx._key.charPositionInLine,
-      length: ctx._key.text?.length ?? 1,
+      length: key.length,
     });
   };
 
