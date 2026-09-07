@@ -365,6 +365,9 @@ environment-owned validation risk whenever web smoke is attempted.
   and `rtk git diff --check`. The focused qlty smells run retains only the
   pre-existing projection/panel complexity findings assigned to later Slice
   7/11 decomposition; no suppressions or thresholds changed.
+- Review follow-up: the zero-match assertion targets the explicit
+  `p[role="status"]` so MUI summary output elements with implicit status roles
+  cannot make the test ambiguous. Runtime and design are unchanged.
 - Managed Chromium smoke remains `blocked-before-execution` because the host
   reports `bootstrap_check_in ... Permission denied (1100)`; desktop smoke
   and both production bundles pass, and no browser pass is claimed.

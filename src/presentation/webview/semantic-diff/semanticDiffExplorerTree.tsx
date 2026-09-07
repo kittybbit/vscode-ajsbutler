@@ -338,6 +338,7 @@ const ExplorerGroupRow = ({
     aria-expanded={row.expanded}
     aria-selected={selected}
     data-row-id={row.id}
+    data-row-kind="group"
     sx={rowSx(selected)}
     onClick={onToggle}
   >
@@ -438,6 +439,8 @@ const ExplorerLeafRow = ({
       aria-setsize={row.size}
       aria-selected={selected}
       data-row-id={row.id}
+      data-record-kind={leaf.kind}
+      data-record-id={leaf.recordId}
       sx={{
         display: "flex",
         flexWrap: "wrap",

@@ -195,6 +195,33 @@ suite("Semantic diff Explorer panel", () => {
     );
   });
 
+  test("retains exact context identity through the host session and message", async () => {
+    const harness = createHarness();
+    const context = emptyContext();
+    const handle = await harness.opener(context);
+    const entry = harness.contextRegistry.get(context);
+
+    assert.ok(entry);
+    assert.strictEqual(entry?.context, context);
+    assert.strictEqual(entry?.session.context, context);
+    assert.strictEqual(entry?.session.context.result, context.result);
+    assert.strictEqual(entry?.session.context.summary, context.summary);
+    assert.strictEqual(entry?.session.sessionId, handle.sessionId);
+
+    const fake = harness.panels[0]!;
+    fake.emit(createSemanticDiffExplorerReadyRequest(handle.sessionId, 1));
+    await flush();
+
+    const message = fake.messages[0] as {
+      type: string;
+      sessionId: string;
+      payload: unknown;
+    };
+    assert.strictEqual(message.type, "session");
+    assert.strictEqual(message.sessionId, entry?.session.sessionId);
+    assert.deepStrictEqual(message.payload, entry?.session.viewModel);
+  });
+
   test("keeps the Explorer webview CSP nonce-bound and asset-free", async () => {
     const harness = createHarness();
     await harness.opener(emptyContext());

@@ -11,6 +11,12 @@ import {
   within,
 } from "@testing-library/react";
 import SemanticDiffExplorerApp from "../../presentation/webview/semantic-diff/semanticDiffExplorer";
+import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
+import {
+  createSemanticDiffExplorerActionIdAllocator,
+  createSemanticDiffExplorerSession,
+  createSemanticDiffExplorerSessionIdAllocator,
+} from "../../application/semantic-diff/semanticDiffExplorer";
 import type {
   SemanticDiffExplorerActionSet,
   SemanticDiffExplorerCard,
@@ -32,9 +38,12 @@ import {
   semanticDiffExplorerTargetSizePx,
 } from "../../presentation/webview/shared/muiTheme";
 import {
+  createSemanticDiffExplorerSessionMessage,
   createSemanticDiffExplorerError,
   createSemanticDiffExplorerFailureMessage,
 } from "../../application/semantic-diff/semanticDiffExplorerMessages";
+import { createSemanticDiffDetail } from "../../application/semantic-diff/semanticDiffStructuredFacts";
+import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 
 type GlobalValue = {
   key: string;
@@ -226,6 +235,87 @@ const createViewModel = (leafCount = 2): SemanticDiffExplorerViewModel => {
     status: leafCount > 0 ? "findings" : "empty",
   };
 };
+
+const createSessionFixture = (
+  withConfirmationRecords = true,
+  withRequiredChange = true,
+) => {
+  const target = (id: string) => ({
+    kind: "unit" as const,
+    unit: {
+      id,
+      name: id,
+      absolutePath: `/group/${id}`,
+      unitType: "unit",
+    },
+  });
+  const result: SemanticDiffResult = {
+    inputs: {
+      before: { side: "before", unitIds: [], relations: [] },
+      after: { side: "after", unitIds: [], relations: [] },
+    },
+    changes: [
+      {
+        id: "ordinary-change",
+        kind: "changed",
+        elementKind: "unit",
+        confirmationLevel: "confirmed",
+        before: target("ordinary-before"),
+        after: target("ordinary-change"),
+        relationPair: null,
+        identityDecisionId: "identity:ordinary-change",
+      },
+      ...(withRequiredChange
+        ? [
+            {
+              id: "required-change",
+              kind: "changed" as const,
+              elementKind: "unit" as const,
+              confirmationLevel: "confirmation-required" as const,
+              before: target("required-before"),
+              after: target("required-change"),
+              relationPair: null,
+              identityDecisionId: "identity:required-change",
+            },
+          ]
+        : []),
+    ],
+    identityDecisions: [],
+    confirmationRequired: withConfirmationRecords
+      ? [
+          {
+            id: "confirmation-record",
+            reasonCode: "wait-target-changed",
+            target: target("confirmation-record"),
+            relatedTargets: [],
+            detail: createSemanticDiffDetail(),
+            constraints: [],
+            warning: null,
+          },
+        ]
+      : [],
+    unsupportedItems: [],
+    limitations: [],
+  };
+  const context = buildSemanticDiffOutputContext(result);
+  const session = createSemanticDiffExplorerSession(context, {
+    sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(900),
+    actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(900),
+  });
+  return { context, session };
+};
+
+const recordTuples = (container: HTMLElement): string[] =>
+  [
+    ...container.querySelectorAll<HTMLElement>(
+      "[data-record-kind][data-record-id][data-row-id]",
+    ),
+  ]
+    .map(
+      (row) =>
+        `${row.dataset.recordKind}:${row.dataset.recordId}:${row.dataset.rowId}`,
+    )
+    .sort();
 
 const factText = (element: Element): string =>
   element.querySelector(".MuiChip-label")?.textContent?.trim() ??
@@ -434,6 +524,136 @@ suite("Semantic diff Explorer DOM", () => {
       rules: { "color-contrast": { enabled: false } },
     });
     assert.deepStrictEqual(results.violations, []);
+  });
+
+  test("filters the actual host session message by exact record tuple", async () => {
+    const { session } = createSessionFixture();
+    const messages: unknown[] = [];
+    dom.window.document.body.dataset.semanticDiffSessionId = session.sessionId;
+    (
+      dom.window as unknown as {
+        vscode: { postMessage: (value: unknown) => void };
+      }
+    ).vscode = { postMessage: (value) => messages.push(value) };
+
+    const view = render(<SemanticDiffExplorerApp />);
+    assert.strictEqual(messages.length, 1);
+    assert.strictEqual((messages[0] as { type: string }).type, "ready");
+
+    await act(async () => {
+      dom.window.dispatchEvent(
+        new dom.window.MessageEvent("message", {
+          data: createSemanticDiffExplorerSessionMessage(
+            session.sessionId,
+            session.viewModel,
+          ),
+        }),
+      );
+      await Promise.resolve();
+    });
+
+    assert.deepStrictEqual(recordTuples(view.container), [
+      "change:ordinary-change:change:ordinary-change:0",
+      "change:required-change:change:required-change:0",
+      "confirmation:confirmation-record:confirmation:confirmation-record:0",
+    ]);
+    assert.ok(view.container.querySelector('[data-row-kind="group"]'));
+    assert.ok(view.getByRole("article", { name: "Changes: 2" }));
+    assert.ok(view.getByRole("article", { name: "Confirmation required: 2" }));
+
+    const ordinaryRow = view.container.querySelector(
+      '[data-record-kind="change"][data-record-id="ordinary-change"]',
+    ) as HTMLElement;
+    const tree = view.getByRole("tree");
+    fireEvent.click(ordinaryRow);
+    const ordinaryRowId = ordinaryRow.dataset.rowId;
+    assert.strictEqual(
+      tree.getAttribute("aria-activedescendant"),
+      ordinaryRowId,
+    );
+    assert.strictEqual(ordinaryRow.getAttribute("aria-selected"), "true");
+
+    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
+      target: { value: "confirmation-required" },
+    });
+    assert.deepStrictEqual(recordTuples(view.container), [
+      "change:required-change:change:required-change:0",
+      "confirmation:confirmation-record:confirmation:confirmation-record:0",
+    ]);
+    assert.strictEqual(
+      view
+        .getByRole("article", { name: "Changes: 2" })
+        .textContent?.includes("2"),
+      true,
+    );
+    assert.strictEqual(
+      tree.getAttribute("aria-activedescendant")?.includes("ordinary-change"),
+      false,
+    );
+    assert.strictEqual(
+      view.container.querySelector('[data-record-id="ordinary-change"]'),
+      null,
+    );
+
+    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
+      target: { value: "all" },
+    });
+    assert.deepStrictEqual(recordTuples(view.container), [
+      "change:ordinary-change:change:ordinary-change:0",
+      "change:required-change:change:required-change:0",
+      "confirmation:confirmation-record:confirmation:confirmation-record:0",
+    ]);
+    assert.strictEqual(
+      tree.getAttribute("aria-activedescendant"),
+      ordinaryRowId,
+    );
+    assert.strictEqual(
+      view.container
+        .querySelector(`[data-row-id="${ordinaryRowId}"]`)
+        ?.getAttribute("aria-selected"),
+      "true",
+    );
+    assert.strictEqual(
+      view.container.querySelector('[aria-live="polite"]')?.textContent,
+      "All",
+    );
+  });
+
+  test("announces a zero-match result in the actual session App", async () => {
+    const { session } = createSessionFixture(false, false);
+    dom.window.document.body.dataset.semanticDiffSessionId = session.sessionId;
+    (
+      dom.window as unknown as {
+        vscode: { postMessage: (value: unknown) => void };
+      }
+    ).vscode = { postMessage: () => undefined };
+    const view = render(<SemanticDiffExplorerApp />);
+
+    await act(async () => {
+      dom.window.dispatchEvent(
+        new dom.window.MessageEvent("message", {
+          data: createSemanticDiffExplorerSessionMessage(
+            session.sessionId,
+            session.viewModel,
+          ),
+        }),
+      );
+      await Promise.resolve();
+    });
+    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
+      target: { value: "confirmation-required" },
+    });
+
+    assert.strictEqual(
+      view.container.querySelector('p[role="status"]')?.textContent,
+      "No confirmation-required items match this filter.",
+    );
+    assert.strictEqual(
+      view.container.querySelector("[data-record-kind]"),
+      null,
+    );
+    assert.ok(view.getByRole("combobox", { name: "Filter changes" }));
+    assert.ok(view.getByRole("article", { name: "Changes: 1" }));
   });
 
   test("renders an initial host failure instead of leaving the Explorer loading", async () => {
