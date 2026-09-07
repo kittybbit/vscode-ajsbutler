@@ -268,9 +268,13 @@ independent `Ready` review, Human Approval, and focused commit `54ca4005`.
 Slice 5 is complete and focused-committed as
 `ee76722d0628d2d4e223f6faf13751a7a16a3a35`. The narrow Slice 6 path replan
 was focused-committed as `1ede39bb`; Slice 6 is complete and focused-committed
-as `6af753e7`. Slice 7 is the sole active implementation-approved slice;
-Slices 8-13 remain planned and dependency-blocked until their predecessors are
-complete, reviewed, and focused-committed.
+as `6af753e7`. Slice 7 is complete and focused-committed as
+`b7c537d3410b2a05fae0487df3fd92fbb6b8f484`. Full `qlty check` then reported
+14 committed Slice 7 files as unformatted. Slice 7A is now the sole active
+approved formatter-only reconciliation; its focused docs-only replan commit is
+pending. Slice 8 activation is held and Slices 9-13 remain planned and
+dependency-blocked until their predecessors are complete, reviewed, and
+focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -280,6 +284,7 @@ complete, reviewed, and focused-committed.
 | Slice 6A: host identity evidence                 | EXP-3; immutable context/session lifecycle                            | `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` and `src/test/suite/semanticDiffExplorerPanel.test.ts`; exact `SemanticDiffOutputContext` object identity, retained registry context, emitted session ID, and no clone/rebuild proof                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Slice 6B: actual-session confirmation filter     | EXP-3; filter scenario; visible zero-match feedback                   | `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx` renders the approved stable row/group attributes; `src/test/suite/semanticDiffExplorerDom.test.tsx` sends `createSemanticDiffExplorerSessionMessage` with the 6A session ID to the actual App; exact `(data-record-kind,data-record-id,data-row-id)` tuples prove ordinary exclusion, confirmation retention, zero-match status, cards, and latent selection restore                                                                                                                                                                                                                                                                                             |
 | Slice 7: application projection/transport smells | qlty findings in closed validators/projection/occurrence helpers      | `semanticDiffExplorerMessages.ts`, `semanticDiffExplorerProjection.ts`, `semanticDiffRecordOccurrence.ts`; strict-union/property/focused regression suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Slice 7A: Slice 7 formatter reconciliation       | full qlty check found 14 committed Slice 7 paths unformatted          | Exact 14 committed Slice 7 application/test paths listed in `TASKS.md`; mechanical-only diff review, full `rtk pnpm run qlty:check`, targeted smells, and Slice 7 message/projection/DOM/Flow regression evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Slice 8: source capture/parser smells            | qlty findings in source-index/capture/report-data composition         | `AjsParserWithSourceIndexPort.ts`, `semanticDiffSourceCapture.ts`, `AntlrAjsParser.ts`, `buildSemanticDiffReportData.ts`; parser/capture/architecture/desktop-web suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Slice 9: Flow graph/highlight smells             | qlty findings in graph builders/highlight projection                  | `buildExpandedFlowGraph.ts`, `buildFlowGraph.ts`, `buildFlowGraphCore.ts`, `buildSemanticDiffFlowHighlights.ts`; graph IDs/order/large-fixture suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Slice 10: Flow overlay/document/message smells   | qlty findings in overlay/document/viewer validation                   | `buildSemanticDiffFlowOverlay.ts`, `flowGraphDocument.ts`, `unitListDocument.ts`, `viewerHostMessages.ts`; exact-key/atomic-rejection/normal viewer suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -347,13 +352,69 @@ environment-owned validation risk whenever web smoke is attempted.
 
 ### Slice 7 Activation (2026-09-07)
 
-- Slice 7 is the sole active implementation-approved slice after Slice 6
-  completion commit `6af753e7`. Its scope is the application projection,
-  transport, and occurrence refactoring only; Slice 6 behavior, DTO/message
-  compatibility, and the recorded qlty baseline assignments remain fixed.
-- The exact assigned qlty families are resolved without suppression,
-  allowlisting, threshold changes, or configuration edits. Slices 8-13 remain
-  dependency-blocked until Slice 7 is independently reviewed and committed.
+- Slice 7 was the sole active implementation-approved slice after Slice 6
+  completion commit `6af753e7`. Its application projection, transport, and
+  occurrence refactoring completed with independent `Ready`/no-findings
+  review, automatic Completion Approval, and focused commit
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`.
+- The exact assigned qlty families were resolved without suppression,
+  allowlisting, threshold changes, or configuration edits. Slice 7A addresses
+  only the committed formatter output; Slice 8 activation is held and Slices
+  9-13 remain dependency-blocked.
+
+### Slice 7A Activation (2026-09-07)
+
+- Slice 7A is the sole active approved replan, with its focused plan commit
+  pending. The trigger was
+  the full `rtk pnpm run qlty:check` result after Slice 7 commit
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`, which reported exactly 14
+  committed Slice 7 paths as unformatted by `prettier:fmt`.
+- Scope is formatter-only and behavior-neutral. The exact paths are
+  `src/application/semantic-diff/semanticDiffExplorerLeafGuards.ts`,
+  `semanticDiffExplorerMessageParsers.ts`,
+  `semanticDiffExplorerMessagePrimitives.ts`,
+  `semanticDiffExplorerMessages.ts`, `semanticDiffExplorerProjection.ts`,
+  `semanticDiffExplorerProjectionLeaves.ts`,
+  `semanticDiffExplorerProjectionPaths.ts`,
+  `semanticDiffExplorerProjectionSupport.ts`,
+  `semanticDiffExplorerProjectionTree.ts`,
+  `semanticDiffExplorerRecordGuards.ts`,
+  `semanticDiffRecordOccurrence.ts`,
+  `semanticDiffExplorerViewGuards.ts`,
+  `src/test/suite/semanticDiffExplorerMessages.test.ts`, and
+  `src/test/suite/semanticDiffExplorerProjection.test.ts` (the first 12
+  application paths are under `src/application/semantic-diff/`).
+- Required evidence is a mechanical-only diff review, full `rtk pnpm run
+qlty:check` pass, targeted qlty smells, and Slice 7 message/projection/
+  DOM/Flow tests. No suppression, exclusion, threshold, generated-ignore, or
+  qlty configuration change is allowed. Final independent plan review is
+  `Ready` with no findings; Human Approval was granted through the trusted
+  user messages `承認します。` and `継続して。` on 2026-09-07.
+- Exact approved replan commit paths are only
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`. The focused
+  docs-only commit is eligible/pending; no implementation or formatting has
+  started. Slice 8 activation remains held until that commit and the later
+  Slice 7A implementation gate; Slices 9-13 remain blocked.
+
+### Slice 8 Activation (2026-09-07)
+
+- Slice 8's implementation-approved scope remains held after Slice 7
+  completion commit `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`; Slice 7A
+  must complete first. Its scope is source capture, parser locator, and
+  report-data composition refactoring only; same-pass capture, parser/source
+  DTO behavior, ownership, errors, and the `AjsParserPort.parse(content)`
+  compatibility seam remain fixed.
+- Exact qlty assignments are preserved from the baseline: `AjsParserWithSourceIndexPort.ts`
+  has `manyReturns=3`, `functionComplexity=4`, `totalComplexity=1`, and
+  `complexBinary=4`; `semanticDiffSourceCapture.ts` has `manyReturns=3`,
+  `functionComplexity=4`, `totalComplexity=1`, and `complexBinary=2`;
+  `AntlrAjsParser.ts` has `functionComplexity=1`; and
+  `buildSemanticDiffReportData.ts` has `functionComplexity=1`.
+- Remediation must use cohesive extraction only: no suppression, allowlist,
+  threshold, generated-ignore, or qlty configuration change. Slice 8 remains
+  held until Slice 7A is independently reviewed and focused-committed; Slices
+  9-13 remain dependency-blocked.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
@@ -392,6 +453,7 @@ environment-owned validation risk whenever web smoke is attempted.
 
 ### Slice 7 Implementation Evidence (2026-09-07)
 
+- Completion commit: `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`.
 - Slice 7 implementation is complete within the approved application-only
   boundary. `semanticDiffExplorerMessages.ts` now delegates strict primitives,
   record/leaf/view guards, request/reply/host parsers, and payload validation

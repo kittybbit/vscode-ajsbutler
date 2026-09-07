@@ -9,10 +9,11 @@
   completion-approved under the recorded user policy, and focused-committed.
   The 2026-09-07 user requirements reopened Feature Exit and require a
   replanned quality/accessibility/filter verification sequence before closure.
-  Slices 1-6 are complete, independently reviewed `Ready` with no findings,
+  Slices 1-7 are complete, independently reviewed `Ready` with no findings,
   automatically completion-approved under the recorded user policy, and
-  focused-committed; Slice 7 is now implementation-approved and active;
-  Slices 8-13 remain planned and dependency-blocked.
+  focused-committed; the formatter-only Slice 7A reconciliation is the sole
+  active approved replan with its focused plan commit pending; Slice 8 is held
+  and Slices 9-13 remain planned and dependency-blocked.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -46,11 +47,12 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main delegates exactly active Slice 7 to `implementer`. After
-  Slice 7 is independently reviewed, its `Ready`/no-findings verdict
-  conditionally authorizes automatic Completion Approval under the recorded
-  policy. Slices 8-13 remain blocked until their predecessors complete and are
-  focused-committed; the six closure drafts remain excluded.
+- Next route: `approval-committer` handles only the eligible focused Slice 7A
+  replan commit. No formatter or implementation work starts before that
+  commit. Afterward Main delegates Slice 7A to `implementer`; its independent
+  `Ready`/no-findings verdict conditionally authorizes automatic Completion
+  Approval under the recorded policy. Slice 8 and Slices 9-13 remain blocked;
+  the six closure drafts remain excluded.
 
 ## Sync Rule
 
@@ -108,15 +110,23 @@
   `ee76722d0628d2d4e223f6faf13751a7a16a3a35`. The narrow Slice 6 replan was
   focused-committed as `1ede39bb`; Slice 6 is independently reviewed `Ready`
   with no findings, automatically completion-approved, and focused-committed
-  as `6af753e7`. Slice 7 is now the sole active implementation-approved slice;
-  Slices 8-13 remain blocked until their predecessor slice is focused-committed.
+  as `6af753e7`. Slice 7 is independently reviewed `Ready` with no findings,
+  automatically completion-approved, and focused-committed as
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`. Full `qlty check` then
+  reported 14 committed Slice 7 files as unformatted; Slice 7A is now the
+  sole active approved replan for formatter-only reconciliation; its focused
+  plan commit is pending before implementation. Slice 8 and Slices 9-13 remain
+  blocked until their predecessor gates are focused-committed.
+  Slice 8 and Slices 9-13 remain blocked until their predecessor gates are
+  focused-committed.
 
 ## Plan Status
 
-- Status: Slices 1-6 complete and focused-committed; Feature Exit reopened;
+- Status: Slices 1-7 complete and focused-committed; Feature Exit reopened;
   replan commit `54ca4005` and narrow Slice 6 replan commit `1ede39bb` are
-  reviewed and approved; Slice 7 is the sole active implementation-approved
-  slice; Slices 8-13 are planned and blocked.
+  reviewed and approved; the Slice 7A replan is independently reviewed
+  `Ready` with no findings and Human Approved, eligible/pending its focused
+  docs-only commit; Slice 8 is held and Slices 9-13 are planned and blocked.
 - Planning scope: preserve EXP-1 through EXP-10 while adding the MUI/WCAG 2.2
   AA surface contract, actual-session confirmation-filter proof, and qlty-smell
   remediation across the changed application, parser, host, Flow, and webview
@@ -127,10 +137,11 @@
 - Human approval: the historical approvals below are limited to Slices 1-4
   only and are superseded as the active gate. Replanning Human Approval was
   granted on 2026-09-07 under the user's explicit MUI/WCAG/qlty/filter request.
-- Active implementation slice: Slice 7 — Decompose Explorer Application
-  Projection And Transport.
-- Slice order: Slices 1-6 remain complete and committed; Slice 7 is active;
-  Slices 8-13 remain dependency-blocked in order. Each new slice has an
+- Active approved replan: Slice 7A — Reconcile Slice 7 Formatter Output;
+  focused replan commit pending.
+- Slice order: Slices 1-7 remain complete and committed; Slice 7A is the
+  active approved replan pending its docs-only commit; Slice 8 is held;
+  Slices 9-13 remain dependency-blocked in order. Each new slice has an
   independent review and the recorded automatic Completion Approval rule
   applies only when that review is `Ready` with no findings.
 
@@ -249,9 +260,10 @@ separate gates.
   `docs/specs/features/semantic-diff-explorer/TASKS.md`, and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md` only. No
   runtime, test, or configuration path is authorized by this replan approval.
-- Activation result: this approval authorized the reviewed replan; Slices 1-6
-  are complete and committed, and Slice 7 is now the sole active
-  implementation-approved slice. The historical Slices 1-4 approval and
+- Activation result: this approval authorized the reviewed replan; Slices 1-7
+  are complete and committed. The formatter-only Slice 7A reconciliation is
+  now the sole active approved replan, pending its focused docs-only commit;
+  Slice 8 is held. The historical Slices 1-4 approval and
   completion approval below do not authorize any later slice.
 - Replan commit scope: only `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`.
   The uncommitted Feature Exit drafts
@@ -263,8 +275,10 @@ separate gates.
 - Commit status: reviewed/approved focused replan commit `54ca4005`; the
   closure-draft documents listed above were excluded, and no feature-folder
   removal was part of that commit.
-- Gate condition: satisfied for Slice 7; implementation may begin within the
-  Slice 7 approval below. Slices 8-13 remain blocked by predecessor completion.
+- Gate condition: the narrow Slice 7A plan review and Human Approval are
+  satisfied, but implementation remains blocked until its focused docs-only
+  replan commit. Slice 8 and Slices 9-13 remain blocked by predecessor
+  completion.
 - Automatic completion policy: a new slice's Completion Approval is
   automatically approved only after its independent implementation review is
   `Ready` with no findings. Actionable Findings suspend that slice and require
@@ -448,14 +462,14 @@ separate gates.
   Slices 7-13 remain planned and dependency-blocked; aggregate human approval
   and Closure Approval remain pending until all new slices are complete and
   committed.
-- Next route: Main delegates exactly active Slice 7 to `implementer`; no
-  closure-draft path is part of that gate.
+- Next route: `approval-committer` handles the narrow Slice 7A replan commit;
+  no formatter, implementation, or closure-draft path is part of that gate.
 
 ### Slice 7 Implementation Approval — Completed
 
 - Status: Implementation complete; independently reviewed `Ready` with no
   findings; Completion Approval automatically approved on 2026-09-07; focused
-  completion commit pending.
+  completion commit `b7c537d3410b2a05fae0487df3fd92fbb6b8f484` recorded.
 - Approved at: 2026-09-07 under the user's explicit MUI Semantic Explorer,
   WCAG 2.2 coverage, qlty-smell remediation, and confirmation-required filter
   verification request, using the existing proceed-through-slices policy.
@@ -492,12 +506,11 @@ separate gates.
   alter qlty configuration. Preserve behavior and DTO/message compatibility.
 - Gate result: Slice 6 completion commit `6af753e7` was present; the Slice 7
   independent implementation review returned `Ready` with no findings, so
-  Completion Approval was automatically approved on 2026-09-07. The package
-  is eligible for the focused completion commit through the
-  approval-committer gate; no staging or commit is performed here.
-- Next route: approval-committer handles only the focused Slice 7 commit.
-  Slices 8-13 remain blocked, closure drafts and Feature Exit remain excluded,
-  and aggregate final approval remains pending.
+  Completion Approval was automatically approved on 2026-09-07. Focused
+  completion commit `b7c537d3410b2a05fae0487df3fd92fbb6b8f484` is recorded.
+- Next route: Main delegates exactly active Slice 7A to `implementer`.
+  Slice 8 and Slices 9-13 remain blocked; closure drafts and Feature Exit
+  remain excluded, and aggregate final approval remains pending.
 
 ## Historical Completion Approval (Slices 1-4 Only; Superseded)
 
@@ -525,7 +538,7 @@ separate gates.
 - Approved paths: none
 - Feature Exit verdict: previous `Close` recommendation is superseded by the
   reopened Feature Exit; Closure Approval remains pending and is ineligible
-  until Slices 5-13 complete.
+  until Slice 7A and Slices 5-13 complete.
 - Commit status: Not eligible
 
 ## Feature Exit Review (2026-09-07)
@@ -596,11 +609,13 @@ the selected feature-folder evidence/removal under
   inactive.
 - Required evidence: Slice 5 supplies MUI/CSP/theme/WCAG 2.2 AA evidence;
   Slice 6 supplies exact record-level actual-session DOM evidence; Slices 7-13
-  remove the qlty smell report across the changed application, parser, host,
-  Flow, and webview surfaces without suppression.
+  plus the formatter-only Slice 7A reconciliation remove the qlty smell report
+  across the changed application, parser, host, Flow, and webview surfaces
+  without suppression.
 - Status: `Close` recommendation superseded; closure-draft durable documents
   remain uncommitted and the feature folder remains. A new Feature Exit review
-  is required after Slices 5-13 are independently reviewed and committed.
+  is required after Slice 7A and Slices 5-13 are independently reviewed and
+  committed.
 
 ## Predecessor Contract Decisions
 
@@ -1876,7 +1891,7 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
 
 - Status: Implementation complete; independent implementation review `Ready`
   with no findings; Completion Approval automatically approved on 2026-09-07;
-  focused completion commit pending.
+  focused completion commit `6af753e7` recorded.
 - Scope: verify and, only where the actual-session path requires it, correct
   `変更を絞り込む` → `確認が必要` behavior across the projected session,
   host session message, MUI filter control, tree, status, and latent selection.
@@ -2061,8 +2076,9 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
   malformed-payload behavior. Source-order occurrence assignment remains
   before presentation sorting, and host lookup remains a linear filter over
   the retained source records.
-- Remaining risk: the focused completion commit remains pending through the
-  approval-committer gate. Slices 8-13 remain blocked.
+- Remaining risk: Slice 8 source/parser extraction must preserve same-pass
+  capture, parser compatibility, and source-index ownership. Slices 9-13
+  remain blocked.
 
 #### Slice 7 Completion Gate (2026-09-07)
 
@@ -2089,13 +2105,17 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
     `semanticDiffExplorerViewGuards.ts`.
   - Tests: `src/test/suite/semanticDiffExplorerMessages.test.ts` and
     `src/test/suite/semanticDiffExplorerProjection.test.ts`.
-- Commit status: eligible and pending the focused completion commit; no
-  staging or commit is performed by the implementer. Closure drafts and
-  Feature Exit artifacts are excluded, and Slices 8-13 remain blocked.
+- Commit status: focused completion commit
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484` is recorded; no staging or
+  commit is performed by the implementer. Closure drafts and Feature Exit
+  artifacts are excluded; Slice 8 activation is recorded below and Slices
+  9-13 remain blocked.
 
 ### Slice 8: Simplify Source Capture And Parser Locator Boundaries
 
-- Status: Planned; blocked until Slice 7 is complete and reviewed.
+- Status: Approved scope retained; activation held pending Slice 7A's
+  formatter-only reconciliation and full qlty validation after Slice 7
+  completion commit `b7c537d3410b2a05fae0487df3fd92fbb6b8f484`.
 - Scope: remove qlty smells from `AjsParserWithSourceIndexPort.ts`,
   `semanticDiffSourceCapture.ts`, `AntlrAjsParser.ts`, and
   `buildSemanticDiffReportData.ts` by extracting closed validators, explicit
@@ -2129,6 +2149,114 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
   ordering. Existing identity/range/capture call-count tests are the gate.
 - Out of Scope: panel/UI, Flow, comparison semantics, WebAPI/Git sources, and
   durable docs.
+
+### Slice 7A Implementation Approval — Active
+
+- Status: Approved; sole active approved replan; focused plan commit pending
+- Approved at: 2026-09-07 under the existing user MUI Semantic Explorer,
+  WCAG 2.2, qlty-smell, and confirmation-filter approval/proceed-through-
+  slices policy, as a narrow reconciliation required by the plan-review
+  finding.
+- Trigger: full `rtk pnpm run qlty:check` after the committed Slice 7
+  implementation reported exactly 14 committed Slice 7 files as unformatted
+  by `prettier:fmt`. Slice 8 activation is held until this gate is resolved.
+- Approved scope: formatter-only reconciliation of the exact 14 paths below.
+  Formatting must be mechanical and behavior-neutral; no runtime, test
+  assertion, export, DTO/message, parser, host, UI, architecture, qlty
+  policy, or configuration change is authorized.
+- Exact approved paths:
+  `src/application/semantic-diff/semanticDiffExplorerLeafGuards.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerMessageParsers.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerMessagePrimitives.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerMessages.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjection.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjectionLeaves.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjectionPaths.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjectionSupport.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjectionTree.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerRecordGuards.ts`,
+  `src/application/semantic-diff/semanticDiffRecordOccurrence.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerViewGuards.ts`,
+  `src/test/suite/semanticDiffExplorerMessages.test.ts`, and
+  `src/test/suite/semanticDiffExplorerProjection.test.ts`.
+- Required evidence: diff review proves only formatter/mechanical changes on
+  these committed Slice 7 paths; full `rtk pnpm run qlty:check` passes;
+  targeted `qlty smells` and the Slice 7 message/projection/DOM/Flow tests
+  remain passing. No suppression, exclusion, threshold, generated-ignore, or
+  qlty configuration change is permitted.
+- Gate condition: Slice 7 completion commit
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484` is present, and its independent
+  review/automatic Completion Approval remain recorded. The Slice 7A replan
+  has independent plan review `Ready` with no findings and Human Approval, but
+  its focused docs-only commit is still pending. `implementer` may perform
+  only the formatter reconciliation after that commit. Completion Approval is
+  conditionally automatic only after independent review confirms mechanical
+  formatting and the required qlty/tests pass.
+- Next route: `approval-committer` handles only the exact Slice 7A replan
+  paths. After the focused commit Main delegates Slice 7A to `implementer`.
+  Slice 8 activation remains held; Slices 9-13 remain blocked and closure
+  drafts stay excluded.
+
+### Narrow Slice 7A Replan Human Approval — Focused Commit Pending
+
+- Status: Human Approved; eligible and pending one focused replan commit
+- Approved at: 2026-09-07
+- Final independent plan-review verdict: `Ready` with no findings.
+- Human Approval evidence: the trusted user messages `承認します。` and
+  `継続して。` approve this narrow mechanical replan under the existing
+  proceed-through-slices policy.
+- Approved scope: only the formatter-only Slice 7A scope and its exact 14
+  committed Slice 7 paths already listed above. No behavior, implementation,
+  test assertion, DTO/message, qlty policy, suppression, exclusion, threshold,
+  generated-ignore, or configuration change is approved.
+- Exact approved replan commit paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md` only.
+- Commit status: eligible/pending one focused docs-only replan commit by
+  `approval-committer`; no implementation or formatting has started, and the
+  six closure drafts remain excluded and untouched.
+- Next route: `approval-committer` handles only the two approved documentation
+  paths. After that commit, Main may delegate Slice 7A implementation.
+
+### Slice 8 Implementation Approval — Held
+
+- Status: Approved scope retained; activation held pending Slice 7A completion
+  and full qlty validation
+- Approved at: 2026-09-07 under the user's explicit MUI Semantic Explorer,
+  WCAG 2.2 coverage, qlty-smell remediation, and confirmation-required filter
+  verification request, using the existing proceed-through-slices policy.
+- Approved scope: Slice 8 — Simplify Source Capture And Parser Locator
+  Boundaries, exactly as specified above. Preserve the enriched-parser result,
+  same-pass before/after capture, exact context binding, unregister-before-
+  release ownership, strict UTF-16/CRLF/Unicode/duplicate/malformed lookup,
+  parser errors and ordering, browser-safe DTOs, and the compatible
+  `AjsParserPort.parse(content)` seam. No grammar, normalized-domain,
+  comparison, source-selection, report-schema, UI, Flow, or workflow change is
+  authorized.
+- Approved paths: `src/application/parsing/AjsParserWithSourceIndexPort.ts`,
+  `src/application/semantic-diff/semanticDiffSourceCapture.ts`,
+  `src/infrastructure/parser/AntlrAjsParser.ts`,
+  `src/application/semantic-diff/buildSemanticDiffReportData.ts`, and the
+  focused existing tests `src/test/suite/semanticDiffSourceCapture.test.ts`,
+  `src/test/suite/AntlrAjsParser.test.ts`,
+  `src/test/suite/buildSemanticDiffReportData.test.ts`, and
+  `src/test/suite/architectureDependencyRules.test.ts`. No host, webview,
+  Flow, command, configuration, or durable-document paths are approved.
+- Qlty boundary: resolve only the assigned baseline findings without
+  suppression, allowlisting, threshold relaxation, generated-ignore edits, or
+  qlty configuration changes. The exact assignment is
+  `AjsParserWithSourceIndexPort.ts`: `manyReturns=3`,
+  `functionComplexity=4`, `totalComplexity=1`, `complexBinary=4`;
+  `semanticDiffSourceCapture.ts`: `manyReturns=3`,
+  `functionComplexity=4`, `totalComplexity=1`, `complexBinary=2`;
+  `AntlrAjsParser.ts`: `functionComplexity=1`; and
+  `buildSemanticDiffReportData.ts`: `functionComplexity=1`.
+- Gate condition: Slice 7 completion commit
+  `b7c537d3410b2a05fae0487df3fd92fbb6b8f484` is present, but Slice 7A must
+  first receive independent review, automatic Completion Approval, focused
+  commit, and full qlty validation. Slice 8 cannot begin before that gate.
+- Next route: Slice 8 remains blocked pending Slice 7A completion; Slices 9-13
+  remain blocked in order and closure drafts remain excluded.
 
 ### Slice 9: Simplify Flow Graph Construction And Highlight Projection
 
@@ -2461,7 +2589,11 @@ changed delta; it may not be hidden.
       recorded; focused completion commit `6af753e7` recorded
 - [x] Slice 7 application projection/transport qlty remediation complete;
       independently reviewed `Ready` with no findings, Completion Approval
-      automatically approved on 2026-09-07, focused commit pending
+      automatically approved on 2026-09-07, focused commit
+      `b7c537d3410b2a05fae0487df3fd92fbb6b8f484` recorded
+- [ ] Slice 7A formatter-only reconciliation complete; exact 14 committed
+      Slice 7 paths mechanically formatted, full qlty check and targeted
+      smells/tests passing
 - [ ] Slice 8 source capture/parser qlty remediation complete
 - [ ] Slice 9 Flow graph/highlight qlty remediation complete
 - [ ] Slice 10 Flow overlay/document/message qlty remediation complete
