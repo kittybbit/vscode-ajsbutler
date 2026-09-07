@@ -9,7 +9,10 @@
   completion-approved under the recorded user policy, and focused-committed.
   The 2026-09-07 user requirements reopened Feature Exit and require a
   replanned quality/accessibility/filter verification sequence before closure.
-  New slices 5-13 are planned below; no new slice is approved or implemented.
+  Slice 5 implementation is complete, independently reviewed `Ready` with no
+  findings, automatically completion-approved under the recorded user policy,
+  and eligible for its pending focused commit; Slices 6-13 remain planned and
+  dependency-blocked.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -43,12 +46,11 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: Main sends this replan through independent `plan-reviewer`
-  review. After the revised plan receives Human Approval, each new slice is
-  plan-gate committed, implemented, independently reviewed, and completion-
-  approved according to the recorded automatic-approval policy when its
-  review is `Ready`. Feature Exit and Closure Approval are deferred until all
-  new slices are complete and committed.
+- Next route: Main routes the exact Slice 5 completion scope to
+  `approval-committer` for one focused commit. Slices 6-13 remain blocked until
+  their predecessors complete and are focused-committed; Feature Exit and
+  Closure Approval remain deferred until all new slices are complete and
+  committed.
 
 ## Sync Rule
 
@@ -100,26 +102,35 @@
 - Feature Exit route: independent review is complete; Main owns aggregate
   human approval and Closure Approval, and `approval-committer` owns the later
   approved closure commit.
+- Current-state route: the reviewed and approved replan commit
+  `54ca4005` activated exactly Slice 5. Slice 5 is now independently reviewed
+  `Ready` with no findings and automatically completion-approved; Main routes
+  its exact completion scope to `approval-committer`. Slices 6-13 remain
+  blocked until their predecessor slice is focused-committed.
 
 ## Plan Status
 
-- Status: replanning required; Slices 1-4 complete and focused-committed;
-  Feature Exit reopened; Slices 5-13 planned but not approved or implemented.
+- Status: Slices 1-4 complete and focused-committed; Feature Exit reopened;
+  replan commit `54ca4005` is reviewed and approved; Slice 5 is complete,
+  independently reviewed `Ready` with no findings, automatically
+  completion-approved, and pending its focused commit; Slices 6-13 are planned
+  and blocked.
 - Planning scope: preserve EXP-1 through EXP-10 while adding the MUI/WCAG 2.2
   AA surface contract, actual-session confirmation-filter proof, and qlty-smell
   remediation across the changed application, parser, host, Flow, and webview
   files.
 - Review status: Existing four-slice plan review `Ready` for commit `067d2189`;
-  this replan changes acceptance, validation, dependencies, and approval scope
-  and therefore requires a fresh independent `plan-reviewer` verdict.
+  final independent review of this replan returned `Ready` with no findings,
+  followed by reviewed/approved commit `54ca4005`.
 - Human approval: the historical approvals below are limited to Slices 1-4
-  only and are superseded as the active gate. Replanning Human Approval for
-  the revised Slices 5-13 plan is pending and is the sole active gate.
-- Active implementation slice: none; Replanning Mode.
-- Slice order: Slices 1-4 remain complete. After revised-plan approval, execute
-  Slices 5, 6, 7, 8, 9, 10, 11, 12, and 13 in that order. Each new slice has
-  an independent review and the recorded automatic Completion Approval rule
-  applies only when that review is `Ready` with no findings.
+  only and are superseded as the active gate. Replanning Human Approval was
+  granted on 2026-09-07 under the user's explicit MUI/WCAG/qlty/filter request.
+- Active implementation slice: Slice 5 — Adopt The MUI Explorer Surface And
+  WCAG 2.2 AA Baseline is complete and pending its focused commit.
+- Slice order: Slices 1-5 remain complete or commit-pending; Slices 6-13
+  remain dependency-blocked in order. Each new slice has an independent review
+  and the recorded automatic Completion Approval rule applies only when that
+  review is `Ready` with no findings.
 
 ## Historical Human Approval (Slices 1-4 Only; Superseded)
 
@@ -221,9 +232,9 @@ separate gates.
   pre-authorized only if `implementation-reviewer` returns `Ready`; Findings
   keep it pending and return the slice to Main for remediation.
 
-## Replanning Human Approval (Sole Active Gate)
+## Replanning Human Approval (Approved and Committed)
 
-- Status: Approved; eligible for focused replan commit
+- Status: Approved and committed
 - Approved at: 2026-09-07
 - Plan-review verdict: `Ready` with no findings from the final independent
   `plan-reviewer` review.
@@ -236,8 +247,9 @@ separate gates.
   `docs/specs/features/semantic-diff-explorer/TASKS.md`, and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md` only. No
   runtime, test, or configuration path is authorized by this replan approval.
-- Sole active gate: the historical Slices 1-4 approval and completion
-  approval below cannot authorize this replan or any Slices 5-13 work.
+- Activation result: this approval authorizes the reviewed replan; Slice 5 is
+  the sole active implementation-approved slice. The historical Slices 1-4
+  approval and completion approval below do not authorize any later slice.
 - Replan commit scope: only `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`.
   The uncommitted Feature Exit drafts
   (`CHANGELOG.md`, `README.en.md`, `README.md`,
@@ -245,16 +257,80 @@ separate gates.
   `docs/requirements/use-cases/uc-present-semantic-diff-report.md`, and
   `docs/specs/roadmap.md`) are preserved and explicitly excluded; no feature
   folder removal is part of this gate.
-- Commit status: Eligible; pending one focused replan commit by
-  `approval-committer`. The closure-draft documents listed above remain
-  excluded, and no feature-folder removal is part of this commit.
-- Gate condition: the revised plan commit is required before Slice 5
-  implementation begins.
+- Commit status: reviewed/approved focused replan commit `54ca4005`; the
+  closure-draft documents listed above were excluded, and no feature-folder
+  removal was part of that commit.
+- Gate condition: satisfied for Slice 5; implementation may begin within the
+  Slice 5 approval below. Slices 6-13 remain blocked by predecessor completion.
 - Automatic completion policy: a new slice's Completion Approval is
   automatically approved only after its independent implementation review is
   `Ready` with no findings. Actionable Findings suspend that slice and require
   Main to route remediation or another replan; they never silently grant
   approval.
+
+### Slice 5 Completion Gate — Ready, Automatically Approved; Focused Commit Pending
+
+- Status: Implementation complete; independent review `Ready` with no
+  findings; Completion Approval automatically approved; eligible and pending
+  one focused commit
+- Approved at: 2026-09-07 under the user's explicit MUI Semantic Explorer,
+  WCAG 2.2 coverage, qlty-smell remediation, and confirmation-required filter
+  verification request, using the existing proceed-through-slices policy.
+- Approved scope: Slice 5 — Adopt The MUI Explorer Surface And WCAG 2.2 AA
+  Baseline, exactly as specified below. This includes the canonical
+  `src/presentation/webview/shared/muiTheme.ts` owner, the Explorer MUI
+  presentation migration, the complete applicable WCAG matrix and explicit
+  N/A rationale, static CSP assertions, and the named accessibility/bundle
+  evidence. It does not authorize Slice 6 filtering changes or Slices 7-13
+  qlty refactors.
+- Approved paths: the Slice 5 cohesive change group and named tests below:
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`,
+  `src/presentation/webview/shared/muiTheme.ts`,
+  `src/test/suite/semanticDiffExplorerDom.test.tsx`, and
+  `src/test/suite/semanticDiffExplorerPanel.test.ts`. Optional Explorer
+  tree/state helpers remain inside the same presentation boundary; the panel
+  HTML/CSP seam may change only if the approved static CSP evidence requires
+  it. No durable-document, closure-draft, feature-folder, engine, dependency,
+  transport, or Flow-renderer paths are approved.
+- Gate condition: replan commit `54ca4005` is present and reviewed/approved;
+  Slice 5 implementation is complete within the approved boundary.
+- Independent implementation review: `Ready` with no findings on 2026-09-07.
+- Completion Approval: automatically approved on 2026-09-07 under the recorded
+  user policy because the independent implementation review was `Ready` with no
+  findings.
+- Exact approved completion paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`,
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`,
+  `src/test/suite/semanticDiffExplorerDom.test.tsx`,
+  `src/test/suite/semanticDiffExplorerPanel.test.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerFocus.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerHostMessageState.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerHostState.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerKeyboard.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerTreeData.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerViewState.ts`,
+  and `src/presentation/webview/shared/muiTheme.ts`.
+- Explicitly excluded closure drafts: `CHANGELOG.md`, `README.en.md`,
+  `README.md`, `docs/requirements/use-cases/uc-explore-flow-graph.md`,
+  `docs/requirements/use-cases/uc-present-semantic-diff-report.md`, and
+  `docs/specs/roadmap.md`.
+- Completion commit status: eligible and pending one focused commit; this
+  implementer does not stage or commit. Slice 6 remains blocked until that
+  focused commit succeeds.
+- Validation follow-up: real-browser Chromium and screen-reader checks remain
+  `blocked-before-execution` on the managed host because of the known
+  `bootstrap_check_in ... Permission denied (1100)` failure; the
+  permissive-host owner must rerun them before those manual rows can be
+  claimed. Aggregate human approval and Closure Approval remain pending until
+  Slices 5-13 are complete and committed.
+- Next route: Main routes exactly the paths above to `approval-committer` for
+  the focused completion commit; no closure-draft path is part of that gate.
 
 ## Historical Completion Approval (Slices 1-4 Only; Superseded)
 
@@ -1531,8 +1607,9 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
 
 ### Slice 5: Adopt The MUI Explorer Surface And WCAG 2.2 AA Baseline
 
-- Status: Planned; blocked until revised-plan review, Human Approval, and the
-  replan commit.
+- Status: Implementation complete; independently reviewed `Ready` with no
+  findings; Completion Approval automatically approved and focused commit
+  pending after reviewed replan commit `54ca4005`.
 - Scope: replace the Explorer's ad-hoc HTML controls/layout with MUI 7
   components and a VS Code-aware theme; split the Explorer app/view into
   cohesive presentational and host-message helpers; deduplicate localized
@@ -1594,6 +1671,36 @@ environment failure. `rtk pnpm run qlty:check`, `rtk git diff --check`, and
   style policy only, no remote origins/fonts/connect/eval, and no weakened
   policy. The CSP/bundle/axe/manual matrix is the gate; a required CSP policy
   change triggers Replanning rather than silent weakening.
+- Implementation evidence (2026-09-07): Slice 5 presentation implementation
+  is complete; its independent implementation review is `Ready` with no
+  findings and Completion Approval is automatically approved. The focused
+  commit remains pending. The
+  canonical MUI theme is in `src/presentation/webview/shared/muiTheme.ts`;
+  the Explorer surface uses MUI cards, controls, status/tree semantics,
+  VS Code tokens, 44px primary targets, stricter `:focus-visible`, and
+  forced-colors styles. Host message handling, tree data/keyboard/focus, and
+  view state were split into presentation-only helpers without transport or
+  DTO changes. The DOM suite has 11 passing tests including axe structure,
+  keyboard/tree semantics, 10,000-leaf virtualization, focus restoration,
+  filter selection, computed 4.5:1/3:1 fallback contrast arithmetic,
+  system-color forced-colors assertions, focus/name-role-value/status checks,
+  and 200%/400%/320px responsive assertions. Static panel CSP assertions
+  cover nonce-bound scripts, the existing inline-style policy, and absence of
+  remote assets/eval. `pnpm run test:compile`, desktop preparation,
+  production build, targeted qlty smells, and the compiled Electron runner
+  (`node ./out/test/runTest.js`, exit 0) pass; the managed web Chromium
+  runner remains environment-blocked before execution by its known
+  `bootstrap_check_in` permission failure. Manual WCAG matrix rows requiring a
+  real browser/screen reader remain reviewer/CI evidence, not claimed here.
+- Full repository `qlty check --all --no-fix --no-formatters` was also run. It
+  reports four unrelated baseline findings in `.github/ISSUE_TEMPLATE`,
+  `CHANGELOG.md`, `src/application/unit-list/buildUnitListRemainingGroups.ts`,
+  and `src/test/suite/index.ts`; none is in the Slice 5 delta, and those files
+  were intentionally left unchanged.
+- Implementation boundary: no Slice 6 filter correction, application or
+  transport change, Flow/table migration, dependency update, or closure-draft
+  edit was made. The changed Explorer production files are qlty-smell clean
+  without suppressions or threshold changes.
 - Out of Scope: changing semantic facts, confirmation predicates, source or
   Flow actions, qlty refactors outside Explorer presentation, and durable docs.
 
@@ -2063,7 +2170,8 @@ changed delta; it may not be hidden.
 - [x] Slice 2 tests and checks complete
 - [x] Slice 3 tests and checks complete
 - [x] Slice 4 tests and checks complete
-- [ ] Slice 5 MUI/WCAG 2.2 AA implementation and evidence complete
+- [x] Slice 5 MUI/WCAG 2.2 AA implementation and evidence complete; focused
+      completion commit pending
 - [ ] Slice 6 actual-session confirmation-filter proof complete
 - [ ] Slice 7 application projection/transport qlty remediation complete
 - [ ] Slice 8 source capture/parser qlty remediation complete

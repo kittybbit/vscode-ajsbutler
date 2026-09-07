@@ -263,9 +263,11 @@ the selected `docs/specs/features/semantic-diff-explorer/` folder.
 
 ## Replan Traceability (2026-09-07)
 
-The prior `Close` recommendation is superseded. The following slices are
-planned, not implemented, and require independent plan review plus Human
-Approval before any runtime or test edits:
+The prior `Close` recommendation is superseded. The replan received final
+independent `Ready` review, Human Approval, and focused commit `54ca4005`.
+Slice 5 is the sole active implementation-approved slice; Slices 6-13 remain
+planned and dependency-blocked until their predecessors are complete,
+reviewed, and focused-committed.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -290,6 +292,37 @@ extracting cohesive helpers and preserving behavior; suppressions,
 allowlists, threshold changes, and unverified metrics-only waivers are not
 acceptable. The managed Chromium startup permission failure remains an
 environment-owned validation risk whenever web smoke is attempted.
+
+### Slice 5 Implementation Evidence (2026-09-07)
+
+- Delivered the canonical MUI 7 theme and VS Code-token/forced-colors/focus/
+  target-size policy in `src/presentation/webview/shared/muiTheme.ts`, then
+  migrated only the Semantic Diff Explorer presentation surface and its
+  presentation-only tree, keyboard, focus, host-message, and view-state
+  helpers. Existing message DTOs, action IDs, session lifecycle, and webview
+  entry points are unchanged.
+- `semanticDiffExplorerDom.test.tsx` passes 11 focused tests, including axe
+  structural checks, localized labels/facts, `確認が必要` filter behavior,
+  keyboard parent/child semantics, latent selection restoration, 10,000-leaf
+  virtualization, focus restoration, computed 4.5:1/3:1 contrast arithmetic,
+  system-color forced-colors styles, focus/name-role-value/status contracts,
+  and 200%/400%/320px responsive assertions.
+  `semanticDiffExplorerPanel.test.ts` contains static nonce/CSP/no-remote-asset
+  assertions; desktop test preparation, the production desktop/web bundles,
+  and the compiled Electron runner (`node ./out/test/runTest.js`, exit 0)
+  complete successfully. Targeted `qlty smells --no-snippets` is clean for all
+  changed Explorer production files, with no suppressions or threshold edits.
+- Manual computed contrast, real forced-colors, 200%/400% reflow, focus-
+  obscured, screen-reader, and browser status-announcement rows remain
+  reviewer/CI evidence. Managed Chromium was attempted but remains
+  `blocked-before-execution` by the known host `bootstrap_check_in` permission
+  failure; no browser pass is claimed.
+- Full repository `qlty check --all --no-fix --no-formatters` reports four
+  pre-existing unrelated findings: markdownlint MD041 in
+  `.github/ISSUE_TEMPLATE/pull_request_template.md`, MD013 in `CHANGELOG.md`,
+  one unused `ParamSymbol` in `src/application/unit-list/`, and one unused
+  eslint-disable directive in `src/test/suite/index.ts`. Targeted Slice 5
+  qlty check and smells remain clean; no unrelated baseline file was changed.
 
 ## Replan Compatibility, Lifecycle, And Predecessor Traceability
 

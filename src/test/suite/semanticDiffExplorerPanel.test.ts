@@ -195,6 +195,18 @@ suite("Semantic diff Explorer panel", () => {
     );
   });
 
+  test("keeps the Explorer webview CSP nonce-bound and asset-free", async () => {
+    const harness = createHarness();
+    await harness.opener(emptyContext());
+    const html = harness.panels[0]!.panel.webview.html;
+
+    assert.match(html, /default-src 'none'/);
+    assert.match(html, /script-src https:\/\/fake\.invalid 'nonce-[^']+'/);
+    assert.match(html, /style-src https:\/\/fake\.invalid 'unsafe-inline'/);
+    assert.doesNotMatch(html, /connect-src|font-src|eval\(|<link\b/i);
+    assert.match(html, /semanticDiffExplorer\.js/);
+  });
+
   test("reports an oversized initial session with nullable correlation", async () => {
     const harness = createHarness();
     const oversized = "x".repeat(4_300_000);

@@ -25,6 +25,13 @@ import {
 } from "../../presentation/webview/semantic-diff/semanticDiffExplorerView";
 import { getSemanticDiffExplorerLabels } from "../../presentation/webview/semantic-diff/semanticDiffExplorerLocalization";
 import {
+  semanticDiffExplorerColors,
+  semanticDiffExplorerContrastFallbacks,
+  semanticDiffExplorerFocusSx,
+  semanticDiffExplorerGlobalStyles,
+  semanticDiffExplorerTargetSizePx,
+} from "../../presentation/webview/shared/muiTheme";
+import {
   createSemanticDiffExplorerError,
   createSemanticDiffExplorerFailureMessage,
 } from "../../application/semantic-diff/semanticDiffExplorerMessages";
@@ -220,6 +227,30 @@ const createViewModel = (leafCount = 2): SemanticDiffExplorerViewModel => {
   };
 };
 
+const factText = (element: Element): string =>
+  element.querySelector(".MuiChip-label")?.textContent?.trim() ??
+  element.textContent?.trim() ??
+  "";
+
+const relativeLuminance = (hex: string): number => {
+  const channels = [0, 2, 4].map(
+    (offset) => Number.parseInt(hex.slice(offset + 1, offset + 3), 16) / 255,
+  );
+  const linear = channels.map((channel) =>
+    channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * linear[0]! + 0.7152 * linear[1]! + 0.0722 * linear[2]!;
+};
+
+const contrastRatio = (first: string, second: string): number => {
+  const firstLuminance = relativeLuminance(first);
+  const secondLuminance = relativeLuminance(second);
+  return (
+    (Math.max(firstLuminance, secondLuminance) + 0.05) /
+    (Math.min(firstLuminance, secondLuminance) + 0.05)
+  );
+};
+
 suite("Semantic diff Explorer DOM", () => {
   let dom: JSDOM;
   let globals: GlobalValue[];
@@ -230,6 +261,114 @@ suite("Semantic diff Explorer DOM", () => {
   teardown(() => {
     cleanup();
     restoreDom(dom, globals);
+  });
+
+  test("uses VS Code tokens and the stricter focus/target baseline", () => {
+    assert.match(semanticDiffExplorerColors.foreground, /--vscode-foreground/);
+    assert.match(semanticDiffExplorerColors.focus, /--vscode-focusBorder/);
+    assert.match(
+      semanticDiffExplorerColors.primary,
+      /--vscode-button-background/,
+    );
+    assert.match(
+      semanticDiffExplorerColors.buttonForeground,
+      /--vscode-button-foreground/,
+    );
+    assert.strictEqual(semanticDiffExplorerTargetSizePx, 44);
+    assert.ok(semanticDiffExplorerFocusSx["&:focus-visible"]);
+    assert.ok(
+      semanticDiffExplorerGlobalStyles["@media (forced-colors: active)"],
+    );
+  });
+
+  test("uses computed contrast-safe fallbacks and system forced-colors", () => {
+    const fallbacks = semanticDiffExplorerContrastFallbacks;
+    assert.ok(
+      contrastRatio(fallbacks.buttonForeground, fallbacks.buttonBackground) >=
+        4.5,
+    );
+    assert.ok(contrastRatio(fallbacks.foreground, fallbacks.background) >= 4.5);
+    assert.ok(
+      contrastRatio(fallbacks.mutedForeground, fallbacks.background) >= 3,
+    );
+    assert.ok(contrastRatio(fallbacks.focus, fallbacks.background) >= 3);
+    assert.ok(contrastRatio(fallbacks.border, fallbacks.background) >= 3);
+    const forcedColors = semanticDiffExplorerGlobalStyles[
+      "@media (forced-colors: active)"
+    ] as Record<string, Record<string, string>>;
+    assert.deepStrictEqual(forcedColors["button, select"], {
+      backgroundColor: "ButtonFace",
+      color: "ButtonText",
+      borderColor: "ButtonText",
+    });
+    assert.strictEqual(
+      forcedColors["button:focus-visible, select:focus-visible"]?.outline,
+      "2px solid Highlight",
+    );
+    assert.strictEqual(
+      "forcedColorAdjust" in forcedColors["button, select"]!,
+      false,
+    );
+  });
+
+  test("keeps the semantic surface available at 200% text and 400%/320px reflow", () => {
+    dom.window.document.documentElement.style.fontSize = "200%";
+    Object.defineProperty(dom.window, "innerWidth", {
+      configurable: true,
+      value: 320,
+    });
+    const view = render(
+      <SemanticDiffExplorerView viewModel={createViewModel()} />,
+    );
+    const output = view.getByRole("button", { name: "Output" });
+    const filter = view.getByRole("combobox", { name: "Filter changes" });
+    const tree = view.getByRole("tree", { name: "Semantic diff changes" });
+    assert.strictEqual(output.getAttribute("type"), "button");
+    assert.strictEqual(
+      getComputedStyle(output).minHeight,
+      `${semanticDiffExplorerTargetSizePx}px`,
+    );
+    assert.strictEqual(
+      getComputedStyle(filter).minHeight,
+      `${semanticDiffExplorerTargetSizePx}px`,
+    );
+    assert.ok(view.container.querySelector('p[role="status"]')?.textContent);
+    assert.ok(view.container.querySelector('[aria-live="polite"]'));
+    assert.ok(tree.getAttribute("aria-activedescendant"));
+    const injectedStyles = [...dom.window.document.querySelectorAll("style")]
+      .map((style) => style.textContent ?? "")
+      .join("\n");
+    assert.match(injectedStyles, /min\(100%, 14rem\)/);
+    assert.match(injectedStyles, /overflow-wrap:anywhere/);
+    dom.window.document.documentElement.style.fontSize = "400%";
+    view.rerender(<SemanticDiffExplorerView viewModel={createViewModel()} />);
+    assert.ok(view.getByRole("button", { name: "Output" }));
+    assert.ok(view.getByRole("combobox", { name: "Filter changes" }));
+    assert.ok(view.getByRole("tree", { name: "Semantic diff changes" }));
+  });
+
+  test("keeps focus, name-role-value, and status contracts explicit", () => {
+    const view = render(
+      <SemanticDiffExplorerView viewModel={createViewModel()} />,
+    );
+    const output = view.getByRole("button", { name: "Output" });
+    const filter = view.getByRole("combobox", { name: "Filter changes" });
+    const tree = view.getByRole("tree", { name: "Semantic diff changes" });
+    assert.strictEqual(output.getAttribute("type"), "button");
+    assert.strictEqual(filter.getAttribute("aria-label"), "Filter changes");
+    tree.focus();
+    assert.strictEqual(document.activeElement, tree);
+    assert.ok(tree.getAttribute("aria-activedescendant"));
+    assert.match(
+      String(semanticDiffExplorerFocusSx["&:focus-visible"]?.outline),
+      /2px solid/,
+    );
+    fireEvent.change(filter, { target: { value: "confirmation-required" } });
+    assert.match(
+      view.container.querySelector('[aria-live="polite"]')?.textContent ?? "",
+      /Confirmation required/,
+    );
+    assert.ok(view.container.querySelector('p[role="status"]')?.textContent);
   });
 
   test("renders localized cards, reasons, details, actions, and accessible tree", async () => {
@@ -282,14 +421,12 @@ suite("Semantic diff Explorer DOM", () => {
     );
     assert.deepStrictEqual(
       [...view.container.querySelectorAll('[data-fact="change-kind"]')].map(
-        (element) => element.textContent?.trim(),
+        factText,
       ),
       ["変更", "変更"],
     );
     assert.deepStrictEqual(
-      [...view.container.querySelectorAll('[data-fact="state"]')].map(
-        (element) => element.textContent?.trim(),
-      ),
+      [...view.container.querySelectorAll('[data-fact="state"]')].map(factText),
       ["確定", "確認が必要"],
     );
     // jsdom cannot resolve CSS pseudo-elements; structural axe rules remain active.
@@ -483,14 +620,12 @@ suite("Semantic diff Explorer DOM", () => {
     );
     assert.deepStrictEqual(
       [...view.container.querySelectorAll('[data-fact="change-kind"]')].map(
-        (element) => element.textContent?.trim(),
+        factText,
       ),
       ["変更", "変更"],
     );
     assert.deepStrictEqual(
-      [...view.container.querySelectorAll('[data-fact="state"]')].map(
-        (element) => element.textContent?.trim(),
-      ),
+      [...view.container.querySelectorAll('[data-fact="state"]')].map(factText),
       ["候補", "未対応"],
     );
   });
@@ -528,21 +663,21 @@ suite("Semantic diff Explorer DOM", () => {
     const target = dom.window.document.createElement("div");
     let frames = 0;
     const focused: HTMLElement[] = [];
-    focusExplorerRowAfterVirtualizedScroll(
-      "leaf-9999",
-      () => {
+    focusExplorerRowAfterVirtualizedScroll({
+      id: "leaf-9999",
+      getElement: () => {
         if (frames < 2) return undefined;
         return target;
       },
-      (element) => focused.push(element),
-      (callback) => {
+      focus: (element) => focused.push(element),
+      requestAnimationFrame: (callback) => {
         frames += 1;
         return dom.window.setTimeout(
           () => callback(dom.window.performance.now()),
           0,
         );
       },
-    );
+    });
 
     await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 10));
     assert.strictEqual(frames, 2);
