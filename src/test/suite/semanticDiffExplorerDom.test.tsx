@@ -31,10 +31,10 @@ import {
 } from "../../presentation/webview/semantic-diff/semanticDiffExplorerView";
 import { getSemanticDiffExplorerLabels } from "../../presentation/webview/semantic-diff/semanticDiffExplorerLocalization";
 import {
-  semanticDiffExplorerColors,
-  semanticDiffExplorerContrastFallbacks,
+  createSemanticDiffTheme,
   semanticDiffExplorerFocusSx,
   semanticDiffExplorerGlobalStyles,
+  semanticDiffExplorerSelectionSx,
   semanticDiffExplorerTargetSizePx,
 } from "../../presentation/webview/shared/muiTheme";
 import {
@@ -323,8 +323,13 @@ const factText = (element: Element): string =>
   "";
 
 const relativeLuminance = (hex: string): number => {
+  const normalized =
+    hex.length === 4
+      ? `#${[1, 2, 3].map((index) => `${hex[index]}${hex[index]}`).join("")}`
+      : hex;
   const channels = [0, 2, 4].map(
-    (offset) => Number.parseInt(hex.slice(offset + 1, offset + 3), 16) / 255,
+    (offset) =>
+      Number.parseInt(normalized.slice(offset + 1, offset + 3), 16) / 255,
   );
   const linear = channels.map((channel) =>
     channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
@@ -353,39 +358,65 @@ suite("Semantic diff Explorer DOM", () => {
     restoreDom(dom, globals);
   });
 
-  test("uses VS Code tokens and the stricter focus/target baseline", () => {
-    assert.match(semanticDiffExplorerColors.foreground, /--vscode-foreground/);
-    assert.match(semanticDiffExplorerColors.focus, /--vscode-focusBorder/);
-    assert.match(
-      semanticDiffExplorerColors.primary,
-      /--vscode-button-background/,
+  test("uses MUI standard colors and the stricter focus/target baseline", () => {
+    const lightTheme = createSemanticDiffTheme({ mode: "light" });
+    const darkTheme = createSemanticDiffTheme({ mode: "dark" });
+    const lightGlobalStyles = semanticDiffExplorerGlobalStyles(lightTheme);
+    assert.strictEqual(lightTheme.palette.background.default, "#fff");
+    assert.strictEqual(darkTheme.palette.background.default, "#121212");
+    assert.ok(contrastRatio(lightTheme.palette.primary.main, "#ffffff") >= 3);
+    assert.ok(contrastRatio(darkTheme.palette.primary.main, "#121212") >= 3);
+    assert.ok(
+      contrastRatio(
+        lightTheme.palette.primary.main,
+        lightTheme.palette.background.default,
+      ) >= 3,
     );
-    assert.match(
-      semanticDiffExplorerColors.buttonForeground,
-      /--vscode-button-foreground/,
+    assert.ok(
+      contrastRatio(
+        darkTheme.palette.primary.main,
+        darkTheme.palette.background.default,
+      ) >= 3,
     );
+    assert.strictEqual(lightGlobalStyles.body.backgroundColor, "#fff");
+    assert.strictEqual(lightGlobalStyles.body.color, "rgba(0, 0, 0, 0.87)");
     assert.strictEqual(semanticDiffExplorerTargetSizePx, 44);
     assert.ok(semanticDiffExplorerFocusSx["&:focus-visible"]);
-    assert.ok(
-      semanticDiffExplorerGlobalStyles["@media (forced-colors: active)"],
+    assert.ok(lightGlobalStyles["@media (forced-colors: active)"]);
+  });
+
+  test("injects resolved theme colors into the document stylesheet", () => {
+    render(<SemanticDiffExplorerView viewModel={createViewModel()} />);
+    const injectedStyles = [...dom.window.document.querySelectorAll("style")]
+      .map((style) => style.textContent ?? "")
+      .join("\n");
+    assert.match(injectedStyles, /background-color:#fff/);
+    assert.match(injectedStyles, /color:rgba\(0,\s*0,\s*0,\s*0\.87\)/);
+    assert.strictEqual(
+      getComputedStyle(document.body).backgroundColor,
+      "rgb(255, 255, 255)",
+    );
+    assert.strictEqual(
+      getComputedStyle(document.body).color,
+      "rgba(0, 0, 0, 0.87)",
     );
   });
 
-  test("uses computed contrast-safe fallbacks and system forced-colors", () => {
-    const fallbacks = semanticDiffExplorerContrastFallbacks;
-    assert.ok(
-      contrastRatio(fallbacks.buttonForeground, fallbacks.buttonBackground) >=
-        4.5,
-    );
-    assert.ok(contrastRatio(fallbacks.foreground, fallbacks.background) >= 4.5);
-    assert.ok(
-      contrastRatio(fallbacks.mutedForeground, fallbacks.background) >= 3,
-    );
-    assert.ok(contrastRatio(fallbacks.focus, fallbacks.background) >= 3);
-    assert.ok(contrastRatio(fallbacks.border, fallbacks.background) >= 3);
-    const forcedColors = semanticDiffExplorerGlobalStyles[
-      "@media (forced-colors: active)"
-    ] as Record<string, Record<string, string>>;
+  test("uses system forced-colors and a visible two-pixel focus", () => {
+    const focus = semanticDiffExplorerFocusSx["&:focus-visible"];
+    assert.strictEqual(typeof focus?.outline, "function");
+    if (typeof focus?.outline === "function") {
+      assert.match(
+        String(focus.outline(createSemanticDiffTheme({ mode: "light" }))),
+        /2px solid/,
+      );
+    }
+    const forcedColors = semanticDiffExplorerGlobalStyles(
+      createSemanticDiffTheme({ mode: "light" }),
+    )["@media (forced-colors: active)"] as Record<
+      string,
+      Record<string, string>
+    >;
     assert.deepStrictEqual(forcedColors["button, select"], {
       backgroundColor: "ButtonFace",
       color: "ButtonText",
@@ -398,6 +429,53 @@ suite("Semantic diff Explorer DOM", () => {
     assert.strictEqual(
       "forcedColorAdjust" in forcedColors["button, select"]!,
       false,
+    );
+    const forcedSelection = semanticDiffExplorerSelectionSx(true)[
+      "@media (forced-colors: active)"
+    ] as Record<string, string>;
+    assert.strictEqual(forcedSelection.borderLeftColor, "Highlight");
+  });
+
+  test("marks selected rows with a theme-contrast leading marker", () => {
+    const lightView = render(
+      <SemanticDiffExplorerView
+        viewModel={createViewModel()}
+        themeMode="light"
+      />,
+    );
+    const lightTree = lightView.getByRole("tree");
+    fireEvent.keyDown(lightTree, { key: "ArrowRight" });
+    const lightSelected = lightView
+      .getAllByRole("treeitem")
+      .find((item) => item.getAttribute("aria-selected") === "true");
+    assert.ok(lightSelected);
+    assert.strictEqual(getComputedStyle(lightSelected!).borderLeftWidth, "4px");
+    assert.strictEqual(
+      getComputedStyle(lightSelected!).borderLeftColor,
+      "rgb(25, 118, 210)",
+    );
+    const lightStyles = [...dom.window.document.querySelectorAll("style")]
+      .map((style) => style.textContent ?? "")
+      .join("\n");
+    assert.match(lightStyles, /border-left-color:Highlight/);
+
+    lightView.unmount();
+    const darkView = render(
+      <SemanticDiffExplorerView
+        viewModel={createViewModel()}
+        themeMode="dark"
+      />,
+    );
+    const darkTree = darkView.getByRole("tree");
+    fireEvent.keyDown(darkTree, { key: "ArrowRight" });
+    const darkSelected = darkView
+      .getAllByRole("treeitem")
+      .find((item) => item.getAttribute("aria-selected") === "true");
+    assert.ok(darkSelected);
+    assert.strictEqual(getComputedStyle(darkSelected!).borderLeftWidth, "4px");
+    assert.strictEqual(
+      getComputedStyle(darkSelected!).borderLeftColor,
+      "rgb(144, 202, 249)",
     );
   });
 
@@ -696,6 +774,59 @@ suite("Semantic diff Explorer DOM", () => {
       view.container.querySelector('div[aria-live="polite"]')?.textContent,
       "The Explorer message is too large",
     );
+  });
+
+  test("follows host theme changes in loading and loaded states", async () => {
+    const { session } = createSessionFixture();
+    const messages: unknown[] = [];
+    dom.window.document.body.className = "vscode-light";
+    dom.window.document.body.dataset.semanticDiffSessionId = session.sessionId;
+    (
+      dom.window as unknown as {
+        vscode: { postMessage: (value: unknown) => void };
+      }
+    ).vscode = { postMessage: (value) => messages.push(value) };
+
+    const view = render(<SemanticDiffExplorerApp />);
+    assert.strictEqual(
+      view.getByRole("main").dataset.semanticDiffThemeMode,
+      "light",
+    );
+
+    await act(async () => {
+      dom.window.document.body.className = "vscode-dark";
+      await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 0));
+    });
+    assert.strictEqual(
+      view.getByRole("main").dataset.semanticDiffThemeMode,
+      "dark",
+    );
+
+    await act(async () => {
+      dom.window.dispatchEvent(
+        new dom.window.MessageEvent("message", {
+          data: createSemanticDiffExplorerSessionMessage(
+            session.sessionId,
+            session.viewModel,
+          ),
+        }),
+      );
+      await Promise.resolve();
+    });
+    assert.strictEqual(
+      view.getByRole("main").dataset.semanticDiffThemeMode,
+      "dark",
+    );
+
+    await act(async () => {
+      dom.window.document.body.className = "vscode-light";
+      await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 0));
+    });
+    assert.strictEqual(
+      view.getByRole("main").dataset.semanticDiffThemeMode,
+      "light",
+    );
+    assert.strictEqual(messages.length, 1);
   });
 
   test("supports tree parent/child keyboard semantics and sibling aria positions", () => {

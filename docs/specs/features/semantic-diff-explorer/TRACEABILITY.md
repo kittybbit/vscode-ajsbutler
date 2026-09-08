@@ -1354,7 +1354,61 @@ Plan approved 2026-09-09.
 - Independent plan review returned `Ready` with no findings on 2026-09-09.
   Under the user's standing policy that a no-findings slice review is
   automatically approved, Slice 15 Human Approval is recorded for the exact
-  boundary above. The focused plan-gate commit is eligible and pending through
-  `approval-committer`; runtime/test changes remain forbidden until that commit
-  is complete. Existing Slice 14 and Feature Exit evidence remains preserved;
-  closure drafts remain untouched.
+  boundary above. Focused plan-gate commit `d879a160` is recorded. Existing
+  Slice 14 and Feature Exit evidence remains preserved; closure drafts remain
+  untouched.
+
+### Slice 15 Implementation Evidence (2026-09-09)
+
+- The approved presentation slice is implemented in the shared MUI theme,
+  Explorer provider/view/tree, panel HTML, and browser-safe theme-mode helper.
+  `createSemanticDiffTheme` now derives standard MUI light/dark palettes;
+  global styles resolve `background.default` and `text.primary` through the
+  active theme callback; and Explorer loading/loaded states observe host theme
+  classes/data attributes plus `prefers-color-scheme`. Non-essential VS Code
+  and fixed-color overrides were removed while 44px controls, 2px focus, a
+  4px `primary.main` selected-row marker, and
+  Canvas/CanvasText/ButtonFace/ButtonText/Highlight forced-colors semantics
+  remain explicit. Light/dark marker contrast is numerically at least 3:1;
+  forced-colors selection uses `Highlight`. Measured marker contrast is about
+  4.60:1 for light (`#1976d2` on `#fff`) and 10.71:1 for dark (`#90caf9` on
+  `#121212`).
+- Focused `muiTheme`, theme-mode, Explorer DOM/axe, and panel/CSP tests cover
+  palette derivation, generated stylesheet and `getComputedStyle` values,
+  host mode changes through loading and loaded states, selected-row marker
+  width/color and light/dark/forced-colors contrast, selection/focus/reflow,
+  status/tree/filter contracts, and static CSP/no-remote-assets policy.
+- Validation passed `rtk pnpm run test:compile`, the focused theme/mode/DOM
+  suite (20 tests), `rtk pnpm run qlty` with zero smell findings and
+  `qlty check` `No issues`, `rtk pnpm run test:prepare:desktop`, compiled
+  desktop smoke (`node ./out/test/runTest.js`, exit 0),
+  `rtk pnpm run test:prepare:web`, production `rtk pnpm run build`, Markdown
+  lint, and `rtk git diff --check`. Direct panel Mocha loading is not a valid
+  VS Code test environment (`Cannot find module 'vscode'`); the panel suite
+  remains covered by the compiled desktop runner. Managed Chromium web smoke
+  is blocked before execution by host `bootstrap_check_in ... Permission
+denied (1100)`.
+- No application/domain/parser/host transport/source-capture/telemetry or
+  dependency changes were made. Desktop/web bundles remain browser-safe and
+  CSP-compatible; Flow/Table shared theme consumers retain their contracts.
+  Existing webpack asset-size warnings and unrelated `url.parse()` `DEP0169`
+  startup warning remain outside scope. Independent implementation review is
+  `Ready` with no findings and Completion Approval is automatic under the
+  standing user policy; the focused completion commit remains pending.
+
+### Slice 15 Completion Approval (2026-09-09)
+
+- Independent implementation review returned `Ready` with no findings.
+  Under the user's standing no-findings policy, Completion Approval is
+  automatically recorded for the exact Slice 15 boundary.
+- Acceptance evidence is complete: MUI-standard light/dark palettes, host
+  mode following, 4px selected-row marker with approximately 4.60:1 light and
+  10.71:1 dark contrast, forced-colors `Highlight`, and focused suite 20
+  passing.
+- Production checks remain green: qlty check `No issues`, qlty smells zero
+  findings, desktop/web preparation and production build succeeded, and diff
+  checks passed. Web smoke remains environment-blocked before execution by
+  Chromium `bootstrap_check_in ... Permission denied (1100)`.
+- The focused completion commit is the next gate. No commit was created in
+  this implementation/review evidence update, and the six Feature Exit
+  closure-draft documents remain protected and untouched.

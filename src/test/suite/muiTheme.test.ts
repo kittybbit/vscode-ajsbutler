@@ -9,17 +9,28 @@ suite("Semantic Diff MUI theme", () => {
     assert.strictEqual(semanticDiffExplorerTheme.palette.mode, "light");
     assert.strictEqual(
       semanticDiffExplorerTheme.palette.background.default,
-      "#1e1e1e",
+      "#fff",
     );
   });
 
-  test("creates the shared theme for both viewer modes", () => {
+  test("uses MUI standard light and dark palette values", () => {
     const lightTheme = createSemanticDiffTheme({ mode: "light" });
     const darkTheme = createSemanticDiffTheme({ mode: "dark" });
 
     assert.strictEqual(lightTheme.palette.mode, "light");
     assert.strictEqual(darkTheme.palette.mode, "dark");
-    assert.strictEqual(darkTheme.palette.divider, lightTheme.palette.divider);
+    assert.strictEqual(lightTheme.palette.background.default, "#fff");
+    assert.strictEqual(darkTheme.palette.background.default, "#121212");
+    assert.strictEqual(lightTheme.palette.primary.main, "#1976d2");
+    assert.strictEqual(darkTheme.palette.primary.main, "#90caf9");
+    assert.notStrictEqual(
+      darkTheme.palette.divider,
+      lightTheme.palette.divider,
+    );
     assert.ok(darkTheme.components?.MuiButton?.styleOverrides?.root);
+    assert.strictEqual(
+      darkTheme.components?.MuiButton?.styleOverrides?.contained,
+      undefined,
+    );
   });
 });

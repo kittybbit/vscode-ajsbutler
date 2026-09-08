@@ -231,6 +231,11 @@ suite("Semantic diff Explorer panel", () => {
     assert.match(html, /script-src https:\/\/fake\.invalid 'nonce-[^']+'/);
     assert.match(html, /style-src https:\/\/fake\.invalid 'unsafe-inline'/);
     assert.doesNotMatch(html, /connect-src|font-src|eval\(|<link\b/i);
+    assert.doesNotMatch(
+      html,
+      /background:transparent|color:var\(--vscode-foreground/,
+    );
+    assert.match(html, /font-family:var\(--vscode-font-family, sans-serif\)/);
     assert.match(html, /semanticDiffExplorer\.js/);
   });
 

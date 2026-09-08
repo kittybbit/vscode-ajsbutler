@@ -38,7 +38,7 @@ export const buildSemanticDiffExplorerHtml = (
 <title>${title}</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src ${panel.webview.cspSource} 'nonce-${nonce}'; style-src ${panel.webview.cspSource} 'unsafe-inline';">
 <style>
-html,body,#root{width:100%;height:100%;margin:0;padding:0}body{box-sizing:border-box;background:transparent;font-family:var(--vscode-font-family);color:var(--vscode-foreground)}*,*:before,*:after{box-sizing:inherit}
+html,body,#root{width:100%;height:100%;margin:0;padding:0}body{box-sizing:border-box;font-family:var(--vscode-font-family, sans-serif)}*,*:before,*:after{box-sizing:inherit}
 </style>
 </head>
 <body data-semantic-diff-session-id="${session}" data-semantic-diff-output-action-id="${actionId}">

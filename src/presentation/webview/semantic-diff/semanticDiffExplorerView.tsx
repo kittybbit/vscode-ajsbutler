@@ -19,10 +19,9 @@ import {
   type SemanticDiffExplorerViewModel,
 } from "../../../application/semantic-diff/semanticDiffExplorer";
 import {
-  semanticDiffExplorerColors,
+  createSemanticDiffTheme,
   semanticDiffExplorerFocusSx,
   semanticDiffExplorerGlobalStyles,
-  semanticDiffExplorerTheme,
 } from "../shared/muiTheme";
 import {
   ExplorerRowView,
@@ -40,10 +39,12 @@ import {
   useExplorerSelection,
   useExplorerTreeState,
 } from "./semanticDiffExplorerViewState";
+import type { SemanticDiffExplorerThemeMode } from "./semanticDiffExplorerThemeMode";
 
 export type SemanticDiffExplorerViewProps = Readonly<{
   viewModel: SemanticDiffExplorerViewModel;
   language?: string;
+  themeMode?: SemanticDiffExplorerThemeMode;
   outputAction?: (element?: HTMLElement) => void;
   action?: (actionId: string, element?: HTMLElement) => void;
   hostAnnouncement?: string;
@@ -85,7 +86,7 @@ const ExplorerCards = ({
         variant="outlined"
         key={card.id}
         aria-label={`${semanticDiffExplorerCardLabel(card.id, language)}: ${card.count}`}
-        sx={{ minWidth: 0, borderColor: semanticDiffExplorerColors.border }}
+        sx={{ minWidth: 0, borderColor: "divider" }}
       >
         <CardContent>
           <Typography
@@ -329,6 +330,7 @@ const ExplorerTree = ({
 export const SemanticDiffExplorerView = ({
   viewModel,
   language = "en",
+  themeMode = "light",
   outputAction,
   action,
   hostAnnouncement,
@@ -344,12 +346,13 @@ export const SemanticDiffExplorerView = ({
     if (hostAnnouncement) setAnnouncement(hostAnnouncement);
   }, [hostAnnouncement]);
   return (
-    <ThemeProvider theme={semanticDiffExplorerTheme}>
+    <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
       <CssBaseline />
       <GlobalStyles styles={semanticDiffExplorerGlobalStyles} />
       <Box
         component="main"
         aria-labelledby="semantic-diff-explorer-title"
+        data-semantic-diff-theme-mode={themeMode}
         sx={{
           width: "100%",
           minWidth: 0,

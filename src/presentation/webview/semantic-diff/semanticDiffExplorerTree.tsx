@@ -18,7 +18,10 @@ import {
   flattenSemanticDiffExplorerTree,
   type ExplorerRow,
 } from "./semanticDiffExplorerTreeData";
-import { semanticDiffExplorerFocusSx } from "../shared/muiTheme";
+import {
+  semanticDiffExplorerFocusSx,
+  semanticDiffExplorerSelectionSx,
+} from "../shared/muiTheme";
 import { focusExplorerRowAfterVirtualizedScroll } from "./semanticDiffExplorerFocus";
 
 export type { ExplorerRow } from "./semanticDiffExplorerTreeData";
@@ -361,13 +364,10 @@ const rowSx = (selected: boolean) => ({
   cursor: "pointer",
   border: "1px solid transparent",
   borderRadius: 1,
-  backgroundColor: selected
-    ? "var(--vscode-list-activeSelectionBackground, rgba(38,79,120,.45))"
-    : "transparent",
-  color: selected
-    ? "var(--vscode-list-activeSelectionForeground, inherit)"
-    : "inherit",
+  backgroundColor: selected ? "action.selected" : "transparent",
+  color: "text.primary",
   ...semanticDiffExplorerFocusSx,
+  ...semanticDiffExplorerSelectionSx(selected),
 });
 const expandGlyph = (expanded: boolean): string => (expanded ? "▾" : "▸");
 
@@ -451,13 +451,10 @@ const ExplorerLeafRow = ({
         py: 1,
         border: "1px solid transparent",
         borderRadius: 1,
-        backgroundColor: selected
-          ? "var(--vscode-list-activeSelectionBackground, rgba(38,79,120,.45))"
-          : "transparent",
-        color: selected
-          ? "var(--vscode-list-activeSelectionForeground, inherit)"
-          : "inherit",
+        backgroundColor: selected ? "action.selected" : "transparent",
+        color: "text.primary",
         ...semanticDiffExplorerFocusSx,
+        ...semanticDiffExplorerSelectionSx(selected),
       }}
       onClick={onSelect}
     >
