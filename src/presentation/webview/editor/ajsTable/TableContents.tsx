@@ -15,7 +15,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
+import { ThemeProvider, type Theme } from "@mui/material/styles";
 import { type Table as ReactTable } from "@tanstack/react-table";
 import { Row, SortingState, VisibilityState } from "@tanstack/table-core";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
@@ -73,6 +73,10 @@ import {
   type ViewerAnnouncementHostHandle,
 } from "../shared/viewerAnnouncements";
 import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
+import {
+  createSemanticDiffTheme,
+  semanticDiffViewerSurfaceSx,
+} from "../../shared/muiTheme";
 import {
   formatUnitInformationMessage,
   unitInformationMessage,
@@ -174,12 +178,7 @@ const useChangeDocument = (): TableDocumentState => {
 
 const useTableViewerTheme = (isDarkMode: boolean): Theme =>
   useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? "dark" : "light",
-        },
-      }),
+    () => createSemanticDiffTheme({ mode: isDarkMode ? "dark" : "light" }),
     [isDarkMode],
   );
 
@@ -269,22 +268,7 @@ const TableViewerShell = ({
           visibleRowCount={rows.length}
           totalRowCount={totalRowCount}
         />
-        <Box
-          sx={{
-            width: "100%",
-            flex: 1,
-            minWidth: 0,
-            minHeight: 0,
-            overflow: "hidden",
-            padding: 1.25,
-            background: (theme) =>
-              `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-            "body.vscode-high-contrast &": {
-              background: "var(--vscode-editor-background, Canvas)",
-            },
-            boxSizing: "border-box",
-          }}
-        >
+        <Box sx={semanticDiffViewerSurfaceSx}>
           <Stack
             direction="row"
             spacing={1.25}
@@ -369,21 +353,309 @@ const TableViewerShell = ({
   </>
 );
 
-const TableContents = () => {
-  console.log("render TableContents.");
+type TableAnnouncementInput = Readonly<{
+  announceTable: (eventKey: string, message: string) => void;
+  getTableUnitName: (absolutePath: string) => string;
+  lang: string;
+}>;
 
-  const { isDarkMode, lang } = useMyAppContext();
-  const renderReadyStartedAt = useRef(performance.now());
+const applySelectedTableAnnouncement = ({
+  announceTable,
+  getTableUnitName,
+  lang,
+  previousSelectedPathRef,
+  hasObservedSelectedPathRef,
+  selectedAbsolutePath,
+}: TableAnnouncementInput & {
+  previousSelectedPathRef: React.MutableRefObject<string | undefined>;
+  hasObservedSelectedPathRef: React.MutableRefObject<boolean>;
+  selectedAbsolutePath: string | undefined;
+}): void => {
+  if (!hasObservedSelectedPathRef.current) {
+    hasObservedSelectedPathRef.current = true;
+    previousSelectedPathRef.current = selectedAbsolutePath;
+    return;
+  }
+  if (selectedAbsolutePath) {
+    announceTable(
+      `table:selected:${selectedAbsolutePath}`,
+      formatUnitInformationMessage("a11y.announce.selected", lang, {
+        unit: getTableUnitName(selectedAbsolutePath),
+      }),
+    );
+  }
+  previousSelectedPathRef.current = selectedAbsolutePath;
+};
+
+const applyTableSearchAnnouncement = ({
+  announceTable,
+  getTableUnitName,
+  lang,
+  previousSearchSignatureRef,
+  hasObservedSearchRef,
+  searchState,
+}: TableAnnouncementInput & {
+  previousSearchSignatureRef: React.MutableRefObject<string | undefined>;
+  hasObservedSearchRef: React.MutableRefObject<boolean>;
+  searchState: TableSearchState;
+}): void => {
+  const position = getTableSearchResultPosition(searchState);
+  const signature = tableSearchSignature(searchState, position);
+  if (!hasObservedSearchRef.current) {
+    hasObservedSearchRef.current = true;
+    previousSearchSignatureRef.current = signature;
+    return;
+  }
+  announceTableSearchResult({
+    announceTable,
+    getTableUnitName,
+    lang,
+    position,
+    searchState,
+    signature,
+  });
+  previousSearchSignatureRef.current = signature;
+};
+
+const tableSearchSignature = (
+  searchState: TableSearchState,
+  position: ReturnType<typeof getTableSearchResultPosition>,
+): string | undefined =>
+  position
+    ? `${searchState.searchedAbsolutePath ?? ""}:${position.current}:${position.total}`
+    : undefined;
+
+const announceTableSearchResult = ({
+  announceTable,
+  getTableUnitName,
+  lang,
+  position,
+  searchState,
+  signature,
+}: {
+  announceTable: (eventKey: string, message: string) => void;
+  getTableUnitName: (absolutePath: string) => string;
+  lang: string;
+  position: ReturnType<typeof getTableSearchResultPosition>;
+  searchState: TableSearchState;
+  signature: string | undefined;
+}): void => {
+  const kind = tableSearchAnnouncementKind(
+    position,
+    searchState.searchedAbsolutePath,
+  );
+  const announcement = {
+    cleared: () => ({
+      eventKey: "table:search:cleared",
+      message: unitInformationMessage("a11y.announce.searchCleared", lang),
+    }),
+    empty: () => ({
+      eventKey: "table:search:no-results",
+      message: unitInformationMessage("a11y.announce.searchNoResults", lang),
+    }),
+    results: () => ({
+      eventKey: `table:search:${signature}`,
+      message: formatUnitInformationMessage(
+        "a11y.announce.searchResults",
+        lang,
+        {
+          count: position?.total ?? 0,
+          current: position?.current ?? 0,
+          total: position?.total ?? 0,
+          unit: getTableUnitName(searchState.searchedAbsolutePath ?? ""),
+        },
+      ),
+    }),
+    none: () => undefined,
+  }[kind]();
+  if (announcement) announceTable(announcement.eventKey, announcement.message);
+};
+
+type TableSearchAnnouncementKind = "cleared" | "empty" | "results" | "none";
+
+const tableSearchAnnouncementKind = (
+  position: ReturnType<typeof getTableSearchResultPosition>,
+  searchedAbsolutePath: string | undefined,
+): TableSearchAnnouncementKind => {
+  const index =
+    Number(position !== undefined) + Number((position?.total ?? 0) > 0);
+  return [
+    "cleared",
+    "empty",
+    searchedAbsolutePath === undefined ? "none" : "results",
+  ][index] as TableSearchAnnouncementKind;
+};
+
+const applyTableSortingAnnouncement = ({
+  announceTable,
+  lang,
+  previousSortingSignatureRef,
+  hasObservedSortingRef,
+  sorting,
+}: Pick<TableAnnouncementInput, "announceTable" | "lang"> & {
+  previousSortingSignatureRef: React.MutableRefObject<string | undefined>;
+  hasObservedSortingRef: React.MutableRefObject<boolean>;
+  sorting: SortingState;
+}): void => {
+  const sort = sorting[0];
+  const signature = tableSortSignature(sort);
+  if (!hasObservedSortingRef.current) {
+    hasObservedSortingRef.current = true;
+    previousSortingSignatureRef.current = signature;
+    return;
+  }
+  const announcement = tableSortAnnouncement(sort, signature, lang);
+  announceTable(announcement.eventKey, announcement.message);
+  previousSortingSignatureRef.current = signature;
+};
+
+const tableSortSignature = (
+  sort: SortingState[number] | undefined,
+): string | undefined => {
+  if (!sort) return undefined;
+  return `${sort.id}:${sort.desc ? "desc" : "asc"}`;
+};
+
+const tableSortAnnouncement = (
+  sort: SortingState[number] | undefined,
+  signature: string | undefined,
+  lang: string,
+): { eventKey: string; message: string } => {
+  const directionKey = tableSortDirectionKey(sort);
+  return {
+    eventKey: `table:sort:${signature ?? "none"}`,
+    message: formatUnitInformationMessage("a11y.announce.sorted", lang, {
+      direction: unitInformationMessage(directionKey, lang),
+    }),
+  };
+};
+
+const tableSortDirectionKey = (
+  sort: SortingState[number] | undefined,
+): string => {
+  if (!sort) return "a11y.sort.none";
+  return sort.desc ? "a11y.sort.descending" : "a11y.sort.ascending";
+};
+
+const useTableAnnouncements = ({
+  getTableUnitName,
+  lang,
+  searchState,
+  selectedAbsolutePath,
+  sorting,
+}: {
+  getTableUnitName: (absolutePath: string) => string;
+  lang: string;
+  searchState: TableSearchState;
+  selectedAbsolutePath: string | undefined;
+  sorting: SortingState;
+}) => {
   const announcementHostRef = useRef<ViewerAnnouncementHostHandle>(null);
   const announceTable = useCallback((eventKey: string, message: string) => {
     announcementHostRef.current?.announce({ eventKey, message });
   }, []);
+  const previousSelectedPathRef = useRef<string | undefined>(undefined);
+  const hasObservedSelectedPathRef = useRef(false);
+  useEffect(() => {
+    applySelectedTableAnnouncement({
+      announceTable,
+      getTableUnitName,
+      lang,
+      previousSelectedPathRef,
+      hasObservedSelectedPathRef,
+      selectedAbsolutePath,
+    });
+  }, [announceTable, getTableUnitName, lang, selectedAbsolutePath]);
+  const previousSearchSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSearchRef = useRef(false);
+  useEffect(() => {
+    applyTableSearchAnnouncement({
+      announceTable,
+      getTableUnitName,
+      lang,
+      previousSearchSignatureRef,
+      hasObservedSearchRef,
+      searchState,
+    });
+  }, [announceTable, getTableUnitName, lang, searchState]);
+  const previousSortingSignatureRef = useRef<string | undefined>(undefined);
+  const hasObservedSortingRef = useRef(false);
+  useEffect(() => {
+    applyTableSortingAnnouncement({
+      announceTable,
+      lang,
+      previousSortingSignatureRef,
+      hasObservedSortingRef,
+      sorting,
+    });
+  }, [announceTable, lang, sorting]);
+  const copiedAnnouncementRevisionRef = useRef(0);
+  const handleCopied = useCallback(() => {
+    copiedAnnouncementRevisionRef.current += 1;
+    announceTable(
+      `table:copied:${copiedAnnouncementRevisionRef.current}`,
+      unitInformationMessage("a11y.announce.csvCopied", lang),
+    );
+  }, [announceTable, lang]);
+  return { announcementHostRef, handleCopied };
+};
 
-  const [dialogData, setDialogData] = useState<
-    UnitDefinitionDialogDto | undefined
-  >();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+type TableRowSelectionDispatch = React.Dispatch<
+  Parameters<typeof reduceTableRowSelection>[1]
+>;
+
+const commitTableRowSelection = ({
+  absolutePath,
+  committedAbsolutePathRef,
+  dispatchRowSelection,
+  setDetailPaneClosed,
+}: {
+  absolutePath: string;
+  committedAbsolutePathRef: React.MutableRefObject<string | undefined>;
+  dispatchRowSelection: TableRowSelectionDispatch;
+  setDetailPaneClosed: React.Dispatch<React.SetStateAction<boolean>>;
+}): boolean => {
+  if (committedAbsolutePathRef.current === absolutePath) return false;
+  committedAbsolutePathRef.current = absolutePath;
+  setDetailPaneClosed(false);
+  reportTableOperation("unit.select");
+  dispatchRowSelection({ type: "select", absolutePath });
+  return true;
+};
+
+const focusedTablePath = (
+  focusedGridFocusRef: React.MutableRefObject<TableGridFocus | undefined>,
+): string | undefined =>
+  focusedGridFocusRef.current?.kind === "cell"
+    ? focusedGridFocusRef.current.absolutePath
+    : undefined;
+
+const commitTableFocusedRow = ({
+  absolutePath,
+  committedAbsolutePathRef,
+  commitRowSelection,
+  focusedGridFocusRef,
+}: {
+  absolutePath: string | undefined;
+  committedAbsolutePathRef: React.MutableRefObject<string | undefined>;
+  commitRowSelection: (absolutePath: string) => boolean;
+  focusedGridFocusRef: React.MutableRefObject<TableGridFocus | undefined>;
+}): string | undefined => {
+  const targetPath =
+    absolutePath ??
+    focusedTablePath(focusedGridFocusRef) ??
+    committedAbsolutePathRef.current;
+  if (!targetPath) return undefined;
+  commitRowSelection(targetPath);
+  return targetPath;
+};
+
+const resolveTableDetailFocusRevision = (
+  currentRevision: number,
+  requestedRevision: number,
+): number => (currentRevision === requestedRevision ? 0 : currentRevision);
+
+const useTableSelectionActions = () => {
   const [detailPaneClosed, setDetailPaneClosed] = useState(false);
   const [detailFocusRequestRevision, setDetailFocusRequestRevision] =
     useState(0);
@@ -397,32 +669,28 @@ const TableContents = () => {
   );
   const committedAbsolutePathRef = useRef<string | undefined>(undefined);
   const focusedGridFocusRef = useRef<TableGridFocus | undefined>(undefined);
-  const observedDocumentRevisionRef = useRef(0);
-  const commitRowSelection = useCallback((absolutePath: string) => {
-    if (committedAbsolutePathRef.current === absolutePath) return false;
-    committedAbsolutePathRef.current = absolutePath;
-    setDetailPaneClosed(false);
-    reportTableOperation("unit.select");
-    dispatchRowSelection({ type: "select", absolutePath });
-    return true;
-  }, []);
+  const commitRowSelection = useCallback(
+    (absolutePath: string) =>
+      commitTableRowSelection({
+        absolutePath,
+        committedAbsolutePathRef,
+        dispatchRowSelection,
+        setDetailPaneClosed,
+      }),
+    [],
+  );
   const selectRow = useCallback(
-    (absolutePath: string) => {
-      commitRowSelection(absolutePath);
-    },
+    (absolutePath: string) => commitRowSelection(absolutePath),
     [commitRowSelection],
   );
   const commitFocusedRow = useCallback(
     (absolutePath?: string): string | undefined => {
-      const focusedPath =
-        focusedGridFocusRef.current?.kind === "cell"
-          ? focusedGridFocusRef.current.absolutePath
-          : undefined;
-      const targetPath =
-        absolutePath ?? focusedPath ?? committedAbsolutePathRef.current;
-      if (!targetPath) return undefined;
-      commitRowSelection(targetPath);
-      return targetPath;
+      return commitTableFocusedRow({
+        absolutePath,
+        committedAbsolutePathRef,
+        commitRowSelection,
+        focusedGridFocusRef,
+      });
     },
     [commitRowSelection],
   );
@@ -442,15 +710,46 @@ const TableContents = () => {
   }, []);
   const handleDetailFocusRequest = useCallback((revision: number) => {
     setDetailFocusRequestRevision((current) =>
-      current === revision ? 0 : current,
+      resolveTableDetailFocusRevision(current, revision),
     );
   }, []);
   const returnToGrid = useCallback(() => {
     const targetPath = commitFocusedRow();
     requestGridFocus(targetPath);
   }, [commitFocusedRow, requestGridFocus]);
-  const { viewerData, changeDocument, documentRevision } = useChangeDocument();
-  const { tableData } = viewerData;
+  return {
+    closeDetailPane,
+    commitFocusedRow,
+    committedAbsolutePathRef,
+    detailFocusRequestRevision,
+    detailPaneClosed,
+    dispatchRowSelection,
+    focusTreeRequest,
+    focusedGridFocusRef,
+    handleDetailFocusRequest,
+    openDetailPane,
+    requestGridFocus,
+    restoreGridFocusRequest,
+    returnToGrid,
+    selectRow,
+    selectedAbsolutePath,
+    setFocusTreeRequest,
+  };
+};
+
+const syncTableDocumentSelection = ({
+  committedAbsolutePathRef,
+  documentRevision,
+  focusedGridFocusRef,
+  observedDocumentRevisionRef,
+  selectedAbsolutePath,
+}: {
+  committedAbsolutePathRef: React.MutableRefObject<string | undefined>;
+  documentRevision: number;
+  focusedGridFocusRef: React.MutableRefObject<TableGridFocus | undefined>;
+  observedDocumentRevisionRef: React.MutableRefObject<number>;
+  selectedAbsolutePath: string | undefined;
+}): void => {
   if (observedDocumentRevisionRef.current !== documentRevision) {
     observedDocumentRevisionRef.current = documentRevision;
     committedAbsolutePathRef.current = undefined;
@@ -458,25 +757,144 @@ const TableContents = () => {
   } else {
     committedAbsolutePathRef.current = selectedAbsolutePath;
   }
+};
+
+const useTableTreeActions = ({
+  committedAbsolutePathRef,
+  revealPath,
+  selectedUnitId,
+  setFocusTreeRequest,
+  unitByAbsolutePath,
+  unitById,
+}: {
+  committedAbsolutePathRef: React.MutableRefObject<string | undefined>;
+  revealPath: (absolutePath: string) => void;
+  selectedUnitId: string | undefined;
+  setFocusTreeRequest: React.Dispatch<
+    React.SetStateAction<UnitTreeFocusRequest>
+  >;
+  unitByAbsolutePath: ReadonlyMap<string, TableUnitMetadata>;
+  unitById: ReadonlyMap<string, TableUnitMetadata>;
+}) => {
+  const selectTreeUnit = useCallback(
+    (unitId: string) => selectUnitTreeUnitInTable(unitId, unitById, revealPath),
+    [revealPath, unitById],
+  );
+  const openTreeUnitScope = useCallback(
+    (unitId: string) => openUnitTreeUnitInFlow(unitId, unitById),
+    [unitById],
+  );
+  const focusUnitTree = useCallback(
+    (absolutePath?: string) => {
+      const targetPath = absolutePath ?? committedAbsolutePathRef.current;
+      const targetUnitId = targetPath
+        ? unitByAbsolutePath.get(targetPath)?.id
+        : selectedUnitId;
+      setFocusTreeRequest((request) => ({
+        revision: request.revision + 1,
+        targetUnitId,
+      }));
+    },
+    [
+      committedAbsolutePathRef,
+      selectedUnitId,
+      setFocusTreeRequest,
+      unitByAbsolutePath,
+    ],
+  );
+  return { focusUnitTree, openTreeUnitScope, selectTreeUnit };
+};
+
+const useTableViewerLifecycle = ({
+  changeDocument,
+  dispatchRowSelection,
+  renderReadyStartedAt,
+  resetSearch,
+  revealUnit,
+  rowCount,
+  tableData,
+}: {
+  changeDocument: (type: string, data: unknown) => void;
+  dispatchRowSelection: React.Dispatch<
+    Parameters<typeof reduceTableRowSelection>[1]
+  >;
+  renderReadyStartedAt: React.MutableRefObject<number>;
+  resetSearch: () => void;
+  revealUnit: (data: unknown) => boolean;
+  rowCount: number;
+  tableData: TableViewerData["tableData"];
+}): void => {
+  useEffect(() => {
+    dispatchRowSelection({ type: "documentChanged" });
+    resetSearch();
+  }, [dispatchRowSelection, resetSearch, tableData]);
+
+  useEffect(() => {
+    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocument);
+    const revealUnitFn = (_type: string, data: unknown): void => {
+      if (revealUnit(data)) resetSearch();
+    };
+    window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
+    window.vscode.postMessage(
+      createTableRenderReadyEvent(
+        performance.now() - renderReadyStartedAt.current,
+        rowCount,
+      ),
+    );
+    window.vscode.postMessage(createViewerReadyRequest());
+    return () => {
+      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocument);
+      window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
+    };
+  }, [changeDocument, renderReadyStartedAt, resetSearch, revealUnit]);
+};
+
+const TableContents = () => {
+  console.log("render TableContents.");
+
+  const { isDarkMode, lang } = useMyAppContext();
+  const renderReadyStartedAt = useRef(performance.now());
+
+  const [dialogData, setDialogData] = useState<
+    UnitDefinitionDialogDto | undefined
+  >();
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const { viewerData, changeDocument, documentRevision } = useChangeDocument();
+  const tableSelection = useTableSelectionActions();
+  const {
+    closeDetailPane,
+    commitFocusedRow,
+    committedAbsolutePathRef,
+    detailFocusRequestRevision,
+    detailPaneClosed,
+    dispatchRowSelection,
+    focusTreeRequest,
+    focusedGridFocusRef,
+    handleDetailFocusRequest,
+    openDetailPane,
+    requestGridFocus,
+    restoreGridFocusRequest,
+    returnToGrid,
+    selectRow,
+    selectedAbsolutePath,
+    setFocusTreeRequest,
+  } = tableSelection;
+  const observedDocumentRevisionRef = useRef(0);
+  const { tableData } = viewerData;
+  syncTableDocumentSelection({
+    committedAbsolutePathRef,
+    documentRevision,
+    focusedGridFocusRef,
+    observedDocumentRevisionRef,
+    selectedAbsolutePath,
+  });
   const rowViews = tableData?.rows;
   const rowsRef = useRef<ReadonlyArray<Row<TableRowView>>>([]);
   const { handleJump, revealPath, revealUnit } = useTableRowRevealState(
     selectRow,
     rowsRef,
     requestGridFocus,
-  );
-
-  const selectTreeUnit = useCallback(
-    (unitId: string) => {
-      selectUnitTreeUnitInTable(unitId, viewerData.unitById, revealPath);
-    },
-    [revealPath, viewerData.unitById],
-  );
-  const openTreeUnitScope = useCallback(
-    (unitId: string) => {
-      openUnitTreeUnitInFlow(unitId, viewerData.unitById);
-    },
-    [viewerData.unitById],
   );
 
   const { table, parameterSearchValuesByPath } = useTableModelSetup({
@@ -498,19 +916,15 @@ const TableContents = () => {
     selectedAbsolutePath,
     viewerData.unitByAbsolutePath,
   );
-  const focusUnitTree = useCallback(
-    (absolutePath?: string) => {
-      const targetPath = absolutePath ?? committedAbsolutePathRef.current;
-      const targetUnitId = targetPath
-        ? viewerData.unitByAbsolutePath.get(targetPath)?.id
-        : selectedUnitId;
-      setFocusTreeRequest((request) => ({
-        revision: request.revision + 1,
-        targetUnitId,
-      }));
-    },
-    [selectedUnitId, viewerData.unitByAbsolutePath],
-  );
+  const { focusUnitTree, openTreeUnitScope, selectTreeUnit } =
+    useTableTreeActions({
+      committedAbsolutePathRef,
+      revealPath,
+      selectedUnitId,
+      setFocusTreeRequest,
+      unitByAbsolutePath: viewerData.unitByAbsolutePath,
+      unitById: viewerData.unitById,
+    });
   const onGridFocusChange = useCallback((focus: TableGridFocus): void => {
     focusedGridFocusRef.current = focus;
   }, []);
@@ -533,25 +947,6 @@ const TableContents = () => {
     [viewerData.unitByAbsolutePath],
   );
 
-  const previousSelectedPathRef = useRef<string | undefined>(undefined);
-  const hasObservedSelectedPathRef = useRef(false);
-  useEffect(() => {
-    if (!hasObservedSelectedPathRef.current) {
-      hasObservedSelectedPathRef.current = true;
-      previousSelectedPathRef.current = selectedAbsolutePath;
-      return;
-    }
-    if (selectedAbsolutePath) {
-      announceTable(
-        `table:selected:${selectedAbsolutePath}`,
-        formatUnitInformationMessage("a11y.announce.selected", lang, {
-          unit: getTableUnitName(selectedAbsolutePath),
-        }),
-      );
-    }
-    previousSelectedPathRef.current = selectedAbsolutePath;
-  }, [announceTable, getTableUnitName, lang, selectedAbsolutePath]);
-
   const {
     searchQuery,
     searchState,
@@ -564,102 +959,23 @@ const TableContents = () => {
     revealPath,
   });
 
-  const previousSearchSignatureRef = useRef<string | undefined>(undefined);
-  const hasObservedSearchRef = useRef(false);
-  useEffect(() => {
-    const position = getTableSearchResultPosition(searchState);
-    const signature = position
-      ? `${searchState.searchedAbsolutePath ?? ""}:${position.current}:${position.total}`
-      : undefined;
-    if (!hasObservedSearchRef.current) {
-      hasObservedSearchRef.current = true;
-      previousSearchSignatureRef.current = signature;
-      return;
-    }
-    if (!position) {
-      announceTable(
-        "table:search:cleared",
-        unitInformationMessage("a11y.announce.searchCleared", lang),
-      );
-    } else if (position.total === 0) {
-      announceTable(
-        "table:search:no-results",
-        unitInformationMessage("a11y.announce.searchNoResults", lang),
-      );
-    } else if (searchState.searchedAbsolutePath) {
-      announceTable(
-        `table:search:${signature}`,
-        formatUnitInformationMessage("a11y.announce.searchResults", lang, {
-          count: position.total,
-          current: position.current,
-          total: position.total,
-          unit: getTableUnitName(searchState.searchedAbsolutePath),
-        }),
-      );
-    }
-    previousSearchSignatureRef.current = signature;
-  }, [announceTable, getTableUnitName, lang, searchState]);
+  const { announcementHostRef, handleCopied } = useTableAnnouncements({
+    getTableUnitName,
+    lang,
+    searchState,
+    selectedAbsolutePath,
+    sorting,
+  });
 
-  const previousSortingSignatureRef = useRef<string | undefined>(undefined);
-  const hasObservedSortingRef = useRef(false);
-  useEffect(() => {
-    const sort = sorting[0];
-    const signature = sort
-      ? `${sort.id}:${sort.desc ? "desc" : "asc"}`
-      : undefined;
-    if (!hasObservedSortingRef.current) {
-      hasObservedSortingRef.current = true;
-      previousSortingSignatureRef.current = signature;
-      return;
-    }
-    announceTable(
-      `table:sort:${signature ?? "none"}`,
-      formatUnitInformationMessage("a11y.announce.sorted", lang, {
-        direction: unitInformationMessage(
-          sort
-            ? sort.desc
-              ? "a11y.sort.descending"
-              : "a11y.sort.ascending"
-            : "a11y.sort.none",
-          lang,
-        ),
-      }),
-    );
-    previousSortingSignatureRef.current = signature;
-  }, [announceTable, lang, sorting]);
-
-  const copiedAnnouncementRevisionRef = useRef(0);
-  const handleCopied = useCallback(() => {
-    copiedAnnouncementRevisionRef.current += 1;
-    announceTable(
-      `table:copied:${copiedAnnouncementRevisionRef.current}`,
-      unitInformationMessage("a11y.announce.csvCopied", lang),
-    );
-  }, [announceTable, lang]);
-
-  useEffect(() => {
-    dispatchRowSelection({ type: "documentChanged" });
-    resetSearch();
-  }, [resetSearch, tableData]);
-
-  useEffect(() => {
-    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocument);
-    const revealUnitFn = (_type: string, data: unknown) => {
-      if (revealUnit(data)) resetSearch();
-    };
-    window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
-    window.vscode.postMessage(
-      createTableRenderReadyEvent(
-        performance.now() - renderReadyStartedAt.current,
-        rowViews?.length ?? 0,
-      ),
-    );
-    window.vscode.postMessage(createViewerReadyRequest());
-    return () => {
-      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocument);
-      window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
-    };
-  }, [changeDocument, resetSearch, revealUnit]); // fire this when mount.
+  useTableViewerLifecycle({
+    changeDocument,
+    dispatchRowSelection,
+    renderReadyStartedAt,
+    resetSearch,
+    revealUnit,
+    rowCount: rowViews?.length ?? 0,
+    tableData,
+  });
 
   const theme = useTableViewerTheme(isDarkMode);
 

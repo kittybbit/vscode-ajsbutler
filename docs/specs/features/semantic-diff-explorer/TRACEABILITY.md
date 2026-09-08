@@ -655,9 +655,9 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 - Slice 11 is independently reviewed `Ready` with no findings, automatically
   completion-approved, and focused-committed as
   `628cc9333ed10d540665cb23329a8e7e3c6af6df`. Slice 12 then completed and
-  focused-committed as `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13 is
-  now the sole active implementation-approved slice, and the closure drafts
-  remain excluded and untouched.
+  focused-committed as `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13
+  implementation is complete and awaiting independent review, and the
+  closure drafts remain excluded and untouched.
 
 ### Slice 11 Implementation Evidence (2026-09-08)
 
@@ -736,8 +736,8 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 - Validation is the focused Flow host/wiring/viewer lifecycle suites,
   architecture dependency rules, desktop smoke, web preparation/build,
   targeted smells, full qlty check, and diff checks. These gates passed for
-  Slice 12; Slice 13 is held pending its narrow plan review and focused replan
-  commit, and closure drafts remain excluded and untouched.
+  Slice 12; Slice 13 is implementation-complete and awaiting independent
+  review, and closure drafts remain excluded and untouched.
 
 ### Slice 12 Implementation Evidence (2026-09-08)
 
@@ -791,14 +791,14 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   scope or design change was discovered; focused completion commit
   `a7905e8fdd905c506627a83d6c86ed1246255298` is recorded.
 
-### Slice 13 Activation — Plan Approved; Focused Replan Commit Pending (2026-09-08)
+### Slice 13 Activation — Focused Replan Present; Implementation Complete (2026-09-08)
 
 - Slice 13's narrow canonical-theme replan is plan-approved after Slice 12's
   focused completion commit `a7905e8fdd905c506627a83d6c86ed1246255298`.
   Independent plan review returned `Ready` with no findings and Human Approval
   was granted on 2026-09-08 under the trusted messages `承認します。` and
-  repeated `継続して。`. The focused replan commit is eligible and pending;
-  implementation remains blocked until it is present.
+  repeated `継続して。`. The focused replan commit is `d0cc7815`; the
+  implementation is complete and awaits independent implementation review.
   Its exact webview implementation paths are
   `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`,
   `src/presentation/webview/editor/ajsFlow/FlowGraphCanvas.tsx`,
@@ -838,11 +838,9 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   keyboard/focus/forced-colors/contrast, target-size, reflow, status, and WCAG
   checks, MUI/Emotion bundle and static CSP smoke, desktop/web bundles and
   smoke, targeted qlty smells, full qlty check, and diff checks. Slice 13
-  completion is the final implementation gate after the focused replan commit
-  is present and implementation is independently reviewed. Aggregate human
-  approval and Feature Exit approval remain pending. No implementation may
-  start before the focused replan commit; its exact paths are only TASKS.md
-  and TRACEABILITY.md.
+  completion is the final implementation gate after the implementation is
+  independently reviewed. Aggregate human approval and Feature Exit approval
+  remain pending; no completion commit has been created.
 
 ### Slice 13 Theme API Replan Review and Human Approval (2026-09-08)
 
@@ -856,11 +854,53 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
   `semanticDiffExplorerTheme` export/API, and adds focused
   `src/test/suite/muiTheme.test.ts` coverage. No second theme, qlty
   suppression/configuration change, or broad design change is authorized.
-- The focused replan commit is eligible and pending with exact paths only
+- The focused replan commit `d0cc7815` is present; its exact paths were only
   `docs/specs/features/semantic-diff-explorer/TASKS.md` and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`. Slice 13
-  implementation remains blocked until that commit; closure drafts remain
-  excluded and untouched.
+  implementation is complete pending independent review; closure drafts
+  remain excluded and untouched.
+
+### Slice 13 Implementation Evidence (2026-09-08)
+
+- The approved presentation refactor is implemented without changing the
+  Explorer transport, semantic model, host wiring, layout/search behavior, or
+  telemetry. Flow keyboard/focus coordination and graph-view helpers are now
+  cohesive, Flow/Table share the canonical MUI theme factory, and the existing
+  `semanticDiffExplorerTheme` export remains the default light-mode theme.
+  Flow and Table select the existing light/dark mode without introducing a
+  second theme. Node/edge state labels, relation non-focusability, patterns,
+  legend/high-contrast styling, MiniMap precedence, table behavior, and the
+  `確認が必要` filter contract remain unchanged.
+- The independent-review follow-up removed only the unused `useEffect` and
+  `FlowNodeData` imports left in `FlowContents.tsx` after extraction. No
+  runtime, public API, or behavior change was introduced by this cleanup.
+- `pnpm run test:compile` passed. Targeted qlty smells returned no findings for
+  all eight changed production/focused-test paths; repository `pnpm run
+qlty:check` returned `No issues`; `git diff --check` passed. Every changed
+  runtime/helper/test path was formatted with `qlty fmt`.
+- Focused compiled Flow/theme coverage passed: 46 tests across
+  `flowGraphView`, `flowKeyboardNavigation`, `flowAccessibility`,
+  `flowMiniMap`, `semanticDiffExplorerFlow`, and `muiTheme`. The isolated
+  Explorer DOM/axe suite passed all 13 tests, including actual-session
+  `確認が必要` filtering, zero-match feedback, latent selection restoration,
+  tree semantics, 10,000-leaf bounds, contrast/reflow, and focus contracts.
+  The focused table run passed 63 tests; three existing controller/tree
+  assertion mismatches remain outside the touched TableContents behavior and
+  are recorded for follow-up rather than changed in this slice.
+- `pnpm run build`, `pnpm run test:prepare:desktop`, and `pnpm run
+test:prepare:web` passed. The desktop runner exited 0 and the web runner
+  exited 0; the web runner emitted transient EPIPE/premature-close stream
+  warnings after smoke. Existing webpack asset-size warnings remain. Static
+  CSP and MUI/Emotion composition are preserved by the successful desktop/web
+  bundles and unchanged host boundary.
+- Production readiness is positive for VS Code `^1.75.0`, desktop/web parity,
+  browser-safe imports, WCAG 2.2 focus/target/contrast/high-contrast behavior,
+  bounded rendering, and privacy-preserving telemetry. Independent
+  implementation review is the next gate; no completion commit has been
+  created. Remaining risks are the existing accessibility DOM harness
+  failures when the whole mixed suite is run (the isolated Explorer suite is
+  green), three pre-existing table/controller assertions, and web-runner
+  stream warnings.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 

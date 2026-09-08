@@ -27,8 +27,9 @@
   `a7905e8fdd905c506627a83d6c86ed1246255298`. A narrow Slice 13 replan
   authorizes the backward-compatible canonical MUI theme factory. It received
   final independent `Ready`/no-findings review and Human Approval on
-  2026-09-08; its focused replan commit is eligible and pending. Implementation
-  remains blocked until that commit.
+  2026-09-08; its focused replan commit `d0cc7815` is present. Slice 13
+  implementation is complete and ready for independent implementation review;
+  no completion commit has been created.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -62,10 +63,8 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: `approval-committer` may create the exact focused Slice 13
-  replan commit after Main accepts the final `Ready` review and Human
-  Approval. Main then delegates Slice 13 implementation. The six closure
-  drafts remain excluded.
+- Next route: Main may delegate independent implementation review for the
+  completed Slice 13 diff. The six closure drafts remain excluded.
 
 ## Sync Rule
 
@@ -145,10 +144,9 @@
   `628cc9333ed10d540665cb23329a8e7e3c6af6df` after independent `Ready`/
   no-findings review and automatic Completion Approval. Slice 12 then
   completed and focused-committed as
-  `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13 is held for the
-  narrow canonical-theme replan; its final plan review is `Ready` with no
-  findings and Human Approval is recorded, but the focused replan commit is
-  still pending before implementation can start.
+  `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13's narrow canonical-
+  theme replan is present as `d0cc7815`, and its implementation is complete
+  pending independent implementation review.
 
 ## Plan Status
 
@@ -172,7 +170,7 @@
   final independent review of this replan returned `Ready` with no findings,
   followed by reviewed/approved commit `54ca4005`. The narrow Slice 13 theme
   API replan received final independent plan review `Ready` with no findings
-  on 2026-09-08; its focused replan commit is eligible and pending.
+  on 2026-09-08; its focused replan commit is `d0cc7815`.
 - Human approval: the historical approvals below are limited to Slices 1-4
   only and are superseded as the active gate. Replanning Human Approval was
   granted on 2026-09-07 under the user's explicit MUI/WCAG/qlty/filter request.
@@ -180,12 +178,12 @@
   user messages `承認します。` and `継続して。`.
   Narrow Slice 13 theme API Human Approval was granted on 2026-09-08 through
   the trusted messages `承認します。` and repeated `継続して。`.
-- Active gate: Slice 13 — Simplify Flow/Shared MUI Presentation Components has
-  a final `Ready`/no-findings plan review and Human Approval; its focused
-  replan commit is eligible and pending. No implementation slice is active
-  until that commit completes.
+- Active gate: Slice 13 — Simplify Flow/Shared MUI Presentation Components is
+  implementation-complete and awaits independent implementation review. No
+  completion commit has been created.
 - Slice order: Slices 1-12, Slice 9A, and Slice 7A remain complete and
-  committed; Slice 13 is blocked pending its eligible focused replan commit.
+  committed; Slice 13 is implementation-complete and awaiting independent
+  review.
   Each new slice
   has an
   independent review and the recorded automatic Completion Approval rule
@@ -217,14 +215,15 @@
 - Gate: final independent plan review returned `Ready` with no findings and
   Human Approval was granted on 2026-09-08 under the trusted messages
   `承認します。` and repeated `継続して。`. The focused replan commit is
-  eligible and pending; Slice 13 implementation remains blocked until it is
-  present. The exact replan commit paths are only `TASKS.md` and
+  `d0cc7815`; Slice 13 implementation is complete and awaits independent
+  review. The exact replan commit paths were only `TASKS.md` and
   `TRACEABILITY.md`; closure drafts remain excluded.
 
 ### Narrow Slice 13 Theme API Replan Human Approval — Eligible/Pending Commit
 
 - Status: Human Approved; final independent plan review returned `Ready` with
-  no findings.
+  no findings; focused replan commit `d0cc7815` is present and implementation
+  is complete pending independent review.
 - Approved at: 2026-09-08.
 - Human Approval evidence: the trusted user messages `承認します。` and
   repeated `継続して。` approve the narrow backward-compatible mode-aware
@@ -2999,9 +2998,8 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
 - Completion commit: `628cc9333ed10d540665cb23329a8e7e3c6af6df` is present.
   Aggregate human approval and Feature Exit approval remain pending, and
   closure drafts remain excluded.
-- Next route: Main delegates exactly active Slice 12 to `implementer`.
-  Slice 13 remains dependency-blocked until Slice 12 is complete, reviewed,
-  and focused-committed.
+- Next route: Slice 12 is complete and focused-committed; Main delegates
+  Slice 13 implementation review after its completed implementation.
 
 ### Slice 11 Implementation Evidence (2026-09-08)
 
@@ -3085,9 +3083,9 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
   `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceActionRunner.ts`.
 - Scope guard: no focused tests, Flow/wiring paths, UI paths, configuration,
   telemetry, or closure-draft path was included in this completion commit.
-  Slice 12 was the next route and is now complete; Slice 13 is held pending
-  its narrow plan review and focused replan commit. Aggregate human approval
-  and Feature Exit approval remain pending.
+  Slice 12 was the next route and is now complete; Slice 13 implementation is
+  complete and awaits independent review. Aggregate human approval and Feature
+  Exit approval remain pending.
 
 ### Slice 12: Simplify Flow Host Wiring And Viewer Lifecycle Adapters
 
@@ -3255,18 +3253,19 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
   missing-target regression; the final pre-overlay freshness guard remains.
 - The focused completion commit is
   `a7905e8fdd905c506627a83d6c86ed1246255298`; this update performs no stage or
-  commit operation. Slice 13 is held pending its narrow plan review and
-  focused replan commit; implementation is blocked. Closure drafts remain
+  commit operation. Slice 13 implementation is complete and awaits independent
+  review. Closure drafts remain
   excluded and untouched; aggregate human approval and Feature Exit approval
   remain pending.
 
 ### Slice 13: Simplify Flow/Shared MUI Presentation Components
 
-- Status: Plan-approved but implementation-blocked pending the eligible
-  focused replan commit. The narrow canonical-theme replan received final
-  independent `Ready`/no-findings review and Human Approval on 2026-09-08.
-  Slice 12's focused completion commit
-  `a7905e8fdd905c506627a83d6c86ed1246255298` is present.
+- Status: Implementation review returned `Ready` with no findings on
+  2026-09-08, and Completion Approval is automatic under the user's
+  proceed-through-slices policy. The exact focused completion commit is
+  eligible and pending; no completion commit has been created. The narrow
+  canonical-theme replan commit is `d0cc7815`, and Slice 12's focused
+  completion commit `a7905e8fdd905c506627a83d6c86ed1246255298` is present.
 - Scope: resolve remaining qlty smells in `FlowContents.tsx`,
   `FlowGraphCanvas.tsx`, `flowGraphView.ts`, `flowMiniMap.ts`,
   `AjsNode.tsx`, and the related `TableContents.tsx` duplication by extracting
@@ -3293,7 +3292,8 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
   parser contracts.
 - Validation: Flow component/view/accessibility/axe tests, table regression
   tests, manual keyboard/focus/forced-colors checks, desktop/web bundles and
-  smoke, `rtk pnpm run qlty:smells`, qlty check, and diff checks.
+  smoke, `pnpm run qlty:smells`, qlty check, and diff checks. Evidence is
+  recorded in `TRACEABILITY.md`; no completion commit has been created.
 - Production Readiness: no color-only state, no unbounded render work, no
   bundle/CSP regression, and unchanged non-diff Flow/table behavior.
 - Approval Boundary: webview presentation/refactoring and the backward-
@@ -3307,14 +3307,16 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
 - Out of Scope: new product behavior, source/report actions, comparison rules,
   qlty suppression/allowlisting, and durable docs.
 
-### Slice 13 Implementation Approval — Plan Approved; Focused Replan Commit Pending
+### Slice 13 Implementation Approval — Plan Approved; Focused Replan Commit Present
 
 - Status: The narrow Slice 13 plan replan returned final independent `Ready`
   with no findings and Human Approval was granted on 2026-09-08 under the
-  trusted messages `承認します。` and repeated `継続して。`. The focused
-  replan commit is eligible and pending; implementation remains blocked until
-  it is present. Aggregate human approval and Feature Exit approval remain
-  pending; the six closure drafts remain excluded and untouched.
+  trusted messages `承認します。` and repeated `継続して。`. Focused replan
+  commit `d0cc7815` is present; implementation review returned `Ready` with no
+  findings on 2026-09-08 and Completion Approval is automatic. The focused
+  completion commit is eligible and pending; aggregate human approval and
+  Feature Exit approval remain pending; the six closure drafts remain excluded
+  and untouched.
 - Approved implementation paths are exactly
   `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`,
   `src/presentation/webview/editor/ajsFlow/FlowGraphCanvas.tsx`,
@@ -3358,11 +3360,44 @@ data-row-id)` tuples prove ordinary-leaf removal and retention of both
   target-size, reflow, status, and WCAG checks, MUI/Emotion bundle and static
   CSP smoke, desktop/web bundles and smoke, targeted qlty smells, full qlty
   check, and diff checks. Completion Approval is conditionally automatic only
-  after the focused replan commit is present and the later implementation
-  review returns `Ready` with no findings. The exact eligible replan commit
-  paths are only `docs/specs/features/semantic-diff-explorer/TASKS.md` and
-  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`; no
-  implementation may start before that commit.
+  after the implementation review returns `Ready` with no findings. The
+  focused replan commit paths were only
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`; no completion
+  commit has been created.
+
+### Slice 13 Completion Gate — Ready; Automatic Approval; Commit Pending
+
+- Independent implementation review returned `Ready` with no findings on
+  2026-09-08. Under the user's explicit proceed-through-slices policy,
+  Completion Approval is automatically approved for Slice 13. The focused
+  completion commit is eligible and pending; this update performs no stage or
+  commit operation.
+- The exact nine completion paths are only:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md`,
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`,
+  `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`,
+  `src/presentation/webview/editor/ajsFlow/FlowGraphCanvas.tsx`,
+  `src/presentation/webview/editor/ajsFlow/flowGraphView.ts`,
+  `src/presentation/webview/editor/ajsFlow/nodes/AjsNode.tsx`,
+  `src/presentation/webview/editor/ajsTable/TableContents.tsx`,
+  `src/presentation/webview/shared/muiTheme.ts`, and
+  `src/test/suite/muiTheme.test.ts`. `flowMiniMap.ts` was reviewed but is
+  unchanged and is therefore excluded from the focused completion commit.
+- Evidence is complete: targeted qlty smells found no findings, full qlty
+  check returned `No issues`, the changed paths were formatted, and targeted
+  ESLint, TypeScript compilation, Markdown lint, and `git diff --check` passed.
+  Focused Flow/theme coverage passed 48 tests and the isolated Explorer
+  DOM/axe suite passed 13 tests, including actual-session `確認が必要`
+  filtering, zero-match status, latent selection restoration, tree semantics,
+  reflow, contrast, and focus contracts. The shared theme factory/export,
+  MUI/WCAG 2.2 behavior, Flow accessibility/high-contrast behavior, and
+  desktop/web production builds remain verified. Existing table follow-up
+  mismatches and web-runner stream warnings remain documented as pre-existing
+  risks and are outside this completion cleanup.
+- The six closure drafts remain excluded and untouched. Aggregate human
+  approval and Feature Exit approval remain pending; the next route is the
+  exact focused completion commit through `approval-committer`.
 
 ## Auditable qlty Smell Baseline (2026-09-07)
 
@@ -3550,6 +3585,8 @@ changed delta; it may not be hidden.
 - [x] Slice 12 Flow host/wiring qlty remediation complete; independently
       reviewed `Ready` with no findings, automatic approval recorded, focused
       completion commit `a7905e8fdd905c506627a83d6c86ed1246255298` recorded
-- [ ] Slice 13 Flow/shared MUI presentation qlty remediation complete
+- [x] Slice 13 Flow/shared MUI presentation qlty remediation implementation
+      and review complete; `Ready`/no findings and automatic Completion
+      Approval recorded; focused completion commit eligible and pending
 - [ ] README, CHANGELOG, durable use cases, roadmap, and final traceability
       revalidated at the reopened Feature Exit

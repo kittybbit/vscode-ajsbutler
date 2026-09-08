@@ -1,26 +1,23 @@
-import React, {
-  FC,
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { FC, memo, useCallback, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 import GlobalStyles from "@mui/material/GlobalStyles";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import { ThemeProvider, createTheme, type Theme } from "@mui/material/styles";
+import { ThemeProvider, type Theme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
-import { type Edge, type Node, ReactFlowProvider } from "@xyflow/react";
+import { type Edge, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { createViewerOperationRequest } from "../../viewerRequestMessages";
+import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
 import FlowNodeDetailPanel from "./FlowNodeDetailPanel";
-import FlowGraphCanvas from "./FlowGraphCanvas";
+import {
+  FlowGraphPanel,
+  useFlowAnnouncementActions,
+  useFlowAnnouncementEffects,
+  type SemanticDiffRelationDuplicateGroup,
+} from "./FlowGraphCanvas";
 import { useFlowViewerController } from "./useFlowViewerController";
 import {
   useFlowViewportAdapter,
@@ -29,437 +26,80 @@ import {
 } from "./useFlowViewportAdapter";
 import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
 import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
+import {
+  createSemanticDiffTheme,
+  semanticDiffViewerSurfaceSx,
+} from "../../shared/muiTheme";
 import { navigateToTable } from "./nodes/Utils";
 import { type FlowMiniMapColors } from "./flowMiniMap";
-import type { FlowNodeData } from "./flowNodePresentationModel";
-import {
-  focusRenderedFlowNode,
-  getFlowNodeIdFromTarget,
-  getOwnedFlowNodeId,
-  isFlowInteractiveTarget,
-  isFlowSpatialNavigationKey,
-  resolveFlowKeyboardFocusTarget,
-  resolveFlowKeyboardScopeFocusDecision,
-  resolveFlowKeyboardNavigationKeyResult,
-  resolveFlowKeyboardNavigationIndexCache,
-  resolveFlowKeyboardNodeGeometry,
-  resolveFlowGraphEntryTabIndex,
-  type FlowKeyboardNavigationIndexCache,
-} from "./flowKeyboardNavigation";
-import {
-  resolveFlowGraphFocusRequest,
-  type FlowGraphFocusRequest,
-} from "./flowViewportFocus";
-import { resolveFlowViewerShortcut } from "./flowViewerShortcuts";
+import type { CurrentUnitIdStateType } from "./flowViewerStateTypes";
+import { type FlowGraphFocusRequest } from "./flowViewportFocus";
 import { resolveFlowSelectorFocusTarget } from "./FlowSelector";
 import type { FlowKeyboardNavigationMovement } from "./flowKeyboardNavigation";
 import {
   ViewerAnnouncementHost,
   type ViewerAnnouncementHostHandle,
 } from "../shared/viewerAnnouncements";
-import {
-  formatUnitInformationMessage,
-  unitInformationMessage,
-} from "../unitInformationLocalization";
+import { unitInformationMessage } from "../unitInformationLocalization";
 
-export type SemanticDiffRelationDuplicateGroup = Readonly<{
+export type { SemanticDiffRelationDuplicateGroup } from "./FlowGraphCanvas";
+
+type HighlightedRelation = Readonly<{
+  key: string;
   sourceUnitId: string;
   targetUnitId: string;
   relationType: "seq" | "con";
-  count: number;
 }>;
+
+const highlightedRelation = (edge: Edge): HighlightedRelation | undefined => {
+  const data = edge.data as
+    | {
+        flowRelationType?: "seq" | "con";
+        semanticDiffHighlight?: unknown;
+      }
+    | undefined;
+  if (!data?.semanticDiffHighlight || !data.flowRelationType) return undefined;
+  return {
+    key: `${edge.source}\u0000${edge.target}\u0000${data.flowRelationType}`,
+    sourceUnitId: edge.source,
+    targetUnitId: edge.target,
+    relationType: data.flowRelationType,
+  };
+};
+
+const compareFlowIds = (left: string, right: string): number =>
+  Number(left > right) - Number(left < right);
+
+const compareDuplicateGroups = (
+  left: SemanticDiffRelationDuplicateGroup,
+  right: SemanticDiffRelationDuplicateGroup,
+): number =>
+  compareFlowIds(left.sourceUnitId, right.sourceUnitId) ||
+  compareFlowIds(left.targetUnitId, right.targetUnitId) ||
+  compareFlowIds(left.relationType, right.relationType);
 
 /** Count every highlighted formal relation in a concrete graph pair. */
 export const collectSemanticDiffRelationDuplicateGroups = (
   edges: readonly Edge[],
 ): SemanticDiffRelationDuplicateGroup[] => {
   const counts = new Map<string, SemanticDiffRelationDuplicateGroup>();
-  for (const edge of edges) {
-    const data = edge.data as
-      | {
-          flowRelationType?: "seq" | "con";
-          semanticDiffHighlight?: unknown;
-        }
-      | undefined;
-    if (!data?.semanticDiffHighlight || !data.flowRelationType) continue;
-    const key = `${edge.source}\u0000${edge.target}\u0000${data.flowRelationType}`;
-    const previous = counts.get(key);
-    counts.set(
-      key,
-      previous
-        ? { ...previous, count: previous.count + 1 }
-        : {
-            sourceUnitId: edge.source,
-            targetUnitId: edge.target,
-            relationType: data.flowRelationType,
-            count: 1,
-          },
-    );
-  }
+  edges.forEach((edge) => {
+    const relation = highlightedRelation(edge);
+    if (!relation) return;
+    const previous = counts.get(relation.key);
+    counts.set(relation.key, {
+      sourceUnitId: relation.sourceUnitId,
+      targetUnitId: relation.targetUnitId,
+      relationType: relation.relationType,
+      count: (previous?.count ?? 0) + 1,
+    });
+  });
   return [...counts.values()]
     .filter((group) => group.count > 1)
-    .sort(
-      (left, right) =>
-        (left.sourceUnitId < right.sourceUnitId
-          ? -1
-          : left.sourceUnitId > right.sourceUnitId
-            ? 1
-            : 0) ||
-        (left.targetUnitId < right.targetUnitId
-          ? -1
-          : left.targetUnitId > right.targetUnitId
-            ? 1
-            : 0) ||
-        (left.relationType < right.relationType
-          ? -1
-          : left.relationType > right.relationType
-            ? 1
-            : 0),
-    );
+    .sort(compareDuplicateGroups);
 };
 
 type FlowViewerController = ReturnType<typeof useFlowViewerController>;
-
-type FlowGraphPanelProps = Pick<
-  FlowViewerController,
-  | "clearGraphHoveredUnit"
-  | "currentUnitIdState"
-  | "edges"
-  | "graphHoveredUnit"
-  | "nodes"
-  | "selectFlowNode"
-  | "selectedUnitId"
-  | "showMiniMap"
-  | "toggleExpandedFlowNodeFromKeyboard"
-  | "unitById"
-> & {
-  focusRequest: FlowGraphFocusRequest;
-  miniMapColors: FlowMiniMapColors;
-  onFocusDetail: (unitId: string) => void;
-  onFocusSelector: (unitId?: string) => void;
-  onKeyboardNavigation: (unitId: string) => void;
-  onRendererReady: FlowRendererReady;
-  reactFlowInstanceRef: FlowViewportInstanceRef;
-  onScopeChange: (targetScopeUnitId: string) => void;
-  onNestedExpansion?: (unitId: string, expanded: boolean) => void;
-  onNodeSelected?: (unitId: string) => void;
-  onSpatialMove?: (
-    unitId: string,
-    direction: FlowKeyboardNavigationMovement,
-  ) => void;
-  language: string;
-  graphAriaLabel: string;
-  theme: Theme;
-};
-
-const FlowGraphPanelComponent: FC<FlowGraphPanelProps> = ({
-  clearGraphHoveredUnit,
-  currentUnitIdState,
-  edges,
-  focusRequest,
-  graphHoveredUnit,
-  miniMapColors,
-  nodes,
-  onFocusDetail,
-  onFocusSelector,
-  onKeyboardNavigation,
-  onRendererReady,
-  onScopeChange,
-  onNestedExpansion,
-  onNodeSelected,
-  onSpatialMove,
-  language,
-  graphAriaLabel,
-  reactFlowInstanceRef,
-  selectFlowNode,
-  selectedUnitId,
-  showMiniMap,
-  theme,
-  toggleExpandedFlowNodeFromKeyboard,
-  unitById,
-}) => {
-  const graphEntryRef = useRef<HTMLDivElement>(null);
-  const navigationIndexCacheRef =
-    useRef<FlowKeyboardNavigationIndexCache>(undefined);
-  const handledFocusRequestRevisionRef = useRef(0);
-  const pendingFocusRequestRef = useRef<
-    | {
-        fallbackToGraphEntry: boolean;
-        expectedCurrentUnitId?: string;
-        expectedExpanded?: boolean;
-        selectTarget?: boolean;
-        sourceScopeUnitId?: string;
-        sourceNodes: readonly Node<FlowNodeData>[];
-        targetUnitId: string;
-      }
-    | undefined
-  >(undefined);
-  const navigationNodes = nodes.flatMap((node) => {
-    const unit = unitById.get(node.id);
-    const geometry = resolveFlowKeyboardNodeGeometry(node);
-    return node.data.unitId === node.id && unit && geometry
-      ? [
-          {
-            id: node.id,
-            parentId: unit.parentId,
-            ...geometry,
-            canExpandNested: Boolean(node.data.canExpandNested),
-            isExpandedNested: Boolean(node.data.isExpandedNested),
-          },
-        ]
-      : [];
-  });
-  const scopeUnitById = useMemo(
-    () =>
-      new Map(
-        [...unitById].map(([id, unit]) => [
-          id,
-          {
-            id,
-            parentId: unit.parentId,
-            unitType: unit.unitType,
-            childCount: unit.children.length,
-          },
-        ]),
-      ),
-    [unitById],
-  );
-  navigationIndexCacheRef.current = resolveFlowKeyboardNavigationIndexCache(
-    navigationIndexCacheRef.current,
-    navigationNodes,
-  );
-  const navigationIndex = navigationIndexCacheRef.current.index;
-  useEffect(() => {
-    const request = pendingFocusRequestRef.current;
-    if (!request) return;
-    const renderedUnitIds = new Set(
-      nodes.flatMap((node) => (node.data.unitId === node.id ? [node.id] : [])),
-    );
-    const target = request.expectedCurrentUnitId
-      ? resolveFlowKeyboardScopeFocusDecision({
-          currentScopeUnitId: currentUnitIdState.currentUnitId,
-          expectedScopeUnitId: request.expectedCurrentUnitId,
-          renderedUnitIds,
-          sourceNodesChanged: request.sourceNodes !== nodes,
-          sourceScopeUnitId: request.sourceScopeUnitId,
-          targetUnitId: request.targetUnitId,
-        })
-      : request.sourceNodes === nodes
-        ? { kind: "wait" as const }
-        : resolveFlowKeyboardFocusTarget(renderedUnitIds, request.targetUnitId);
-    if (target.kind === "wait") return;
-    if (target.kind === "cancel") {
-      pendingFocusRequestRef.current = undefined;
-      return;
-    }
-    const targetNode = nodes.find(
-      (node) => node.data.unitId === request.targetUnitId,
-    );
-    if (
-      request.expectedExpanded !== undefined &&
-      targetNode &&
-      Boolean(targetNode.data.isExpandedNested) !== request.expectedExpanded
-    ) {
-      return;
-    }
-    const focused =
-      target.kind === "node" &&
-      focusRenderedFlowNode(
-        graphEntryRef.current,
-        target.targetUnitId,
-        CSS.escape,
-      );
-    if (focused && request.selectTarget) {
-      selectFlowNode(request.targetUnitId);
-    }
-    if (!focused && request.fallbackToGraphEntry) {
-      graphEntryRef.current?.focus({ preventScroll: true });
-    }
-    pendingFocusRequestRef.current = undefined;
-  }, [currentUnitIdState, nodes, selectFlowNode]);
-
-  useEffect(() => {
-    if (focusRequest.revision <= handledFocusRequestRevisionRef.current) {
-      return;
-    }
-    const renderedUnitIds = new Set(
-      nodes.flatMap((node) => (node.data.unitId === node.id ? [node.id] : [])),
-    );
-    const decision = resolveFlowGraphFocusRequest(
-      focusRequest,
-      currentUnitIdState.currentUnitId,
-      renderedUnitIds,
-    );
-    if (decision.kind === "wait") return;
-    if (decision.kind === "node") {
-      const focused = focusRenderedFlowNode(
-        graphEntryRef.current,
-        decision.targetUnitId,
-        CSS.escape,
-      );
-      if (!focused) return;
-      if (focusRequest.selectTarget) {
-        selectFlowNode(decision.targetUnitId);
-      }
-    } else {
-      graphEntryRef.current?.focus({ preventScroll: true });
-    }
-    handledFocusRequestRevisionRef.current = focusRequest.revision;
-  }, [currentUnitIdState, focusRequest, nodes, selectFlowNode]);
-
-  const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node<FlowNodeData>) => {
-      selectFlowNode(node.id);
-      onNodeSelected?.(node.id);
-    },
-    [onNodeSelected, selectFlowNode],
-  );
-  const handleNodeMouseEnter = useCallback(
-    (_event: React.MouseEvent, node: Node<FlowNodeData>) =>
-      graphHoveredUnit(node.id),
-    [graphHoveredUnit],
-  );
-  const handleNodeMouseLeave = useCallback(
-    (_event: React.MouseEvent, node: Node<FlowNodeData>) =>
-      clearGraphHoveredUnit(node.id),
-    [clearGraphHoveredUnit],
-  );
-  const handleFlowNodeKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      const currentUnitId = getFlowNodeIdFromTarget(event.target);
-      const isNestedNodeTarget =
-        currentUnitId !== undefined &&
-        getOwnedFlowNodeId(event.target) === undefined;
-      if (isNestedNodeTarget && isFlowInteractiveTarget(event.target)) {
-        return;
-      }
-      if (isNestedNodeTarget && !isFlowSpatialNavigationKey(event.key)) {
-        return;
-      }
-      const shortcut = resolveFlowViewerShortcut({
-        altKey: event.altKey,
-        ctrlKey: event.ctrlKey,
-        key: event.key,
-        metaKey: event.metaKey,
-        shiftKey: event.shiftKey,
-      });
-      if (shortcut === "detail" && currentUnitId) {
-        event.preventDefault();
-        event.stopPropagation();
-        onFocusDetail(currentUnitId);
-        return;
-      }
-      if (
-        shortcut === "selector" &&
-        (currentUnitId || event.target === event.currentTarget)
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        onFocusSelector(currentUnitId);
-        return;
-      }
-      if (!currentUnitId) return;
-      const result = resolveFlowKeyboardNavigationKeyResult(navigationIndex, {
-        currentUnitId,
-        currentScopeUnitId: currentUnitIdState.currentUnitId,
-        key: event.key,
-        altKey: event.altKey,
-        ctrlKey: event.ctrlKey,
-        metaKey: event.metaKey,
-        scopeUnitById,
-        shiftKey: event.shiftKey,
-      });
-      if (!result.suppressDefault) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const action = result.action;
-      if (!action) return;
-      if (action.kind === "navigate") {
-        onKeyboardNavigation(action.targetUnitId);
-        focusRenderedFlowNode(
-          graphEntryRef.current,
-          action.targetUnitId,
-          CSS.escape,
-        );
-        onSpatialMove?.(action.targetUnitId, action.movement);
-        return;
-      }
-      if (action.kind === "enter-scope" || action.kind === "return-scope") {
-        pendingFocusRequestRef.current = {
-          expectedCurrentUnitId: action.targetScopeId,
-          fallbackToGraphEntry: true,
-          selectTarget: true,
-          sourceScopeUnitId: currentUnitIdState.currentUnitId,
-          sourceNodes: nodes,
-          targetUnitId: action.focusUnitId,
-        };
-        onScopeChange(action.targetScopeId);
-        return;
-      }
-      if (action.kind !== "expand" && action.kind !== "collapse") return;
-      pendingFocusRequestRef.current = {
-        expectedExpanded: action.kind === "expand",
-        fallbackToGraphEntry: true,
-        sourceNodes: nodes,
-        targetUnitId: action.targetUnitId,
-      };
-      toggleExpandedFlowNodeFromKeyboard(action.targetUnitId);
-      onNestedExpansion?.(action.targetUnitId, action.kind === "expand");
-    },
-    [
-      navigationIndex,
-      nodes,
-      onFocusDetail,
-      onFocusSelector,
-      onScopeChange,
-      onKeyboardNavigation,
-      onNestedExpansion,
-      onNodeSelected,
-      onSpatialMove,
-      currentUnitIdState,
-      scopeUnitById,
-      toggleExpandedFlowNodeFromKeyboard,
-    ],
-  );
-
-  return (
-    <Paper
-      ref={graphEntryRef}
-      role="region"
-      aria-label={graphAriaLabel}
-      tabIndex={resolveFlowGraphEntryTabIndex(nodes)}
-      onKeyDownCapture={handleFlowNodeKeyDown}
-      variant="outlined"
-      sx={{
-        flex: 1,
-        height: "100%",
-        minWidth: 0,
-        minHeight: 0,
-        overflow: "hidden",
-        borderRadius: 3,
-        backgroundColor: "background.paper",
-      }}
-    >
-      <FlowGraphCanvas
-        nodes={nodes}
-        edges={edges}
-        onNodeClick={handleNodeClick}
-        onNodeMouseEnter={handleNodeMouseEnter}
-        onNodeMouseLeave={handleNodeMouseLeave}
-        onRendererReady={onRendererReady}
-        reactFlowInstanceRef={reactFlowInstanceRef}
-        selectedUnitId={selectedUnitId}
-        showMiniMap={showMiniMap}
-        theme={theme}
-        language={language}
-        miniMapColors={miniMapColors}
-      />
-    </Paper>
-  );
-};
-
-FlowGraphPanelComponent.displayName = "FlowGraphPanel";
-const FlowGraphPanel = memo(FlowGraphPanelComponent);
 
 type FlowViewerBodyProps = Pick<
   FlowViewerController,
@@ -560,22 +200,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   currentUnitIdState,
 }) => {
   return (
-    <Box
-      sx={{
-        width: "100%",
-        flex: 1,
-        minWidth: 0,
-        minHeight: 0,
-        overflow: "hidden",
-        padding: 1.25,
-        background: (theme) =>
-          `radial-gradient(circle at top left, ${theme.palette.primary.light}12, transparent 28%), linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-        "body.vscode-high-contrast &": {
-          background: "var(--vscode-editor-background, Canvas)",
-        },
-        boxSizing: "border-box",
-      }}
-    >
+    <Box sx={semanticDiffViewerSurfaceSx}>
       <Stack
         direction="row"
         spacing={1.25}
@@ -662,12 +287,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
 const useFlowTheme = (): Theme => {
   const { isDarkMode } = useMyAppContext();
   return useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: isDarkMode ? "dark" : "light",
-        },
-      }),
+    () => createSemanticDiffTheme({ mode: isDarkMode ? "dark" : "light" }),
     [isDarkMode],
   );
 };
@@ -708,6 +328,150 @@ const reportFlowOperation = (
   operation: Parameters<typeof createViewerOperationRequest>[0],
 ): void => {
   window.vscode.postMessage(createViewerOperationRequest(operation));
+};
+
+const openSelectedDefinitionWithTelemetry = (
+  canOpenDefinition: boolean | undefined,
+  openDefinition: () => void,
+): void => {
+  if (!canOpenDefinition) return;
+  reportFlowOperation("definition.open");
+  openDefinition();
+};
+
+type FlowTelemetryActionsInput = Readonly<{
+  currentUnitIdState: CurrentUnitIdStateType;
+  flowDocumentDto: FlowViewerController["flowDocumentDto"];
+  openSelectedNodeDefinition: () => void;
+  openSelectedNodeScope: () => void;
+  requestDetailFocus: (unitId: string) => void;
+  requestGraphFocus: (unitId: string) => void;
+  requestScopeTransition: (unitId: string, focusUnitId: string) => void;
+  requestSelectorFocus: (targetUnitId: string, sourceUnitId?: string) => void;
+  selectFlowNode: (unitId: string) => void;
+  selectTreeUnit: (unitId: string) => void;
+  selectedNodeCanOpenDefinition: boolean | undefined;
+  selectedUnitId: string | undefined;
+  toggleExpandAllNestedUnits: () => void;
+  toggleExpandedFlowNodeFromKeyboard: (unitId: string) => void;
+  toggleFocusMode: () => void;
+  toggleMiniMap: () => void;
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>;
+}>;
+
+const useFlowTelemetryActions = ({
+  currentUnitIdState,
+  flowDocumentDto,
+  openSelectedNodeDefinition,
+  openSelectedNodeScope,
+  requestDetailFocus,
+  requestGraphFocus,
+  requestScopeTransition,
+  requestSelectorFocus,
+  selectFlowNode,
+  selectTreeUnit,
+  selectedNodeCanOpenDefinition,
+  selectedUnitId,
+  toggleExpandAllNestedUnits,
+  toggleExpandedFlowNodeFromKeyboard,
+  toggleFocusMode,
+  toggleMiniMap,
+  unitById,
+}: FlowTelemetryActionsInput) => {
+  const selectFlowNodeWithTelemetry = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("unit.select");
+      selectFlowNode(unitId);
+    },
+    [selectFlowNode],
+  );
+  const selectTreeUnitWithTelemetry = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("unit.select");
+      selectTreeUnit(unitId);
+    },
+    [selectTreeUnit],
+  );
+  const handleEnterFlowTreeUnit = useCallback(
+    (unitId: string) => requestGraphFocus(unitId),
+    [requestGraphFocus],
+  );
+  const handleFocusDetail = useCallback(
+    (unitId: string) => {
+      if (selectedUnitId !== unitId) reportFlowOperation("unit.select");
+      requestDetailFocus(unitId);
+    },
+    [requestDetailFocus, selectedUnitId],
+  );
+  const handleFocusSelector = useCallback(
+    (unitId?: string) =>
+      requestSelectorFocus(
+        resolveFlowSelectorFocusTarget(
+          currentUnitIdState.currentUnitId,
+          flowDocumentDto?.rootUnits ?? [],
+          unitById,
+        ),
+        unitId,
+      ),
+    [
+      currentUnitIdState,
+      flowDocumentDto?.rootUnits,
+      requestSelectorFocus,
+      unitById,
+    ],
+  );
+  const handleOpenFlowScope = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("flow.scope.open");
+      requestScopeTransition(unitId, unitId);
+    },
+    [requestScopeTransition],
+  );
+  const openSelectedNodeDefinitionWithTelemetry = useCallback(
+    () =>
+      openSelectedDefinitionWithTelemetry(
+        selectedNodeCanOpenDefinition,
+        openSelectedNodeDefinition,
+      ),
+    [openSelectedNodeDefinition, selectedNodeCanOpenDefinition],
+  );
+  const openSelectedNodeScopeWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.scope.open");
+    openSelectedNodeScope();
+  }, [openSelectedNodeScope]);
+  const toggleExpandAllNestedUnitsWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.nested.toggle");
+    toggleExpandAllNestedUnits();
+  }, [toggleExpandAllNestedUnits]);
+  const toggleExpandedFlowNodeFromKeyboardWithTelemetry = useCallback(
+    (unitId: string) => {
+      reportFlowOperation("flow.nested.toggle");
+      toggleExpandedFlowNodeFromKeyboard(unitId);
+    },
+    [toggleExpandedFlowNodeFromKeyboard],
+  );
+  const toggleFocusModeWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.relationship_focus.toggle");
+    toggleFocusMode();
+  }, [toggleFocusMode]);
+  const toggleMiniMapWithTelemetry = useCallback(() => {
+    reportFlowOperation("flow.minimap.toggle");
+    toggleMiniMap();
+  }, [toggleMiniMap]);
+  return {
+    handleEnterFlowTreeUnit,
+    handleFocusDetail,
+    handleFocusSelector,
+    handleOpenFlowScope,
+    openSelectedNodeDefinitionWithTelemetry,
+    openSelectedNodeScopeWithTelemetry,
+    selectFlowNodeWithTelemetry,
+    selectTreeUnitWithTelemetry,
+    toggleExpandAllNestedUnitsWithTelemetry,
+    toggleExpandedFlowNodeFromKeyboardWithTelemetry,
+    toggleFocusModeWithTelemetry,
+    toggleMiniMapWithTelemetry,
+  };
 };
 
 const FlowContents: FC = () => {
@@ -785,166 +549,54 @@ const FlowContents: FC = () => {
   const openSelectedNodeUnitList =
     useSelectedNodeUnitListAction(selectedNodeDetail);
   const miniMapColors = useFlowMiniMapColors(theme);
-  const selectFlowNodeWithTelemetry = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("unit.select");
-      selectFlowNode(unitId);
-    },
-    [selectFlowNode],
-  );
-  const selectTreeUnitWithTelemetry = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("unit.select");
-      selectTreeUnit(unitId);
-    },
-    [selectTreeUnit],
-  );
-  const handleEnterFlowTreeUnit = useCallback(
-    (unitId: string) => {
-      requestGraphFocus(unitId);
-    },
-    [requestGraphFocus],
-  );
-  const handleFocusDetail = useCallback(
-    (unitId: string) => {
-      if (selectedUnitId !== unitId) {
-        reportFlowOperation("unit.select");
-      }
-      requestDetailFocus(unitId);
-    },
-    [requestDetailFocus, selectedUnitId],
-  );
-  const handleFocusSelector = useCallback(
-    (unitId?: string) => {
-      const targetUnitId = resolveFlowSelectorFocusTarget(
-        currentUnitIdState.currentUnitId,
-        flowDocumentDto?.rootUnits ?? [],
-        unitById,
-      );
-      requestSelectorFocus(targetUnitId, unitId);
-    },
-    [
-      currentUnitIdState,
-      flowDocumentDto?.rootUnits,
-      requestSelectorFocus,
-      unitById,
-    ],
-  );
-  const handleOpenFlowScope = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("flow.scope.open");
-      requestScopeTransition(unitId, unitId);
-    },
-    [requestScopeTransition],
-  );
-  const openSelectedNodeDefinitionWithTelemetry = useCallback(() => {
-    if (!selectedNodeDetail?.canOpenDefinition) {
-      return;
-    }
-    reportFlowOperation("definition.open");
-    openSelectedNodeDefinition();
-  }, [openSelectedNodeDefinition, selectedNodeDetail?.canOpenDefinition]);
-  const openSelectedNodeScopeWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.scope.open");
-    openSelectedNodeScope();
-  }, [openSelectedNodeScope]);
-  const toggleExpandAllNestedUnitsWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.nested.toggle");
-    toggleExpandAllNestedUnits();
-  }, [toggleExpandAllNestedUnits]);
-  const toggleExpandedFlowNodeFromKeyboardWithTelemetry = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("flow.nested.toggle");
-      toggleExpandedFlowNodeFromKeyboard(unitId);
-    },
-    [toggleExpandedFlowNodeFromKeyboard],
-  );
-  const toggleFocusModeWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.relationship_focus.toggle");
-    toggleFocusMode();
-  }, [toggleFocusMode]);
-  const toggleMiniMapWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.minimap.toggle");
-    toggleMiniMap();
-  }, [toggleMiniMap]);
-  const announceFlow = useCallback((eventKey: string, message: string) => {
-    announcementHostRef.current?.announce({ eventKey, message });
-  }, []);
-  const getFlowUnitName = useCallback(
-    (unitId: string): string => unitById.get(unitId)?.name ?? unitId,
-    [unitById],
-  );
+  const telemetryActions = useFlowTelemetryActions({
+    currentUnitIdState,
+    flowDocumentDto,
+    openSelectedNodeDefinition,
+    openSelectedNodeScope,
+    requestDetailFocus,
+    requestGraphFocus,
+    requestScopeTransition,
+    requestSelectorFocus,
+    selectFlowNode,
+    selectTreeUnit,
+    selectedNodeCanOpenDefinition: selectedNodeDetail?.canOpenDefinition,
+    selectedUnitId,
+    toggleExpandAllNestedUnits,
+    toggleExpandedFlowNodeFromKeyboard,
+    toggleFocusMode,
+    toggleMiniMap,
+    unitById,
+  });
+  const {
+    handleEnterFlowTreeUnit,
+    handleFocusDetail,
+    handleFocusSelector,
+    handleOpenFlowScope,
+    openSelectedNodeDefinitionWithTelemetry,
+    openSelectedNodeScopeWithTelemetry,
+    selectFlowNodeWithTelemetry,
+    selectTreeUnitWithTelemetry,
+    toggleExpandAllNestedUnitsWithTelemetry,
+    toggleExpandedFlowNodeFromKeyboardWithTelemetry,
+    toggleFocusModeWithTelemetry,
+    toggleMiniMapWithTelemetry,
+  } = telemetryActions;
+  const {
+    announceFlow,
+    announceFlowNestedExpansion,
+    announceFlowSelection,
+    announceFlowSpatialMove,
+    getFlowUnitName,
+  } = useFlowAnnouncementActions({
+    announcementHostRef,
+    language: lang,
+    unitById,
+  });
   const semanticDiffRelationDuplicateGroups = useMemo(
     () => collectSemanticDiffRelationDuplicateGroups(edges),
     [edges],
   );
-  const announceFlowSelection = useCallback(
-    (unitId: string) => {
-      announceFlow(
-        `flow:selected:${unitId}`,
-        formatUnitInformationMessage("a11y.announce.selected", lang, {
-          unit: getFlowUnitName(unitId),
-        }),
-      );
-    },
-    [announceFlow, getFlowUnitName, lang],
-  );
-  const announceFlowSpatialMove = useCallback(
-    (unitId: string, direction: FlowKeyboardNavigationMovement) => {
-      announceFlow(
-        `flow:moved:${unitId}:${direction}`,
-        formatUnitInformationMessage("a11y.announce.moved", lang, {
-          direction: formatUnitInformationMessage(
-            `a11y.direction.${direction}`,
-            lang,
-          ),
-          unit: getFlowUnitName(unitId),
-        }),
-      );
-    },
-    [announceFlow, getFlowUnitName, lang],
-  );
-  const announceFlowNestedExpansion = useCallback(
-    (unitId: string, expanded: boolean) => {
-      announceFlow(
-        `flow:nested:${unitId}:${expanded ? "expanded" : "collapsed"}`,
-        formatUnitInformationMessage(
-          expanded ? "a11y.announce.expanded" : "a11y.announce.collapsed",
-          lang,
-          { unit: getFlowUnitName(unitId) },
-        ),
-      );
-    },
-    [announceFlow, getFlowUnitName, lang],
-  );
-  useEffect(() => {
-    if (semanticDiffRelationDuplicateGroups.length === 0) return;
-    const signature = semanticDiffRelationDuplicateGroups
-      .map(
-        ({ sourceUnitId, targetUnitId, relationType, count }) =>
-          `${sourceUnitId}:${targetUnitId}:${relationType}:${count}`,
-      )
-      .join("|");
-    const message = semanticDiffRelationDuplicateGroups
-      .map(({ sourceUnitId, targetUnitId, count }) =>
-        formatUnitInformationMessage(
-          "a11y.announce.semanticDiffRelations",
-          lang,
-          {
-            source: getFlowUnitName(sourceUnitId),
-            target: getFlowUnitName(targetUnitId),
-            count,
-          },
-        ),
-      )
-      .join(" ");
-    announceFlow(`flow:semantic-diff-relations:${signature}`, message);
-  }, [
-    announceFlow,
-    getFlowUnitName,
-    lang,
-    semanticDiffRelationDuplicateGroups,
-  ]);
   const selectTreeUnitWithAnnouncement = useCallback(
     (unitId: string) => {
       selectTreeUnitWithTelemetry(unitId);
@@ -952,85 +604,16 @@ const FlowContents: FC = () => {
     },
     [announceFlowSelection, selectTreeUnitWithTelemetry],
   );
-
-  const previousScopeIdRef = useRef<string | undefined>(undefined);
-  useEffect(() => {
-    const scopeId = currentUnit?.id;
-    if (previousScopeIdRef.current === undefined) {
-      previousScopeIdRef.current = scopeId;
-      return;
-    }
-    if (scopeId && previousScopeIdRef.current !== scopeId) {
-      announceFlow(
-        `flow:scope:${scopeId}`,
-        formatUnitInformationMessage("a11y.announce.scopeChanged", lang, {
-          unit: getFlowUnitName(scopeId),
-        }),
-      );
-    }
-    previousScopeIdRef.current = scopeId;
-  }, [announceFlow, currentUnit?.id, getFlowUnitName, lang]);
-
-  const previousSearchSignatureRef = useRef<string | undefined>(undefined);
-  const hasObservedSearchRef = useRef(false);
-  useEffect(() => {
-    const signature = searchResultPosition
-      ? `${searchedUnitId ?? ""}:${searchResultPosition.current}:${searchResultPosition.total}`
-      : undefined;
-    if (!hasObservedSearchRef.current) {
-      hasObservedSearchRef.current = true;
-      previousSearchSignatureRef.current = signature;
-      return;
-    }
-    if (!searchResultPosition) {
-      announceFlow(
-        "flow:search:cleared",
-        unitInformationMessage("a11y.announce.searchCleared", lang),
-      );
-    } else if (searchResultPosition.total === 0) {
-      announceFlow(
-        "flow:search:no-results",
-        unitInformationMessage("a11y.announce.searchNoResults", lang),
-      );
-    } else if (searchedUnitId) {
-      announceFlow(
-        `flow:search:${signature}`,
-        formatUnitInformationMessage("a11y.announce.searchResults", lang, {
-          count: searchResultPosition.total,
-          current: searchResultPosition.current,
-          total: searchResultPosition.total,
-          unit: getFlowUnitName(searchedUnitId),
-        }),
-      );
-    }
-    previousSearchSignatureRef.current = signature;
-  }, [
+  useFlowAnnouncementEffects({
     announceFlow,
+    currentScopeUnitId: currentUnit?.id,
+    duplicateGroups: semanticDiffRelationDuplicateGroups,
+    focusModeEnabled,
     getFlowUnitName,
-    lang,
+    language: lang,
     searchResultPosition,
     searchedUnitId,
-  ]);
-
-  const previousFocusModeRef = useRef<boolean | undefined>(undefined);
-  useEffect(() => {
-    if (previousFocusModeRef.current === undefined) {
-      previousFocusModeRef.current = focusModeEnabled;
-      return;
-    }
-    if (previousFocusModeRef.current !== focusModeEnabled) {
-      announceFlow(
-        `flow:relationships:${focusModeEnabled ? "on" : "off"}`,
-        unitInformationMessage(
-          focusModeEnabled
-            ? "a11y.announce.relationshipsOn"
-            : "a11y.announce.relationshipsOff",
-          lang,
-        ),
-      );
-      previousFocusModeRef.current = focusModeEnabled;
-    }
-  }, [announceFlow, focusModeEnabled, lang]);
+  });
 
   return (
     <ThemeProvider theme={theme}>

@@ -200,6 +200,33 @@ const statusPresentation: Record<
   },
 };
 
+const flowNodeStatusMessageKey = (status: FlowNodeStatus): string =>
+  status === "schedule"
+    ? "a11y.flow.node.hasSchedule"
+    : "a11y.flow.node.hasWaitedFor";
+
+const FlowNodeStatusIndicator: FC<{
+  status: FlowNodeStatus;
+  language: string;
+}> = ({ status, language }) => {
+  const message = unitInformationMessage(
+    flowNodeStatusMessageKey(status),
+    language,
+  );
+  return (
+    <Tooltip key={status} title={message}>
+      <Box
+        component="span"
+        role="img"
+        aria-label={message}
+        sx={{ display: "inline-flex" }}
+      >
+        {statusPresentation[status].icon}
+      </Box>
+    </Tooltip>
+  );
+};
+
 export type FlowNodeHeaderItemKind = "rootBadge" | FlowNodeStatus | "action";
 
 export const getFlowNodeHeaderItemKinds = (
@@ -238,34 +265,9 @@ const NodeStatusIndicators: FC<{ data: FlowNodePresentationModel }> = ({
         fontSize: "0.75rem",
       }}
     >
-      {statuses.map((status) => {
-        const presentation = statusPresentation[status];
-        return (
-          <Tooltip
-            key={status}
-            title={unitInformationMessage(
-              status === "schedule"
-                ? "a11y.flow.node.hasSchedule"
-                : "a11y.flow.node.hasWaitedFor",
-              lang,
-            )}
-          >
-            <Box
-              component="span"
-              role="img"
-              aria-label={unitInformationMessage(
-                status === "schedule"
-                  ? "a11y.flow.node.hasSchedule"
-                  : "a11y.flow.node.hasWaitedFor",
-                lang,
-              )}
-              sx={{ display: "inline-flex" }}
-            >
-              {presentation.icon}
-            </Box>
-          </Tooltip>
-        );
-      })}
+      {statuses.map((status) => (
+        <FlowNodeStatusIndicator key={status} status={status} language={lang} />
+      ))}
     </Box>
   );
 };
@@ -289,6 +291,30 @@ const semanticDiffPresentation = {
   },
 } as const;
 
+const semanticDiffPaletteKey: Record<
+  keyof typeof semanticDiffPresentation,
+  "success" | "error" | "info" | "warning"
+> = {
+  added: "success",
+  removed: "error",
+  changed: "info",
+  "confirmation-required": "warning",
+};
+
+const semanticDiffIndicatorColors = (
+  highlight: NonNullable<FlowNodePresentationModel["semanticDiffHighlight"]>,
+  theme: Theme,
+): { color: string; backgroundColor: string } => {
+  const palette = theme.palette[semanticDiffPaletteKey[highlight.kind]];
+  return {
+    color:
+      highlight.kind === "confirmation-required"
+        ? palette.contrastText
+        : theme.palette.getContrastText(palette.main),
+    backgroundColor: palette.main,
+  };
+};
+
 const NodeSemanticDiffIndicator: FC<{
   data: FlowNodePresentationModel;
 }> = ({ data }) => {
@@ -305,27 +331,10 @@ const NodeSemanticDiffIndicator: FC<{
         role="img"
         aria-label={title}
         data-semantic-diff-state={highlight.kind}
-        sx={{
+        sx={(theme) => ({
           ...nodeBadgeSxProps,
           minWidth: "auto",
-          color: (theme) =>
-            highlight.kind === "confirmation-required"
-              ? theme.palette.warning.contrastText
-              : theme.palette.getContrastText(
-                  highlight.kind === "removed"
-                    ? theme.palette.error.main
-                    : highlight.kind === "added"
-                      ? theme.palette.success.main
-                      : theme.palette.info.main,
-                ),
-          backgroundColor: (theme) =>
-            highlight.kind === "confirmation-required"
-              ? theme.palette.warning.main
-              : highlight.kind === "removed"
-                ? theme.palette.error.main
-                : highlight.kind === "added"
-                  ? theme.palette.success.main
-                  : theme.palette.info.main,
+          ...semanticDiffIndicatorColors(highlight, theme),
           "@media (forced-colors: active)": {
             color: "CanvasText",
             backgroundColor: "Canvas",
@@ -336,7 +345,7 @@ const NodeSemanticDiffIndicator: FC<{
             backgroundColor: "var(--vscode-editor-background, Canvas)",
             borderColor: "var(--vscode-foreground, CanvasText)",
           },
-        }}
+        })}
       >
         {label}
       </Box>
