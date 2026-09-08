@@ -29,10 +29,12 @@
   final independent `Ready`/no-findings review and Human Approval on
   2026-09-08; its focused replan commit `d0cc7815` is present. Slice 13
   implementation is complete, independently reviewed, and focused-committed.
-  Feature Exit returned `Close`, but closure is paused by a reproduced runtime
-  regression in the Explorer source-capture handoff. Slice 14 is the active
-  narrow regression-fix replan; no implementation approval or completion
-  commit exists for it.
+  Feature Exit returned `Close`, but closure was paused by a reproduced runtime
+  regression in the Explorer source-capture handoff. Slice 14 repaired that
+  boundary, was independently reviewed `Ready` with no findings, automatically
+  completion-approved, and focused-committed as `6cce14b7`. The final Feature
+  Exit rerun returned `Close`. A new user-reported color regression reopens
+  the feature for the narrow Slice 15 theme-mode/default-color replan below.
 - Do not own comparison sources/periods, upstream rules, report modes,
   schedule-calendar behavior, definition editing, or review persistence.
 - Reuse the existing Flow graph, nesting, search, navigation, focus, and
@@ -66,9 +68,11 @@
 - Read first: `SPECS.md`, this file, the three predecessor contracts, and
   `TRACEABILITY.md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next route: independent review of the Slice 14 replan, followed by the
-  existing plan-approval and one-slice implementation gates. The six closure
-  drafts remain excluded.
+- Next route: `approval-committer` may create the focused Slice 15 plan-gate
+  commit after the independent `Ready` review and automatic Human Approval
+  recorded below. Aggregate human approval and explicit Closure Approval for
+  the final six durable paths plus selected feature-folder removal remain
+  paused; the six closure drafts stay excluded from implementation slices.
 
 ## Sync Rule
 
@@ -150,8 +154,9 @@
   completed and focused-committed as
   `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13's narrow canonical-
   theme replan is present as `d0cc7815`, and its implementation is complete,
-  independently reviewed, and focused-committed. Feature Exit is paused by
-  the Slice 14 regression replan.
+  independently reviewed, and focused-committed. Slice 14 is complete and its
+  post-repair Feature Exit returned `Close`; the Slice 15 color/theme
+  regression replan now pauses closure.
 
 ## Plan Status
 
@@ -165,10 +170,12 @@
   focused-committed as
   `a7905e8fdd905c506627a83d6c86ed1246255298`; Slice 13's narrow replan is
   independently reviewed `Ready` with no findings, Human Approval recorded,
-  and focused-committed. Slice 14 is the active regression-fix replan; its
-  independent plan review is `Ready` with no findings and Human Approval is
+  and focused-committed. Slice 14 was the regression-fix replan; its
+  independent plan review is `Ready` with no findings and Human Approval was
   automatically recorded under the standing proceed-through-slices policy.
-  Implementation remains blocked until the approved plan is committed.
+  Slice 14 is complete and focused-committed as `6cce14b7`; the post-repair
+  Feature Exit returned `Close`. Slice 15 is now the active color/theme
+  regression replan.
 - Planning scope: preserve EXP-1 through EXP-10 while adding the MUI/WCAG 2.2
   AA surface contract, actual-session confirmation-filter proof, and qlty-smell
   remediation across the changed application, parser, host, Flow, and webview
@@ -180,7 +187,9 @@
   on 2026-09-08; its focused replan commit is `d0cc7815`. Slice 14's
   independent plan review also returned `Ready` with no findings, and its
   Human Approval is automatically recorded under the user's explicit
-  no-findings auto-approval policy. The plan-gate commit is still pending.
+  no-findings auto-approval policy; its plan-gate commit is `6f1f262d` and
+  focused completion commit is `6cce14b7`. The post-repair Feature Exit
+  returned `Close`; Slice 15 is now the active replan.
 - Human approval: the historical approvals below are limited to Slices 1-4
   only and are superseded as the active gate. Replanning Human Approval was
   granted on 2026-09-07 under the user's explicit MUI/WCAG/qlty/filter request.
@@ -188,13 +197,16 @@
   user messages `承認します。` and `継続して。`.
   Narrow Slice 13 theme API Human Approval was granted on 2026-09-08 through
   the trusted messages `承認します。` and repeated `継続して。`.
-- Active gate: Slice 14 — Repair URI-bearing source capture and command error
-  classification. The plan replan is reviewed and Human Approved; the
-  approval-committer plan gate is pending, so no runtime or test changes are
-  authorized by this document yet.
+- Active gate: Slice 15 — Restore MUI standard theme colors and explicit
+  Explorer theme-mode following. Independent plan review is `Ready` with no
+  findings and Human Approval is automatically recorded under the user's
+  standing no-findings proceed-through-slices policy. The focused plan-gate
+  commit is pending through `approval-committer`; no runtime or test changes
+  are authorized before that commit.
 - Slice order: Slices 1-12, Slice 9A, and Slice 7A remain complete and
-  committed; Slice 13 is complete and focused-committed; Slice 14 is the
-  newly planned regression-fix slice.
+  committed; Slice 13 and Slice 14 are complete and focused-committed; Slice
+  15 is the color/theme regression-fix slice with its plan approved; the
+  focused plan-gate commit is the next route.
   Each new slice
   has an
   independent review and the recorded automatic Completion Approval rule
@@ -334,8 +346,8 @@
   auto-approval policy, and the approved plan-gate commit `6f1f262d` is
   present. Implementation review returned `Ready` with no findings on
   2026-09-09; Completion Approval is automatically recorded under the
-  standing no-findings policy. The focused completion commit is eligible and
-  pending.
+  standing no-findings policy. Focused completion commit `6cce14b7` is
+  present.
 - Scope: strip only the host-only `uri` field before calling the application
   capture factory, retain the original URI-bearing descriptors for host
   registration, and separate capture setup exception handling from parser/
@@ -408,12 +420,13 @@ test:compile`, targeted qlty smells, full qlty check, Markdown lint, and
   and remains outside Slice 14. The six closure-draft paths remain untouched.
 - Production readiness is positive for valid JP1/AJS Explorer opening,
   malformed-parser diagnostics, exact source handle/version preservation,
-  registration cleanup, and desktop/web bundle preparation. Browser smoke and
-  the focused completion commit remain Main-owned follow-up gates.
+  registration cleanup, and desktop/web bundle preparation. Browser smoke
+  remains an environment-owned caveat; the focused completion commit is
+  `6cce14b7`.
 - Independent implementation review returned `Ready` with no findings on
   2026-09-09. Under the user's standing proceed-through-slices policy,
-  Completion Approval is automatically approved; no commit was created by
-  this implementation or review handoff.
+  Completion Approval is automatically approved; focused completion commit
+  `6cce14b7` is recorded.
 
 ## Historical Human Approval (Slices 1-4 Only; Superseded)
 
@@ -3618,12 +3631,143 @@ are zero findings. Counts are findings, not a suppression or a score.
 
 <!-- markdownlint-enable MD013 -->
 
+## Feature Exit Superseded By Slice 15 Color Regression Replan
+
+The post-Slice-14 `Close` recommendation is retained as historical evidence
+for completed Slices 1-14 only. The reported Explorer color regression
+reopens the feature because the shared factory applies fixed dark colors in
+light mode, the Explorer uses a fixed singleton in loading and loaded views,
+and Explorer surfaces override MUI with VS Code/custom colors. Slice 15 is
+the smallest presentation/theme repair. Its implementation and completion
+gates must pass before Feature Exit is rerun; the six uncommitted
+closure-draft paths remain protected and excluded.
+
+## Current Narrow Replan Boundary (Slice 15)
+
+- Trigger: post-Slice-14 Feature Exit investigation found a user-visible color
+  regression in Semantic Diff Explorer. `createSemanticDiffTheme({ mode:
+"light" })` currently applies a fixed dark palette after selecting the mode,
+  and both loading and loaded Explorer views use the singleton light theme.
+  Explorer global styles, panel HTML, card borders, and selected tree rows
+  also override MUI with VS Code token/custom colors. The result is a light
+  theme with dark surfaces/text and mismatched MUI/body colors; the same
+  standard-MUI rule applies to every supported theme, including dark and
+  high-contrast/forced-colors modes.
+- Planned change: make the shared factory use MUI's standard light/dark
+  palette by default, removing non-essential custom palette, background, text,
+  component color, and VS Code token overrides from the Explorer path. Retain
+  only WCAG necessities: 44px primary targets, 2px visible focus, and
+  forced-colors system colors. Explorer loading and loaded providers must use
+  the resolved mode instead of the fixed singleton. Add a browser-safe mode
+  resolver that follows available host signals (standard theme class/data
+  attributes and `prefers-color-scheme`) and observes feasible live changes;
+  do not add a semantic comparison or session-protocol dependency merely to
+  transport theme state.
+- Approved replan boundary: `src/presentation/webview/shared/muiTheme.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelHtml.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerThemeMode.ts`,
+  and focused `muiTheme`, `semanticDiffExplorerThemeMode`, Explorer DOM/axe,
+  and panel tests. Existing Flow/Table consumers remain on the same shared
+  factory and receive regression coverage; application/domain/host capture,
+  comparison,
+  transport, and session contracts are unchanged.
+- Validation boundary: verify light and dark themes retain MUI standard
+  palette values, Explorer follows mode changes when the host exposes a
+  supported signal, and high-contrast/forced-colors retains system colors.
+  Prove no non-essential VS Code color tokens or fixed dark values remain in
+  the Explorer theme/global/panel/tree/card paths. Test text/background,
+  selection, border, and focus contrast/perceivability, 44px target sizing,
+  2px focus visibility, WCAG non-color state cues, reflow, CSP, desktop/web
+  bundles, focused DOM/axe behavior, Flow/Table regressions, qlty, Markdown,
+  and diff checks.
+- Production readiness: preserve MUI 7, Emotion/CSP/no-remote-assets,
+  VS Code `^1.75.0`, desktop/web parity, keyboard/focus behavior, semantic
+  state labels, high-contrast/forced-colors behavior, and all Explorer data,
+  action, filter, report, source, and Flow contracts. If no live host mode
+  signal is available in a target webview, the resolver must fall back
+  deterministically without claiming unsupported live-follow behavior.
+- Approval boundary: one independently reviewable presentation/theme slice;
+  no application/domain/parser change, semantic-diff protocol change, source
+  capture change, new renderer, dependency/engine change, qlty suppression,
+  telemetry change, or closure-draft propagation.
+- Dependencies: completed Slices 5, 12, 13, and 14 plus the existing WCAG and
+  actual-session filter evidence. Slice 15's independent plan review is
+  `Ready` with no findings and Human Approval is automatically recorded under
+  the user's standing policy; its focused plan-gate commit is the next route.
+  After that commit, Slice 15 must pass implementation review and automatic
+  Completion Approval when `Ready` with no findings before Feature Exit is
+  rerun.
+- Risks: a theme-mode observer could miss a host signal or cause stale theme
+  state; removing custom colors could regress contrast, selection, Flow/Table
+  surfaces, or forced-colors behavior. Standard MUI palette assertions,
+  simulated class/media changes, numeric contrast tests, DOM/axe checks, and
+  desktop/web evidence are required. Host protocol expansion is a replan
+  trigger, not an implicit fallback.
+- Out of Scope: parser/comparison/source/Flow/report behavior, session and
+  transport schemas, URL/dependency warnings, telemetry, remote assets,
+  engine-floor changes, broad visual redesign, and closure-folder removal.
+
+### Slice 15: Restore MUI Standard Colors And Explorer Theme-Mode Following
+
+- Status: Plan reviewed `Ready` with no findings; Human Approval is
+  automatically recorded under the user's standing no-findings policy on
+  2026-09-09. The focused plan-gate commit is eligible and pending through
+  `approval-committer`; runtime and test edits remain forbidden until that
+  commit.
+- Scope: simplify `createSemanticDiffTheme` to MUI-standard light/dark palette
+  defaults, retain only WCAG-required target/focus/forced-colors overrides,
+  remove Explorer-specific VS Code/custom color overrides from shared theme,
+  panel HTML, global styles, cards, and tree selection, and make loading and
+  loaded Explorer providers consume the resolved mode. Add a small
+  browser-safe mode resolver/observer in
+  `semanticDiffExplorerThemeMode.ts` for host theme changes.
+- User / Domain Value: light and dark Semantic Diff Explorer sessions look
+  like their selected MUI theme instead of inheriting a fixed dark palette,
+  while selected states and focus remain perceivable and accessible in normal,
+  high-contrast, and forced-colors environments.
+- Cohesive Change Group: shared MUI theme policy, Explorer provider/mode
+  resolution, Explorer surface/tree color cleanup, panel bootstrap color
+  cleanup, and focused theme/DOM/panel regression evidence.
+- Acceptance: light and dark factory outputs use the corresponding MUI
+  standard palette; no fixed dark background/text or non-essential VS Code
+  color token overrides remain in Explorer paths; loading and loaded views
+  render the same resolved mode; feasible host class/data/media changes update
+  the mode; high-contrast/forced-colors keeps Canvas/CanvasText,
+  ButtonFace/ButtonText, and Highlight semantics; selection, borders, text,
+  and focus meet the recorded WCAG contrast/perceivability checks; 44px
+  controls, 2px focus, keyboard operation, filter behavior, cards, state
+  labels, CSP, Flow/Table behavior, and desktop/web parity remain unchanged.
+- Validation: `muiTheme.test.ts`, Explorer DOM/axe and mode-change tests,
+  panel HTML/CSP assertions, existing Flow/Table/theme suites, compiled
+  desktop runner, web preparation/build/smoke where available, targeted and
+  full qlty checks, Markdown lint, and `rtk git diff --check`.
+- Production Readiness: no application/domain/host protocol change; preserve
+  browser-safe imports, MUI/Emotion CSP, standard palette derivation,
+  read-only behavior, source/Flow/report actions, and WCAG manual/host
+  evidence boundaries. Unsupported live host-mode signals fall back without
+  corrupting the Explorer session.
+- Approval Boundary: exactly the shared theme, Explorer presentation/mode
+  helper, panel bootstrap color cleanup, and focused test paths listed above;
+  no durable docs or closure propagation.
+- Dependencies: completed Slices 5, 12, 13, and 14; protected closure drafts
+  remain uncommitted and excluded.
+- Risks: light/dark palette inversion, stale host-mode state, loss of
+  selection/focus contrast, forced-colors regression, and accidental Flow/Table
+  color drift. Existing mode, accessibility, Flow/Table, and bundle tests plus
+  numeric contrast evidence are the gates.
+- Out of Scope: `url.parse()`/dependency changes, parser/semantic rules,
+  Explorer data/transport, source capture, Flow graph logic, telemetry,
+  remote assets, and feature-folder removal.
+
 The aggregate is `P=23`, `R=50`, `F=134`, `T=12`, `B=55`, `N=2`, and
 `D=9`. Slice 5's Explorer files are intentionally included in this baseline;
 the new `src/presentation/webview/shared/muiTheme.ts` is included in the
 post-slice clean check even though it did not exist in the baseline. The exit
 definition is zero qlty-smell findings in every feature-delta file (including
-new helpers and any file touched by Slices 5-13), a passing `qlty check`, and
+new helpers and any file touched by Slices 5-15), a passing `qlty check`, and
 no suppression, allowlist, threshold, generated-ignore, or metrics-only
 waiver change. If a repository-baseline finding is outside this feature delta,
 the final report must identify it by path and prove zero new findings in the
@@ -3631,7 +3775,7 @@ changed delta; it may not be hidden.
 
 ## Cross-Slice Readiness And Approval Boundaries
 
-- Slices 1-4 remain complete and focused-committed. Slices 5-13 each require
+- Slices 1-4 remain complete and focused-committed. Slices 5-15 each require
   focused tests, qlty smell/check evidence, and a build whenever the changed
   surface affects compilation/bundling; parser, host, Flow, and webview slices
   add the relevant desktop/web/architecture checks.
@@ -3663,7 +3807,7 @@ changed delta; it may not be hidden.
   the explicit user policy, a `Ready` verdict with no findings conditionally
   authorizes that slice's Completion Approval automatically; actionable
   Findings suspend the slice and require Main to route remediation. Main
-  requests one aggregate human approval only after Slices 5-13 are complete
+  requests one aggregate human approval only after Slices 5-15 are complete
   and committed, then reopens Feature Exit for the final closure review.
 - Domain gains no responsibility; application imports no VS Code/UI/
   infrastructure; ANTLR stays in parser infrastructure; presentation consumes
@@ -3715,15 +3859,17 @@ changed delta; it may not be hidden.
 ## Traceability And Feature Exit
 
 - `TRACEABILITY.md` maps EXP-1 through EXP-11, N-1, E-4, filter verification,
-  qlty-smell remediation, compatibility, readiness, durable follow-up, and
-  the URI-bearing capture regression to Slices 1-14.
+  qlty-smell remediation, compatibility, readiness, durable follow-up, the
+  URI-bearing capture regression, and the MUI color/theme regression to
+  Slices 1-15.
 - Exit now requires the original four plus the reviewed/approved/committed
   remediation slices, MUI/WCAG 2.2 AA evidence, actual-session filter
   evidence, a clean qlty-smell report without suppression, desktop/web/a11y
-  evidence, durable-document review, final traceability, and Slice 14's
-  command-level regression proof. The prior `Close` recommendation is
-  superseded and closure remains paused until Slice 14 is complete and
-  Feature Exit is rerun.
+  evidence, durable-document review, final traceability, Slice 14's
+  command-level regression proof, and Slice 15's light/dark/default-color
+  regression proof. The post-Slice-14 `Close` recommendation is superseded
+  and closure remains paused until Slice 15 is complete and Feature Exit is
+  rerun.
 
 ## Validation
 
@@ -3763,10 +3909,14 @@ changed delta; it may not be hidden.
 - [x] Slice 14 URI-bearing source-capture regression fix implemented within
       the approved two-path boundary; focused tests/checks pass, independent
       review is `Ready`/no findings, and Completion Approval is automatic;
-      focused completion commit is pending
+      focused completion commit `6cce14b7` recorded
+- [ ] Slice 15 MUI standard colors and Explorer theme-mode following plan is
+      `Ready`/no findings with automatic Human Approval recorded; focused
+      plan-gate commit, implementation, review, and completion commit remain
+      pending
 - [x] README, CHANGELOG, durable use cases, roadmap, and final traceability
       revalidated at the reopened Feature Exit; the six durable paths remain
-      uncommitted until Slice 14 completes and aggregate human and Closure
+      uncommitted until Slice 15 completes and aggregate human and Closure
       Approval are obtained
 
 ## Final Feature Exit Review (2026-09-08)
@@ -3842,3 +3992,64 @@ misclassified the resulting setup exception as `parse-failed`. Slice 14 is
 the smallest repair plan. Its implementation and completion gates must pass
 before Feature Exit is rerun; the six uncommitted closure-draft paths remain
 protected and outside the replan.
+
+<!-- markdownlint-disable MD013 -->
+
+## Final Feature Exit Review After Slice 14 (2026-09-09)
+
+- Feature: `semantic-diff-explorer`.
+- Completed slices: Slices 1-13, formatter reconciliations 7A/9A, and Slice 14. Slice 14 plan-gate commit is `6f1f262d`; its focused completion commit
+  is `6cce14b7`. Every implementation slice has an independent `Ready` review
+  with no findings and automatic Completion Approval under the recorded user
+  policy.
+- Regression acceptance: `src/presentation/vscode/commands/
+semanticDiffCommandBuild.ts` now projects URI-bearing host descriptors into
+  the exact application capture shape
+  `{side, sourceHandleId, text, version}` while retaining the original URI
+  descriptors for source registration. The concrete command test uses
+  `AntlrAjsParser` and `createBeginSemanticDiffSourceCapture`, proves valid
+  before/after sources reach `openExplorer`, verifies URI and opaque-handle
+  identity, and confirms cleanup. Setup exceptions are `display-failed`;
+  concrete parser failures remain `parse-failed` with exactly-once release.
+  The reproduced malformed-descriptor failure is therefore fixed without
+  widening the application DTO or changing parser/source-index contracts.
+- Original acceptance remains satisfied: EXP-1 through EXP-11, N-1, and E-4;
+  immutable read-only Explorer session; exact source/Flow targets; canonical
+  MUI 7 mode-aware theme; WCAG 2.2 AA matrix with explicit N/A and
+  host/manual boundaries; and actual-session `確認が必要` filtering with
+  ordinary exclusion, confirmation retention, unchanged cards, zero-match
+  status, and latent-selection restoration.
+- Validation: `rtk pnpm run test:compile`, compiled desktop extension runner
+  (exit 0), production desktop/web build, web preparation, permissive-host
+  web smoke (Chromium and VS Code web extension started, exit 0), targeted
+  Slice 14 `qlty smells` (zero findings), full `qlty smells` (96 files,
+  zero findings), full `qlty check` (`No issues`), Markdown lint, and
+  `git diff --check` passed. Web smoke emitted existing ECONNRESET/EPIPE/
+  premature-close stream warnings after the app initialized; the ordinary
+  managed-host `bootstrap_check_in ... Permission denied (1100)` remains an
+  environment caveat, not a source failure. Existing webpack asset-size
+  warnings and the known architecture/golden baseline follow-ups are
+  unchanged.
+- Traceability and durable documentation: `TRACEABILITY.md` records Slice 14
+  command/capture/parser proof and the complete EXP-1 through EXP-11 matrix.
+  The six existing closure paths remain the only uncommitted durable
+  propagation: `README.md`, `README.en.md`, `CHANGELOG.md`,
+  `docs/requirements/use-cases/uc-present-semantic-diff-report.md`,
+  `docs/requirements/use-cases/uc-explore-flow-graph.md`, and
+  `docs/specs/roadmap.md`. No architecture, glossary, context, or neutral
+  comparison use-case update is required.
+- Production readiness: VS Code `^1.75.0`, Node `>=20`, desktop/web parity,
+  browser-safe imports, static CSP/no-remote-asset policy, Flow/table
+  behavior, parser diagnostics, source lifecycle cleanup, and
+  privacy-preserving telemetry remain intact. The unrelated `url.parse()`
+  DEP0169 warning remains outside scope.
+- Remaining risks: the two existing architecture composition-root violations
+  and expanded-Flow node-order golden mismatch remain assigned in
+  `docs/specs/roadmap.md`; web stream warnings and host-dependent manual
+  assistive-technology rows remain explicitly bounded in the evidence. No
+  new design, scope, or compatibility decision is required.
+- Closure recommendation: `Close`. Aggregate human approval and explicit
+  Closure Approval are still required; this review performs no commit or
+  feature-folder deletion.
+
+<!-- markdownlint-enable MD013 -->

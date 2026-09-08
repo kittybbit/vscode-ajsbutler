@@ -23,9 +23,10 @@
 | Application source-index boundary                              | Source-Index Boundary; Architecture                                                            | Slice 3              | Exact source-index DTO/range/unit-entry/parameter-occurrence shapes, `AjsParserWithSourceIndexPort` and `ParseAjsWithSourceIndexResult`, scoped lookup/parser/bind/release state machine, allocator brands with runtime prefix/membership checks, same-pass parser/index producer, normalized `AjsUnit.id` mapping with duplicate-path→`unit-missing`, fixed lookup/failure union, ANTLR context/token derivation and header fallback, no URI/TextDocument/parser/domain leakage, exact finite-range/ordinal/malformed tests                                                                                                                                                                                                                                                  |
 | Workflow capture and context binding                           | Session, Transport, And Lifecycle Contract; Architecture                                       | Slice 3              | Current file command scoped parser/output-context callback, future calendar callback seam without reverse dependency, begin with both immutable descriptors before builder, exactly two fixed-order enriched-parser calls with second-side continuation after first parser error, typed capture exception mapped to `source-capture-failed` without fake syntax errors, atomic bind to exact context identity, sole-owner/borrowed registry, unregister-before-release rollback, concurrent scope, disposal/stale outcome, one-argument async `OpenSemanticDiffExplorer(context)` resolving the exact host-only session handle, partial cleanup before reject mapped to current `display-failed`/future `explorer-open-failed`, Slice 2 no-op source hook attached by Slice 3 |
 | Relation edge and reason-detail ownership                      | Closed Target-Side And Relation Contract; Flow Accessibility And Detail Ownership              | Slice 4              | CanonicalPair-to-all-formal side edge IDs, duplicate highlighting/lowest-ordinal focus/count announcement, IDs/state-only optional augmentation through existing messages, `context.result` lookup with existing change/confirmation IDs, missing-ID safe error, `error.detail.targetId` unit-ID-or-null mapping, no reason/detail wire fields, non-focusable relation DOM/axe tests                                                                                                                                                                                                                                                                                                                                                                                          |
-| EXP-11: MUI design and WCAG 2.2 AA                             | Requirement EXP-11; WCAG 2.2 AA Explorer Matrix; Compatibility; Explorer Interaction And Scale | Slices 5, 13         | Canonical Slice-5-owned `muiTheme.ts`, MUI component/theme integration, static CSP assertions, desktop/web bundle smoke, applicable criteria 1.1.1/1.3.1/1.3.2/1.3.4/1.4.1/1.4.3/1.4.4/1.4.10/1.4.11/1.4.12/2.1.1/2.1.2/2.4.1/2.4.2/2.4.3/2.4.6/2.4.7/2.4.11/2.4.13/2.5.2/2.5.3/2.5.7/2.5.8/3.1.1/3.1.2/3.2.1/3.2.2/3.2.4/3.3.1/3.3.2/4.1.2/4.1.3 evidence, explicit N/A rationale, 4.5:1/3:1 text contrast, 3:1 non-text/focus contrast, 2 CSS-pixel focus perimeter, 24x24 AA floor/44x44 product target, 200% text resize, 400%/320 CSS px reflow, `axe-core`, and manual checks                                                                                                                                                                                           |
+| EXP-11: MUI design and WCAG 2.2 AA                             | Requirement EXP-11; WCAG 2.2 AA Explorer Matrix; Compatibility; Explorer Interaction And Scale | Slices 5, 13, 15     | Canonical Slice-5-owned `muiTheme.ts`, MUI standard light/dark palette and mode-following Explorer provider, static CSP assertions, desktop/web bundle smoke, applicable criteria 1.1.1/1.3.1/1.3.2/1.3.4/1.4.1/1.4.3/1.4.4/1.4.10/1.4.11/1.4.12/2.1.1/2.1.2/2.4.1/2.4.2/2.4.3/2.4.6/2.4.7/2.4.11/2.4.13/2.5.2/2.5.3/2.5.7/2.5.8/3.1.1/3.1.2/3.2.1/3.2.2/3.2.4/3.3.1/3.3.2/4.1.2/4.1.3 evidence, explicit N/A rationale, 4.5:1/3:1 text contrast, 3:1 non-text/focus contrast, 2 CSS-pixel focus perimeter, 24x24 AA floor/44x44 product target, 200% text resize, 400%/320 CSS px reflow, `axe-core`, and manual checks                                                                                                                                                      |
 | qlty smell remediation without suppression                     | Acceptance Criteria; Architecture; Risk-Based Validation                                       | Slices 7-13          | Auditable qlty 0.500.0 baseline in `TASKS.md` (45 analyzed/31 finding files and exact family counts); fresh report is clean for every feature-delta file, including Slice-5 Explorer files and the new shared theme helper; no threshold relaxation, suppression, or allowlist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | URI-bearing source capture regression                          | Requirement EXP-1/EXP-5; Source-Index Boundary; Session, Transport, And Lifecycle Contract     | Slice 14             | Command-level concrete capture/parser regression proves URI-free application DTO projection, retained URI-bearing registration descriptors, valid Explorer opening, exact-key acceptance, no capture leak, and setup-vs-parser error classification; focused command/source-capture/parser/report suites, desktop command path, qlty, build, and diff checks                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| MUI standard colors and Explorer theme-mode following          | Requirement EXP-11; WCAG 2.2 AA Explorer Matrix; Compatibility; Explorer Interaction And Scale | Slice 15             | Light/dark MUI-standard palette assertions, Explorer mode/provider and host-signal change tests, high-contrast/forced-colors system-color checks, removal of non-essential VS Code/custom color overrides, selection/focus contrast and target-size DOM/axe evidence, panel CSP, Flow/Table regressions, desktop/web bundles, qlty, and diff checks                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Durable report/Flow/user docs reflect delivery                 | Impact Analysis; Acceptance                                                                    | Feature Exit         | Update report/Flow use cases, README, CHANGELOG; evaluate build-semantic-diff                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 <!-- markdownlint-enable MD013 MD060 -->
@@ -1120,6 +1121,7 @@ test:prepare:web` passed. The desktop runner exited 0 and the web runner
 | 12    | Slice 4 Flow readiness/reveal and ordinary viewer wiring; bootstrap composition rules                       | `semanticDiffExplorerFlow.ts`, `semanticDiffFlowViewerBridge.ts`, `src/bootstrap/extension/semanticDiffWiring.ts`, `viewerWiring.ts`, `extensionDependencies.ts`, and `ajsDocument.ts` preserve concrete dependency ownership in bootstrap, one overlay per URI, stale-owner guards, telemetry privacy, normal viewer lifecycle, and web-safe imports.                                                                           |
 | 13    | Existing Flow/table accessibility and Slice 5's canonical MUI theme API                                     | `FlowContents.tsx`, `FlowGraphCanvas.tsx`, `flowGraphView.ts`, `flowMiniMap.ts`, `nodes/AjsNode.tsx`, and `TableContents.tsx` consume `src/presentation/webview/shared/muiTheme.ts`; no duplicate theme owner, parser/host import, renderer protocol, or Flow/table behavior change.                                                                                                                                             |
 | 14    | Slice 3/8 capture contract and Slice 11 command/registration boundary                                       | `semanticDiffCommandBuild.ts` projects URI-free application descriptors while retaining URI-bearing registration descriptors; `semanticDiffCommand.test.ts` proves concrete parser/capture success, exact keys, URI identity, Explorer opening, setup-vs-parser error classification, and cleanup. The `url.parse()` startup warning remains out of scope.                                                                       |
+| 15    | Slice 5/13 MUI theme ownership and Explorer WCAG presentation boundary                                      | `muiTheme.ts`, Explorer provider/view/tree, panel HTML, and focused theme/DOM/panel tests preserve application/host protocol contracts while restoring MUI-standard light/dark defaults, feasible host-mode following, forced-colors system colors, selection/focus contrast, target size, CSP, and Flow/Table regressions.                                                                                                      |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -1244,5 +1246,115 @@ test:prepare:web`, targeted `qlty smells --no-snippets` for both changed
   and the rerun Feature Exit remain pending.
 - Independent implementation review returned `Ready` with no findings on
   2026-09-09. Under the user's standing no-findings policy, Completion
-  Approval is automatically approved; the exact focused completion commit is
-  now eligible but has not been created.
+  Approval is automatically approved; focused completion commit `6cce14b7` is
+  recorded.
+
+## Final Feature Exit Review After Slice 14 (2026-09-09)
+
+- All implementation slices are complete, independently reviewed `Ready` with
+  no findings, automatically completion-approved under the standing user
+  policy, and focused-committed. The original/replanned implementation
+  sequence ends with Slice 14 commit `6cce14b7`; its approved plan-gate commit
+  is `6f1f262d`.
+- Slice 14 regression proof is concrete and command-level. The command keeps
+  URI-bearing registration descriptors but passes the application capture
+  factory only `{side, sourceHandleId, text, version}`. The new
+  `semanticDiffCommand.test.ts` coverage uses the concrete `AntlrAjsParser`
+  and `createBeginSemanticDiffSourceCapture` to prove valid before/after
+  definitions reach `openExplorer`, URI and opaque-handle identity are
+  retained for registration, and source capture is removed during cleanup.
+  Separate concrete tests prove setup exceptions become `display-failed`,
+  parser failures remain `parse-failed`, and release occurs exactly once.
+  This closes the reproduced `Malformed semantic diff source descriptor`
+  failure without changing the application DTO guard, parser, source index,
+  or Explorer contracts.
+- EXP-1 through EXP-11, N-1, and E-4 remain satisfied. The canonical MUI 7
+  mode-aware theme, WCAG 2.2 AA matrix and explicit N/A/manual host
+  boundaries, strict CSP/no-remote-assets policy, keyboard/focus/high-contrast
+  behavior, and actual-session `確認が必要` filter proof remain unchanged and
+  passing. The real session ID reaches the actual App; ordinary records are
+  excluded, confirmation records and confirmation-required changes remain,
+  cards stay canonical, zero-match status is visible, and latent selection is
+  restored after clearing the filter.
+- Validation passed `rtk pnpm run test:compile`, compiled desktop extension
+  tests (`node ./out/test/runTest.js`, exit 0), production desktop/web build,
+  web preparation, and permissive-host web smoke. The web smoke launched
+  Chromium and the VS Code web extension and exited 0; existing
+  ECONNRESET/EPIPE/premature-close stream warnings appeared after app startup.
+  The ordinary managed-host `bootstrap_check_in ... Permission denied (1100)`
+  remains an environment restriction and is not a source failure. Targeted
+  Slice 14 qlty smells returned zero findings; the fresh full smells run
+  analyzed 96 files with zero findings; full qlty check returned `No issues`;
+  Markdown lint and `git diff --check` passed.
+- Compatibility and production readiness remain positive for VS Code
+  `^1.75.0`, Node `>=20`, desktop/web parity, browser-safe imports, parser
+  diagnostics, source lifecycle cleanup, Flow/table behavior, static CSP, and
+  privacy-preserving telemetry. Existing webpack asset-size warnings, the
+  two architecture baseline violations, expanded-Flow golden mismatch, and
+  unrelated `url.parse()` DEP0169 warning remain explicitly bounded and
+  assigned/out of scope.
+- Durable propagation remains complete in the six uncommitted closure paths:
+  `README.md`, `README.en.md`, `CHANGELOG.md`,
+  `docs/requirements/use-cases/uc-present-semantic-diff-report.md`,
+  `docs/requirements/use-cases/uc-explore-flow-graph.md`, and
+  `docs/specs/roadmap.md`. No architecture, glossary, context, or neutral
+  comparison use-case update is required. No reusable knowledge or unresolved
+  feature risk remains only in the feature folder.
+- Closure recommendation: `Close`. Aggregate human approval and explicit
+  Closure Approval remain the next gate. The proposed closure scope is those
+  six durable paths plus removal of
+  `docs/specs/features/semantic-diff-explorer/`; this review performs no
+  staging, commit, or deletion.
+
+## Feature Exit Superseded By Slice 15 Color Regression Replan
+
+The 2026-09-09 `Close` recommendation remains historical evidence for the
+completed Slices 1-14 only. The reported Explorer color regression reopens
+the feature: the shared factory applies a fixed dark palette after selecting
+light mode, the Explorer uses a fixed singleton in both loading and loaded
+views, and Explorer surfaces still override MUI with VS Code/custom colors.
+The standard-MUI rule applies to every supported theme, including dark and
+high-contrast/forced-colors modes.
+Slice 15 owns the smallest presentation/theme repair and its light/dark,
+high-contrast/forced-colors, host-signal, contrast, selection, focus, CSP,
+and desktop/web regression evidence. The six uncommitted closure-draft paths
+remain protected and excluded.
+
+### Slice 15 Activation — MUI Standard Colors And Theme-Mode Following
+
+Plan approved 2026-09-09.
+
+- Trigger: user-reported color mismatch after Slice 14 Feature Exit. Current
+  evidence shows `createSemanticDiffTheme({ mode: "light" })` spreads fixed
+  dark background/text values after setting the mode, while both Explorer
+  loading and loaded views use `semanticDiffExplorerTheme`. Global styles,
+  panel HTML, card borders, and selected tree rows also use VS Code/custom
+  colors that override MUI defaults.
+- Planned boundary: `src/presentation/webview/shared/muiTheme.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+  `semanticDiffExplorerView.tsx`, `semanticDiffExplorerTree.tsx`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelHtml.ts`,
+  `src/presentation/webview/semantic-diff/semanticDiffExplorerThemeMode.ts`,
+  and focused `muiTheme`, `semanticDiffExplorerThemeMode`, Explorer DOM/axe,
+  and panel tests. Existing Flow/Table consumers
+  receive regression coverage; application/domain/capture/comparison/session
+  and host transport contracts are unchanged.
+- Acceptance requires MUI-standard light/dark palette values by default, no
+  non-essential fixed dark or VS Code/custom color overrides in Explorer
+  paths, mode-following loading/loaded providers, feasible live host-signal
+  updates, and retained high-contrast/forced-colors system colors. Numeric
+  contrast/perceivability, selection, focus, target-size, keyboard, reflow,
+  non-color state, CSP, Flow/Table, desktop/web, and qlty evidence are gates.
+- Host-mode following is bounded to signals available inside the webview:
+  standard theme class/data attributes and `prefers-color-scheme`, with
+  mutation/media listeners where supported. No new semantic-diff session or
+  application transport field is authorized merely to carry theme state; an
+  unavailable live signal must fall back deterministically and be reported as
+  an environment boundary.
+- Independent plan review returned `Ready` with no findings on 2026-09-09.
+  Under the user's standing policy that a no-findings slice review is
+  automatically approved, Slice 15 Human Approval is recorded for the exact
+  boundary above. The focused plan-gate commit is eligible and pending through
+  `approval-committer`; runtime/test changes remain forbidden until that commit
+  is complete. Existing Slice 14 and Feature Exit evidence remains preserved;
+  closure drafts remain untouched.
