@@ -25,6 +25,7 @@
 | Relation edge and reason-detail ownership                      | Closed Target-Side And Relation Contract; Flow Accessibility And Detail Ownership              | Slice 4              | CanonicalPair-to-all-formal side edge IDs, duplicate highlighting/lowest-ordinal focus/count announcement, IDs/state-only optional augmentation through existing messages, `context.result` lookup with existing change/confirmation IDs, missing-ID safe error, `error.detail.targetId` unit-ID-or-null mapping, no reason/detail wire fields, non-focusable relation DOM/axe tests                                                                                                                                                                                                                                                                                                                                                                                          |
 | EXP-11: MUI design and WCAG 2.2 AA                             | Requirement EXP-11; WCAG 2.2 AA Explorer Matrix; Compatibility; Explorer Interaction And Scale | Slices 5, 13         | Canonical Slice-5-owned `muiTheme.ts`, MUI component/theme integration, static CSP assertions, desktop/web bundle smoke, applicable criteria 1.1.1/1.3.1/1.3.2/1.3.4/1.4.1/1.4.3/1.4.4/1.4.10/1.4.11/1.4.12/2.1.1/2.1.2/2.4.1/2.4.2/2.4.3/2.4.6/2.4.7/2.4.11/2.4.13/2.5.2/2.5.3/2.5.7/2.5.8/3.1.1/3.1.2/3.2.1/3.2.2/3.2.4/3.3.1/3.3.2/4.1.2/4.1.3 evidence, explicit N/A rationale, 4.5:1/3:1 text contrast, 3:1 non-text/focus contrast, 2 CSS-pixel focus perimeter, 24x24 AA floor/44x44 product target, 200% text resize, 400%/320 CSS px reflow, `axe-core`, and manual checks                                                                                                                                                                                           |
 | qlty smell remediation without suppression                     | Acceptance Criteria; Architecture; Risk-Based Validation                                       | Slices 7-13          | Auditable qlty 0.500.0 baseline in `TASKS.md` (45 analyzed/31 finding files and exact family counts); fresh report is clean for every feature-delta file, including Slice-5 Explorer files and the new shared theme helper; no threshold relaxation, suppression, or allowlist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| URI-bearing source capture regression                          | Requirement EXP-1/EXP-5; Source-Index Boundary; Session, Transport, And Lifecycle Contract     | Slice 14             | Command-level concrete capture/parser regression proves URI-free application DTO projection, retained URI-bearing registration descriptors, valid Explorer opening, exact-key acceptance, no capture leak, and setup-vs-parser error classification; focused command/source-capture/parser/report suites, desktop command path, qlty, build, and diff checks                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Durable report/Flow/user docs reflect delivery                 | Impact Analysis; Acceptance                                                                    | Feature Exit         | Update report/Flow use cases, README, CHANGELOG; evaluate build-semantic-diff                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 <!-- markdownlint-enable MD013 MD060 -->
@@ -857,8 +858,9 @@ test:compile`, production desktop/web `rtk pnpm run build`, the focused
 - The focused replan commit `d0cc7815` is present; its exact paths were only
   `docs/specs/features/semantic-diff-explorer/TASKS.md` and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`. Slice 13
-  implementation is complete pending independent review; closure drafts
-  remain excluded and untouched.
+  implementation is complete, independently reviewed, and focused-committed;
+  closure drafts remain excluded and untouched. Feature Exit is paused by the
+  Slice 14 regression replan below.
 
 ### Slice 13 Implementation Evidence (2026-09-08)
 
@@ -896,11 +898,53 @@ test:prepare:web` passed. The desktop runner exited 0 and the web runner
 - Production readiness is positive for VS Code `^1.75.0`, desktop/web parity,
   browser-safe imports, WCAG 2.2 focus/target/contrast/high-contrast behavior,
   bounded rendering, and privacy-preserving telemetry. Independent
-  implementation review is the next gate; no completion commit has been
-  created. Remaining risks are the existing accessibility DOM harness
+  implementation review and focused completion commit `9229f299` are
+  complete. Remaining risks are the existing accessibility DOM harness
   failures when the whole mixed suite is run (the isolated Explorer suite is
   green), three pre-existing table/controller assertions, and web-runner
-  stream warnings.
+  stream warnings. This evidence is retained; Slice 14 reopens only the
+  command-to-capture source descriptor boundary.
+
+### Slice 14 Activation — URI-Bearing Source Capture Regression (Plan Approved)
+
+- Feature Exit investigation reproduced the user-reported failure in the
+  command source-capture path. The presentation command keeps URI-bearing
+  descriptors for host registration but currently passes those same objects to
+  the application capture guard, which intentionally rejects extra keys and
+  throws `Malformed semantic diff source descriptor`. The command's broad
+  catch then reports the setup exception as `parse-failed`, so valid JP1/AJS
+  definitions cannot open the Explorer.
+- The planned Slice 14 boundary is limited to
+  `src/presentation/vscode/commands/semanticDiffCommandBuild.ts` and focused
+  `src/test/suite/semanticDiffCommand.test.ts` coverage. The implementation
+  will project URI-free `{side, sourceHandleId, text, version}` values for the
+  application factory, retain the original URI-bearing descriptors for
+  registration, and isolate source-capture setup errors from parser/report
+  errors. No application DTO/guard relaxation is planned.
+- Acceptance evidence must use the concrete
+  `createBeginSemanticDiffSourceCapture` factory and real parser behavior (or
+  the equivalent concrete command factory), prove exact application keys and
+  retained URI identity, reach `openExplorer` for valid URI-bearing sources,
+  and prove no registration leak. Parser failures remain `parse-failed`; an
+  unexpected source-capture setup exception is `display-failed` with the
+  existing source-capture message.
+- Required validation is the focused compiled command/source-capture/parser/
+  report suite, command-level identity and cleanup assertions, desktop
+  command-path preparation/smoke, relevant web build/preparation,
+  `rtk pnpm run test:compile`, targeted and full qlty checks, Markdown lint,
+  and `rtk git diff --check`. Existing MUI/WCAG/filter/Flow evidence remains
+  valid and is not re-opened.
+- The DEP0169 `url.parse()` startup warning is out of scope for this slice:
+  investigation indicates it predates this feature regression and no
+  feature-owned Semantic Diff path calls it. Dependency, telemetry, startup,
+  or URL API changes require a separate finding and replan.
+- Independent plan review returned `Ready` with no findings. Under the user's
+  explicit standing policy, the Slice 14 Human Approval is automatically
+  recorded because the plan review found no actionable findings; aggregate
+  human approval remains reserved for after all feature slices complete.
+- The approved replan remains uncommitted pending the approval-committer plan
+  gate. No runtime or test edits are authorized until that focused plan commit
+  is present; the closure drafts remain protected and excluded.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
@@ -1075,6 +1119,7 @@ test:prepare:web` passed. The desktop runner exited 0 and the web runner
 | 11    | Slice 2/3 host actions, source-index lookup, report dispatcher, and one-argument opener                     | `semanticDiffExplorerPanel.ts`, `semanticDiffExplorerRegistry.ts`, `semanticDiffExplorerReportAction.ts`, `semanticDiffExplorerSourceAction.ts`, and `semanticDiffCommand.ts` preserve action/session brands, disposal order, current-source revalidation, four-mode output, and VS Code desktop behavior.                                                                                                                       |
 | 12    | Slice 4 Flow readiness/reveal and ordinary viewer wiring; bootstrap composition rules                       | `semanticDiffExplorerFlow.ts`, `semanticDiffFlowViewerBridge.ts`, `src/bootstrap/extension/semanticDiffWiring.ts`, `viewerWiring.ts`, `extensionDependencies.ts`, and `ajsDocument.ts` preserve concrete dependency ownership in bootstrap, one overlay per URI, stale-owner guards, telemetry privacy, normal viewer lifecycle, and web-safe imports.                                                                           |
 | 13    | Existing Flow/table accessibility and Slice 5's canonical MUI theme API                                     | `FlowContents.tsx`, `FlowGraphCanvas.tsx`, `flowGraphView.ts`, `flowMiniMap.ts`, `nodes/AjsNode.tsx`, and `TableContents.tsx` consume `src/presentation/webview/shared/muiTheme.ts`; no duplicate theme owner, parser/host import, renderer protocol, or Flow/table behavior change.                                                                                                                                             |
+| 14    | Slice 3/8 capture contract and Slice 11 command/registration boundary                                       | `semanticDiffCommandBuild.ts` projects URI-free application descriptors while retaining URI-bearing registration descriptors; `semanticDiffCommand.test.ts` proves concrete parser/capture success, exact keys, URI identity, Explorer opening, setup-vs-parser error classification, and cleanup. The `url.parse()` startup warning remains out of scope.                                                                       |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -1099,3 +1144,73 @@ test:prepare:web` passed. The desktop runner exited 0 and the web runner
   Only the three feature plan documents may be included in the replan commit;
   the historical Slices 1-4 approvals and prior `Close` recommendation are
   not active authorization.
+- Slice 14 adds one command-boundary regression gate before Feature Exit may
+  be rerun. Its only planned runtime/test paths are
+  `src/presentation/vscode/commands/semanticDiffCommandBuild.ts` and
+  `src/test/suite/semanticDiffCommand.test.ts`; all six closure-draft paths
+  remain protected and excluded. The `url.parse()` DEP0169 startup warning is
+  recorded as an unrelated dependency/startup risk and is not a Slice 14
+  acceptance item.
+
+## Final Feature Exit Review (2026-09-08)
+
+- All implementation slices are complete, independently reviewed `Ready` with
+  no findings, automatically completion-approved under the recorded user
+  policy, and focused-committed. The implementation commit sequence is
+  `e85d012a`, `01349376`, `a25d674c`, `aa972a29`, `ee76722d`, `6af753e7`,
+  `b7c537d3`, `c9b97b0d`, `792842b9`, `52166c1a`, `d19a38ce`, `9acfb577`,
+  `628cc933`, `a7905e8f`, and `9229f299`. Approved plan/replan commits are
+  `54ca4005`, `1ede39bb`, `aa13b73e`, `5185ec18`, and `d0cc7815`.
+- EXP-1 through EXP-11, N-1, and E-4 are accepted. EXP-11 uses the canonical
+  `src/presentation/webview/shared/muiTheme.ts` owner and its mode-aware
+  factory without a second theme or engine-floor change. The complete WCAG
+  2.2 AA matrix in `SPECS.md` has explicit applicable/N/A coverage for
+  keyboard, roles, focus, contrast, non-color states, high contrast,
+  forced-colors, target size, resize/reflow, status announcements, and CSP.
+  DOM/axe and numeric token evidence is recorded; computed contrast,
+  screen-reader, and host/manual rows are intentionally not claimed by jsdom
+  and remain explicit manual/host evidence boundaries.
+- Actual-session filter proof is complete in
+  `src/test/suite/semanticDiffExplorerDom.test.tsx`: the host session ID is
+  used with `createSemanticDiffExplorerSessionMessage` and the real
+  `SemanticDiffExplorerApp`; exact record tuples prove ordinary exclusion,
+  confirmation retention, unchanged cards, visible zero-match status, and
+  latent-selection restoration after clearing `確認が必要`.
+- Qlty remediation is complete without suppression, allowlisting, threshold,
+  generated-ignore, or configuration changes. The fresh smell report used
+  `qlty smells --no-snippets`; it analyzed 96 files and returned zero findings.
+  The full check `rtk pnpm run qlty:check` returned `No issues`.
+- Final validation passed TypeScript test compilation, focused Flow/theme,
+  Explorer DOM/axe, source, overlay, transport, and host suites, production
+  desktop/web build, desktop/web preparation, compiled desktop smoke (exit
+  0), Markdown lint, and diff checks. A permitted web smoke retry launched
+  Chromium and the VS Code web extension and exited 0 with only the known
+  EPIPE/premature-close stream warnings. The unprivileged attempt's
+  `bootstrap_check_in ... Permission denied (1100)` is an environment
+  restriction and is not reported as a source failure.
+- Compatibility and readiness remain positive for VS Code `^1.75.0`, Node
+  `>=20`, desktop/web parity, browser-safe imports, static CSP/no-remote-asset
+  policy, read-only behavior, and privacy-preserving telemetry. Existing
+  webpack asset-size warnings, the two architecture baseline violations, and
+  the expanded-Flow golden mismatch are unchanged and explicitly assigned in
+  `docs/specs/roadmap.md`.
+- Durable propagation is complete in the six uncommitted closure paths:
+  `README.md`, `README.en.md`, `CHANGELOG.md`,
+  `docs/requirements/use-cases/uc-present-semantic-diff-report.md`,
+  `docs/requirements/use-cases/uc-explore-flow-graph.md`, and
+  `docs/specs/roadmap.md`. Neutral comparison, architecture, glossary, and
+  context documents were evaluated and require no update. No reusable
+  knowledge remains only in this temporary feature folder after its approved
+  removal.
+- Closure recommendation: `Close`. Aggregate human approval and explicit
+  Closure Approval remain the required next gate; this review does not stage,
+  commit, or remove the feature folder.
+
+## Feature Exit Superseded By Slice 14 Regression Replan
+
+The 2026-09-08 `Close` recommendation is retained as historical evidence for
+Slices 1-13 only. The reproduced URI-bearing source-capture failure blocks
+closure, and Slice 14 now owns the command-boundary repair and regression
+proof. Feature Exit must be rerun after Slice 14 is reviewed, approved,
+implemented, independently reviewed, and focused-committed. The six
+uncommitted closure-draft paths remain protected and excluded.
