@@ -942,9 +942,9 @@ test:prepare:web` passed. The desktop runner exited 0 and the web runner
   explicit standing policy, the Slice 14 Human Approval is automatically
   recorded because the plan review found no actionable findings; aggregate
   human approval remains reserved for after all feature slices complete.
-- The approved replan remains uncommitted pending the approval-committer plan
-  gate. No runtime or test edits are authorized until that focused plan commit
-  is present; the closure drafts remain protected and excluded.
+- The approved replan commit `6f1f262d` is present. Slice 14 implementation
+  remains limited to the approved command/test paths; the closure drafts
+  remain protected and excluded.
 
 ### Slice 6 Implementation Evidence (2026-09-07)
 
@@ -1214,3 +1214,35 @@ closure, and Slice 14 now owns the command-boundary repair and regression
 proof. Feature Exit must be rerun after Slice 14 is reviewed, approved,
 implemented, independently reviewed, and focused-committed. The six
 uncommitted closure-draft paths remain protected and excluded.
+
+### Slice 14 Implementation Evidence (2026-09-09)
+
+- The command boundary now retains URI-bearing descriptors for host
+  registration but passes a separate exact-key projection containing only
+  `side`, `sourceHandleId`, `text`, and `version` to the application capture
+  factory. This preserves the application guard and fixes the reproduced
+  `Malformed semantic diff source descriptor` regression without changing the
+  parser, source-index, or host contracts.
+- `semanticDiffCommand.test.ts` uses the concrete `AntlrAjsParser` and
+  `createBeginSemanticDiffSourceCapture` to prove valid URI-bearing before/
+  after sources reach `openExplorer`, application inputs have no `uri` key,
+  registration keeps both URI identities and opaque handles, and cleanup
+  removes the source capture. Separate tests prove setup exceptions map to
+  `display-failed`, while concrete parser failures remain `parse-failed` and
+  release exactly once.
+- Validation passed `rtk pnpm run test:compile`, compiled desktop extension
+  tests (`node ./out/test/runTest.js`, exit 0), `rtk pnpm run
+test:prepare:web`, targeted `qlty smells --no-snippets` for both changed
+  paths with zero findings, `rtk pnpm run qlty:check` (`No issues`), and
+  `rtk pnpm run lint:md`, `rtk pnpm run build` (desktop/web production
+  bundles; existing asset-size warnings only), and `git diff --check`. The
+  desktop and web preparation bundles compiled successfully; no production
+  Node built-in, telemetry, CSP, or dependency change was introduced.
+- The `url.parse()` DEP0169 warning remains an unrelated dependency/startup
+  risk explicitly outside this slice. Six Feature Exit closure-draft files
+  were not changed. Independent implementation review, completion approval,
+  and the rerun Feature Exit remain pending.
+- Independent implementation review returned `Ready` with no findings on
+  2026-09-09. Under the user's standing no-findings policy, Completion
+  Approval is automatically approved; the exact focused completion commit is
+  now eligible but has not been created.

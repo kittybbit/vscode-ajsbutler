@@ -329,10 +329,13 @@
 
 ### Slice 14: Repair URI-Bearing Source Capture And Error Classification
 
-- Status: Independent plan review returned `Ready` with no findings, and Human
+- Status: Independent plan review returned `Ready` with no findings, Human
   Approval is automatically recorded under the user's explicit no-findings
-  auto-approval policy. The approved plan-gate commit is pending; runtime and
-  test edits remain forbidden until it is committed through the approval gate.
+  auto-approval policy, and the approved plan-gate commit `6f1f262d` is
+  present. Implementation review returned `Ready` with no findings on
+  2026-09-09; Completion Approval is automatically recorded under the
+  standing no-findings policy. The focused completion commit is eligible and
+  pending.
 - Scope: strip only the host-only `uri` field before calling the application
   capture factory, retain the original URI-bearing descriptors for host
   registration, and separate capture setup exception handling from parser/
@@ -375,6 +378,42 @@ test:compile`, targeted qlty smells, full qlty check, Markdown lint, and
   semantic comparison rules, Explorer UI/MUI/WCAG work, Flow/report protocol,
   telemetry, README/CHANGELOG/use-case/roadmap propagation, and feature-folder
   removal.
+
+### Slice 14 Implementation Evidence (2026-09-09)
+
+- `semanticDiffCommandBuild.ts` now keeps URI-bearing descriptors on
+  `request.sourceDescriptors` for host registration while projecting exact
+  `{side, sourceHandleId, text, version}` objects into the application capture
+  factory. Capture setup is isolated from report/parser execution, so an
+  unexpected factory exception is `display-failed`; parser result failures and
+  report/parser exceptions remain `parse-failed`.
+- `semanticDiffCommand.test.ts` adds concrete `AntlrAjsParser` and
+  `createBeginSemanticDiffSourceCapture` command coverage for successful
+  URI-bearing sources, exact application keys, retained URI and opaque-handle
+  identity, Explorer opening, registry cleanup, setup-failure classification,
+  and concrete parser-failure classification with exactly-once release.
+- Validation passed `rtk pnpm run test:compile`, the compiled desktop runner
+  (`node ./out/test/runTest.js`, exit 0), `rtk pnpm run test:prepare:web`,
+  `rtk pnpm run build` (desktop/web production bundles; existing asset-size
+  warnings only),
+  targeted `qlty smells --no-snippets` for the two approved paths (zero
+  findings), `rtk pnpm run qlty:check` (`No issues`), `rtk pnpm run lint:md`,
+  and `git diff --check`.
+  `qlty fmt` was limited to the assigned command test and this traceability
+  evidence; no qlty policy, suppression, allowlist, or threshold changed.
+- Compatibility impact is none by design: VS Code `^1.75.0`, desktop/web
+  composition, browser-safe contracts, parser/source-index behavior, source
+  snapshots, Explorer identity, and telemetry remain unchanged. The known
+  `url.parse()` DEP0169 startup warning is unrelated dependency/startup noise
+  and remains outside Slice 14. The six closure-draft paths remain untouched.
+- Production readiness is positive for valid JP1/AJS Explorer opening,
+  malformed-parser diagnostics, exact source handle/version preservation,
+  registration cleanup, and desktop/web bundle preparation. Browser smoke and
+  the focused completion commit remain Main-owned follow-up gates.
+- Independent implementation review returned `Ready` with no findings on
+  2026-09-09. Under the user's standing proceed-through-slices policy,
+  Completion Approval is automatically approved; no commit was created by
+  this implementation or review handoff.
 
 ## Historical Human Approval (Slices 1-4 Only; Superseded)
 
@@ -3721,9 +3760,10 @@ changed delta; it may not be hidden.
 - [x] Slice 13 Flow/shared MUI presentation qlty remediation implementation
       and review complete; `Ready`/no findings and automatic Completion
       Approval recorded; focused completion commit `9229f299` recorded
-- [ ] Slice 14 URI-bearing source-capture regression fix planned; independent
-      plan review, Human Approval, implementation, review, and focused
-      completion commit are pending
+- [x] Slice 14 URI-bearing source-capture regression fix implemented within
+      the approved two-path boundary; focused tests/checks pass, independent
+      review is `Ready`/no findings, and Completion Approval is automatic;
+      focused completion commit is pending
 - [x] README, CHANGELOG, durable use cases, roadmap, and final traceability
       revalidated at the reopened Feature Exit; the six durable paths remain
       uncommitted until Slice 14 completes and aggregate human and Closure

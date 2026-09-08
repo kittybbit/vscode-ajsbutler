@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
+import { createBuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { BuildSemanticDiffReportDataInput } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import {
   createSemanticDiffSourceIndexIdAllocator,
@@ -12,6 +13,7 @@ import type {
 } from "../../application/semantic-diff/semanticDiffDto";
 import type { SemanticDiffOutputDocument } from "../../presentation/semantic-diff/semanticDiffOutput";
 import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -219,6 +221,211 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(harness.observed.reportSteps, [
       "build-data",
       "build-context",
+    ]);
+  });
+
+  test("projects exact application capture keys and retains host URIs", async () => {
+    const beforeUri = vscode.Uri.parse("file:///before.ajs");
+    const afterUri = vscode.Uri.parse("file:///after.ajs");
+    const harness = new SemanticDiffCommandHarness({
+      beforeContent: "unit=before,,jp1admin,;{ty=g;}",
+      afterContent: "unit=after,,jp1admin,;{ty=g;}",
+      openDialogResult: [beforeUri],
+      getActiveEditor: () =>
+        ({
+          document: {
+            uri: afterUri,
+            version: 7,
+            getText: () => "unit=after,,jp1admin,;{ty=g;}",
+          },
+        }) as unknown as vscode.TextEditor,
+    });
+    const captureInputs: unknown[] = [];
+    const concreteBegin = createBeginSemanticDiffSourceCapture(
+      new AntlrAjsParser(),
+    );
+    const contextRegistry = new SemanticDiffExplorerContextRegistry();
+    let registeredContext: SemanticDiffOutputContext | undefined;
+    let registeredRelease: (() => void) | undefined;
+    let registeredSources:
+      | Parameters<
+          NonNullable<
+            SemanticDiffCommandDeps["registerSemanticDiffSourceCapture"]
+          >
+        >[2]
+      | undefined;
+    const handle = {
+      sessionId: "sde-session-concrete" as never,
+      panel: {} as vscode.WebviewPanel,
+      dispose: () => undefined,
+    };
+
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      beginSemanticDiffSourceCapture: (input) => {
+        captureInputs.push(input);
+        return concreteBegin(input);
+      },
+      buildSemanticDiffReportData: createBuildSemanticDiffReportData(
+        new AntlrAjsParser(),
+      ),
+      registerSemanticDiffSourceCapture: (
+        context,
+        binding,
+        sources,
+        release,
+      ) => {
+        registeredContext = context;
+        registeredSources = sources;
+        registeredRelease = release;
+        contextRegistry.registerSourceCapture(context, {
+          binding,
+          sources,
+          release,
+        });
+      },
+      unregisterSemanticDiffSourceCapture: (context) => {
+        contextRegistry.unregisterSourceCapture(context);
+      },
+      openExplorer: async (context) => {
+        assert.strictEqual(context, registeredContext);
+        return handle;
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: true,
+      sessionId: "sde-session-concrete",
+      action: "explorer-opened",
+    });
+    assert.strictEqual(captureInputs.length, 1);
+    const captureInput = captureInputs[0] as {
+      before: Record<string, unknown>;
+      after: Record<string, unknown>;
+    };
+    assert.deepStrictEqual(Object.keys(captureInput.before).sort(), [
+      "side",
+      "sourceHandleId",
+      "text",
+      "version",
+    ]);
+    assert.deepStrictEqual(Object.keys(captureInput.after).sort(), [
+      "side",
+      "sourceHandleId",
+      "text",
+      "version",
+    ]);
+    assert.strictEqual("uri" in captureInput.before, false);
+    assert.strictEqual("uri" in captureInput.after, false);
+    assert.strictEqual(registeredSources?.before.uri, beforeUri);
+    assert.strictEqual(registeredSources?.after.uri, afterUri);
+    assert.strictEqual(
+      registeredSources?.before.sourceHandleId,
+      captureInput.before.sourceHandleId,
+    );
+    assert.strictEqual(
+      registeredSources?.after.sourceHandleId,
+      captureInput.after.sourceHandleId,
+    );
+    assert.ok(registeredContext);
+    assert.ok(contextRegistry.sourceCapture(registeredContext));
+
+    contextRegistry.unregisterSourceCapture(registeredContext);
+    registeredRelease?.();
+    assert.strictEqual(
+      contextRegistry.sourceCapture(registeredContext),
+      undefined,
+    );
+  });
+
+  test("maps capture setup exceptions to display failure", async () => {
+    const afterUri = vscode.Uri.parse("file:///after.ajs");
+    const harness = new SemanticDiffCommandHarness({
+      getActiveEditor: () =>
+        ({
+          document: {
+            uri: afterUri,
+            version: 1,
+            getText: () => "unit=after,,jp1admin,;",
+          },
+        }) as unknown as vscode.TextEditor,
+    });
+    let openExplorerCount = 0;
+
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      beginSemanticDiffSourceCapture: () => {
+        throw new Error("capture setup failed");
+      },
+      openExplorer: async () => {
+        openExplorerCount += 1;
+        throw new Error("Explorer must not open after setup failure.");
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: false,
+      error: {
+        code: "display-failed",
+        message: "Semantic diff source capture could not be established.",
+      },
+    });
+    assert.strictEqual(openExplorerCount, 0);
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Semantic diff source capture could not be established.",
+    ]);
+  });
+
+  test("keeps concrete parser failures as parse failure", async () => {
+    const afterUri = vscode.Uri.parse("file:///after.ajs");
+    const harness = new SemanticDiffCommandHarness({
+      beforeContent: "unit=before,,jp1admin,\n{ty=g;}\n",
+      afterContent: "unit=after,,jp1admin,;{ty=g;}",
+      getActiveEditor: () =>
+        ({
+          document: {
+            uri: afterUri,
+            version: 2,
+            getText: () => "unit=after,,jp1admin,;{ty=g;}",
+          },
+        }) as unknown as vscode.TextEditor,
+    });
+    const concreteBegin = createBeginSemanticDiffSourceCapture(
+      new AntlrAjsParser(),
+    );
+    let releaseCount = 0;
+
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      beginSemanticDiffSourceCapture: (input) => {
+        const capture = concreteBegin(input);
+        return {
+          ...capture,
+          release: () => {
+            releaseCount += 1;
+            capture.release();
+          },
+        };
+      },
+      buildSemanticDiffReportData: createBuildSemanticDiffReportData(
+        new AntlrAjsParser(),
+      ),
+      openExplorer: async () => {
+        throw new Error("Explorer must not open after parser failure.");
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: false,
+      error: {
+        code: "parse-failed",
+        message:
+          "Semantic diff could not parse one or both JP1/AJS definitions.",
+      },
+    });
+    assert.strictEqual(releaseCount, 1);
+    assert.deepStrictEqual(harness.observed.errorMessages, [
+      "Semantic diff could not parse one or both JP1/AJS definitions.",
     ]);
   });
 

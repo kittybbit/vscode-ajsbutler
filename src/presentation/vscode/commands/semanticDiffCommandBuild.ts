@@ -73,9 +73,34 @@ const beginSourceCapture = (
   const sourceDescriptors = createSourceDescriptors(deps, request);
   request.sourceDescriptors = sourceDescriptors;
   return deps.beginSemanticDiffSourceCapture({
-    before: sourceDescriptors.before,
-    after: sourceDescriptors.after,
+    before: {
+      side: sourceDescriptors.before.side,
+      sourceHandleId: sourceDescriptors.before.sourceHandleId,
+      text: sourceDescriptors.before.text,
+      version: sourceDescriptors.before.version,
+    },
+    after: {
+      side: sourceDescriptors.after.side,
+      sourceHandleId: sourceDescriptors.after.sourceHandleId,
+      text: sourceDescriptors.after.text,
+      version: sourceDescriptors.after.version,
+    },
   });
+};
+
+const beginSourceCaptureStep = (
+  deps: SemanticDiffCommandDeps,
+  request: CommandReportData,
+): CommandStep<SemanticDiffSourceCapture | undefined> => {
+  try {
+    return readyStep(beginSourceCapture(deps, request));
+  } catch {
+    return failedStep(
+      "display-failed",
+      "Semantic diff source capture could not be established.",
+      true,
+    );
+  }
 };
 
 const buildReportResultStep = (
@@ -135,11 +160,13 @@ export const buildSemanticDiffReportDataStep = (
     >["result"];
   }
 > => {
-  let sourceCapture: SemanticDiffSourceCapture | undefined;
+  const sourceCaptureStep = beginSourceCaptureStep(deps, request);
+  if (sourceCaptureStep.kind === "failed") {
+    return sourceCaptureStep;
+  }
   try {
-    sourceCapture = beginSourceCapture(deps, request);
-    return buildReportResultStep(deps, request, sourceCapture);
+    return buildReportResultStep(deps, request, sourceCaptureStep.value);
   } catch (error: unknown) {
-    return reportBuildFailure(error, sourceCapture);
+    return reportBuildFailure(error, sourceCaptureStep.value);
   }
 };
