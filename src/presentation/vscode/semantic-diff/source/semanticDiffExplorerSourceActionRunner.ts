@@ -2,12 +2,12 @@ import * as vscode from "vscode";
 import type {
   SemanticDiffSourceLookupRequest,
   SemanticDiffSourceLookupResult,
-} from "../../../application/parsing/AjsParserWithSourceIndexPort";
+} from "../../../../application/parsing/AjsParserWithSourceIndexPort";
 import {
   isSemanticDiffSourceCaptureBindingActive,
   lookupSemanticDiffSourceCaptureBinding,
-} from "../../../application/semantic-diff/semanticDiffSourceCapture";
-import type { SemanticDiffSide } from "../../../application/semantic-diff/semanticDiffDto";
+} from "../../../../application/semantic-diff/semanticDiffSourceCapture";
+import type { SemanticDiffSide } from "../../../../application/semantic-diff/semanticDiffDto";
 import type {
   SemanticDiffSourceActionDeps,
   SemanticDiffSourceActionFailureCode,
@@ -17,7 +17,7 @@ import type {
 import type {
   SemanticDiffSourceCaptureEntry,
   SemanticDiffSourceHostDescriptor,
-} from "./semanticDiffExplorerRegistry";
+} from "./semanticDiffExplorerSourceTypes";
 
 type SourceLookupSuccess = Readonly<{
   primaryRange: Readonly<{

@@ -1485,10 +1485,10 @@ constant.ts`; leave `src/presentation/vscode/webview/mountViewerPanel.ts`
 qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
   `rtk git diff --check`. Browser smoke remains unclaimed only because the
   managed Chromium host is blocked by its known bootstrap permission gate.
-- Implementation review is the next route. Slice 17 remains uncommitted and
-  no Slice 17 Completion Approval is recorded yet. The review's P1 finding
-  about ignored report files is routed through the narrow remediation below;
-  existing Slice 17 implementation and behavior remain preserved.
+- The implementation review's P1 finding about ignored report files is
+  resolved by the narrow remediation below; the resulting `Ready` review and
+  automatic Completion Approval are recorded below. Slice 17 remains
+  uncommitted and its implementation behavior is preserved.
 
 ### Slice 17 Review Remediation (P1 Narrow Replan, 2026-09-10)
 
@@ -1510,8 +1510,8 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
 - Acceptance and validation: `git check-ignore` must not match the three
   exact source files while the generic `report/` rule still matches non-source
   report output; the path-scoped command `git status --short
-  --untracked-files=all --
-  src/presentation/vscode/semantic-diff/report/` must expose exactly the three
+--untracked-files=all --
+src/presentation/vscode/semantic-diff/report/` must expose exactly the three
   new files; and the Slice 17 completion staged manifest must show the
   old-flat report deletions plus all three new additions. Run the existing
   Slice 17 focused tests, architecture checks, qlty/build/desktop/web checks,
@@ -1539,6 +1539,48 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
 - The plan-gate commit remains pending. No `.gitignore`, runtime, test,
   generated-artifact, staging, or commit change is made here, and the six
   closure drafts remain protected.
+
+### Slice 17 P1 Narrow Replan Implementation Result (2026-09-10)
+
+- Applied only the two approved `.gitignore` negations for
+  `src/presentation/vscode/semantic-diff/report/`. The general `report/`
+  exclusion remains active for unrelated report output.
+- `git check-ignore --no-index` confirms the three report source files are
+  trackable while `report/slice17-output.txt` remains ignored. Scoped status
+  exposes exactly the three new report files, preserving the old-flat
+  deletion/new-file completion mapping without staging.
+- No Slice 17 runtime/test behavior changed. Independent implementation
+  re-review returned `Ready` with no findings; Completion Approval is recorded
+  below under the standing no-findings policy. The six closure drafts and
+  Slice 17 completion commit remain untouched.
+
+### Slice 17 Completion Approval (2026-09-10)
+
+- Independent implementation review: `Ready`; Findings: none. The review
+  confirmed the exact facade/category placement, constant ownership,
+  Flow/Table compatibility, Explorer CSP/session/action behavior, report-file
+  tracking remediation, and the recorded validation evidence.
+- Completion Approval: automatically recorded under the user's standing
+  proceed-through-slices policy for the exact Slice 17 boundary. The focused
+  completion commit is eligible and pending; this handoff performs no staging
+  or commit.
+- P1 final evidence: the two approved `.gitignore` negations remain directly
+  after the general `report/` rule; all three report sources are visible to
+  normal status/add while `report/slice17-output.txt` remains ignored; scoped
+  status exposes exactly the three sources. No additional runtime, test, or
+  `.gitignore` change was made after the P1 remediation.
+- Final validation passed: `rtk pnpm run test:compile`, desktop preparation
+  and compiled runner, web preparation and production build,
+  `rtk pnpm run qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero
+  findings), Markdown lint, and `git diff --check`. Browser smoke remains
+  environment-bounded by the known Chromium bootstrap permission restriction.
+- Exact completion paths are the `.gitignore`, this feature's
+  `TASKS.md`/`TRACEABILITY.md`, `src/bootstrap/extension/semanticDiffWiring.ts`,
+  the three root facades, `src/presentation/vscode/webview/constant.ts`, the
+  deleted old-flat Flow/Panel/report/source implementations, the new
+  `flow/`, `panel/`, `report/`, and `source/` implementations, and the five
+  affected `src/test/suite/` files enumerated in `TASKS.md` above. The six
+  closure drafts remain protected and excluded.
 
 ## Current Replan Validation And Closure Boundary
 

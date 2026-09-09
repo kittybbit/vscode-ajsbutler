@@ -3,7 +3,8 @@ import { v4 as uuid } from "uuid";
 import type {
   SemanticDiffExplorerActionId,
   SemanticDiffExplorerSessionId,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
+import { SEMANTIC_DIFF_EXPLORER_BUNDLE_SRC } from "./semanticDiffExplorerConstants";
 
 type ExplorerHtmlOptions = Readonly<{
   context: vscode.ExtensionContext;
@@ -25,7 +26,10 @@ export const buildSemanticDiffExplorerHtml = (
   const { context, panel, sessionId, outputActionId } = options;
   const nonce = uuid();
   const bundleUri = panel.webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, "out", "semanticDiffExplorer.js"),
+    vscode.Uri.joinPath(
+      context.extensionUri,
+      SEMANTIC_DIFF_EXPLORER_BUNDLE_SRC,
+    ),
   );
   const title = htmlEscape(panel.title);
   const session = htmlEscape(sessionId);

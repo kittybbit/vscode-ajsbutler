@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
-import { executeSemanticDiffExplorerReportAction } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerReportAction";
+import { executeSemanticDiffExplorerReportAction } from "../../presentation/vscode/semantic-diff/report/semanticDiffExplorerReportAction";
 
 const emptyResult = (): SemanticDiffResult => ({
   inputs: {

@@ -6,11 +6,11 @@ import {
   validateSemanticDiffExplorerMessage,
   type SemanticDiffExplorerHostMessage,
   type SemanticDiffExplorerRequest,
-} from "../../../application/semantic-diff/semanticDiffExplorerMessages";
+} from "../../../../application/semantic-diff/semanticDiffExplorerMessages";
 import type {
   SemanticDiffExplorerActionLookup,
   SemanticDiffExplorerSession,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 import { processSemanticDiffExplorerAction } from "./semanticDiffExplorerPanelActions";
 
 type PanelRequestOptions = Readonly<{

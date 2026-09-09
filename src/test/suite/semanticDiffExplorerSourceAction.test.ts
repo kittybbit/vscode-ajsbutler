@@ -15,7 +15,7 @@ import type { SemanticDiffOutputContext } from "../../application/semantic-diff/
 import {
   executeSemanticDiffExplorerSourceAction,
   type SemanticDiffSourceActionDeps,
-} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerSourceAction";
+} from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceAction";
 import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
 
 type SourceActionTestDeps = SemanticDiffSourceActionDeps & {

@@ -2,8 +2,8 @@ import type * as vscode from "vscode";
 import type {
   SemanticDiffExplorerSessionId,
   SemanticDiffExplorerSession,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
-import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
+import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
 import type {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextEntry,

@@ -4,22 +4,22 @@ import {
   type SemanticDiffExplorerActionOutcome,
   type SemanticDiffExplorerHostMessage,
   type SemanticDiffExplorerRequest,
-} from "../../../application/semantic-diff/semanticDiffExplorerMessages";
+} from "../../../../application/semantic-diff/semanticDiffExplorerMessages";
 import type {
   SemanticDiffExplorerSession,
   SemanticDiffExplorerSessionId,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type {
   SemanticDiffChange,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffOutputContext,
   SemanticDiffSide,
   SemanticDiffUnsupportedItem,
-} from "../../../application/semantic-diff/semanticDiffDto";
-import { recordAtSourceOccurrence } from "../../../application/semantic-diff/semanticDiffRecordOccurrence";
-import { executeSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportAction";
-import { executeSemanticDiffExplorerSourceAction } from "./semanticDiffExplorerSourceAction";
-import type { SemanticDiffFlowActionRequest } from "./semanticDiffExplorerFlow";
+} from "../../../../application/semantic-diff/semanticDiffDto";
+import { recordAtSourceOccurrence } from "../../../../application/semantic-diff/semanticDiffRecordOccurrence";
+import { executeSemanticDiffExplorerReportAction } from "../report/semanticDiffExplorerReportAction";
+import { executeSemanticDiffExplorerSourceAction } from "../source/semanticDiffExplorerSourceAction";
+import type { SemanticDiffFlowActionRequest } from "../flow/semanticDiffExplorerFlow";
 import type {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffSourceCaptureEntry,

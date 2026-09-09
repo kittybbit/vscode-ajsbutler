@@ -1,5 +1,5 @@
-import type { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
-import { createViewerDocumentChangedMessage } from "../../webview/viewerHostMessages";
+import type { UnitListDocumentDto } from "../../../../application/unit-list/unitListDocument";
+import { createViewerDocumentChangedMessage } from "../../../webview/viewerHostMessages";
 import type {
   FlowOverlayOwner,
   SemanticDiffFlowPanel,

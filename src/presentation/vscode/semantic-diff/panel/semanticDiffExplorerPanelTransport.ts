@@ -4,13 +4,13 @@ import {
   createSemanticDiffExplorerFailureMessage,
   serializeSemanticDiffExplorerMessage,
   type SemanticDiffExplorerHostMessage,
-} from "../../../application/semantic-diff/semanticDiffExplorerMessages";
+} from "../../../../application/semantic-diff/semanticDiffExplorerMessages";
 import type {
   SemanticDiffExplorerActionLookup,
   SemanticDiffExplorerSession,
   SemanticDiffExplorerSessionId,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
-import type { SemanticDiffExplorerActionId } from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
+import type { SemanticDiffExplorerActionId } from "../../../../application/semantic-diff/semanticDiffExplorer";
 
 type PanelTransportOptions = Readonly<{
   panel: vscode.WebviewPanel;

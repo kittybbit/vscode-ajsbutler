@@ -9,6 +9,7 @@ import {
   AJS_TABLE_VIEWER_TYPE,
   getViewerBundleSrc,
 } from "../../presentation/vscode/webview/constant";
+import * as viewerConstants from "../../presentation/vscode/webview/constant";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 
 suite("Viewer bundle", () => {
@@ -26,6 +27,17 @@ suite("Viewer bundle", () => {
   test("rejects unknown view types", () => {
     assert.throws(
       () => getViewerBundleSrc("ajsbutler.unknownViewer"),
+      /Unknown viewer bundle/,
+    );
+  });
+
+  test("keeps Explorer bundle ownership out of generic viewer constants", () => {
+    assert.strictEqual(
+      "AJS_SEMANTIC_DIFF_EXPLORER_TYPE" in viewerConstants,
+      false,
+    );
+    assert.throws(
+      () => getViewerBundleSrc("ajsbutler.semanticDiffExplorer"),
       /Unknown viewer bundle/,
     );
   });

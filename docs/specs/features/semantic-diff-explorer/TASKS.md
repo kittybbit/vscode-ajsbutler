@@ -3873,11 +3873,12 @@ pnpm run qlty:smells` (zero findings), and `rtk git diff --check` passed.
 
 ### Slice 17: VS Code Semantic Diff Adapter Placement And Constant Ownership
 
-- Status: Implemented after Slice 16's focused completion commit. Implementation
-  review identified P1 tracking loss for the three new `report` files; this
-  narrow replan preserves the implementation and is pending independent plan
-  re-review before Completion Approval. No commit or staging was performed for
-  Slice 17.
+- Status: Implemented after Slice 16's focused completion commit. The P1
+  tracking remediation is applied; independent implementation re-review
+  returned `Ready` with no findings, and Completion Approval is automatically
+  recorded under the standing no-findings policy. The exact focused
+  completion commit remains eligible and pending; no commit or staging was
+  performed for Slice 17.
 - Scope: keep `src/presentation/vscode/semantic-diff` as the public adapter
   boundary while placing implementation modules under `panel`, `flow`,
   `report`, and `source`. `panel` owns panel lifecycle, requests, transport,
@@ -3937,7 +3938,7 @@ semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   the three exact source files, the generic `report/` exclusion still matches
   non-source report output, and the path-scoped command
   `git status --short --untracked-files=all --
-  src/presentation/vscode/semantic-diff/report/` exposes exactly those three
+src/presentation/vscode/semantic-diff/report/` exposes exactly those three
   new files. Verify the completion staged manifest
   contains the old-flat report deletions and these three additions. Retain
   CSP/no-remote-asset assertions. Browser smoke remains explicitly
@@ -4005,11 +4006,11 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
   the corresponding old-flat report deletions already in the Slice 17
   completion manifest; and the Slice 17 tests/architecture evidence. The six
   closure drafts remain excluded.
-- Re-review evidence: prove the three files are visible to normal Git status
-  and `git add`, no unrelated report path is unignored, and the completion
-  staged manifest contains both the old-flat deletions and all three new
-  additions. No `.gitignore` implementation, runtime, staging, or commit is
-  performed by this replan handoff.
+- Re-review evidence: the three files are visible to normal Git status and
+  `git add`, no unrelated report path is unignored, and the completion staged
+  manifest can carry both the old-flat deletions and all three new additions.
+  No runtime behavior, staging, or commit is performed by this replan
+  handoff.
 
 ### Slice 17 P1 Narrow Replan Approval (2026-09-10)
 
@@ -4030,6 +4031,92 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
 - The plan-gate commit remains pending. No `.gitignore`, runtime, test,
   generated-artifact, staging, or commit change is made here, and the six
   closure drafts remain protected.
+
+### Slice 17 P1 Narrow Replan Implementation Result (2026-09-10)
+
+- Added exactly `!src/presentation/vscode/semantic-diff/report/` and
+  `!src/presentation/vscode/semantic-diff/report/**` after the general
+  `report/` exclusion. The three report source files are now normal
+  untracked candidates; `report/slice17-output.txt` remains ignored by the
+  general rule.
+- Tracking checks passed: `git check-ignore --no-index` reports all three
+  source files as trackable and the generic report output as ignored; scoped
+  status exposes exactly the three new files.
+- Runtime/test behavior is unchanged. Independent implementation re-review
+  returned `Ready` with no findings, and Completion Approval is recorded
+  below under the standing no-findings policy.
+
+### Slice 17 Completion Approval (2026-09-10)
+
+- Independent implementation review: `Ready`; Findings: none. The review
+  confirmed the exact facade/category placement, constant ownership,
+  Flow/Table compatibility, Explorer CSP/session/action behavior, report-file
+  tracking remediation, and the recorded validation evidence.
+- Completion Approval: automatically recorded under the user's standing
+  proceed-through-slices policy for the exact Slice 17 boundary. This approval
+  makes the focused completion commit eligible and pending; this handoff does
+  not stage or commit any path.
+- P1 final evidence: the two approved `.gitignore` negations are present
+  after the general `report/` rule; all three report sources are visible to
+  normal status/add while `report/slice17-output.txt` remains ignored; scoped
+  status exposes exactly the three sources. No additional runtime, test, or
+  `.gitignore` change was made after the P1 remediation.
+- Validation: `rtk pnpm run test:compile`, desktop preparation and compiled
+  runner, web preparation and production build, `rtk pnpm run qlty:check`
+  (`No issues`), `rtk pnpm run qlty:smells` (zero findings), Markdown lint,
+  and `git diff --check` passed. Browser smoke remains environment-bounded by
+  the known Chromium bootstrap permission restriction.
+- Exact completion paths, enumerated from the current `git status`, are:
+  - `.gitignore`
+  - `docs/specs/features/semantic-diff-explorer/TASKS.md`
+  - `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts`
+  - `src/presentation/vscode/webview/constant.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlowAction.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlowActionPreparation.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlowOverlayRegistry.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlowTargets.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelActions.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelHtml.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelInstall.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelLifecycle.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelRequests.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanelTransport.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerReportAction.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerReportActionRunner.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffReportDocument.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceAction.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerSourceActionRunner.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowAction.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowActionPreparation.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowOverlayRegistry.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowTargets.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerConstants.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelActions.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelHtml.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelInstall.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelLifecycle.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelRequests.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelTransport.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry.ts`
+  - `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportAction.ts`
+  - `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportActionRunner.ts`
+  - `src/presentation/vscode/semantic-diff/report/semanticDiffReportDocument.ts`
+  - `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceAction.ts`
+  - `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceActionRunner.ts`
+  - `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/semanticDiffExplorerReportAction.test.ts`
+  - `src/test/suite/semanticDiffExplorerSourceAction.test.ts`
+  - `src/test/suite/semanticDiffReportDocument.test.ts`
+  - `src/test/suite/viewerBundle.test.ts`
+- The six closure drafts remain protected and excluded. No unrelated status
+  path is included in this exact completion boundary.
 
 ## Slice 16/17 Exit Route
 

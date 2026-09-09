@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import type { SemanticDiffSide } from "../../../application/semantic-diff/semanticDiffDto";
-import type { SemanticDiffSourceCaptureEntry } from "./semanticDiffExplorerRegistry";
+import type { SemanticDiffSide } from "../../../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffSourceCaptureEntry } from "./semanticDiffExplorerSourceTypes";
 import { runSemanticDiffExplorerSourceAction } from "./semanticDiffExplorerSourceActionRunner";
 
 export type SemanticDiffSourceActionRequest = Readonly<{

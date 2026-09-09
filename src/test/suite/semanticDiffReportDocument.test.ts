@@ -4,7 +4,7 @@ import {
   SEMANTIC_DIFF_REPORT_SCHEME,
   SemanticDiffReportDocumentProvider,
   type SemanticDiffReportDocumentDeps,
-} from "../../presentation/vscode/semantic-diff/semanticDiffReportDocument";
+} from "../../presentation/vscode/semantic-diff/report/semanticDiffReportDocument";
 import type { SemanticDiffOutputDocument } from "../../presentation/semantic-diff/semanticDiffOutput";
 
 type ReportDocumentObservations = {

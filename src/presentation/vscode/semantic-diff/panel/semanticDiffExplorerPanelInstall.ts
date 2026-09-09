@@ -2,7 +2,7 @@ import type * as vscode from "vscode";
 import type {
   SemanticDiffExplorerActionId,
   SemanticDiffExplorerSession,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type {
   SemanticDiffExplorerContextEntry,
   SemanticDiffExplorerActionRegistry,
@@ -13,7 +13,7 @@ import { handleSemanticDiffExplorerRequest } from "./semanticDiffExplorerPanelRe
 import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanel";
 
 type PanelInstallOptions = Readonly<{
-  context: import("../../../application/semantic-diff/semanticDiffDto").SemanticDiffOutputContext;
+  context: import("../../../../application/semantic-diff/semanticDiffDto").SemanticDiffOutputContext;
   entry: SemanticDiffExplorerContextEntry;
   session: SemanticDiffExplorerSession;
   outputActionId: SemanticDiffExplorerActionId;

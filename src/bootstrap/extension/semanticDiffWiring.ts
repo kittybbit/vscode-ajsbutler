@@ -11,7 +11,7 @@ import {
   SAVE_SEMANTIC_DIFF_OUTPUT_COMMAND,
   SEMANTIC_DIFF_REPORT_SCHEME,
   SemanticDiffReportDocumentProvider,
-} from "../../presentation/vscode/semantic-diff/semanticDiffReportDocument";
+} from "../../presentation/vscode/semantic-diff/report/semanticDiffReportDocument";
 import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";

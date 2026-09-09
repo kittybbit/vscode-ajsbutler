@@ -1,13 +1,13 @@
-import { buildSemanticDiffFlowOverlay } from "../../../application/flow-graph/buildSemanticDiffFlowOverlay";
-import type { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
+import { buildSemanticDiffFlowOverlay } from "../../../../application/flow-graph/buildSemanticDiffFlowOverlay";
+import type { UnitListDocumentDto } from "../../../../application/unit-list/unitListDocument";
 import type {
   SemanticDiffOutputContext,
   SemanticDiffRelationReference,
-} from "../../../application/semantic-diff/semanticDiffDto";
+} from "../../../../application/semantic-diff/semanticDiffDto";
 import {
   createViewerDocumentChangedMessage,
   createViewerRevealUnitMessage,
-} from "../../webview/viewerHostMessages";
+} from "../../../webview/viewerHostMessages";
 import type {
   SemanticDiffFlowActionRequest,
   SemanticDiffFlowActionResult,

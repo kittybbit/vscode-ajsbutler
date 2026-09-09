@@ -1,10 +1,10 @@
-import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
 import {
   presentSemanticDiffOutput,
   type SemanticDiffOutputDocument,
   type SemanticDiffOutputMode,
   type SemanticDiffOutputModeItem,
-} from "../../semantic-diff/semanticDiffOutput";
+} from "../../../semantic-diff/semanticDiffOutput";
 import { runSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportActionRunner";
 
 export type SemanticDiffExplorerReportActionDeps = Readonly<{
