@@ -1380,6 +1380,59 @@ move. The six uncommitted closure-draft paths remain protected and excluded.
   review, the focused plan-gate commit, implementation review, and the
   standing no-findings automatic Completion Approval before Slice 17 starts.
 
+### Slice 16 Implementation Result (2026-09-10)
+
+- Bootstrap-owned allocator construction is complete for source-index,
+  source-handle, capture-scope, Explorer session, and Explorer action IDs.
+  The injected action allocator covers both tree leaf actions and output
+  actions; parser, command, source capture, projection, and panel defaults,
+  fallbacks, module allocators, and the manual output range are removed.
+- Architecture regression coverage now resolves direct, aliased, namespace,
+  transitive re-export, and cycle-safe factory bindings. A static production
+  scan rejects imported `create*Allocator()` calls outside Bootstrap; the
+  current scan reports five allocator construction calls, all in
+  `src/bootstrap/extension/extensionDependencies.ts`, and zero composition-
+  root violations.
+- Validation passed `rtk pnpm run test:compile`, the compiled desktop runner
+  (exit 0), `rtk pnpm run test:prepare:desktop`, `rtk pnpm run
+test:prepare:web`, and `rtk pnpm run build`. `rtk pnpm run qlty:check`
+  reported `No issues`; `rtk pnpm run qlty:smells` completed with zero
+  findings; `rtk pnpm run lint:md` and `rtk git diff --check` passed. Web
+  browser smoke remains unclaimed because the managed Chromium host is
+  blocked before execution by its known bootstrap permission restriction.
+- Implementation review is the next route. Completion Approval remains
+  pending; no Slice 16 commit, Slice 17 work, or protected closure-draft
+  modification is part of this handoff.
+
+### Slice 16 Review Remediation (P3, 2026-09-10)
+
+- Finding: `beginSemanticDiffSourceCapture` JSDoc incorrectly called the
+  parser optional.
+- Remediation: the documentation now records parser and capture-scope
+  allocator as required explicit dependencies. No runtime behavior, public
+  DTO, transport contract, or Slice 17 file was changed.
+
+### Slice 16 Completion Approval (2026-09-10)
+
+- Independent implementation review returned `Ready` with no findings after
+  the P3 JSDoc remediation. Under the user's standing no-findings policy,
+  Completion Approval is automatically recorded for the exact Slice 16
+  boundary.
+- Final validation: `rtk pnpm run test:compile`, compiled desktop runner
+  exit 0, `rtk pnpm run qlty:check` (`No issues`), `rtk pnpm run
+qlty:smells` (zero findings), and `rtk git diff --check` passed. Web smoke
+  remains unclaimed only because the managed Chromium host is blocked by its
+  known bootstrap permission restriction.
+- Exact completion paths are the Slice 16 runtime files under
+  `src/application/semantic-diff/`, `src/bootstrap/extension/`,
+  `src/infrastructure/parser/`, and
+  `src/presentation/vscode/{commands,semantic-diff}/`; the updated parser,
+  command, source-capture, Explorer, extension, and architecture tests under
+  `src/test/`; and this feature's `TASKS.md` and `TRACEABILITY.md`. Slice 17
+  files and all six protected closure-draft paths remain outside the approval.
+- The slice is ready for the focused completion commit. This handoff does
+  not stage or commit any path.
+
 ### Slice 17 Activation — VS Code Adapter Placement And Constants
 
 - Trigger: the VS Code Semantic Diff adapter has panel, Flow, report, source,
@@ -1398,7 +1451,7 @@ move. The six uncommitted closure-draft paths remain protected and excluded.
 - Affected implementation/test boundary:
   `src/presentation/vscode/semantic-diff/**` and its existing Explorer panel,
   Flow, report, source, registry suites; `src/presentation/vscode/webview/
-  constant.ts`; leave `src/presentation/vscode/webview/mountViewerPanel.ts`
+constant.ts`; leave `src/presentation/vscode/webview/mountViewerPanel.ts`
   unchanged; update Bootstrap Semantic Diff imports; viewer-bundle,
   wiring, architecture, desktop, and web regression suites. The two
   host-independent presentation directories are not affected.
@@ -1553,7 +1606,7 @@ denied (1100)`.
   remains perceivable at approximately 4.60:1 in light mode and 10.71:1 in
   dark mode, with `Highlight` in forced colors.
 - Validation: independent recheck passed `rtk pnpm run qlty:check` (`No
-  issues`), `rtk pnpm run qlty:smells` (zero findings across 97 files),
+issues`), `rtk pnpm run qlty:smells` (zero findings across 97 files),
   `rtk pnpm run test:compile`, the focused MUI/theme-mode/Explorer DOM suite
   (20 passing), `rtk pnpm run lint:md`, and `rtk git diff --check`. Recorded
   Slice 15 evidence also includes desktop preparation and smoke (exit 0), web

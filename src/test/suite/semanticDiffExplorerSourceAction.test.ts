@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import {
+  createSemanticDiffCaptureScopeIdAllocator,
   createSemanticDiffSourceHandleIdAllocator,
   createSemanticDiffSourceIndexIdAllocator,
   type AjsParserWithSourceIndexPort,
@@ -78,6 +79,7 @@ const createSourceActionDeps = (
       },
     },
     enrichedParser,
+    createSemanticDiffCaptureScopeIdAllocator(),
   );
   capture.parser.parse("before");
   capture.parser.parse("after");

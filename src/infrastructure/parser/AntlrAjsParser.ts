@@ -11,7 +11,6 @@ import type {
   SemanticDiffSourceRange,
   SemanticDiffSourceUnitEntry,
 } from "../../application/parsing/AjsParserWithSourceIndexPort";
-import { createSemanticDiffSourceIndexIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import { AntlrRawAjsParser } from "./AntlrRawAjsParser";
 import type { AntlrSyntaxError } from "./AntlrSyntaxError";
 import type { AjsRawSourceRange, AjsRawUnit } from "./raw/AjsRawUnit";
@@ -33,12 +32,10 @@ export class AntlrAjsParser implements AjsParserPort {
 
   public constructor(
     options: Readonly<{
-      sourceIndexIdAllocator?: SemanticDiffSourceIndexIdAllocator;
-    }> = {},
+      sourceIndexIdAllocator: SemanticDiffSourceIndexIdAllocator;
+    }>,
   ) {
-    this.#sourceIndexIds =
-      options.sourceIndexIdAllocator ??
-      createSemanticDiffSourceIndexIdAllocator();
+    this.#sourceIndexIds = options.sourceIndexIdAllocator;
   }
 
   public parse(content: string): ParseAjsResult {

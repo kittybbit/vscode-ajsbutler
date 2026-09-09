@@ -114,6 +114,70 @@ suite("Architecture dependency rules", () => {
     ]);
   });
 
+  test("resolves named and namespace construction through re-export chains", () => {
+    const sourceFiles = new Map([
+      [
+        "src/application/factories.ts",
+        "export const createFeature = () => () => undefined;",
+      ],
+      [
+        "src/application/reexports.ts",
+        'export { createFeature as createAlias } from "./factories";',
+      ],
+      ["src/application/index.ts", 'export * from "./reexports";'],
+    ]);
+    const namedReferences = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `import { createAlias } from "../application/index"; createAlias();`,
+      sourceFiles,
+    );
+    const namespaceReferences = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `import * as application from "../application/index"; application.createAlias();`,
+      sourceFiles,
+    );
+
+    assert.deepStrictEqual(namedReferences, [
+      {
+        file: "src/presentation/example.ts",
+        target: "src/application/factories",
+        symbol: "createFeature",
+        kind: "call",
+      },
+    ]);
+    assert.deepStrictEqual(namespaceReferences, [
+      {
+        file: "src/presentation/example.ts",
+        target: "src/application/factories",
+        symbol: "createFeature",
+        kind: "call",
+      },
+    ]);
+  });
+
+  test("resolves cyclic re-exports without recursing indefinitely", () => {
+    const sourceFiles = new Map([
+      ["src/application/first.ts", 'export * from "./second";'],
+      ["src/application/second.ts", 'export * from "./first";'],
+    ]);
+
+    assert.deepStrictEqual(
+      collectImportedConstructionReferencesFromSource(
+        "src/presentation/example.ts",
+        `import { missing } from "../application/first"; missing();`,
+        sourceFiles,
+      ),
+      [
+        {
+          file: "src/presentation/example.ts",
+          target: "src/application/first",
+          symbol: "missing",
+          kind: "call",
+        },
+      ],
+    );
+  });
+
   test("detects exported function factories without relying on their names", () => {
     assert.deepStrictEqual(
       collectFunctionFactoryDefinitionsFromSource(
@@ -497,6 +561,29 @@ suite("Architecture dependency rules", () => {
         "infrastructure-construction-outside-bootstrap",
       ],
     );
+  });
+
+  test("rejects allocator construction outside bootstrap", () => {
+    const references = collectImportedConstructionReferencesFromSource(
+      "src/presentation/example.ts",
+      `import { createSemanticDiffActionIdAllocator } from "../application/ids"; createSemanticDiffActionIdAllocator();`,
+    );
+
+    assert.deepStrictEqual(
+      findCompositionRootViolations(references, []).map(({ reason }) => reason),
+      ["allocator-construction-outside-bootstrap"],
+    );
+  });
+
+  test("keeps production allocator construction in bootstrap", () => {
+    const violations = findCompositionRootViolations(
+      collectProductionConstructionReferences(repoRoot),
+      collectProductionApplicationFactoryDefinitions(repoRoot),
+    ).filter(
+      ({ reason }) => reason === "allocator-construction-outside-bootstrap",
+    );
+
+    assert.deepStrictEqual(violations, []);
   });
 
   test("keeps raw parser test access confined to the exact approved suites", () => {

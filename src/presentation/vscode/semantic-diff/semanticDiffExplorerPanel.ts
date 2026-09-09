@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import {
-  createSemanticDiffExplorerActionIdAllocator,
-  createSemanticDiffExplorerSessionIdAllocator,
   createSemanticDiffExplorerSession,
   type SemanticDiffExplorerActionId,
+  type SemanticDiffExplorerActionIdAllocator,
   type SemanticDiffExplorerSession,
   type SemanticDiffExplorerSessionId,
+  type SemanticDiffExplorerSessionIdAllocator,
 } from "../../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
 import {
@@ -27,9 +27,6 @@ export const SEMANTIC_DIFF_EXPLORER_VIEW_TYPE =
   "ajsbutler.semanticDiffExplorer";
 export const SEMANTIC_DIFF_EXPLORER_BUNDLE_SRC =
   "./out/semanticDiffExplorer.js";
-
-const sessionIds = createSemanticDiffExplorerSessionIdAllocator();
-const actionIds = createSemanticDiffExplorerActionIdAllocator();
 
 /** The host-only handle intentionally does not expose the application session. */
 export type SemanticDiffExplorerSessionHandle = Readonly<{
@@ -56,6 +53,8 @@ export type SemanticDiffExplorerPanelDeps = Readonly<{
   ) => Thenable<vscode.TextEditor>;
   contextRegistry?: SemanticDiffExplorerContextRegistry;
   actionRegistry?: SemanticDiffExplorerActionRegistry;
+  sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
+  actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
   /** Host-owned Flow adapter; viewer transport remains unchanged. */
   flowAction?: (
     request: SemanticDiffFlowActionRequest,
@@ -272,15 +271,15 @@ const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
 const openExplorerSession = async (
   resources: ExplorerOpenerResources,
   context: SemanticDiffOutputContext,
-  outputActionId: SemanticDiffExplorerActionId,
 ): Promise<SemanticDiffExplorerSessionHandle> => {
   resources.contextRegistry.get(context)?.dispose();
   const language = resources.deps.language ?? vscode.env.language;
   const session = createSemanticDiffExplorerSession(context, {
     displayLanguage: language,
-    sessionIdAllocator: sessionIds,
-    actionIdAllocator: actionIds,
+    sessionIdAllocator: resources.deps.sessionIdAllocator,
+    actionIdAllocator: resources.deps.actionIdAllocator,
   });
+  const outputActionId = resources.deps.actionIdAllocator();
   const panel = createExplorerPanel(resources, context, language);
   const runtime = createExplorerPanelRuntime({
     resources,
@@ -307,13 +306,8 @@ export const createOpenSemanticDiffExplorer = (
   context: SemanticDiffOutputContext,
 ) => Promise<SemanticDiffExplorerSessionHandle>) => {
   const resources = createExplorerOpenerResources(deps);
-  let nextOutputAction = 1_000_000_000;
   return (context: SemanticDiffOutputContext) =>
-    openExplorerSession(
-      resources,
-      context,
-      `sde-action-${nextOutputAction++}` as SemanticDiffExplorerActionId,
-    );
+    openExplorerSession(resources, context);
 };
 
 export const openSemanticDiffExplorer = createOpenSemanticDiffExplorer;

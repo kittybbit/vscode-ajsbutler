@@ -12,7 +12,9 @@ import {
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
 import {
   createSemanticDiffExplorerActionId,
+  createSemanticDiffExplorerActionIdAllocator,
   createSemanticDiffExplorerSession,
+  createSemanticDiffExplorerSessionIdAllocator,
 } from "../../application/semantic-diff/semanticDiffExplorer";
 import type {
   SemanticDiffOutputContext,
@@ -498,7 +500,10 @@ suite("Semantic diff Explorer Flow integration", () => {
 
   test("keeps source-order duplicate ordinals through sorted presentation and relation focus", async () => {
     const context = createReversedDuplicateRelationContext();
-    const session = createSemanticDiffExplorerSession(context);
+    const session = createSemanticDiffExplorerSession(context, {
+      sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(),
+      actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+    });
     const actionRegistry = new SemanticDiffExplorerActionRegistry();
     actionRegistry.register(session, createSemanticDiffExplorerActionId(99));
     const findLeaf = (

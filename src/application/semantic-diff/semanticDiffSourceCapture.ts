@@ -1,7 +1,7 @@
 import type { AjsParserPort } from "../parsing/AjsParserPort";
 import {
-  createSemanticDiffCaptureScopeIdAllocator,
   type AjsParserWithSourceIndexPort,
+  type SemanticDiffCaptureScopeIdAllocator,
   type SemanticDiffCaptureScopeId,
   type SemanticDiffSourceHandleId,
   type SemanticDiffSourceIndex,
@@ -75,7 +75,6 @@ export type SemanticDiffSourceCaptureFactory = (
   input: SemanticDiffSourceCaptureInput,
 ) => SemanticDiffSourceCapture;
 
-const scopeIds = createSemanticDiffCaptureScopeIdAllocator();
 const bindingRegistry = new SemanticDiffSourceCaptureRegistry();
 
 export const registerSemanticDiffSourceCaptureScope = (
@@ -96,23 +95,23 @@ export const lookupSemanticDiffSourceCaptureBinding = (
 export const createBeginSemanticDiffSourceCapture =
   (
     enrichedParser: AjsParserWithSourceIndexPort,
+    scopeIdAllocator: SemanticDiffCaptureScopeIdAllocator,
   ): SemanticDiffSourceCaptureFactory =>
   (input) =>
-    createCapture(input, enrichedParser, scopeIds());
+    createCapture(input, enrichedParser, scopeIdAllocator());
 
 /**
  * Injectable application entry point. Production composition uses
  * createBeginSemanticDiffSourceCapture so infrastructure never crosses this
- * boundary; the optional parser is useful for pure contract tests.
+ * boundary. Both the enriched parser and capture-scope allocator are
+ * required dependencies; callers must provide them explicitly.
  */
 export const beginSemanticDiffSourceCapture = (
   input: SemanticDiffSourceCaptureInput,
-  enrichedParser?: AjsParserWithSourceIndexPort,
+  enrichedParser: AjsParserWithSourceIndexPort,
+  scopeIdAllocator: SemanticDiffCaptureScopeIdAllocator,
 ): SemanticDiffSourceCapture => {
-  if (enrichedParser === undefined) {
-    throw new TypeError("An enriched parser is required to begin capture.");
-  }
-  return createCapture(input, enrichedParser, scopeIds());
+  return createCapture(input, enrichedParser, scopeIdAllocator());
 };
 
 const createCapture = (

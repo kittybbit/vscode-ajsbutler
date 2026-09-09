@@ -68,6 +68,31 @@ suite("Extension dependencies", () => {
     dependencies.telemetry.dispose();
   });
 
+  test("keeps semantic diff allocators extension-lifetime and collision-free", () => {
+    const dependencies = createExtensionDependencies(
+      {} as vscode.ExtensionContext,
+      "web",
+    );
+
+    const sourceHandles = [
+      dependencies.semanticDiff.sourceHandleIdAllocator(),
+      dependencies.semanticDiff.sourceHandleIdAllocator(),
+    ];
+    const sessions = [
+      dependencies.semanticDiff.sessionIdAllocator(),
+      dependencies.semanticDiff.sessionIdAllocator(),
+    ];
+    const actions = [
+      dependencies.semanticDiff.actionIdAllocator(),
+      dependencies.semanticDiff.actionIdAllocator(),
+    ];
+
+    assert.strictEqual(new Set(sourceHandles).size, sourceHandles.length);
+    assert.strictEqual(new Set(sessions).size, sessions.length);
+    assert.strictEqual(new Set(actions).size, actions.length);
+    dependencies.telemetry.dispose();
+  });
+
   test("instruments parser performance without exposing content", () => {
     const events: Array<{
       eventName: string;

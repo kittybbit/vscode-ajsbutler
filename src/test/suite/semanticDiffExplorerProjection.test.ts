@@ -541,7 +541,9 @@ suite("Semantic Diff Explorer projection", () => {
         hasFindings: false,
       },
     });
-    const view = buildSemanticDiffExplorerViewModel(emptyContext);
+    const view = buildSemanticDiffExplorerViewModel(emptyContext, {
+      actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+    });
     assert.strictEqual(view.leafCount, 0);
     assert.strictEqual(view.status, "empty");
     assert.strictEqual(view.cards.length, 7);

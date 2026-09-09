@@ -16,7 +16,11 @@ import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/sema
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
-import { createSemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
+import type { SemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
+import type {
+  SemanticDiffExplorerActionIdAllocator,
+  SemanticDiffExplorerSessionIdAllocator,
+} from "../../application/semantic-diff/semanticDiffExplorerDto";
 import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
 import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 import {
@@ -28,7 +32,10 @@ import {
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
-  beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
+  beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
+  sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
+  sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
+  actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
   flowBridge?: SemanticDiffFlowViewerBridge;
 };
 
@@ -203,6 +210,8 @@ const createOpenExplorer = ({
     showTextDocument: (document, options) =>
       vscode.window.showTextDocument(document, options),
     contextRegistry,
+    sessionIdAllocator: deps.sessionIdAllocator,
+    actionIdAllocator: deps.actionIdAllocator,
     flowAction: deps.flowBridge
       ? createSemanticDiffFlowAction({
           host: createFlowHost({
@@ -243,7 +252,7 @@ const createCompareCommand = ({
     presentSemanticDiffOutput,
     openExplorer,
     beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
-    sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
+    sourceHandleIdAllocator: deps.sourceHandleIdAllocator,
     registerSemanticDiffSourceCapture:
       createSourceCaptureRegistrar(contextRegistry),
     unregisterSemanticDiffSourceCapture: (context) =>

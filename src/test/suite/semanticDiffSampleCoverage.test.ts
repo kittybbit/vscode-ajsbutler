@@ -4,13 +4,16 @@ import { join } from "path";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
 import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { createSemanticDiffSourceIndexIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 
 const readSample = (name: string): string =>
   readFileSync(join(__dirname, "../../..", "sample", name), "utf8");
 
 suite("Semantic diff sample coverage", () => {
   test("sample definitions cover implemented semantic diff evaluation categories", () => {
-    const parser = new AntlrAjsParser();
+    const parser = new AntlrAjsParser({
+      sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+    });
     const beforeParse = parser.parse(readSample("semantic_diff_before_utf8"));
     const afterParse = parser.parse(readSample("semantic_diff_after_utf8"));
 

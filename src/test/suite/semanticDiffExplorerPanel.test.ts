@@ -1,9 +1,14 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import {
+  createSemanticDiffCaptureScopeIdAllocator,
   createSemanticDiffSourceHandleIdAllocator,
   createSemanticDiffSourceIndexIdAllocator,
 } from "../../application/parsing/AjsParserWithSourceIndexPort";
+import {
+  createSemanticDiffExplorerActionIdAllocator,
+  createSemanticDiffExplorerSessionIdAllocator,
+} from "../../application/semantic-diff/semanticDiffExplorer";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import {
   beginSemanticDiffSourceCapture,
@@ -39,6 +44,11 @@ type FakePanel = {
   emit(value: unknown): void;
   disposeCount: number;
 };
+
+const createPanelAllocatorDeps = () => ({
+  sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(),
+  actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+});
 
 const createFakePanel = (title: string): FakePanel => {
   let received: ((value: unknown) => void) | undefined;
@@ -108,6 +118,7 @@ const createHarness = () => {
     contextRegistry,
     actionRegistry,
     language: "en",
+    ...createPanelAllocatorDeps(),
   });
   return { opener, panels, contextRegistry, actionRegistry };
 };
@@ -150,6 +161,7 @@ const createSourceEntry = (context: ReturnType<typeof emptyContext>) => {
         },
       }),
     },
+    createSemanticDiffCaptureScopeIdAllocator(),
   );
   capture.parser.parse("before");
   capture.parser.parse("after");
@@ -324,6 +336,7 @@ suite("Semantic diff Explorer panel", () => {
       sourceLifetimeRelease: () => {
         releases += 1;
       },
+      ...createPanelAllocatorDeps(),
     });
     const context = emptyContext();
     const handle = await opener(context);
@@ -364,6 +377,7 @@ suite("Semantic diff Explorer panel", () => {
       openReport: async () => undefined,
       contextRegistry,
       actionRegistry,
+      ...createPanelAllocatorDeps(),
     });
 
     await assert.rejects(() => opener(context), /panel failed/);
@@ -389,6 +403,25 @@ suite("Semantic diff Explorer panel", () => {
     );
     second.dispose();
     assert.strictEqual(harness.contextRegistry.size, 0);
+  });
+
+  test("allocates output actions uniquely across Explorer sessions", async () => {
+    const harness = createHarness();
+    const firstContext = emptyContext();
+    const secondContext = emptyContext();
+    const first = await harness.opener(firstContext);
+    const firstOutputActionId =
+      harness.contextRegistry.get(firstContext)!.outputActionId;
+    const second = await harness.opener(secondContext);
+    const secondOutputActionId =
+      harness.contextRegistry.get(secondContext)!.outputActionId;
+
+    assert.notStrictEqual(first.sessionId, second.sessionId);
+    assert.notStrictEqual(firstOutputActionId, secondOutputActionId);
+    assert.strictEqual(harness.actionRegistry.size, 2);
+
+    first.dispose();
+    second.dispose();
   });
 
   test("rejects unknown actions with nullable strict correlation", async () => {
@@ -445,6 +478,7 @@ suite("Semantic diff Explorer panel", () => {
       },
       contextRegistry,
       actionRegistry,
+      ...createPanelAllocatorDeps(),
     });
     const handle = await opener(context);
     const fake = panels[0]!;

@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import {
+  createSemanticDiffCaptureScopeIdAllocator,
   createSemanticDiffSourceHandleIdAllocator,
   createSemanticDiffSourceIndexIdAllocator,
   lookupSemanticDiffSourceIndex,
@@ -27,6 +28,7 @@ const range = (
 });
 
 const context = {} as SemanticDiffOutputContext;
+const scopeIds = createSemanticDiffCaptureScopeIdAllocator();
 
 const index = (
   id: ReturnType<typeof createSemanticDiffSourceIndexIdAllocator>,
@@ -74,6 +76,7 @@ suite("Semantic Diff source capture and index contracts", () => {
               };
         },
       },
+      scopeIds,
     );
 
     assert.deepStrictEqual(capture.parser.parse("before"), {
@@ -136,6 +139,7 @@ suite("Semantic Diff source capture and index contracts", () => {
               };
         },
       },
+      scopeIds,
     );
     assert.strictEqual(capture.parser.parse("bad").ok, false);
     assert.strictEqual(capture.parser.parse("good").ok, true);
@@ -174,6 +178,7 @@ suite("Semantic Diff source capture and index contracts", () => {
           };
         },
       },
+      scopeIds,
     );
     assert.throws(
       () => capture.parser.parse("after"),
@@ -345,6 +350,7 @@ suite("Semantic Diff source capture and index contracts", () => {
                 sourceIndex: validAfter,
               },
       },
+      scopeIds,
     );
     capture.parser.parse("before");
     capture.parser.parse("after");
@@ -382,6 +388,7 @@ suite("Semantic Diff source capture and index contracts", () => {
           ]),
         }),
       },
+      scopeIds,
     );
     first.parser.parse("first-before");
     first.parser.parse("first-after");
@@ -418,6 +425,7 @@ suite("Semantic Diff source capture and index contracts", () => {
           ]),
         }),
       },
+      scopeIds,
     );
     second.parser.parse("second-before");
     second.parser.parse("second-after");
@@ -492,6 +500,7 @@ suite("Semantic Diff source capture and index contracts", () => {
               : { ...sourceIndex, sourceIndexId: indexIds() },
         }),
       },
+      scopeIds,
     );
     capture.parser.parse("before");
     capture.parser.parse("after");

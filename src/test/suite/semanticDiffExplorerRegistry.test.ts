@@ -1,13 +1,18 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
-import { createSemanticDiffExplorerSession } from "../../application/semantic-diff/semanticDiffExplorer";
+import {
+  createSemanticDiffExplorerActionIdAllocator,
+  createSemanticDiffExplorerSession,
+  createSemanticDiffExplorerSessionIdAllocator,
+} from "../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import {
   beginSemanticDiffSourceCapture,
   type SemanticDiffSourceCaptureBinding,
 } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import {
+  createSemanticDiffCaptureScopeIdAllocator,
   createSemanticDiffSourceHandleIdAllocator,
   createSemanticDiffSourceIndexIdAllocator,
 } from "../../application/parsing/AjsParserWithSourceIndexPort";
@@ -28,6 +33,7 @@ const emptyContext = () =>
     unsupportedItems: [],
     limitations: [],
   } satisfies SemanticDiffResult);
+const scopeIds = createSemanticDiffCaptureScopeIdAllocator();
 
 const createBoundSourceCapture = () => {
   const indexIds = createSemanticDiffSourceIndexIdAllocator();
@@ -67,6 +73,7 @@ const createBoundSourceCapture = () => {
         },
       }),
     },
+    scopeIds,
   );
   capture.parser.parse("before");
   capture.parser.parse("after");
@@ -97,7 +104,10 @@ suite("Semantic diff Explorer host registries", () => {
   test("uses context identity and exact-owner unregister", () => {
     const context = emptyContext();
     const sameFacts = emptyContext();
-    const session = createSemanticDiffExplorerSession(context);
+    const session = createSemanticDiffExplorerSession(context, {
+      sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(),
+      actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+    });
     let disposed = 0;
     const entry = {
       context,
@@ -121,7 +131,10 @@ suite("Semantic diff Explorer host registries", () => {
 
   test("keeps action membership scoped to one session", () => {
     const context = emptyContext();
-    const session = createSemanticDiffExplorerSession(context);
+    const session = createSemanticDiffExplorerSession(context, {
+      sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(),
+      actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+    });
     const outputActionId = "sde-action-900000002" as never;
     const registry = new SemanticDiffExplorerActionRegistry();
     registry.register(session, outputActionId);

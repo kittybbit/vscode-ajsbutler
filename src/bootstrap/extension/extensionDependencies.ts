@@ -25,6 +25,20 @@ import {
 } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import { createBeginSemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
+import {
+  createSemanticDiffCaptureScopeIdAllocator,
+  createSemanticDiffSourceHandleIdAllocator,
+  createSemanticDiffSourceIndexIdAllocator,
+  type SemanticDiffCaptureScopeIdAllocator,
+  type SemanticDiffSourceHandleIdAllocator,
+  type SemanticDiffSourceIndexIdAllocator,
+} from "../../application/parsing/AjsParserWithSourceIndexPort";
+import {
+  createSemanticDiffExplorerActionIdAllocator,
+  createSemanticDiffExplorerSessionIdAllocator,
+  type SemanticDiffExplorerActionIdAllocator,
+  type SemanticDiffExplorerSessionIdAllocator,
+} from "../../application/semantic-diff/semanticDiffExplorerDto";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
 import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3WebApiImportAdapter";
@@ -43,7 +57,10 @@ export type ExtensionDependencies = {
   findParameterHover: FindParameterHover;
   semanticDiff: {
     buildSemanticDiffReportData: BuildSemanticDiffReportData;
-    beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
+    beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
+    sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
+    sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
+    actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
   };
   webApiImport: ImportAjsDefinitionCapability;
 };
@@ -127,8 +144,21 @@ export const createExtensionDependencies = (
   },
 ): ExtensionDependencies => {
   const telemetry = createTelemetry();
-  const parser = instrumentParserPerformance(new AntlrAjsParser(), telemetry);
-  const enrichedParser = new AntlrAjsParser();
+  const sourceIndexIdAllocator: SemanticDiffSourceIndexIdAllocator =
+    createSemanticDiffSourceIndexIdAllocator();
+  const sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator =
+    createSemanticDiffSourceHandleIdAllocator();
+  const captureScopeIdAllocator: SemanticDiffCaptureScopeIdAllocator =
+    createSemanticDiffCaptureScopeIdAllocator();
+  const sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator =
+    createSemanticDiffExplorerSessionIdAllocator();
+  const actionIdAllocator: SemanticDiffExplorerActionIdAllocator =
+    createSemanticDiffExplorerActionIdAllocator();
+  const parser = instrumentParserPerformance(
+    new AntlrAjsParser({ sourceIndexIdAllocator }),
+    telemetry,
+  );
+  const enrichedParser = new AntlrAjsParser({ sourceIndexIdAllocator });
   const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
   const webApiImport = createWebApiImportCapability(host, () =>
     factories.createDesktopWebApiImportCapability(context),
@@ -142,8 +172,13 @@ export const createExtensionDependencies = (
     findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {
       buildSemanticDiffReportData: createBuildSemanticDiffReportData(parser),
-      beginSemanticDiffSourceCapture:
-        createBeginSemanticDiffSourceCapture(enrichedParser),
+      beginSemanticDiffSourceCapture: createBeginSemanticDiffSourceCapture(
+        enrichedParser,
+        captureScopeIdAllocator,
+      ),
+      sourceHandleIdAllocator,
+      sessionIdAllocator,
+      actionIdAllocator,
     },
     webApiImport,
   };

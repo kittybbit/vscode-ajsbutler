@@ -1,5 +1,4 @@
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
-import { createSemanticDiffSourceHandleIdAllocator } from "../../../application/parsing/AjsParserWithSourceIndexPort";
 import type {
   ImmutableSourceDescriptor,
   SemanticDiffSourceCapture,
@@ -40,8 +39,7 @@ const createSourceDescriptors = (
   deps: SemanticDiffCommandDeps,
   request: CommandReportData,
 ): NonNullable<CommandReportData["sourceDescriptors"]> => {
-  const sourceHandleIds =
-    deps.sourceHandleIdAllocator ?? createSemanticDiffSourceHandleIdAllocator();
+  const sourceHandleIds = deps.sourceHandleIdAllocator;
   const before: ImmutableSourceDescriptor = {
     side: "before",
     sourceHandleId: sourceHandleIds(),

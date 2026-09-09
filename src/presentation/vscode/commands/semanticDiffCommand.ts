@@ -91,7 +91,7 @@ export type SemanticDiffCommandDeps = {
   language?: string;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
   beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
-  sourceHandleIdAllocator?: SemanticDiffSourceHandleIdAllocator;
+  sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   registerSemanticDiffSourceCapture?: (
     context: SemanticDiffOutputContext,
     binding: Extract<SemanticDiffSourceCaptureBindResult, { ok: true }>,

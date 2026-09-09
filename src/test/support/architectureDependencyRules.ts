@@ -36,7 +36,8 @@ export type FunctionFactoryDefinition = {
 export type CompositionRootViolation = ImportedConstructionReference & {
   reason:
     | "application-factory-outside-bootstrap"
-    | "infrastructure-construction-outside-bootstrap";
+    | "infrastructure-construction-outside-bootstrap"
+    | "allocator-construction-outside-bootstrap";
 };
 
 export const architectureRuleIds = {
@@ -204,9 +205,152 @@ type ImportedBinding = {
   symbol: string;
 };
 
+type SourceModuleMap = ReadonlyMap<string, string>;
+
+const withoutSourceExtension = (file: string): string =>
+  file.replace(/\.(?:tsx?|mts|cts)$/u, "");
+
+const sourceModuleCandidates = (modulePath: string): string[] => [
+  modulePath,
+  `${modulePath}.ts`,
+  `${modulePath}.tsx`,
+  `${modulePath}.mts`,
+  `${modulePath}.cts`,
+  `${modulePath}/index.ts`,
+  `${modulePath}/index.tsx`,
+];
+
+const findSourceModule = (
+  modulePath: string,
+  sourceFiles: SourceModuleMap,
+): { file: string; source: string } | undefined => {
+  const candidate = sourceModuleCandidates(modulePath).find((file) =>
+    sourceFiles.has(file),
+  );
+  return candidate
+    ? { file: candidate, source: sourceFiles.get(candidate) as string }
+    : undefined;
+};
+
+const parseSourceModule = (file: string, source: string): ts.SourceFile =>
+  ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+
+const resolveExportedBinding = (
+  modulePath: string,
+  symbol: string,
+  sourceFiles: SourceModuleMap,
+  visited = new Set<string>(),
+): ImportedBinding | undefined => {
+  const module = findSourceModule(modulePath, sourceFiles);
+  if (!module) {
+    return { target: withoutSourceExtension(modulePath), symbol };
+  }
+  const moduleKey = `${module.file}\0${symbol}`;
+  if (visited.has(moduleKey)) {
+    return undefined;
+  }
+  const nextVisited = new Set(visited).add(moduleKey);
+  const sourceFile = parseSourceModule(module.file, module.source);
+
+  for (const statement of sourceFile.statements) {
+    if (!ts.isExportDeclaration(statement)) {
+      continue;
+    }
+    const moduleSpecifier = readStringArgument(statement.moduleSpecifier);
+    const exportClause = statement.exportClause;
+    if (moduleSpecifier) {
+      const target =
+        resolveImportPath(module.file, moduleSpecifier) ?? moduleSpecifier;
+      if (exportClause && ts.isNamedExports(exportClause)) {
+        const exported = exportClause.elements.find(
+          (element) => (element.name.text ?? "") === symbol,
+        );
+        if (exported) {
+          return resolveExportedBinding(
+            target,
+            exported.propertyName?.text ?? exported.name.text,
+            sourceFiles,
+            nextVisited,
+          );
+        }
+      } else if (!exportClause) {
+        const resolved = resolveExportedBinding(
+          target,
+          symbol,
+          sourceFiles,
+          nextVisited,
+        );
+        if (resolved) {
+          return resolved;
+        }
+      }
+      continue;
+    }
+    if (exportClause && ts.isNamedExports(exportClause)) {
+      const exported = exportClause.elements.find(
+        (element) => element.name.text === symbol,
+      );
+      if (exported) {
+        const localName = exported.propertyName?.text ?? exported.name.text;
+        const localBinding = collectImportedBindings(
+          module.file,
+          sourceFile,
+          sourceFiles,
+        ).get(localName);
+        if (localBinding) {
+          return resolveExportedBinding(
+            localBinding.target,
+            localBinding.symbol,
+            sourceFiles,
+            nextVisited,
+          );
+        }
+        return {
+          target: withoutSourceExtension(module.file),
+          symbol: localName,
+        };
+      }
+    }
+  }
+
+  const exportedDeclaration = sourceFile.statements.find((statement) => {
+    if (!hasExportModifier(statement)) {
+      return false;
+    }
+    if (
+      ts.isFunctionDeclaration(statement) ||
+      ts.isClassDeclaration(statement)
+    ) {
+      return statement.name?.text === symbol;
+    }
+    if (ts.isVariableStatement(statement)) {
+      return statement.declarationList.declarations.some(
+        (declaration) =>
+          ts.isIdentifier(declaration.name) && declaration.name.text === symbol,
+      );
+    }
+    return false;
+  });
+  if (exportedDeclaration) {
+    return {
+      target: withoutSourceExtension(module.file),
+      symbol,
+    };
+  }
+
+  return { target: withoutSourceExtension(module.file), symbol };
+};
+
 const collectImportedBindings = (
   file: string,
   sourceFile: ts.SourceFile,
+  sourceFiles: SourceModuleMap = new Map(),
 ): ReadonlyMap<string, ImportedBinding> => {
   const bindings = new Map<string, ImportedBinding>();
 
@@ -234,10 +378,14 @@ const collectImportedBindings = (
         namedBindings.elements
           .filter((element) => !element.isTypeOnly)
           .forEach((element) => {
-            bindings.set(element.name.text, {
-              target,
-              symbol: element.propertyName?.text ?? element.name.text,
-            });
+            const symbol = element.propertyName?.text ?? element.name.text;
+            bindings.set(
+              element.name.text,
+              resolveExportedBinding(target, symbol, sourceFiles) ?? {
+                target,
+                symbol,
+              },
+            );
           });
       }
     });
@@ -248,6 +396,7 @@ const collectImportedBindings = (
 const resolveImportedConstruction = (
   expression: ts.Expression,
   bindings: ReadonlyMap<string, ImportedBinding>,
+  sourceFiles: SourceModuleMap,
 ): ImportedBinding | undefined => {
   if (ts.isIdentifier(expression)) {
     return bindings.get(expression.text);
@@ -257,9 +406,16 @@ const resolveImportedConstruction = (
     ts.isIdentifier(expression.expression)
   ) {
     const namespaceBinding = bindings.get(expression.expression.text);
-    return namespaceBinding?.symbol === "*"
-      ? { target: namespaceBinding.target, symbol: expression.name.text }
-      : undefined;
+    if (namespaceBinding?.symbol !== "*") {
+      return undefined;
+    }
+    return (
+      resolveExportedBinding(
+        namespaceBinding.target,
+        expression.name.text,
+        sourceFiles,
+      ) ?? { target: namespaceBinding.target, symbol: expression.name.text }
+    );
   }
   return undefined;
 };
@@ -267,6 +423,7 @@ const resolveImportedConstruction = (
 export const collectImportedConstructionReferencesFromSource = (
   file: string,
   source: string,
+  sourceFiles: SourceModuleMap = new Map(),
 ): ImportedConstructionReference[] => {
   const sourceFile = ts.createSourceFile(
     file,
@@ -275,13 +432,17 @@ export const collectImportedConstructionReferencesFromSource = (
     true,
     file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
-  const bindings = collectImportedBindings(file, sourceFile);
+  const bindings = collectImportedBindings(file, sourceFile, sourceFiles);
   const references: ImportedConstructionReference[] = [];
 
   const visit = (node: ts.Node): void => {
     if (ts.isNewExpression(node) || ts.isCallExpression(node)) {
       const kind = ts.isNewExpression(node) ? "new" : "call";
-      const binding = resolveImportedConstruction(node.expression, bindings);
+      const binding = resolveImportedConstruction(
+        node.expression,
+        bindings,
+        sourceFiles,
+      );
       if (binding) {
         references.push({ file, ...binding, kind });
       }
@@ -421,16 +582,27 @@ const compareConstructionReferences = (
 
 export const collectProductionConstructionReferences = (
   repoRoot: string,
-): ImportedConstructionReference[] =>
-  collectProductionSourceFiles(repoRoot)
+): ImportedConstructionReference[] => {
+  const productionFiles = collectProductionSourceFiles(repoRoot);
+  const sourceFiles = new Map<string, string>();
+  productionFiles.forEach((filePath) => {
+    const file = toRelativePath(repoRoot, filePath);
+    const source = fs.readFileSync(filePath, "utf8");
+    sourceFiles.set(file, source);
+    sourceFiles.set(withoutSourceExtension(file), source);
+  });
+
+  return productionFiles
     .flatMap((filePath) => {
       const file = toRelativePath(repoRoot, filePath);
       return collectImportedConstructionReferencesFromSource(
         file,
-        fs.readFileSync(filePath, "utf8"),
+        sourceFiles.get(file) as string,
+        sourceFiles,
       );
     })
     .sort(compareConstructionReferences);
+};
 
 export const collectProductionApplicationFactoryDefinitions = (
   repoRoot: string,
@@ -528,6 +700,18 @@ export const findCompositionRootViolations = (
 
   return references.flatMap<CompositionRootViolation>((reference) => {
     const sourceLayer = layerOf(reference.file);
+    if (
+      reference.kind === "call" &&
+      /^create[A-Za-z0-9]*Allocator$/u.test(reference.symbol) &&
+      !reference.file.startsWith("src/bootstrap/")
+    ) {
+      return [
+        {
+          ...reference,
+          reason: "allocator-construction-outside-bootstrap" as const,
+        },
+      ];
+    }
     if (
       reference.kind === "new" &&
       reference.target.startsWith("src/infrastructure/") &&

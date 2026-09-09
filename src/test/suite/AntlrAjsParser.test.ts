@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { flattenAjsUnits } from "../../domain/models/ajs/AjsDocument";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { createSemanticDiffSourceIndexIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import { AntlrRawAjsParser } from "../../infrastructure/parser/AntlrRawAjsParser";
 
 const buildBoundedLargeDefinition = (childCount: number): string => {
@@ -12,7 +13,9 @@ const buildBoundedLargeDefinition = (childCount: number): string => {
 };
 
 suite("ANTLR AJS parser adapter", () => {
-  const parser = new AntlrAjsParser();
+  const parser = new AntlrAjsParser({
+    sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+  });
 
   test("normalizes nested units before returning them", () => {
     const result = parser.parse(`

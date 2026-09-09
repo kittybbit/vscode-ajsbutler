@@ -12,10 +12,6 @@ import type {
   SemanticDiffExplorerViewModel,
 } from "./semanticDiffExplorerDto";
 import {
-  createSemanticDiffExplorerActionIdAllocator,
-  createSemanticDiffExplorerSessionIdAllocator,
-} from "./semanticDiffExplorerDto";
-import {
   buildCards,
   createLeaves,
 } from "./semanticDiffExplorerProjectionLeaves";
@@ -26,8 +22,6 @@ import {
 import { buildTree } from "./semanticDiffExplorerProjectionTree";
 import { freeze } from "./semanticDiffExplorerProjectionSupport";
 
-const defaultSessionIds = createSemanticDiffExplorerSessionIdAllocator();
-const defaultActionIds = createSemanticDiffExplorerActionIdAllocator();
 const unfilteredViewByFilteredView = new WeakMap<
   object,
   SemanticDiffExplorerViewModel
@@ -101,16 +95,15 @@ const explorerStatus = (
 };
 
 export type BuildSemanticDiffExplorerViewOptions = {
-  readonly actionIdAllocator?: SemanticDiffExplorerActionIdAllocator;
+  readonly actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
 };
 
 /** Build the projection from one already-built output context. */
 export const buildSemanticDiffExplorerViewModel = (
   context: SemanticDiffOutputContext,
-  options: BuildSemanticDiffExplorerViewOptions = {},
+  options: BuildSemanticDiffExplorerViewOptions,
 ): SemanticDiffExplorerViewModel => {
-  const actionIdAllocator = options.actionIdAllocator ?? defaultActionIds;
-  const leaves = createLeaves(context, actionIdAllocator);
+  const leaves = createLeaves(context, options.actionIdAllocator);
   return createViewModel(buildCards(context), buildTree(leaves), "all");
 };
 
@@ -151,8 +144,8 @@ export const applySemanticDiffExplorerFilter =
 
 export type CreateSemanticDiffExplorerSessionOptions = {
   readonly displayLanguage?: string;
-  readonly sessionIdAllocator?: SemanticDiffExplorerSessionIdAllocator;
-  readonly actionIdAllocator?: SemanticDiffExplorerActionIdAllocator;
+  readonly sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
+  readonly actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
 };
 
 const actionIdsInTree = (
@@ -200,13 +193,13 @@ const createActionLookup = (
 /** Create one session while retaining the exact context object identity. */
 export const createSemanticDiffExplorerSession = (
   context: SemanticDiffOutputContext,
-  options: CreateSemanticDiffExplorerSessionOptions = {},
+  options: CreateSemanticDiffExplorerSessionOptions,
 ): SemanticDiffExplorerSession => {
   const allViewModel = buildSemanticDiffExplorerViewModel(context, {
     actionIdAllocator: options.actionIdAllocator,
   });
   return freeze({
-    sessionId: (options.sessionIdAllocator ?? defaultSessionIds)(),
+    sessionId: options.sessionIdAllocator(),
     context,
     displayLanguage: options.displayLanguage ?? "en",
     viewModel: allViewModel,

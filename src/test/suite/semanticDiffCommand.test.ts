@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 import { createBuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { BuildSemanticDiffReportDataInput } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import {
+  createSemanticDiffCaptureScopeIdAllocator,
+  createSemanticDiffSourceHandleIdAllocator,
   createSemanticDiffSourceIndexIdAllocator,
   type AjsParserWithSourceIndexPort,
 } from "../../application/parsing/AjsParserWithSourceIndexPort";
@@ -19,6 +21,17 @@ import {
   executeCompareSemanticDiffCommand,
   type SemanticDiffCommandDeps,
 } from "../../presentation/vscode/commands/semanticDiffCommand";
+
+const createTestParser = (): AntlrAjsParser =>
+  new AntlrAjsParser({
+    sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+  });
+
+const createTestCaptureFactory = (parser: AjsParserWithSourceIndexPort) =>
+  createBeginSemanticDiffSourceCapture(
+    parser,
+    createSemanticDiffCaptureScopeIdAllocator(),
+  );
 
 type SemanticDiffCommandObservations = {
   openDialogCount: number;
@@ -110,6 +123,7 @@ class SemanticDiffCommandHarness {
       },
       buildSemanticDiffReportData: (input) =>
         this.buildSemanticDiffReportData(input),
+      sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
       buildSemanticDiffOutputContext: (result) => {
         this.observed.reportSteps.push("build-context");
         const context = { result, summary: {} as never };
@@ -241,9 +255,7 @@ suite("Semantic diff command", () => {
         }) as unknown as vscode.TextEditor,
     });
     const captureInputs: unknown[] = [];
-    const concreteBegin = createBeginSemanticDiffSourceCapture(
-      new AntlrAjsParser(),
-    );
+    const concreteBegin = createTestCaptureFactory(createTestParser());
     const contextRegistry = new SemanticDiffExplorerContextRegistry();
     let registeredContext: SemanticDiffOutputContext | undefined;
     let registeredRelease: (() => void) | undefined;
@@ -266,9 +278,8 @@ suite("Semantic diff command", () => {
         captureInputs.push(input);
         return concreteBegin(input);
       },
-      buildSemanticDiffReportData: createBuildSemanticDiffReportData(
-        new AntlrAjsParser(),
-      ),
+      buildSemanticDiffReportData:
+        createBuildSemanticDiffReportData(createTestParser()),
       registerSemanticDiffSourceCapture: (
         context,
         binding,
@@ -390,9 +401,7 @@ suite("Semantic diff command", () => {
           },
         }) as unknown as vscode.TextEditor,
     });
-    const concreteBegin = createBeginSemanticDiffSourceCapture(
-      new AntlrAjsParser(),
-    );
+    const concreteBegin = createTestCaptureFactory(createTestParser());
     let releaseCount = 0;
 
     const result = await executeCompareSemanticDiffCommand({
@@ -407,9 +416,8 @@ suite("Semantic diff command", () => {
           },
         };
       },
-      buildSemanticDiffReportData: createBuildSemanticDiffReportData(
-        new AntlrAjsParser(),
-      ),
+      buildSemanticDiffReportData:
+        createBuildSemanticDiffReportData(createTestParser()),
       openExplorer: async () => {
         throw new Error("Explorer must not open after parser failure.");
       },
@@ -634,7 +642,7 @@ suite("Semantic diff command", () => {
         },
       }),
     };
-    const beginCapture = createBeginSemanticDiffSourceCapture(enrichedParser);
+    const beginCapture = createTestCaptureFactory(enrichedParser);
 
     const result = await executeCompareSemanticDiffCommand({
       ...harness.deps,
@@ -702,7 +710,7 @@ suite("Semantic diff command", () => {
         },
       }),
     };
-    const beginCapture = createBeginSemanticDiffSourceCapture(enrichedParser);
+    const beginCapture = createTestCaptureFactory(enrichedParser);
 
     const result = await executeCompareSemanticDiffCommand({
       ...harness.deps,

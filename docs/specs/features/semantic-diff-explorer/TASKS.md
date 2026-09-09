@@ -3708,8 +3708,9 @@ excluded until Slices 16 and 17 are complete and the exit review is rerun.
 
 ### Slice 16: Bootstrap Allocator Injection And Composition-Root Detection
 
-- Status: Replanned and pending independent plan review and the focused
-  plan-gate commit; no implementation authorization is implied by this entry.
+- Status: Implemented; independent implementation review and Completion
+  Approval remain pending. The implementation stays within the approved
+  Slice 16 boundary and has not been staged or committed.
 - Scope: construct one extension-lifetime source-index allocator,
   source-handle allocator, capture-scope allocator, Explorer session
   allocator, and Explorer action allocator in Bootstrap. Inject the
@@ -3727,7 +3728,7 @@ excluded until Slices 16 and 17 are complete and the exit review is rerun.
 - Scope details: update
   `src/bootstrap/extension/extensionDependencies.ts` and
   `semanticDiffWiring.ts`, `src/application/semantic-diff/
-  semanticDiffExplorerProjection.ts`,
+semanticDiffExplorerProjection.ts`,
   `src/application/semantic-diff/semanticDiffSourceCapture.ts`,
   `src/infrastructure/parser/AntlrAjsParser.ts`,
   `src/presentation/vscode/commands/semanticDiffCommand.ts` and
@@ -3814,6 +3815,62 @@ excluded until Slices 16 and 17 are complete and the exit review is rerun.
   viewer placement, telemetry, dependencies, README/CHANGELOG/use-case/
   roadmap changes, and closure-folder removal.
 
+### Slice 16 Implementation Result (2026-09-10)
+
+- Bootstrap now creates one extension-lifetime allocator for each source
+  index, source handle, capture scope, Explorer session, and Explorer action,
+  then forwards those exact instances through Semantic Diff wiring. Parser,
+  command, source capture, projection, and Explorer panel production APIs no
+  longer create module/default/fallback allocators; output actions use the
+  same injected action allocator as leaf actions.
+- Application test fixtures now pass explicit parser, capture, session, and
+  action allocators. The architecture collector resolves named aliases,
+  namespace bindings, transitive `export { ... } from`/`export * from`
+  chains, and cyclic re-exports safely. Its production scan rejects
+  non-Bootstrap imported `create*Allocator()` calls and reports zero
+  composition-root violations for the current production graph.
+- Acceptance evidence: compiled desktop tests exit 0; `rtk pnpm run
+test:compile`, `rtk pnpm run test:prepare:desktop`, `rtk pnpm run
+test:prepare:web`, and `rtk pnpm run build` pass. `rtk pnpm run qlty:check`
+  reports `No issues`; `rtk pnpm run qlty:smells` completes with zero
+  findings; Markdown lint and `rtk git diff --check` pass. Web browser smoke
+  remains environment-gated by the known Chromium bootstrap permission
+  restriction and was not claimed.
+- Review handoff: return the exact runtime/test/documentation diff and this
+  evidence to `implementation-reviewer`; no completion commit is authorized
+  until an independent `Ready` result and the standing no-findings approval
+  gate are recorded.
+
+### Slice 16 Review Remediation (P3, 2026-09-10)
+
+- Finding: the `beginSemanticDiffSourceCapture` JSDoc described an optional
+  parser even though Slice 16 requires explicit parser and capture-scope
+  allocator injection.
+- Remediation: corrected the JSDoc to state that both dependencies are
+  required; runtime behavior and the approved Slice 16 boundary are
+  unchanged.
+
+### Slice 16 Completion Approval (2026-09-10)
+
+- Independent implementation review returned `Ready` with no findings after
+  the P3 JSDoc remediation. Under the user's standing no-findings policy,
+  Completion Approval is automatically recorded for the exact Slice 16
+  boundary.
+- Final validation remains green: `rtk pnpm run test:compile`, compiled
+  desktop runner (exit 0), `rtk pnpm run qlty:check` (`No issues`), `rtk
+pnpm run qlty:smells` (zero findings), and `rtk git diff --check` passed.
+  The known managed Chromium bootstrap permission restriction remains the
+  only unclaimed web-smoke boundary.
+- Exact completion paths are limited to the Slice 16 runtime files under
+  `src/application/semantic-diff/`, `src/bootstrap/extension/`,
+  `src/infrastructure/parser/`, and
+  `src/presentation/vscode/{commands,semantic-diff}/`; the updated parser,
+  command, source-capture, Explorer, extension, and architecture tests under
+  `src/test/`; and this feature's `TASKS.md` and `TRACEABILITY.md`. Slice 17
+  files and the six protected closure drafts are excluded.
+- Slice 16 is completion-approved and eligible for its focused completion
+  commit; no commit or staging was performed in this handoff.
+
 ### Slice 17: VS Code Semantic Diff Adapter Placement And Constant Ownership
 
 - Status: Planned after Slice 16's focused completion commit; it cannot start
@@ -3832,7 +3889,7 @@ excluded until Slices 16 and 17 are complete and the exit review is rerun.
   implementation file may be imported directly.
 - Constant ownership: place the dedicated Explorer constants module at
   `src/presentation/vscode/semantic-diff/panel/
-  semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
+semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   generation must use it, and the Panel facade re-exports its public values.
   Remove the Explorer constants and Explorer switch branch from
   `src/presentation/vscode/webview/constant.ts`; the generic resolver and
@@ -4378,7 +4435,7 @@ semanticDiffCommandBuild.ts` now projects URI-bearing host descriptors into
   remains perceivable at approximately 4.60:1 in light mode and 10.71:1 in
   dark mode, with `Highlight` in forced colors.
 - Validation: independent recheck passed `rtk pnpm run qlty:check` (`No
-  issues`), `rtk pnpm run qlty:smells` (zero findings across 97 files),
+issues`), `rtk pnpm run qlty:smells` (zero findings across 97 files),
   `rtk pnpm run test:compile`, the focused MUI/theme-mode/Explorer DOM suite
   (20 passing), `rtk pnpm run lint:md`, and `rtk git diff --check`. Recorded
   Slice 15 evidence also includes desktop preparation and smoke (exit 0), web
