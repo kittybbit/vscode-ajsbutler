@@ -1,11 +1,14 @@
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { createSemanticDiffSourceIndexIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import {
   AntlrRawAjsParser,
   RawParseAjsResult,
 } from "../../infrastructure/parser/AntlrRawAjsParser";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 
-export const testAjsParser = new AntlrAjsParser();
+export const testAjsParser = new AntlrAjsParser({
+  sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+});
 const testRawAjsParser = new AntlrRawAjsParser();
 
 export const parseAjsDocumentForTest = (content: string): AjsDocument => {

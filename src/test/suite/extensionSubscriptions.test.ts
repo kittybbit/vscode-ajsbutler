@@ -1,6 +1,11 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { createSemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
+import {
+  createSemanticDiffExplorerActionIdAllocator,
+  createSemanticDiffExplorerSessionIdAllocator,
+} from "../../application/semantic-diff/semanticDiffExplorer";
 import type { ExtensionDependencies } from "../../bootstrap/extension/extensionDependencies";
 import { createExtensionSubscriptions } from "../../bootstrap/extension/extensionSubscriptions";
 
@@ -32,6 +37,12 @@ suite("Extension subscriptions", () => {
             limitations: [],
           },
         }),
+        beginSemanticDiffSourceCapture: (() => {
+          throw new Error("not called");
+        }) as ExtensionDependencies["semanticDiff"]["beginSemanticDiffSourceCapture"],
+        sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
+        sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(),
+        actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
       },
       webApiImport: {
         importDefinition: async () => ({

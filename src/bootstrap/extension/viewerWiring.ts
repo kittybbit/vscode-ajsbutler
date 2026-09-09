@@ -6,6 +6,7 @@ import {
   createViewerReadyEvent,
 } from "../../application/telemetry/viewerTelemetry";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
+import type { UnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import {
   type ViewerNavigationRequest,
   type NavigationTargetView,
@@ -33,6 +34,7 @@ import {
 } from "../../presentation/vscode/webview/ajsDocument";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 import { saveText } from "../../presentation/vscode/webview/messageHandlers";
+import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 
 type ViewerConfig = {
   viewType: string;
@@ -48,6 +50,7 @@ export type ViewerWiringDeps = {
   context: vscode.ExtensionContext;
   telemetry: TelemetryPort;
   buildUnitList: BuildUnitList;
+  flowBridge?: SemanticDiffFlowViewerBridge;
 };
 
 const createPreviewCommandDependencies = (
@@ -131,6 +134,36 @@ export const flushPendingViewerReveal = (
   postRevealUnit(panel, absolutePath);
 };
 
+const handleViewerReady = ({
+  document,
+  panel,
+  onReady,
+  pendingRevealByPanel,
+  onViewerReady,
+}: Readonly<{
+  document: vscode.TextDocument;
+  panel: vscode.WebviewPanel;
+  onReady: (document: vscode.TextDocument, panel: vscode.WebviewPanel) => void;
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
+  onViewerReady: (
+    document: vscode.TextDocument,
+    panel: vscode.WebviewPanel,
+    source: "command" | "navigation",
+  ) => void;
+}>): void => {
+  onReady(document, panel);
+  try {
+    onViewerReady(
+      document,
+      panel,
+      pendingRevealByPanel.has(panel) ? "navigation" : "command",
+    );
+  } catch {
+    // Lifecycle telemetry must not prevent a pending reveal from flushing.
+  }
+  flushPendingViewerReveal(panel, pendingRevealByPanel);
+};
+
 export const createViewerReadyHandler =
   (
     onReady: (
@@ -144,19 +177,14 @@ export const createViewerReadyHandler =
       source: "command" | "navigation",
     ) => void = () => {},
   ) =>
-  (document: vscode.TextDocument, panel: vscode.WebviewPanel): void => {
-    onReady(document, panel);
-    try {
-      onViewerReady(
-        document,
-        panel,
-        pendingRevealByPanel.has(panel) ? "navigation" : "command",
-      );
-    } catch {
-      // Lifecycle telemetry must not prevent a pending reveal from flushing.
-    }
-    flushPendingViewerReveal(panel, pendingRevealByPanel);
-  };
+  (document: vscode.TextDocument, panel: vscode.WebviewPanel): void =>
+    handleViewerReady({
+      document,
+      panel,
+      onReady,
+      pendingRevealByPanel,
+      onViewerReady,
+    });
 
 const revealExistingCounterpartPanel = (
   panel: vscode.WebviewPanel,
@@ -193,21 +221,44 @@ const openCounterpartPanel = (
   }
 };
 
-export const revealCounterpartPanel = (
+const getExistingCounterpartPanel = (
+  factory: ViewerFactory,
+  document: vscode.TextDocument,
+): vscode.WebviewPanel | undefined => {
+  try {
+    return factory.getExistingPanel(document);
+  } catch {
+    return undefined;
+  }
+};
+
+const getNewCounterpartPanel = (
+  factory: ViewerFactory,
+  document: vscode.TextDocument,
+): vscode.WebviewPanel | undefined => {
+  try {
+    return factory.getPanel(document);
+  } catch {
+    return undefined;
+  }
+};
+
+const openNewCounterpartPanel = (
   request: CounterpartRevealRequest,
   deps: CounterpartRevealDeps,
+  factory: ViewerFactory,
 ): void => {
-  const targetFactory = deps.factoryByViewType.get(request.targetViewType);
-  if (!targetFactory) {
-    return;
-  }
+  const panel = getNewCounterpartPanel(factory, request.document);
+  if (!panel) return;
+  openCounterpartPanel(request, deps, panel);
+};
 
-  let panel: vscode.WebviewPanel | undefined;
-  try {
-    panel = targetFactory.getExistingPanel(request.document);
-  } catch {
-    return;
-  }
+const revealExistingOrOpenCounterpart = (
+  request: CounterpartRevealRequest,
+  deps: CounterpartRevealDeps,
+  factory: ViewerFactory,
+): void => {
+  const panel = getExistingCounterpartPanel(factory, request.document);
   if (panel) {
     revealExistingCounterpartPanel(
       panel,
@@ -216,14 +267,18 @@ export const revealCounterpartPanel = (
     );
     return;
   }
+  openNewCounterpartPanel(request, deps, factory);
+};
 
-  let newPanel: vscode.WebviewPanel;
-  try {
-    newPanel = targetFactory.getPanel(request.document);
-  } catch {
+export const revealCounterpartPanel = (
+  request: CounterpartRevealRequest,
+  deps: CounterpartRevealDeps,
+): void => {
+  const targetFactory = deps.factoryByViewType.get(request.targetViewType);
+  if (!targetFactory) {
     return;
   }
-  openCounterpartPanel(request, deps, newPanel);
+  revealExistingOrOpenCounterpart(request, deps, targetFactory);
 };
 
 const revealCounterpartFromNavigation = (
@@ -239,6 +294,63 @@ const revealCounterpartFromNavigation = (
     },
     deps,
   );
+};
+
+const reportNavigationTelemetry = (
+  telemetry: TelemetryPort,
+  viewType: string,
+  event: ViewerNavigationRequest,
+): void => {
+  const navigationEvent = createViewerNavigationActionEvent({
+    viewType,
+    targetView: event.data.targetView,
+    host: getTelemetryHost(),
+  });
+  if (navigationEvent) {
+    reportTelemetrySafely(telemetry, navigationEvent);
+  }
+};
+
+const reportNavigationOpenStarted = (
+  telemetry: TelemetryPort,
+  targetViewType: string,
+): void => {
+  const openEvent = createViewerOpenStartedEvent({
+    viewType: targetViewType,
+    source: "navigation",
+    result: "success",
+    host: getTelemetryHost(),
+  });
+  if (openEvent) {
+    reportTelemetrySafely(telemetry, openEvent);
+  }
+};
+
+const handleViewerNavigation = ({
+  document,
+  event,
+  viewType,
+  telemetry,
+  previewDeps,
+  factoryByViewType,
+  pendingRevealByPanel,
+}: Readonly<{
+  document: vscode.TextDocument;
+  event: ViewerNavigationRequest;
+  viewType: string;
+  telemetry: TelemetryPort;
+  previewDeps: OpenPreviewCommandDependencies;
+  factoryByViewType: Map<string, ViewerFactory>;
+  pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
+}>): void => {
+  reportNavigationTelemetry(telemetry, viewType, event);
+  revealCounterpartFromNavigation(document, event, {
+    factoryByViewType,
+    mountPanel: previewDeps.mountPanel,
+    onOpenStarted: (targetViewType) =>
+      reportNavigationOpenStarted(telemetry, targetViewType),
+    pendingRevealByPanel,
+  });
 };
 
 const createViewerNavigationHandler =
@@ -258,58 +370,126 @@ const createViewerNavigationHandler =
     document: vscode.TextDocument,
     event: ViewerNavigationRequest,
   ) => void) =>
-  (document, event) => {
-    const navigationEvent = createViewerNavigationActionEvent({
+  (document, event) =>
+    handleViewerNavigation({
+      document,
+      event,
       viewType,
-      targetView: event.data.targetView,
-      host: getTelemetryHost(),
-    });
-    if (navigationEvent) {
-      reportTelemetrySafely(telemetry, navigationEvent);
-    }
-
-    revealCounterpartFromNavigation(document, event, {
+      telemetry,
+      previewDeps,
       factoryByViewType,
-      mountPanel: previewDeps.mountPanel,
-      onOpenStarted: (targetViewType) => {
-        const openEvent = createViewerOpenStartedEvent({
-          viewType: targetViewType,
-          source: "navigation",
-          result: "success",
-          host: getTelemetryHost(),
-        });
-        if (openEvent) {
-          reportTelemetrySafely(telemetry, openEvent);
-        }
-      },
       pendingRevealByPanel,
     });
-  };
 
-const createViewerBundle = ({
-  context,
-  telemetry,
-  buildUnitList,
-  previewDeps,
-  factoryByViewType,
-  viewType,
-  saveHandler,
-  pendingRevealByPanel,
-}: ViewerWiringDeps & {
+type ViewerBundleOptions = ViewerWiringDeps & {
   previewDeps: OpenPreviewCommandDependencies;
   factoryByViewType: Map<string, ViewerFactory>;
   viewType: string;
   saveHandler?: (content: string) => Promise<void>;
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
-}): vscode.Disposable[] => {
-  const store = new WebviewStore(viewType);
-  const mediator = new WebviewMediator({
+  flowBridge?: SemanticDiffFlowViewerBridge;
+};
+
+const createDocumentChangeHandler = (
+  viewType: string,
+  flowBridge: SemanticDiffFlowViewerBridge | undefined,
+) =>
+  viewType === AJS_FLOW_VIEWER_TYPE
+    ? (document: UnitListDocumentDto | null, panel: vscode.WebviewPanel) =>
+        flowBridge?.onDocumentChanged(document, panel)
+    : undefined;
+
+const notifyFlowReady = ({
+  viewType,
+  flowBridge,
+  document,
+  panel,
+}: Readonly<{
+  viewType: string;
+  flowBridge?: SemanticDiffFlowViewerBridge;
+  document: vscode.TextDocument;
+  panel: vscode.WebviewPanel;
+}>): void => {
+  if (flowBridge && viewType === AJS_FLOW_VIEWER_TYPE) {
+    flowBridge.onReady(document, panel);
+  }
+};
+
+const reportReadyTelemetry = ({
+  viewType,
+  telemetry,
+  source,
+}: Readonly<{
+  viewType: string;
+  telemetry: TelemetryPort;
+  source: "command" | "navigation";
+}>): void => {
+  const event = createViewerReadyEvent({
+    viewType,
+    source,
+    result: "success",
+    host: getTelemetryHost(),
+  });
+  if (event) {
+    reportTelemetrySafely(telemetry, event);
+  }
+};
+
+const createViewerReadyCallback = ({
+  viewType,
+  telemetry,
+  flowBridge,
+}: Readonly<{
+  viewType: string;
+  telemetry: TelemetryPort;
+  flowBridge?: SemanticDiffFlowViewerBridge;
+}>): ((
+  document: vscode.TextDocument,
+  panel: vscode.WebviewPanel,
+  source: "command" | "navigation",
+) => void) => {
+  return (document, panel, source) => {
+    notifyFlowReady({ viewType, flowBridge, document, panel });
+    reportReadyTelemetry({ viewType, telemetry, source });
+  };
+};
+
+const createViewerMediator = ({
+  context,
+  viewType,
+  buildUnitList,
+  telemetry,
+  flowBridge,
+  store,
+}: Readonly<{
+  context: vscode.ExtensionContext;
+  viewType: string;
+  buildUnitList: BuildUnitList;
+  telemetry: TelemetryPort;
+  flowBridge?: SemanticDiffFlowViewerBridge;
+  store: WebviewStore;
+}>): WebviewMediator =>
+  new WebviewMediator({
     context,
     viewType,
     store,
-    change: createDebouncedAjsDocumentChange(buildUnitList, 300, telemetry),
+    change: createDebouncedAjsDocumentChange(
+      buildUnitList,
+      300,
+      telemetry,
+      createDocumentChangeHandler(viewType, flowBridge),
+    ),
   });
-  const registerPanel: ViewerPanelRegistration = (registration) => {
+
+const createPanelRegistrar =
+  ({
+    telemetry,
+    store,
+  }: Readonly<{
+    telemetry: TelemetryPort;
+    store: WebviewStore;
+  }>): ViewerPanelRegistration =>
+  (registration) => {
     registerViewerPanel({
       ...registration,
       telemetry,
@@ -317,24 +497,30 @@ const createViewerBundle = ({
       showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     });
   };
-  const factory = new ViewerFactory({
+
+const createViewerFactory = ({
+  telemetry,
+  buildUnitList,
+  previewDeps,
+  factoryByViewType,
+  viewType,
+  saveHandler,
+  pendingRevealByPanel,
+  flowBridge,
+  store,
+  registerPanel,
+}: ViewerBundleOptions & {
+  store: WebviewStore;
+  registerPanel: ViewerPanelRegistration;
+}): ViewerFactory =>
+  new ViewerFactory({
     viewType,
     store,
     handlers: {
       onReady: createViewerReadyHandler(
         createReadyAjsDocument(buildUnitList, telemetry),
         pendingRevealByPanel,
-        (_document, _panel, source) => {
-          const event = createViewerReadyEvent({
-            viewType,
-            source,
-            result: "success",
-            host: getTelemetryHost(),
-          });
-          if (event) {
-            reportTelemetrySafely(telemetry, event);
-          }
-        },
+        createViewerReadyCallback({ viewType, telemetry, flowBridge }),
       ),
       onNavigate: createViewerNavigationHandler({
         viewType,
@@ -350,18 +536,46 @@ const createViewerBundle = ({
       registerPanel,
     },
   });
-  factoryByViewType.set(viewType, factory);
+
+const createViewerOpenCommand = (
+  viewType: string,
+  factory: ViewerFactory,
+  previewDeps: OpenPreviewCommandDependencies,
+): vscode.Disposable =>
+  vscode.commands.registerCommand(`open.${viewType}`, () => {
+    console.log(`invoke registerPreview. (${viewType})`);
+    executeOpenPreviewCommand({
+      viewType,
+      panelFactory: factory,
+      deps: previewDeps,
+    });
+  });
+
+const createViewerBundle = (
+  options: ViewerBundleOptions,
+): vscode.Disposable[] => {
+  const store = new WebviewStore(options.viewType);
+  const mediator = createViewerMediator({
+    context: options.context,
+    viewType: options.viewType,
+    buildUnitList: options.buildUnitList,
+    telemetry: options.telemetry,
+    flowBridge: options.flowBridge,
+    store,
+  });
+  const registerPanel = createPanelRegistrar({
+    telemetry: options.telemetry,
+    store,
+  });
+  const factory = createViewerFactory({ ...options, store, registerPanel });
+  if (options.viewType === AJS_FLOW_VIEWER_TYPE) {
+    options.flowBridge?.setFactory(factory);
+  }
+  options.factoryByViewType.set(options.viewType, factory);
 
   return [
     mediator,
-    vscode.commands.registerCommand(`open.${viewType}`, () => {
-      console.log(`invoke registerPreview. (${viewType})`);
-      executeOpenPreviewCommand({
-        viewType,
-        panelFactory: factory,
-        deps: previewDeps,
-      });
-    }),
+    createViewerOpenCommand(options.viewType, factory, options.previewDeps),
   ];
 };
 
@@ -381,6 +595,7 @@ export const createViewerSubscriptions = (
       previewDeps,
       factoryByViewType,
       pendingRevealByPanel,
+      flowBridge: deps.flowBridge,
       ...config,
     }),
   );

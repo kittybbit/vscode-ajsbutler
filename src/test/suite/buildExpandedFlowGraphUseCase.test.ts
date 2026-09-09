@@ -1,5 +1,9 @@
 import * as assert from "assert";
 import { buildExpandedFlowGraphResult } from "../../application/flow-graph/buildExpandedFlowGraph";
+import {
+  flowGraphEdgeId,
+  type FlowGraphSemanticDiffHighlights,
+} from "../../application/flow-graph/buildFlowGraphCore";
 import type {
   FlowGraphUnitDto,
   ValidatedFlowGraphDocument,
@@ -148,7 +152,16 @@ suite("Build Expanded Flow Graph use case", () => {
       ["sibling", "child", "scope", "grand", "nested-job", "leaf"],
     );
     assert.deepStrictEqual(first.graph.edges, [
-      { source: "grand", target: "nested-job", type: "seq" },
+      {
+        id: flowGraphEdgeId({
+          source: "grand",
+          target: "nested-job",
+          type: "seq",
+        }),
+        source: "grand",
+        target: "nested-job",
+        type: "seq",
+      },
     ]);
     assert.deepStrictEqual(first.constraints.realizedExpandedUnitIds, [
       "child",
@@ -211,6 +224,55 @@ suite("Build Expanded Flow Graph use case", () => {
         "out_of_scope_visible_unit",
         "invalid_visible_unit",
       ],
+    );
+  });
+
+  test("propagates semantic highlights to nested nodes and relations", () => {
+    const relation = {
+      source: "grand",
+      target: "nested-job",
+      type: "seq" as const,
+    };
+    const semanticDiffHighlights: FlowGraphSemanticDiffHighlights = {
+      nodes: new Map([
+        [
+          "grand",
+          {
+            kind: "changed",
+            changeIds: ["change:grand"],
+            confirmationIds: [],
+          },
+        ],
+      ]),
+      edges: new Map([
+        [
+          flowGraphEdgeId(relation),
+          {
+            kind: "removed",
+            changeIds: ["change:relation"],
+            confirmationIds: [],
+          },
+        ],
+      ]),
+    };
+    const result = buildExpandedFlowGraphResult({
+      document: createNestedDocument(),
+      activeScopeUnitId: "scope",
+      requestedExpandedUnitIds: ["child", "grand"],
+      semanticDiffHighlights,
+    });
+
+    assert.strictEqual(result.status, "available");
+    if (result.status !== "available") return;
+    assert.strictEqual(
+      result.graph.nodes.find((node) => node.id === "grand")?.metadata
+        .semanticDiffHighlight?.kind,
+      "changed",
+    );
+    assert.strictEqual(
+      result.graph.edges.find((edge) => edge.id === flowGraphEdgeId(relation))
+        ?.semanticDiffHighlight?.kind,
+      "removed",
     );
   });
 

@@ -200,6 +200,33 @@ const statusPresentation: Record<
   },
 };
 
+const flowNodeStatusMessageKey = (status: FlowNodeStatus): string =>
+  status === "schedule"
+    ? "a11y.flow.node.hasSchedule"
+    : "a11y.flow.node.hasWaitedFor";
+
+const FlowNodeStatusIndicator: FC<{
+  status: FlowNodeStatus;
+  language: string;
+}> = ({ status, language }) => {
+  const message = unitInformationMessage(
+    flowNodeStatusMessageKey(status),
+    language,
+  );
+  return (
+    <Tooltip key={status} title={message}>
+      <Box
+        component="span"
+        role="img"
+        aria-label={message}
+        sx={{ display: "inline-flex" }}
+      >
+        {statusPresentation[status].icon}
+      </Box>
+    </Tooltip>
+  );
+};
+
 export type FlowNodeHeaderItemKind = "rootBadge" | FlowNodeStatus | "action";
 
 export const getFlowNodeHeaderItemKinds = (
@@ -238,35 +265,91 @@ const NodeStatusIndicators: FC<{ data: FlowNodePresentationModel }> = ({
         fontSize: "0.75rem",
       }}
     >
-      {statuses.map((status) => {
-        const presentation = statusPresentation[status];
-        return (
-          <Tooltip
-            key={status}
-            title={unitInformationMessage(
-              status === "schedule"
-                ? "a11y.flow.node.hasSchedule"
-                : "a11y.flow.node.hasWaitedFor",
-              lang,
-            )}
-          >
-            <Box
-              component="span"
-              role="img"
-              aria-label={unitInformationMessage(
-                status === "schedule"
-                  ? "a11y.flow.node.hasSchedule"
-                  : "a11y.flow.node.hasWaitedFor",
-                lang,
-              )}
-              sx={{ display: "inline-flex" }}
-            >
-              {presentation.icon}
-            </Box>
-          </Tooltip>
-        );
-      })}
+      {statuses.map((status) => (
+        <FlowNodeStatusIndicator key={status} status={status} language={lang} />
+      ))}
     </Box>
+  );
+};
+
+const semanticDiffPresentation = {
+  added: {
+    label: "semanticDiff.flow.badge.added",
+    title: "semanticDiff.flow.title.added",
+  },
+  removed: {
+    label: "semanticDiff.flow.badge.removed",
+    title: "semanticDiff.flow.title.removed",
+  },
+  changed: {
+    label: "semanticDiff.flow.badge.changed",
+    title: "semanticDiff.flow.title.changed",
+  },
+  "confirmation-required": {
+    label: "semanticDiff.flow.badge.confirmationRequired",
+    title: "semanticDiff.flow.title.confirmationRequired",
+  },
+} as const;
+
+const semanticDiffPaletteKey: Record<
+  keyof typeof semanticDiffPresentation,
+  "success" | "error" | "info" | "warning"
+> = {
+  added: "success",
+  removed: "error",
+  changed: "info",
+  "confirmation-required": "warning",
+};
+
+const semanticDiffIndicatorColors = (
+  highlight: NonNullable<FlowNodePresentationModel["semanticDiffHighlight"]>,
+  theme: Theme,
+): { color: string; backgroundColor: string } => {
+  const palette = theme.palette[semanticDiffPaletteKey[highlight.kind]];
+  return {
+    color:
+      highlight.kind === "confirmation-required"
+        ? palette.contrastText
+        : theme.palette.getContrastText(palette.main),
+    backgroundColor: palette.main,
+  };
+};
+
+const NodeSemanticDiffIndicator: FC<{
+  data: FlowNodePresentationModel;
+}> = ({ data }) => {
+  const { lang = "en" } = useMyAppContext();
+  const highlight = data.semanticDiffHighlight;
+  if (!highlight) return null;
+  const presentation = semanticDiffPresentation[highlight.kind];
+  const label = unitInformationMessage(presentation.label, lang);
+  const title = unitInformationMessage(presentation.title, lang);
+  return (
+    <Tooltip title={title}>
+      <Box
+        component="span"
+        role="img"
+        aria-label={title}
+        data-semantic-diff-state={highlight.kind}
+        sx={(theme) => ({
+          ...nodeBadgeSxProps,
+          minWidth: "auto",
+          ...semanticDiffIndicatorColors(highlight, theme),
+          "@media (forced-colors: active)": {
+            color: "CanvasText",
+            backgroundColor: "Canvas",
+            borderColor: "CanvasText",
+          },
+          "body.vscode-high-contrast &": {
+            color: "var(--vscode-foreground, CanvasText)",
+            backgroundColor: "var(--vscode-editor-background, Canvas)",
+            borderColor: "var(--vscode-foreground, CanvasText)",
+          },
+        })}
+      >
+        {label}
+      </Box>
+    </Tooltip>
   );
 };
 
@@ -304,6 +387,7 @@ export const FlowNodeCard: FC<{
       <TyTitle ty={data.ty} gty={data.gty} />
       <Box sx={{ display: "flex", alignItems: "center", gap: "0.25em" }}>
         {data.isRootJobnet && <Box sx={nodeBadgeSxProps}>ROOT</Box>}
+        <NodeSemanticDiffIndicator data={data} />
         <NodeStatusIndicators data={data} />
         {headerAction}
       </Box>

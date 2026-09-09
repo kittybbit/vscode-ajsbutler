@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { flattenAjsUnits } from "../../domain/models/ajs/AjsDocument";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { createSemanticDiffSourceIndexIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import { AntlrRawAjsParser } from "../../infrastructure/parser/AntlrRawAjsParser";
 
 const buildBoundedLargeDefinition = (childCount: number): string => {
@@ -12,7 +13,9 @@ const buildBoundedLargeDefinition = (childCount: number): string => {
 };
 
 suite("ANTLR AJS parser adapter", () => {
-  const parser = new AntlrAjsParser();
+  const parser = new AntlrAjsParser({
+    sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+  });
 
   test("normalizes nested units before returning them", () => {
     const result = parser.parse(`
@@ -166,5 +169,68 @@ unit=root,,jp1admin,;
     assert.strictEqual(result.errors[0].line, 5);
     assert.strictEqual(result.errors[0].column, 0);
     assert.strictEqual(result.errors[0].message, "missing ';' at '}'");
+  });
+
+  test("returns a parser error without constructing a partial source index", () => {
+    const result = parser.parseWithSourceIndex(
+      "unit=root,,jp1admin,\n{ty=g;}\n",
+    );
+    assert.strictEqual(result.ok, false);
+    if (result.ok) throw new Error("Expected malformed definition to fail.");
+    assert.ok(result.errors.length > 0);
+    assert.ok(!("sourceIndex" in result));
+  });
+
+  test("builds a same-pass source index with exact UTF-16 ranges", () => {
+    const result = parser.parseWithSourceIndex(
+      "unit=😀root,,jp1admin,;\r\n{\r\n  ty=g;\r\n  cm=😀;\r\n  unit=child,,jp1admin,;\r\n  {\r\n    ty=j;\r\n  }\r\n}",
+    );
+    assert.strictEqual(result.ok, true);
+    if (!result.ok) throw new Error("Expected enriched parser success.");
+    assert.strictEqual(result.document.rootUnits[0]?.id, "/😀root");
+    const root = result.sourceIndex.unitEntries[0]!;
+    assert.strictEqual(root.unitId, "/😀root");
+    assert.deepStrictEqual(root.headerRange, {
+      start: { line: 0, character: 0 },
+      end: { line: 0, character: 23 },
+    });
+    assert.deepStrictEqual(root.nameRange, {
+      start: { line: 0, character: 5 },
+      end: { line: 0, character: 11 },
+    });
+    assert.deepStrictEqual(root.parameterOccurrences[0], {
+      parameterKey: "ty",
+      occurrenceOrdinal: 0,
+      range: {
+        start: { line: 2, character: 2 },
+        end: { line: 2, character: 4 },
+      },
+    });
+    assert.deepStrictEqual(root.parameterOccurrences[1], {
+      parameterKey: "cm",
+      occurrenceOrdinal: 0,
+      range: {
+        start: { line: 3, character: 2 },
+        end: { line: 3, character: 4 },
+      },
+    });
+    assert.strictEqual(
+      result.sourceIndex.unitEntries[1]?.unitId,
+      "/😀root/child",
+    );
+  });
+
+  test("retains duplicate normalized paths for unavailable lookup", () => {
+    const result = parser.parseWithSourceIndex(
+      "unit=root,,jp1admin,;{ty=g;unit=job,,jp1admin,;{ty=j;}unit=job,,jp1admin,;{ty=j;}}",
+    );
+    assert.strictEqual(result.ok, true);
+    if (!result.ok) throw new Error("Expected enriched parser success.");
+    assert.strictEqual(
+      result.sourceIndex.unitEntries.filter(
+        (entry) => entry.unitId === "/root/job",
+      ).length,
+      2,
+    );
   });
 });

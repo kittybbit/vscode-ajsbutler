@@ -2,7 +2,7 @@ import type * as vscode from "vscode";
 import type {
   SemanticDiffOutputDocument,
   SemanticDiffOutputMode,
-} from "../../semantic-diff/semanticDiffOutput";
+} from "../../../semantic-diff/semanticDiffOutput";
 
 export const SEMANTIC_DIFF_REPORT_SCHEME = "ajsbutler-semantic-diff";
 export const COPY_SEMANTIC_DIFF_MARKDOWN_COMMAND =

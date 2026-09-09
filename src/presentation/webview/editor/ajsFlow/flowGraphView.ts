@@ -1,4 +1,5 @@
 import type { Theme } from "@mui/material/styles";
+import type React from "react";
 import { Edge, MarkerType, Node } from "@xyflow/react";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type {
@@ -7,6 +8,7 @@ import type {
   FlowGraphNodeDto,
   FlowGraphSemanticDiffHighlight,
 } from "../../../../application/flow-graph/buildFlowGraphCore";
+import { flowGraphEdgeId } from "../../../../application/flow-graph/buildFlowGraphCore";
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import type {
   CurrentUnitIdStateType,
@@ -18,6 +20,303 @@ import type { FlowNodeData } from "./flowNodePresentationModel";
 import { createFlowNodeGeometryPx } from "./nodes/flowNodeGeometry";
 import { calculateFlowGraphNodePosition } from "./flowGraphPosition";
 import { isExpandableNestedUnit } from "./nestedExpansion";
+import {
+  getFlowNodeIdFromTarget,
+  getOwnedFlowNodeId,
+  isFlowInteractiveTarget,
+  isFlowSpatialNavigationKey,
+  focusRenderedFlowNode,
+  resolveFlowKeyboardFocusTarget,
+  resolveFlowKeyboardScopeFocusDecision,
+  resolveFlowKeyboardNavigationKeyResult,
+  resolveFlowKeyboardNodeGeometry,
+  type FlowKeyboardNavigationMovement,
+  type FlowKeyboardNavigationIndexCache,
+  type FlowKeyboardFocusTarget,
+} from "./flowKeyboardNavigation";
+import { resolveFlowViewerShortcut } from "./flowViewerShortcuts";
+export type FlowNavigationNode = {
+  id: string;
+  parentId?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  canExpandNested: boolean;
+  isExpandedNested: boolean;
+};
+
+export const flowNavigationNodes = (
+  nodes: readonly Node<FlowNodeData>[],
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): FlowNavigationNode[] =>
+  nodes.flatMap((node) => {
+    const unit = unitById.get(node.id);
+    const geometry = resolveFlowKeyboardNodeGeometry(node);
+    return node.data.unitId === node.id && unit && geometry
+      ? [
+          {
+            id: node.id,
+            parentId: unit.parentId,
+            ...geometry,
+            canExpandNested: Boolean(node.data.canExpandNested),
+            isExpandedNested: Boolean(node.data.isExpandedNested),
+          },
+        ]
+      : [];
+  });
+
+export const flowScopeUnitById = (
+  unitById: ReadonlyMap<string, FlowGraphUnitDto>,
+): ReadonlyMap<
+  string,
+  { id: string; parentId?: string; unitType: string; childCount: number }
+> =>
+  new Map(
+    [...unitById].map(([id, unit]) => [
+      id,
+      {
+        id,
+        parentId: unit.parentId,
+        unitType: unit.unitType,
+        childCount: unit.children.length,
+      },
+    ]),
+  );
+
+export const renderedFlowUnitIds = (
+  nodes: readonly Node<FlowNodeData>[],
+): ReadonlySet<string> =>
+  new Set(
+    nodes.flatMap((node) =>
+      node.data.unitId === node.id ? [node.data.unitId] : [],
+    ),
+  );
+
+type PendingFlowFocusRequest = Readonly<{
+  fallbackToGraphEntry: boolean;
+  expectedCurrentUnitId?: string;
+  expectedExpanded?: boolean;
+  selectTarget?: boolean;
+  sourceScopeUnitId?: string;
+  sourceNodes: readonly Node<FlowNodeData>[];
+  targetUnitId: string;
+}>;
+
+export type FlowKeyboardHandlerContext = Readonly<{
+  currentUnitIdState: CurrentUnitIdStateType;
+  graphEntryRef: React.RefObject<HTMLDivElement | null>;
+  navigationIndex: FlowKeyboardNavigationIndexCache["index"];
+  nodes: readonly Node<FlowNodeData>[];
+  onFocusDetail: (unitId: string) => void;
+  onFocusSelector: (unitId?: string) => void;
+  onKeyboardNavigation: (unitId: string) => void;
+  onScopeChange: (targetScopeUnitId: string) => void;
+  onSpatialMove?: (
+    unitId: string,
+    direction: FlowKeyboardNavigationMovement,
+  ) => void;
+  pendingFocusRequestRef: React.MutableRefObject<
+    PendingFlowFocusRequest | undefined
+  >;
+  scopeUnitById: ReadonlyMap<
+    string,
+    { id: string; parentId?: string; unitType: string; childCount: number }
+  >;
+  toggleExpandedFlowNodeFromKeyboard: (unitId: string) => void;
+  onNestedExpansion?: (unitId: string, expanded: boolean) => void;
+}>;
+
+const isNestedFlowNodeTarget = (
+  event: React.KeyboardEvent<HTMLElement>,
+): boolean => {
+  const currentUnitId = getFlowNodeIdFromTarget(event.target);
+  return (
+    currentUnitId !== undefined &&
+    getOwnedFlowNodeId(event.target) === undefined
+  );
+};
+
+const shouldSkipFlowKeyboardEvent = (
+  event: React.KeyboardEvent<HTMLElement>,
+): boolean =>
+  isNestedFlowNodeTarget(event) &&
+  (isFlowInteractiveTarget(event.target) ||
+    !isFlowSpatialNavigationKey(event.key));
+
+const handleFlowDetailShortcut = ({
+  event,
+  currentUnitId,
+  shortcut,
+  context,
+}: {
+  event: React.KeyboardEvent<HTMLElement>;
+  currentUnitId: string | undefined;
+  shortcut: ReturnType<typeof resolveFlowViewerShortcut>;
+  context: FlowKeyboardHandlerContext;
+}): boolean => {
+  if (shortcut !== "detail" || currentUnitId === undefined) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  context.onFocusDetail(currentUnitId);
+  return true;
+};
+
+const handleFlowSelectorShortcut = ({
+  event,
+  currentUnitId,
+  shortcut,
+  context,
+}: {
+  event: React.KeyboardEvent<HTMLElement>;
+  currentUnitId: string | undefined;
+  shortcut: ReturnType<typeof resolveFlowViewerShortcut>;
+  context: FlowKeyboardHandlerContext;
+}): boolean => {
+  const canFocusSelector =
+    shortcut === "selector" &&
+    (currentUnitId !== undefined || event.target === event.currentTarget);
+  if (!canFocusSelector) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  context.onFocusSelector(currentUnitId);
+  return true;
+};
+
+const handleFlowKeyboardShortcut = (
+  event: React.KeyboardEvent<HTMLElement>,
+  currentUnitId: string | undefined,
+  context: FlowKeyboardHandlerContext,
+): boolean => {
+  const shortcut = resolveFlowViewerShortcut({
+    altKey: event.altKey,
+    ctrlKey: event.ctrlKey,
+    key: event.key,
+    metaKey: event.metaKey,
+    shiftKey: event.shiftKey,
+  });
+  return (
+    handleFlowDetailShortcut({ event, currentUnitId, shortcut, context }) ||
+    handleFlowSelectorShortcut({ event, currentUnitId, shortcut, context })
+  );
+};
+
+const applyFlowNavigateAction = (
+  action: Extract<
+    NonNullable<
+      ReturnType<typeof resolveFlowKeyboardNavigationKeyResult>["action"]
+    >,
+    { kind: "navigate" }
+  >,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  context.onKeyboardNavigation(action.targetUnitId);
+  focusRenderedFlowNode(
+    context.graphEntryRef.current,
+    action.targetUnitId,
+    CSS.escape,
+  );
+  context.onSpatialMove?.(action.targetUnitId, action.movement);
+};
+
+const applyFlowScopeAction = (
+  action: Extract<
+    NonNullable<
+      ReturnType<typeof resolveFlowKeyboardNavigationKeyResult>["action"]
+    >,
+    { kind: "enter-scope" | "return-scope" }
+  >,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  context.pendingFocusRequestRef.current = {
+    expectedCurrentUnitId: action.targetScopeId,
+    fallbackToGraphEntry: true,
+    selectTarget: true,
+    sourceScopeUnitId: context.currentUnitIdState.currentUnitId,
+    sourceNodes: context.nodes,
+    targetUnitId: action.focusUnitId,
+  };
+  context.onScopeChange(action.targetScopeId);
+};
+
+const applyFlowExpansionAction = (
+  action: Extract<
+    NonNullable<
+      ReturnType<typeof resolveFlowKeyboardNavigationKeyResult>["action"]
+    >,
+    { kind: "expand" | "collapse" }
+  >,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  const expanded = action.kind === "expand";
+  context.pendingFocusRequestRef.current = {
+    expectedExpanded: expanded,
+    fallbackToGraphEntry: true,
+    sourceNodes: context.nodes,
+    targetUnitId: action.targetUnitId,
+  };
+  context.toggleExpandedFlowNodeFromKeyboard(action.targetUnitId);
+  context.onNestedExpansion?.(action.targetUnitId, expanded);
+};
+
+const applyFlowKeyboardAction = (
+  action: NonNullable<
+    ReturnType<typeof resolveFlowKeyboardNavigationKeyResult>["action"]
+  >,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  const handlers = {
+    navigate: applyFlowNavigateAction,
+    "enter-scope": applyFlowScopeAction,
+    "return-scope": applyFlowScopeAction,
+    expand: applyFlowExpansionAction,
+    collapse: applyFlowExpansionAction,
+  } as const;
+  handlers[action.kind](action as never, context);
+};
+
+const handleFlowKeyboardNavigation = (
+  event: React.KeyboardEvent<HTMLElement>,
+  currentUnitId: string,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  const result = resolveFlowKeyboardNavigationKeyResult(
+    context.navigationIndex,
+    {
+      currentUnitId,
+      currentScopeUnitId: context.currentUnitIdState.currentUnitId,
+      key: event.key,
+      altKey: event.altKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      scopeUnitById: context.scopeUnitById,
+      shiftKey: event.shiftKey,
+    },
+  );
+  if (!result.suppressDefault || !result.action) return;
+  event.preventDefault();
+  event.stopPropagation();
+  applyFlowKeyboardAction(result.action, context);
+};
+
+const handleFlowKeyboardNavigationIfPresent = (
+  event: React.KeyboardEvent<HTMLElement>,
+  currentUnitId: string | undefined,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  if (currentUnitId)
+    handleFlowKeyboardNavigation(event, currentUnitId, context);
+};
+
+export const handleFlowNodeKeyDownEvent = (
+  event: React.KeyboardEvent<HTMLElement>,
+  context: FlowKeyboardHandlerContext,
+): void => {
+  const currentUnitId = getFlowNodeIdFromTarget(event.target);
+  if (shouldSkipFlowKeyboardEvent(event)) return;
+  if (handleFlowKeyboardShortcut(event, currentUnitId, context)) return;
+  handleFlowKeyboardNavigationIfPresent(event, currentUnitId, context);
+};
 
 type CreateReactFlowDataOptions = {
   searchMatchedUnitIds?: ReadonlySet<string>;
@@ -92,26 +391,43 @@ const edgeStrokeColor = (
   highlight: FlowGraphSemanticDiffHighlight | undefined,
   theme: Theme,
 ): string | undefined => {
-  if (highlight?.kind === "confirmation-required") {
-    return theme.palette.warning.main;
-  }
-  if (highlight?.kind === "changed") {
-    return theme.palette.info.main;
-  }
-  return undefined;
+  const paletteKey = highlight
+    ? {
+        "confirmation-required": "warning",
+        removed: "error",
+        added: "success",
+        changed: "info",
+      }[highlight.kind]
+    : undefined;
+  return paletteKey ? theme.palette[paletteKey].main : undefined;
 };
 
 const toEdgeData = (edge: FlowGraphEdgeDto): Edge["data"] =>
   edge.semanticDiffHighlight
-    ? { semanticDiffHighlight: edge.semanticDiffHighlight }
+    ? {
+        flowRelationType: edge.type,
+        semanticDiffHighlight: edge.semanticDiffHighlight,
+      }
     : undefined;
+
+const edgeStrokeWidth = (highlight: FlowGraphSemanticDiffHighlight): number =>
+  highlight.kind === "confirmation-required" ? 4 : 3;
+
+const edgeDashArray = (highlight: FlowGraphSemanticDiffHighlight): string =>
+  ({
+    removed: "7 4",
+    added: "7 4",
+    changed: "2 4",
+    "confirmation-required": "10 3 2 3",
+  })[highlight.kind];
 
 const toEdgeStyle = (edge: FlowGraphEdgeDto, theme: Theme): Edge["style"] => {
   const highlight = edge.semanticDiffHighlight;
   if (!highlight) return undefined;
   return {
     stroke: edgeStrokeColor(highlight, theme),
-    strokeWidth: highlight.kind === "confirmation-required" ? 4 : 3,
+    strokeWidth: edgeStrokeWidth(highlight),
+    strokeDasharray: edgeDashArray(highlight),
   };
 };
 
@@ -122,22 +438,49 @@ const toArrowMarker = (color?: string): Edge["markerEnd"] => ({
   color,
 });
 
-const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
-  id: `${edge.source}-${edge.target}`,
-  type: "smoothstep",
-  source: edge.source,
-  target: edge.target,
+const toEdgeInteraction = (): Pick<
+  Edge,
+  "focusable" | "selectable" | "reconnectable" | "deletable"
+> => ({
   focusable: false,
   selectable: false,
   reconnectable: false,
   deletable: false,
-  data: toEdgeData(edge),
-  style: toEdgeStyle(edge, theme),
+});
+
+const toEdgeAccessibility = (edge: FlowGraphEdgeDto): Edge["domAttributes"] =>
+  edge.semanticDiffHighlight ? { "aria-hidden": "true" } : undefined;
+
+const toEdgeClassName = (edge: FlowGraphEdgeDto): string | undefined =>
+  edge.semanticDiffHighlight
+    ? `semantic-diff-edge semantic-diff-edge-${edge.semanticDiffHighlight.kind}`
+    : undefined;
+
+const toEdgeMarkers = (
+  edge: FlowGraphEdgeDto,
+  theme: Theme,
+): Pick<Edge, "markerStart" | "markerEnd"> => ({
   markerStart: edge.type === "con" ? toArrowMarker() : undefined,
   markerEnd: toArrowMarker(edgeStrokeColor(edge.semanticDiffHighlight, theme)),
-  animated:
-    edge.type === "con" ||
-    edge.semanticDiffHighlight?.kind === "confirmation-required",
+});
+
+const isAnimatedEdge = (edge: FlowGraphEdgeDto): boolean =>
+  edge.type === "con" ||
+  edge.semanticDiffHighlight?.kind === "confirmation-required" ||
+  edge.semanticDiffHighlight?.kind === "added";
+
+const toEdge = (edge: FlowGraphEdgeDto, theme: Theme): Edge => ({
+  id: edge.id ?? flowGraphEdgeId(edge),
+  className: toEdgeClassName(edge),
+  domAttributes: toEdgeAccessibility(edge),
+  type: "smoothstep",
+  source: edge.source,
+  target: edge.target,
+  ...toEdgeInteraction(),
+  data: toEdgeData(edge),
+  style: toEdgeStyle(edge, theme),
+  ...toEdgeMarkers(edge, theme),
+  animated: isAnimatedEdge(edge),
 });
 
 const toNodePosition = (
@@ -236,4 +579,96 @@ export const createReactFlowData = ({
   const edges: Edge[] = graph.edges.map((edge) => toEdge(edge, context.theme));
 
   return { nodes: [...nodes, ...nestedPanelBoundsNodes], edges };
+};
+export const isPendingFlowExpansionReady = (
+  request: PendingFlowFocusRequest,
+  targetNode: Node<FlowNodeData> | undefined,
+): boolean =>
+  request.expectedExpanded === undefined ||
+  !targetNode ||
+  Boolean(targetNode.data.isExpandedNested) === request.expectedExpanded;
+
+export const focusPendingFlowTarget = (
+  target: FlowKeyboardFocusTarget,
+  graphEntryRef: React.RefObject<HTMLDivElement | null>,
+): boolean =>
+  target.kind === "node"
+    ? focusRenderedFlowNode(
+        graphEntryRef.current,
+        target.targetUnitId,
+        CSS.escape,
+      )
+    : false;
+
+export type PendingFlowFocusStep =
+  | { kind: "idle" | "wait" | "cancel" }
+  | {
+      kind: "apply";
+      request: PendingFlowFocusRequest;
+      target: FlowKeyboardFocusTarget;
+    };
+
+export const resolvePendingFlowFocusStep = ({
+  currentUnitIdState,
+  nodes,
+  pendingFocusRequestRef,
+}: {
+  currentUnitIdState: CurrentUnitIdStateType;
+  nodes: readonly Node<FlowNodeData>[];
+  pendingFocusRequestRef: React.MutableRefObject<
+    PendingFlowFocusRequest | undefined
+  >;
+}): PendingFlowFocusStep => {
+  const request = pendingFocusRequestRef.current;
+  if (!request) return { kind: "idle" };
+  const renderedUnitIds = renderedFlowUnitIds(nodes);
+  return toPendingFlowFocusStep(
+    request,
+    resolvePendingFlowTarget({
+      request,
+      currentUnitIdState,
+      nodes,
+      renderedUnitIds,
+    }),
+  );
+};
+
+const resolvePendingFlowTarget = ({
+  request,
+  currentUnitIdState,
+  nodes,
+  renderedUnitIds,
+}: {
+  request: PendingFlowFocusRequest;
+  currentUnitIdState: CurrentUnitIdStateType;
+  nodes: readonly Node<FlowNodeData>[];
+  renderedUnitIds: ReadonlySet<string>;
+}): ReturnType<typeof resolveFlowKeyboardScopeFocusDecision> => {
+  if (request.expectedCurrentUnitId) {
+    return resolveFlowKeyboardScopeFocusDecision({
+      currentScopeUnitId: currentUnitIdState.currentUnitId,
+      expectedScopeUnitId: request.expectedCurrentUnitId,
+      renderedUnitIds,
+      sourceNodesChanged: request.sourceNodes !== nodes,
+      sourceScopeUnitId: request.sourceScopeUnitId,
+      targetUnitId: request.targetUnitId,
+    });
+  }
+  if (request.sourceNodes === nodes) return { kind: "wait" };
+  return resolveFlowKeyboardFocusTarget(renderedUnitIds, request.targetUnitId);
+};
+
+const toPendingFlowFocusStep = (
+  request: PendingFlowFocusRequest,
+  target: ReturnType<typeof resolveFlowKeyboardScopeFocusDecision>,
+): PendingFlowFocusStep => {
+  const stepKind = ({ wait: "wait", cancel: "cancel", node: "apply" } as const)[
+    target.kind
+  ];
+  const stepFactories = {
+    wait: () => ({ kind: "wait" as const }),
+    cancel: () => ({ kind: "cancel" as const }),
+    apply: () => ({ kind: "apply" as const, request, target }),
+  };
+  return stepFactories[stepKind]();
 };

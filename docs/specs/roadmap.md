@@ -15,18 +15,20 @@ entry conditions that make planning each item useful.
   `searchTarget=DEFINITION`.
 - Keep broader WebAPI behavior outside this decision.
 
+## Verification Follow-ups
+
+### Expanded Flow Graph Golden Alignment
+
+- Owner: Flow graph test maintainers.
+- Current baseline: the representative expanded-graph use-case suite retains
+  one node-order golden mismatch while the implementation's deterministic
+  ordering remains unchanged for Semantic Diff Explorer behavior.
+- Entry condition: reconcile the existing golden with the verified graph-order
+  contract in a separately scoped test-maintenance slice.
+
 ## Semantic Diff Roadmap
 
 ### Wave 3: Review Exploration And Comparison Entry
-
-#### Add A Semantic Diff Explorer
-
-- Origin: proposals N-1 and E-4.
-- Add an interactive change tree, confirmation-required filtering, source
-  navigation, and Flow Viewer integration on top of the existing highlight
-  foundation.
-- Entry condition: Wave 1 contracts are stable and the existing Flow Viewer
-  highlight foundation can be reused.
 
 #### Improve The Semantic Diff Comparison Workflow
 

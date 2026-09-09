@@ -3,6 +3,8 @@ import { AjsUnitType } from "../../domain/models/ajs/AjsDocument";
 export type FlowGraphNodeType = "job" | "jobnet" | "jobgroup" | "condition";
 export type FlowGraphEdgeType = "seq" | "con";
 export type FlowGraphSemanticDiffHighlightKind =
+  | "added"
+  | "removed"
   | "changed"
   | "confirmation-required";
 
@@ -15,7 +17,52 @@ export type FlowGraphSemanticDiffHighlight = {
 export type FlowGraphSemanticDiffHighlights = {
   nodes: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
   edges: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
+  /** Optional side-specific sets used by semantic-diff host integrations. */
+  before?: FlowGraphSemanticDiffHighlightSet;
+  after?: FlowGraphSemanticDiffHighlightSet;
 };
+
+export type FlowGraphSemanticDiffHighlightSet = {
+  nodes: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
+  edges: ReadonlyMap<string, FlowGraphSemanticDiffHighlight>;
+};
+
+export type FlowGraphSemanticDiffOverlayEntry = {
+  id: string;
+  kind: FlowGraphSemanticDiffHighlightKind;
+  changeIds: string[];
+  confirmationIds: string[];
+};
+
+export type FlowGraphSemanticDiffOverlay = {
+  nodes: FlowGraphSemanticDiffOverlayEntry[];
+  relations: FlowGraphSemanticDiffOverlayEntry[];
+};
+
+export const flowGraphSemanticDiffHighlightsFromOverlay = (
+  overlay: FlowGraphSemanticDiffOverlay | null | undefined,
+): FlowGraphSemanticDiffHighlightSet => ({
+  nodes: new Map(
+    (overlay?.nodes ?? []).map((entry) => [
+      entry.id,
+      {
+        kind: entry.kind,
+        changeIds: [...entry.changeIds],
+        confirmationIds: [...entry.confirmationIds],
+      },
+    ]),
+  ),
+  edges: new Map(
+    (overlay?.relations ?? []).map((entry) => [
+      entry.id,
+      {
+        kind: entry.kind,
+        changeIds: [...entry.changeIds],
+        confirmationIds: [...entry.confirmationIds],
+      },
+    ]),
+  ),
+});
 
 export type FlowGraphNodeLayout =
   | {
@@ -50,6 +97,8 @@ export type FlowGraphNodeDto = {
 };
 
 export type FlowGraphEdgeDto = {
+  /** Stable ID for one concrete relation occurrence in its owning scope. */
+  id: string;
   source: string;
   target: string;
   type: FlowGraphEdgeType;
@@ -81,7 +130,7 @@ export type FlowGraphInput = {
   ancestorNodes: FlowGraphInputNode[];
   childNodes: FlowGraphInputNode[];
   conditionNode?: FlowGraphInputNode;
-  edges: FlowGraphEdgeDto[];
+  edges: Array<FlowGraphEdgeDto | Omit<FlowGraphEdgeDto, "id">>;
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights;
 };
 
@@ -97,9 +146,50 @@ const tyTypeMap: Partial<Record<AjsUnitType, FlowGraphNodeType>> = {
 const toNodeType = (ty: AjsUnitType): FlowGraphNodeType =>
   tyTypeMap[ty] ?? "job";
 
-export const flowGraphEdgeSemanticDiffKey = (
+const encodeUtf16Part = (value: string): string => `${value.length}:${value}`;
+
+/**
+ * Build a collision-free ID for an ordered relation occurrence.  JS string
+ * length is deliberately used here: it counts UTF-16 code units, matching
+ * VS Code/React Flow string identity and the semantic-diff contract.
+ */
+export const flowGraphEdgeId = (
   edge: Pick<FlowGraphEdgeDto, "source" | "target" | "type">,
-): string => `${edge.source}->${edge.target}:${edge.type}`;
+  occurrenceOrdinal = 0,
+): string => {
+  if (!Number.isSafeInteger(occurrenceOrdinal) || occurrenceOrdinal < 0) {
+    throw new RangeError(
+      "A Flow edge occurrence ordinal must be non-negative.",
+    );
+  }
+  return `flow-edge:${encodeUtf16Part(edge.source)}${encodeUtf16Part(
+    edge.target,
+  )}${encodeUtf16Part(edge.type)}${encodeUtf16Part(String(occurrenceOrdinal))}`;
+};
+
+/** The semantic-diff key is the graph's formal ID, never a display string. */
+export const flowGraphEdgeSemanticDiffKey = (
+  edge: Pick<FlowGraphEdgeDto, "source" | "target" | "type"> &
+    Partial<Pick<FlowGraphEdgeDto, "id">>,
+  occurrenceOrdinal = 0,
+): string => edge.id ?? flowGraphEdgeId(edge, occurrenceOrdinal);
+
+const ensureEdgeIds = (
+  edges: Array<FlowGraphEdgeDto | Omit<FlowGraphEdgeDto, "id">>,
+): FlowGraphEdgeDto[] => {
+  const ordinals = new Map<string, number>();
+  return edges.map((edge) => {
+    const key = `${edge.source}\u0000${edge.target}\u0000${edge.type}`;
+    const occurrenceOrdinal = ordinals.get(key) ?? 0;
+    ordinals.set(key, occurrenceOrdinal + 1);
+    return {
+      ...edge,
+      id:
+        ("id" in edge ? edge.id : undefined) ??
+        flowGraphEdgeId(edge, occurrenceOrdinal),
+    };
+  });
+};
 
 const toGridNode = (
   node: FlowGraphInputNode,
@@ -175,7 +265,7 @@ export const buildFlowGraphFromInput = (
 
   return {
     nodes,
-    edges: input.edges.map((edge) => ({
+    edges: ensureEdgeIds(input.edges).map((edge) => ({
       ...edge,
       semanticDiffHighlight: input.semanticDiffHighlights?.edges.get(
         flowGraphEdgeSemanticDiffKey(edge),

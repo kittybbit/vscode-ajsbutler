@@ -48,7 +48,7 @@ Copy the visible unit list as CSV. When you choose to save it, VS Code asks you 
 
 ### Semantic Diff
 
-Run `JP1/AJS: Compare JP1/AJS Semantic Diff` to compare the active definition with a selected before definition by semantic meaning. After comparison, choose Summary, Full, Audit, or JSON. Full is the default human-readable report, Summary is a compact overview, Audit includes decision evidence, and JSON is locale-neutral for automation. Copy Markdown with `JP1/AJS: Copy Semantic Diff Markdown`, or save Markdown/JSON with `JP1/AJS: Save Semantic Diff Output`; copying and saving are always explicit actions.
+Run `JP1/AJS: Compare JP1/AJS Semantic Diff` to compare the active definition with a selected before definition by semantic meaning. A successful comparison opens the read-only Semantic Diff Explorer with summary cards, a hierarchical change tree, and confirmation-required filtering. Explorer items can navigate to the corresponding before or after source range or Flow Viewer target. The Explorer supports keyboard operation, high-contrast presentation, and state cues that do not depend on color; an empty confirmation-required result is announced explicitly. Use Output to choose Summary, Full, Audit, or JSON; all modes use the same comparison session. Full is the default human-readable mode, Summary is a compact overview, Audit includes decision evidence, and JSON is locale-neutral for automation. Copy Markdown with `JP1/AJS: Copy Semantic Diff Markdown`, or save Markdown/JSON with `JP1/AJS: Save Semantic Diff Output`; copying and saving are always explicit actions.
 
 ### Diagnostics and hover
 
@@ -71,7 +71,7 @@ Once the list is open, search for a unit and open its details. To try the flow f
 
 The list view lets you inspect hierarchy, search, choose visible columns, open details, and export CSV. The flow view lets you search within the current scope, select related units, and expand nested jobnets.
 
-Semantic Diff starts with `JP1/AJS: Compare JP1/AJS Semantic Diff`. The selected output is shown before any copy or save action, so the extension does not change the clipboard or write a file implicitly.
+Semantic Diff starts with `JP1/AJS: Compare JP1/AJS Semantic Diff`. A successful comparison opens the Explorer, where you can inspect the change tree, filter confirmation-required items, navigate to source or Flow targets, and open a report through Output. The review surface is keyboard-operable and announces empty filter results. The selected output is shown before any copy or save action, so the extension does not change the clipboard or write a file implicitly.
 
 ## Compatibility and scope
 

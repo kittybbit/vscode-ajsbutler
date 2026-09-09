@@ -1,7 +1,10 @@
 import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
-import type { FlowGraphDto } from "../../application/flow-graph/buildFlowGraphCore";
+import {
+  flowGraphEdgeId,
+  type FlowGraphDto,
+} from "../../application/flow-graph/buildFlowGraphCore";
 import { indexUnitDefinitionsByPath } from "../../application/unit-definition/unitDefinitionDocument";
 import { createReactFlowData } from "../../presentation/webview/editor/ajsFlow/flowGraphView";
 import { applyHoveredUnitToFlowNodes } from "../../presentation/webview/editor/ajsFlow/flowGraphHover";
@@ -120,6 +123,11 @@ suite("Flow Graph View", () => {
       ],
       edges: [
         {
+          id: flowGraphEdgeId({
+            source: "/root/jobnet",
+            target: "/root/jobnet/job-a",
+            type: "seq",
+          }),
           source: "/root/jobnet",
           target: "/root/jobnet/job-a",
           type: "seq",
@@ -350,6 +358,7 @@ suite("Flow Graph View", () => {
     assert.strictEqual(edges[0].reconnectable, false);
     assert.strictEqual(edges[0].style?.strokeWidth, 3);
     assert.deepStrictEqual(edges[0].data, {
+      flowRelationType: "seq",
       semanticDiffHighlight: {
         kind: "changed",
         changeIds: ["relation:added"],
@@ -406,16 +415,31 @@ suite("Flow Graph View", () => {
       })),
       edges: [
         {
+          id: flowGraphEdgeId({
+            source: "/root/jobnet/job-0",
+            target: "/root/jobnet/job-1",
+            type: "seq",
+          }),
           source: "/root/jobnet/job-0",
           target: "/root/jobnet/job-1",
           type: "seq",
         },
         {
+          id: flowGraphEdgeId({
+            source: "/root/jobnet/job-1",
+            target: "/root/jobnet/job-2",
+            type: "con",
+          }),
           source: "/root/jobnet/job-1",
           target: "/root/jobnet/job-2",
           type: "con",
         },
         {
+          id: flowGraphEdgeId({
+            source: "/root/jobnet/job-2",
+            target: "/root/jobnet/job-3",
+            type: "seq",
+          }),
           source: "/root/jobnet/job-2",
           target: "/root/jobnet/job-3",
           type: "seq",
@@ -426,6 +450,11 @@ suite("Flow Graph View", () => {
           },
         },
         {
+          id: flowGraphEdgeId({
+            source: "/root/jobnet/job-3",
+            target: "/root/jobnet/job-4",
+            type: "seq",
+          }),
           source: "/root/jobnet/job-3",
           target: "/root/jobnet/job-4",
           type: "seq",
@@ -436,6 +465,11 @@ suite("Flow Graph View", () => {
           },
         },
         ...Array.from({ length: nodeCount - 5 }, (_, index) => ({
+          id: flowGraphEdgeId({
+            source: `/root/jobnet/job-${index + 4}`,
+            target: `/root/jobnet/job-${index + 5}`,
+            type: "seq",
+          }),
           source: `/root/jobnet/job-${index + 4}`,
           target: `/root/jobnet/job-${index + 5}`,
           type: "seq" as const,

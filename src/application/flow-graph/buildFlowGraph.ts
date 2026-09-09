@@ -1,5 +1,6 @@
 import {
   buildFlowGraphFromInput,
+  flowGraphEdgeId,
   type FlowGraphDto,
   type FlowGraphEdgeDto,
   type FlowGraphInput,
@@ -59,22 +60,51 @@ const toAncestorNodes = (
   unit: FlowGraphUnitDto,
 ): FlowGraphInputNode[] => {
   const ancestors: FlowGraphInputNode[] = [];
-  let parentId = unit.parentId;
+  const visited = new Set<string>();
+  let parentId = nextAncestorId(unit.parentId, visited);
   while (parentId) {
+    appendAncestorNode(ancestors, index, parentId);
     const parent = index.unitById.get(parentId);
-    if (!parent) break;
-    ancestors.push(toInputNode(parent));
-    parentId = parent.parentId;
+    parentId = nextAncestorId(parent?.parentId, visited);
   }
   return ancestors;
 };
 
-const toEdgeDtos = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] =>
-  unit.relations.map((relation) => ({
-    source: relation.sourceUnitId,
-    target: relation.targetUnitId,
-    type: relation.type,
-  }));
+const appendAncestorNode = (
+  ancestors: FlowGraphInputNode[],
+  index: FlowGraphDocumentIndex,
+  parentId: string,
+): void => {
+  const parent = index.unitById.get(parentId);
+  if (parent) ancestors.push(toInputNode(parent));
+};
+
+const nextAncestorId = (
+  parentId: string | undefined,
+  visited: Set<string>,
+): string | undefined => {
+  if (!parentId || visited.has(parentId)) return undefined;
+  visited.add(parentId);
+  return parentId;
+};
+
+const toEdgeDtos = (unit: FlowGraphUnitDto): FlowGraphEdgeDto[] => {
+  const ordinals = new Map<string, number>();
+  return unit.relations.map((relation) => {
+    const edge = {
+      source: relation.sourceUnitId,
+      target: relation.targetUnitId,
+      type: relation.type,
+    } as const;
+    const key = `${edge.source}\u0000${edge.target}\u0000${edge.type}`;
+    const occurrenceOrdinal = ordinals.get(key) ?? 0;
+    ordinals.set(key, occurrenceOrdinal + 1);
+    return {
+      ...edge,
+      id: flowGraphEdgeId(edge, occurrenceOrdinal),
+    };
+  });
+};
 
 const toInput = (
   index: FlowGraphDocumentIndex,
@@ -94,36 +124,48 @@ const toInput = (
   };
 };
 
+const unavailableFlowGraph = (
+  validation: ValidatedFlowGraphDocument,
+  issue: FlowGraphBuildIssue,
+): FlowGraphBuildResult => ({
+  status: "unavailable",
+  issues: [...validation.issues, issue],
+});
+
+const missingScopeIssue = (currentUnitId: string): FlowGraphBuildIssue => ({
+  code: "scope_not_found",
+  message: `Flow graph scope was not found: ${currentUnitId}`,
+});
+
+const invalidScopeIssue = (currentUnitId: string): FlowGraphBuildIssue => ({
+  code: "invalid_scope",
+  message: `Unit is not a flow graph scope: ${currentUnitId}`,
+});
+
+const flowGraphScopeIssue = (
+  unit: FlowGraphUnitDto | undefined,
+  currentUnitId: string,
+): FlowGraphBuildIssue | undefined =>
+  unit
+    ? invalidFlowGraphScopeIssue(unit, currentUnitId)
+    : missingScopeIssue(currentUnitId);
+
+const invalidFlowGraphScopeIssue = (
+  unit: FlowGraphUnitDto,
+  currentUnitId: string,
+): FlowGraphBuildIssue | undefined =>
+  unit.unitType === "n" || unit.unitType === "rc"
+    ? undefined
+    : invalidScopeIssue(currentUnitId);
+
 export const buildFlowGraphFromValidatedDocument = (
   validation: ValidatedFlowGraphDocument,
   currentUnitId: string,
   semanticDiffHighlights?: FlowGraphSemanticDiffHighlights,
 ): FlowGraphBuildResult => {
   const unit = validation.index.unitById.get(currentUnitId);
-  if (!unit) {
-    return {
-      status: "unavailable",
-      issues: [
-        ...validation.issues,
-        {
-          code: "scope_not_found",
-          message: `Flow graph scope was not found: ${currentUnitId}`,
-        },
-      ],
-    };
-  }
-  if (unit.unitType !== "n" && unit.unitType !== "rc") {
-    return {
-      status: "unavailable",
-      issues: [
-        ...validation.issues,
-        {
-          code: "invalid_scope",
-          message: `Unit is not a flow graph scope: ${currentUnitId}`,
-        },
-      ],
-    };
-  }
+  const issue = flowGraphScopeIssue(unit, currentUnitId);
+  if (issue) return unavailableFlowGraph(validation, issue);
 
   return {
     status: "available",

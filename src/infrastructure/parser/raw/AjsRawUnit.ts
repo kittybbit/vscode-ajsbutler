@@ -7,6 +7,18 @@ export type AjsRawUnitParameter = {
   length?: number;
 };
 
+export type AjsRawSourceRange = {
+  startLine: number;
+  startColumn: number;
+  endLine: number;
+  endColumn: number;
+};
+
+export type AjsRawUnitSource = {
+  headerRange: AjsRawSourceRange;
+  nameRange: AjsRawSourceRange | null;
+};
+
 /**
  * raw object of unit
  */
@@ -22,6 +34,9 @@ export class AjsRawUnit {
 
   /** children (el parameters) */
   children: Array<AjsRawUnit>;
+
+  /** ANTLR token ranges retained only while building the infrastructure index. */
+  source?: AjsRawUnitSource;
 
   constructor(unitAttribute: string, parent?: AjsRawUnit) {
     this.unitAttribute = unitAttribute;

@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import {
   buildFlowGraphFromInput,
+  flowGraphEdgeId,
   FlowGraphInput,
 } from "../../application/flow-graph/buildFlowGraphCore";
 
@@ -131,7 +132,18 @@ suite("Build Flow Graph", () => {
         },
       ],
     );
-    assert.deepStrictEqual(graph.edges, input.edges);
+    assert.deepStrictEqual(graph.edges, [
+      {
+        ...input.edges[0],
+        id: flowGraphEdgeId(input.edges[0], 0),
+        semanticDiffHighlight: undefined,
+      },
+      {
+        ...input.edges[1],
+        id: flowGraphEdgeId(input.edges[1], 0),
+        semanticDiffHighlight: undefined,
+      },
+    ]);
   });
 
   test("carries optional semantic diff highlight metadata", () => {
@@ -150,7 +162,7 @@ suite("Build Flow Graph", () => {
         ]),
         edges: new Map([
           [
-            "job-a->job-b:seq",
+            flowGraphEdgeId(input.edges[0]),
             {
               kind: "changed",
               changeIds: ["relation:job-a->job-b"],
@@ -175,5 +187,47 @@ suite("Build Flow Graph", () => {
       changeIds: ["relation:job-a->job-b"],
       confirmationIds: [],
     });
+  });
+
+  test("uses collision-free IDs for parallel and duplicate relation occurrences", () => {
+    const edge = { source: "a|", target: "b:😀", type: "seq" as const };
+    assert.notStrictEqual(flowGraphEdgeId(edge, 0), flowGraphEdgeId(edge, 1));
+    assert.notStrictEqual(
+      flowGraphEdgeId(edge, 0),
+      flowGraphEdgeId({ ...edge, type: "con" }, 0),
+    );
+    assert.notStrictEqual(
+      flowGraphEdgeId({ source: "a", target: "b:😀", type: "seq" }, 0),
+      flowGraphEdgeId({ source: "a|", target: "b", type: "seq" }, 0),
+    );
+
+    const duplicateGraph = buildFlowGraphFromInput({
+      ...input,
+      edges: [edge, edge, { ...edge, type: "con" }],
+      semanticDiffHighlights: {
+        nodes: new Map(),
+        edges: new Map([
+          [
+            flowGraphEdgeId(edge, 0),
+            { kind: "added", changeIds: ["change:0"], confirmationIds: [] },
+          ],
+          [
+            flowGraphEdgeId(edge, 1),
+            { kind: "added", changeIds: ["change:1"], confirmationIds: [] },
+          ],
+        ]),
+      },
+    });
+    assert.deepStrictEqual(
+      duplicateGraph.edges.map(({ id, semanticDiffHighlight }) => ({
+        id,
+        kind: semanticDiffHighlight?.kind,
+      })),
+      [
+        { id: flowGraphEdgeId(edge, 0), kind: "added" },
+        { id: flowGraphEdgeId(edge, 1), kind: "added" },
+        { id: flowGraphEdgeId({ ...edge, type: "con" }, 0), kind: undefined },
+      ],
+    );
   });
 });

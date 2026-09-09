@@ -95,6 +95,20 @@ const isPlainJsonProperty = (parent: object, key: string): boolean => {
     : !isUnsupportedJsonValue(value);
 };
 
+const allChecksPass = (checks: readonly (() => boolean)[]): boolean =>
+  checks.every((check) => check());
+
+const isViewerResourceState = (
+  value: unknown,
+): value is Record<string, unknown> =>
+  isPlainRecord(value) &&
+  allChecksPass([
+    () => hasOnlyKeys(value, ["isDarkMode", "lang", "scrollType"]),
+    () => typeof value.isDarkMode === "boolean",
+    () => typeof value.lang === "string",
+    () => value.scrollType === "window" || value.scrollType === "table",
+  ]);
+
 const isPlainJsonValue = (root: unknown): boolean => {
   let isValid = true;
   try {
@@ -111,69 +125,99 @@ const isPlainJsonValue = (root: unknown): boolean => {
   }
 };
 
-const isViewerDocumentData = (data: unknown): data is UnitListDocumentDto => {
-  if (
-    !isPlainRecord(data) ||
-    !hasOnlyKeys(data, ["rootUnits", "warnings", "unitDefinitions", "unitList"])
-  ) {
-    return false;
-  }
-  const unitList = data.unitList;
-  if (!isPlainRecord(unitList)) {
-    return false;
-  }
-  let isValid = ["rootUnits", "warnings", "unitDefinitions"].every((key) =>
+const hasDocumentArrays = (data: Record<string, unknown>): boolean =>
+  ["rootUnits", "warnings", "unitDefinitions"].every((key) =>
     Array.isArray(data[key]),
   );
-  if (isValid) {
-    isValid = Array.isArray(unitList.rows);
-  }
-  if (isValid) {
-    isValid = Array.isArray(unitList.units);
-  }
-  return isValid;
+
+const hasUnitListArrays = (unitList: Record<string, unknown>): boolean =>
+  Array.isArray(unitList.rows) && Array.isArray(unitList.units);
+
+const isViewerDocumentData = (data: unknown): data is UnitListDocumentDto => {
+  if (!isPlainRecord(data)) return false;
+  return hasValidViewerDocumentShape(data);
 };
+
+const hasValidViewerDocumentShape = (data: Record<string, unknown>): boolean =>
+  allChecksPass([
+    () =>
+      hasOnlyKeys(data, [
+        "rootUnits",
+        "warnings",
+        "unitDefinitions",
+        "unitList",
+        "semanticDiffOverlay",
+      ]),
+    () => hasDocumentArrays(data),
+    () => isPlainRecord(data.unitList) && hasUnitListArrays(data.unitList),
+  ]);
 
 export const parseViewerResourceState = (
   value: unknown,
 ): ViewerResourceStateDto | undefined => {
-  if (
-    !isPlainRecord(value) ||
-    !hasOnlyKeys(value, ["isDarkMode", "lang", "scrollType"]) ||
-    typeof value.isDarkMode !== "boolean" ||
-    typeof value.lang !== "string" ||
-    (value.scrollType !== "window" && value.scrollType !== "table")
-  ) {
-    return undefined;
-  }
+  if (!isViewerResourceState(value)) return undefined;
+  const resource = value as {
+    isDarkMode: boolean;
+    lang: string;
+    scrollType: "window" | "table";
+  };
   return {
-    isDarkMode: value.isDarkMode,
-    lang: value.lang,
-    scrollType: value.scrollType,
+    isDarkMode: resource.isDarkMode,
+    lang: resource.lang,
+    scrollType: resource.scrollType,
   };
 };
+
+const isValidViewerDocument = (data: unknown): data is UnitListDocumentDto =>
+  isPlainJsonValue(data) &&
+  isViewerDocumentData(data) &&
+  validateFlowGraphDocument(data).status === "available";
 
 const parseViewerDocumentChangedMessage = (
   data: unknown,
 ): ViewerDocumentChangedMessage | undefined => {
-  if (data === null) {
-    return { type: CHANGE_DOCUMENT, data: null };
-  }
-  if (!isPlainJsonValue(data) || !isViewerDocumentData(data)) {
-    return undefined;
-  }
-  return validateFlowGraphDocument(data).status === "available"
-    ? { type: CHANGE_DOCUMENT, data }
-    : undefined;
+  if (data === null) return { type: CHANGE_DOCUMENT, data: null };
+  if (!isValidViewerDocument(data)) return undefined;
+  return { type: CHANGE_DOCUMENT, data };
 };
 
 const parseViewerRevealUnitMessage = (
   data: unknown,
 ): ViewerRevealUnitMessage | undefined => {
+  if (!isPlainRecord(data)) return undefined;
+  if (!hasOnlyKeys(data, ["absolutePath"])) return undefined;
   const result = parseNavigationRequest(data);
-  return result.status === "available"
-    ? { type: REVEAL_UNIT, data: result.request }
-    : undefined;
+  return revealUnitMessage(result);
+};
+
+const revealUnitMessage = (
+  result: ReturnType<typeof parseNavigationRequest>,
+): ViewerRevealUnitMessage | undefined => {
+  if (result.status !== "available") return undefined;
+  return { type: REVEAL_UNIT, data: result.request };
+};
+
+type ViewerMessageParser = (data: unknown) => ViewerHostMessage | undefined;
+
+const viewerMessageParsers: Partial<
+  Record<ViewerHostMessageType, ViewerMessageParser>
+> = {
+  [RESOURCE]: (data) => {
+    const resource = parseViewerResourceState(data);
+    return resource ? { type: RESOURCE, data: resource } : undefined;
+  },
+  [CHANGE_DOCUMENT]: parseViewerDocumentChangedMessage,
+  [REVEAL_UNIT]: parseViewerRevealUnitMessage,
+};
+
+const getViewerMessageParser = (
+  type: unknown,
+): ViewerMessageParser | undefined => {
+  if (typeof type !== "string") return undefined;
+  if (!Object.prototype.hasOwnProperty.call(viewerMessageParsers, type)) {
+    return undefined;
+  }
+  return viewerMessageParsers[type as ViewerHostMessageType];
 };
 
 export const parseViewerHostMessage = (
@@ -185,21 +229,8 @@ export const parseViewerHostMessage = (
   if (!hasOnlyKeys(value, ["type", "data"])) {
     return undefined;
   }
-  let result: ViewerHostMessage | undefined;
-  switch (value.type) {
-    case RESOURCE: {
-      const data = parseViewerResourceState(value.data);
-      result = data ? { type: RESOURCE, data } : undefined;
-      break;
-    }
-    case CHANGE_DOCUMENT:
-      result = parseViewerDocumentChangedMessage(value.data);
-      break;
-    case REVEAL_UNIT:
-      result = parseViewerRevealUnitMessage(value.data);
-      break;
-  }
-  return result;
+  const parser = getViewerMessageParser(value.type);
+  return parser?.(value.data);
 };
 
 export const createViewerDocumentChangedMessage = (
