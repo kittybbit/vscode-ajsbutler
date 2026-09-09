@@ -64,6 +64,12 @@ explicitly.
   language, host, or source insertion order
 - all modes consume the same immutable comparison result and canonical summary;
   selecting or rendering a mode does not rerun comparison or re-aggregate data
+- when a Semantic Diff Explorer session is active, its Output action uses this
+  same immutable result and the shared four-mode picker; the Explorer does not
+  create a second comparison or report context
+- the Explorer's filter, tree, and Output actions remain keyboard-operable;
+  confirmation-required filtering preserves the session and announces an
+  explicit empty result when no matching item remains
 - the report includes the schedule comparison period when schedule comparison
   was requested
 - report presentation does not change semantic comparison meaning
@@ -90,6 +96,12 @@ Scenario: A selected mode reuses one comparison result
   When the user selects Summary, Full, Audit, or JSON
   Then the selected output represents the same changes and decisions
   And comparison and summary aggregation are not rerun
+
+Scenario: Explorer output preserves the comparison session
+  Given a successful comparison is open in the Semantic Diff Explorer
+  When the reviewer chooses Summary, Full, Audit, or JSON from Output
+  Then the selected report is rendered from the Explorer's comparison session
+  And the report opens without an implicit clipboard write
 
 Scenario: Summary provides a compact review overview
   Given a comparison contains changes, confirmation items, and an uncalculated

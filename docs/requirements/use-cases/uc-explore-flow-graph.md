@@ -20,6 +20,8 @@ flow scope while preserving predictable navigation and viewport state.
 - current nested expansion set
 - current query, selected unit, hovered unit, and relationship-focus state
 - current viewport position and zoom
+- an optional validated Semantic Diff overlay for the active before or after
+  graph scope
 
 ## Outputs
 
@@ -96,6 +98,14 @@ flow scope while preserving predictable navigation and viewport state.
   content
 - necessary graph state and operation outcomes are exposed semantically and
   follow the current localization context
+- Semantic Diff overlays add review state to existing graph nodes and
+  relations by their actual graph IDs; they do not change ordinary graph
+  construction, search, scope, or keyboard behavior
+- overlay state is available through visible text, patterns, a legend, DOM
+  semantics, and high-contrast styling; relation edges remain non-focusable
+- when duplicate relation edges match one semantic relation, every matching
+  edge is highlighted and focus uses the lowest occurrence ordinal while the
+  duplicate count is announced
 - graph rerendering or scope changes restore focus to the corresponding unit or
   a defined meaningful fallback
 - this presentation-local search behavior does not create a shared search
@@ -198,6 +208,19 @@ Scenario: Flow tree and graph focus handoffs match list-view semantics
     in-scope tree row
   Then focus moves between the graph node and the flow selector's defined
     target row without changing the selected unit or flow scope
+
+Scenario: Semantic Diff overlay preserves accessible Flow exploration
+  Given the active Flow graph has a validated Semantic Diff overlay
+  When the reviewer opens the graph or moves its focus
+  Then added, removed, changed, and confirmation-required states are exposed
+  through text and non-color cues
+  And ordinary search, nesting, scope, and keyboard behavior remain unchanged
+
+Scenario: Duplicate semantic relation targets remain distinguishable
+  Given multiple formal Flow edges match one Semantic Diff relation pair
+  When the reviewer focuses that relation from the Explorer
+  Then every matching edge receives the semantic state
+  And focus selects the lowest occurrence ordinal and announces the count
 ```
 
 ## Acceptance Notes

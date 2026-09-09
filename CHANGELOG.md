@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Added a read-only Semantic Diff Explorer with summary cards, hierarchical
+  change review, confirmation-required filtering, exact before/after source
+  navigation, and existing Flow Viewer focus/highlight integration. The
+  Explorer is keyboard-accessible, preserves non-color state cues in
+  high-contrast modes, and reports an explicit empty result when the
+  confirmation-required filter has no matches. Reports remain available
+  through the Explorer's explicit Output action, and copy or save operations
+  remain explicit.
 - Added Summary, Full, Audit, and deterministic JSON Semantic Diff outputs,
   with Full as the default human-readable mode and explicit Markdown copy and
   output save actions.

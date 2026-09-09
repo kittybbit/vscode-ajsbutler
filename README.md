@@ -48,7 +48,7 @@ JP1/AJS定義から、ジョブやジョブネットなどのユニットを一�
 
 ### Semantic Diff
 
-`JP1/AJS: Compare JP1/AJS Semantic Diff` で、現在の定義と選択した比較元の定義を意味単位で比較できます。比較後に Summary、Full、Audit、JSON の出力モードを選べます。Fullが既定の人向けレポートで、Summaryは概要、Auditは判断根拠、JSONはロケールに依存しない自動処理向けです。表示中のMarkdownは `JP1/AJS: Copy Semantic Diff Markdown` で明示的にコピーでき、MarkdownまたはJSONは `JP1/AJS: Save Semantic Diff Output` で保存できます。保存やコピーは自動では行われません。
+`JP1/AJS: Compare JP1/AJS Semantic Diff` で、現在の定義と選択した比較元の定義を意味単位で比較できます。比較が成功すると、専用のSemantic Diff Explorerで概要カード、変更ツリー、確認が必要な項目の絞り込みを確認できます。項目から対応する比較元・比較先の定義範囲やFlow Viewerへ移動でき、Explorerはread-onlyで比較結果を変更しません。キーボード操作、高コントラスト表示、色以外の状態表示にも対応しています。OutputからSummary、Full、Audit、JSON の出力モードを選べます。Fullが既定の人向けレポートで、Summaryは概要、Auditは判断根拠、JSONはロケールに依存しない自動処理向けです。表示中のMarkdownは `JP1/AJS: Copy Semantic Diff Markdown` で明示的にコピーでき、MarkdownまたはJSONは `JP1/AJS: Save Semantic Diff Output` で保存できます。保存やコピーは自動では行われません。
 
 Semantic Diffのスケジュール比較では、完全修飾されたGregorian暦の月末
 （`YYYY/MM/b`、`YYYY/MM/b-DD`）と絶対曜日
@@ -90,7 +90,7 @@ Semantic Diffのスケジュール比較では、完全修飾されたGregorian�
 
 一覧画面では、ユニットの階層を確認しながら検索、列の表示、詳細の確認、CSV出力を行えます。フロー画面では、検索結果をたどり、関係するユニットを選び、ネストしたジョブネットを展開できます。
 
-Semantic Diffは `JP1/AJS: Compare JP1/AJS Semantic Diff` から起動します。モードを選ぶと、比較結果を一度だけ使って選択した出力を表示します。Markdownのコピーと出力の保存は、表示後の明示的な操作です。
+Semantic Diffは `JP1/AJS: Compare JP1/AJS Semantic Diff` から起動します。成功するとExplorerが開き、変更ツリーの確認、確認が必要な項目の絞り込み、定義範囲やFlow Viewerへの移動、Outputからのレポート表示を行えます。キーボードだけでも操作でき、確認が必要な項目がない場合はその状態が明示されます。モードを選ぶと、同じ比較結果を一度だけ使って選択した出力を表示します。Markdownのコピーと出力の保存は、表示後の明示的な操作です。
 
 ## 対応範囲
 
