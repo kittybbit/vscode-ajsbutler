@@ -1,9 +1,6 @@
 import { buildSemanticDiffFlowOverlay } from "../../../../application/flow-graph/buildSemanticDiffFlowOverlay";
 import type { UnitListDocumentDto } from "../../../../application/unit-list/unitListDocument";
-import type {
-  SemanticDiffOutputContext,
-  SemanticDiffRelationReference,
-} from "../../../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
 import {
   createViewerDocumentChangedMessage,
   createViewerRevealUnitMessage,
@@ -14,33 +11,18 @@ import type {
   SemanticDiffFlowHost,
   SemanticDiffFlowPanel,
   FlowOverlayOwner,
-} from "./semanticDiffExplorerFlow";
+  ReadyFlowTarget,
+} from "./semanticDiffExplorerFlowTypes";
 import { SemanticDiffFlowOverlayRegistry } from "./semanticDiffExplorerFlowOverlayRegistry";
 import {
   openReadyFlowTarget,
   prepareFlowAction,
 } from "./semanticDiffExplorerFlowActionPreparation";
-
-type FlowRelationPair = Pick<
-  SemanticDiffRelationReference,
-  "sourceUnitId" | "targetUnitId" | "type"
->;
-
-export type ResolvedFlowTarget = Readonly<{
-  targetUnitId: string;
-  relation: FlowRelationPair | undefined;
-}>;
-
-export type PreparedFlowAction = Readonly<{
-  target: ResolvedFlowTarget;
-  isFresh: () => boolean;
-}>;
-
-export type ReadyFlowTarget = Readonly<{
-  panel: SemanticDiffFlowPanel;
-  document: UnitListDocumentDto;
-  targetUnit: Readonly<{ absolutePath: string }>;
-}>;
+export type {
+  PreparedFlowAction,
+  ReadyFlowTarget,
+  ResolvedFlowTarget,
+} from "./semanticDiffExplorerFlowTypes";
 
 const notReady = (): Readonly<{
   ok: false;

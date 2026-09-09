@@ -3,7 +3,7 @@ import { createViewerDocumentChangedMessage } from "../../../webview/viewerHostM
 import type {
   FlowOverlayOwner,
   SemanticDiffFlowPanel,
-} from "./semanticDiffExplorerFlow";
+} from "./semanticDiffExplorerFlowTypes";
 
 type FlowOverlayEntry = Readonly<{
   owner: FlowOverlayOwner;

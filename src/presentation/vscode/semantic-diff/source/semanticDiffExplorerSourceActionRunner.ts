@@ -13,7 +13,7 @@ import type {
   SemanticDiffSourceActionFailureCode,
   SemanticDiffSourceActionRequest,
   SemanticDiffSourceActionResult,
-} from "./semanticDiffExplorerSourceAction";
+} from "./semanticDiffExplorerSourceTypes";
 import type {
   SemanticDiffSourceCaptureEntry,
   SemanticDiffSourceHostDescriptor,

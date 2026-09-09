@@ -3868,17 +3868,16 @@ pnpm run qlty:smells` (zero findings), and `rtk git diff --check` passed.
   command, source-capture, Explorer, extension, and architecture tests under
   `src/test/`; and this feature's `TASKS.md` and `TRACEABILITY.md`. Slice 17
   files and the six protected closure drafts are excluded.
-- Slice 16 is completion-approved and eligible for its focused completion
-  commit; no commit or staging was performed in this handoff.
+- Slice 16 is completion-approved and focused-committed as
+  `6d4eae6c5c27c6ba80d33954cd2e16c3b6bc1d48`.
 
 ### Slice 17: VS Code Semantic Diff Adapter Placement And Constant Ownership
 
 - Status: Implemented after Slice 16's focused completion commit. The P1
   tracking remediation is applied; independent implementation re-review
   returned `Ready` with no findings, and Completion Approval is automatically
-  recorded under the standing no-findings policy. The exact focused
-  completion commit remains eligible and pending; no commit or staging was
-  performed for Slice 17.
+  recorded under the standing no-findings policy. Focused completion commit
+  `79045caedec04f6b57e39488e0cff4909ecea5de` is recorded.
 - Scope: keep `src/presentation/vscode/semantic-diff` as the public adapter
   boundary while placing implementation modules under `panel`, `flow`,
   `report`, and `source`. `panel` owns panel lifecycle, requests, transport,
@@ -4028,9 +4027,9 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
 - Exact plan-gate paths:
   `docs/specs/features/semantic-diff-explorer/TASKS.md` and
   `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`.
-- The plan-gate commit remains pending. No `.gitignore`, runtime, test,
-  generated-artifact, staging, or commit change is made here, and the six
-  closure drafts remain protected.
+- Focused plan-gate commit `b74235bcef1210663e17f5e07e7fcf7b552af459` is
+  recorded. No additional `.gitignore`, runtime, test, or generated-artifact
+  change is made here, and the six closure drafts remain protected.
 
 ### Slice 17 P1 Narrow Replan Implementation Result (2026-09-10)
 
@@ -4053,14 +4052,16 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
   Flow/Table compatibility, Explorer CSP/session/action behavior, report-file
   tracking remediation, and the recorded validation evidence.
 - Completion Approval: automatically recorded under the user's standing
-  proceed-through-slices policy for the exact Slice 17 boundary. This approval
-  makes the focused completion commit eligible and pending; this handoff does
-  not stage or commit any path.
+  proceed-through-slices policy for the exact Slice 17 boundary. Focused
+  completion commit `79045caedec04f6b57e39488e0cff4909ecea5de` is recorded;
+  this handoff performs no additional staging or commit.
 - P1 final evidence: the two approved `.gitignore` negations are present
   after the general `report/` rule; all three report sources are visible to
   normal status/add while `report/slice17-output.txt` remains ignored; scoped
-  status exposes exactly the three sources. No additional runtime, test, or
-  `.gitignore` change was made after the P1 remediation.
+  status exposes exactly the three sources. No additional `.gitignore` or
+  report-tracking change was made after the P1 remediation; the later Feature
+  Exit acceptance remediation is limited to approved category type boundaries
+  and its architecture fixture.
 - Validation: `rtk pnpm run test:compile`, desktop preparation and compiled
   runner, web preparation and production build, `rtk pnpm run qlty:check`
   (`No issues`), `rtk pnpm run qlty:smells` (zero findings), Markdown lint,
@@ -4117,6 +4118,76 @@ qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
   - `src/test/suite/viewerBundle.test.ts`
 - The six closure drafts remain protected and excluded. No unrelated status
   path is included in this exact completion boundary.
+
+### Slice 17 Feature Exit Acceptance Remediation (2026-09-10)
+
+- Feature Exit finding: the architecture resolver fixture expected the first
+  module after a cyclic `export *` chain, while the deterministic resolver
+  contract returns the terminal module where the visited-binding guard stops
+  (`src/application/second`). The test now asserts that contract; resolver
+  behavior and cycle protection are unchanged.
+- Feature Exit finding: the category graph reported ten cycles because the
+  architecture check intentionally includes type-only imports. The check was
+  not weakened. Shared contracts were moved to category-local leaf modules:
+  `flow/semanticDiffExplorerFlowTypes.ts`,
+  `panel/semanticDiffExplorerPanelTypes.ts`, and
+  `report/semanticDiffExplorerReportActionTypes.ts`; Source action contracts
+  now live in the existing `source/semanticDiffExplorerSourceTypes.ts`.
+  Runtime modules consume those leaf types, leaving the existing three root
+  facades, category ownership, and public imports unchanged.
+- Scope confirmation: every new helper is under an already approved Slice 17
+  category (`flow`, `panel`, or `report`); no new root facade, host-independent
+  presentation path, or design boundary was introduced. Type-only imports
+  remain in the architecture graph and the category graph now has zero cycles.
+- Validation: the architecture suite passes 25/25, `rtk pnpm run
+test:compile`, desktop preparation and compiled runner, web preparation and
+  production build, `rtk pnpm run qlty:check` (`No issues`), `rtk pnpm run
+qlty:smells` (zero findings), and `git diff --check` pass. Existing
+  webpack asset-size warnings remain informational; browser smoke remains
+  environment-bounded by the known Chromium bootstrap permission restriction.
+- This remediation does not change `.gitignore`, the report tracking rules,
+  runtime behavior, the five existing architecture/Explorer tests beyond the
+  resolver expectation, or the six protected closure drafts. No staging or
+  commit was performed.
+
+### Slice 17 Feature Exit Acceptance Remediation Completion Approval (2026-09-10)
+
+- Independent remediation review: `Ready`; Findings: none. The review
+  confirmed the resolver contract, type-only dependency coverage, zero-cycle
+  result, facade/export compatibility, and the recorded desktop/web and
+  quality evidence.
+- Completion Approval: automatically recorded under the user's standing
+  no-findings policy for this exact Slice 17 acceptance remediation. The
+  remediation completion is eligible for its focused completion handoff; this
+  update performs no staging or commit.
+- Final evidence: architecture suite 25/25; category cycles 0; `rtk pnpm run
+test:compile`; Desktop runner exit 0; web preparation and production build;
+  `rtk pnpm run qlty:check` (`No issues`); `rtk pnpm run qlty:smells` (zero
+  findings); Markdown lint 0 errors; and `git diff --check` all passed.
+- Exact remediation completion paths from the current `git status` are:
+  - `docs/specs/features/semantic-diff-explorer/TASKS.md`
+  - `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowAction.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowActionPreparation.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowOverlayRegistry.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowTargets.ts`
+  - `src/presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlowTypes.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelActions.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelInstall.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelLifecycle.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelTypes.ts`
+  - `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportAction.ts`
+  - `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportActionRunner.ts`
+  - `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportActionTypes.ts`
+  - `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceAction.ts`
+  - `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceActionRunner.ts`
+  - `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+- This approval update makes no additional runtime, test, or `.gitignore`
+  change. The six closure drafts remain protected and excluded; no path is
+  staged or committed.
 
 ## Slice 16/17 Exit Route
 
@@ -4661,3 +4732,59 @@ independent plan review, the focused plan-gate commit, sequential completion
 of Slices 16 and 17 with their review/approval gates, and a fresh Feature Exit
 review before aggregate Closure Approval. The six protected closure drafts
 remain unmodified and outside all implementation commits.
+
+## Feature Exit Review After Slices 16-17 (2026-09-10)
+
+- Feature: `semantic-diff-explorer`.
+- Completed slices: Slices 1-17, including formatter reconciliations 7A/9A,
+  Slice 16 completion commit `6d4eae6c5c27c6ba80d33954cd2e16c3b6bc1d48`, and
+  Slice 17 completion commit
+  `79045caedec04f6b57e39488e0cff4909ecea5de`. Plan-gate commits are
+  `8090fc41683ca9628a47ec67c7f22fab0a7f5bfa` and
+  `b74235bcef1210663e17f5e07e7fcf7b552af459`. Independent implementation
+  reviews are recorded as `Ready` with no findings and Completion Approval is
+  recorded for both slices.
+- Acceptance status: allocator construction is now Bootstrap-owned for all
+  five allocator types, the production composition scan reports zero
+  violations, re-export factory resolution and three root facades are covered,
+  category placement and constant ownership are implemented, Flow/Table
+  resolver behavior is preserved, and the two exact report-directory
+  `.gitignore` negations are present. However, the required full
+  `architectureDependencyRules` suite fails two assertions: the cyclic
+  re-export fixture resolves the fallback target to `src/application/second`
+  instead of the expected `src/application/first`, and the category graph
+  detector reports ten cycles (including type-only/category action and facade
+  paths) instead of `[]`. This is unresolved implementation evidence.
+- Validation: `rtk pnpm run test:compile`, qlty check (`No issues`), qlty
+  smells (zero findings across 102 files), desktop runner (exit 0), recorded
+  web preparation/production build, Markdown/diff checks, and the focused
+  passing architecture subset all succeeded. The independent full
+  architecture suite was run after compilation and returned 23 passing and 2
+  failing tests, so Feature Definition of Done validation is incomplete.
+  Managed Chromium smoke remains environment-bounded by the known bootstrap
+  permission restriction.
+- Traceability: Slice 16/17 commits, allocator ownership, composition scan,
+  re-export detection, facade/category placement, constants, report tracking,
+  and the failing independent architecture evidence are recorded in this
+  document and `TRACEABILITY.md`.
+- Production readiness: no parser grammar, comparison semantics, Explorer
+  transport, report schema, MUI/WCAG, Flow wire, telemetry, dependency, or
+  VS Code engine-floor change was introduced. Desktop smoke and recorded web
+  bundles remain positive, but category-cycle and cyclic-re-export guard
+  failures must be resolved before closure.
+- Durable documentation: the six closure paths remain the approved durable
+  propagation surface. `docs/specs/roadmap.md` was synchronized by removing
+  the resolved allocator composition-root follow-up; the README, English
+  README, CHANGELOG, and two user-facing use cases already contain the
+  delivered behavior. No additional architecture/glossary/context update is
+  required at this point.
+- Remaining risks: the two failing architecture assertions are not yet
+  assigned as a resolved follow-up and therefore block closure. Return this
+  evidence to Main for implementation/replanning route handling. The known
+  managed Chromium restriction and existing Flow golden mismatch remain
+  bounded; the latter remains assigned in the roadmap.
+- Closure recommendation: `Do not close`. The exact future closure scope,
+  after the architecture evidence is repaired and independently reviewed,
+  remains the six durable paths above plus removal of
+  `docs/specs/features/semantic-diff-explorer/`. This review performs no
+  staging, commit, or feature-folder deletion.

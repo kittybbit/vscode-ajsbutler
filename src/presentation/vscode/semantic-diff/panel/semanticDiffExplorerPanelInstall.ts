@@ -10,7 +10,7 @@ import type {
 } from "./semanticDiffExplorerRegistry";
 import { buildSemanticDiffExplorerHtml } from "./semanticDiffExplorerPanelHtml";
 import { handleSemanticDiffExplorerRequest } from "./semanticDiffExplorerPanelRequests";
-import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanelTypes";
 
 type PanelInstallOptions = Readonly<{
   context: import("../../../../application/semantic-diff/semanticDiffDto").SemanticDiffOutputContext;

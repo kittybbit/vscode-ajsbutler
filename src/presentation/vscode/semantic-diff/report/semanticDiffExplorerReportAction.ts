@@ -1,30 +1,13 @@
 import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
-import {
-  presentSemanticDiffOutput,
-  type SemanticDiffOutputDocument,
-  type SemanticDiffOutputMode,
-  type SemanticDiffOutputModeItem,
-} from "../../../semantic-diff/semanticDiffOutput";
 import { runSemanticDiffExplorerReportAction } from "./semanticDiffExplorerReportActionRunner";
-
-export type SemanticDiffExplorerReportActionDeps = Readonly<{
-  showQuickPick: (
-    items: readonly SemanticDiffOutputModeItem[],
-    options?: { readonly placeHolder?: string },
-  ) => Thenable<SemanticDiffOutputModeItem | undefined>;
-  openReport: (document: SemanticDiffOutputDocument) => Thenable<unknown>;
-  presentOutput?: typeof presentSemanticDiffOutput;
-  language?: string;
-  isCurrent?: () => boolean;
-}>;
-
-export type SemanticDiffExplorerReportActionResult =
-  | Readonly<{
-      ok: true;
-      mode: SemanticDiffOutputMode;
-      document: SemanticDiffOutputDocument;
-    }>
-  | Readonly<{ ok: false; code: "cancelled" | "output-failed" }>;
+export type {
+  SemanticDiffExplorerReportActionDeps,
+  SemanticDiffExplorerReportActionResult,
+} from "./semanticDiffExplorerReportActionTypes";
+import type {
+  SemanticDiffExplorerReportActionDeps,
+  SemanticDiffExplorerReportActionResult,
+} from "./semanticDiffExplorerReportActionTypes";
 
 /**
  * The Explorer output button is deliberately a thin consumer of the

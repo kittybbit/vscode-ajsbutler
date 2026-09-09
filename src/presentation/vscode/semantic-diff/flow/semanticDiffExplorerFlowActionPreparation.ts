@@ -15,12 +15,10 @@ import type {
   SemanticDiffFlowActionResult,
   SemanticDiffFlowHost,
   SemanticDiffFlowPanel,
-} from "./semanticDiffExplorerFlow";
-import type {
   PreparedFlowAction,
   ReadyFlowTarget,
   ResolvedFlowTarget,
-} from "./semanticDiffExplorerFlowAction";
+} from "./semanticDiffExplorerFlowTypes";
 
 type FlowRelationPair = Pick<
   SemanticDiffRelationReference,

@@ -261,7 +261,7 @@ suite("Architecture dependency rules", () => {
       [
         {
           file: "src/presentation/example.ts",
-          target: "src/application/first",
+          target: "src/application/second",
           symbol: "missing",
           kind: "call",
         },

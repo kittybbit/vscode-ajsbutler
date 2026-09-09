@@ -4,7 +4,7 @@ import type {
   SemanticDiffTarget,
 } from "../../../../application/semantic-diff/semanticDiffDto";
 import { recordAtSourceOccurrence } from "../../../../application/semantic-diff/semanticDiffRecordOccurrence";
-import type { SemanticDiffFlowActionRequest } from "./semanticDiffExplorerFlow";
+import type { SemanticDiffFlowActionRequest } from "./semanticDiffExplorerFlowTypes";
 
 type FlowRelationPair = Pick<
   SemanticDiffRelationEndpoint,

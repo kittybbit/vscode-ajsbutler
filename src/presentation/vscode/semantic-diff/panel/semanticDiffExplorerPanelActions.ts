@@ -19,12 +19,12 @@ import type {
 import { recordAtSourceOccurrence } from "../../../../application/semantic-diff/semanticDiffRecordOccurrence";
 import { executeSemanticDiffExplorerReportAction } from "../report/semanticDiffExplorerReportAction";
 import { executeSemanticDiffExplorerSourceAction } from "../source/semanticDiffExplorerSourceAction";
-import type { SemanticDiffFlowActionRequest } from "../flow/semanticDiffExplorerFlow";
+import type { SemanticDiffFlowActionRequest } from "../flow/semanticDiffExplorerFlowTypes";
 import type {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffSourceCaptureEntry,
 } from "./semanticDiffExplorerRegistry";
-import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanelTypes";
 
 type ActionRequest = Extract<SemanticDiffExplorerRequest, { type: "action" }>;
 type ActionMetadata = NonNullable<

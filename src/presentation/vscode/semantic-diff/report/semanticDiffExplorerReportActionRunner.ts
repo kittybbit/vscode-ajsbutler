@@ -8,7 +8,7 @@ import {
 import type {
   SemanticDiffExplorerReportActionDeps,
   SemanticDiffExplorerReportActionResult,
-} from "./semanticDiffExplorerReportAction";
+} from "./semanticDiffExplorerReportActionTypes";
 
 type ReportModeSelection =
   | Readonly<{ ok: true; mode: SemanticDiffOutputMode }>

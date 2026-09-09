@@ -10,7 +10,7 @@ import type {
   SemanticDiffExplorerContextRegistry,
   SemanticDiffSourceCaptureEntry,
 } from "./semanticDiffExplorerRegistry";
-import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerPanelDeps } from "./semanticDiffExplorerPanelTypes";
 
 type PanelLifecycleOptions = Readonly<{
   context: SemanticDiffOutputContext;
