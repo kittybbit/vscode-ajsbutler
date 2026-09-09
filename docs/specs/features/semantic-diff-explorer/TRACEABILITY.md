@@ -1306,6 +1306,127 @@ test:prepare:web`, targeted `qlty smells --no-snippets` for both changed
   `docs/specs/features/semantic-diff-explorer/`; this review performs no
   staging, commit, or deletion.
 
+## Feature Exit Superseded By Slice 16/17 Presentation And Composition Replan
+
+The post-Slice-15 `Close` recommendation is retained as historical evidence
+for Slices 1-15 only. The user's presentation-placement assessment identified
+the remaining allocator/composition-root violations and the flat VS Code
+Semantic Diff adapter structure. The feature is reopened for two bounded
+architecture/presentation slices; `src/presentation/semantic-diff` and
+`src/presentation/webview/semantic-diff` remain intentionally out of the
+move. The six uncommitted closure-draft paths remain protected and excluded.
+
+### Slice 16/17 Plan Review And Human Approval (2026-09-10)
+
+- Independent Plan Review: `Ready`; Findings: none.
+- Human Approval: the trusted user message `PLEASE IMPLEMENT THIS PLAN`
+  approves the exact Slice 16/17 replan boundary.
+- Exact plan-gate paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`.
+- The focused plan-gate commit is still pending. This record does not
+  authorize implementation outside the reviewed boundary and does not modify,
+  stage, or commit the six closure drafts.
+
+### Slice 16 Activation — Bootstrap Allocators And Composition-Root Detection
+
+- Trigger: production construction still occurs in
+  `AntlrAjsParser`, the Semantic Diff command fallback, and the Explorer panel
+  module/manual output range. The architecture helper also needs to resolve
+  application factories reached through named, namespace, and transitive
+  re-export bindings.
+- Planned boundary: create extension-lifetime source-index, source-handle,
+  capture-scope, Explorer session, and Explorer action allocators in Bootstrap;
+  inject them into parser, command, source-capture, and Explorer panel
+  production dependencies; require session/action allocators in the
+  application projection API; use the same action allocator for leaf and
+  output actions; remove all module-scoped/default/fallback allocators and the
+  `1_000_000_000` manual range. Extend the architecture collector with
+  cycle-safe direct/re-export factory resolution and add a static regression
+  scan that rejects any non-Bootstrap production `create*Allocator()` call.
+  DTOs, messages, `AjsParserPort`, capture, comparison, report, Flow, and
+  webview contracts remain unchanged.
+- Affected implementation/test boundary:
+  `src/bootstrap/extension/extensionDependencies.ts`,
+  `src/bootstrap/extension/semanticDiffWiring.ts`,
+  `src/infrastructure/parser/AntlrAjsParser.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommand*.ts`,
+  `src/application/semantic-diff/semanticDiffExplorerProjection.ts`,
+  `src/application/semantic-diff/semanticDiffSourceCapture.ts`,
+  `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts`,
+  parser/command/source-capture/panel allocator fixtures, and
+  `src/test/support/architectureDependencyRules.ts` plus its suite.
+- Acceptance/evidence: the only production allocator construction calls are
+  the five Bootstrap call sites
+  (`createSemanticDiffSourceIndexIdAllocator`,
+  `createSemanticDiffSourceHandleIdAllocator`,
+  `createSemanticDiffCaptureScopeIdAllocator`,
+  `createSemanticDiffExplorerSessionIdAllocator`, and
+  `createSemanticDiffExplorerActionIdAllocator`); parser, command,
+  source-capture, and
+  projection/panel fallback calls are absent; production session/action APIs
+  require explicit allocators; concurrent Explorer sessions/actions and parser
+  source-index/capture-scope IDs remain pairwise distinct; direct and
+  re-exported application factories are detected; a non-Bootstrap
+  `create*Allocator()` fixture fails the static regression test; the full
+  architecture suite reports zero composition-root violations; parser,
+  command, source capture, lifecycle, report, Flow, desktop, web, qlty, and
+  build checks remain green. Application tests construct explicit allocator
+  instances in `semanticDiffExplorerProjection.test.ts`,
+  `semanticDiffSourceCapture.test.ts`, `semanticDiffExplorerRegistry.test.ts`,
+  `semanticDiffExplorerSourceAction.test.ts`, the semantic-diff command/parser/
+  panel suites, and `src/test/support/parseAjs.ts`.
+- Gate: this slice is planned, not implemented. It requires independent plan
+  review, the focused plan-gate commit, implementation review, and the
+  standing no-findings automatic Completion Approval before Slice 17 starts.
+
+### Slice 17 Activation — VS Code Adapter Placement And Constants
+
+- Trigger: the VS Code Semantic Diff adapter has panel, Flow, report, source,
+  registry, and HTML implementations at one level, while Explorer bundle
+  constants are duplicated and the generic Flow/Table resolver has an unused
+  Explorer branch.
+- Planned boundary: classify implementations under `panel`, `flow`, `report`,
+  and `source`; keep exactly the three root facades
+  `semanticDiffExplorerPanel.ts`, `semanticDiffExplorerFlow.ts`, and
+  `semanticDiffExplorerRegistry.ts` (the Panel facade also exposes panel
+  constants); update report/source consumers and tests to category paths; add
+  the Explorer constants module under `panel`; remove Explorer entries from
+  the generic Flow/Table constants/resolver. Keep the existing webpack
+  entries, bundle URI, CSP, session/action attributes, and Flow/Table
+  behavior unchanged.
+- Affected implementation/test boundary:
+  `src/presentation/vscode/semantic-diff/**` and its existing Explorer panel,
+  Flow, report, source, registry suites; `src/presentation/vscode/webview/
+  constant.ts`; leave `src/presentation/vscode/webview/mountViewerPanel.ts`
+  unchanged; update Bootstrap Semantic Diff imports; viewer-bundle,
+  wiring, architecture, desktop, and web regression suites. The two
+  host-independent presentation directories are not affected.
+- Acceptance/evidence: exactly the three designated root facades preserve
+  existing Panel/Flow/Registry imports; old-root imports are allowed only for
+  those facades; direct imports of moved flat implementations are zero; the
+  `panel`/`flow`/`report`/`source` graph has zero cycles; generic viewer
+  constants are Flow/Table-only; Explorer HTML resolves the unchanged bundle
+  URI and CSP; Flow/Table bundle resolution remains unchanged; focused
+  Explorer/viewer/wiring tests, the executable facade/old-path/cycle checks
+  added to `src/test/suite/architectureDependencyRules.test.ts`, qlty,
+  desktop/web builds, Markdown lint, and diff checks pass.
+- Gate: Slice 17 is planned after Slice 16's focused completion commit and
+  requires its own independent implementation review and conditional
+  automatic Completion Approval.
+
+## Current Replan Validation And Closure Boundary
+
+The replan commit may contain only `TASKS.md` and `TRACEABILITY.md`; the six
+closure-draft paths remain untouched. Before Feature Exit, evidence must cover
+zero composition-root violations, re-export detection, allocator uniqueness,
+root-facade/export parity, import-cycle absence, unchanged Explorer/Flow/Table
+bundle behavior, full qlty/build/desktop/web checks, and all prior
+WCAG/filter/source/Flow/report readiness. After both slices are committed,
+Feature Exit must be rerun; only its renewed `Close` recommendation can return
+the feature to Main for one aggregate human approval and explicit Closure
+Approval covering the six durable paths plus feature-folder removal.
+
 ## Feature Exit Superseded By Slice 15 Color Regression Replan
 
 The 2026-09-09 `Close` recommendation remains historical evidence for the
@@ -1394,7 +1515,8 @@ denied (1100)`.
   Existing webpack asset-size warnings and unrelated `url.parse()` `DEP0169`
   startup warning remain outside scope. Independent implementation review is
   `Ready` with no findings and Completion Approval is automatic under the
-  standing user policy; the focused completion commit remains pending.
+  standing user policy; focused completion commit
+  `80645ffa7cd1f3bde484d21087ee3ee680a06956` is recorded.
 
 ### Slice 15 Completion Approval (2026-09-09)
 
@@ -1409,6 +1531,73 @@ denied (1100)`.
   findings, desktop/web preparation and production build succeeded, and diff
   checks passed. Web smoke remains environment-blocked before execution by
   Chromium `bootstrap_check_in ... Permission denied (1100)`.
-- The focused completion commit is the next gate. No commit was created in
-  this implementation/review evidence update, and the six Feature Exit
-  closure-draft documents remain protected and untouched.
+- Focused completion commit
+  `80645ffa7cd1f3bde484d21087ee3ee680a06956` is recorded. The six Feature
+  Exit closure-draft documents remain protected and untouched.
+
+## Final Feature Exit Review After Slice 15 (2026-09-09)
+
+- Feature: `semantic-diff-explorer`.
+- Completed slices: Slices 1-15, including formatter reconciliations 7A and
+  9A. Every implementation slice has an independent `Ready` review with no
+  findings, conditional automatic Completion Approval under the recorded user
+  policy, and a focused completion commit. Slice 15 is committed as
+  `80645ffa7cd1f3bde484d21087ee3ee680a06956`; its approved plan-gate commit
+  is `d879a160802db6257b56c857521282f001191712`.
+- Acceptance status: EXP-1 through EXP-11, N-1, and E-4 are satisfied. The
+  Explorer remains read-only, keeps one immutable comparison session, exposes
+  exact source and Flow targets, and preserves the actual-session
+  `確認が必要` filter behavior. The shared MUI theme now follows standard
+  light/dark palettes for every theme; only WCAG-required focus, target-size,
+  forced-colors, and selected-row marker rules remain explicit. Selection
+  remains perceivable at approximately 4.60:1 in light mode and 10.71:1 in
+  dark mode, with `Highlight` in forced colors.
+- Validation: independent recheck passed `rtk pnpm run qlty:check` (`No
+  issues`), `rtk pnpm run qlty:smells` (zero findings across 97 files),
+  `rtk pnpm run test:compile`, the focused MUI/theme-mode/Explorer DOM suite
+  (20 passing), `rtk pnpm run lint:md`, and `rtk git diff --check`. Recorded
+  Slice 15 evidence also includes desktop preparation and smoke (exit 0), web
+  preparation, and production desktop/web build. Managed Chromium web smoke
+  remains blocked before execution by the host
+  `bootstrap_check_in ... Permission denied (1100)` restriction.
+- Traceability: this document maps EXP-1 through EXP-11, N-1, E-4, the
+  actual-session filter, qlty remediation, URI-bearing capture regression,
+  MUI standard-color/theme following, compatibility, production readiness,
+  and durable propagation through Slice 15. The Slice 15 completion commit is
+  recorded and no implementation evidence remains only in an uncommitted
+  state.
+- Production readiness: VS Code `^1.75.0`, Node `>=20`, desktop/web parity,
+  browser-safe imports, MUI/Emotion CSP/no-remote-assets, parser diagnostics,
+  source lifecycle cleanup, Flow/Table behavior, and privacy-preserving
+  telemetry remain intact. Existing webpack asset-size warnings, the two
+  architecture composition-root baseline violations, the expanded-Flow node
+  order golden mismatch, and the unrelated `url.parse()` `DEP0169` warning
+  remain explicitly bounded; the first two follow-ups are owned in
+  `docs/specs/roadmap.md`.
+- Durable documentation: the six existing closure paths remain the exact
+  durable propagation surface: `README.md`, `README.en.md`, `CHANGELOG.md`,
+  `docs/requirements/use-cases/uc-present-semantic-diff-report.md`,
+  `docs/requirements/use-cases/uc-explore-flow-graph.md`, and
+  `docs/specs/roadmap.md`. They reflect the user-visible Explorer workflow,
+  confirmation filtering, Flow/report handoff, accessibility behavior, and
+  assigned follow-ups. No architecture, glossary, context, or neutral
+  comparison use-case update is required. These paths remain uncommitted until
+  Closure Approval.
+- Remaining risks: managed-host browser smoke and host-dependent manual
+  assistive-technology evidence remain environment-bounded; the existing
+  architecture and Flow golden follow-ups are explicitly owned in the
+  roadmap. No unresolved feature risk, reusable knowledge, or unfinished
+  repository work remains only in this feature folder.
+- Closure recommendation: `Close`. Aggregate human approval and explicit
+  Closure Approval remain required; the proposed closure scope is the six
+  durable paths above plus removal of
+  `docs/specs/features/semantic-diff-explorer/`. This review performs no
+  staging, commit, or feature-folder deletion.
+
+## Current Replan Superseding Final Feature Exit Review
+
+The preceding Slice 15 `Close` review is historical and is superseded by the
+user-approved Slice 16/17 traceability above. The next route is independent
+plan review, the focused plan-gate commit, sequential implementation/review/
+completion of Slices 16 and 17, and a fresh Feature Exit review. The six
+protected closure drafts remain unchanged and outside implementation commits.
