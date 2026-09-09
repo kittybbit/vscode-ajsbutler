@@ -1468,6 +1468,78 @@ constant.ts`; leave `src/presentation/vscode/webview/mountViewerPanel.ts`
   requires its own independent implementation review and conditional
   automatic Completion Approval.
 
+### Slice 17 Implementation Result (2026-09-10)
+
+- The VS Code Semantic Diff adapter is now classified under `panel`, `flow`,
+  `report`, and `source`. The root contains exactly the three public facades;
+  moved flat implementation imports are updated to category paths.
+- Explorer constants are owned by
+  `panel/semanticDiffExplorerConstants.ts`, re-exported by the Panel facade,
+  and used by both Panel creation and Explorer HTML. Generic viewer constants
+  remain Flow/Table-only while their resolver behavior is preserved.
+- Architecture tests cover facade root shape, moved-path imports, and category
+  cycle absence. CSP, nonce, session/action HTML attributes, Explorer bundle
+  URI, and Flow/Table bundle behavior remain covered by existing regressions.
+- Validation passed `rtk pnpm run test:compile`, desktop preparation and
+  runner (exit 0), web preparation, production build, `rtk pnpm run
+qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
+  `rtk git diff --check`. Browser smoke remains unclaimed only because the
+  managed Chromium host is blocked by its known bootstrap permission gate.
+- Implementation review is the next route. Slice 17 remains uncommitted and
+  no Slice 17 Completion Approval is recorded yet. The review's P1 finding
+  about ignored report files is routed through the narrow remediation below;
+  existing Slice 17 implementation and behavior remain preserved.
+
+### Slice 17 Review Remediation (P1 Narrow Replan, 2026-09-10)
+
+- Finding: the existing `.gitignore` `report/` rule ignores the three new
+  source files under `src/presentation/vscode/semantic-diff/report/`, leaving
+  their additions out of the completion manifest.
+- Planned change: keep the general `report/` output exclusion and add only
+  these exact source-directory negations:
+  `!src/presentation/vscode/semantic-diff/report/` and
+  `!src/presentation/vscode/semantic-diff/report/**`. No other report path may
+  be unignored; all Slice 17 placement, facade, constant, bundle, and runtime
+  behavior remains unchanged.
+- Approved paths: `.gitignore`; the three report files
+  `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportAction.ts`,
+  `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportActionRunner.ts`,
+  and `src/presentation/vscode/semantic-diff/report/semanticDiffReportDocument.ts`;
+  the corresponding old-flat report deletions; and the existing Slice 17
+  tests/architecture evidence. The six closure-draft paths remain protected.
+- Acceptance and validation: `git check-ignore` must not match the three
+  exact source files while the generic `report/` rule still matches non-source
+  report output; the path-scoped command `git status --short
+  --untracked-files=all --
+  src/presentation/vscode/semantic-diff/report/` must expose exactly the three
+  new files; and the Slice 17 completion staged manifest must show the
+  old-flat report deletions plus all three new additions. Run the existing
+  Slice 17 focused tests, architecture checks, qlty/build/desktop/web checks,
+  Markdown lint, and diff checks after the narrow implementation.
+- Gate: this is a plan-only P1 remediation. Independent plan re-review is
+  required before the `.gitignore` change or any staging/commit; then Slice 17
+  implementation review must re-run before Completion Approval.
+
+### Slice 17 P1 Narrow Replan Approval (2026-09-10)
+
+- Independent Plan Review: `Ready`; Findings: none.
+- Human Approval: the user's explicit implementation instruction
+  `PLEASE IMPLEMENT THIS PLAN` includes the approved `report` classification;
+  making that exact source directory Git-trackable is the minimum scope
+  correction required to deliver the approved Slice 17 plan, not a new design
+  or behavior change.
+- Standing proceed-through-slices intent: the user's standing instruction
+  automatically permits the next slice approval when its independent review
+  has no findings. This supports the no-findings remediation route only; it
+  does not broaden the exact `.gitignore` and report-file boundary or remove
+  the subsequent implementation review gate.
+- Exact plan-gate paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`.
+- The plan-gate commit remains pending. No `.gitignore`, runtime, test,
+  generated-artifact, staging, or commit change is made here, and the six
+  closure drafts remain protected.
+
 ## Current Replan Validation And Closure Boundary
 
 The replan commit may contain only `TASKS.md` and `TRACEABILITY.md`; the six

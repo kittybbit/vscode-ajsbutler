@@ -3873,8 +3873,11 @@ pnpm run qlty:smells` (zero findings), and `rtk git diff --check` passed.
 
 ### Slice 17: VS Code Semantic Diff Adapter Placement And Constant Ownership
 
-- Status: Planned after Slice 16's focused completion commit; it cannot start
-  while Slice 16 is incomplete or has unresolved review Findings.
+- Status: Implemented after Slice 16's focused completion commit. Implementation
+  review identified P1 tracking loss for the three new `report` files; this
+  narrow replan preserves the implementation and is pending independent plan
+  re-review before Completion Approval. No commit or staging was performed for
+  Slice 17.
 - Scope: keep `src/presentation/vscode/semantic-diff` as the public adapter
   boundary while placing implementation modules under `panel`, `flow`,
   `report`, and `source`. `panel` owns panel lifecycle, requests, transport,
@@ -3895,6 +3898,12 @@ semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   `src/presentation/vscode/webview/constant.ts`; the generic resolver and
   `mountViewerPanel` remain Flow/Table-only. Webpack entry names and the
   Explorer bundle URI remain unchanged.
+- Tracking boundary: preserve the general `.gitignore` `report/` exclusion and
+  add only the exact source-directory negations
+  `!src/presentation/vscode/semantic-diff/report/` and
+  `!src/presentation/vscode/semantic-diff/report/**`. The three report
+  implementation files are therefore normal Git candidates without unignoring
+  any other report output directory.
 - User / Domain Value: maintainable VS Code host code makes panel/Flow/report/
   source ownership visible, and one Explorer constant source prevents panel/
   HTML/bundle drift without moving the host-independent report or React/MUI
@@ -3907,7 +3916,13 @@ semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   Explorer view type; Explorer panel HTML still emits the same CSP, nonce,
   session/action attributes, and bundle URI; Flow/Table panel creation and
   bundle resolution are behaviorally unchanged; webpack desktop/web entries
-  remain unchanged.
+  remain unchanged. The three new report files
+  `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportAction.ts`,
+  `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportActionRunner.ts`,
+  and `src/presentation/vscode/semantic-diff/report/semanticDiffReportDocument.ts`
+  appear in status and are addable; no unrelated report directory becomes
+  unignored. The Slice 17 completion staged manifest contains those three
+  additions together with the corresponding old-flat report deletions.
 - Validation: run focused Explorer panel/Flow/report/source, viewer-bundle,
   wiring, and architecture suites; `rtk pnpm run test:compile`; desktop
   preparation and compiled runner; web preparation and production build;
@@ -3918,7 +3933,14 @@ semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   permit old-root imports only for those facades, report zero direct imports
   of moved flat implementations, and traverse the
   `panel`/`flow`/`report`/`source` module graph with zero cycles.
-  Retain CSP/no-remote-asset assertions. Browser smoke remains explicitly
+  Add a Git tracking check that confirms `git check-ignore` no longer matches
+  the three exact source files, the generic `report/` exclusion still matches
+  non-source report output, and the path-scoped command
+  `git status --short --untracked-files=all --
+  src/presentation/vscode/semantic-diff/report/` exposes exactly those three
+  new files. Verify the completion staged manifest
+  contains the old-flat report deletions and these three additions. Retain
+  CSP/no-remote-asset assertions. Browser smoke remains explicitly
   environment-bounded when Chromium cannot pass bootstrap check-in.
 - Production Readiness: no change to Explorer data/session/action contracts,
   Flow graph or message protocol, MUI/WCAG behavior, report modes, source
@@ -3927,10 +3949,11 @@ semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   user documentation or CHANGELOG update is needed for this internal
   placement refactor.
 - Approval Boundary: exactly the four VS Code adapter category directories,
-  root facades, Explorer constants, generic Flow/Table constant cleanup, and
-  affected import/test paths. No allocator construction, application/parser
-  behavior, report/output semantics, or closure-draft propagation is part of
-  Slice 17.
+  root facades, Explorer constants, generic Flow/Table constant cleanup,
+  affected import/test paths, `.gitignore`, and the three report files listed
+  above. The only `.gitignore` additions are the two exact source-directory
+  negations. No allocator construction, application/parser behavior,
+  report/output semantics, or closure-draft propagation is part of Slice 17.
 - Risks: an incomplete one of the three facade exports, stale relative
   import, hidden old-root import, accidental category cycle, or generic viewer
   constant removal could break desktop/web loading. Facade export parity,
@@ -3940,6 +3963,73 @@ semanticDiffExplorerConstants.ts`; Panel creation and Explorer HTML
   `src/presentation/webview/semantic-diff`, Composition Root allocator work
   from Slice 16, comparison/parser/domain/transport changes, MUI redesign,
   dependency/engine changes, durable-doc edits, and feature-folder removal.
+
+### Slice 17 Implementation Result (2026-09-10)
+
+- Moved VS Code Semantic Diff host implementations into the approved
+  `panel`, `flow`, `report`, and `source` categories. The three root files
+  remain facades only; Explorer constants are centralized under
+  `panel/semanticDiffExplorerConstants.ts` and are shared by Panel creation
+  and Explorer HTML. Generic Flow/Table viewer constants no longer contain an
+  Explorer branch.
+- Updated Bootstrap, tests, and internal category imports while preserving
+  external facade imports, Explorer CSP/nonce/session/action attributes,
+  bundle URI, Flow/Table behavior, and the two protected host-independent
+  presentation directories.
+- Architecture regression tests now assert the exact root facade set, zero
+  direct imports of moved flat modules, and zero category import cycles.
+- Validation passed desktop/web preparation, the compiled desktop runner
+  (exit 0), production build, `rtk pnpm run test:compile`, `rtk pnpm run
+qlty:check` (`No issues`), `rtk pnpm run qlty:smells` (zero findings), and
+  `rtk git diff --check`. Existing webpack asset-size warnings remain
+  informational. Browser smoke remains environment-gated by the known
+  Chromium bootstrap permission restriction.
+- Review handoff: implementation review is the next route; no completion
+  commit is authorized until the P1 narrow replan receives independent plan
+  re-review, then implementation re-review returns `Ready` and the recorded
+  approval gate is satisfied.
+
+### Slice 17 Review Remediation (P1, 2026-09-10)
+
+- Finding: the existing `.gitignore` `report/` rule also ignores the three new
+  source files under `src/presentation/vscode/semantic-diff/report/`, so the
+  Slice 17 completion manifest cannot carry their additions.
+- Narrow replan: retain the general `report/` output exclusion and add only
+  `!src/presentation/vscode/semantic-diff/report/` plus
+  `!src/presentation/vscode/semantic-diff/report/**`. Preserve all existing
+  Slice 17 placement, facade, constant, bundle, and runtime behavior.
+- Approved paths: `.gitignore`; the three new report files
+  `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportAction.ts`,
+  `src/presentation/vscode/semantic-diff/report/semanticDiffExplorerReportActionRunner.ts`,
+  and `src/presentation/vscode/semantic-diff/report/semanticDiffReportDocument.ts`;
+  the corresponding old-flat report deletions already in the Slice 17
+  completion manifest; and the Slice 17 tests/architecture evidence. The six
+  closure drafts remain excluded.
+- Re-review evidence: prove the three files are visible to normal Git status
+  and `git add`, no unrelated report path is unignored, and the completion
+  staged manifest contains both the old-flat deletions and all three new
+  additions. No `.gitignore` implementation, runtime, staging, or commit is
+  performed by this replan handoff.
+
+### Slice 17 P1 Narrow Replan Approval (2026-09-10)
+
+- Independent Plan Review: `Ready`; Findings: none.
+- Human Approval: the user's explicit implementation instruction
+  `PLEASE IMPLEMENT THIS PLAN` includes the approved `report` classification;
+  making that exact source directory Git-trackable is the minimum scope
+  correction required to deliver the approved Slice 17 plan, not a new design
+  or behavior change.
+- Standing proceed-through-slices intent: the user's standing instruction
+  automatically permits the next slice approval when its independent review
+  has no findings. That intent is recorded as supporting this no-findings
+  remediation route only; it does not broaden the exact `.gitignore` and
+  report-file boundary or remove the subsequent implementation review gate.
+- Exact plan-gate paths:
+  `docs/specs/features/semantic-diff-explorer/TASKS.md` and
+  `docs/specs/features/semantic-diff-explorer/TRACEABILITY.md`.
+- The plan-gate commit remains pending. No `.gitignore`, runtime, test,
+  generated-artifact, staging, or commit change is made here, and the six
+  closure drafts remain protected.
 
 ## Slice 16/17 Exit Route
 
