@@ -292,13 +292,15 @@ counterpartPath: string; identityDecisionId: string }`. Ordinary added or
   explicit `null` token. Each component is length-prefixed; target ID/path and
   parameter key are never flattened into an ambiguous string. Fixtures cover
   target-kind, target-ID/path, and null-versus-present parameter collisions.
-- Duplicate runs are retained by grouping the captured side arrays by root,
-  side, date, and rule; sorting by exact time and stable source facts; and
-  assigning consecutive zero-based occurrence ordinals. Before and after
-  records pair by date, rule, and occurrence ordinal: equal times are
+- Duplicate runs are retained within each root and side by grouping the
+  captured side arrays by source-unit identity, date, and rule; sorting by
+  exact time and stable source facts; and assigning consecutive zero-based
+  occurrence ordinals. Before and after records pair only when source-unit
+  identity, date, rule, and occurrence ordinal agree: equal times are
   unchanged, differing times are changed-time, and unmatched records are
-  added or removed. Duplicate issues use the same stable occurrence principle
-  and are never silently merged.
+  added or removed. Root and side ownership remains authoritative, so runs
+  from different nested source units never cross-pair. Duplicate issues use
+  the same stable occurrence principle and are never silently merged.
 - Identity, pairing, period membership, and ordering are locale- and
   timezone-independent. They must not use `localeCompare`, host/browser time,
   JavaScript `Date` conversion, current time, or localized strings.
