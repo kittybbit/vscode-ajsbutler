@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import type { BuildSemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
@@ -28,10 +29,14 @@ import {
   SemanticDiffFlowOverlayRegistry,
   type SemanticDiffFlowSourceSnapshot,
 } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
+import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
+import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendarSessionRegistry";
 
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
+  buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
   beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
@@ -230,11 +235,15 @@ const createCompareCommand = ({
   deps,
   reportDocuments,
   openExplorer,
+  openScheduleAwareExplorerSession,
   contextRegistry,
 }: Readonly<{
   deps: SemanticDiffWiringDeps;
   reportDocuments: SemanticDiffReportDocumentProvider;
   openExplorer: ReturnType<typeof createOpenExplorer>;
+  openScheduleAwareExplorerSession: ReturnType<
+    typeof createScheduleAwareExplorerSession
+  >;
   contextRegistry: SemanticDiffExplorerContextRegistry;
 }>): vscode.Disposable => {
   const commandDeps: SemanticDiffCommandDeps = {
@@ -251,6 +260,7 @@ const createCompareCommand = ({
     buildSemanticDiffOutputContext,
     presentSemanticDiffOutput,
     openExplorer,
+    openScheduleAwareExplorerSession,
     beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
     sourceHandleIdAllocator: deps.sourceHandleIdAllocator,
     registerSemanticDiffSourceCapture:
@@ -258,6 +268,10 @@ const createCompareCommand = ({
     unregisterSemanticDiffSourceCapture: (context) =>
       contextRegistry.unregisterSourceCapture(context),
   };
+  if (deps.buildSemanticDiffPresentationArtifacts) {
+    commandDeps.buildSemanticDiffPresentationArtifacts =
+      deps.buildSemanticDiffPresentationArtifacts;
+  }
   return vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
     executeCompareSemanticDiffCommand(commandDeps),
   );
@@ -277,6 +291,14 @@ export const createSemanticDiffSubscriptions = (
     flowOverlayRegistry,
     getSourceSnapshot,
   });
+  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
+  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
+  const openScheduleAwareExplorerSession = createScheduleAwareExplorerSession({
+    openExplorer,
+    sidecarRegistry,
+    releaseCalendarParent: (parentSessionId) =>
+      calendarSessionRegistry.releaseParent(parentSessionId),
+  });
 
   return [
     vscode.workspace.registerTextDocumentContentProvider(
@@ -287,6 +309,7 @@ export const createSemanticDiffSubscriptions = (
       deps,
       reportDocuments,
       openExplorer,
+      openScheduleAwareExplorerSession,
       contextRegistry,
     }),
     vscode.commands.registerCommand(

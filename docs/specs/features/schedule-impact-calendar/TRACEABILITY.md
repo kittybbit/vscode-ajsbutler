@@ -24,8 +24,10 @@
 ## Slice 1 Implementation Evidence
 
 - Approved boundary: the third targeted replan is committed in `11615026`;
-  Slice 1 implementation is complete in the uncommitted working tree and is
-  pending independent implementation review and Completion Approval.
+  Slice 1 implementation is complete and completion-committed at `51a8ae4a`.
+  Independent implementation review was `Ready` with no Findings and
+  Completion Approval was recorded under the user's automatic no-findings
+  instruction.
 - Runtime evidence: the internal schedule differ groups by canonical source
   path/date/rule, pairs duplicate occurrences deterministically, and emits
   changed-time plus unmatched rows without changing the public run-change
@@ -47,9 +49,40 @@
   and `git diff --check` passed.
 - Compatibility/readiness: no command, bootstrap, Explorer, UI, manifest,
   telemetry, parser, Node-built-in, public result/report/JSON, or public action
-  boundary changed. Shared code remains browser-safe and host-neutral. The
-  independent implementation-reviewer is the next required route; no
-  Completion Approval or completion commit is claimed here.
+  boundary changed. Shared code remains browser-safe and host-neutral. Slice 1
+  is complete and committed; the active Slice 2 implementation is the next
+  independent implementation-review route.
+
+## Slice 2 Implementation Evidence
+
+- Approved boundary: Slice 2 is active after completion-committed Slice 1
+  `51a8ae4a`; implementation review and Completion Approval remain pending.
+- Runtime evidence: the source-text presentation adapter parses both sides
+  once, forwards only the exact optional schedule period, invokes comparison
+  and the pure builder once, and preserves the existing parser-error union.
+  Bootstrap owns exact-context sidecar registration and the calendar-aware
+  companion opens the existing Explorer once for both impact states. Internal
+  calendar session IDs, epochs, closed transport envelopes, byte limits,
+  recursive JSON validation, normalized language, panel/listener cascade, late
+  callback guards, request-envelope validation-result preservation, panel
+  shell, and browser bridge are isolated from the public Explorer wire.
+- Validation rerun: `rtk pnpm run test:compile`; focused
+  transport/session/sidecar/adapter Mocha tests (11 passing); Slice 1
+  regression Mocha tests (67 passing); desktop and web webpack builds; desktop
+  extension-host tests (exit 0 with the existing macOS codesign warning); web
+  extension-host tests (exit 0 after the permitted rerun, with existing
+  EPIPE/Premature-close stream-cleanup warnings);
+  `rtk pnpm run qlty:check` passed with no issues; `rtk pnpm run qlty:smells`
+  completed with advisory complexity/duplication findings; markdown lint and
+  `git diff --check` passed. The initial sandbox web run was blocked by
+  Chromium Mach rendezvous permission and is superseded by the permitted
+  rerun.
+- Compatibility/readiness: `package.json`, command contributions, activation
+  events, custom editors, VS Code engine, public result/report/JSON contracts,
+  Explorer transport, Flow/source behavior, and telemetry remain unchanged.
+  Shared browser-safe code has no Node-built-in dependency. The next route is
+  independent implementation review; no Completion Approval or completion
+  commit is claimed here.
 
 ## Dependency And Approval Trace
 

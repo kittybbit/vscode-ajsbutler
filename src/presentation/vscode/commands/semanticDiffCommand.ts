@@ -1,5 +1,11 @@
 import type * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
+import type { SemanticDiffComparisonPeriod } from "../../../application/semantic-diff/semanticDiffDto";
+import type {
+  BuildSemanticDiffPresentationArtifacts,
+  BuildSemanticDiffPresentationArtifactsInput,
+  SemanticDiffPresentationArtifacts,
+} from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffSourceHandleIdAllocator } from "../../../application/parsing/AjsParserWithSourceIndexPort";
 import type {
   ImmutableSourceDescriptor,
@@ -7,6 +13,7 @@ import type {
   SemanticDiffSourceCaptureBindResult,
   SemanticDiffSourceCaptureFactory,
 } from "../../../application/semantic-diff/semanticDiffSourceCapture";
+import { isSemanticDiffSourceCaptureError } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import {
   buildSemanticDiffOutputContext,
   type SemanticDiffOutputContext,
@@ -90,6 +97,8 @@ export type SemanticDiffCommandDeps = {
   openReport: (document: SemanticDiffOutputDocument) => Thenable<unknown>;
   language?: string;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
+  buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
+  scheduleComparisonPeriod?: SemanticDiffComparisonPeriod;
   beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   registerSemanticDiffSourceCapture?: (
@@ -110,6 +119,9 @@ export type SemanticDiffCommandDeps = {
   openExplorer?: (
     context: SemanticDiffOutputContext,
   ) => Promise<SemanticDiffExplorerSessionHandle>;
+  openScheduleAwareExplorerSession?: (
+    artifacts: SemanticDiffPresentationArtifacts,
+  ) => Promise<SemanticDiffExplorerSessionHandle>;
   presentSemanticDiffOutput?: (
     context: SemanticDiffOutputContext,
     mode: SemanticDiffOutputMode,
@@ -126,6 +138,7 @@ type CommandReadyExplorer = {
   readonly result: CommandReadyReport;
   readonly context: SemanticDiffOutputContext;
   readonly sourceCaptureRelease?: () => void;
+  readonly presentation?: SemanticDiffPresentationArtifacts;
 };
 
 type SourceBinding = Extract<SemanticDiffSourceCaptureBindResult, { ok: true }>;
@@ -257,6 +270,104 @@ const createSourceCaptureRelease = (
   };
 };
 
+type PresentationCommandData = CommandReportData & {
+  readonly result: CommandReadyReport;
+  readonly presentation: SemanticDiffPresentationArtifacts;
+};
+
+const beginPresentationSourceCapture = (
+  deps: SemanticDiffCommandDeps,
+  request: CommandReportData,
+): SemanticDiffSourceCapture | undefined => {
+  if (!deps.beginSemanticDiffSourceCapture) return undefined;
+  if (request.beforeUri === undefined || request.afterUri === undefined) {
+    throw new Error("Source capture requires source URIs.");
+  }
+  const before: ImmutableSourceDescriptor & { uri: vscode.Uri } = {
+    side: "before",
+    sourceHandleId: deps.sourceHandleIdAllocator(),
+    text: request.input.beforeContent,
+    version: request.beforeVersion,
+    uri: request.beforeUri,
+  };
+  const after: ImmutableSourceDescriptor & { uri: vscode.Uri } = {
+    side: "after",
+    sourceHandleId: deps.sourceHandleIdAllocator(),
+    text: request.input.afterContent,
+    version: request.afterVersion,
+    uri: request.afterUri,
+  };
+  request.sourceDescriptors = { before, after };
+  return deps.beginSemanticDiffSourceCapture({
+    before: {
+      side: before.side,
+      sourceHandleId: before.sourceHandleId,
+      text: before.text,
+      version: before.version,
+    },
+    after: {
+      side: after.side,
+      sourceHandleId: after.sourceHandleId,
+      text: after.text,
+      version: after.version,
+    },
+  });
+};
+
+const buildPresentationArtifactsStep = (
+  deps: SemanticDiffCommandDeps,
+  request: CommandReportData,
+): CommandStep<PresentationCommandData> => {
+  const adapter = deps.buildSemanticDiffPresentationArtifacts;
+  if (!adapter) {
+    return failedStep(
+      "display-failed",
+      "Semantic diff calendar artifacts could not be prepared.",
+      true,
+    );
+  }
+  let sourceCapture: SemanticDiffSourceCapture | undefined;
+  try {
+    sourceCapture = beginPresentationSourceCapture(deps, request);
+    const input: BuildSemanticDiffPresentationArtifactsInput =
+      deps.scheduleComparisonPeriod === undefined
+        ? request.input
+        : {
+            ...request.input,
+            options: {
+              scheduleComparisonPeriod: deps.scheduleComparisonPeriod,
+            },
+          };
+    const result = adapter(input, sourceCapture?.parser);
+    if ("ok" in result && result.ok === false) {
+      sourceCapture?.release();
+      return failedStep(
+        "parse-failed",
+        "Semantic diff could not parse one or both JP1/AJS definitions.",
+        true,
+      );
+    }
+    const presentation = result as SemanticDiffPresentationArtifacts;
+    return readyStep({
+      ...request,
+      result: presentation.context.result,
+      presentation,
+      sourceCapture,
+    });
+  } catch (error: unknown) {
+    sourceCapture?.release();
+    return failedStep(
+      isSemanticDiffSourceCaptureError(error)
+        ? "display-failed"
+        : "parse-failed",
+      isSemanticDiffSourceCaptureError(error)
+        ? "Semantic diff source capture could not be established."
+        : "Semantic diff could not parse one or both JP1/AJS definitions.",
+      true,
+    );
+  }
+};
+
 const createExplorerContextStep = (
   deps: SemanticDiffCommandDeps,
   result: CommandReadyReport,
@@ -278,16 +389,17 @@ const createExplorerContextStep = (
 
 const buildExplorerContextStep = (
   deps: SemanticDiffCommandDeps,
-  request: CommandReportData & { result: CommandReadyReport },
+  request: CommandReportData & {
+    result: CommandReadyReport;
+    presentation?: SemanticDiffPresentationArtifacts;
+  },
 ): CommandStep<CommandReadyExplorer> => {
   const releaseSourceCapture = createSourceCaptureRelease(
     request.sourceCapture,
   );
-  const contextStep = createExplorerContextStep(
-    deps,
-    request.result,
-    releaseSourceCapture,
-  );
+  const contextStep = request.presentation
+    ? readyStep(request.presentation.context)
+    : createExplorerContextStep(deps, request.result, releaseSourceCapture);
   if (contextStep.kind === "failed") return contextStep;
   const bindingStep = bindAndRegisterExplorerSources({
     deps,
@@ -300,6 +412,7 @@ const buildExplorerContextStep = (
     : readyStep({
         result: request.result,
         context: contextStep.value,
+        presentation: request.presentation,
         sourceCaptureRelease: releaseSourceCapture,
       });
 };
@@ -308,6 +421,21 @@ const openExplorerStep = async (
   deps: SemanticDiffCommandDeps,
   request: CommandReadyExplorer,
 ): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
+  if (request.presentation && deps.openScheduleAwareExplorerSession) {
+    try {
+      return readyStep(
+        await deps.openScheduleAwareExplorerSession(request.presentation),
+      );
+    } catch {
+      deps.unregisterSemanticDiffSourceCapture?.(request.context);
+      request.sourceCaptureRelease?.();
+      return failedStep(
+        "display-failed",
+        "Semantic diff Explorer could not be opened.",
+        true,
+      );
+    }
+  }
   if (!deps.openExplorer) {
     request.sourceCaptureRelease?.();
     return failedStep(
@@ -361,7 +489,10 @@ const runExplorerCommand = async (
     readReportInputStep(request),
   );
   const reportData = await continueCommandStep(reportInput, (request) =>
-    buildReportDataStep(deps, request),
+    deps.buildSemanticDiffPresentationArtifacts &&
+    deps.openScheduleAwareExplorerSession
+      ? buildPresentationArtifactsStep(deps, request)
+      : buildReportDataStep(deps, request),
   );
   const context = await continueCommandStep(reportData, (request) =>
     buildExplorerContextStep(deps, request),
@@ -468,6 +599,8 @@ const finalizeExplorerCommand = async (
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
 ): Promise<SemanticDiffCommandResult> =>
-  deps.openExplorer
+  deps.openExplorer ||
+  (deps.buildSemanticDiffPresentationArtifacts !== undefined &&
+    deps.openScheduleAwareExplorerSession !== undefined)
     ? finalizeExplorerCommand(deps, await runExplorerCommand(deps))
     : finalizeSemanticDiffCommand(deps, await runSemanticDiffCommand(deps));
