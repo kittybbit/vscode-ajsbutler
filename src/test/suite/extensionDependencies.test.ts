@@ -39,6 +39,10 @@ suite("Extension dependencies", () => {
       "function",
     );
     assert.strictEqual(
+      typeof dependencies.semanticDiff.readGitHeadDefinition,
+      "function",
+    );
+    assert.strictEqual(
       typeof dependencies.webApiImport.importDefinition,
       "function",
     );

@@ -48,7 +48,7 @@ Copy the visible unit list as CSV. When you choose to save it, VS Code asks you 
 
 ### Semantic Diff
 
-Run `JP1/AJS: Compare JP1/AJS Semantic Diff` to compare the active definition with a selected before definition by semantic meaning. A successful comparison opens the read-only Semantic Diff Explorer with summary cards, a hierarchical change tree, and confirmation-required filtering. Explorer items can navigate to the corresponding before or after source range or Flow Viewer target. The Explorer supports keyboard operation, high-contrast presentation, and state cues that do not depend on color; an empty confirmation-required result is announced explicitly. Use Output to choose Summary, Full, Audit, or JSON; all modes use the same comparison session. Full is the default human-readable mode, Summary is a compact overview, Audit includes decision evidence, and JSON is locale-neutral for automation. Copy Markdown with `JP1/AJS: Copy Semantic Diff Markdown`, or save Markdown/JSON with `JP1/AJS: Save Semantic Diff Output`; copying and saving are always explicit actions.
+Run `JP1/AJS: Compare Definition` to compare the active definition with a selected definition file or the current definition at Git `HEAD`. You can choose no schedule period or enter a half-open `YYYY-MM-DD` period. A successful comparison opens the read-only Semantic Diff Explorer with summary cards, a hierarchical change tree, and confirmation-required filtering. Explorer items can navigate to the captured before or after source range or Flow Viewer target. The Explorer supports keyboard operation, high-contrast presentation, and state cues that do not depend on color; an empty confirmation-required result is announced explicitly. Use Output to choose Summary, Full, Audit, or JSON; all modes use the same comparison session. Full is the default human-readable mode, Summary is a compact overview, Audit includes decision evidence, and JSON is locale-neutral for automation. Copy Markdown with `JP1/AJS: Copy Semantic Diff Markdown`, or save Markdown/JSON with `JP1/AJS: Save Semantic Diff Output`; copying and saving are always explicit actions.
 
 ### Diagnostics and hover
 
@@ -71,13 +71,16 @@ Once the list is open, search for a unit and open its details. To try the flow f
 
 The list view lets you inspect hierarchy, search, choose visible columns, open details, and export CSV. The flow view lets you search within the current scope, select related units, and expand nested jobnets.
 
-Semantic Diff starts with `JP1/AJS: Compare JP1/AJS Semantic Diff`. A successful comparison opens the Explorer, where you can inspect the change tree, filter confirmation-required items, navigate to source or Flow targets, and open a report through Output. The review surface is keyboard-operable and announces empty filter results. The selected output is shown before any copy or save action, so the extension does not change the clipboard or write a file implicitly.
+Semantic Diff starts with `JP1/AJS: Compare Definition`. Choose a definition file for the before side or, when the built-in Git extension and repository are available, choose Git `HEAD`. Git uses the captured commit and decoded `Repository.show` content; it does not use the index, working tree, Git CLI, or direct `.git` access. If Git is unavailable, file comparison remains available. A successful comparison opens the Explorer, where you can inspect the change tree, filter confirmation-required items, navigate to captured source or Flow targets, and open a report through Output. The review surface is keyboard-operable and announces empty filter results. The selected output is shown before any copy or save action, so the extension does not change the clipboard or write a file implicitly.
 
 ## Compatibility and scope
 
 - The extension targets JP1/AJS3 definitions and provides list, search, flow, detail, and diagnostic views.
 - List and flow views are available in Desktop and Web VS Code hosts. Shared viewers still have host-specific constraints.
 - VS Code compatibility follows the `^1.75.0` value in `package.json` under `engines.vscode`.
+- Semantic Diff file comparison works in Desktop and Web hosts. Git `HEAD` is
+  optional and is available only when the host supplies the built-in Git API;
+  no Git executable is required.
 - The repository includes representative UTF-8 and Shift_JIS definition coverage. This is not a complete compatibility matrix for every product version or definition form.
 - WebAPI import beta is available only in the Desktop host. The Web host does not provide the same network feature.
 

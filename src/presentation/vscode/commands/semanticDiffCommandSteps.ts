@@ -1,4 +1,5 @@
 import type * as vscode from "vscode";
+import type { GitHeadDefinitionUnavailableReason } from "../../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import type {
   ImmutableSourceDescriptor,
@@ -22,6 +23,7 @@ export type CommandFailure = {
     code: SemanticDiffCommandErrorCode;
     message: string;
     notify: boolean;
+    reason?: GitHeadDefinitionUnavailableReason;
   };
 };
 
@@ -69,9 +71,10 @@ export const failedStep = (
   code: SemanticDiffCommandErrorCode,
   message: string,
   notify: boolean,
+  reason?: GitHeadDefinitionUnavailableReason,
 ): CommandFailure => ({
   kind: "failed",
-  error: { code, message, notify },
+  error: { code, message, notify, ...(reason ? { reason } : {}) },
 });
 
 export const continueCommandStep = async <T, U>(
@@ -89,9 +92,10 @@ export const mapCommandStep = <T, U>(
 export const commandError = (
   code: SemanticDiffCommandErrorCode,
   message: string,
+  reason?: GitHeadDefinitionUnavailableReason,
 ): Extract<SemanticDiffCommandResult, { ok: false }> => ({
   ok: false,
-  error: { code, message },
+  error: { code, message, ...(reason ? { reason } : {}) },
 });
 
 export const safeShowErrorMessage = async (

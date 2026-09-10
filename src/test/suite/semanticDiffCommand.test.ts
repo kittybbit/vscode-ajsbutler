@@ -27,6 +27,10 @@ import {
   type SemanticDiffCommandDeps,
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import { getSemanticDiffCommandLocalization } from "../../presentation/vscode/commands/semanticDiffCommandLocalization";
+import {
+  MAX_GIT_HEAD_SNAPSHOT_ENTRIES,
+  VscodeGitHeadContentProvider,
+} from "../../infrastructure/git/VscodeGitHeadContentProvider";
 
 const createTestParser = (): AntlrAjsParser =>
   new AntlrAjsParser({
@@ -1768,5 +1772,186 @@ suite("Semantic diff command", () => {
     assert.strictEqual(captureCount, 0);
     assert.strictEqual(callbackCount, 0);
     assert.strictEqual(openCount, 0);
+  });
+
+  test("compares Git HEAD through an opaque provider snapshot", async () => {
+    const harness = createWorkflowHarness();
+    const provider = new VscodeGitHeadContentProvider();
+    const headContent = "unit=head,,jp1admin,;{ty=g;}";
+    let receivedBeforeUri: vscode.Uri | undefined;
+    let callbackInput:
+      | { beforeContent: string; afterContent: string }
+      | undefined;
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      showWorkflowQuickPick: async (items) =>
+        items.find((item) => item.workflowKind === "git-head") ?? items[0],
+      readGitHeadDefinition: async () => ({
+        kind: "ready" as const,
+        content: headContent,
+        ref: "HEAD" as const,
+      }),
+      gitHeadSnapshotProvider: provider,
+      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+        callbackInput = input;
+        return createBuildSemanticDiffPresentationArtifacts(createTestParser())(
+          input,
+          scopedParser,
+        );
+      },
+      registerSemanticDiffSourceCapture: (context, entry) => {
+        receivedBeforeUri = entry.sources.before.uri;
+        harness.deps.registerSemanticDiffSourceCapture?.(context, entry);
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: true,
+      action: "explorer-opened",
+      sessionId: "sde-workflow-harness",
+      source: "git-head",
+      period: "not-requested",
+    });
+    assert.strictEqual(callbackInput?.beforeContent, headContent);
+    assert.strictEqual(receivedBeforeUri?.scheme, "ajsbutler-git-head");
+    assert.strictEqual(
+      provider.provideTextDocumentContent(receivedBeforeUri!),
+      headContent,
+    );
+  });
+
+  test("keeps file comparison available when Git HEAD is unavailable", async () => {
+    const harness = createWorkflowHarness();
+    let callbackCount = 0;
+    let openCount = 0;
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      showWorkflowQuickPick: async (items) =>
+        items.find((item) => item.workflowKind === "file") ?? items[0],
+      readGitHeadDefinition: async () => ({
+        kind: "unavailable" as const,
+        reason: "extension-missing" as const,
+      }),
+      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+        callbackCount += 1;
+        return createBuildSemanticDiffPresentationArtifacts(createTestParser())(
+          input,
+          scopedParser,
+        );
+      },
+      openScheduleAwareExplorerSession: async (artifacts) => {
+        openCount += 1;
+        return harness.deps.openScheduleAwareExplorerSession!(artifacts);
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: true,
+      action: "explorer-opened",
+      sessionId: "sde-workflow-harness",
+      source: "file",
+      period: "not-requested",
+    });
+    assert.strictEqual(callbackCount, 1);
+    assert.strictEqual(openCount, 1);
+  });
+
+  test("returns a localized stable reason for Git HEAD failure", async () => {
+    const harness = createWorkflowHarness();
+    const provider = new VscodeGitHeadContentProvider();
+    let callbackCount = 0;
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      language: "ja-JP",
+      showWorkflowQuickPick: async (items) =>
+        items.find((item) => item.workflowKind === "git-head") ?? items[0],
+      readGitHeadDefinition: async () => ({
+        kind: "unavailable" as const,
+        reason: "head-source-missing" as const,
+      }),
+      gitHeadSnapshotProvider: provider,
+      buildSemanticDiffPresentationArtifacts: () => {
+        callbackCount += 1;
+        throw new Error("must not build after Git failure");
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: false,
+      error: {
+        code: "git-head-unavailable",
+        reason: "head-source-missing",
+        message: "Git HEAD に定義が見つかりません。",
+      },
+    });
+    assert.strictEqual(callbackCount, 0);
+  });
+
+  test("releases Git reservations when capture setup is unavailable", async () => {
+    const harness = createWorkflowHarness();
+    const provider = new VscodeGitHeadContentProvider();
+    const deps: SemanticDiffCommandDeps = {
+      ...harness.deps,
+      showWorkflowQuickPick: async (items) =>
+        items.find((item) => item.workflowKind === "git-head") ?? items[0],
+      readGitHeadDefinition: async () => ({
+        kind: "ready" as const,
+        content: "unit=head,,jp1admin,;{ty=g;}",
+        ref: "HEAD" as const,
+      }),
+      gitHeadSnapshotProvider: provider,
+      beginSemanticDiffSourceCapture: undefined,
+    };
+
+    const first = await executeCompareSemanticDiffCommand(deps);
+    const second = await executeCompareSemanticDiffCommand(deps);
+    for (const result of [first, second]) {
+      assert.deepStrictEqual(result, {
+        ok: false,
+        error: {
+          code: "source-capture-failed",
+          message: "Semantic diff source capture could not be established.",
+        },
+      });
+    }
+    assert.strictEqual(provider.size, 0);
+  });
+
+  test("fails before capture when the Git snapshot provider is at capacity", async () => {
+    const harness = createWorkflowHarness();
+    const provider = new VscodeGitHeadContentProvider();
+    const reservations = Array.from(
+      { length: MAX_GIT_HEAD_SNAPSHOT_ENTRIES },
+      (_, index) => provider.reserve(`occupied-${index}`),
+    );
+    let captureCount = 0;
+    const result = await executeCompareSemanticDiffCommand({
+      ...harness.deps,
+      showWorkflowQuickPick: async (items) =>
+        items.find((item) => item.workflowKind === "git-head") ?? items[0],
+      readGitHeadDefinition: async () => ({
+        kind: "ready" as const,
+        content: "unit=head,,jp1admin,;{ty=g;}",
+        ref: "HEAD" as const,
+      }),
+      gitHeadSnapshotProvider: provider,
+      beginSemanticDiffSourceCapture: () => {
+        captureCount += 1;
+        throw new Error("capture must not begin at capacity");
+      },
+    });
+
+    assert.deepStrictEqual(result, {
+      ok: false,
+      error: {
+        code: "explorer-open-failed",
+        message: "Git HEAD source snapshots are temporarily full.",
+      },
+    });
+    assert.strictEqual(captureCount, 0);
+    assert.strictEqual(provider.size, MAX_GIT_HEAD_SNAPSHOT_ENTRIES);
+    reservations.forEach((entry) => {
+      if (entry.kind === "reserved") entry.reservation.release();
+    });
   });
 });

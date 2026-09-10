@@ -28,9 +28,10 @@
 
 ## Slice 1 Implementation Evidence
 
-- The second targeted replan is approved and completion-committed at
-  `5e160b74`, after the Calendar internal Slice 2 dependency at `b9cee633`
-  and post-state evidence `a0e73c31`.
+- The second targeted replan is approved at `5e160b74`, after the Calendar
+  internal Slice 2 dependency at `b9cee633` and post-state evidence `a0e73c31`.
+  Slice 1 implementation review is `Ready` with no Findings, Completion
+  Approval is recorded, and the focused completion commit is `7f74eab4`.
 - The predecessor Calendar adapter shape now has an explicit no-UI fallback
   that bypasses the report workflow and preserves file snapshot, capture-first
   `(input, capture.parser)`, exact-context registry, cleanup, and closed
@@ -45,5 +46,64 @@
   sandbox blocker. Existing predecessor qlty advisory smells remain
   distinguished from the approved command-path orchestration advisories; no
   suppression was added.
-- Independent implementation review and Completion Approval remain pending;
-  Git Slice 2 and durable Feature Exit documentation are out of scope.
+- Git Slice 2 and durable Feature Exit work were out of scope for that slice;
+  Slice 2 is now implemented separately under its approved boundary.
+
+## Slice 2 Implementation Evidence
+
+- The Slice 2 dependency gate is satisfied by the completion-approved Slice 1
+  commit `7f74eab4`. The implementation is limited to the approved application
+  Git port, VS Code Git API v1 adapter, opaque content provider, command and
+  bootstrap integration, named tests/host contracts, and durable compare-
+  definitions documentation. Calendar public Slice 3 remains downstream and
+  out of scope.
+- WF-4/WF-5 evidence: `GitHeadDefinitionSourcePort.ts` keeps the application
+  boundary host-neutral. `VscodeGitHeadDefinitionSourceAdapter.ts` feature-
+  detects and activates the built-in Git extension, gates on the activated
+  export's `enabled` flag, captures one immutable HEAD commit, selects the
+  active repository/path, uses current-path-first inspection and only the
+  approved exact rename fallback, enforces object/type/encoding/NUL and
+  decoded `show()` size safety, and returns closed unavailable reasons without
+  provider error text. The adapter never uses index/worktree data as source,
+  Git CLI, Node, `.git`, arbitrary refs, or WebAPI.
+- WF-9/WF-10/WF-12/WF-13 evidence: the command's Git HEAD branch reserves an
+  opaque provider snapshot before the existing capture/bind/Explorer flow,
+  preserves the exact period/artifact/context contracts, releases reservations
+  on cancellation/failure, and leaves the file source available when Git is
+  absent. `VscodeGitHeadContentProvider.ts` serves only the captured decoded
+  string, has the fixed eight-entry active cap, and releases entries
+  idempotently with extension disposal. Command tests cover Git success,
+  opaque source handoff, file fallback, localized unavailable output, and no
+  downstream artifact work after Git failure.
+- WF-14/documentation evidence: localization maps stable Git capability,
+  source, binary, encoding, size, and read failures in English/Japanese with
+  English fallback. The new use case, requirements index, README files, and
+  changelog describe the two sources, optional period, decoded `show` behavior,
+  limitations, and no-Git degradation without adding telemetry or exposing
+  paths/content.
+- Coverage evidence: adapter tests cover the real activated export shape and
+  activation/API failures, nested/path boundaries, missing HEAD, virtual
+  repositories, working rename/deleted cases, copied/chain/multiple and
+  unsupported candidate shapes, candidate `UnknownPath`, encoding variants,
+  decoded textconv and exact/over limits. Wiring/host tests cover provider
+  registration and available structural Git behavior. Command tests cover
+  localized failure ordering, repeated early reservation cleanup, and capacity
+  rejection before capture.
+- Validation: `npx tsc -p tsconfig.json --noEmit`,
+  `rtk pnpm run test:compile`, `rtk pnpm run build`,
+  `rtk pnpm run test:desktop:run`, `rtk pnpm run qlty`,
+  `rtk pnpm run lint:md`, and `git diff --check` passed. The default-sandbox
+  web run was blocked before startup by Chromium Mach rendezvous permission
+  `1100`; the permitted rerun of `rtk pnpm run test:web:run` completed with
+  exit 0. Qlty check found no modified-file issues; qlty smells completed with
+  existing predecessor advisories and the approved command/adapter/provider
+  orchestration advisories. These non-blocking findings have a separately
+  approved follow-up owned by Main and the semantic-diff maintainer: split
+  adapter capability/path resolution and provider reservation into smaller
+  functions without changing the approved contracts after this slice. No
+  suppression was added.
+- Compatibility/readiness: VS Code `^1.75.0`, desktop/web file behavior,
+  parser/error meaning, report/JSON output, calendar sidecar ownership, and
+  telemetry privacy remain unchanged. Slice 2 implementation is complete and
+  awaits independent implementation review; Completion Approval and the
+  focused completion commit remain pending.

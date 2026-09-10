@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Improved Semantic Diff with the `Compare Definition` workflow: choose a
+  definition file or an optional Git `HEAD` source, carry an optional schedule
+  period, and open one reusable Explorer context. Git access is feature
+  detected, uses the captured commit and decoded provider output, and degrades
+  safely when the Git API or repository is unavailable; no Git executable,
+  direct `.git` access, or implicit report copy is used.
 - Added a read-only Semantic Diff Explorer with summary cards, hierarchical
   change review, confirmation-required filtering, exact before/after source
   navigation, and existing Flow Viewer focus/highlight integration. The

@@ -1,4 +1,9 @@
 import type * as vscode from "vscode";
+import type {
+  GitHeadDefinitionResult,
+  GitHeadDefinitionUnavailableReason,
+  ReadGitHeadDefinition,
+} from "../../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import type { SemanticDiffComparisonPeriod } from "../../../application/semantic-diff/semanticDiffDto";
 import {
@@ -58,8 +63,26 @@ import {
 } from "../../semantic-diff/semanticDiffOutput";
 import {
   getSemanticDiffCommandLocalization,
+  localizeGitHeadUnavailableReason,
   type SemanticDiffCommandLocalization,
 } from "./semanticDiffCommandLocalization";
+
+export type SemanticDiffGitHeadSnapshotReservation = Readonly<{
+  uri: vscode.Uri;
+  release(): void;
+}>;
+
+export type SemanticDiffGitHeadSnapshotProvider = Readonly<{
+  reserve(content: string):
+    | Readonly<{
+        kind: "reserved";
+        reservation: SemanticDiffGitHeadSnapshotReservation;
+      }>
+    | Readonly<{
+        kind: "unavailable";
+        reason: "capacity-exceeded";
+      }>;
+}>;
 
 export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 
@@ -108,6 +131,7 @@ export type SemanticDiffCommandResult =
           | "render-failed"
           | "display-failed"
           | "explorer-open-failed";
+        reason?: GitHeadDefinitionUnavailableReason;
         message: string;
       };
     };
@@ -135,6 +159,8 @@ export type SemanticDiffCommandDeps = {
   language?: string;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
   buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
+  readGitHeadDefinition?: ReadGitHeadDefinition;
+  gitHeadSnapshotProvider?: SemanticDiffGitHeadSnapshotProvider;
   scheduleComparisonPeriod?: SemanticDiffComparisonPeriod;
   beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
@@ -320,7 +346,7 @@ type WorkflowSourceDescriptor = ImmutableSourceDescriptor & {
 
 type WorkflowExplorerResult = {
   handle: SemanticDiffExplorerSessionHandle;
-  source: "file";
+  source: "file" | "git-head";
   period: "not-requested" | "evaluated";
 };
 
@@ -333,6 +359,8 @@ type WorkflowAfterSnapshot = {
 type WorkflowSourceRequest = {
   after: WorkflowAfterSnapshot;
   before: WorkflowSourceDescriptor;
+  source: "file" | "git-head";
+  providerReservation?: SemanticDiffGitHeadSnapshotReservation;
 };
 
 type WorkflowArtifactState = {
@@ -342,6 +370,7 @@ type WorkflowArtifactState = {
     before: WorkflowSourceDescriptor;
     after: WorkflowSourceDescriptor;
   };
+  source: "file" | "git-head";
   period: "not-requested" | "evaluated";
   release: () => void;
 };
@@ -350,7 +379,8 @@ const workflowFailure = (
   code: Extract<SemanticDiffCommandResult, { ok: false }>["error"]["code"],
   message: string,
   notify = true,
-): CommandFailure => failedStep(code, message, notify);
+  reason?: GitHeadDefinitionUnavailableReason,
+): CommandFailure => failedStep(code, message, notify, reason);
 
 const unregisterAndReleaseWorkflowCapture = (
   deps: SemanticDiffCommandDeps,
@@ -669,11 +699,87 @@ const readWorkflowSourceFile = async (
     const before = await readWorkflowBefore(deps, selected[0], localization);
     return before.kind === "failed"
       ? before
-      : readyStep({ after, before: before.value });
+      : readyStep({ after, before: before.value, source: "file" });
   } catch {
     return workflowFailure(
       "before-file-read-failed",
       localization.beforeFileReadFailed,
+    );
+  }
+};
+
+const readWorkflowGitHead = async (
+  deps: SemanticDiffCommandDeps,
+  after: WorkflowAfterSnapshot,
+  localization: SemanticDiffCommandLocalization,
+): Promise<CommandStep<WorkflowSourceRequest>> => {
+  if (!deps.readGitHeadDefinition) {
+    return workflowFailure(
+      "git-head-unavailable",
+      localization.gitHeadUnavailable,
+      true,
+      "extension-missing",
+    );
+  }
+  if (!deps.gitHeadSnapshotProvider) {
+    return workflowFailure(
+      "git-head-unavailable",
+      localization.gitHeadUnavailable,
+      true,
+      "api-unavailable",
+    );
+  }
+  let result: GitHeadDefinitionResult;
+  try {
+    result = await deps.readGitHeadDefinition({
+      documentUri: after.uri.toString(),
+    });
+  } catch {
+    result = { kind: "unavailable", reason: "read-failed" };
+  }
+  if (result.kind === "unavailable") {
+    return workflowFailure(
+      "git-head-unavailable",
+      localizeGitHeadUnavailableReason(localization, result.reason),
+      true,
+      result.reason,
+    );
+  }
+  if (result.ref !== "HEAD") {
+    return workflowFailure(
+      "git-head-unavailable",
+      localization.gitHeadUnavailable,
+      true,
+      "api-unavailable",
+    );
+  }
+  const reservation = deps.gitHeadSnapshotProvider.reserve(result.content);
+  if (reservation.kind === "unavailable") {
+    return workflowFailure(
+      "explorer-open-failed",
+      localization.gitHeadSnapshotCapacity,
+    );
+  }
+  try {
+    return readyStep({
+      after,
+      before: {
+        side: "before",
+        sourceHandleId: deps.sourceHandleIdAllocator(),
+        text: result.content,
+        version: 1,
+        uri: reservation.reservation.uri,
+      },
+      source: "git-head",
+      providerReservation: reservation.reservation,
+    });
+  } catch {
+    reservation.reservation.release();
+    return workflowFailure(
+      "git-head-unavailable",
+      localization.gitHeadReadFailed,
+      true,
+      "read-failed",
     );
   }
 };
@@ -691,10 +797,7 @@ const prepareWorkflowSource = async (
     return workflowSourceFailure(selection, localization);
   }
   if (selection.kind === "git-head") {
-    return workflowFailure(
-      "git-head-unavailable",
-      localization.gitHeadUnavailable,
-    );
+    return readWorkflowGitHead(deps, after, localization);
   }
   return readWorkflowSourceFile(deps, after, localization);
 };
@@ -712,6 +815,7 @@ const beginWorkflowCapture = (
     !deps.beginSemanticDiffSourceCapture ||
     !deps.buildSemanticDiffPresentationArtifacts
   ) {
+    source.providerReservation?.release();
     return workflowFailure(
       "source-capture-failed",
       localization.sourceCaptureFailed,
@@ -741,6 +845,7 @@ const beginWorkflowCapture = (
     });
     return readyStep({ before: source.before, after, capture });
   } catch {
+    source.providerReservation?.release();
     return workflowFailure(
       "source-capture-failed",
       localization.sourceCaptureFailed,
@@ -759,7 +864,16 @@ const buildWorkflowArtifacts = (
 ): CommandStep<WorkflowArtifactState> => {
   const captureStep = beginWorkflowCapture(deps, source, localization);
   if (captureStep.kind === "failed") return captureStep;
-  const release = createSourceCaptureRelease(captureStep.value.capture);
+  const releaseSourceCapture = createSourceCaptureRelease(
+    captureStep.value.capture,
+  );
+  let released = false;
+  const release = (): void => {
+    if (released) return;
+    released = true;
+    releaseSourceCapture();
+    source.providerReservation?.release();
+  };
   const input: BuildSemanticDiffPresentationArtifactsInput =
     selection.kind === "evaluated"
       ? {
@@ -790,6 +904,7 @@ const buildWorkflowArtifacts = (
         before: captureStep.value.before,
         after: captureStep.value.after,
       },
+      source: source.source,
       period: selection.kind === "evaluated" ? "evaluated" : "not-requested",
       release,
     });
@@ -876,7 +991,7 @@ const openWorkflowArtifacts = async (
     const handle = await deps.openScheduleAwareExplorerSession(state.artifacts);
     return readyStep({
       handle,
-      source: "file",
+      source: state.source,
       period: state.period,
     });
   } catch {
@@ -903,11 +1018,14 @@ const runFileComparisonWorkflow = async (
   const periodStep = await continueCommandStep(sourceStep, async (source) => {
     const selection = await selectWorkflowPeriod(deps, localization);
     if (selection.kind === "cancelled") {
+      source.providerReservation?.release();
       return workflowCancellation(localization);
     }
-    return selection.kind === "failed"
-      ? workflowPeriodFailure(selection, localization)
-      : readyStep({ source, selection });
+    if (selection.kind === "failed") {
+      source.providerReservation?.release();
+      return workflowPeriodFailure(selection, localization);
+    }
+    return readyStep({ source, selection });
   });
   const artifactStep = await continueCommandStep(
     periodStep,
@@ -1252,7 +1370,7 @@ const finalizeCommandFailure = async (
   if (failure.notify) {
     await safeShowErrorMessage(deps, message);
   }
-  return commandError(failure.code, message);
+  return commandError(failure.code, message, failure.reason);
 };
 
 const finalizeSemanticDiffCommand = async (

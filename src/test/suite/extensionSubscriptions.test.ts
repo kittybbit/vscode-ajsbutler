@@ -8,6 +8,7 @@ import {
 } from "../../application/semantic-diff/semanticDiffExplorer";
 import type { ExtensionDependencies } from "../../bootstrap/extension/extensionDependencies";
 import { createExtensionSubscriptions } from "../../bootstrap/extension/extensionSubscriptions";
+import { VscodeGitHeadContentProvider } from "../../infrastructure/git/VscodeGitHeadContentProvider";
 
 suite("Extension subscriptions", () => {
   test("creates diagnostics, hover, import, semantic diff, and viewer subscriptions", () => {
@@ -58,8 +59,14 @@ suite("Extension subscriptions", () => {
 
     const subscriptions = createExtensionSubscriptions(context, dependencies);
 
-    assert.strictEqual(subscriptions.length, 12);
+    assert.strictEqual(subscriptions.length, 14);
     assert.strictEqual(new Set(subscriptions).size, subscriptions.length);
+    assert.ok(
+      subscriptions.some(
+        (subscription) => subscription instanceof VscodeGitHeadContentProvider,
+      ),
+      "Git HEAD content provider is registered and owned by activation",
+    );
     assert.deepStrictEqual(
       context.subscriptions,
       [],

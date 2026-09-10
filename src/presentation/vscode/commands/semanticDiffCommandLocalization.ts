@@ -1,3 +1,5 @@
+import type { GitHeadDefinitionUnavailableReason } from "../../../application/semantic-diff/GitHeadDefinitionSourcePort";
+
 export type SemanticDiffCommandLocalization = Readonly<{
   noActiveEditor: string;
   cancelled: string;
@@ -22,6 +24,14 @@ export type SemanticDiffCommandLocalization = Readonly<{
   afterTooLarge: string;
   sourcePickerFailed: string;
   gitHeadUnavailable: string;
+  gitHeadRepositoryMissing: string;
+  gitHeadMissing: string;
+  gitHeadSourceMissing: string;
+  gitHeadUnsupported: string;
+  gitHeadBinary: string;
+  gitHeadTooLarge: string;
+  gitHeadReadFailed: string;
+  gitHeadSnapshotCapacity: string;
   beforeFileReadFailed: string;
   beforeFileNonText: string;
   beforeFileTooLarge: string;
@@ -109,6 +119,38 @@ const LOCALIZED_TEXT: Readonly<
     en: "Git HEAD comparison is not available yet.",
     ja: "Git HEAD 比較はまだ利用できません。",
   },
+  gitHeadRepositoryMissing: {
+    en: "The active definition is not in a Git repository.",
+    ja: "アクティブな定義は Git リポジトリにありません。",
+  },
+  gitHeadMissing: {
+    en: "The active Git repository has no HEAD definition.",
+    ja: "アクティブな Git リポジトリに HEAD 定義がありません。",
+  },
+  gitHeadSourceMissing: {
+    en: "The definition could not be found at Git HEAD.",
+    ja: "Git HEAD に定義が見つかりません。",
+  },
+  gitHeadUnsupported: {
+    en: "Git HEAD could not provide this definition.",
+    ja: "Git HEAD からこの定義を取得できません。",
+  },
+  gitHeadBinary: {
+    en: "The Git HEAD definition is not text.",
+    ja: "Git HEAD の定義はテキストではありません。",
+  },
+  gitHeadTooLarge: {
+    en: "The Git HEAD definition exceeds the 8 MiB limit.",
+    ja: "Git HEAD の定義が 8 MiB の上限を超えています。",
+  },
+  gitHeadReadFailed: {
+    en: "The Git HEAD definition could not be read.",
+    ja: "Git HEAD の定義を読み込めませんでした。",
+  },
+  gitHeadSnapshotCapacity: {
+    en: "Git HEAD source snapshots are temporarily full.",
+    ja: "Git HEAD ソースの保持領域が一時的に上限に達しています。",
+  },
   beforeFileReadFailed: {
     en: "The selected before definition could not be read.",
     ja: "選択した比較元の定義を読み込めませんでした。",
@@ -168,3 +210,32 @@ export const getSemanticDiffCommandLocalization = (
   language: string | undefined,
 ): SemanticDiffCommandLocalization =>
   language?.toLowerCase().startsWith("ja") === true ? JAPANESE : ENGLISH;
+
+export const localizeGitHeadUnavailableReason = (
+  localization: SemanticDiffCommandLocalization,
+  reason: GitHeadDefinitionUnavailableReason,
+): string => {
+  switch (reason) {
+    case "repository-not-found":
+      return localization.gitHeadRepositoryMissing;
+    case "head-missing":
+      return localization.gitHeadMissing;
+    case "head-source-missing":
+      return localization.gitHeadSourceMissing;
+    case "binary":
+    case "submodule":
+      return localization.gitHeadBinary;
+    case "unsupported-encoding":
+      return localization.gitHeadUnsupported;
+    case "too-large":
+      return localization.gitHeadTooLarge;
+    case "read-failed":
+      return localization.gitHeadReadFailed;
+    case "extension-missing":
+    case "extension-disabled":
+    case "activation-failed":
+    case "api-unavailable":
+    case "virtual-repository-unsupported":
+      return localization.gitHeadUnavailable;
+  }
+};
