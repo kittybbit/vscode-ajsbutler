@@ -4,14 +4,23 @@
 
 - Purpose: deliver one explicit file/Git `HEAD` comparison workflow that opens
   one reusable Semantic Diff Explorer context.
-- Approved or active slice: none; the complete two-slice plan is independently
-  reviewed and Human Approved, awaiting the focused plan commit.
+- Mode: Replanning Mode for the Slice 1 predecessor-callback contract gap;
+  runtime code, tests, generated artifacts, configuration, staging, and
+  implementation are not authorized in this run.
+- Approved or active slice: none; the revised Slice 1 replan has independent
+  `plan-reviewer` `Ready` review with no Findings and Main's revised Human
+  Approval. The focused replan commit is eligible and pending; implementation
+  has not started.
 - Do not implement runtime code, tests, generated artifacts, or configuration
-  from this approval; implementation remains a separate slice gate.
+  from this replan; implementation remains a separate slice gate.
 - Preserve `ajsbutler.compareSemanticDiff`, VS Code `^1.75.0`, and the existing
   parser-error union.
-- Consume the predecessor artifact builder and schedule-aware Explorer opener
-  exactly once; do not rebuild comparison, schedule, output, or calendar facts.
+- Consume the landed calendar artifact callback and schedule-aware Explorer
+  opener exactly once; call the callback input-first as
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`
+  and pass the capture scope's parser as its optional second argument. Do not
+  rebuild comparison, schedule, output, or calendar facts.
 - Pass a selected period under the predecessor's exact
   `options.scheduleComparisonPeriod` field; do not invent `period` or
   `options.period` aliases.
@@ -25,9 +34,10 @@
   existing one-argument Explorer opener. The capture scope is the sole owner
   of retained indexes and source snapshots through `collecting` → `bound` →
   `registered` → `released`; the context registry stores only a borrowed
-  binding. Composite cleanup calls `unregister(context, scope)` first and
-  `scope.release()` exactly once, with the separate provider reservation
-  released in the same transaction.
+  `SemanticDiffSourceCaptureEntry`. Composite cleanup calls
+  `unregisterSourceCapture(context)` first and invokes the workflow-owned
+  idempotent release callback carried by that entry exactly once, with the
+  separate provider reservation released in the same transaction.
 - Do not add WebAPI, index/arbitrary-ref comparison, persistence, telemetry,
   Git CLI, Node built-ins, or direct `.git` access.
 - Read first: `SPECS.md`, this file, and predecessor contracts named below.
@@ -46,33 +56,130 @@
 - Keep implementation sequencing, approval, validation, risk, production
   readiness, and Feature Exit readiness here; keep requirements in `SPECS.md`.
 
+## Replanning Record
+
+- Trigger: the Calendar internal Slice 2 implementation landed in
+  `b9cee633` with the exact injected callback contract
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`.
+  The approved workflow plan still required `(parser, input) => result`, so
+  Slice 1 cannot continue unchanged without either an invalid call or a
+  forbidden overload, alias, or compatibility shim.
+- Completion-committed predecessor state: Calendar internal Slice 2 is
+  completion-committed at `b9cee633`. The current workflow branch includes
+  post-state synchronization commit `a0e73c31` (HEAD), whose parent is
+  `b9cee633` and whose dependency record confirms the Slice 2 completion.
+  The hard gate is therefore satisfied; implementation must still verify the
+  exact committed callback signature at `b9cee633` before editing Slice 1.
+- Minimal revision: revise only Slice 1's injected artifact-callback boundary
+  and its command/bootstrap contract tests. Begin Explorer capture first, then
+  invoke the callback exactly once with the artifact input first and the
+  capture scope's parser as the optional second argument. Preserve the exact
+  `options.scheduleComparisonPeriod` field, parser-error union,
+  `collecting` -> `bound` -> `registered` -> `released` ownership/lifecycle,
+  one-argument Explorer opener, public command behavior, and all compatibility
+  boundaries.
+- Preserved scope: Slice 2's Git source, adapter, provider, documentation, and
+  cross-source work are unchanged; no Slice 2 Git path or dependency is added,
+  removed, or reordered. No runtime, test, generated-artifact, or
+  configuration file is edited by this replan.
+- Contract evidence inspected (read-only):
+  `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry.ts`,
+  `src/presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes.ts`,
+  `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelLifecycle.ts`,
+  `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`, and
+  `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`. These landed
+  predecessor paths are not part of the revised Slice 1 edit scope.
+- Implementation gate: Calendar internal Slice 2 completion commit `b9cee633`
+  is present and independently post-state-verified by `a0e73c31` before Slice
+  1 implementation. The gate must still check the committed
+  `BuildSemanticDiffPresentationArtifacts` type and callable signature exactly;
+  a working-tree-only or parser-first predecessor is not sufficient.
+- Normative documentation correction status: `feature-author` has completed
+  the WF-9 and Architecture Application/Bootstrap correction in the current
+  `SPECS.md` working tree, covering the landed callback
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`,
+  capture-first `(input, capture.parser)` invocation, parser-error union,
+  borrowed `SemanticDiffSourceCaptureEntry`,
+  `registerSourceCapture(context, entry)`, and
+  `unregisterSourceCapture(context)` followed by the entry-carried
+  workflow-owned idempotent release. This role is authorized to edit only
+  `TASKS.md` and `TRACEABILITY.md`; the correction is included in the revised
+  approval scope and no Explorer public opener or source-capture type change
+  is planned. No `docs/specs/architecture.md` policy change is required
+  because dependency boundaries remain unchanged.
+- Lifecycle decision: no registry or source-capture type change is required.
+  Slice 1 consumes the landed `registerSourceCapture(context, entry)` and
+  `unregisterSourceCapture(context)` APIs. Exact-context safety is proved by
+  the registry's object-keyed lookup and binding/source-handle checks; stale
+  safety is proved by the capture scope's release invalidation and the
+  registry's active-binding guard. The revised Slice 1 tests cover this
+  contract; the landed registry, panel-lifecycle, source-capture, and
+  predecessor-adapter tests remain read-only evidence.
+
+## Quality Baseline
+
+- Revised planning documents pass `rtk pnpm run lint:md`, `rtk pnpm run
+qlty:check`, and `git diff --check`. The current landed-predecessor workspace
+  is the qlty smell baseline for Slice 1.
+- Baseline evidence: the full `rtk pnpm run qlty` run completed; formatting and
+  checks passed, and the smell scan reported only existing advisory findings in
+  landed predecessor implementation paths (including the artifact builder,
+  command, Explorer session, and schedule-impact modules). No Slice 1 runtime
+  or test file was changed in this replan.
+- Before Slice 1 implementation review, rerun `rtk pnpm run qlty` and compare
+  its smell output with that baseline. The implementation evidence must record
+  no new smell findings attributable to Slice 1; pre-existing findings remain
+  follow-up risks and are not silently refactored in this slice.
+
 ## Plan Status
 
-- Status: Reviewed plan Ready; awaiting focused plan commit
+- Status: Replanned; Calendar Slice 2 gate satisfied at `b9cee633` with
+  post-state evidence `a0e73c31`; plan review is `Ready` with no Findings and
+  revised Human Approval is recorded. The focused replan commit is eligible and
+  pending.
 - Planning scope: complete two-slice plan covering file/period/source
   registration and Explorer handoff first, then optional Git `HEAD` retrieval
   and final documentation.
-- Review status: Ready (`plan-reviewer` final verdict)
-- Human approval: Approved.
+- Review status: `Ready` (`plan-reviewer`); Findings none.
+- Human approval: `Approved` for the revised Slice 1 replan.
 - Active implementation slice: None
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: 2026-08-31 (explicit user approval in Codex)
-- Approved scope: The complete reviewed two-slice planning package for
-  file/period comparison, Explorer handoff, optional Git `HEAD` retrieval,
-  source lifecycle, validation, and durable documentation. Runtime
-  implementation remains subject to its separate slice approval gates.
-- Approved paths: `docs/specs/features/semantic-diff-comparison-workflow/SPECS.md`,
-  `docs/specs/features/semantic-diff-comparison-workflow/TASKS.md`, and
-  `docs/specs/features/semantic-diff-comparison-workflow/TRACEABILITY.md`.
-
-The approved paths authorize only the focused plan-gate commit. No runtime,
-test, generated-artifact, or configuration change is included.
-
-Implementation must not start from this plan approval alone; the approved plan
-must first be committed, and each implementation slice requires its own gate.
+- Approved at: 2026-09-10; approved in the current conversation.
+- Result: Approved.
+- Basis: independent `plan-reviewer` `Ready` verdict with no Findings and the
+  user's automatic no-findings slice approval instruction.
+- Approved scope: the revised Slice 1 callback invocation, landed
+  source-capture lifecycle consumption, exact command/bootstrap contract
+  validation, and the completed normative `SPECS.md` WF-9/Architecture
+  correction. The unchanged Slice 2 Git boundary and all unrelated approved
+  slices remain preserved.
+- Approved implementation paths:
+  - `src/application/semantic-diff/parseSemanticDiffComparisonPeriod.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommandLocalization.ts`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/bootstrap/extension/extensionDependencies.ts`
+  - `package.json`
+  - `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffWiring.test.ts`
+  - `src/test/suite/packageManifest.test.ts`
+- Approved planning package paths for the focused replan commit:
+  - `docs/specs/features/semantic-diff-comparison-workflow/SPECS.md`
+  - `docs/specs/features/semantic-diff-comparison-workflow/TASKS.md`
+  - `docs/specs/features/semantic-diff-comparison-workflow/TRACEABILITY.md`
+- Focused replan commit status: Eligible; pending through
+  `approval-committer`.
+- Implementation status: Not started. No implementation may begin until the
+  focused replan commit is complete; the four unlisted-test boundary and
+  read-only predecessor restrictions remain in force.
 
 ## Completion Approval
 
@@ -95,10 +202,19 @@ must first be committed, and each implementation slice requires its own gate.
 ## Selection And Dependency Evidence
 
 - Selected feature: `semantic-diff-comparison-workflow`, explicitly delegated
-  on branch `docs/semantic-diff-comparison-workflow`.
-- Branch evidence: this branch adds only
-  `docs/specs/features/semantic-diff-comparison-workflow/` over roadmap commit
-  `97d5ccfd`.
+  on branch `codex/semantic-diff-comparison-workflow`.
+- Branch/base evidence: `git merge-base HEAD origin/main` is
+  `97652aa1` (`feat: add Semantic Diff Explorer (#316)`). The current branch
+  is at `a0e73c31` (`docs: sync schedule impact calendar slice 2 state`), a
+  direct post-state child of Calendar Slice 2 completion `b9cee633`.
+- Current inherited dependency commits after that merge-base are
+  `6622953f` (Calendar replan approval), `ebf8bf3d` (second replan approval),
+  `11615026` (third replan approval), `51a8ae4a` (Calendar internal Slice 1
+  completion), `b9cee633` (Calendar internal Slice 2 completion), and
+  `a0e73c31` (post-state synchronization). The historical feature-plan commit
+  `91447419` was approved from roadmap commit `97d5ccfd`; neither is the
+  current merge-base. No workflow runtime or test implementation is present
+  in this branch.
 - Required completion-committed predecessors:
   `semantic-diff-identity-confidence`, `semantic-diff-structured-outputs`,
   `semantic-diff-review-risk-rules`, `schedule-semantics-expansion`,
@@ -113,26 +229,29 @@ must first be committed, and each implementation slice requires its own gate.
 BuildSemanticDiffReportDataResult`, and
   `createBuildSemanticDiffReportData(parser, compare?)` parses both strings and
   calls the current `compareSemanticDiff` without a period option.
-- Required future predecessor contract: the calendar-owned
+- Landed predecessor contract: Calendar internal Slice 2's
   `createBuildSemanticDiffPresentationArtifacts(parser, compareWithArtifacts,
-builder)` adapter keeps the source-text/parser-error boundary and accepts the
-  exact future input
+builder)` factory keeps the source-text/parser-error boundary and returns the
+  injected callback with the exact input
   `BuildSemanticDiffPresentationArtifactsInput =
 BuildSemanticDiffReportDataInput & { options?: Pick<CompareSemanticDiffOptions,
 "scheduleComparisonPeriod"> }`. Its callable shape is
-  `(input: BuildSemanticDiffPresentationArtifactsInput) =>
-BuildSemanticDiffPresentationArtifactsResult`. The command passes the
-  selected value exactly as `options.scheduleComparisonPeriod`; no `period` or
-  `options.period` alias is permitted. The adapter parses each side once,
-  forwards that exact field to
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+  scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`.
+  Slice 1 begins capture first, then calls it exactly once as
+  `(input, capture.parser)`—input first and the capture scope's parser second;
+  the workflow must not call it parser-first or add a shim. The command passes
+  the selected value exactly as `options.scheduleComparisonPeriod`; no
+  `period` or `options.period` alias is permitted. The adapter parses each side
+  once, using the scoped parser when supplied, and forwards that exact field to
   `CompareSemanticDiffInput.options.scheduleComparisonPeriod`, invokes
   `compareSemanticDiffWithArtifacts` and the pure builder once, and returns the
   established parser-error union or `{ context, scheduleImpact }`.
-- The implementation gate must verify the completion-committed predecessor
-  signatures, including the exact `scheduleComparisonPeriod` field, result
-  union, and command adapter call shape. A mismatch is a Replanning trigger
-  with the owning predecessor; do not add an overload, alias, or compatibility
-  shim in this feature.
+- The implementation gate must verify this landed predecessor signature, the
+  exact `scheduleComparisonPeriod` field, result union, and input-first command
+  adapter call shape. Any future mismatch remains a Replanning trigger with
+  the owning predecessor; do not add an overload, alias, or compatibility shim
+  in this feature.
 - Predecessor integration contract:
   `createScheduleAwareExplorerSession` consumes those artifacts, owns calendar
   sidecar registration, and calls the existing one-argument
@@ -169,8 +288,10 @@ BuildSemanticDiffPresentationArtifactsResult`. The command passes the
   document decoder is authoritative; no raw file-byte preflight is used.
   Cancellation at either picker or date prompt returns `cancelled` silently.
 - A successful command begins the Explorer-owned same-pass source capture,
-  then calls the injected `(parser, input) =>
-BuildSemanticDiffPresentationArtifactsResult` callback exactly once with
+  then calls the injected `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`
+  callback exactly once with the artifact input first and the capture scope's
+  parser as its optional second argument. The input is
   `{ beforeContent, afterContent, options?: { scheduleComparisonPeriod } }`,
   omitting `options` when no period is selected. That bootstrap callback alone
   invokes the calendar-owned artifact factory. After success, the command
@@ -199,12 +320,15 @@ BuildSemanticDiffPresentationArtifactsResult` callback exactly once with
   the sole owner of retained indexes and immutable source-snapshot references
   for its whole lifetime.
 - Begin capture before invoking the injected bootstrap callback
-  `(parser, input) => BuildSemanticDiffPresentationArtifactsResult`. That
-  callback alone invokes the calendar-owned
-  `createBuildSemanticDiffPresentationArtifacts(parser, compareWithArtifacts,
-builder)(input)` once. The enriched parser wrapper performs the same normal
-  before/after parse calls and preserves the existing side-specific parser
-  error union; the workflow never calls an application factory directly.
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`.
+  Invoke it exactly once as `(input, capture.parser)`, with input first and
+  the capture scope's parser second. That callback alone invokes the
+  calendar-owned `createBuildSemanticDiffPresentationArtifacts(parser,
+compareWithArtifacts, builder)(input, scopedParser)` once. The enriched
+  parser wrapper performs the same normal before/after parse calls and
+  preserves the existing side-specific parser error union; the workflow never
+  calls an application factory directly.
   The workflow owns this injected orchestration-callback boundary; Explorer's
   current-file builder remains independent. A future calendar callback is
   optional and may replace only this callback under its own approved contract,
@@ -212,13 +336,13 @@ builder)(input)` once. The enriched parser wrapper performs the same normal
   opener.
   After a successful artifact result, call `bind(context)` exactly once. A
   successful closed bind yields `{ context, before: { sourceIndex,
-  sourceHandleId }, after: { sourceIndex, sourceHandleId } }` and changes the
+sourceHandleId }, after: { sourceIndex, sourceHandleId } }` and changes the
   scope to `bound`; the binding is borrowed and never transfers ownership.
-  Only then does bootstrap register the exact `{ context, scope }` pair as a
-  borrowed entry, changing the scope to `registered`, and invoke the existing
-  calendar-aware session opener, which ultimately calls the one-argument
-  `OpenSemanticDiffExplorer(context)` exactly once. No second opener argument
-  or new Explorer hook is added.
+  Only then does bootstrap register the exact
+  `SemanticDiffSourceCaptureEntry` for that context, changing the scope to
+  `registered`, and invoke the existing calendar-aware session opener, which
+  ultimately calls the one-argument `OpenSemanticDiffExplorer(context)`
+  exactly once. No second opener argument or new Explorer hook is added.
 - Before capture, prepare host snapshots and opaque handles without exposing
   host types inward. File-before uses the selected document's URI, version,
   and one decoded `getText()` result; Git-before uses the decoded
@@ -227,9 +351,10 @@ builder)(input)` once. The enriched parser wrapper performs the same normal
   created before the output context exists because its URI key is opaque and
   unique; the provider reservation remains a separate in-flight resource and
   is released by the composite disposer. It never transfers capture-scope
-  ownership: `bind(context)` returns only a borrowed binding, and the exact
-  context registry stores only a borrowed reference to that scope. After uses
-  the active document URI, version, and text captured once at command start.
+  ownership: `bind(context)` returns only a borrowed binding, and the
+  `SemanticDiffSourceCaptureEntry` stored by the context registry is borrowed
+  only. After uses the active document URI, version, and text captured once at
+  command start.
   Before/after side identity comes from descriptor order and handle IDs, not
   matching paths.
 - Capture, provider reservation, context binding, calendar companion, and
@@ -239,7 +364,7 @@ builder)(input)` once. The enriched parser wrapper performs the same normal
   registration first removes any borrowed exact-context entry, then calls the
   scope's idempotent `release()` exactly once, and releases the separate
   provider reservation exactly once. No registry, provider entry, index, or
-  stale action remains. Direct scope release or a stale epoch invalidates
+  stale action remains. Direct capture-scope release or a stale epoch invalidates
   borrowed registry references before any lookup can dereference them. Map a
   typed capture exception or unsuccessful closed bind to
   `source-capture-failed` without fabricating syntax errors; map provider
@@ -250,10 +375,14 @@ builder)(input)` once. The enriched parser wrapper performs the same normal
   the context-keyed borrowed registry and never parse, rebuild an index, read
   Git again, or search the other side. A duplicate normalized `unitId` is
   ambiguous and returns the Explorer-defined `unit-missing` outcome; it never
-  chooses by occurrence. `unregister(context, scope)` removes only the exact
-  borrowed pair and then releases that scope exactly once. Direct release and
-  stale epochs invalidate borrowed references, so disposal and a later
-  independent session cannot resolve one another's handles.
+  chooses by occurrence. `registerSourceCapture(context, entry)` accepts only
+  an entry whose binding has the exact context and matching opaque source
+  handles; `unregisterSourceCapture(context)` removes only that context's
+  borrowed `SemanticDiffSourceCaptureEntry`. Cleanup then invokes the
+  workflow-owned idempotent release callback carried by that entry exactly
+  once. Direct release and stale epochs
+  invalidate borrowed references, so disposal and a later independent session
+  cannot resolve one another's handles.
 - The implementation gate must verify the completion-committed Explorer
   source-capture types, callback and calendar-aware opener wiring, and
   `unit-missing` behavior. A mismatch stops implementation and routes
@@ -464,10 +593,13 @@ too-large | read-failed`. It deliberately has no
   dependencies, the per-command capture capability, and the exact-context
   borrowed registry/opener through `extensionDependencies.ts` and
   `semanticDiffWiring.ts`; bootstrap selects no source and constructs no
-  semantic facts. The registry accepts only the exact `{ context, scope }`
-  pair and its composite disposer calls `unregister(context, scope)` before
-  `scope.release()` exactly once. The calendar companion owns internal sidecar
-  registration, while calendar Slice 3 owns the public action.
+  semantic facts. The Explorer registry accepts only a
+  `SemanticDiffSourceCaptureEntry` whose binding context and source handles
+  exactly match the context/descriptors. Its composite disposer calls
+  `unregisterSourceCapture(context)` before invoking the workflow-owned
+  idempotent release callback carried by the entry exactly once. The calendar
+  companion owns internal sidecar registration,
+  while calendar Slice 3 owns the public action.
 - Configuration: update only the existing `package.json` command title and
   short title. Preserve engine, activation, menus, command ID, and settings.
 - Tests: extend command/build/bootstrap/package checks and add focused period,
@@ -487,8 +619,10 @@ too-large | read-failed`. It deliberately has no
 
 ### Slice 1: Deliver File And Period Comparison To Explorer
 
-- Status: Planned; blocked on predecessor completion, plan review, Human
-  Approval, and the focused plan commit.
+- Status: Replanned; Calendar Slice 2 gate satisfied at `b9cee633` with
+  post-state evidence `a0e73c31`; plan review is `Ready` with no Findings and
+  revised Human Approval is recorded. Blocked only on the focused replan
+  commit.
 - Scope: retain the public command ID while changing its display name; add the
   pure period validator, command localization, decoded after/file document
   snapshots, explicit source and optional-period prompts, stable outcomes,
@@ -506,10 +640,21 @@ too-large | read-failed`. It deliberately has no
   - `src/bootstrap/extension/semanticDiffWiring.ts` and
     `extensionDependencies.ts`.
   - `package.json`.
-  - `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts`,
-    `semanticDiffCommand.test.ts`, `semanticDiffWiring.test.ts`, the predecessor
-    calendar-command companion integration test, and existing
-    package/bootstrap contract tests affected by the changed injection shape.
+  - `docs/specs/features/semantic-diff-comparison-workflow/SPECS.md` for the
+    completed feature-author-owned WF-9/Architecture correction; it remains in
+    the revised approval scope, while this role does not edit that file.
+  - `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts` (new).
+  - `src/test/suite/semanticDiffCommand.test.ts` (modified).
+  - `src/test/suite/semanticDiffWiring.test.ts` (new).
+  - `src/test/suite/packageManifest.test.ts` (modified).
+  - Existing `src/test/suite/semanticDiffCommandScheduleImpact.test.ts` is
+    read-only landed-contract evidence and is not in this Slice 1 approval
+    scope.
+  - Closed test boundary: only the four `src/test/suite/...` paths listed
+    above are approved for Slice 1 modification or creation. Every unlisted
+    test path, including predecessor and host-regression suites, is read-only
+    evidence and is not approved for modification; any newly discovered test
+    need requires Replanning.
 - Acceptance:
   - `JP1/AJS: Compare Definition` invokes the unchanged command ID and reads
     the active buffer and selected file exactly once.
@@ -527,19 +672,26 @@ too-large | read-failed`. It deliberately has no
     inferring a decode or I/O cause; an active-editor `getText()` failure maps
     to `active-editor-failed`. Parser failures retain side separation.
   - File success starts one Explorer-owned same-pass capture before the
-    injected artifact callback, binds both successful side indexes exactly
-    once to the resulting context, installs the exact borrowed `{ context,
-scope }` registry entry, and reaches the one-argument Explorer opener
-    exactly once. Parser errors preserve the normal before/after union;
+    injected artifact callback, then invokes the exact landed callback once as
+    `(input, capture.parser)`—input first and the capture scope's parser as its
+    optional second argument. It binds both successful side indexes exactly
+    once to the resulting context, installs a
+    `SemanticDiffSourceCaptureEntry` whose binding context and opaque source
+    handles exactly match, and reaches the one-argument Explorer opener exactly
+    once. Parser errors preserve the normal before/after union;
     capture-contract errors map to `source-capture-failed`. Any cancellation,
-    artifact/bind failure, or opener failure unregisters the exact borrowed
-    pair first, then calls `scope.release()` exactly once and releases all file
-    snapshots exactly once, with no action-time parse or index regeneration.
+    artifact, or bind failure before registration releases the capture scope
+    exactly once without dereferencing a missing entry. Any registered-entry
+    rollback or opener failure calls `unregisterSourceCapture(context)` first,
+    then invokes the workflow-owned idempotent release callback carried by the
+    entry exactly once and releases all file snapshots exactly once, with no
+    action-time parse or index regeneration.
 - Validation:
-  - Add `parseSemanticDiffComparisonPeriod.test.ts` for format, real dates,
-    leap days, year/month/day edges, `from == to`, reversed range, and the
-    uncapped ten-year period.
-  - Extend `semanticDiffCommand.test.ts` for prompt order, command/title
+  - Add `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts` for format,
+    real dates, leap days, year/month/day edges, `from == to`, reversed range,
+    and the uncapped ten-year period.
+  - Extend `src/test/suite/semanticDiffCommand.test.ts` for prompt order,
+    command/title
     compatibility, active/selected document open and `getText()` call counts,
     UTF-8/BOM/Shift_JIS decoded text, NUL, exactly/over 8 MiB measured with
     browser `TextEncoder`, active-editor `getText()` failures mapped to
@@ -547,21 +699,40 @@ scope }` registry entry, and reaches the one-argument Explorer opener
     failures mapped to `before-file-read-failed`, all cancellation points,
     localized validation, unknown-locale fallback, side-specific parser
     errors, downstream throws, at-most-one notification, no persistence, exact
-    `scheduleComparisonPeriod` forwarding, and context identity.
-  - Extend `semanticDiffWiring.test.ts` and `semanticDiffCommand.test.ts` for
-    file descriptors, capture-before-callback ordering, same-pass parser
-    injection, both-side parser errors, exact-context bind, one-argument
+    `scheduleComparisonPeriod` forwarding, context identity, and exact
+    `unregisterSourceCapture(context)`/entry-release cleanup ordering.
+  - Extend `src/test/suite/semanticDiffWiring.test.ts` and
+    `src/test/suite/semanticDiffCommand.test.ts` for file descriptors,
+    capture-before-callback ordering, exact input-first callback invocation
+    with `capture.parser` as the optional second argument, same-pass parser
+    injection, and rejection of parser-first or shimmed calls;
+    preserve both-side parser errors, exact-context bind, one-argument
     calendar-aware opener composition, typed capture failure mapping,
     `collecting` → `bound` → `registered` → `released` transitions,
-    `unregister(context, scope)` before one `scope.release()`, idempotent and
-    direct-release rollback, cancellation rollback, stale action rejection,
-    and independent later sessions. Assert that source actions never parse or
-    regenerate an index.
-  - Extend calendar companion and Explorer/output integration tests only to
-    prove `not-requested`/evaluated handoff and one normal Explorer for both
-    impact states. Assert that this workflow never calls calendar sidecar
-    registration or a public calendar action; public action coverage belongs to
-    calendar Slice 3.
+    `registerSourceCapture(context, entry)` exact-context/source-handle
+    validation, `unregisterSourceCapture(context)` before one entry-carried
+    idempotent release callback for registered cleanup, pre-registration
+    capture-scope release without entry lookup, idempotent and direct-release
+    rollback, cancellation rollback, stale action rejection, and independent
+    later sessions. Assert that source
+    actions never parse or regenerate an index.
+  - Update `src/test/suite/packageManifest.test.ts` for the renamed
+    `Compare Definition` title/short title while proving the stable command ID,
+    activation event, menu placement, icon, language enablement, engine, and
+    settings remain unchanged.
+  - Treat these landed predecessor tests as read-only contract evidence, not
+    Slice 1 edits: `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`,
+    `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
+    `src/test/suite/semanticDiffSourceCapture.test.ts`,
+    `src/test/suite/semanticDiffExplorerRegistry.test.ts`, and
+    `src/test/suite/semanticDiffExplorerPanel.test.ts`.
+  - Extend the approved
+    `src/test/suite/semanticDiffCommand.test.ts` and
+    `src/test/suite/semanticDiffWiring.test.ts` paths to prove
+    `not-requested`/evaluated handoff and one normal Explorer for both impact
+    states. Assert that this workflow never calls calendar sidecar registration
+    or a public calendar action; public action coverage belongs to calendar
+    Slice 3.
   - Run focused compiled suites, `rtk pnpm run qlty`, `rtk pnpm run build`,
     desktop extension tests, web tests, and the architecture dependency test.
 - Production Readiness: bounded per-side input, no silent truncation, no
@@ -569,19 +740,25 @@ scope }` registry entry, and reaches the one-argument Explorer opener
   prompts, privacy-safe messages, unchanged JP1/AJS semantics, desktop/web
   file support, and preserved VS Code `^1.75.0`.
 - Approval Boundary: period parser, file command flow/localization, command
-  contribution title, predecessor artifact/Explorer wiring, and named tests.
-  Git source implementation, durable final docs, or any predecessor contract
-  change is outside this slice.
+  contribution title, the landed input-first predecessor artifact callback
+  and Explorer wiring, named contract tests, and the completed
+  feature-author-owned `SPECS.md` WF-9/Architecture correction. Git source
+  implementation, durable final docs, or any predecessor contract change is
+  outside this slice; no Slice 2 Git path is changed.
 - Dependencies: completion-committed identity, structured-output, review-risk,
-  schedule-semantics, and Explorer contracts plus calendar internal Slices 1-2.
-  Calendar public Slice 3 is not a dependency. No dependency on Slice 2.
-- Risks: the predecessor may land different symbols or command wiring; the
-  calendar adapter may not yet expose exact
-  `options.scheduleComparisonPeriod`; the Explorer may expose a different
-  same-pass capture/bind contract; or size measurement may expose an 8 MiB
-  boundary not previously explicit. Any mismatch requires stopping at the
-  implementation gate and routing Replanning to the owning feature before code
-  edits.
+  schedule-semantics, and Explorer contracts plus Calendar internal Slices 1-2,
+  with Calendar Slice 2 completion commit `b9cee633` present before
+  implementation. Calendar public Slice 3 is not a dependency. The workflow
+  Slice 1 revision does not depend on or modify this feature's Slice 2 Git
+  work.
+- Risks: the landed predecessor callback is input-first with an optional
+  scoped-parser argument; accidental parser-first invocation, omission of the
+  scoped parser, or a compatibility shim would break same-pass capture and
+  violate the predecessor boundary. The exact
+  `options.scheduleComparisonPeriod` field, parser-error union, Explorer
+  capture/bind contract, or size boundary may still diverge in a future
+  predecessor change. Any mismatch requires stopping at the implementation
+  gate and routing Replanning to the owning feature before code edits.
 - Out of Scope: Git, WebAPI, index/ref selection, persistence, telemetry,
   report auto-open/copy, semantic changes, calendar sidecar registration,
   public calendar action/UI, and calendar Slice 3.
@@ -688,9 +865,10 @@ GitErrorCodes.UnknownPath` permits exactly one mapping from `indexChanges`
     `ajsbutler-git-head:` URI/content handoff, localized reason mapping, file
     fallback, no report/copy, same context identity, exact
     `options.scheduleComparisonPeriod` forwarding, and exactly one
-    artifact/capture-bind/session call. Assert exact-pair unregister precedes
-    one scope release, stale source actions fail after composite disposal,
-    action-time parsing is never used, and no calendar action is invoked here.
+    artifact/capture-bind/session call. Assert
+    `unregisterSourceCapture(context)` precedes one entry-carried idempotent
+    release, stale source actions fail after composite disposal, action-time
+    parsing is never used, and no calendar action is invoked here.
   - Add/extend desktop and web host tests: available desktop API, absent API on
     either host, and an available structural provider path without assuming a
     Git executable in test logic.
@@ -737,22 +915,32 @@ GitErrorCodes.UnknownPath` permits exactly one mapping from `indexChanges`
   period-bearing context and never implements or invokes that action.
 - The current code's no-period `BuildSemanticDiffReportDataInput` and
   `createBuildSemanticDiffReportData` shape remains documented as a baseline.
-  The future calendar adapter must expose the exact
-  `options.scheduleComparisonPeriod` forwarding shape before this workflow's
-  implementation gate can open. A different predecessor signature or
-  one-argument Explorer/source-handle contract stops implementation and routes
-  Replanning to the owning feature.
+  Calendar internal Slice 2 has now landed the exact
+  `BuildSemanticDiffPresentationArtifactsInput` forwarding shape and the
+  input-first `(input, scopedParser?)` callback. Slice 1 must pass the exact
+  `options.scheduleComparisonPeriod` field and the capture scope's parser as
+  the optional second argument; a parser-first call, alias, or shim is not
+  permitted. A future predecessor signature or one-argument
+  Explorer/source-handle contract mismatch remains a Replanning trigger to
+  the owning feature.
+- Slice 1's predecessor gate is satisfied by completion commit `b9cee633`,
+  with post-state evidence in `a0e73c31`; the implementer must still verify the
+  committed callback type and exact input-first signature before editing any
+  approved path. No implementation may target a working-tree-only predecessor
+  or add a parser-first adapter shim.
 - Source capture is the Explorer-owned scoped state machine:
   `collecting` → `bound` → `registered` → `released`. Prepare the
   file/Git-before and active-after immutable descriptors, begin capture before
-  the injected calendar artifact callback, bind the successful context once,
-  and let bootstrap register the exact borrowed `{ context, scope }` pair
+  the injected calendar artifact callback, invoke that callback input-first
+  with the scoped parser second, bind the successful context once, and let
+  bootstrap register the exact borrowed `SemanticDiffSourceCaptureEntry`
   before the existing one-argument `OpenSemanticDiffExplorer(context)`.
-  Composite cleanup calls `unregister(context, scope)` first and
-  `scope.release()` exactly once, then releases the separate provider entry;
-  direct release and stale epochs invalidate borrowed references before
-  dereference. Stale actions must fail closed, no action re-parses, and no
-  URI/content crosses the Explorer wire.
+  Composite cleanup calls `unregisterSourceCapture(context)` first and the
+  workflow-owned idempotent release callback carried by the entry exactly once,
+  then releases the separate provider entry; direct release and stale epochs
+  invalidate borrowed
+  references before dereference. Stale actions must fail closed, no action
+  re-parses, and no URI/content crosses the Explorer wire.
 - Any new source, setting, command ID, output default, absent-side meaning,
   predecessor DTO/schema/session change, Git executable/Node dependency,
   compatibility-floor increase, telemetry, or calendar behavior is a
@@ -807,17 +995,30 @@ GitErrorCodes.UnknownPath` permits exactly one mapping from `indexChanges`
       Explorer predecessor.
 - [x] Plan file/Git, period, exactly-once, desktop/web, malformed/large,
       localization, accessibility, privacy, docs, and rollback validation.
-- [x] Obtain independent `plan-reviewer` verdict `Ready`.
-- [x] Obtain Human Approval for the reviewed planning package.
-- [ ] Delegate the approved planning package to `approval-committer` for one
-      focused plan-gate commit before implementation.
+- [x] Obtain the original independent `plan-reviewer` verdict `Ready`.
+- [x] Obtain the original Human Approval for the reviewed planning package.
+- [x] Obtain independent `plan-reviewer` `Ready` review with no Findings for
+      the revised Slice 1 callback-boundary delta.
+- [x] Record revised Human Approval for the exact replan paths on 2026-09-10
+      under the user's automatic no-findings slice approval instruction.
+- [ ] Delegate the revised approved planning package to `approval-committer`
+      for one focused replan commit before implementation; the gate is
+      eligible and pending.
+- [x] Validate revised planning documents with `rtk pnpm run lint:md`,
+      `rtk pnpm run qlty`, and `git diff --check`; the qlty smell scan is the
+      landed-predecessor baseline.
+- [x] Capture the qlty baseline from the landed-predecessor workspace; the
+      full `rtk pnpm run qlty` scan recorded existing advisory findings.
+- [ ] Prove no new Slice 1 smell findings during implementation review.
 
 ## Notes
 
-- Planning changed only this feature's planning documents; Human Approval now
-  authorizes one focused plan-gate commit, while no runtime code, tests,
+- Replanning changed only this feature's TASKS.md and TRACEABILITY.md; the
+  feature-author's normative SPECS correction is present in the working tree,
+  while the focused replan commit remains pending. No runtime code, tests,
   generated artifacts, or configuration change is authorized.
-- Next decision: Main delegates this approved plan gate to
-  `approval-committer`; no implementation slice is active.
+- Next route: Main delegates the approved planning package paths to
+  `approval-committer` for the focused replan commit. No implementation slice
+  is active until that commit completes.
 - Source for the Git API verification: Microsoft VS Code tag `1.75.0`,
   `extensions/git/src/api/git.d.ts`, `api1.ts`, and `repository.ts`.

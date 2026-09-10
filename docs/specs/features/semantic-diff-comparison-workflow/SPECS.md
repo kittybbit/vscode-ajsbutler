@@ -109,13 +109,17 @@ period` or `Specify schedule period`. No period remains the compatibility
   one immutable output context. Before artifact construction, begin an
   isolated Explorer-owned capture with both immutable, side-labelled source
   descriptors. Its scoped `AjsParserPort` derives each normalized document
-  and source index from the same ANTLR pass. Call the bootstrap-injected
-  `(parser, input) => result` callback with that scoped parser; bootstrap
-  alone invokes the unchanged calendar artifact factory and its unchanged
-  input/result interface. Bind the two successful captures exactly once to
-  the exact resulting context. Explorer, report modes, and schedule-impact
-  consumers reuse that context; source actions use retained indexes and
-  snapshots without parsing, regenerating indexes, or searching another side.
+  and source index from the same ANTLR pass. After capture begins, invoke the
+  bootstrap-injected
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`
+  callback exactly once as `(input, capture.parser)`; no parser-first shim is
+  introduced. Bootstrap alone supplies the completion-committed calendar
+  artifact callback, whose input/result and parser-error union remain
+  unchanged. Bind the two successful captures exactly once to the exact
+  resulting context. Explorer, report modes, and schedule-impact consumers
+  reuse that context; source actions use retained indexes and snapshots
+  without parsing, regenerating indexes, or searching another side.
 - WF-10: The Semantic Diff Explorer is the sole default successful
   destination. It opens exactly once with the immutable context. Its existing
   Output action keeps Summary, Full, Audit, and JSON reachable through the
@@ -125,23 +129,29 @@ period` or `Specify schedule period`. No period remains the compatibility
   side uses the selected document snapshot, Git before uses an immutable
   `ajsbutler-git-head:` URI/content snapshot, and after uses the active
   document URI, version, and text snapshot. After successful capture binding,
-  bootstrap registers a borrowed binding against that exact context/scope
-  before the existing one-argument `OpenSemanticDiffExplorer(context)` call.
+  bootstrap stores the bound, borrowed `SemanticDiffSourceCaptureEntry`
+  against that exact context through the existing
+  `registerSourceCapture(context, entry)` API before the one-argument
+  `OpenSemanticDiffExplorer(context)` call.
   Host URI and `TextDocument` remain outside application descriptors; source
   navigation resolves the predecessor registry, not new context fields or
   wire content. Captures are isolated per command and remain the sole lifetime
   owner of retained indexes and immutable snapshot references from collecting
-  through release. Binding transfers no ownership; the registry and Explorer
-  only borrow references and never dispose those resources. Composite cleanup
-  calls `unregister(context, scope)` before `scope.release()` exactly once;
-  repeated cleanup is a no-op. Failure, cancellation, partial registration,
-  creation rollback, direct scope release, and stale epochs invalidate
-  borrowed lookups and release acquired resources. Late actions or completion
-  cannot reacquire released state or reveal changed content as the snapshot.
+  through release. Binding transfers no ownership; the registry stores the
+  bound, borrowed `SemanticDiffSourceCaptureEntry`, and Explorer never disposes
+  its resources directly. Composite cleanup calls
+  `unregisterSourceCapture(context)` for the exact context before invoking the
+  workflow-owned idempotent `release` callback carried by that entry exactly
+  once; repeated cleanup is a no-op. Failure, cancellation, partial
+  registration, creation rollback, direct capture release, and stale epochs
+  invalidate borrowed lookups and release acquired resources. Late actions or
+  completion cannot reacquire released state or reveal changed content as the
+  snapshot.
 - WF-11: Pass the selected period unchanged as
   `options.scheduleComparisonPeriod` through the calendar-owned source-text
   adapter into comparison; omit `options` when no period is selected. Consume
-  its future `BuildSemanticDiffPresentationArtifactsInput`, defined as
+  the landed, completion-committed
+  `BuildSemanticDiffPresentationArtifactsInput` contract, defined as
   `BuildSemanticDiffReportDataInput & { options?: Pick<CompareSemanticDiffOptions,
 "scheduleComparisonPeriod"> }`, without changing the existing content-only
   `BuildSemanticDiffReportDataInput`. The resulting context and sidecar retain
@@ -231,9 +241,14 @@ Scenario: Invalid or cancelled input has no partial result
   comparison semantics remain owned by their predecessor domain contracts.
 - Application: own a host-neutral workflow input/result boundary and
   orchestrate exactly one parse/comparison/context build through injected
-  ports. Explorer owns the same-pass capture and source-index contracts;
-  existing parser and calendar factory interfaces remain unchanged. It must
-  not depend on Git, VS Code, or presentation types.
+  ports. Capture begins first, and the workflow invokes the injected
+  `(input: BuildSemanticDiffPresentationArtifactsInput,
+scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`
+  callback exactly once as `(input, capture.parser)`. The exact
+  `options.scheduleComparisonPeriod` forwarding and parser-error union remain
+  unchanged; no parser-first shim is introduced. Explorer owns the same-pass
+  capture and source-index contracts. The application must not depend on Git,
+  VS Code, or presentation types.
 - Presentation: own command prompts, labels, localization, active-editor
   and decoded-file capture, cancellation/error presentation, host-private
   source snapshots, and the default Explorer handoff.
@@ -242,13 +257,16 @@ Scenario: Invalid or cancelled input has no partial result
   expose VS Code Git types inward.
 - Bootstrap: compose source adapters, the predecessor comparison/artifact
   builder, and the existing Explorer/session opener without constructing
-  semantic meaning. Inject the per-command capture capability and the
-  `(parser, input) => result` callback that invokes the application factory.
-  After capture succeeds, associate the retained indexes and opaque source
-  handles with the exact output context through a borrowing host-private
-  registry. The capture remains their sole owner. Preserve the opener
-  signature and coordinate unregister-before-release cleanup with the calendar
-  companion owner.
+  semantic meaning. Inject the per-command capture capability and the landed
+  input-first artifact callback; the workflow calls it exactly once as
+  `(input, capture.parser)`. After successful capture binding, register the
+  bound, borrowed `SemanticDiffSourceCaptureEntry` against the exact output
+  context through the existing `registerSourceCapture(context, entry)` API.
+  The capture remains the sole owner. Preserve the one-argument Explorer
+  opener and existing registry/type APIs; cleanup calls
+  `unregisterSourceCapture(context)` before invoking the entry's
+  workflow-owned idempotent `release` callback exactly once, coordinated with
+  the calendar companion owner.
 
 ## Impact Analysis
 
@@ -408,9 +426,10 @@ Definition` states the immediate action and does not imply that an approval
   and reject incomplete, mismatched, extra, rebound, or released captures.
   Source actions perform zero parses or index regeneration.
 - Lifecycle tests prove capture ownership never transfers at bind or registry
-  registration; cleanup unregisters the exact context/scope before one scope
-  release. Repeated cleanup, direct release, stale epochs, and late completion
-  cannot double-dispose, retain, or reacquire borrowed resources.
+  registration; cleanup calls `unregisterSourceCapture(context)` before the
+  entry-carried, workflow-owned idempotent release exactly once. Repeated
+  cleanup, direct release, stale epochs, and late completion cannot
+  double-dispose, retain, or reacquire borrowed resources.
 - The one-argument Explorer handoff resolves the exact before/after snapshots
   and retained indexes through context-keyed opaque handles. Tests verify
   snapshot acquisition before any context exists, subsequent exact-context
