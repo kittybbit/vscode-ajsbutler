@@ -49,6 +49,10 @@ export type SemanticDiffScheduleUnsupportedDecision = {
   unit: AjsUnit;
   parameter: AjsParameter;
   reason: SemanticDiffScheduleUnsupportedReason;
+  status?: Extract<
+    SemanticDiffScheduleStatus,
+    "invalid" | "missing-context" | "unsupported"
+  >;
   scheduleRule?: number;
 };
 
@@ -81,6 +85,10 @@ export type SemanticDiffScheduleEvaluation =
       runDecisions: SemanticDiffScheduleRunDecision[];
       unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
       zeroRunCandidates: AjsUnit[];
+      zeroRunCandidatesBySide: {
+        before: AjsUnit[];
+        after: AjsUnit[];
+      };
       pairEvaluations: SemanticDiffSchedulePairEvaluation[];
     };
 
@@ -145,11 +153,22 @@ const unsupportedDecision = (
   if (!rule.reason) {
     return undefined;
   }
+  const carriesProjectionStatus =
+    rule.reason === "calendar-selection" ||
+    rule.reason === "closed-day-substitution";
+  const status =
+    carriesProjectionStatus &&
+    (rule.status === "invalid" ||
+      rule.status === "missing-context" ||
+      rule.status === "unsupported")
+      ? rule.status
+      : undefined;
   return {
     side,
     unit: interpretation.unit,
     parameter: rule.parameter,
     reason: rule.reason,
+    ...(status === undefined ? {} : { status }),
     ...(rule.rule === undefined ? {} : { scheduleRule: rule.rule }),
   };
 };
@@ -413,6 +432,10 @@ export const evaluateSemanticDiffSchedule = (
       ...after.unsupportedDecisions,
     ],
     zeroRunCandidates: after.zeroRunCandidates,
+    zeroRunCandidatesBySide: {
+      before: before.zeroRunCandidates,
+      after: after.zeroRunCandidates,
+    },
     pairEvaluations: toPairEvaluations(
       input.matches,
       before.unitEvaluations,

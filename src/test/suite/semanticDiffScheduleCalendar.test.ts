@@ -508,6 +508,10 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       result.zeroRunCandidates.map((candidate) => candidate.id),
       [noRun.id],
     );
+    assert.deepStrictEqual(result.zeroRunCandidatesBySide, {
+      before: [],
+      after: [noRun],
+    });
     assert.deepStrictEqual(
       result.unsupportedDecisions.map((decision) => [
         decision.unit.id,

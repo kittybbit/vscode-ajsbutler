@@ -21,6 +21,36 @@
 
 <!-- markdownlint-enable MD013 MD060 -->
 
+## Slice 1 Implementation Evidence
+
+- Approved boundary: the third targeted replan is committed in `11615026`;
+  Slice 1 implementation is complete in the uncommitted working tree and is
+  pending independent implementation review and Completion Approval.
+- Runtime evidence: the internal schedule differ groups by canonical source
+  path/date/rule, pairs duplicate occurrences deterministically, and emits
+  changed-time plus unmatched rows without changing the public run-change
+  DTO. The sidecar pairs by source identity/date/rule, prevents nested
+  cross-pairing, resolves actual upstream `(id, occurrenceOrdinal)` references,
+  and fails closed when an eligible row is absent. The real parsed-document
+  end-to-end fixture covers duplicate/count-mismatch output and exact sidecar
+  references; deterministic issue, timeline, and rule expectations are
+  asserted.
+- Validation rerun: `rtk pnpm run test:compile`; focused schedule/sidecar/
+  artifact/calendar Mocha suites (67 passing); JSON/contract/schedule/Explorer
+  pure regression Mocha suites (54 passing); report and host-bound Explorer
+  regressions in the desktop extension-host run (exit 0 with the existing
+  macOS codesign warning); desktop and web webpack builds; and web
+  extension-host tests (exit 0 with existing EPIPE/Premature-close
+  stream-cleanup warnings). `rtk pnpm run qlty:check`
+  passed with no issues; `rtk pnpm run qlty:smells` completed with advisory
+  complexity/duplication findings only; markdown lint passed with 0 errors;
+  and `git diff --check` passed.
+- Compatibility/readiness: no command, bootstrap, Explorer, UI, manifest,
+  telemetry, parser, Node-built-in, public result/report/JSON, or public action
+  boundary changed. Shared code remains browser-safe and host-neutral. The
+  independent implementation-reviewer is the next required route; no
+  Completion Approval or completion commit is claimed here.
+
 ## Dependency And Approval Trace
 
 - Slice 1 uses the schedule-semantics predecessor evaluation and the

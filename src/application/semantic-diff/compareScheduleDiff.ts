@@ -54,6 +54,10 @@ export type ScheduleDiffResult = {
   limitations: SemanticDiffLimitation[];
 };
 
+export type ScheduleDiffResultWithEvaluation = ScheduleDiffResult & {
+  evaluation: SemanticDiffScheduleEvaluation;
+};
+
 const ruleValueId = (parameter: AjsParameter): string =>
   `${parameter.key}:${parameter.value}`;
 
@@ -320,9 +324,9 @@ const createEvaluatedScheduleDiffResult = (
   limitations: [],
 });
 
-export const compareScheduleDiff = (
+export const compareScheduleDiffWithEvaluation = (
   input: ScheduleDiffInput,
-): ScheduleDiffResult => {
+): ScheduleDiffResultWithEvaluation => {
   const evaluation = evaluateSemanticDiffSchedule({
     beforeUnits: input.beforeUnits,
     afterUnits: input.afterUnits,
@@ -334,6 +338,7 @@ export const compareScheduleDiff = (
 
   if (evaluation.kind === "not-requested") {
     return {
+      evaluation,
       confirmationRequired: [],
       unsupportedItems: [],
       limitations: [],
@@ -342,6 +347,7 @@ export const compareScheduleDiff = (
 
   if (evaluation.kind === "invalid-period") {
     return {
+      evaluation,
       confirmationRequired: [],
       unsupportedItems: [
         createPeriodUnsupportedItem(
@@ -354,5 +360,22 @@ export const compareScheduleDiff = (
     };
   }
 
-  return createEvaluatedScheduleDiffResult(evaluation, input);
+  return {
+    evaluation,
+    ...createEvaluatedScheduleDiffResult(evaluation, input),
+  };
+};
+
+export const compareScheduleDiff = (
+  input: ScheduleDiffInput,
+): ScheduleDiffResult => {
+  const result = compareScheduleDiffWithEvaluation(input);
+  return {
+    ...(result.scheduleComparison
+      ? { scheduleComparison: result.scheduleComparison }
+      : {}),
+    confirmationRequired: result.confirmationRequired,
+    unsupportedItems: result.unsupportedItems,
+    limitations: result.limitations,
+  };
 };

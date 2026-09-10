@@ -46,7 +46,8 @@ import {
   type SemanticDiffRelationDecision,
   type SemanticDiffUnitMatch,
 } from "../../domain/services/semantic-diff/semanticDiffStructuralRules";
-import { compareScheduleDiff } from "./compareScheduleDiff";
+import { compareScheduleDiffWithEvaluation } from "./compareScheduleDiff";
+import type { SemanticDiffScheduleEvaluation } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
 
 export type CompareSemanticDiffOptions = {
   jobGroupPath?: string;
@@ -70,6 +71,12 @@ export type SemanticDiffResultParts = {
   unsupportedItems?: SemanticDiffUnsupportedItem[];
   limitations?: SemanticDiffLimitation[];
   scheduleComparison?: SemanticDiffResult["scheduleComparison"];
+};
+
+/** Internal comparison output used by the calendar artifact projection. */
+export type SemanticDiffComparisonArtifacts = {
+  result: SemanticDiffResult;
+  scheduleEvaluation: SemanticDiffScheduleEvaluation;
 };
 
 const sortStrings = (values: string[]): string[] => [...values].sort();
@@ -818,7 +825,9 @@ export const createSemanticDiffResult = (
   return result;
 };
 
-export const compareSemanticDiff: CompareSemanticDiff = (input) => {
+export const compareSemanticDiffInternal = (
+  input: CompareSemanticDiffInput,
+): SemanticDiffComparisonArtifacts => {
   const beforeUnits = scopedUnits(input.before, input.options?.jobGroupPath);
   const afterUnits = scopedUnits(input.after, input.options?.jobGroupPath);
   const beforeUnitById = buildUnitById(beforeUnits);
@@ -889,7 +898,7 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
   const unsupportedItems = evidence.unsupportedDecisions.map(
     createUnsupportedEvidenceItem,
   );
-  const scheduleDiff = compareScheduleDiff({
+  const scheduleDiff = compareScheduleDiffWithEvaluation({
     beforeDocument: input.before,
     afterDocument: input.after,
     beforeUnits,
@@ -899,7 +908,7 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
     toUnitTarget,
   });
 
-  return createSemanticDiffResult(
+  const result = createSemanticDiffResult(
     input,
     {
       changes: changes.sort((left, right) => compareStrings(left.id, right.id)),
@@ -917,4 +926,12 @@ export const compareSemanticDiff: CompareSemanticDiff = (input) => {
     },
     { before: beforeUnits, after: afterUnits },
   );
+
+  return {
+    result,
+    scheduleEvaluation: scheduleDiff.evaluation,
+  };
 };
+
+export const compareSemanticDiff: CompareSemanticDiff = (input) =>
+  compareSemanticDiffInternal(input).result;

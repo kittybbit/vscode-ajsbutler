@@ -5,18 +5,18 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Replanning approved for the third targeted Slice 1 delta; the focused
-  plan/replan commit remains required before implementation. Runtime code,
-  tests, generated artifacts, configuration, staging, and implementation are
-  not authorized in this run.
+- Mode: Completion Approval recorded for Slice 1 after approved third targeted
+  replan commit `11615026`; the focused completion commit is eligible and
+  pending. Runtime and focused test changes remain limited to the approved
+  Slice 1 paths.
 - Approved or active slice: Slice 1 (the immutable schedule-impact sidecar)
-  remains selected. The previous implementation and approved first and
-  second-Replanning deltas are preserved. The latest implementation review
-  found a real upstream differ/reference and deterministic-order gap. The
-  third targeted delta received final independent `plan-reviewer` `Ready`
-  review with no Findings and Main's automatic Human Approval; its focused
-  plan/replan commit remains required. Slice 2 and public Slice 3 remain out
-  of scope.
+  is implementation-complete, independently reviewed `Ready` with no
+  Findings, and Completion Approved. The previous implementation and approved
+  first and second-Replanning deltas are preserved. The latest implementation
+  review found no remaining Findings; the third targeted delta received final
+  independent `plan-reviewer` `Ready` review with no Findings and Main's
+  automatic Human Approval; its focused plan/replan commit `11615026` is
+  complete. Slice 2 is not active and public Slice 3 remains out of scope.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -26,17 +26,18 @@
   `schedule-semantics-expansion`, `semantic-diff-structured-outputs`, and
   `semantic-diff-explorer` plans.
 - Validate the revised planning documents with `rtk pnpm run lint:md` and
-  `git diff --check`; no third-delta implementation or test result may be
-  claimed until its exact approved paths are implemented and rerun.
+  `git diff --check`; record third-delta implementation results only after
+  its exact approved paths are implemented and rerun.
 
 ## Current Plan Basis
 
-- This is the third targeted Replanning Mode revision for Slice 1 after the
+- This was the third targeted Replanning Mode revision for Slice 1 after the
   latest implementation-review Findings. The feature contract and rationale
   remain in `SPECS.md`; this file owns the executable slice plan and current
   gate state. The earlier replan approval commit `6622953f` and the second
   replan approval commit `ebf8bf3d` remain historical and their implementation
-  changes are preserved; this third delta has no implementation commit yet.
+  changes are preserved; this third delta is authorized by focused commit
+  `11615026` and remains uncommitted pending independent review.
 - The prior Findings remain remediated and preserved: carried status is
   reason-scoped; before and after valid-no-runs metadata is retained in one
   evaluation; duplicate/count-mismatch effects have strict reference rules;
@@ -48,8 +49,8 @@
   be proven against the actual upstream output; sidecar pairing groups only by
   date/rule and can cross-pair nested source units; focused expected detail,
   timeline, and rule order needs to follow the approved deterministic
-  comparators; and the prior validation claims must be reset to historical
-  evidence until the revised checks pass.
+  comparators; prior validation claims were reset to historical evidence and
+  are superseded by the current rerun evidence below.
 - The required revision remains an evaluation-only predecessor carrier,
   internal differ, and application sidecar projection change, plus one narrow
   normative documentation clarification. No new schedule meaning, public
@@ -69,9 +70,10 @@
 - The original independent plan review, first replan review, and second
   replan review are complete with `Ready` verdicts and no Findings. The third
   package has final independent `plan-reviewer` `Ready` review with no
-  Findings and Main's automatic Human Approval. It is eligible for the
-  approval-committer plan/replan route; implementation remains gated on that
-  focused commit.
+  Findings and Main's automatic Human Approval. Its focused plan/replan commit
+  `11615026` is complete; implementation review is `Ready` with no Findings,
+  Completion Approval is recorded below, and the focused completion commit is
+  pending.
 
 ## Sync Rule
 
@@ -90,11 +92,10 @@
 
 ## Plan Status
 
-- Status: Third Replanning approved for Slice 1; the prior approved replan
-  commit `ebf8bf3d` and implementation diff remain present. Final independent
-  plan review found no Findings and Main recorded automatic Human Approval;
-  the focused plan/replan commit, implementation re-review, and Completion
-  Approval remain pending.
+- Status: Slice 1 implementation is complete under approved third-replan
+  commit `11615026`; independent implementation review is `Ready` with no
+  Findings, Completion Approval is recorded, and the focused completion commit
+  is pending.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
@@ -105,7 +106,9 @@
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
-  plan/replan commit remains required before implementation.
+  plan/replan commit `11615026` is complete; implementation review is `Ready`
+  with no Findings, Completion Approval is recorded, and the focused
+  completion commit remains pending.
 - Active implementation slice: Slice 1.
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused commit after the
@@ -146,8 +149,8 @@
   - `src/test/suite/semanticDiffScheduleImpact.test.ts`
   - `src/test/suite/semanticDiffScheduleCalendar.test.ts`
 
-- Third targeted Replanning delta paths (independently reviewed and Human
-  Approved; focused plan/replan commit pending):
+- Third targeted Replanning delta paths (independently reviewed, Human
+  Approved, and committed in focused plan/replan commit `11615026`):
   - `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`: add a
     minimal internal run-differ contract that groups by canonical source-unit
     path, date, and rule; uses stable source facts as tie-breaks; pairs
@@ -186,18 +189,44 @@ also covers the independently reviewed third targeted delta above.
 
 This approval authorizes implementation within the listed original Slice 1
 boundary and all listed Replanning delta paths, including the independently
-reviewed third targeted paths above. The focused plan/replan commit remains
-required before implementation. Completion Approval remains a separate gate
-after independent implementation review.
+reviewed third targeted paths above. The focused plan/replan commit
+`11615026` is complete. Independent implementation review is `Ready` with no
+Findings and Completion Approval is recorded above; the focused completion
+commit remains pending.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-10; approved in current conversation
+- Basis: independent `implementation-reviewer` verdict `Ready`; Findings none;
+  the user's automatic no-findings slice-level approval instruction.
+- Approved scope: the completed Slice 1 immutable schedule-impact sidecar,
+  including its one-pass comparison-artifact contract, evaluation-only
+  predecessor carriers, internal source-aware differ and sidecar pairing,
+  exact upstream reference validation, pure artifact builder, focused tests,
+  deterministic ordering, and current validation evidence. Slice 2 is not
+  active and public Slice 3 remains out of scope.
+- Approved paths:
+  - `src/application/semantic-diff/compareScheduleDiff.ts`
+  - `src/application/semantic-diff/compareSemanticDiff.ts`
+  - `src/application/semantic-diff/compareSemanticDiffWithArtifacts.ts`
+  - `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
+  - `src/application/semantic-diff/semanticDiffScheduleImpact.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
+  - `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`
+  - `src/test/suite/semanticDiffPresentationArtifacts.test.ts`
+  - `src/test/suite/semanticDiffScheduleImpact.test.ts`
+  - `src/test/suite/semanticDiffScheduleCalendar.test.ts`
+  - `src/test/suite/semanticDiffScheduleRules.test.ts`
+- Implementation review verdict: `Ready`; Findings none. The review package
+  covers the exact completed paths above, duplicate/count-mismatch pairing,
+  source-unit isolation, root-scope/reference fail-closed behavior, status and
+  no-run preservation, public run-change ordering compatibility, report/JSON
+  and Explorer regressions, desktop/web checks, and quality evidence recorded
+  in this task.
+- Commit status: Eligible; focused Slice 1 completion commit pending through
+  `approval-committer`.
 
 ## Closure Approval
 
@@ -603,11 +632,11 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
 
 ### Slice 1: Capture And Validate The Immutable Schedule-Impact Sidecar
 
-- Status: Third targeted Replanning is independently reviewed and Human
-  Approved; the prior implementation and approved predecessor-status deltas
-  remain preserved. This new differ, source-identity, ordering, and
-  E2E-validation delta still requires its focused plan/replan commit before
-  implementation resumes.
+- Status: Slice 1 implementation is complete under approved third targeted
+  replan commit `11615026`; the prior implementation and approved
+  predecessor-status deltas remain preserved. Independent implementation review
+  is `Ready` with no Findings, Completion Approval is recorded, and the focused
+  completion commit is pending.
 - Scope: create the calendar-owned internal
   `compareSemanticDiffWithArtifacts(input: CompareSemanticDiffInput)` contract
   over parsed documents. Invoke identity comparison and schedule evaluation
@@ -708,8 +737,8 @@ scheduleProjectionFacts })`; it calls `buildSemanticDiffOutputContext(result)`
     predecessor's existing after-side zero-run confirmation behavior while
     proving that the new before/after evaluation metadata is additive and
     evaluation-only.
-- Third targeted Replanning paths (independently reviewed and Human Approved;
-  focused plan/replan commit pending):
+- Third targeted Replanning paths (independently reviewed, Human Approved, and
+  committed in focused plan/replan commit `11615026`):
   `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`,
   `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
   `src/test/suite/semanticDiffScheduleRules.test.ts`,
@@ -722,8 +751,8 @@ scheduleProjectionFacts })`; it calls `buildSemanticDiffOutputContext(result)`
   unchanged public result/report/JSON boundaries. The authorized
   feature-author has prepared and validated the normative source-unit pairing
   clarification in SPECS.
-- Third targeted Replanning delta (reviewed `Ready` with no Findings and Human
-  Approved; focused plan/replan commit pending): the real
+- Third targeted Replanning delta (reviewed `Ready` with no Findings, Human
+  Approved, and committed in focused plan/replan commit `11615026`): the real
   upstream differ and the sidecar must share a minimal internal pairing
   contract. `compareScheduleRuns` groups by canonical source-unit path, exact
   date, and rule; sorts each side by exact time and stable source facts;
@@ -847,9 +876,9 @@ scheduleProjectionFacts })`; it calls `buildSemanticDiffOutputContext(result)`
   the real comparison path, inspect its emitted `runChanges`, build the
   sidecar, and assert exact references for each effect; synthetic
   hand-authored changed-time rows are insufficient. Focused expectations must
-  match the approved detail/timeline/rule comparator order. Validation text
-  remains historical until these exact tests and the scoped compile/quality
-  checks pass.
+  match the approved detail/timeline/rule comparator order. The scoped tests
+  and compile/quality checks now pass, with their current results recorded in
+  the implementation evidence below.
 - Documentation validation confirms that `SPECS.md` contains the
   source-unit-identity/date/rule rule above and that its root/side, duplicate,
   deterministic-order, and public-contract constraints remain intact. The
@@ -888,8 +917,9 @@ scheduleProjectionFacts })`, its exactly-one output-context call, the internal
   differ/source-identity/order/E2E plus normative-SPECS delta has final
   independent `plan-reviewer` `Ready` review with no Findings and Main's
   automatic Human Approval recorded for its exact paths. Its focused
-  plan/replan commit is still required before implementation. Completion
-  Approval remains a separate gate.
+  plan/replan commit `11615026` is complete. Implementation review is `Ready`
+  with no Findings and Completion Approval is recorded; the focused completion
+  commit remains pending.
 - Dependencies: completion-committed `schedule-semantics-expansion`,
   `semantic-diff-structured-outputs`, and the predecessor's stable parsed
   `CompareSemanticDiffInput`, result/context, and
@@ -944,99 +974,55 @@ scheduleProjectionFacts })`, its exactly-one output-context call, the internal
 
 ### Slice 1 Implementation Evidence
 
-- Status: The prior Slice 1 implementation is present under approved commit
-  `ebf8bf3d`, but the third targeted implementation-review Findings reopen
-  Replanning. No third-delta implementation, review, or Completion Approval
-  is claimed.
-- Changed paths: `compareSemanticDiff.ts`, `compareScheduleDiff.ts`,
-  `compareSemanticDiffWithArtifacts.ts`,
-  `semanticDiffScheduleImpact.ts`,
-  `buildSemanticDiffPresentationArtifacts.ts`, and the three named pure
-  application test files, `semanticDiffScheduleRules.ts`, and the two
-  approved status-regression test files.
-- Historical acceptance evidence from the prior approved package: one internal
-  comparison/evaluation pass returns the
-  unchanged public result plus discriminated schedule facts; the pure builder
-  creates exactly one `{ result, summary }` context and maps evaluated versus
-  unavailable facts. The sidecar retains closed root/candidate correspondence,
-  scoped roots, root-owned issues, explicit outcomes, duplicate-aware
-  ordering, length-prefixed IDs, and validated composite source-change
-  references. The predecessor carries reason-scoped calendar status and
-  both-side valid-no-runs metadata; legacy `missing-start-time` remains
-  `uncalculated`; duplicate/count-mismatch and root-scope effects resolve
-  one-to-one against upstream rows; candidate-root issues are excluded; and
-  issue ordinals are grouped by issue kind. This evidence does not cover the
-  real differ duplicate/count-mismatch output, source-unit pairing, or the
-  required end-to-end reference fixture in the third delta.
-- Historical validation completed after the second approved replan:
-  `rtk pnpm run test:compile`,
-  desktop and web webpack builds, desktop and web extension-host test runs,
-  `rtk pnpm run qlty:check`, `rtk pnpm run qlty:smells`,
-  `rtk pnpm run lint:md`, and `git diff --check` all passed. The web harness
-  emitted existing stream-cleanup warnings while exiting with status 0. These
-  results are not new validation for the third replan; no third-delta check
-  has been run yet.
+- Status: Slice 1 implementation is complete in the working tree under
+  approved third-replan commit `11615026`; independent implementation review
+  is `Ready` with no Findings, Completion Approval is approved, and the focused
+  completion commit is pending.
+- Changed paths: the prior Slice 1 comparison-artifact and presentation
+  builder paths, the evaluation-only schedule carrier, and the approved third
+  delta paths including the internal differ, source-identity sidecar pairing,
+  deterministic-order fixtures, and real end-to-end comparison fixture.
+- Acceptance evidence: the internal comparison performs one identity pass and
+  one schedule evaluation; the public `.result` and `{ result, summary }`
+  context remain unchanged; and the pure builder projects available versus
+  unavailable facts without recalculation. The sidecar retains closed-root
+  correspondence, scoped roots, root-owned issues, explicit outcomes,
+  duplicate-aware IDs and ordinals, and exact composite source references.
+  Real differ fixtures prove duplicate/count-mismatch changed-time rows and
+  unmatched extras. Nested source-unit fixtures prove no cross-pairing, and
+  the end-to-end fixture resolves actual `runChanges` rows. Missing eligible
+  references fail closed; candidate-root issues remain excluded; issue
+  ordinals remain issue-kind scoped; and calendar status is reason-scoped.
+- Validation completed for this implementation: `rtk pnpm run test:compile`;
+  focused schedule/sidecar/artifact/calendar Mocha suites (67 passing);
+  JSON/contract/schedule/Explorer pure regression Mocha suites (54 passing);
+  report and host-bound Explorer regressions are covered by the desktop
+  extension-host run (exit 0, with the existing macOS codesign warning);
+  desktop and web webpack builds; and web extension-host tests (exit 0, with
+  existing EPIPE/Premature-close stream-cleanup warnings).
+  `rtk pnpm run qlty:check` passed with no issues; `rtk pnpm run qlty:smells`
+  completed with advisory complexity/duplication findings only; markdown lint
+  passed with 0 errors; and `git diff --check` passed.
 - Compatibility and readiness: no manifest, command, bootstrap, Explorer,
-  UI, JSON/report, telemetry, parser, Node-built-in, or public-action changes;
-  application code remains host-neutral and browser-safe. Completion is not
-  claimed until the independent implementation re-review has no findings and
-  the separate completion gate is granted.
-- Prior review finding remediation: root-scope metadata remains descriptive, while
-  real one-sided effects now require exact upstream references and missing
-  rows fail closed; root discovery follows `jobGroupPath`; duplicate details
-  retain structured raw values; candidate-root issues are excluded; issue
-  ordering uses the global comparator; and the corrected fixture exercises a
-  missing calendar source. The predecessor status carrier is limited to the
-  two calendar reasons and preserves the existing after-side compatibility
-  view.
-- Third targeted Finding status: the real domain differ still needs
-  deterministic duplicate/count-mismatch pairing; sidecar pairing still needs
-  source-unit identity; focused detail/timeline/rule expectations need the
-  approved comparator order; and all validation claims for this delta remain
-  reset until rerun. The public result/report/JSON boundaries remain
-  unchanged.
-- Latest exact revision paths: predecessor evaluation carrier in
-  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`; sidecar
-  projection, candidate filtering, ordinals, and reference validation in
-  `src/application/semantic-diff/semanticDiffScheduleImpact.ts`; and focused
-  regression fixtures in
-  `src/test/suite/semanticDiffScheduleRules.test.ts`,
-  `src/test/suite/semanticDiffScheduleImpact.test.ts`, and
-  `src/test/suite/semanticDiffScheduleCalendar.test.ts`. The existing
-  `SemanticDiffScheduleStatus` union is reused. No Slice 2/3, command,
-  bootstrap, Explorer, public UI, result/report/JSON, or documentation path
-  was implemented; the SPECS path below is planning scope only.
-- Third targeted paths approved by Main are
-  `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`,
-  `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
-  `src/test/suite/semanticDiffScheduleRules.test.ts`,
-  `src/test/suite/semanticDiffScheduleImpact.test.ts`, and
-  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`,
-  `src/test/suite/semanticDiffScheduleCalendar.test.ts`, and
-  `docs/specs/features/schedule-impact-calendar/SPECS.md`. They remain
-  uncommitted planning scope in this run; the authorized feature-author has
-  prepared and validated the SPECS clarification.
-- Changed dependency and boundary: predecessor status and per-side no-run
-  carriers remain evaluation-only; the third delta adds only the internal
-  differ pairing contract, sidecar source-identity pairing, and the exact
-  normative SPECS wording clarification. No public result/report/JSON
-  contract is widened, and no Slice 2/3, command, bootstrap, Explorer, public
-  UI, or telemetry work is authorized.
-- Remaining risks: duplicate rows may still be misclassified as added/removed,
-  nested units may cross-pair, real upstream references may be absent despite
-  synthetic unit-test rows, or comparator order may drift. A public
-  DTO/result/report/JSON change, schedule-meaning change, second evaluation,
-  or identity-policy change remains a blocker for Main rather than part of
-  this replan.
-- Recommended route: Main should route this independently reviewed and Human
-  Approved seven-path package to `approval-committer` for the focused
-  plan/replan commit, then return to implementation and independent
-  implementation review.
+  UI, telemetry, parser, Node-built-in, public result/report/JSON, or public
+  action changes were made. Shared code remains host-neutral and browser-safe.
+  Production readiness evidence covers deterministic source-local pairing,
+  fail-closed reference validation, immutable facts, and no schedule
+  recalculation. Independent implementation review is `Ready` with no
+  Findings and Completion Approval is approved; only the focused completion
+  commit remains pending.
+- Unresolved risks: the focused completion commit remains pending; no Slice
+  2/3, command, bootstrap, Explorer, public UI, or public documentation work
+  is included. A public DTO/result/report/JSON, schedule-meaning,
+  identity-policy, or scope change remains a Main-owned Replanning trigger.
+- Recommended route: Main should route this approved, complete uncommitted
+  Slice 1 diff and evidence to `approval-committer` for the focused completion
+  commit. Slice 2 remains inactive until that commit is complete.
 
 ### Slice 2: Build The Internal Calendar Session And Transport Foundation
 
-- Status: Planned; blocked on completion-committed Slice 1 and the existing
-  Explorer session creation contract.
+- Status: Planned and not active; blocked on the completion-committed Slice 1
+  and the existing Explorer session creation contract.
 - Scope: move the command caller, injected builder dependency, and bootstrap
   composition into this integration slice. The existing
   `BuildSemanticDiffReportDataInput` remains unchanged. The calendar-owned
@@ -1427,9 +1413,8 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 - [x] The latest second-Replanning package receives an independent
       `plan-reviewer` `Ready` verdict with no Findings.
 - [x] Human Approval is recorded for the original Slice 1, first and second
-      Replanning, and third targeted Replanning delta paths; the focused
-      second-Replanning commit `ebf8bf3d` is complete and the third targeted
-      focused plan/replan commit remains pending.
+      Replanning, and third targeted Replanning delta paths; the focused third
+      plan/replan commit `11615026` is complete.
 - [x] Slice 1 proves exact root/candidate selection, the full root/non-root
       correspondence matrix, `scopeTransition` metadata and no-cross-side
       pairing, one identity comparison and one schedule evaluation in
@@ -1446,14 +1431,23 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 - [x] Third targeted Replanning delta received independent `plan-reviewer`
       `Ready` review with no Findings and Main's Human Approval for the exact
       differ, sidecar, focused-rule, focused-impact, end-to-end
-      comparison-artifact, calendar, and normative-SPECS paths. Its focused
-      plan/replan commit remains required before implementation resumes.
-- [ ] Third delta proves the real `semanticDiffScheduleDiffer` preserves
+      comparison-artifact, calendar, and normative-SPECS paths; its focused
+      plan/replan commit is `11615026`.
+- [x] Third delta proves the real `semanticDiffScheduleDiffer` preserves
       duplicate records, pairs duplicate/count-mismatch occurrences into real
       changed-time rows plus unmatched extras, groups by source identity/date/
       rule, and emits approved deterministic detail/timeline/rule order; the
       sidecar isolates nested source units and the end-to-end comparison path
       resolves every reference against its actual upstream `runChanges`.
+- [x] Independent `implementation-reviewer` review of the exact completed
+      Slice 1 paths returned `Ready` with no Findings, including public
+      run-change ordering compatibility, source-aware pairing, exact
+      references, report/JSON and Explorer regressions, and desktop/web
+      validation evidence.
+- [x] Main recorded automatic Completion Approval for Slice 1 on 2026-09-10
+      in the current conversation under the user's no-findings instruction;
+      the exact completion paths and evidence are recorded above, and the
+      focused completion commit is eligible and pending.
 - [ ] Slice 2 proves the additive
       `BuildSemanticDiffPresentationArtifactsInput` shape, omitted
       `options`/period-field behavior, and selected-period forwarding under
@@ -1482,14 +1476,15 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       use-case/index/docs lint plus the corrected roadmap dependency.
 - [x] Existing Semantic Diff result/context, JSON/report, Explorer, Flow,
       source, copy, schedule, and normal viewer regressions remain passing.
-- [x] Historical risk-based validation for the second approved Slice 1
-      package passed: compile, desktop/web builds, desktop/web extension-host
-      tests, quality checks, markdown lint, and diff whitespace validation. The
-      web harness emitted existing stream-cleanup warnings while exiting
-      successfully.
-- [ ] Third targeted delta validation has been rerun successfully. Until then,
-      prior results remain historical and no implementation/review readiness is
-      claimed for this delta.
+- [x] Risk-based validation for the current Slice 1 implementation completed:
+      compile, focused 67-test Mocha run, JSON/contract/schedule/Explorer pure
+      regression Mocha run (54 passing), report and host-bound Explorer
+      coverage in the desktop extension-host run, desktop/web builds, and
+      desktop/web extension-host tests. Desktop exited 0 with the existing
+      macOS codesign warning; web exited 0 with existing EPIPE/Premature-close
+      stream-cleanup warnings. `qlty:check` passed with no issues;
+      `qlty:smells` completed with advisory complexity/duplication findings
+      only; markdown lint passed with 0 errors; and `git diff --check` passed.
 - [x] The authorized feature-author prepared and validated the `SPECS.md`
       source-unit-identity/date/rule normative pairing rule with preserved
       root/side semantics and deterministic duplicate handling.
