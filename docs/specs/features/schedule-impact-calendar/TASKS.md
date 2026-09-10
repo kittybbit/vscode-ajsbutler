@@ -5,14 +5,13 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Slice 2 implementation is complete under the reviewed and approved
-  full-plan gate. Slice 1 is completion-committed at `51a8ae4a`; its runtime
-  and focused test changes remain preserved. Slice 2's focused completion
-  commit is pending.
-- Approved or active slice: Slice 2 (the internal calendar session and
-  transport foundation) is completion-approved under its approved boundary;
-  its focused commit is pending. Slice 1 is complete and committed; public
-  Slice 3 is not active and remains out of scope.
+- Mode: Slice 2 implementation and completion are complete under the reviewed
+  and approved full-plan gate. Slice 1 is completion-committed at `51a8ae4a`;
+  its runtime and focused test changes remain preserved. Slice 2 is
+  completion-committed at `b9cee633`.
+- Approved or active slice: none for this dependency run. Slices 1 and 2 are
+  complete and committed; public Slice 3 remains planned, not active, and out
+  of scope.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -61,8 +60,8 @@
   transport change, and no schedule recalculation or candidate merging.
 - Public calendar exposure remains gated by the completion-committed
   `semantic-diff-comparison-workflow` and a period-bearing context. Slices 1
-  and 2 are complete on this branch, with Slice 2's focused completion commit
-  pending; public Slice 3 is not active and remains unreachable.
+  and 2 are complete and committed on this branch, including Slice 2 at
+  `b9cee633`; public Slice 3 is planned, not active, and remains unreachable.
 - The original independent plan review, first replan review, and second
   replan review are complete with `Ready` verdicts and no Findings. The third
   package has final independent `plan-reviewer` `Ready` review with no
@@ -90,8 +89,8 @@
 
 - Status: Slice 1 implementation is complete under approved third-replan
   commit `11615026` and completion-committed at `51a8ae4a`; Slice 2
-  implementation is complete and Completion Approved under the approved
-  full-plan gate, with its focused completion commit pending.
+  implementation is complete and completion-committed at `b9cee633` under
+  the approved full-plan gate.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
@@ -105,7 +104,8 @@
   plan/replan commit `11615026` is complete; implementation review is `Ready`
   with no Findings, Completion Approval is recorded, and the focused
   completion commit `51a8ae4a` is complete.
-- Active implementation slice: None; Slice 2 completion commit is pending.
+- Active implementation slice: None for this dependency run; Slice 3 remains
+  planned, not active, and out of scope.
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused commit after the
   plan gate.
@@ -201,8 +201,7 @@ Findings and Completion Approval is recorded above; focused completion commit
   predecessor carriers, internal source-aware differ and sidecar pairing,
   exact upstream reference validation, pure artifact builder, focused tests,
   deterministic ordering, and current validation evidence. Slice 2 is now
-  completion-approved with its focused commit pending, and public Slice 3
-  remains out of scope.
+  completion-committed at `b9cee633`, and public Slice 3 remains out of scope.
 - Approved paths:
   - `src/application/semantic-diff/compareScheduleDiff.ts`
   - `src/application/semantic-diff/compareSemanticDiff.ts`
@@ -259,8 +258,7 @@ Findings and Completion Approval is recorded above; focused completion commit
   parent/child lifecycle and panel-listener cascade, strict calendar transport,
   stale/late work suppression, normalized language, public-contract guards,
   and desktop/web plus quality evidence recorded in this task.
-- Commit status: Eligible; focused Slice 2 completion commit is pending
-  through `approval-committer`.
+- Commit status: Complete; focused Slice 2 completion commit `b9cee633`.
 
 ## Closure Approval
 
@@ -1039,20 +1037,21 @@ scheduleProjectionFacts })`, its exactly-one output-context call, the internal
   Slice 1. Shared code remains host-neutral and browser-safe. Production
   readiness evidence covers deterministic source-local pairing, fail-closed
   reference validation, immutable facts, and no schedule recalculation.
-- Unresolved risks: Slice 2's focused completion commit is pending; no public
-  Slice 3, public UI, or public documentation work is included. A public
+- Unresolved risks: no public Slice 3, public UI, or public documentation work
+  is included. A public
   DTO/result/report/JSON, schedule-meaning,
   identity-policy, or scope change remains a Main-owned Replanning trigger.
-- Recommended route: Slice 1 is completion-committed and Slice 2 is
-  completion-approved; Main should route the exact Slice 2 paths to
-  `approval-committer` for the focused completion commit.
+- Recommended route: Slices 1 and 2 are completion-committed; Main may
+  continue the comparison workflow dependency. Public Slice 3 remains
+  blocked until that workflow is complete and a period-bearing context exists.
 
 ### Slice 2: Build The Internal Calendar Session And Transport Foundation
 
-- Status: Implementation complete under the approved full-plan gate;
-  dependency Slice 1 is completion-committed at `51a8ae4a`. Independent
-  implementation review is `Ready` with no Findings, Completion Approval is
-  recorded above, and the focused completion commit is pending.
+- Status: Implementation and completion are complete under the approved
+  full-plan gate; dependency Slice 1 is completion-committed at `51a8ae4a`.
+  Independent implementation review is `Ready` with no Findings, Completion
+  Approval is recorded above, and the focused completion commit is
+  `b9cee633`.
 - Scope: move the command caller, injected builder dependency, and bootstrap
   composition into this integration slice. The existing
   `BuildSemanticDiffReportDataInput` remains unchanged. The calendar-owned
@@ -1237,8 +1236,8 @@ BuildSemanticDiffReportDataInput & { options?: Pick<CompareSemanticDiffOptions,
 - Implementation evidence: the approved command/application adapter,
   bootstrap composition and exact-context sidecar registry, Explorer
   companion, internal calendar panel/session/transport, browser-safe bridge,
-  and the seven approved Slice 2 test paths are implemented in the current
-  uncommitted diff. The latest review remediation adds a valid immutable
+  and the seven approved Slice 2 test paths are implemented and committed in
+  `b9cee633`. The latest review remediation adds a valid immutable
   context fixture, parent-to-child panel/listener disposal cascade, disposed
   and stale callback/post guards, recursive strict JSON validation, and
   normalized session-language title/HTML assertions, request-envelope result
@@ -1251,8 +1250,8 @@ tsconfig.json --noEmit`, `rtk pnpm run test:compile`, focused transport/
   `rtk pnpm run qlty:check`, `rtk pnpm run qlty:smells` (advisory
   complexity/duplication findings), markdown lint, and `git diff --check` are
   the current validation evidence.
-  Completion Approval is recorded above; the next route is the focused
-  completion commit through `approval-committer`.
+  Completion Approval and the focused completion commit are recorded above;
+  the next route for this dependency run is the comparison workflow.
 - Out of Scope: public Explorer action, candidate/root UI, timeline/filter/
   legend, React rendering, documentation, package contributions, Flow/source
   changes, persistence, and schedule calculation.
@@ -1521,7 +1520,7 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       with no Findings, and Main recorded automatic Completion Approval on
       2026-09-10 under the user's no-findings instruction. The exact completed
       paths and evidence are recorded above; its focused completion commit is
-      eligible and pending.
+      complete at `b9cee633`.
 - [x] Risk-based validation for the current Slice 2 implementation completed:
       focused transport/session/sidecar/adapter Mocha tests (11 passing), Slice
       1 regression Mocha tests (67 passing), TypeScript and test compile,

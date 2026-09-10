@@ -50,13 +50,14 @@
 - Compatibility/readiness: no command, bootstrap, Explorer, UI, manifest,
   telemetry, parser, Node-built-in, public result/report/JSON, or public action
   boundary changed. Shared code remains browser-safe and host-neutral. Slice 1
-  is complete and committed; the active Slice 2 implementation is the next
-  independent implementation-review route.
+  is complete and committed, and Slice 2 is complete and committed at
+  `b9cee633`; the comparison workflow is the next dependency-run route.
 
 ## Slice 2 Implementation Evidence
 
-- Approved boundary: Slice 2 is active after completion-committed Slice 1
-  `51a8ae4a`; implementation review and Completion Approval remain pending.
+- Approved boundary: Slice 2 is complete after completion-committed Slice 1
+  `51a8ae4a`; implementation review is `Ready`, Completion Approval is
+  recorded, and the focused completion commit is `b9cee633`.
 - Runtime evidence: the source-text presentation adapter parses both sides
   once, forwards only the exact optional schedule period, invokes comparison
   and the pure builder once, and preserves the existing parser-error union.
@@ -80,9 +81,10 @@
 - Compatibility/readiness: `package.json`, command contributions, activation
   events, custom editors, VS Code engine, public result/report/JSON contracts,
   Explorer transport, Flow/source behavior, and telemetry remain unchanged.
-  Shared browser-safe code has no Node-built-in dependency. The next route is
-  independent implementation review; no Completion Approval or completion
-  commit is claimed here.
+  Shared browser-safe code has no Node-built-in dependency. Completion
+  Approval and completion commit `b9cee633` are recorded; the comparison
+  workflow is the next dependency-run route and public Slice 3 remains out of
+  scope.
 
 ## Dependency And Approval Trace
 
