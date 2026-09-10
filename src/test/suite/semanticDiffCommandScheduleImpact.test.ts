@@ -1,8 +1,15 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { createSemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
+import {
+  createSemanticDiffCaptureScopeIdAllocator,
+  createSemanticDiffSourceHandleIdAllocator,
+  createSemanticDiffSourceIndexIdAllocator,
+} from "../../application/parsing/AjsParserWithSourceIndexPort";
+import { createBeginSemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
+import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
 import {
   executeCompareSemanticDiffCommand,
   type SemanticDiffCommandDeps,
@@ -34,12 +41,22 @@ suite("Semantic Diff command calendar adapter", () => {
       inputs: unknown[];
       contexts: unknown[];
       legacyBuilds: number;
+      events: string[];
     } = {
       inputs: [],
       contexts: [],
       legacyBuilds: 0,
+      events: [],
     };
     const artifacts = makeArtifacts();
+    const parser = new AntlrAjsParser({
+      sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+    });
+    const beginCapture = createBeginSemanticDiffSourceCapture(
+      parser,
+      createSemanticDiffCaptureScopeIdAllocator(),
+    );
+    const contextRegistry = new SemanticDiffExplorerContextRegistry();
     const handle = {
       sessionId: "sde-session-1" as never,
       panel: {} as vscode.WebviewPanel,
@@ -51,11 +68,18 @@ suite("Semantic Diff command calendar adapter", () => {
           document: {
             uri: afterUri,
             version: 1,
-            getText: () => "after",
+            getText: () => "unit=after,,jp1admin,;{ty=g;}",
           },
         }) as unknown as vscode.TextEditor,
       showOpenDialog: async () => [beforeUri],
-      readFile: async () => new TextEncoder().encode("before"),
+      readFile: async () =>
+        new TextEncoder().encode("unit=before,,jp1admin,;{ty=g;}"),
+      openTextDocument: async () =>
+        ({
+          uri: beforeUri,
+          version: 1,
+          getText: () => "unit=before,,jp1admin,;{ty=g;}",
+        }) as unknown as vscode.TextDocument,
       showQuickPick: async () => undefined,
       showErrorMessage: async () => undefined,
       openReport: async () => undefined,
@@ -63,14 +87,29 @@ suite("Semantic Diff command calendar adapter", () => {
         observed.legacyBuilds += 1;
         throw new Error("legacy builder must not run");
       },
-      buildSemanticDiffPresentationArtifacts: (input) => {
+      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+        observed.events.push("callback");
         observed.inputs.push(input);
+        assert.ok(scopedParser);
+        scopedParser.parse(input.beforeContent);
+        scopedParser.parse(input.afterContent);
         return artifacts;
       },
+      beginSemanticDiffSourceCapture: (input) => {
+        observed.events.push("capture");
+        return beginCapture(input);
+      },
       openScheduleAwareExplorerSession: async (receivedArtifacts) => {
+        observed.events.push("open");
         observed.contexts.push(receivedArtifacts.context);
         return handle;
       },
+      registerSemanticDiffSourceCapture: (context, entry) => {
+        observed.events.push("register");
+        contextRegistry.registerSourceCapture(context, entry);
+      },
+      unregisterSemanticDiffSourceCapture: (context) =>
+        contextRegistry.unregisterSourceCapture(context),
       scheduleComparisonPeriod: period,
       sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
     };
@@ -80,6 +119,8 @@ suite("Semantic Diff command calendar adapter", () => {
       ok: true,
       action: "explorer-opened",
       sessionId: "sde-session-1",
+      source: "file",
+      period: "evaluated",
     });
     assert.strictEqual(observed.inputs.length, 1);
     assert.strictEqual(
@@ -90,5 +131,11 @@ suite("Semantic Diff command calendar adapter", () => {
     assert.strictEqual(observed.contexts.length, 1);
     assert.strictEqual(observed.contexts[0], artifacts.context);
     assert.strictEqual(observed.legacyBuilds, 0);
+    assert.deepStrictEqual(observed.events, [
+      "capture",
+      "callback",
+      "register",
+      "open",
+    ]);
   });
 });

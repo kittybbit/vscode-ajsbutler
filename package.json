@@ -83,8 +83,8 @@
         "enablement": "editorLangId == 'jp1ajs'",
         "command": "ajsbutler.compareSemanticDiff",
         "category": "JP1/AJS",
-        "title": "Compare JP1/AJS Semantic Diff",
-        "shortTitle": "Semantic Diff",
+        "title": "Compare Definition",
+        "shortTitle": "Compare Definition",
         "icon": "$(diff)"
       },
       {

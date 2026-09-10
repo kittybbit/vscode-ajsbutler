@@ -4,14 +4,13 @@
 
 - Purpose: deliver one explicit file/Git `HEAD` comparison workflow that opens
   one reusable Semantic Diff Explorer context.
-- Mode: Slice 1 implementation is complete under the approved replan gate;
-  the second targeted compatibility/test replan is pending independent plan
-  review and approval, and implementation review/Completion Approval remain
-  pending.
+- Mode: Slice 1 implementation and independent implementation review are
+  complete under the approved replan gates; Completion Approval is recorded
+  and its focused completion commit is pending.
 - Approved or active slice: Slice 1 (`Deliver File And Period Comparison To
-  Explorer`) remains the active slice. Its prior focused replan commit is
-  complete at `f04dbfd1`; the second targeted replan is not yet approved or
-  committed, and Git/Slice 2 remains out of scope.
+Explorer`) remains the completion-gate active slice. Its prior focused replan
+  commit is complete at `f04dbfd1`, the second targeted replan commit is
+  complete at `5e160b74`, and Git/Slice 2 is planned but not active.
 - Preserve `ajsbutler.compareSemanticDiff`, VS Code `^1.75.0`, and the existing
   parser-error union.
 - Consume the landed calendar artifact callback and schedule-aware Explorer
@@ -87,8 +86,9 @@ scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`.
   boundaries.
 - Preserved scope: Slice 2's Git source, adapter, provider, documentation, and
   cross-source work are unchanged; no Slice 2 Git path or dependency is added,
-  removed, or reordered. No runtime, test, generated-artifact, or
-  configuration file is edited by this replan.
+  removed, or reordered. The implementation changes only the approved Slice 1
+  runtime and test paths; no generated artifact or configuration file is
+  added.
 - Contract evidence inspected (read-only):
   `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`,
   `src/presentation/vscode/commands/semanticDiffCommand.ts`,
@@ -97,9 +97,10 @@ scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`.
   `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelLifecycle.ts`,
   `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`, and
   `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`. These paths were
-  inspected read-only; the second targeted replan now permits only the
-  schedule-impact path's success-shape assertion update, while the other
-  evidence paths remain outside the Slice 1 edit scope.
+  inspected read-only; implementation remains within the approved Slice 1
+  runtime and five-test boundary, including the schedule-impact success-shape
+  and parser-valid fixture corrections. The other predecessor evidence paths
+  remain read-only.
 - Implementation gate: Calendar internal Slice 2 completion commit `b9cee633`
   is present and independently post-state-verified by `a0e73c31` before Slice
   1 implementation. The gate must still check the committed
@@ -164,44 +165,43 @@ scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`,
   runtime/test edit is made by this planning role.
 - Current gate: the prior replan approval/commit `f04dbfd1` and Calendar Slice
   2 completion gate `b9cee633` with post-state `a0e73c31` remain historical
-  evidence. This second targeted replan has `plan-reviewer` `Ready` and revised
-  Human Approval; its focused replan commit is eligible and pending through
-  `approval-committer` before the compatibility fix may be implemented.
+  evidence. This second targeted replan has `plan-reviewer` `Ready`, revised
+  Human Approval, and focused replan commit `5e160b74`; its implementation
+  delta has completed independent implementation review with `Ready` and no
+  Findings.
 
 ## Quality Baseline
 
-- Revised planning documents pass `rtk pnpm run lint:md` and `git diff
-  --check`. The current `rtk pnpm run qlty:check` attempt is blocked by the
-  environment's permission failure while qlty creates its rolling log; the
-  previously recorded successful qlty result remains the landed-predecessor
-  smell baseline for Slice 1.
+- Revised planning documents pass `rtk pnpm run lint:md` and
+  `git diff --check`. The implementation rerun of `rtk pnpm run qlty:check`
+  passed; the previously recorded successful qlty result remains the
+  landed-predecessor smell baseline for Slice 1.
 - Baseline evidence: the full `rtk pnpm run qlty` run completed; formatting and
   checks passed, and the smell scan reported only existing advisory findings in
   landed predecessor implementation paths (including the artifact builder,
-  command, Explorer session, and schedule-impact modules). No Slice 1 runtime
-  or test file was changed in this replan.
-- Before Slice 1 implementation review, rerun `rtk pnpm run qlty` and compare
-  its smell output with that baseline. Any new findings attributable to Slice 1
-  must be resolved or recorded as an actionable follow-up for independent
-  review; pre-existing findings remain follow-up risks and are not silently
-  refactored in this slice.
+  command, Explorer session, and schedule-impact modules). The current
+  implementation delta and its rerun findings are recorded below.
+- Implementation-review evidence: rerun `rtk pnpm run qlty` and compare its
+  smell output with the landed-predecessor baseline. Existing findings and the
+  approved command-path advisory are recorded as follow-up risks; no new
+  unreviewed finding blocks the completion gate.
 
 ## Plan Status
 
 - Status: Second targeted Slice 1 replan is independently reviewed `Ready` with
   no Findings and Human Approved; Calendar Slice 2 gate remains satisfied at
   `b9cee633` with post-state evidence `a0e73c31`, and the prior focused replan
-  commit is `f04dbfd1`. The second focused replan commit is eligible and
-  pending through `approval-committer`.
+  commit is `f04dbfd1`. The second focused replan commit is complete at
+  `5e160b74`.
 - Planning scope: complete two-slice plan covering file/period/source
   registration and Explorer handoff first, then optional Git `HEAD` retrieval
   and final documentation.
 - Review status: `Ready` (`plan-reviewer`) for the second targeted replan;
   Findings none.
 - Human approval: `Approved` for the second targeted compatibility/test delta.
-- Active implementation slice: Slice 1 prior implementation is complete, but
-  the Finding-driven compatibility fix has not started; implementation review
-  and Completion Approval remain pending.
+- Active implementation slice: Slice 1 implementation and the approved
+  Finding-driven fixture remediation are complete; implementation review is
+  `Ready` with no Findings and Completion Approval is recorded below.
 
 ## Human Approval
 
@@ -263,21 +263,50 @@ scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`,
   `src/test/suite/packageManifest.test.ts`, and
   `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`. Every other
   test path is read-only evidence and is not approved for modification.
-- Second targeted replan commit status: Eligible and pending through
-  `approval-committer`.
-- Implementation status: Prior approved Slice 1 paths are implemented; the
-  Finding-driven compatibility/test changes are approved but remain gated on
-  completion of the eligible focused replan commit. Implementation review and
-  Completion Approval remain pending.
+- Second targeted replan commit status: Complete at `5e160b74`.
+- Implementation status: Prior approved Slice 1 paths and the Finding-driven
+  compatibility/test changes are implemented. Independent implementation
+  review is `Ready` with no Findings; Completion Approval is recorded below and
+  the focused completion commit is eligible and pending.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved; completion commit pending
+- Approved at: 2026-09-11; approved in the current conversation.
+- Result: Approved.
+- Basis: independent `implementation-reviewer` `Ready` verdict with no
+  Findings and the user's automatic no-findings slice approval instruction.
+- Approved scope: completed `semantic-diff-comparison-workflow` Slice 1,
+  `Deliver File And Period Comparison To Explorer`, including its approved
+  implementation, test, package, and feature-evidence paths. Git Slice 2 is
+  planned but not active.
+- Approved paths:
+  - `docs/specs/features/semantic-diff-comparison-workflow/TASKS.md`
+  - `docs/specs/features/semantic-diff-comparison-workflow/TRACEABILITY.md`
+  - `package.json`
+  - `src/application/semantic-diff/parseSemanticDiffComparisonPeriod.ts`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommandLocalization.ts`
+  - `src/test/suite/packageManifest.test.ts`
+  - `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`
+  - `src/test/suite/semanticDiffWiring.test.ts`
+- Implementation review evidence: final review confirmed the predecessor
+  Calendar adapter fallback, capture-first `(input, capture.parser)` call,
+  exact-context registration/cleanup, closed source/period success result,
+  parser-valid JP1/AJS fixtures, real registry-backed period forwarding, and
+  no scope or design findings.
+- Validation evidence: `npx tsc -p tsconfig.json --noEmit`,
+  `rtk pnpm run test:compile`, `rtk pnpm run build`,
+  `rtk pnpm run test:desktop:run`, permitted `rtk pnpm run test:web:run`,
+  `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and `git diff --check` passed.
+  The default-sandbox Web attempt is separately recorded as blocked by
+  Chromium Mach rendezvous permission `1100`; the permitted rerun exited 0.
+- Implementation review verdict: `Ready`; Findings none.
+- Commit status: Eligible and pending through `approval-committer`; no
+  completion commit has been created by this role.
 
 ## Closure Approval
 
@@ -294,18 +323,19 @@ scopedParser?: AjsParserPort) => BuildSemanticDiffPresentationArtifactsResult`,
   on branch `codex/semantic-diff-comparison-workflow`.
 - Branch/base evidence: `git merge-base HEAD origin/main` is
   `97652aa1` (`feat: add Semantic Diff Explorer (#316)`). The current branch
-  is at `f04dbfd1` (`docs: approve semantic diff workflow replan`), following
-  the direct post-state child `a0e73c31` of Calendar Slice 2 completion
-  `b9cee633`.
+  is at `5e160b74` (`docs: approve semantic diff workflow second replan`),
+  following the direct post-state child `a0e73c31` of Calendar Slice 2
+  completion `b9cee633`.
 - Current inherited dependency commits after that merge-base are
   `6622953f` (Calendar replan approval), `ebf8bf3d` (second replan approval),
   `11615026` (third replan approval), `51a8ae4a` (Calendar internal Slice 1
   completion), `b9cee633` (Calendar internal Slice 2 completion),
-  `a0e73c31` (post-state synchronization), and `f04dbfd1` (workflow Slice 1
-  replan approval). The historical feature-plan commit `91447419` was
-  approved from roadmap commit `97d5ccfd`; neither is the current merge-base.
-  The current uncommitted diff contains only the approved Slice 1
-  implementation and tests.
+  `a0e73c31` (post-state synchronization), `f04dbfd1` (workflow Slice 1
+  replan approval), and `5e160b74` (workflow Slice 1 second replan approval).
+  The historical feature-plan commit `91447419` was approved from roadmap
+  commit `97d5ccfd`; neither is the current merge-base. The current
+  uncommitted diff contains only the approved Slice 1 implementation and
+  tests.
 - Required completion-committed predecessors:
   `semantic-diff-identity-confidence`, `semantic-diff-structured-outputs`,
   `semantic-diff-review-risk-rules`, `schedule-semantics-expansion`,
@@ -717,12 +747,12 @@ too-large | read-failed`. It deliberately has no
 
 ### Slice 1: Deliver File And Period Comparison To Explorer
 
-- Status: Prior implementation complete under focused replan commit
-  `f04dbfd1`; the second targeted compatibility/test replan is pending
-  independent plan review, revised Human Approval, and a focused replan
-  commit. Independent implementation review and Completion Approval remain
-  pending. Calendar Slice 2 gate is satisfied at `b9cee633` with post-state
-  evidence `a0e73c31`.
+- Status: Implementation and the approved second targeted compatibility/test
+  remediation are complete under focused replan commits `f04dbfd1` and
+  `5e160b74`. Independent implementation review is `Ready` with no Findings;
+  Completion Approval is recorded and the focused completion commit is pending.
+  Calendar Slice 2 gate is satisfied at `b9cee633` with post-state evidence
+  `a0e73c31`.
 - Scope: retain the public command ID while changing its display name; add the
   pure period validator, command localization, decoded after/file document
   snapshots, explicit source and optional-period prompts, stable outcomes,
@@ -893,7 +923,7 @@ too-large | read-failed`. It deliberately has no
 
 ### Slice 2: Add Optional Git HEAD Source And Complete The Workflow
 
-- Status: Planned; blocked on Slice 1 completion approval and focused commit.
+- Status: Planned; not active; blocked on the Slice 1 focused completion commit.
 - Scope: add the plain Git source port, VS Code 1.75 built-in Git adapter,
   `Git HEAD` picker path, current-path-first and allowlisted-rename/object
   safety, decoded/textconv source handling, Git-before source registration,
@@ -1111,9 +1141,9 @@ GitErrorCodes.UnknownPath` permits exactly one mapping from `indexChanges`
   branch.
 - No architecture, glossary, vision, or context-map update is currently
   justified.
-- Remaining risks before implementation: exact predecessor symbols must be
-  checked against their completion commits; Git provider behavior must be
-  verified through the v1 structural adapter tests.
+- Remaining risks before Slice 1 completion commit: the default-sandbox Web
+  permission blocker and recorded qlty smell advisories remain documented;
+  Git provider behavior remains deferred to planned Slice 2.
 
 ## Validation
 
@@ -1138,23 +1168,24 @@ GitErrorCodes.UnknownPath` permits exactly one mapping from `indexChanges`
       five-test boundary, predecessor-shape fallback, and approved fixture
       corrections under the user's automatic no-findings slice approval
       instruction.
-- [ ] Delegate the approved second targeted planning package to
+- [x] Delegate the approved second targeted planning package to
       `approval-committer` for one focused replan commit before implementing
-      its fixes.
+      its fixes; the gate completed at `5e160b74`.
 - [x] Validate revised planning documents with `rtk pnpm run lint:md`,
       `rtk pnpm run qlty`, and `git diff --check`; the qlty smell scan is the
       landed-predecessor baseline.
 - [x] Capture the qlty baseline from the landed-predecessor workspace; the
       full `rtk pnpm run qlty` scan recorded existing advisory findings.
 - [x] Run implementation validation and record the qlty result and advisory
-      smell findings below; independent implementation review remains the
-      required determination for any follow-up.
+      smell findings below; the final implementation review is recorded as
+      `Ready` with no Findings.
 
 ## Slice 1 Implementation Evidence
 
 - Approved boundary: Slice 1 was implemented after the exact Calendar Slice 2
   predecessor gate (`b9cee633`, post-state evidence `a0e73c31`) and focused
-  replan approval commit `f04dbfd1`. The uncommitted implementation is limited
+  replan approval commits `f04dbfd1` and `5e160b74`. The uncommitted
+  implementation is limited
   to the approved runtime, package, test, and feature-evidence paths listed in
   the Human Approval section; Git and Slice 2 remain untouched.
 - Runtime evidence: the pure Gregorian period parser accepts only real
@@ -1163,48 +1194,59 @@ GitErrorCodes.UnknownPath` permits exactly one mapping from `indexChanges`
   fixed source/period prompt order, rejects NUL and per-source decoded content
   above 8 MiB, starts source capture before the exact `(input, capture.parser)`
   callback, binds/registers one exact-context borrowed entry, and invokes one
-  calendar-aware Explorer handoff. Failure cleanup unregisters before the
-  workflow-owned idempotent release. Explorer success results are a closed
+  calendar-aware Explorer handoff. The explicit predecessor Calendar adapter
+  fallback bypasses the report workflow when its legacy dependency shape is
+  supplied without workflow UI callbacks, while retaining the same
+  capture-before-callback and cleanup ordering. Failure cleanup unregisters
+  before the workflow-owned idempotent release. Explorer success results are a closed
   contract with required source and period fields; cancellation, prompt titles,
   validation, and failure messages use the normalized English/Japanese
   localization, and host prompt exceptions map to `comparison-failed`. No Git
   retrieval, calendar public action, or predecessor report/output/Explorer
   contract was changed; the workflow result fields are the approved command
   boundary.
+- Fixture evidence: all newly added workflow fixtures use parser-valid
+  `unit=...;{ty=g;}` definitions (with NUL cases retaining only the deliberate
+  NUL fault), and the default and valid-period workflow harnesses register the
+  exact context through a real `SemanticDiffExplorerContextRegistry` before
+  asserting Explorer reachability and period forwarding.
 - Validation: `npx tsc -p tsconfig.json --noEmit`,
   `rtk pnpm run test:compile`, `rtk pnpm run build`, and
   `rtk pnpm run test:desktop:run` passed. `rtk pnpm run qlty:check` and
-  `git diff --check` passed. `rtk pnpm run qlty:smells` completed with
+  `git diff --check` passed. `rtk pnpm run qlty:smells` completed after the
+  second replan with
   no findings in the new parser/localization paths and advisory orchestration
   complexity in the approved command path, in addition to existing
   predecessor findings. The command advisory is intentionally recorded rather
   than hidden: owner is Main with the semantic-diff command maintainer, and a
   future command-slice/replan should extract the workflow transaction into a
   separately approved adapter path before adding further orchestration. The
-  web suite remains blocked by the environment's Chromium Mach rendezvous
-  permission error, not by a test assertion. Markdown validation is rerun
-  before handoff.
+  default-sandbox `rtk pnpm run test:web:run` attempt was blocked before test
+  startup by Chromium Mach rendezvous permission `1100`; the same command
+  rerun with the required Chromium permissions completed successfully (exit
+  0), confirming an environment-only default sandbox blocker. Markdown
+  validation was rerun before handoff and passed.
 - Compatibility/readiness: the command ID, engine requirement, activation,
   menu, icon, and settings remain unchanged; the implementation uses injected
   browser-safe capabilities and no Node built-ins, Git CLI, `.git` access, or
   telemetry. Existing parser/error, report, JSON, Explorer, schedule, and
   calendar contracts remain predecessor-owned. Production readiness is ready
-  for independent implementation review with the web-environment blocker and
+  for the focused completion commit with the Web environment evidence and
   qlty smell advisories recorded.
-- Status: Prior Slice 1 implementation is complete; this second targeted
-  compatibility/test replan is pending independent plan review and revised
-  approval before its fixes may be implemented. Independent implementation
-  review and Completion Approval remain pending. No completion commit is
-  authorized by this handoff.
+- Status: Prior Slice 1 implementation and the second targeted
+  compatibility/test delta are complete under approved commit `5e160b74`.
+  Independent implementation review is `Ready` with no Findings; Completion
+  Approval is recorded above and the focused completion commit is eligible and
+  pending.
 
 ## Notes
 
-- The focused replan commit `f04dbfd1` is complete. Slice 1's current
-  uncommitted diff contains only the approved runtime, package, test, and
-  feature-evidence paths; no completion approval or commit has been granted.
-- Next route: Main delegates this revised plan to the independent
-  `plan-reviewer`. After a `Ready` result and revised Human Approval, the
-  focused replan commit must precede implementation of the compatibility/test
-  fixes; Git and Slice 2 remain inactive.
+- The focused replan commits `f04dbfd1` and `5e160b74` are complete. Slice 1's
+  current uncommitted diff contains only the approved runtime, package, test,
+  and feature-evidence paths. Completion Approval is recorded; the focused
+  completion commit remains pending.
+- Next route: Main delegates the approved Slice 1 completion gate to
+  `approval-committer`; planned Git Slice 2 remains inactive until that commit
+  completes.
 - Source for the Git API verification: Microsoft VS Code tag `1.75.0`,
   `extensions/git/src/api/git.d.ts`, `api1.ts`, and `repository.ts`.

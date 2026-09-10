@@ -1,9 +1,14 @@
 import type * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import type { SemanticDiffComparisonPeriod } from "../../../application/semantic-diff/semanticDiffDto";
+import {
+  parseSemanticDiffComparisonPeriod,
+  type SemanticDiffComparisonPeriodInvalidReason,
+} from "../../../application/semantic-diff/parseSemanticDiffComparisonPeriod";
 import type {
   BuildSemanticDiffPresentationArtifacts,
   BuildSemanticDiffPresentationArtifactsInput,
+  BuildSemanticDiffPresentationArtifactsResult,
   SemanticDiffPresentationArtifacts,
 } from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffSourceHandleIdAllocator } from "../../../application/parsing/AjsParserWithSourceIndexPort";
@@ -14,6 +19,7 @@ import type {
   SemanticDiffSourceCaptureFactory,
 } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import { isSemanticDiffSourceCaptureError } from "../../../application/semantic-diff/semanticDiffSourceCapture";
+import type { SemanticDiffSourceCaptureEntry } from "../semantic-diff/source/semanticDiffExplorerSourceTypes";
 import {
   buildSemanticDiffOutputContext,
   type SemanticDiffOutputContext,
@@ -50,8 +56,20 @@ import {
   type SemanticDiffOutputMode,
   type SemanticDiffOutputModeItem,
 } from "../../semantic-diff/semanticDiffOutput";
+import {
+  getSemanticDiffCommandLocalization,
+  type SemanticDiffCommandLocalization,
+} from "./semanticDiffCommandLocalization";
 
 export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
+
+export const MAX_SEMANTIC_DIFF_SOURCE_BYTES = 8 * 1024 * 1024;
+
+export type SemanticDiffWorkflowQuickPickItem = Readonly<{
+  workflowKind: "file" | "git-head" | "no-period" | "specify-period";
+  label: string;
+  description?: string;
+}>;
 
 export type SemanticDiffReportAction = "displayed";
 
@@ -60,6 +78,8 @@ export type SemanticDiffCommandResult =
       ok: true;
       sessionId: SemanticDiffExplorerSessionId;
       action: "explorer-opened";
+      source: "file" | "git-head";
+      period: "not-requested" | "evaluated";
     }
   | {
       ok: true;
@@ -72,12 +92,22 @@ export type SemanticDiffCommandResult =
         code:
           | "no-active-editor"
           | "active-editor-failed"
+          | "after-non-text"
+          | "after-too-large"
+          | "source-picker-failed"
+          | "git-head-unavailable"
           | "cancelled"
+          | "before-file-read-failed"
+          | "before-file-non-text"
+          | "before-file-too-large"
           | "mode-picker-failed"
           | "read-failed"
           | "parse-failed"
+          | "comparison-failed"
+          | "source-capture-failed"
           | "render-failed"
-          | "display-failed";
+          | "display-failed"
+          | "explorer-open-failed";
         message: string;
       };
     };
@@ -88,6 +118,13 @@ export type SemanticDiffCommandDeps = {
     items: readonly SemanticDiffOutputModeItem[],
     options?: vscode.QuickPickOptions,
   ) => Thenable<SemanticDiffOutputModeItem | undefined>;
+  showWorkflowQuickPick?: (
+    items: readonly SemanticDiffWorkflowQuickPickItem[],
+    options?: vscode.QuickPickOptions,
+  ) => Thenable<SemanticDiffWorkflowQuickPickItem | undefined>;
+  showInputBox?: (
+    options?: vscode.InputBoxOptions,
+  ) => Thenable<string | undefined>;
   showOpenDialog: (
     options: vscode.OpenDialogOptions,
   ) => Thenable<vscode.Uri[] | undefined>;
@@ -103,12 +140,7 @@ export type SemanticDiffCommandDeps = {
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   registerSemanticDiffSourceCapture?: (
     context: SemanticDiffOutputContext,
-    binding: Extract<SemanticDiffSourceCaptureBindResult, { ok: true }>,
-    sources: Readonly<{
-      before: ImmutableSourceDescriptor & { uri: vscode.Uri };
-      after: ImmutableSourceDescriptor & { uri: vscode.Uri };
-    }>,
-    release: () => void,
+    entry: SemanticDiffSourceCaptureEntry,
   ) => void;
   unregisterSemanticDiffSourceCapture?: (
     context: SemanticDiffOutputContext,
@@ -227,14 +259,21 @@ const registerSourceBinding = (
   binding: SourceBinding,
 ): SourceBindingStep => {
   try {
-    options.deps.registerSemanticDiffSourceCapture?.(
-      options.context,
+    const sources = options.request.sourceDescriptors;
+    if (
+      sources === undefined ||
+      !options.deps.registerSemanticDiffSourceCapture
+    ) {
+      return sourceBindingFailure(
+        "Semantic diff source targets could not be registered.",
+      );
+    }
+    const entry: SemanticDiffSourceCaptureEntry = {
       binding,
-      options.request.sourceDescriptors as NonNullable<
-        CommandReportData["sourceDescriptors"]
-      >,
-      options.releaseSourceCapture,
-    );
+      sources,
+      release: options.releaseSourceCapture,
+    };
+    options.deps.registerSemanticDiffSourceCapture(options.context, entry);
     return readyStep(undefined);
   } catch {
     return sourceBindingFailure(
@@ -273,6 +312,641 @@ const createSourceCaptureRelease = (
 type PresentationCommandData = CommandReportData & {
   readonly result: CommandReadyReport;
   readonly presentation: SemanticDiffPresentationArtifacts;
+};
+
+type WorkflowSourceDescriptor = ImmutableSourceDescriptor & {
+  uri: vscode.Uri;
+};
+
+type WorkflowExplorerResult = {
+  handle: SemanticDiffExplorerSessionHandle;
+  source: "file";
+  period: "not-requested" | "evaluated";
+};
+
+type WorkflowAfterSnapshot = {
+  uri: vscode.Uri;
+  version: number | null;
+  text: string;
+};
+
+type WorkflowSourceRequest = {
+  after: WorkflowAfterSnapshot;
+  before: WorkflowSourceDescriptor;
+};
+
+type WorkflowArtifactState = {
+  artifacts: SemanticDiffPresentationArtifacts;
+  capture: SemanticDiffSourceCapture;
+  sources: {
+    before: WorkflowSourceDescriptor;
+    after: WorkflowSourceDescriptor;
+  };
+  period: "not-requested" | "evaluated";
+  release: () => void;
+};
+
+const workflowFailure = (
+  code: Extract<SemanticDiffCommandResult, { ok: false }>["error"]["code"],
+  message: string,
+  notify = true,
+): CommandFailure => failedStep(code, message, notify);
+
+const unregisterAndReleaseWorkflowCapture = (
+  deps: SemanticDiffCommandDeps,
+  context: SemanticDiffOutputContext,
+  release: () => void,
+): void => {
+  try {
+    deps.unregisterSemanticDiffSourceCapture?.(context);
+  } catch {
+    // Release must still complete if best-effort registry rollback fails.
+  } finally {
+    release();
+  }
+};
+
+const sourceTextFailure = (
+  text: string,
+  side: "before" | "after",
+  localization: SemanticDiffCommandLocalization,
+): CommandFailure | undefined => {
+  const failure = text.includes("\u0000")
+    ? side === "after"
+      ? ["after-non-text", localization.afterNonText]
+      : ["before-file-non-text", localization.beforeFileNonText]
+    : undefined;
+  const byteLength = new TextEncoder().encode(text).byteLength;
+  const sizeFailure =
+    byteLength > MAX_SEMANTIC_DIFF_SOURCE_BYTES
+      ? side === "after"
+        ? ["after-too-large", localization.afterTooLarge]
+        : ["before-file-too-large", localization.beforeFileTooLarge]
+      : undefined;
+  const selected = failure ?? sizeFailure;
+  return selected
+    ? workflowFailure(
+        selected[0] as Extract<
+          SemanticDiffCommandResult,
+          { ok: false }
+        >["error"]["code"],
+        selected[1],
+      )
+    : undefined;
+};
+
+const parseFailureMessage = (
+  result: Extract<BuildSemanticDiffPresentationArtifactsResult, { ok: false }>,
+  localization: SemanticDiffCommandLocalization,
+): string => {
+  const beforeFailed = result.errors.before.length > 0;
+  const afterFailed = result.errors.after.length > 0;
+  const key =
+    beforeFailed && afterFailed
+      ? "both"
+      : beforeFailed
+        ? "before"
+        : afterFailed
+          ? "after"
+          : "none";
+  return {
+    before: localization.parseFailedBefore,
+    after: localization.parseFailedAfter,
+    both: localization.parseFailedBoth,
+    none: localization.parseFailed,
+  }[key];
+};
+
+const readWorkflowAfterSnapshot = (
+  deps: SemanticDiffCommandDeps,
+  localization: SemanticDiffCommandLocalization,
+): CommandStep<WorkflowAfterSnapshot> => {
+  let activeEditor: vscode.TextEditor | undefined;
+  try {
+    activeEditor = deps.getActiveEditor();
+  } catch {
+    return workflowFailure(
+      "active-editor-failed",
+      localization.activeEditorFailed,
+    );
+  }
+  if (!activeEditor) {
+    return workflowFailure("no-active-editor", localization.noActiveEditor);
+  }
+  try {
+    const document = activeEditor.document;
+    const text = document.getText();
+    const textFailure = sourceTextFailure(text, "after", localization);
+    if (textFailure) return textFailure;
+    if (!document.uri) {
+      return workflowFailure(
+        "active-editor-failed",
+        localization.activeEditorFailed,
+      );
+    }
+    return readyStep({
+      uri: document.uri,
+      version: typeof document.version === "number" ? document.version : null,
+      text,
+    });
+  } catch {
+    return workflowFailure(
+      "active-editor-failed",
+      localization.activeEditorFailed,
+    );
+  }
+};
+
+const workflowQuickPick = (
+  deps: SemanticDiffCommandDeps,
+  items: readonly SemanticDiffWorkflowQuickPickItem[],
+  options: vscode.QuickPickOptions,
+): Thenable<SemanticDiffWorkflowQuickPickItem | undefined> => {
+  if (deps.showWorkflowQuickPick) {
+    return deps.showWorkflowQuickPick(items, options);
+  }
+  return deps.showQuickPick(
+    items as unknown as readonly SemanticDiffOutputModeItem[],
+    options,
+  ) as unknown as Thenable<SemanticDiffWorkflowQuickPickItem | undefined>;
+};
+
+type WorkflowSourceSelection =
+  | { kind: "file" }
+  | { kind: "git-head" }
+  | { kind: "cancelled" }
+  | { kind: "failed"; reason: "host" | "invalid" };
+
+const selectWorkflowSource = async (
+  deps: SemanticDiffCommandDeps,
+  localization: SemanticDiffCommandLocalization,
+): Promise<WorkflowSourceSelection> => {
+  try {
+    const selected = await workflowQuickPick(
+      deps,
+      [
+        { workflowKind: "file", label: localization.selectDefinitionFile },
+        { workflowKind: "git-head", label: localization.gitHead },
+      ],
+      {
+        placeHolder: localization.sourcePicker,
+        title: localization.sourcePickerTitle,
+      },
+    );
+    if (!selected) return { kind: "cancelled" };
+    return selected.workflowKind === "file"
+      ? { kind: "file" }
+      : selected.workflowKind === "git-head"
+        ? { kind: "git-head" }
+        : { kind: "failed", reason: "invalid" };
+  } catch {
+    return { kind: "failed", reason: "host" };
+  }
+};
+
+type WorkflowPeriodSelection =
+  | { kind: "not-requested" }
+  | { kind: "evaluated"; period: SemanticDiffComparisonPeriod }
+  | { kind: "cancelled" }
+  | {
+      kind: "failed";
+      reason: "invalid-from" | "invalid-to" | "non-increasing" | "host";
+    };
+
+const periodValidationMessage = (
+  localization: SemanticDiffCommandLocalization,
+  reason: SemanticDiffComparisonPeriodInvalidReason,
+): string => {
+  switch (reason) {
+    case "invalid-from":
+      return localization.invalidFromDate;
+    case "invalid-to":
+      return localization.invalidToDate;
+    case "non-increasing":
+      return localization.nonIncreasingPeriod;
+  }
+};
+
+const workflowCancellation = (
+  localization: SemanticDiffCommandLocalization,
+): CommandFailure =>
+  workflowFailure("cancelled", localization.cancelled, false);
+
+const showWorkflowInput = (
+  deps: SemanticDiffCommandDeps,
+  options: vscode.InputBoxOptions,
+): Thenable<string | undefined> =>
+  deps.showInputBox ? deps.showInputBox(options) : Promise.resolve(undefined);
+
+const selectWorkflowPeriod = async (
+  deps: SemanticDiffCommandDeps,
+  localization: SemanticDiffCommandLocalization,
+): Promise<WorkflowPeriodSelection> => {
+  try {
+    const selected = await workflowQuickPick(
+      deps,
+      [
+        { workflowKind: "no-period", label: localization.noSchedulePeriod },
+        {
+          workflowKind: "specify-period",
+          label: localization.specifySchedulePeriod,
+        },
+      ],
+      {
+        placeHolder: localization.periodPicker,
+        title: localization.periodPickerTitle,
+      },
+    );
+    if (!selected) return { kind: "cancelled" };
+    if (selected.workflowKind === "no-period") return { kind: "not-requested" };
+    if (selected.workflowKind !== "specify-period" || !deps.showInputBox) {
+      return { kind: "failed", reason: "invalid-from" };
+    }
+
+    const from = await showWorkflowInput(deps, {
+      title: localization.fromDateTitle,
+      prompt: localization.fromDatePrompt,
+      placeHolder: localization.datePlaceholder,
+      validateInput: (value) => {
+        const parsed = parseSemanticDiffComparisonPeriod({
+          from: value,
+          to: "9999-12-31",
+        });
+        return parsed.kind === "invalid" && parsed.reason === "invalid-from"
+          ? localization.invalidFromDate
+          : undefined;
+      },
+    });
+    if (from === undefined) return { kind: "cancelled" };
+
+    const to = await showWorkflowInput(deps, {
+      title: localization.toDateTitle,
+      prompt: localization.toDatePrompt,
+      placeHolder: localization.datePlaceholder,
+      validateInput: (value) => {
+        const parsed = parseSemanticDiffComparisonPeriod({ from, to: value });
+        return parsed.kind === "invalid"
+          ? periodValidationMessage(localization, parsed.reason)
+          : undefined;
+      },
+    });
+    if (to === undefined) return { kind: "cancelled" };
+
+    const parsed = parseSemanticDiffComparisonPeriod({ from, to });
+    return parsed.kind === "valid"
+      ? { kind: "evaluated", period: parsed.period }
+      : { kind: "failed", reason: parsed.reason };
+  } catch {
+    return { kind: "failed", reason: "host" };
+  }
+};
+
+const workflowPeriodFailure = (
+  selection: Extract<WorkflowPeriodSelection, { kind: "failed" }>,
+  localization: SemanticDiffCommandLocalization,
+): CommandFailure =>
+  selection.reason === "host"
+    ? workflowFailure("comparison-failed", localization.comparisonFailed)
+    : workflowFailure(
+        "comparison-failed",
+        periodValidationMessage(localization, selection.reason),
+      );
+
+const workflowSourceFailure = (
+  selection: Extract<WorkflowSourceSelection, { kind: "failed" }>,
+  localization: SemanticDiffCommandLocalization,
+): CommandFailure =>
+  selection.reason === "host"
+    ? workflowFailure("comparison-failed", localization.comparisonFailed)
+    : workflowFailure("source-picker-failed", localization.sourcePickerFailed);
+
+const readWorkflowBefore = async (
+  deps: SemanticDiffCommandDeps,
+  uri: vscode.Uri,
+  localization: SemanticDiffCommandLocalization,
+): Promise<CommandStep<WorkflowSourceDescriptor>> => {
+  if (!deps.openTextDocument) {
+    return workflowFailure(
+      "before-file-read-failed",
+      localization.beforeFileReadFailed,
+    );
+  }
+  try {
+    const document = await deps.openTextDocument(uri);
+    const text = document.getText();
+    const textFailure = sourceTextFailure(text, "before", localization);
+    return (
+      textFailure ??
+      readyStep({
+        side: "before",
+        sourceHandleId: deps.sourceHandleIdAllocator(),
+        text,
+        version: typeof document.version === "number" ? document.version : null,
+        uri,
+      })
+    );
+  } catch {
+    return workflowFailure(
+      "before-file-read-failed",
+      localization.beforeFileReadFailed,
+    );
+  }
+};
+
+const readWorkflowSourceFile = async (
+  deps: SemanticDiffCommandDeps,
+  after: WorkflowAfterSnapshot,
+  localization: SemanticDiffCommandLocalization,
+): Promise<CommandStep<WorkflowSourceRequest>> => {
+  try {
+    const selected = await deps.showOpenDialog({
+      canSelectFiles: true,
+      canSelectFolders: false,
+      canSelectMany: false,
+      openLabel: localization.selectDefinitionFile,
+    });
+    if (!selected?.[0]) return workflowCancellation(localization);
+    const before = await readWorkflowBefore(deps, selected[0], localization);
+    return before.kind === "failed"
+      ? before
+      : readyStep({ after, before: before.value });
+  } catch {
+    return workflowFailure(
+      "before-file-read-failed",
+      localization.beforeFileReadFailed,
+    );
+  }
+};
+
+const prepareWorkflowSource = async (
+  deps: SemanticDiffCommandDeps,
+  after: WorkflowAfterSnapshot,
+  localization: SemanticDiffCommandLocalization,
+): Promise<CommandStep<WorkflowSourceRequest>> => {
+  const selection = await selectWorkflowSource(deps, localization);
+  if (selection.kind === "cancelled") {
+    return workflowCancellation(localization);
+  }
+  if (selection.kind === "failed") {
+    return workflowSourceFailure(selection, localization);
+  }
+  if (selection.kind === "git-head") {
+    return workflowFailure(
+      "git-head-unavailable",
+      localization.gitHeadUnavailable,
+    );
+  }
+  return readWorkflowSourceFile(deps, after, localization);
+};
+
+const beginWorkflowCapture = (
+  deps: SemanticDiffCommandDeps,
+  source: WorkflowSourceRequest,
+  localization: SemanticDiffCommandLocalization,
+): CommandStep<{
+  before: WorkflowSourceDescriptor;
+  after: WorkflowSourceDescriptor;
+  capture: SemanticDiffSourceCapture;
+}> => {
+  if (
+    !deps.beginSemanticDiffSourceCapture ||
+    !deps.buildSemanticDiffPresentationArtifacts
+  ) {
+    return workflowFailure(
+      "source-capture-failed",
+      localization.sourceCaptureFailed,
+    );
+  }
+  try {
+    const after: WorkflowSourceDescriptor = {
+      side: "after",
+      sourceHandleId: deps.sourceHandleIdAllocator(),
+      text: source.after.text,
+      version: source.after.version,
+      uri: source.after.uri,
+    };
+    const capture = deps.beginSemanticDiffSourceCapture({
+      before: {
+        side: source.before.side,
+        sourceHandleId: source.before.sourceHandleId,
+        text: source.before.text,
+        version: source.before.version,
+      },
+      after: {
+        side: after.side,
+        sourceHandleId: after.sourceHandleId,
+        text: after.text,
+        version: after.version,
+      },
+    });
+    return readyStep({ before: source.before, after, capture });
+  } catch {
+    return workflowFailure(
+      "source-capture-failed",
+      localization.sourceCaptureFailed,
+    );
+  }
+};
+
+const buildWorkflowArtifacts = (
+  deps: SemanticDiffCommandDeps,
+  source: WorkflowSourceRequest,
+  selection: Extract<
+    WorkflowPeriodSelection,
+    { kind: "not-requested" | "evaluated" }
+  >,
+  localization: SemanticDiffCommandLocalization,
+): CommandStep<WorkflowArtifactState> => {
+  const captureStep = beginWorkflowCapture(deps, source, localization);
+  if (captureStep.kind === "failed") return captureStep;
+  const release = createSourceCaptureRelease(captureStep.value.capture);
+  const input: BuildSemanticDiffPresentationArtifactsInput =
+    selection.kind === "evaluated"
+      ? {
+          beforeContent: source.before.text,
+          afterContent: captureStep.value.after.text,
+          options: { scheduleComparisonPeriod: selection.period },
+        }
+      : {
+          beforeContent: source.before.text,
+          afterContent: captureStep.value.after.text,
+        };
+  try {
+    const result = deps.buildSemanticDiffPresentationArtifacts!(
+      input,
+      captureStep.value.capture.parser,
+    );
+    if ("ok" in result && result.ok === false) {
+      release();
+      return workflowFailure(
+        "parse-failed",
+        parseFailureMessage(result, localization),
+      );
+    }
+    return readyStep({
+      artifacts: result as SemanticDiffPresentationArtifacts,
+      capture: captureStep.value.capture,
+      sources: {
+        before: captureStep.value.before,
+        after: captureStep.value.after,
+      },
+      period: selection.kind === "evaluated" ? "evaluated" : "not-requested",
+      release,
+    });
+  } catch (error: unknown) {
+    release();
+    return workflowFailure(
+      isSemanticDiffSourceCaptureError(error)
+        ? "source-capture-failed"
+        : "comparison-failed",
+      isSemanticDiffSourceCaptureError(error)
+        ? localization.sourceCaptureFailed
+        : localization.comparisonFailed,
+    );
+  }
+};
+
+const bindWorkflowCapture = (
+  state: WorkflowArtifactState,
+  localization: SemanticDiffCommandLocalization,
+): CommandStep<SourceBinding> => {
+  try {
+    const binding = state.capture.bind(state.artifacts.context);
+    return binding.ok
+      ? readyStep(binding)
+      : workflowFailure(
+          "source-capture-failed",
+          localization.sourceCaptureFailed,
+        );
+  } catch {
+    return workflowFailure(
+      "source-capture-failed",
+      localization.sourceCaptureFailed,
+    );
+  }
+};
+
+const openWorkflowArtifacts = async (
+  deps: SemanticDiffCommandDeps,
+  state: WorkflowArtifactState,
+  localization: SemanticDiffCommandLocalization,
+): Promise<CommandStep<WorkflowExplorerResult>> => {
+  const binding = bindWorkflowCapture(state, localization);
+  if (binding.kind === "failed") {
+    state.release();
+    return binding;
+  }
+  if (!deps.registerSemanticDiffSourceCapture) {
+    state.release();
+    return workflowFailure(
+      "source-capture-failed",
+      localization.sourceCaptureFailed,
+    );
+  }
+  const entry: SemanticDiffSourceCaptureEntry = {
+    binding: binding.value,
+    sources: state.sources,
+    release: state.release,
+  };
+  try {
+    deps.registerSemanticDiffSourceCapture(state.artifacts.context, entry);
+  } catch {
+    unregisterAndReleaseWorkflowCapture(
+      deps,
+      state.artifacts.context,
+      state.release,
+    );
+    return workflowFailure(
+      "source-capture-failed",
+      localization.sourceCaptureFailed,
+    );
+  }
+  if (!deps.openScheduleAwareExplorerSession) {
+    unregisterAndReleaseWorkflowCapture(
+      deps,
+      state.artifacts.context,
+      state.release,
+    );
+    return workflowFailure(
+      "explorer-open-failed",
+      localization.explorerOpenFailed,
+    );
+  }
+  try {
+    const handle = await deps.openScheduleAwareExplorerSession(state.artifacts);
+    return readyStep({
+      handle,
+      source: "file",
+      period: state.period,
+    });
+  } catch {
+    unregisterAndReleaseWorkflowCapture(
+      deps,
+      state.artifacts.context,
+      state.release,
+    );
+    return workflowFailure(
+      "explorer-open-failed",
+      localization.explorerOpenFailed,
+    );
+  }
+};
+
+const runFileComparisonWorkflow = async (
+  deps: SemanticDiffCommandDeps,
+): Promise<CommandStep<WorkflowExplorerResult>> => {
+  const localization = getSemanticDiffCommandLocalization(deps.language);
+  const afterStep = readWorkflowAfterSnapshot(deps, localization);
+  const sourceStep = await continueCommandStep(afterStep, (after) =>
+    prepareWorkflowSource(deps, after, localization),
+  );
+  const periodStep = await continueCommandStep(sourceStep, async (source) => {
+    const selection = await selectWorkflowPeriod(deps, localization);
+    if (selection.kind === "cancelled") {
+      return workflowCancellation(localization);
+    }
+    return selection.kind === "failed"
+      ? workflowPeriodFailure(selection, localization)
+      : readyStep({ source, selection });
+  });
+  const artifactStep = await continueCommandStep(
+    periodStep,
+    ({ source, selection }) =>
+      buildWorkflowArtifacts(deps, source, selection, localization),
+  );
+  return continueCommandStep(artifactStep, (state) =>
+    openWorkflowArtifacts(deps, state, localization),
+  );
+};
+
+const prepareCalendarCompatibilitySource = async (
+  deps: SemanticDiffCommandDeps,
+  after: WorkflowAfterSnapshot,
+  localization: SemanticDiffCommandLocalization,
+): Promise<CommandStep<WorkflowSourceRequest>> =>
+  readWorkflowSourceFile(deps, after, localization);
+
+const runCalendarCompatibilityWorkflow = async (
+  deps: SemanticDiffCommandDeps,
+): Promise<CommandStep<WorkflowExplorerResult>> => {
+  const localization = getSemanticDiffCommandLocalization(deps.language);
+  const afterStep = readWorkflowAfterSnapshot(deps, localization);
+  const sourceStep = await continueCommandStep(afterStep, (after) =>
+    prepareCalendarCompatibilitySource(deps, after, localization),
+  );
+  const selection: Extract<
+    WorkflowPeriodSelection,
+    { kind: "not-requested" | "evaluated" }
+  > =
+    deps.scheduleComparisonPeriod === undefined
+      ? { kind: "not-requested" }
+      : { kind: "evaluated", period: deps.scheduleComparisonPeriod };
+  const artifactStep = await continueCommandStep(sourceStep, (source) =>
+    buildWorkflowArtifacts(deps, source, selection, localization),
+  );
+  return continueCommandStep(artifactStep, (state) =>
+    openWorkflowArtifacts(deps, state, localization),
+  );
 };
 
 const beginPresentationSourceCapture = (
@@ -318,6 +992,7 @@ const buildPresentationArtifactsStep = (
   deps: SemanticDiffCommandDeps,
   request: CommandReportData,
 ): CommandStep<PresentationCommandData> => {
+  const localization = getSemanticDiffCommandLocalization(deps.language);
   const adapter = deps.buildSemanticDiffPresentationArtifacts;
   if (!adapter) {
     return failedStep(
@@ -343,7 +1018,7 @@ const buildPresentationArtifactsStep = (
       sourceCapture?.release();
       return failedStep(
         "parse-failed",
-        "Semantic diff could not parse one or both JP1/AJS definitions.",
+        parseFailureMessage(result, localization),
         true,
       );
     }
@@ -362,7 +1037,7 @@ const buildPresentationArtifactsStep = (
         : "parse-failed",
       isSemanticDiffSourceCaptureError(error)
         ? "Semantic diff source capture could not be established."
-        : "Semantic diff could not parse one or both JP1/AJS definitions.",
+        : localization.parseFailed,
       true,
     );
   }
@@ -570,10 +1245,14 @@ const finalizeCommandFailure = async (
   deps: SemanticDiffCommandDeps,
   failure: CommandFailure["error"],
 ): Promise<SemanticDiffCommandResult> => {
+  const message =
+    failure.code === "cancelled"
+      ? getSemanticDiffCommandLocalization(deps.language).cancelled
+      : failure.message;
   if (failure.notify) {
-    await safeShowErrorMessage(deps, failure.message);
+    await safeShowErrorMessage(deps, message);
   }
-  return commandError(failure.code, failure.message);
+  return commandError(failure.code, message);
 };
 
 const finalizeSemanticDiffCommand = async (
@@ -594,13 +1273,45 @@ const finalizeExplorerCommand = async (
         ok: true,
         action: "explorer-opened",
         sessionId: step.value.sessionId,
+        source: "file",
+        period: "not-requested",
+      };
+
+const finalizeWorkflowExplorerCommand = async (
+  deps: SemanticDiffCommandDeps,
+  step: CommandStep<WorkflowExplorerResult>,
+): Promise<SemanticDiffCommandResult> =>
+  step.kind === "failed"
+    ? finalizeCommandFailure(deps, step.error)
+    : {
+        ok: true,
+        action: "explorer-opened",
+        sessionId: step.value.handle.sessionId,
+        source: step.value.source,
+        period: step.value.period,
       };
 
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
-): Promise<SemanticDiffCommandResult> =>
-  deps.openExplorer ||
-  (deps.buildSemanticDiffPresentationArtifacts !== undefined &&
-    deps.openScheduleAwareExplorerSession !== undefined)
+): Promise<SemanticDiffCommandResult> => {
+  const hasCalendarAdapter =
+    deps.buildSemanticDiffPresentationArtifacts !== undefined &&
+    deps.openScheduleAwareExplorerSession !== undefined;
+  const hasWorkflowUi =
+    deps.showWorkflowQuickPick !== undefined || deps.showInputBox !== undefined;
+  if (hasCalendarAdapter && hasWorkflowUi) {
+    return finalizeWorkflowExplorerCommand(
+      deps,
+      await runFileComparisonWorkflow(deps),
+    );
+  }
+  if (hasCalendarAdapter && !hasWorkflowUi) {
+    return finalizeWorkflowExplorerCommand(
+      deps,
+      await runCalendarCompatibilityWorkflow(deps),
+    );
+  }
+  return deps.openExplorer
     ? finalizeExplorerCommand(deps, await runExplorerCommand(deps))
     : finalizeSemanticDiffCommand(deps, await runSemanticDiffCommand(deps));
+};
