@@ -39,6 +39,13 @@ build and test workflows, and supported desktop and web environments.
   `pnpm audit --audit-level moderate` exits 1. The current advisory inventory
   and exact dependency paths are recorded in `TRACEABILITY.md`; this is a
   targeted Replanning update within the existing security-remediation purpose.
+- Replanning blocker (2026-09-12): the approved Faker `10.5.0` resolution
+  makes the current `postman-collection@4.5.0` module fail during initialization
+  because its dynamic-variable code imports the pre-v10 locale shape and reads
+  removed APIs such as `faker.address.city`. Audit high/moderate/low findings
+  are 0, but Prism smoke cannot start. The current uncommitted dependency diff
+  is retained; this compatibility failure requires a focused dependency-patch
+  replan rather than restoring vulnerable Faker or bypassing the smoke test.
 - JP1/AJS reference basis: not applicable. This feature is based on repository
   supply-chain risk and published package advisories; it does not define or
   infer JP1/AJS product behavior.
@@ -67,7 +74,8 @@ build and test workflows, and supported desktop and web environments.
   formatting churn.
 - R5: Preserve build, lint, test orchestration, extension packaging, OpenAPI
   tooling, and desktop/web test behavior exercised through the affected
-  development toolchain.
+  development toolchain. Prism/Postman startup and dynamic-variable smoke
+  coverage must remain operational after the Faker compatibility fix.
 - R6: Keep production dependency declarations, runtime source, generated
   artifacts, tests, and product behavior unchanged unless Planning discovers
   that a required security fix cannot be achieved within this boundary and
@@ -77,6 +85,39 @@ build and test workflows, and supported desktop and web environments.
   because it is alert 180 in the current GitHub set. Do not expand the feature
   to unrelated low-only advisory families; a future low-only family requires
   a separate Main decision.
+- R8: Retain `@faker-js/faker@10.5.0` on every resolved path. Make the
+  `postman-collection@4.5.0` legacy dynamic-variable consumer compatible through
+  one exact transitive package patch (or a verified published equivalent) that
+  provides the referenced legacy API facade. The plan must inventory all 118
+  dynamic-variable generators and 111 Faker references, including the 47
+  Faker 10-incompatible legacy APIs across address/location, name/person,
+  random/helpers, datatype/number/string, image, finance, and related modules.
+  The facade must preserve `this` binding, arguments, public Substitutor
+  behavior, URL/UUID/IP/email/date/path and other output contracts, seeded
+  determinism, and explicitly define fixed-clock/RNG handling for
+  time/random-dependent exceptions. Validation must prove zero legacy direct
+  references after patching and exercise every generator. The patch must
+  contain no vulnerable Faker copy and must not alter production/runtime
+  behavior. Restoring Faker 5.5.3, suppressing the advisory, or skipping Prism
+  smoke is not an allowed resolution.
+- R9: Preserve third-party patch provenance and license metadata. Record the
+  upstream package URL/version, registry integrity, repository tag or source
+  hash, and patch target. The patch may modify only the required portions of
+  `dynamic-variables.js`; manifest, install scripts, LICENSE, dependency
+  declarations, and package attribution must remain unchanged. Preserve
+  `postman-collection` Apache-2.0 and Faker MIT metadata/license information.
+- Provenance anchor for `postman-collection@4.5.0`: upstream
+  `https://github.com/postmanlabs/postman-collection`, annotated tag object
+  `fbfb40ebf1858b88ad6fb1da8771bf68909cbae6` at `refs/tags/v4.5.0`, and its
+  peeled source commit `0bc9665661a9f8ca4fdd91128d8312d0608ec637` at
+  `refs/tags/v4.5.0^{}`. The patch source and validation must use the peeled
+  source commit while retaining the annotated-tag object as provenance. The
+  registry integrity is
+  `sha512-152JSW9pdbaoJihwjc7Q8lc3nPg/PC9lPTHdMk7SHnHhu/GBJB7b2yb9zG7Qua578+3PxkQ/HYBuXpDSvsf7GQ==`.
+- R10: Keep the development-only patch out of the VSIX. Add the smallest
+  `.vscodeignore` exclusion for the exact patch path (or `patches/` only when
+  repository conventions require it), then verify the archive contains no
+  patch while bundles/assets and license/package attribution remain correct.
 
 ## Architecture
 
@@ -85,8 +126,9 @@ build and test workflows, and supported desktop and web environments.
 - Presentation: none.
 - Infrastructure: none in production code.
 - Dependency/tooling boundary: only development dependency declarations,
-  resolution policy, and the lockfile may change after approval. Existing
-  Clean Architecture dependency rules remain unchanged.
+  resolution policy, the exact approved third-party patch file, the minimal
+  VSIX exclusion, and the lockfile may change after approval. Existing Clean
+  Architecture dependency rules remain unchanged.
 
 ## Impact Analysis
 
@@ -102,23 +144,31 @@ build and test workflows, and supported desktop and web environments.
   `@humanfs/node` (`^0.16.6`), morgan (`^1.6.1`), nanoid (`^3.3.16`), and
   qs (`^6.12.3`). Browserslist 4.28.7 brings the compatible
   `baseline-browser-mapping@2.11.0` floor. The Prism HTTP path admits
-  `@faker-js/faker@^10.4.0`, while `postman-collection@4.5.0` retains an exact
-  `@faker-js/faker@5.5.3` edge; both affected Faker paths therefore require a
-  scoped existing-override remap to 10.5.0. The selected Faker release's Node
-  20.19 floor is already present on the current 10.4.0 path and must be
-  exercised with the repository's Node 20 validation environment.
+  `@faker-js/faker@^10.4.0`, while the selected `postman-collection@4.5.0`
+  package manifest declares an exact `@faker-js/faker@5.5.3` dependency and
+  its dynamic-variable module uses pre-v10 APIs. The scoped override to 10.5.0
+  is security-correct but requires a compatibility patch for that legacy
+  consumer. The selected Faker release's Node 20.19 floor is already present
+  on the current 10.4.0 path and must be exercised with the repository's Node
+  20 validation environment.
 - Existing `pnpm-workspace.yaml` overrides already control `js-yaml`,
   `fast-uri`, and `qs` (as well as the completed Slice 1 families). Update
   those affected targets to `4.3.2`, `3.1.6`, and `6.16.0`, respectively. The
-  replan may add only the two scoped Faker selectors in this existing override
-  section; no other configuration may change.
+  replan may keep only the two scoped Faker selectors at 10.5.0 and register
+  one exact `postman-collection@4.5.0` patch in `pnpm-workspace.yaml`; the only
+  configuration exception is one minimal `.vscodeignore` patch exclusion, and
+  all other configuration must remain unchanged.
 - Propagation decision: use targeted lockfile resolution for
   `postcss-selector-parser@7.1.3`, `browserslist@4.28.7`,
   `baseline-browser-mapping@2.11.0`, `@humanfs/node@0.16.8`, `morgan@1.12.0`,
   and `nanoid@3.3.18`. Keep `package.json` and all direct-parent versions
-  unchanged. If pnpm cannot produce that resolution, or the scoped Faker
-  remap is incompatible with Prism/package tooling, stop and return the exact
-  blocker to Main rather than widening the implementation silently.
+  unchanged. The patch must adapt only the legacy dynamic-variable import and
+  every referenced old Faker method to the 10.5.0 API. Its provenance,
+  integrity, source hash/tag, licenses, package manifest, install scripts, and
+  dependency metadata must be recorded and preserved. If it cannot preserve
+  the complete generator contract or license/package attribution, stop and
+  return the exact blocker to Main rather than widening the implementation
+  silently.
 
 ### Breaking Change Analysis
 
@@ -142,11 +192,15 @@ build and test workflows, and supported desktop and web environments.
   Planning. A direct `@stoplight/prism-cli` update is rejected because 5.16.0
   widens the graph and declares Node `>=24.18.0`; updating
   `@vscode/test-web` to 0.0.81 is rejected because it retains
-  `koa-morgan@^1.0.1` and does not itself select patched morgan. Adding broad
+  `koa-morgan@^1.0.1` and does not itself select patched morgan. Updating
+  Prism/http-spec/Postman is also rejected as a root fix: the current
+  `@stoplight/http-spec@7.1.0` still selects the 4.x Postman line, the latest
+  published Postman Collection 5.3.1 still declares Faker 5.5.3, and Prism
+  5.16 retains the http-spec path while raising its Node floor. Adding broad
   global overrides is rejected when a targeted lockfile resolution satisfies
-  the parent range. The two scoped Faker overrides are required because the
-  exact `postman-collection` 5.5.3 edge otherwise remains auditable. A global
-  audit suppression or `--prod`-only evidence is also rejected.
+  the parent range. The selected exact Postman patch keeps the safe Faker
+  10.5.0 graph while adapting only the legacy dynamic-variable facade. A
+  global audit suppression or `--prod`-only evidence is also rejected.
 
 ### Approval Impact Decisions
 
@@ -157,12 +211,22 @@ build and test workflows, and supported desktop and web environments.
   runtime/test/generated-source edit, new behavior, or an advisory that cannot
   be resolved through compatible development dependency resolution.
 - Replanning approval boundary: Slice 1 approvals remain valid only for the
-  already completed Slice 1. Replanned Slice 2 has independent plan review
-  `Ready` with no Findings and recorded Human Approval for the existing
-  override section plus `pnpm-lock.yaml`; its focused replan commit remains
-  pending. `package.json`, direct/production dependencies, runtime/tests,
-  generated artifacts, all other configuration, and VS Code compatibility
-  remain outside the boundary.
+  already completed Slice 1. The prior Replanned Slice 2 approval covered only
+  the override and lockfile resolution and is superseded by the implementation
+  compatibility blocker; it did not include the patch or `.vscodeignore`. The
+  revised Slice 2 plan review is `Ready` with no Findings and Human Approval
+  was automatically recorded on 2026-09-12. The approved planning package is
+  exactly `docs/specs/features/dependabot-security-updates/SPECS.md`,
+  `docs/specs/features/dependabot-security-updates/TASKS.md`, and
+  `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`. The
+  approval covers exactly four implementation paths: `pnpm-workspace.yaml`
+  (the existing overrides plus one `patchedDependencies` registration),
+  `pnpm-lock.yaml`, `patches/postman-collection@4.5.0.patch`, and one minimal
+  `.vscodeignore` exclusion for that patch. The prior approval did not include
+  either the patch file or `.vscodeignore`; `package.json`, direct/production
+  dependencies, repository runtime/tests, generated artifacts, all other
+  configuration, and VS Code compatibility remain outside the boundary. The
+  focused replan commit is eligible and pending through `approval-committer`.
 
 ## Compatibility
 
@@ -195,7 +259,20 @@ build and test workflows, and supported desktop and web environments.
   low-severity alert 180 is included only because its package is already an
   affected CSS-toolchain family in this replan.
 - Dependency changes remain limited to the approved development-tooling
-  resolution, the existing override section, and its lockfile consequences.
+  resolution, the existing override section, the exact
+  `postman-collection@4.5.0` patch registration and patch file, the minimal
+  `.vscodeignore` exclusion, and their lockfile consequences.
+- With Faker resolved to `10.5.0`, `postman-collection@4.5.0` loads without a
+  legacy API `TypeError`; all 118 public `$random*` dynamic-variable
+  generators cover the 111 Faker references and 47 legacy API mappings,
+  preserve argument/`this`/output contracts and seeded determinism, and the
+  Prism smoke starts and serves the existing fixtures. The patched package has
+  zero remaining direct references to the legacy Faker APIs.
+- The patch provenance, upstream source hash/tag, registry integrity,
+  unchanged manifest/install scripts/dependency metadata, and Apache-2.0/MIT
+  license attribution are recorded. The VSIX contains no development-only
+  patch, while its bundles, assets, and license/package attribution remain
+  valid.
 - The approved risk-based validation passes, including quality checks, build,
   and relevant desktop and web test/tooling paths.
 - `engines.vscode`, production source, JP1/AJS behavior, architecture rules,
@@ -229,8 +306,11 @@ build and test workflows, and supported desktop and web environments.
 
 ## Open Questions
 
-- The exact lockfile-only command sequence is an implementation detail and
-  must be supported by a resolved-graph check. The scoped Faker remap is the
-  only intentional transitive major-line change; Prism and package-tool smoke
-  validation must prove it is compatible. If it is not, the feature stops for
-  a new Main scope decision rather than changing direct dependencies.
+- The exact lockfile and patch-registration command sequence is an
+  implementation detail and must be supported by a resolved-graph check. The
+  scoped Faker remap plus the exact Postman compatibility patch is the only
+  intentional transitive major/source adaptation. Prism and package-tool smoke
+  validation must prove the complete legacy dynamic-variable contract. If no
+  patch can do so without a direct-parent or runtime change, the feature stops
+  for a new Main scope decision rather than changing direct dependencies
+  silently.
