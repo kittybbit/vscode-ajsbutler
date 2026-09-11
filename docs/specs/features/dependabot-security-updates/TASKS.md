@@ -4,8 +4,11 @@
 
 - Purpose: remove known high/moderate vulnerabilities from transitive
   development dependencies without changing extension behavior.
-- Approved or active slice: Slice 1; implementation review is Ready and the
-  completion gate is pending.
+- Approved or active slice: Slice 1 is complete and merged; Replanned Slice 2
+  has independent plan review Ready with no Findings and Human Approval
+  recorded. Its focused replan commit is pending through `approval-committer`.
+  Feature Exit remains blocked by advisory drift and the stale OpenAPI fixture
+  follow-up.
 - Do not: edit dependencies, lockfiles, runtime code, tests, generated
   artifacts, or configuration before an approved plan is committed.
 - Do not: broaden the work into general dependency modernization.
@@ -16,8 +19,10 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: Main delegates the approved completion gate to
-  `approval-committer`.
+- Next decision: route this approved Replanning package to
+  `approval-committer` for the focused replan commit, then begin Slice 2
+  implementation. Keep the stale OpenAPI fixture as a separate WebAPI
+  follow-up.
 
 ## Sync Rule
 
@@ -35,33 +40,47 @@
 
 ## Plan Status
 
-- Status: Implementation review Ready; completion gate pending
-- Planning scope: one complete implementation slice covering the compatible
-  development dependency resolution, lockfile audit closure, affected-tooling
-  validation, and production-readiness evidence.
-- Review status: plan Ready (`plan-reviewer`) and implementation Ready
-  (`implementation-reviewer` final verdict).
-- Human approval: Approved.
-- Active implementation slice: Slice 1
-- Implementation review verdict: Ready
+- Status: Slice 1 complete; Slice 2 replanned; Feature Exit blocked
+- Planning scope: Slice 1 remains complete. Replanned Slice 2 covers the
+  current compatible transitive development-dependency resolution, lockfile
+  audit closure, affected-tooling validation, and production-readiness
+  evidence.
+- Review status: Slice 1 plan and implementation reviews are Ready;
+  Replanned Slice 2 plan review is Ready with no Findings.
+- Human approval: Approved for Slice 1 and Replanned Slice 2.
+- Active implementation slice: None
+- Implementation review verdict: Slice 1 Ready; Slice 2 not started
 
 ## Human Approval
 
-- Status: Approved
-- Approved at: 2026-08-10 (explicit user approval in Codex)
+- Status: Approved for Slice 1 and Replanned Slice 2
+- Slice 1 approved at: 2026-08-10 (explicit user approval in Codex)
 - Approved scope: Slice 1 — resolve and validate the security-clean development
-  graph within the documented dependency and compatibility boundaries.
-- Approved paths: the three plan-gate documents listed below.
-- Plan-gate approved paths, once the revised plan receives `Ready` and Human
-  Approval, are exactly the completed planning package:
+  graph within the documented dependency and compatibility boundaries; and
+  Replanned Slice 2 — resolve the revalidated compatible transitive
+  development-dependency floors within the existing override section and
+  `pnpm-lock.yaml`, with no direct/production dependency, runtime/test/
+  generated-artifact, other-configuration, or VS Code floor changes.
+- Approved paths: the three plan-gate documents listed below for the Replanned
+  Slice 2 package.
+- Plan-gate approved paths are exactly the planning package:
   `docs/specs/features/dependabot-security-updates/SPECS.md`,
   `docs/specs/features/dependabot-security-updates/TASKS.md`, and
   `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
-- These plan-gate paths are separate from the implementation Slice 1 target
-  paths below; this approval authorizes only the plan-gate commit.
+- These plan-gate paths are separate from the implementation target paths;
+  this approval authorizes only the focused replan commit, not implementation.
 
-This approval was the prerequisite for implementation; Slice 1 is now
-implemented and awaits independent implementation review.
+This approval was the prerequisite for implementation; Slice 1 completed
+independent implementation review and the approved completion gate.
+
+- Replanned Slice 2 plan review: Ready; no Findings.
+- Replanned Slice 2 approval: Approved at 2026-09-12 under the existing
+  automatic-approval policy for a reviewed slice with no Findings.
+- Replanned Slice 2 approved implementation paths are exactly
+  `pnpm-workspace.yaml` (existing `overrides` section only) and
+  `pnpm-lock.yaml`.
+- Replanned Slice 2 focused replan commit: Eligible after this approval;
+  `approval-committer` handoff is pending. No implementation has started.
 
 ## Completion Approval
 
@@ -74,7 +93,9 @@ implemented and awaits independent implementation review.
   `docs/specs/features/dependabot-security-updates/TASKS.md`, and
   `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
 - Implementation review verdict: Ready
-- Commit status: Eligible for the completion gate
+- Commit status: Complete; focused completion-gate branch commit
+  `4edda55d`; integrated squash commit `6e94136d` is an ancestor of the
+  current branch.
 
 ## Closure Approval
 
@@ -82,14 +103,15 @@ implemented and awaits independent implementation review.
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Pending
+- Feature Exit verdict: Do not close (2026-09-12 review)
 - Commit status: Not eligible
 
 ## Implementation Slices
 
 ### Slice 1: Resolve and validate the security-clean development graph
 
-- Status: Implemented; completion gate pending
+- Status: Complete; focused completion-gate branch commit `4edda55d`,
+  integrated as `6e94136d`
 - Scope:
   - Immediately before resolution, re-query open Dependabot alerts and
     `pnpm audit --json`; use any newer compatible high/moderate advisory floor
@@ -212,6 +234,151 @@ implemented and awaits independent implementation review.
     roadmap, or CHANGELOG update is expected because no observable contract
     changes; re-evaluate at Feature Exit.
 
+### Slice 2: Resolve the revalidated advisory set
+
+- Status: Planned; plan review Ready, Human Approved; focused replan commit
+  pending
+- Scope:
+  - Immediately before resolution, re-query GitHub Dependabot and
+    `pnpm audit --json`; preserve the exact 10 current GitHub alert rows and
+    all 15 current audit advisory IDs / 16 findings in traceability. The
+    current GitHub alert set is 180, 181, 182, 183, 184, 186, 187, 188, 191,
+    and 192.
+  - In the existing `pnpm-workspace.yaml` `overrides` section, update the
+    affected existing targets to `js-yaml@4.3.2`, `fast-uri@3.1.6`, and
+    `qs@6.16.0`. Add only scoped remaps for
+    `@faker-js/faker@10.4.0` and `@faker-js/faker@5.5.3` to `10.5.0`;
+    the latter is an exact `postman-collection` edge and cannot be resolved
+    by lockfile selection alone.
+  - Regenerate only the necessary `pnpm-lock.yaml` resolution for
+    `postcss-selector-parser@7.1.3`, `browserslist@4.28.7`,
+    `baseline-browser-mapping@2.11.0`, `@humanfs/node@0.16.8`,
+    `morgan@1.12.0`, and `nanoid@3.3.18`, while retaining every completed
+    Slice 1 floor. Include only unavoidable package, snapshot, peer, and
+    integrity consequences of those approved resolutions.
+  - Do not edit `package.json`, direct or production dependencies, runtime,
+    tests, generated artifacts, any configuration outside the existing
+    override section, or VS Code/Node compatibility declarations.
+- User / Domain Value: contributors and release workflows receive a current
+  audit-clean development graph, and the newer Dependabot alerts can close
+  after publication without changing extension behavior or compatibility.
+- Cohesive Change Group: the current advisory families share the same
+  transitive lockfile and override boundary; resolving only a subset would
+  leave the moderate audit gate failing. The scoped Faker remaps and targeted
+  lockfile refresh form one atomic, independently reviewable security slice.
+- Acceptance:
+  - The resolved graph meets all retained Slice 1 floors and the ten current
+    floors in `SPECS.md`, with no affected vulnerable version remaining.
+  - `pnpm audit --audit-level moderate` exits successfully with zero high or
+    moderate findings, and the low `postcss-selector-parser` finding is also
+    absent through the selected `7.1.3` floor. Any advisory outside the mapped
+    inventory is a blocker returned to Main.
+  - The two scoped Faker remaps remain usable by Prism HTTP and
+    `postman-collection`; affected tooling smoke tests pass. A compatibility
+    failure is a blocker, not permission to update a direct parent.
+  - The current GitHub alerts 180, 181, 182, 183, 184, 186, 187, 188, 191,
+    and 192 are eligible for closure only after this committed resolution is
+    published and Dependabot is re-queried. Local audit success must not claim
+    remote alert closure; a newer post-publication alert is a Feature Exit
+    blocker.
+  - The implementation diff is limited to `pnpm-workspace.yaml`'s existing
+    override section and `pnpm-lock.yaml`; no direct/production declaration,
+    runtime/test/generated artifact, other configuration, or compatibility
+    contract changes are present.
+- Validation:
+  - Record the implementation-time GitHub alert tuple and the full
+    implementation-time audit mapping: 15 advisory IDs, 16 findings, 10 high,
+    5 moderate, 1 low, with package, version, every resolved path, severity,
+    vulnerable range, patched floor, and mapped response.
+  - Use Node 20 and pnpm 10.33.0, run `pnpm install --frozen-lockfile`,
+    assert every floor and parent-range decision, and inspect
+    `git diff -- pnpm-workspace.yaml pnpm-lock.yaml package.json` for
+    unrelated churn and unchanged direct/production declarations.
+  - Reproduce the Verify workflow's web prerequisite after the frozen install:
+    with `actions/setup-node@v4`'s `node-version: 20` contract, run exactly
+    `pnpm exec playwright install --with-deps chromium-headless-shell`.
+    Record the exact `node --version` patch (`20.x.y`), `pnpm --version`,
+    platform/architecture, Playwright version, and whether the Chromium and
+    headless-shell assets were cached before and after the installer.
+    Record a zero exit as installer success; record a non-zero exit, hang,
+    timeout, or manual interruption as an environment residual and never as
+    successful installation evidence.
+  - Run `pnpm audit --json` and
+    `pnpm audit --audit-level moderate`; require zero findings at or above
+    moderate and no remaining finding from the mapped current set.
+  - Run `rtk pnpm run qlty`, `rtk pnpm run lint:md`, build, test compilation,
+    desktop tests, web tests, affected Prism/WebAPI smoke coverage, and the
+    existing VSIX archive/content validation. Re-run the relevant paths to
+    prove the Faker, Browserslist, CSS, URL, and test-web tooling changes are
+    behaviorally compatible.
+  - Run the web test after the prerequisite/build steps and record its exit
+    status and test output separately from the Playwright installer result.
+    A successful `pnpm run test:web:run` (or the Verify-equivalent web test)
+    is web-test evidence even when the installer was an environment residual;
+    it does not retroactively claim installer success. A failed or incomplete
+    web test remains a Slice 2 validation failure.
+  - Run `rtk pnpm run openapi:check` as a non-regression observation. The
+    known stale `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`
+    remains an independent WebAPI follow-up; do not change it in this slice.
+    The security slice may complete with that exact residual unchanged, but
+    Feature Exit cannot close until the separate follow-up is resolved (or
+    Main records the SSOT-approved residual decision).
+  - After the implementation commit is published, re-query GitHub Dependabot
+    for Feature Exit evidence; this external check is outside local
+    completion evidence.
+- Production Readiness:
+  - Status: Ready for implementation after the focused replan commit through
+    `approval-committer`.
+  - Failure modes: fail closed on a remaining mapped advisory, new advisory,
+    resolver failure, unexplained lockfile churn, peer mismatch, Faker API
+    incompatibility, build/test/tool startup failure, or new GitHub alert.
+    Do not suppress, dismiss, or ignore findings.
+  - Compatibility: preserve `engines.vscode: ^1.75.0`, repository Node
+    declaration `>=20`, pnpm 10.33.0, direct parent versions, production
+    dependencies, and desktop/web entry points. Faker 10.5.0's Node 20.19
+    floor is already present on the current 10.4.0 path; record the exact
+    Node 20 patch used.
+  - JP1/AJS and malformed/large input: no parser or runtime path changes are
+    permitted. Existing desktop/web, Prism, and unchanged-source evidence
+    protects product behavior; the stale OpenAPI fixture is not mixed into
+    this security slice.
+  - Documentation/release: no README, durable use-case, architecture,
+    roadmap, or CHANGELOG update is expected because no observable contract
+    changes; re-evaluate at Feature Exit.
+- Approval Boundary:
+  - Replanned Slice 2 implementation paths are exactly
+    `pnpm-workspace.yaml` (existing `overrides` section only) and
+    `pnpm-lock.yaml`.
+  - The three feature documents are the separate plan-gate paths. Slice 1
+    completion and approvals are preserved and are not reopened.
+  - Stop and return to Main for Replanning if a direct-parent or
+    package/runtime/test/generated/configuration change is required, if the
+    scoped Faker remap is incompatible, if any lockfile churn is unexplained,
+    or if advisory remediation requires dismissal or an approval-boundary
+    change.
+- Dependencies: Slice 1 completion, prior completion commit, Feature Exit
+  findings, independent Slice 2 plan review, and Slice 2 Human Approval are
+  preserved. The focused replan commit is pending through
+  `approval-committer`; implementation may start only after that commit.
+  Slice 2 then requires implementation review, Completion Approval, and a
+  focused completion commit before Feature Exit is retried.
+- Risks:
+  - Scoped Faker remapping moves the exact `postman-collection` edge from
+    major 5 to 10; this is the only intentional transitive major-line change
+    and must be covered by Prism/package-tool smoke validation.
+  - Browserlist's required baseline mapping update and CSS transitive
+    updates may produce lockfile churn; every changed package must be
+    explained.
+  - Existing global js-yaml/qs overrides affect multiple tooling paths; Prism,
+    WebAPI, and package validation must detect incompatibility.
+  - Dependabot and registry advisories may drift again between planning,
+    implementation, publication, and Feature Exit.
+- Out of Scope: direct parent upgrades, `package.json` changes, production
+  dependencies, runtime/tests/generated artifacts, configuration outside the
+  existing override section, Node/VS Code floor changes, general freshness,
+  advisory suppression, stale OpenAPI fixture repair, and Feature Exit
+  propagation/removal.
+
 ## Implementation Evidence
 
 - Changed files are limited to the approved implementation paths:
@@ -223,12 +390,12 @@ implemented and awaits independent implementation review.
   6 moderate); before-resolution `pnpm audit` reported 23 advisories
   (17 high and 6 moderate); after resolution the audit reported 0, and
   `pnpm audit --audit-level moderate` succeeded.
-- GitHub API re-query evidence is now fixed in `TRACEABILITY.md` as an
+- GitHub API re-query evidence is fixed in `TRACEABILITY.md` as an
   immutable 17-row open-alert table containing each alert number, package/path,
   GHSA, severity, vulnerable range, first patched version, selected floor or
-  response, and stable repository URL. The local zero-audit result does not
-  claim remote alert closure; post-publication reevaluation remains Feature
-  Exit evidence.
+  response, and stable repository URL. The 2026-09-12 Feature Exit requery
+  found 10 newer open alerts; the current findings are recorded in the Feature
+  Exit Revalidation section below and require Replanning.
 - All ten selected security floors are met:
   `js-yaml@4.3.1`, `postcss@8.5.23`, `fast-uri@3.1.5`, `undici@7.29.0`,
   `brace-expansion@1.1.18`, `brace-expansion@5.0.9`, `shell-quote@1.9.0`,
@@ -297,45 +464,50 @@ implemented and awaits independent implementation review.
 
 ## Remaining Items And Handoff
 
-- Implementation review verdict: Ready. Recommended next route:
-  `approval-committer` for the completion gate.
-- Completion Approval is Approved; the exact four approved paths may be
-  staged and committed by `approval-committer` only.
-- GitHub Dependabot closure requires the completed implementation to reach
-  GitHub and a post-publication reevaluation; it is not claimed by local
-  evidence.
+- Implementation review verdict: Ready; Completion Approval and the focused
+  completion-gate branch commit are complete. The integrated squash commit is
+  `6e94136d`.
+- GitHub Dependabot closure was rechecked on 2026-09-12 and found 10 newer open
+  alerts. A fresh local audit re-query found 15 advisory IDs and 16 findings,
+  so the advisory drift is a Replanning blocker rather than a closure
+  candidate. Replanned Slice 2 is independently reviewed Ready with no
+  Findings and Human Approved; the next route is its focused replan commit
+  through `approval-committer`.
 - The stale OpenAPI fixture baseline is unresolved and must be handled by
   Main/the existing WebAPI maintainer as a separate task or Feature Exit
   follow-up. No generated artifact change is included here.
 
 - Approval Boundary:
-  - The exact plan-gate approved paths are the three completed feature
+  - The exact plan-gate approved paths are the three feature
     documents: `docs/specs/features/dependabot-security-updates/SPECS.md`,
     `docs/specs/features/dependabot-security-updates/TASKS.md`, and
     `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
-    They are committed as the planning package only after independent review
-    returns `Ready` and Human Approval is recorded.
+    The Replanned Slice 2 package has independent review `Ready`, no Findings,
+    and Human Approval recorded; it is eligible for the focused replan commit
+    and remains uncommitted pending `approval-committer`.
   - The separate Slice 1 implementation target paths are only
     `pnpm-workspace.yaml` and `pnpm-lock.yaml`. `package.json`, direct parent
     declarations, production/runtime/test code, generated artifacts, and
     all other paths remain outside the implementation slice.
-  - Human Approval applies to this one complete slice after independent review
-    returns `Ready`; the approved planning package must be committed before
-    implementation.
+  - Human Approval applies independently to Replanned Slice 2 after its
+    independent review returns `Ready`; the approved planning package must be
+    committed before implementation.
   - Stop for Replanning, do not stage or commit, and return the exact diff and
-    explanation to Main if resolution requires a new override, `package.json`
-    edit, direct-parent update, production dependency/runtime/test/generated
-    artifact change, compatibility-floor change, advisory dismissal, or any
-    path outside the approved boundary. The same stop condition applies when
-    any `package`, `snapshot`, `integrity`, or `peer` lockfile diff is not
-    explained by the approved override, targeted resolution, or unavoidable
-    peer/integrity consequence, or when an additional resolution remains for
-    an affected family beyond the approved floors.
-- Dependencies: Feature Intake, independent plan review Ready, Human Approval,
-  implementation review Ready, and the approved implementation boundary are
-  complete. Next is the `approval-committer` completion gate; Dependabot
-  closure evidence additionally depends on the completed slice reaching GitHub
-  and GitHub reevaluation.
+    explanation to Main if resolution requires a new direct-parent,
+    `package.json`, production dependency/runtime/test/generated artifact,
+    other configuration, compatibility-floor, or approval-boundary change, or
+    advisory dismissal. The same stop condition applies when any `package`,
+    `snapshot`, `integrity`, or `peer` lockfile diff is not explained by the
+    approved override, targeted resolution, or unavoidable peer/integrity
+    consequence, or when an additional resolution remains for an affected
+    family beyond the planned floors.
+- Dependencies: Slice 1 Feature Intake, plan review, Human Approval,
+  implementation review, Completion Approval, and completion commit are
+  complete and preserved. Replanned Slice 2 has independent plan review Ready
+  with no Findings and Human Approval recorded; it now requires the plan-gate
+  commit, implementation review, Completion Approval, and completion commit.
+  Feature Exit remains blocked until Slice 2 and the separate OpenAPI
+  follow-up are resolved.
 - Risks:
   - A global js-yaml override continues to place 4.x on two legacy 3.x parent
     ranges; this is existing branch behavior, not a new major-line change, but
@@ -347,9 +519,11 @@ implemented and awaits independent implementation review.
   - Registry or advisory drift can raise a floor after planning; compatible
     drift remains in scope, while an incompatible fix triggers Replanning.
 - Out of Scope: broad dependency freshness, direct-parent updates, new
-  persistent overrides for linkify-it/morgan/nanoid, major upgrades,
-  production/runtime/test/generated-source edits, behavior changes, engine
-  changes, alert dismissal, README/CHANGELOG changes, and Feature Exit work.
+  persistent overrides for linkify-it, morgan, or nanoid, direct dependency
+  declarations, production/runtime/test/generated-source edits, behavior
+  changes, engine changes, configuration outside the existing override
+  section, alert dismissal, README/CHANGELOG changes, stale OpenAPI repair,
+  and Feature Exit work.
 
 ## Planning Inputs
 
@@ -370,6 +544,15 @@ implemented and awaits independent implementation review.
   `koa-morgan@^1.0.1`. The selected minimum is existing-override target updates
   plus targeted lockfile resolution, with no `package.json` change or new
   override.
+- Replanning re-query (2026-09-12) found 15 audit advisory IDs and 16
+  findings: 10 high, 5 moderate, and 1 low. The current mapped floors are
+  `@faker-js/faker@10.5.0`, `@humanfs/node@0.16.8`,
+  `baseline-browser-mapping@2.11.0`, `browserslist@4.28.7`,
+  `fast-uri@3.1.6`, `js-yaml@4.3.2`, `morgan@1.12.0`, `nanoid@3.3.18`,
+  `postcss-selector-parser@7.1.3`, and `qs@6.16.0`; the low family is
+  included only because it is current GitHub alert 180 and is resolved by the
+  same CSS-toolchain update. The 10 GitHub alerts are mapped in
+  `TRACEABILITY.md`.
 
 ## Impact And Risks
 
@@ -379,6 +562,9 @@ implemented and awaits independent implementation review.
   undici, linkify-it, and brace-expansion are under VSCE packaging paths.
 - Test risk: morgan is under `@vscode/test-web`; shell-quote and
   brace-expansion participate in test/lint script orchestration.
+- Replan test risk: Faker 10.5.0 is applied to both the Prism HTTP `^10.4.0`
+  edge and the exact `postman-collection` 5.5.3 edge. Prism/package-tool
+  smoke coverage must detect an incompatible API or behavior change.
 - Resolution risk: lockfile updates can change additional compatible
   transitive versions. The plan must distinguish required consequences from
   unrelated churn.
@@ -387,7 +573,9 @@ implemented and awaits independent implementation review.
   intake snapshot.
 - Compatibility risk: undici 7.29.0 retains the current undici 7.x
   `>=20.18.1` engine floor; brace-expansion 5.0.9 supports Node 20 or >=22.
-  Existing Node 20 CI must be exercised.
+  Faker 10.5.0 requires Node 20.19 or newer, which is already required by the
+  current 10.4.0 path. Existing Node 20 CI must be exercised with its exact
+  patch recorded.
 
 ## Traceability
 
@@ -398,14 +586,18 @@ implemented and awaits independent implementation review.
 
 ## Feature Exit
 
-- Definition of Done status: completion gate pending; Slice 1 implementation
-  and independent review are complete. The stale OpenAPI baseline follow-up
-  and post-publication Dependabot reevaluation remain for Feature Exit review.
+- Definition of Done status: not satisfied. Slice 1 implementation,
+  independent review, Completion Approval, and the focused completion-gate
+  branch commit are complete, but the current graph has new high/moderate
+  advisories and `openapi:check` still reports a stale generated fixture.
 - Durable documentation updates: none expected beyond temporary feature
   artifacts; re-evaluate README and CHANGELOG impact at exit.
-- Open risks: advisory drift, transitive lockfile churn, Node 20 execution, and
-  tooling compatibility require independent plan review and implementation
-  evidence.
+- Roadmap propagation: not required; this remains transient dependency
+  remediation and no repository-level product ordering or future work changed.
+- Open risks: current advisory drift requires Replanning; the stale OpenAPI
+  fixture remains a separate follow-up owned by Main/the WebAPI maintainer.
+- Feature Exit review date: 2026-09-12
+- Feature Exit recommendation: Do not close
 
 ## Validation
 
@@ -424,7 +616,42 @@ implemented and awaits independent implementation review.
       behavior-contract update is required.
 - [x] `openapi:check` executed; its only failure is the stale generated WebAPI
       fixture baseline recorded above and assigned as follow-up.
-- [ ] Complete Feature Exit validation and durable-document evaluation.
+- [x] Feature Exit validation and durable-document evaluation completed;
+      closure is blocked by the current audit/Dependabot findings and stale
+      OpenAPI fixture.
+- [ ] Replanned Slice 2 audit, floor assertions, lockfile-diff explanation,
+      and affected-tooling validation complete.
+- [ ] Replanned Slice 2 independently reviewed, Human Approved, implemented,
+      reviewed, Completion Approved, and committed.
+
+## Feature Exit Revalidation (2026-09-12)
+
+- GitHub currently reports 10 open Dependabot alerts: 180, 181, 182, 183,
+  184, 186, 187, 188, 191, and 192. The original alerts 156-176 are no
+  longer open, but these newer alerts supersede the implementation-time
+  security floors under R3 and require Replanning within this feature purpose.
+- Current `pnpm audit --json` re-query reports 15 advisory IDs affecting 16
+  resolved vulnerability findings: 10 high, 5 moderate, and 1 low. The
+  high/moderate
+  findings are `nanoid` 3.3.17 (GHSA-2v37-7h3g-55p8), `browserslist` 4.28.2
+  (GHSA-c83g-rgw3-j3cx and GHSA-73wf-gq98-2v4g), `@humanfs/node` 0.16.6
+  (GHSA-p498-v437-472g), `@faker-js/faker` 5.5.3/10.4.0
+  (GHSA-qxc2-j82w-r537), `qs` 6.15.2 (GHSA-x5fp-wj9c-mxmx and
+  GHSA-4mjr-xmp4-gh2g), `fast-uri` 3.1.5 (GHSA-5jgf-p345-68v8,
+  GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf, GHSA-jqff-g426-hqxp),
+  `baseline-browser-mapping` 2.10.20 (GHSA-w5vr-8v7q-w6rv), `js-yaml`
+  4.3.1 (GHSA-2883-xcg3-v3hh), and `morgan` 1.11.0
+  (GHSA-jxfw-x594-9x9m). The low finding is `postcss-selector-parser` 7.1.0
+  (GHSA-w9m9-85wc-3x92). The 15 IDs are mapped to Slice 2 in
+  `TRACEABILITY.md`. `pnpm audit --audit-level moderate` exits 1 with 16
+  vulnerabilities.
+- `pnpm run openapi:check` remains failing because
+  `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml` is
+  stale. No generated artifact was changed in this Feature Exit review.
+- No runtime, test, configuration, README, CHANGELOG, roadmap, or durable
+  product-contract changes are required by this review. The selected feature
+  folder must remain until the advisory Replanning work and the independent
+  OpenAPI follow-up are resolved.
 
 ## Notes
 

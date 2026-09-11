@@ -8,9 +8,10 @@ build and test workflows, and supported desktop and web environments.
 
 ## Minimal Context
 
-- Current decision: establish a security-clean development dependency
-  resolution without broad dependency modernization or product behavior
-  changes.
+- Current decision: extend the completed security resolution with one
+  revalidated, compatible transitive-development-dependency resolution for
+  the newer advisory set, without broad dependency modernization or product
+  behavior changes.
 - Feature kind: transient branch feature.
 - Selected feature folder:
   `docs/specs/features/dependabot-security-updates/`.
@@ -27,10 +28,17 @@ build and test workflows, and supported desktop and web environments.
 - Alert basis: Dependabot alerts 156-176 that remain open, excluding numbers
   not present in the open result. They cover `morgan`, `brace-expansion`,
   `js-yaml`, `shell-quote`, `linkify-it`, `fast-uri`, `postcss`, and `undici`.
-- Additional risk evidence: `pnpm audit --json` currently reports 23
+- Additional intake risk evidence (2026-08-10): `pnpm audit --json` reported 23
   advisories (17 high and 6 moderate), including two `nanoid@3.3.12`
   advisories and newer `brace-expansion` advisories not yet represented in the
   17 open Dependabot alerts.
+- Replanning trigger (2026-09-12): the original alerts 156-176 are closed, but
+  GitHub currently reports open alerts 180, 181, 182, 183, 184, 186, 187, 188,
+  191, and 192. A fresh local `pnpm audit --json` reports 15 advisory IDs and
+  16 findings (10 high, 5 moderate, 1 low), and
+  `pnpm audit --audit-level moderate` exits 1. The current advisory inventory
+  and exact dependency paths are recorded in `TRACEABILITY.md`; this is a
+  targeted Replanning update within the existing security-remediation purpose.
 - JP1/AJS reference basis: not applicable. This feature is based on repository
   supply-chain risk and published package advisories; it does not define or
   infer JP1/AJS product behavior.
@@ -42,11 +50,14 @@ build and test workflows, and supported desktop and web environments.
 - R1: The resolved development dependency graph must no longer contain a
   version affected by any high- or moderate-severity advisory detected for
   this branch at implementation time.
-- R2: At minimum, resolution must meet the currently known security floors:
-  `js-yaml@4.3.1`, `postcss@8.5.23`, `fast-uri@3.1.5`,
-  `undici@7.29.0`, `brace-expansion@1.1.18` and `5.0.9` for the two
-  retained major lines, `shell-quote@1.9.0`, `linkify-it@5.0.2`,
-  `morgan@1.11.0`, and `nanoid@3.3.17`.
+- R2: The completed Slice 1 floors remain unchanged, and the replan must add
+  these current floors: `js-yaml@4.3.2`, `postcss-selector-parser@7.1.3`,
+  `fast-uri@3.1.6`, `browserslist@4.28.7`,
+  `baseline-browser-mapping@2.11.0`, `@humanfs/node@0.16.8`,
+  `@faker-js/faker@10.5.0`, `morgan@1.12.0`, `nanoid@3.3.18`, and
+  `qs@6.16.0`. The retained Slice 1 floors are
+  `postcss@8.5.23`, `undici@7.29.0`, `brace-expansion@1.1.18` and `5.0.9`,
+  `shell-quote@1.9.0`, and `linkify-it@5.0.2`.
 - R3: Planning must re-query Dependabot and the package audit immediately
   before selecting versions. A newer advisory or security floor supersedes
   the intake snapshot and requires coverage within this same security-clean
@@ -61,6 +72,11 @@ build and test workflows, and supported desktop and web environments.
   artifacts, tests, and product behavior unchanged unless Planning discovers
   that a required security fix cannot be achieved within this boundary and
   returns to Main for replanning or a scope decision.
+- R7: Resolve the current low-severity `postcss-selector-parser` alert as an
+  incidental consequence of the same compatible CSS-toolchain resolution,
+  because it is alert 180 in the current GitHub set. Do not expand the feature
+  to unrelated low-only advisory families; a future low-only family requires
+  a separate Main decision.
 
 ## Architecture
 
@@ -81,24 +97,28 @@ build and test workflows, and supported desktop and web environments.
   `@vscode/test-web`/koa-morgan. The resolved graph also contains non-alerting
   `js-yaml` consumers under textlint, Cosmiconfig, Mocha, and
   rc-config-loader that share the existing global override.
-- The known patched versions fit the current immediate-parent ranges for
-  PostCSS (`^8.4.40`), fast-uri (`^3.0.1`), undici (`^7.12.0`), both
-  brace-expansion lines (`^1.1.7` and `^5.0.2`), shell-quote (`^1.6.1`),
-  linkify-it (`^5.0.1`), and morgan (`^1.6.1`). PostCSS 8.5.23 declares
-  `nanoid@^3.3.16`, which admits 3.3.17. Current `js-yaml` 4.x consumers admit
-  4.3.1; two legacy consumers declare 3.x ranges, but the existing global
-  override already resolves those paths to 4.2.0, so moving that same override
-  to 4.3.1 preserves the branch's established major-version resolution.
+- The revalidated patched versions fit the current immediate-parent ranges for
+  `postcss-selector-parser` (`^7.0.0`), Browserslist (`^4.28.1`),
+  `@humanfs/node` (`^0.16.6`), morgan (`^1.6.1`), nanoid (`^3.3.16`), and
+  qs (`^6.12.3`). Browserslist 4.28.7 brings the compatible
+  `baseline-browser-mapping@2.11.0` floor. The Prism HTTP path admits
+  `@faker-js/faker@^10.4.0`, while `postman-collection@4.5.0` retains an exact
+  `@faker-js/faker@5.5.3` edge; both affected Faker paths therefore require a
+  scoped existing-override remap to 10.5.0. The selected Faker release's Node
+  20.19 floor is already present on the current 10.4.0 path and must be
+  exercised with the repository's Node 20 validation environment.
 - Existing `pnpm-workspace.yaml` overrides already control `js-yaml`,
-  `postcss`, `fast-uri`, `undici`, both brace-expansion lines, and
-  `shell-quote`. `linkify-it`, `morgan`, and `nanoid` currently have no
-  explicit override.
-- Propagation decision: update the existing affected override targets and use
-  targeted lockfile resolution, without adding overrides, for linkify-it,
-  morgan, and nanoid because their current parents already admit the patched
-  versions. Keep `package.json` and direct-parent versions unchanged. If pnpm
-  cannot produce that resolution without a new override or parent update,
-  stop for Replanning rather than widening the implementation silently.
+  `fast-uri`, and `qs` (as well as the completed Slice 1 families). Update
+  those affected targets to `4.3.2`, `3.1.6`, and `6.16.0`, respectively. The
+  replan may add only the two scoped Faker selectors in this existing override
+  section; no other configuration may change.
+- Propagation decision: use targeted lockfile resolution for
+  `postcss-selector-parser@7.1.3`, `browserslist@4.28.7`,
+  `baseline-browser-mapping@2.11.0`, `@humanfs/node@0.16.8`, `morgan@1.12.0`,
+  and `nanoid@3.3.18`. Keep `package.json` and all direct-parent versions
+  unchanged. If pnpm cannot produce that resolution, or the scoped Faker
+  remap is incompatible with Prism/package tooling, stop and return the exact
+  blocker to Main rather than widening the implementation silently.
 
 ### Breaking Change Analysis
 
@@ -122,11 +142,11 @@ build and test workflows, and supported desktop and web environments.
   Planning. A direct `@stoplight/prism-cli` update is rejected because 5.16.0
   widens the graph and declares Node `>=24.18.0`; updating
   `@vscode/test-web` to 0.0.81 is rejected because it retains
-  `koa-morgan@^1.0.1` and does not itself select patched morgan. Adding new
-  linkify-it, morgan, or nanoid overrides is also unnecessary while targeted
-  lockfile resolution satisfies the current parent ranges. The selected
-  approach is therefore the existing-override update plus targeted lockfile
-  resolution described above.
+  `koa-morgan@^1.0.1` and does not itself select patched morgan. Adding broad
+  global overrides is rejected when a targeted lockfile resolution satisfies
+  the parent range. The two scoped Faker overrides are required because the
+  exact `postman-collection` 5.5.3 edge otherwise remains auditable. A global
+  audit suppression or `--prod`-only evidence is also rejected.
 
 ### Approval Impact Decisions
 
@@ -136,6 +156,13 @@ build and test workflows, and supported desktop and web environments.
   direct-dependency major update, Node or VS Code compatibility change,
   runtime/test/generated-source edit, new behavior, or an advisory that cannot
   be resolved through compatible development dependency resolution.
+- Replanning approval boundary: Slice 1 approvals remain valid only for the
+  already completed Slice 1. Replanned Slice 2 has independent plan review
+  `Ready` with no Findings and recorded Human Approval for the existing
+  override section plus `pnpm-lock.yaml`; its focused replan commit remains
+  pending. `package.json`, direct/production dependencies, runtime/tests,
+  generated artifacts, all other configuration, and VS Code compatibility
+  remain outside the boundary.
 
 ## Compatibility
 
@@ -161,15 +188,21 @@ build and test workflows, and supported desktop and web environments.
 - `pnpm audit --audit-level moderate` reports no high- or moderate-severity
   vulnerability in the resolved dependency graph, or any unavoidable result
   is returned to Main as an explicit blocker rather than dismissed silently.
-- The 17 Dependabot alerts that originated this feature are closed after the
-  updated lockfile reaches GitHub; any newer alert for the same resolved graph
-  is also resolved or returned to Main as a blocker.
+- The 17 Dependabot alerts that originated this feature and the current
+  compatible alerts 180, 181, 182, 183, 184, 186, 187, 188, 191, and 192 are
+  closed after the updated lockfile reaches GitHub; any newer alert for the
+  same resolved graph is also resolved or returned to Main as a blocker. The
+  low-severity alert 180 is included only because its package is already an
+  affected CSS-toolchain family in this replan.
 - Dependency changes remain limited to the approved development-tooling
-  resolution and its lockfile consequences.
+  resolution, the existing override section, and its lockfile consequences.
 - The approved risk-based validation passes, including quality checks, build,
   and relevant desktop and web test/tooling paths.
 - `engines.vscode`, production source, JP1/AJS behavior, architecture rules,
   README, and user-facing contracts remain unchanged.
+- The stale generated OpenAPI fixture remains unchanged and is reported as an
+  independent WebAPI follow-up; it is not silently counted as security-slice
+  success or mixed into this implementation.
 
 ## Durable Document Impact
 
@@ -196,5 +229,8 @@ build and test workflows, and supported desktop and web environments.
 
 ## Open Questions
 
-- None blocking Planning. The exact compatible resolution mechanism is a
-  plan-author responsibility and must be supported by a resolved-graph check.
+- The exact lockfile-only command sequence is an implementation detail and
+  must be supported by a resolved-graph check. The scoped Faker remap is the
+  only intentional transitive major-line change; Prism and package-tool smoke
+  validation must prove it is compatible. If it is not, the feature stops for
+  a new Main scope decision rather than changing direct dependencies.
