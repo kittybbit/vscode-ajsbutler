@@ -22,13 +22,15 @@ overrides:
   "@tootallnate/once@2.0.0": 2.0.1
   brace-expansion@1.1.12: 1.1.18
   brace-expansion@5.0.5: 5.0.9
+  "@faker-js/faker@10.4.0": 10.5.0
+  "@faker-js/faker@5.5.3": 10.5.0
   diff: 8.0.3
   elliptic: ^6.5.6
-  fast-uri@3.0.6: 3.1.5
+  fast-uri@3.0.6: 3.1.6
   fast-xml-builder@1.1.5: 1.1.7
   flatted: 3.4.2
   form-data: 4.0.6
-  js-yaml: 4.3.1
+  js-yaml: 4.3.2
   jws: 3.2.3
   koa: 3.1.2
   lodash: 4.18.0
@@ -40,7 +42,7 @@ overrides:
   picomatch@2.3.1: 2.3.2
   picomatch@4.0.3: 4.0.4
   postcss@8.5.6: 8.5.23
-  qs: 6.15.2
+  qs: 6.16.0
   serialize-javascript: 7.0.5
   shell-quote@1.8.3: 1.9.0
   tmp@0.2.5: 0.2.7
@@ -50,3 +52,5 @@ overrides:
   uuid@11.1.0: 11.1.1
   ws: ">=7.5.11"
   yaml: 1.10.3
+patchedDependencies:
+  postman-collection@4.5.0: patches/postman-collection@4.5.0.patch

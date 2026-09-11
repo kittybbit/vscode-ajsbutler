@@ -4,12 +4,12 @@
 
 - Purpose: remove known high/moderate vulnerabilities from transitive
   development dependencies without changing extension behavior.
-- Approved or active slice: Slice 1 is complete and merged. Slice 2's prior
-  replan approval is superseded by an implementation-time Prism/Postman
-  compatibility blocker; the current pnpm implementation diff remains held
-  uncommitted while a revised plan is reviewed and approved. Feature Exit
-  remains blocked by this blocker, advisory publication evidence, and the
-  stale OpenAPI fixture follow-up.
+- Approved or active slice: Slice 1 is complete and merged. Revised Slice 2
+  implementation is complete, independently reviewed Ready with no Findings,
+  and Completion Approved on 2026-09-12 under the no-Findings automatic-
+  approval policy. Its completion commit is eligible and pending. Feature Exit
+  remains blocked by publication/Dependabot re-query evidence and the stale
+  OpenAPI fixture follow-up.
 - Do not: edit dependencies, lockfiles, runtime code, tests, generated
   artifacts, or configuration before an approved plan is committed.
 - Do not: broaden the work into general dependency modernization.
@@ -20,11 +20,11 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: send the independently reviewed and automatically approved
-  revised Slice 2 planning package to `approval-committer` for its focused
-  replan commit. After that gate, adapt the held pnpm diff with the exact
-  Postman compatibility patch and begin implementation. Keep the stale
-  OpenAPI fixture as a separate WebAPI follow-up.
+- Next decision: send the exact completed Slice 2 paths to
+  `approval-committer` for the focused completion commit. Keep the
+  `Accept-Language: *` test residual, stale OpenAPI fixture, and Playwright
+  installer result as separate boundaries; do not claim remote alert closure
+  before publication and a Dependabot re-query.
 
 ## Sync Rule
 
@@ -42,27 +42,29 @@
 
 ## Plan Status
 
-- Status: Slice 1 complete; Slice 2 implementation blocked pending the
-  focused revised-plan commit; Feature Exit blocked
+- Status: Slice 1 complete; Slice 2 implementation independently reviewed
+  Ready with no Findings and Completion Approved; completion commit pending;
+  Feature Exit blocked
 - Planning scope: Slice 1 remains complete. Replanned Slice 2 covers the
   current compatible transitive development-dependency resolution, lockfile
   audit closure, affected-tooling validation, and production-readiness
   evidence.
 - Review status: Slice 1 plan and implementation reviews are Ready. The prior
   Replanned Slice 2 review was Ready with no Findings, but its approval is
-  superseded by the implementation blocker. Revised Slice 2 plan review is
-  Ready with no Findings.
+  superseded by the implementation blocker. Revised Slice 2 plan and
+  implementation reviews are Ready with no Findings.
 - Human approval: Slice 1 approved; revised Slice 2 automatically Approved on
   2026-09-12 under the no-Findings policy.
-- Active implementation slice: None
-- Implementation review verdict: Slice 1 Ready; Slice 2 not started
+- Active implementation slice: Slice 2 implementation complete; completion
+  commit pending
+- Implementation review verdict: Slice 1 Ready; Slice 2 Ready with no Findings
 
 ## Human Approval
 
-- Status: Slice 1 approved; prior Replanned Slice 2 approval superseded by
-  the implementation-time Prism/Postman compatibility blocker; revised Slice
-  2 approved on 2026-09-12 after Ready/no-Findings review. The focused replan
-  commit remains pending.
+- Status: Slice 1 approved; revised Slice 2 plan approved on 2026-09-12 after
+  Ready/no-Findings review, with its focused replan committed at `1b8a2523`.
+  Slice 2 implementation review is Ready with no Findings and its Completion
+  Approval is recorded below under the no-Findings automatic-approval policy.
 - Slice 1 approved at: 2026-08-10 (explicit user approval in Codex)
 - Approved scope: Slice 1 — resolve and validate the security-clean development
   graph within the documented dependency and compatibility boundaries. The
@@ -98,10 +100,9 @@ independent implementation review and the approved completion gate.
   `patchedDependencies` registration), `pnpm-lock.yaml`,
   `patches/postman-collection@4.5.0.patch`, and the minimal `.vscodeignore`
   exclusion for that patch path.
-- Revised Slice 2 focused replan commit: Eligible after the Ready/no-Findings
-  review and 2026-09-12 approval; pending `approval-committer`. No plan or
-  implementation commit has started for this revision. The current
-  uncommitted pnpm implementation diff is held and must not be reverted.
+- Revised Slice 2 focused replan commit: `1b8a2523`, committed after the
+  Ready/no-Findings review and 2026-09-12 approval. The implementation diff
+  remains uncommitted and is eligible for the focused completion commit.
 
 ## Completion Approval
 
@@ -117,6 +118,34 @@ independent implementation review and the approved completion gate.
 - Commit status: Complete; focused completion-gate branch commit
   `4edda55d`; integrated squash commit `6e94136d` is an ancestor of the
   current branch.
+
+### Revised Slice 2 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-12 under the user's no-Findings automatic-approval
+  policy, after independent implementation re-review returned Ready with no
+  Findings.
+- Approved scope: the completed Revised Slice 2 implementation, its
+  acceptance evidence, validation evidence, and recorded residual boundaries.
+  The three prior implementation Findings were resolved: exact legacy
+  masked-card semantics, method-specific Faker 10 positional adapters, and
+  the documented phone/image contracts.
+- Approved paths: exactly `.vscodeignore`, `pnpm-workspace.yaml`,
+  `pnpm-lock.yaml`, and `patches/postman-collection@4.5.0.patch`. No
+  `package.json`, direct/production dependency, runtime, test, generated
+  artifact, other configuration, or compatibility-floor path is included.
+- Acceptance and validation: all 15 advisory IDs / 16 findings resolve to
+  zero local audit findings; all planned dependency floors are met; 118 public
+  dynamic generators, 111 Faker references, the full argument/`this` matrix,
+  seed checks, direct Prism smoke, build, test compilation, desktop/web, qlty,
+  markdown lint, and VSIX exclusion checks passed as recorded below.
+- Residual boundaries: the existing `Accept-Language: *` Node fetch test
+  remains a separate WebAPI follow-up because Prism returns 400; the stale
+  OpenAPI fixture is unchanged and separate; the Playwright installer
+  interruption is separate from the successful web test; and remote
+  Dependabot closure awaits publication and post-publication re-query.
+- Implementation review verdict: Ready with no Findings.
+- Commit status: Eligible and pending; no completion commit has been made.
 
 ## Closure Approval
 
@@ -257,23 +286,19 @@ independent implementation review and the approved completion gate.
 
 ### Slice 2: Resolve the revalidated advisory set
 
-- Status: Blocked by implementation-time Prism/Postman compatibility failure;
-  revised replan is independently reviewed Ready with no Findings and
-  approved on 2026-09-12. The focused replan commit is pending through
-  `approval-committer`; the current `pnpm-workspace.yaml`/`pnpm-lock.yaml`
-  implementation diff is held uncommitted and must be adapted only after that
-  commit.
-- Implementation blocker evidence (2026-09-12): the held security update
-  reaches audit high/moderate/low = 0 and frozen install, build, test
-  compilation, desktop/web, qlty, and lint checks succeeded. Prism smoke
-  cannot start because `postman-collection@4.5.0` initializes against the
-  Faker 10.5.0 override and throws `TypeError` at
-  `lib/superstring/dynamic-variables.js:171` while reading
-  `faker.address.city`. The package declares Faker 5.5.3 and uses its
-  pre-v10 API/locale shape; this is a compatibility failure, not permission
-  to retain the vulnerable Faker or skip smoke coverage. The Playwright
-  installer exit 130/hang and stale OpenAPI fixture are known environment and
-  WebAPI residuals respectively, recorded separately from this blocker.
+- Status: Implemented locally after the Prism/Postman compatibility route;
+  independent implementation review is Ready with no Findings and Completion
+  Approval is recorded above. The focused revised-plan commit is `1b8a2523`;
+  the exact implementation diff remains uncommitted and eligible for the
+  focused completion commit.
+- Resolved implementation blocker (2026-09-12): the exact patch adapts
+  `postman-collection@4.5.0`'s legacy dynamic-variable module to Faker 10.5.0;
+  the package now loads and all 118 public generators return defined values.
+  The original Prism startup `TypeError` is gone. A direct Prism smoke with
+  the contract-valid `Accept-Language: en` header returns the existing sample
+  with HTTP 200. The existing Node `fetch` test still sends
+  `Accept-Language: *`, which Prism rejects as 400; its generated fixture and
+  test are outside this slice and this environment residual is recorded below.
 - Scope:
   - Immediately before resolution, re-query GitHub Dependabot and
     `pnpm audit --json`; preserve the exact 10 current GitHub alert rows and
@@ -444,10 +469,10 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     for Feature Exit evidence; this external check is outside local
     completion evidence.
 - Production Readiness:
-  - Status: Blocked pending the focused revised-plan commit through
-    `approval-committer`; revised independent plan review is Ready with no
-    Findings and Human Approval was recorded on 2026-09-12. Only after that
-    commit may the held pnpm implementation diff be adapted.
+  - Status: Implementation complete locally; independent implementation
+    review is Ready with no Findings and Completion Approval is Approved. The
+    focused revised-plan commit is `1b8a2523`; the focused completion commit
+    remains eligible and pending.
   - Failure modes: fail closed on a remaining mapped advisory, new advisory,
     resolver failure, unexplained lockfile churn, peer mismatch, patch-
     application failure, incomplete legacy Faker facade, dynamic-variable
@@ -484,11 +509,10 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     or an approval-boundary change.
 - Dependencies: Slice 1 completion, prior completion commit, Feature Exit
   findings, and the held current pnpm implementation diff are preserved. The
-  revised Slice 2 plan review is Ready with no Findings and Human Approval is
-  recorded; its focused plan commit through `approval-committer` remains
-  required before implementation.
-  Slice 2 then requires implementation review, Completion Approval, and a
-  focused completion commit before Feature Exit is retried.
+  revised Slice 2 plan review is Ready with no Findings, Human Approval is
+  recorded, and its focused plan commit is `1b8a2523`. Slice 2 now requires
+  independent implementation review, Completion Approval, and a focused
+  completion commit before Feature Exit is retried.
 - Risks:
   - Scoped Faker remapping moves the exact `postman-collection` edge from
     major 5 to 10. The pinned patch must cover all legacy dynamic-variable
@@ -587,6 +611,66 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   maintainer, or a Feature Exit follow-up; it is not part of this Slice 1
   document-only synchronization.
 
+## Slice 2 Implementation Evidence (2026-09-12)
+
+- Changed files are exactly the approved implementation paths:
+  `.vscodeignore`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, and
+  `patches/postman-collection@4.5.0.patch`. The workspace file retains only
+  the existing override section plus one exact `patchedDependencies` entry.
+  `package.json`, direct/production dependencies, runtime source, tests,
+  generated artifacts, and compatibility declarations are unchanged.
+- The 10 implementation-time GitHub alert numbers remain 180, 181, 182, 183,
+  184, 186, 187, 188, 191, and 192. The implementation-time audit inventory
+  remains 15 advisory IDs / 16 findings (10 high, 5 moderate, 1 low) before
+  resolution and zero findings after resolution; the full package/path/range/
+  floor mapping is retained in `TRACEABILITY.md`.
+- Node `20.20.2` and pnpm `10.33.0` frozen install succeeded. The resolved
+  graph meets all floors: Faker `10.5.0`, `@humanfs/node` `0.16.8`,
+  Browserslist `4.28.7` with baseline mapping `2.11.22` (floor `2.11.0`),
+  fast-uri `3.1.6`, js-yaml `4.3.2`, morgan `1.12.0`, nanoid `3.3.18`,
+  postcss-selector-parser `7.1.3`, and qs `6.16.0`. `pnpm audit --json`
+  and `pnpm audit --audit-level moderate` both report zero vulnerabilities.
+- The patched Postman module inventories 118 public dynamic generators (115
+  `$random*` entries plus the three `$guid`/timestamp entries) and the original
+  111 unique Faker references. Every public `Substitutor` token and
+  direct generator call (including alternate `this`) returned a defined value;
+  the full argument matrix covers the legacy positional coordinate/date,
+  finance, email/username/password/name, mask, image, phone, and color
+  adapters. Explicit checks cover `amount(5, 10, 0, '$')`, reference dates,
+  default four-digit and three-argument masks, 10-digit phones without a
+  leading `1`, 640x480/category image paths, and primitive/URL/data URI,
+  UUID, IPv4/IPv6, email, date, and path contracts. Faker-seeded checks passed
+  for 111 non-clock/non-UUID generators. Legacy API mapping and the complete
+  inventory are recorded in `TRACEABILITY.md`; the patched source has no
+  remaining legacy direct API references.
+- The patch adapts only `lib/superstring/dynamic-variables.js`. Postman
+  `package.json`/dependencies/install scripts/LICENSE.md compare unchanged;
+  Faker resolves to one `10.5.0` package with MIT metadata and no embedded
+  copy. The patch hash recorded in the lockfile is
+  `95ec02c7ccf2e749ea08812787f5cfec9b0a4ec06296b07836a8b21385f6bd9b`.
+  Provenance remains the v4.5.0 annotated tag/source pair and registry
+  integrities recorded in `TRACEABILITY.md`.
+- `rtk pnpm run qlty`, `rtk pnpm run lint:md`, production build, Node 20 test
+  compilation, desktop tests, and the escalated Node 20 web test succeeded.
+  The direct Prism smoke starts and serves `sample_ref_minimal_utf8` with
+  HTTP 200 when sending the contract-valid `Accept-Language: en` header.
+  The existing Node `fetch` test sends `Accept-Language: *` and receives 400;
+  that existing test is not claimed as passed, and changing it or the
+  generated fixture is outside this approved slice and remains a separate
+  WebAPI follow-up.
+- VSIX packaging with `vsce package --no-dependencies` succeeded. The archive
+  omits `patches/postman-collection@4.5.0.patch` and retains package/license
+  attribution, all bundles, and assets. The exact Playwright command was
+  attempted under Node 20 with cached assets but hung without output and was
+  interrupted (exit 130); this is an installer environment residual separate
+  from the successful web test. `openapi:check` still reports only the known
+  stale generated fixture, which remains an independent follow-up.
+- Production readiness: implementation evidence is complete within scope;
+  independent implementation review is Ready with no Findings and Completion
+  Approval is Approved. Only the focused completion commit remains before the
+  Slice 2 gate is complete. Remote Dependabot closure is not claimed until
+  publication and a post-publication API re-query.
+
 ## Main Validation-Equivalence Decisions
 
 - Web compatibility objective: `playwright install --with-deps` attempted
@@ -625,21 +709,19 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   environment; the command may hang without output and requires an explicit
   residual record when interrupted.
 - `lint:md` is a useful low-cost document gate for this feature: the recorded
-  result is 35 files with 0 errors.
+  latest result is 39 files with 0 errors.
 
 ## Remaining Items And Handoff
 
-- Implementation review verdict: Ready; Completion Approval and the focused
-  completion-gate branch commit are complete. The integrated squash commit is
-  `6e94136d`.
-- GitHub Dependabot closure was rechecked on 2026-09-12 and found 10 newer open
-  alerts. A fresh local audit re-query found 15 advisory IDs and 16 findings,
-  so the advisory drift is a Replanning blocker rather than a closure
-  candidate. The prior Replanned Slice 2 review/approval is superseded by the
-  implementation-time Prism/Postman compatibility blocker. The revised plan
-  has independent review `Ready` with no Findings and Human Approval recorded
-  on 2026-09-12; its focused replan commit is pending through
-  `approval-committer`.
+- Implementation review verdict: Slice 1 Ready; Slice 2 Ready with no Findings.
+  Slice 2 Completion Approval is Approved under the no-Findings automatic-
+  approval policy; its completion-gate commit remains pending.
+- GitHub Dependabot closure was rechecked on 2026-09-12 and found the 10 open
+  alerts listed above. A fresh local audit re-query found 15 advisory IDs and
+  16 findings before resolution; the held graph now reports zero. Remote alert
+  closure remains unclaimed until publication and a post-publication API
+  re-query. The revised plan has independent review `Ready` with no Findings,
+  Human Approval recorded on 2026-09-12, and focused replan commit `1b8a2523`.
 - The stale OpenAPI fixture baseline is unresolved and must be handled by
   Main/the existing WebAPI maintainer as a separate task or Feature Exit
   follow-up. No generated artifact change is included here.
@@ -650,8 +732,8 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     `docs/specs/features/dependabot-security-updates/TASKS.md`, and
     `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
     The revised Replanned Slice 2 package has independent review `Ready` with
-    no Findings and Human Approval recorded on 2026-09-12; it remains
-    uncommitted pending `approval-committer`.
+    no Findings and Human Approval recorded on 2026-09-12; its focused replan
+    commit is `1b8a2523`.
   - The revised Slice 2 implementation target paths are exactly
     `pnpm-workspace.yaml` (existing overrides plus one exact
     `patchedDependencies` registration), `pnpm-lock.yaml`,
@@ -660,10 +742,12 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     production/runtime/test code, generated artifacts, all other
     configuration, and all other paths remain outside the implementation
     slice.
-  - Human Approval applies to the revised Slice 2 after its independent review
-    returned `Ready` with no Findings on 2026-09-12; the approved planning
-    package must be committed before implementation. The current pnpm diff
-    remains held uncommitted.
+  - Human Approval applies to the revised Slice 2 plan after its independent
+    review returned `Ready` with no Findings on 2026-09-12; the approved
+    planning package was committed at `1b8a2523` before implementation. Its
+    implementation re-review also returned `Ready` with no Findings, and
+    Completion Approval was automatically recorded on 2026-09-12. The exact
+    implementation diff remains uncommitted and eligible for completion commit.
   - Stop for Replanning, do not stage or commit, and return the exact diff and
     explanation to Main if resolution requires a new direct-parent,
     `package.json`, production dependency/runtime/test/generated artifact,
@@ -675,12 +759,11 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     family beyond the planned floors.
 - Dependencies: Slice 1 Feature Intake, plan review, Human Approval,
   implementation review, Completion Approval, and completion commit are
-  complete and preserved. The prior Replanned Slice 2 review/approval is
-  historical and superseded; the revised plan's independent review and Human
-  Approval are complete, and its plan-gate commit remains pending, followed
-  by implementation review, Completion Approval, and completion commit.
-  Feature Exit remains blocked until Slice 2 and the separate OpenAPI
-  follow-up are resolved.
+  complete and preserved. The revised Slice 2 plan's independent review,
+  Human Approval, focused plan-gate commit `1b8a2523`, implementation review,
+  and Completion Approval are complete; its completion commit remains. Feature
+  Exit remains blocked until Slice 2 is committed, remote alerts are
+  re-queried after publication, and the separate OpenAPI follow-up is resolved.
 - Risks:
   - A global js-yaml override continues to place 4.x on two legacy 3.x parent
     ranges; this is existing branch behavior, not a new major-line change, but
@@ -764,8 +847,9 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
 
 - Definition of Done status: not satisfied. Slice 1 implementation,
   independent review, Completion Approval, and the focused completion-gate
-  branch commit are complete, but the current graph has new high/moderate
-  advisories and `openapi:check` still reports a stale generated fixture.
+  branch commit are complete. Revised Slice 2 implementation review and
+  Completion Approval are complete, but its completion commit, post-publication
+  Dependabot re-query, and the separate stale OpenAPI fixture follow-up remain.
 - Durable documentation updates: none expected beyond temporary feature
   artifacts; re-evaluate README and CHANGELOG impact at exit.
 - Roadmap propagation: not required; this remains transient dependency
@@ -793,12 +877,14 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
 - [x] `openapi:check` executed; its only failure is the stale generated WebAPI
       fixture baseline recorded above and assigned as follow-up.
 - [x] Feature Exit validation and durable-document evaluation completed;
-      closure is blocked by the current audit/Dependabot findings and stale
-      OpenAPI fixture.
-- [ ] Replanned Slice 2 audit, floor assertions, lockfile-diff explanation,
-      and affected-tooling validation complete.
-- [ ] Replanned Slice 2 independently reviewed, Human Approved, implemented,
-      reviewed, Completion Approved, and committed.
+      closure remains blocked by post-publication Dependabot re-query and the
+      stale OpenAPI fixture.
+- [x] Replanned Slice 2 audit, floor assertions, lockfile-diff explanation,
+      patch provenance, dynamic-variable contract, and affected-tooling
+      validation complete; the independent reviewer and completion gate remain.
+- [x] Replanned Slice 2 independently reviewed, Human Approved, implemented,
+      reviewed, and Completion Approved; no Findings remain.
+- [ ] Replanned Slice 2 focused completion commit and publication evidence.
 
 ## Feature Exit Revalidation (2026-09-12)
 
