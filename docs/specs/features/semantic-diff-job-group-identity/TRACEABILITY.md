@@ -31,5 +31,67 @@
   fixed two-value discriminator contract triggers Replanning for versioning.
 - Independent plan review is `Ready` with no Findings. Human Approval for the
   exact Slice 1 scope and paths is recorded in `TASKS.md` under the user's
-  automatic no-findings instruction; implementation remains gated on the
-  focused approved-plan commit.
+  automatic no-findings instruction. The approved plan commit is `929009ab`.
+- Independent implementation review is `Ready` with no Findings after the
+  addressed duplicate-path and JSON ordering regressions. The user's existing
+  no-findings instruction auto-approves Completion Approval for the exact
+  completed Slice 1 scope recorded in `TASKS.md`.
+
+## Implementation Validation Result
+
+- `JGI-REFLEXIVE-001`: Passed. The real parser self-comparison of
+  `sample/sample1_large_utf8` normalizes 868 units, produces zero changes and
+  no candidate decisions, and emits 48 distinct exact `nest_jg`
+  `job-group` decisions.
+- `JGI-EXACT-001`: Passed. Focused structural and application tests cover both
+  `g` and `mg`, selected-scope equality/descendants, separator-bounded sibling
+  fallback, and full-path fallback; non-job-group identity remains unchanged.
+- `JGI-AMBIGUITY-001`: Passed. Duplicate canonical path/type keys remain
+  unmatched by exact identity and continue through deterministic fingerprint
+  candidates regardless of input order.
+- `JGI-EVIDENCE-001`: Passed. The domain union, application alias/copy,
+  Markdown renderer, JSON v1 projection, and JSON ordering cover the additive
+  `job-group` exact-key branch while preserving existing branches.
+- `JGI-MOVE-001`: Passed. Path changes do not exact-match; one-to-one
+  fingerprint confirmation and existing rename/move behavior remain intact.
+- `JGI-OUTPUT-001`: Passed. English/Japanese Markdown and JSON v1 expose the
+  stable `jobGroupPath`/`unitType` evidence shape; existing byte baselines are
+  preserved.
+- `JGI-COMPAT-001`: Passed. TypeScript compile, production build, desktop host
+  suite, web host suite, targeted qlty check, diff check, and Markdown lint
+  completed successfully. The web host emitted non-fatal EPIPE/connection
+  cleanup logs after the suite completed.
+- Durable documentation and user-visible behavior evaluation: passed. The
+  Build Semantic Diff use case and Unreleased CHANGELOG now record the
+  reusable identity rule and false-positive fix; report use case, README,
+  roadmap, and architecture did not meet the update gate.
+
+## Completion Approval Trace
+
+- Verdict: Approved on 2026-09-11 under the user's existing automatic
+  no-findings instruction, following independent `implementation-reviewer`
+  verdict `Ready` with no Findings.
+- Completed scope: `g`/`mg` path/type exact identity, conservative duplicate
+  ambiguity, unchanged fingerprint/rename/move/order behavior, exhaustive
+  Markdown and JSON v1 evidence, focused and real-sample regressions, durable
+  use-case, and CHANGELOG updates.
+- Approved implementation paths:
+  - `src/domain/models/semantic-diff/SemanticDiff.ts`
+  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
+  - `src/presentation/semantic-diff/semanticDiffJson.ts`
+  - `src/presentation/semantic-diff/semanticDiffJsonProjection.ts`
+  - `src/presentation/semantic-diff/semanticDiffJsonOrdering.ts`
+  - `src/test/suite/semanticDiffStructuralRules.test.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `src/test/suite/semanticDiffSampleCoverage.test.ts`
+  - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+  - `src/test/suite/semanticDiffJson.test.ts`
+  - `docs/requirements/use-cases/uc-build-semantic-diff.md`
+  - `CHANGELOG.md`
+- Evidence records: this file and
+  `docs/specs/features/semantic-diff-job-group-identity/TASKS.md` were updated
+  to preserve the approval state and exact path set.
+- Completion commit status: Eligible; pending `approval-committer`; no
+  completion commit has been created.

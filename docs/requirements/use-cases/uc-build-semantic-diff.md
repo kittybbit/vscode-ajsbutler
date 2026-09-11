@@ -43,6 +43,9 @@ comparison meaning.
 - identity matching is deterministic for the same inputs
 - similarity scores alone do not confirm identity
 - multiple possible matches remain candidates rather than being auto-selected
+- job-group (`g`/`mg`) exact identity uses the canonical scope-relative path,
+  or the normalized full path when outside the selected scope, together with
+  the unit type
 - jobnet exact identity uses job-group-relative full path and element type
 - unit exact identity uses parent jobnet full path, unit name, and unit type
 - unit name alone does not confirm identity
@@ -68,6 +71,9 @@ comparison meaning.
   fingerprint strategy, unit type, and canonical fields; ambiguous decisions
   retain every candidate in deterministic order, while a changed fingerprint
   remains an addition and a removal
+- repeated job-group names at distinct canonical paths are matched exactly;
+  duplicate canonical path/type keys remain conservative fingerprint
+  candidates rather than being paired by definition order
 - identity decisions are plain, host-neutral data and are not sent through
   telemetry or logging
 - fingerprint-changing rename or move remains delete and add unless a separate

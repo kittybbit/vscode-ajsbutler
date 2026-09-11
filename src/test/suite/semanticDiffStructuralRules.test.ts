@@ -11,6 +11,7 @@ import {
   compareSemanticDiffRelations,
   createSemanticDiffIdentityFingerprint,
   semanticDiffUnitIdentityStrategy,
+  semanticDiffJobGroupIdentityKey,
   semanticDiffUnitFingerprint,
   semanticDiffUnitIdentityKey,
   type SemanticDiffUnitMatch,
@@ -76,6 +77,227 @@ const typedUnit = (
 const quoted = (value: string): string => `"${value}"`;
 
 suite("Semantic Diff Structural Rules", () => {
+  test("uses canonical path and unit type for job-group exact identity", () => {
+    const selectedScopeGroup = typedUnit("g", [], {
+      id: "/root/group",
+      name: "same",
+      absolutePath: "/root/group",
+    });
+    const descendantGroup = typedUnit("mg", [], {
+      id: "/root/group/nested/same",
+      name: "same",
+      absolutePath: "/root/group/nested/same",
+    });
+    const siblingGroup = typedUnit("g", [], {
+      id: "/root/group-other/same",
+      name: "same",
+      absolutePath: "/root/group-other/same",
+    });
+
+    assert.deepStrictEqual(
+      semanticDiffJobGroupIdentityKey(selectedScopeGroup, "/root/group"),
+      { kind: "job-group", jobGroupPath: "", unitType: "g" },
+    );
+    assert.deepStrictEqual(
+      semanticDiffJobGroupIdentityKey(descendantGroup, "/root/group"),
+      { kind: "job-group", jobGroupPath: "nested/same", unitType: "mg" },
+    );
+    assert.deepStrictEqual(
+      semanticDiffJobGroupIdentityKey(siblingGroup, "/root/group"),
+      {
+        kind: "job-group",
+        jobGroupPath: "root/group-other/same",
+        unitType: "g",
+      },
+    );
+    assert.deepStrictEqual(semanticDiffJobGroupIdentityKey(descendantGroup), {
+      kind: "job-group",
+      jobGroupPath: "root/group/nested/same",
+      unitType: "mg",
+    });
+  });
+
+  test("matches repeated job-group names by path and keeps duplicate paths ambiguous", () => {
+    const build = (beforeUnits: AjsUnit[], afterUnits: AjsUnit[]) =>
+      buildSemanticDiffUnitCorrespondence({
+        beforeUnits,
+        afterUnits,
+        beforeUnitById: unitMap(...beforeUnits),
+        afterUnitById: unitMap(...afterUnits),
+        jobGroupPath: "/root",
+      });
+    const beforeNestedA = typedUnit("g", [["sc", quoted("same.sh")]], {
+      id: "before-a",
+      name: "nest_jg",
+      absolutePath: "/root/one/nest_jg",
+    });
+    const beforeNestedB = typedUnit("g", [["sc", quoted("same.sh")]], {
+      id: "before-b",
+      name: "nest_jg",
+      absolutePath: "/root/two/nest_jg",
+    });
+    const afterNestedA = typedUnit("g", [["sc", quoted("same.sh")]], {
+      id: "after-a",
+      name: "nest_jg",
+      absolutePath: "/root/one/nest_jg",
+    });
+    const afterNestedB = typedUnit("g", [["sc", quoted("same.sh")]], {
+      id: "after-b",
+      name: "nest_jg",
+      absolutePath: "/root/two/nest_jg",
+    });
+
+    const distinctPaths = build(
+      [beforeNestedB, beforeNestedA],
+      [afterNestedB, afterNestedA],
+    );
+    assert.deepStrictEqual(
+      distinctPaths.matches.map((match) => [match.before.id, match.after.id]),
+      [
+        ["before-a", "after-a"],
+        ["before-b", "after-b"],
+      ],
+    );
+    assert.deepStrictEqual(distinctPaths.candidates, []);
+    assert.deepStrictEqual(
+      distinctPaths.identityDecisions.map((decision) =>
+        decision.evidence.kind === "exact-key" &&
+        decision.evidence.key.kind === "job-group"
+          ? [decision.evidence.key.jobGroupPath, decision.evidence.key.unitType]
+          : [],
+      ),
+      [
+        ["one/nest_jg", "g"],
+        ["two/nest_jg", "g"],
+      ],
+    );
+
+    const duplicateBefore = [
+      typedUnit("g", [["sc", quoted("duplicate.sh")]], {
+        id: "before-duplicate-a",
+        name: "duplicate",
+        absolutePath: "/root/duplicate",
+      }),
+      typedUnit("g", [["sc", quoted("duplicate.sh")]], {
+        id: "before-duplicate-b",
+        name: "duplicate",
+        absolutePath: "/root/duplicate",
+      }),
+    ];
+    const duplicateAfter = [
+      typedUnit("g", [["sc", quoted("duplicate.sh")]], {
+        id: "after-duplicate-a",
+        name: "duplicate",
+        absolutePath: "/root/duplicate",
+      }),
+      typedUnit("g", [["sc", quoted("duplicate.sh")]], {
+        id: "after-duplicate-b",
+        name: "duplicate",
+        absolutePath: "/root/duplicate",
+      }),
+    ];
+    const duplicatePaths = build(
+      [...duplicateBefore].reverse(),
+      [...duplicateAfter].reverse(),
+    );
+    assert.deepStrictEqual(duplicatePaths.matches, []);
+    assert.strictEqual(duplicatePaths.candidates.length, 1);
+    assert.deepStrictEqual(
+      duplicatePaths.candidates[0]?.before.map((item) => item.id),
+      ["before-duplicate-a", "before-duplicate-b"],
+    );
+    assert.deepStrictEqual(
+      duplicatePaths.candidates[0]?.after.map((item) => item.id),
+      ["after-duplicate-a", "after-duplicate-b"],
+    );
+
+    const beforeOnly = build([...duplicateBefore].reverse(), [
+      duplicateAfter[0]!,
+    ]);
+    const beforeOnlyReversed = build(duplicateBefore, [duplicateAfter[0]!]);
+    assert.deepStrictEqual(beforeOnly.matches, []);
+    assert.strictEqual(beforeOnly.candidates.length, 1);
+    assert.deepStrictEqual(
+      beforeOnly.candidates[0]?.before.map((item) => item.id),
+      ["before-duplicate-a", "before-duplicate-b"],
+    );
+    assert.deepStrictEqual(
+      beforeOnly.candidates[0]?.after.map((item) => item.id),
+      ["after-duplicate-a"],
+    );
+    assert.deepStrictEqual(
+      beforeOnly.identityDecisions.map((decision) => decision.status),
+      ["candidate"],
+    );
+    assert.strictEqual(
+      beforeOnly.identityDecisions[0]?.id,
+      beforeOnlyReversed.identityDecisions[0]?.id,
+    );
+    assert.deepStrictEqual(beforeOnlyReversed.matches, []);
+    assert.strictEqual(beforeOnlyReversed.candidates.length, 1);
+
+    const afterOnly = build(
+      [duplicateBefore[0]!],
+      [...duplicateAfter].reverse(),
+    );
+    const afterOnlyReversed = build([duplicateBefore[0]!], duplicateAfter);
+    assert.deepStrictEqual(afterOnly.matches, []);
+    assert.strictEqual(afterOnly.candidates.length, 1);
+    assert.deepStrictEqual(
+      afterOnly.candidates[0]?.before.map((item) => item.id),
+      ["before-duplicate-a"],
+    );
+    assert.deepStrictEqual(
+      afterOnly.candidates[0]?.after.map((item) => item.id),
+      ["after-duplicate-a", "after-duplicate-b"],
+    );
+    assert.deepStrictEqual(
+      afterOnly.identityDecisions.map((decision) => decision.status),
+      ["candidate"],
+    );
+    assert.strictEqual(
+      afterOnly.identityDecisions[0]?.id,
+      afterOnlyReversed.identityDecisions[0]?.id,
+    );
+    assert.deepStrictEqual(afterOnlyReversed.matches, []);
+    assert.strictEqual(afterOnlyReversed.candidates.length, 1);
+  });
+
+  test("does not exact-match a moved job group but confirms a one-to-one fingerprint", () => {
+    const before = typedUnit("g", [["sc", quoted("stable.sh")]], {
+      id: "before-group",
+      name: "same",
+      absolutePath: "/root/old/same",
+    });
+    const after = typedUnit("g", [["sc", quoted("stable.sh")]], {
+      id: "after-group",
+      name: "same",
+      absolutePath: "/root/new/same",
+    });
+    const result = buildSemanticDiffUnitCorrespondence({
+      beforeUnits: [before],
+      afterUnits: [after],
+      beforeUnitById: unitMap(before),
+      afterUnitById: unitMap(after),
+      jobGroupPath: "/root",
+    });
+
+    assert.deepStrictEqual(result.matches, [
+      { before, after, kind: "fingerprint" },
+    ]);
+    assert.deepStrictEqual(result.fingerprintMatches, [
+      { before, after, kind: "fingerprint" },
+    ]);
+    assert.strictEqual(
+      result.identityDecisions[0]?.status,
+      "fingerprint-confirmed",
+    );
+    assert.strictEqual(
+      result.identityDecisions[0]?.evidence.kind,
+      "fingerprint",
+    );
+  });
+
   test("uses parent jobnet, name, and type for exact unit identity", () => {
     const beforeParent = jobnet("/root/before");
     const afterParent = jobnet("/root/after");

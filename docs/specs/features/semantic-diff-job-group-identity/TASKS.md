@@ -5,10 +5,11 @@
 - Purpose: make identical normalized definitions with repeated nested job
   groups produce no false Semantic Diff changes.
 - Approved or active slice: Slice 1, `Make Job-Group Identity Path-Exact And
-Reflexive`; its complete plan is independently reviewed `Ready`, with Human
-  Approval recorded under the user's automatic no-findings instruction.
+Reflexive`; implementation is complete, the implementation review is `Ready`
+  with no Findings, and Completion Approval is auto-approved; the focused
+  completion commit remains eligible and pending.
 - Do not implement runtime code, tests, generated artifacts, or configuration
-  from this intake.
+  outside the approved Slice 1 boundary.
 - Do not add a text-equality shortcut or pair duplicate keys by array order.
 - Preserve duplicate-path ambiguity, rename/move rules, JSON version 1,
   report modes, and desktop/web compatibility.
@@ -18,8 +19,8 @@ Reflexive`; its complete plan is independently reviewed `Ready`, with Human
 - Validate intake docs with `rtk pnpm run qlty` and
   `rtk pnpm run lint:md`.
 - Approval policy and document roles: `docs/specs/README.md`.
-- Next decision: create the focused approved-plan commit before Slice 1
-  implementation starts.
+- Next decision: delegate the eligible focused completion commit to
+  `approval-committer`.
 
 ## Sync Rule
 
@@ -34,14 +35,17 @@ Reflexive`; its complete plan is independently reviewed `Ready`, with Human
 
 ## Plan Status
 
-- Status: Reviewed and approved; focused plan commit pending
+- Status: Reviewed, approved, and implemented; completion commit pending
 - Planning scope: one cohesive vertical slice corrects `g`/`mg` exact
   identity, transports its typed evidence through the existing application
   boundary, updates every exhaustive Markdown/JSON v1 projection, and records
   the durable behavior and user-visible fix.
 - Review status: `Ready` (`plan-reviewer`); Findings none
+- Implementation review status: `Ready`; Findings none
 - Human approval: Approved
-- Active implementation slice: Slice 1, pending focused plan commit
+- Active implementation slice: Slice 1, implementation complete; independent
+  implementation review `Ready`, Findings none, Completion Approval approved
+  under the automatic no-findings instruction
 
 ## Human Approval
 
@@ -80,18 +84,47 @@ Reflexive`; its complete plan is independently reviewed `Ready`, with Human
   - `docs/specs/features/semantic-diff-job-group-identity/SPECS.md`
   - `docs/specs/features/semantic-diff-job-group-identity/TASKS.md`
   - `docs/specs/features/semantic-diff-job-group-identity/TRACEABILITY.md`
-- Focused plan commit status: Eligible; pending `approval-committer`.
+- Focused plan commit status: Committed as `929009ab` by `approval-committer`.
 
-Implementation must not start until the focused approved-plan commit succeeds.
+Implementation started only after the focused approved-plan commit succeeded.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-11; approved in the current conversation under the
+  user's automatic no-findings slice approval instruction
+- Result: Approved
+- Basis: independent `implementation-reviewer` verdict `Ready` with no
+  Findings after the addressed duplicate-path and JSON ordering regressions;
+  the user's existing instruction treats a no-Findings review as automatic
+  Completion Approval.
+- Approved scope: the completed Slice 1 implementation exactly as planned:
+  path/type exact identity for `g`/`mg`; conservative duplicate-path
+  ambiguity; unchanged fingerprint, rename/move, order, result, host, and
+  compatibility behavior; exhaustive Markdown/JSON v1 evidence; focused and
+  real-sample regressions; durable use-case and CHANGELOG updates.
+- Approved implementation paths:
+  - `src/domain/models/semantic-diff/SemanticDiff.ts`
+  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  - `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`
+  - `src/presentation/semantic-diff/semanticDiffJson.ts`
+  - `src/presentation/semantic-diff/semanticDiffJsonProjection.ts`
+  - `src/presentation/semantic-diff/semanticDiffJsonOrdering.ts`
+  - `src/test/suite/semanticDiffStructuralRules.test.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `src/test/suite/semanticDiffSampleCoverage.test.ts`
+  - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+  - `src/test/suite/semanticDiffJson.test.ts`
+  - `docs/requirements/use-cases/uc-build-semantic-diff.md`
+  - `CHANGELOG.md`
+- Evidence record paths updated with this approval state:
+  `docs/specs/features/semantic-diff-job-group-identity/TASKS.md` and
+  `docs/specs/features/semantic-diff-job-group-identity/TRACEABILITY.md`.
+- Implementation review verdict: `Ready`; Findings none; all prior Findings
+  are recorded as addressed in the implementation evidence.
+- Commit status: Eligible; pending `approval-committer`; no completion commit
+  has been created.
 
 ## Closure Approval
 
@@ -139,8 +172,9 @@ Implementation must not start until the focused approved-plan commit succeeds.
 
 ### Slice 1: Make Job-Group Identity Path-Exact And Reflexive
 
-- Status: Planned, independently reviewed `Ready`, and Human Approved; focused
-  plan commit pending before implementation.
+- Status: Implemented; implementation review `Ready` with no Findings;
+  Completion Approval approved; focused completion commit is eligible and
+  pending `approval-committer`.
 - Scope: add `unitType` to `SemanticDiffJobGroupIdentityKey`; add its
   `job-group` branch to `SemanticDiffIdentityExactKey`; select that key for
   `g` and `mg` before the general-unit key; derive `jobGroupPath` with the
@@ -316,9 +350,9 @@ unitType }`; the path is relative to the selected job-group scope when the
 
 ## Feature Exit
 
-- Definition of Done status: one complete slice planned; implementation,
-  independent implementation review, Completion Approval, focused completion
-  commit, and Feature Exit remain pending.
+- Definition of Done status: Slice 1 implementation, validation, independent
+  implementation review, and Completion Approval are complete; focused
+  completion commit and Feature Exit remain pending.
 - Durable documentation updates: Slice 1 updates
   `uc-build-semantic-diff.md` because job-group exact identity and reflexivity
   are reusable domain behavior. `uc-present-semantic-diff-report.md` already
@@ -337,13 +371,63 @@ unitType }`; the path is relative to the selected job-group scope when the
 - [x] Complete implementation-slice plan
 - [x] Independent plan review: `Ready`; Findings none
 - [x] Human Approval recorded under automatic no-findings instruction
-- [ ] Focused plan commit
-- [ ] Implementation, risk-based validation, independent review, and
-      Completion Approval
+- [x] Focused plan commit: `929009ab`
+- [x] Implementation and risk-based validation
+- [x] Independent implementation review: `Ready`; Findings none
+- [x] Completion Approval: Approved under the automatic no-findings
+      instruction on 2026-09-11
+- [ ] Focused completion commit: eligible; pending `approval-committer`
+
+## Implementation Evidence
+
+- Changed runtime contracts and selectors: `SemanticDiffJobGroupIdentityKey`
+  now carries `unitType`; `g`/`mg` use one shared canonical path/type exact-key
+  selector for grouping and exact evidence; scope-relative paths require exact
+  scope equality or a separator-bounded descendant, with full-path fallback.
+- Changed projections: Markdown and JSON v1 render/project/order the additive
+  `job-group` exact-key branch with stable `kind`, `jobGroupPath`, `unitType`
+  field order. Existing `jobnet`/`unit` branches remain unchanged. The
+  application DTO alias and defensive copy were verified without an
+  application source edit.
+- Regression evidence: focused domain/application, Markdown, JSON, and sample
+  tests cover `g`/`mg`, relative/full-path selection, duplicate-path
+  ambiguity, shuffled inputs, fingerprint rename/move, deterministic evidence,
+  and the real parser self-comparison of `sample/sample1_large_utf8` (868
+  units, zero changes, no candidate decisions, 48 distinct `nest_jg` exact
+  decisions).
+- Implementation review Findings addressed and independently reviewed `Ready`
+  with no Findings: one-sided duplicate canonical path regressions now cover
+  reversed inputs, and multiple job-group exact evidence records directly
+  verify path/type ordering and byte stability. Completion Approval is
+  auto-approved under the user's existing no-findings instruction.
+- Checks passed: `rtk pnpm run test:compile`, `rtk pnpm run development`,
+  `rtk node ./out/test/runTest.js`, `rtk pnpm run test:web:run`, targeted
+  `rtk qlty check` for all changed production/test files, `rtk git diff --check`,
+  and `rtk pnpm run lint:md`.
+- The full qlty smell scan reports only pre-existing complexity/duplication
+  findings in the repository; the changed production files add no actionable
+  new finding. The repository-wide qlty formatter also identifies an
+  unrelated pre-existing formatting discrepancy in the inherited
+  comparison-workflow TASKS document, which remains outside this slice.
+- Compatibility and production readiness: no parser, normalization,
+  infrastructure, Node API, telemetry, report mode, schedule, Explorer, Flow,
+  VS Code floor, or host-specific behavior changed. Matching remains map-based
+  with the existing one-before/one-after gate; duplicate actual paths remain
+  conservative candidates and no positional pairing was introduced.
+- Implementation feedback: sharing the typed selector between exact grouping
+  and evidence prevents result/evidence drift; separator-bounded scope checks
+  make the fallback safe for sibling paths sharing a prefix.
+- Unresolved risks: the additive `job-group` discriminator remains a documented
+  compatibility consideration for strict external consumers of the JSON v1
+  TypeScript union; no published closed two-variant schema was found. This is
+  accepted within Slice 1; the focused completion commit is eligible and
+  pending, while Feature Exit remains pending.
 
 ## Notes
 
-- No runtime code, tests, generated artifacts, configuration, durable docs,
-  roadmap, or commit are changed during this intake.
+- Slice 1 implementation changes remain limited to the approved runtime,
+  projection, test, durable use-case, and CHANGELOG paths. No generated
+  artifacts, configuration, roadmap, README, architecture, or telemetry files
+  were changed.
 - Keep feature requirements and boundary decisions in `SPECS.md`; keep future
   slice planning and approval evidence in this file.

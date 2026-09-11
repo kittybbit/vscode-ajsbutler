@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed Semantic Diff false-positive candidate changes when repeated nested
+  `g`/`mg` job groups have distinct canonical paths, while preserving
+  conservative ambiguity for duplicate paths.
 - Improved Semantic Diff with the `Compare Definition` workflow: choose a
   definition file or an optional Git `HEAD` source, carry an optional schedule
   period, and open one reusable Explorer context. Git access is feature

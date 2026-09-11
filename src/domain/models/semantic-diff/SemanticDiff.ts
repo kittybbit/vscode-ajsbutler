@@ -13,6 +13,7 @@ export type SemanticDiffAttributeCategory =
 export type SemanticDiffJobGroupIdentityKey = {
   kind: "job-group";
   jobGroupPath: string;
+  unitType: AjsUnitType;
 };
 
 export type SemanticDiffJobnetIdentityKey = {
@@ -74,6 +75,11 @@ export type SemanticDiffIdentityUnitReference = {
 };
 
 export type SemanticDiffIdentityExactKey =
+  | {
+      kind: "job-group";
+      jobGroupPath: string;
+      unitType: string;
+    }
   | {
       kind: "jobnet";
       jobGroupRelativePath: string;

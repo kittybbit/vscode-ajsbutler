@@ -87,6 +87,50 @@ const changeSummaries = (
 ): string[] => doc.changes.map((change) => localizedChangeSummary(change));
 
 suite("Compare Semantic Diff", () => {
+  test("copies path/type exact evidence for repeated g and mg job groups", () => {
+    const beforeGroup = unit({
+      id: "/root/one/nest_jg",
+      name: "nest_jg",
+      unitType: "g",
+      absolutePath: "/root/one/nest_jg",
+      parentId: "/root",
+      parameters: params({ ty: "g" }),
+    });
+    const beforeManagedGroup = unit({
+      id: "/root/two/nest_mg",
+      name: "nest_mg",
+      unitType: "mg",
+      absolutePath: "/root/two/nest_mg",
+      parentId: "/root",
+      parameters: params({ ty: "mg" }),
+    });
+    const afterGroup = { ...beforeGroup, id: "after-one" };
+    const afterManagedGroup = { ...beforeManagedGroup, id: "after-two" };
+    const result = compareSemanticDiff({
+      before: document([beforeGroup, beforeManagedGroup]),
+      after: document([afterGroup, afterManagedGroup]),
+      options: { jobGroupPath: "/root" },
+    });
+
+    assert.deepStrictEqual(result.changes, []);
+    assert.deepStrictEqual(
+      result.identityDecisions.map((decision) =>
+        decision.evidence.kind === "exact-key" &&
+        decision.evidence.key.kind === "job-group"
+          ? decision.evidence.key
+          : undefined,
+      ),
+      [
+        { kind: "job-group", jobGroupPath: "one/nest_jg", unitType: "g" },
+        { kind: "job-group", jobGroupPath: "two/nest_mg", unitType: "mg" },
+      ],
+    );
+    assert.strictEqual(
+      result.identityDecisions.every((decision) => decision.status === "exact"),
+      true,
+    );
+  });
+
   test("ignores order-only definition changes", () => {
     const jobA = unit({
       id: "/root/jobnet/job-a",

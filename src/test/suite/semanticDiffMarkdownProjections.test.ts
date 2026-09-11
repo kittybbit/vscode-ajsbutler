@@ -613,6 +613,42 @@ suite("Semantic Diff Markdown Projections", () => {
     assert.strictEqual(report.includes("execution-user-changed"), false);
   });
 
+  test("Audit projects job-group exact-key evidence", () => {
+    const result = auditResult();
+    result.identityDecisions.push({
+      id: "identity:job-group",
+      status: "exact",
+      rule: "exact-key",
+      before: [reference("before", "/root/nested-group")],
+      after: [reference("after", "/root/nested-group")],
+      evidence: {
+        kind: "exact-key",
+        key: {
+          kind: "job-group",
+          jobGroupPath: "nested-group",
+          unitType: "g",
+        },
+      },
+    });
+
+    const report = renderSemanticDiffAuditMarkdown(
+      buildSemanticDiffOutputContext(result),
+    );
+    const japanese = renderSemanticDiffAuditMarkdown(
+      buildSemanticDiffOutputContext(result),
+      "ja-JP",
+    );
+
+    assert.ok(
+      report.includes("Key: job-group; jobGroupPath=nested-group; unitType=g"),
+    );
+    assert.ok(
+      japanese.includes(
+        "キー: job-group; jobGroupPath=nested-group; unitType=g",
+      ),
+    );
+  });
+
   test("Audit localization keeps Japanese generic confirmation wording and codes", () => {
     const report = renderSemanticDiffAuditMarkdown(
       buildSemanticDiffOutputContext(auditResult()),

@@ -386,14 +386,40 @@ const renderIdentityFields = (
   ),
 ];
 
+type IdentityKeyRenderer = (key: SemanticDiffIdentityExactKey) => string;
+
+const identityKeyRenderers: Record<
+  SemanticDiffIdentityExactKey["kind"],
+  IdentityKeyRenderer
+> = {
+  "job-group": (key) => {
+    const jobGroupKey = key as Extract<
+      SemanticDiffIdentityExactKey,
+      { kind: "job-group" }
+    >;
+    return `${escapeMarkdown(jobGroupKey.kind)}; jobGroupPath=${escapeMarkdown(jobGroupKey.jobGroupPath)}; unitType=${escapeMarkdown(jobGroupKey.unitType)}`;
+  },
+  jobnet: (key) => {
+    const jobnetKey = key as Extract<
+      SemanticDiffIdentityExactKey,
+      { kind: "jobnet" }
+    >;
+    return `${escapeMarkdown(jobnetKey.kind)}; jobGroupRelativePath=${escapeMarkdown(jobnetKey.jobGroupRelativePath)}; unitType=${escapeMarkdown(jobnetKey.unitType)}`;
+  },
+  unit: (key) => {
+    const unitKey = key as Extract<
+      SemanticDiffIdentityExactKey,
+      { kind: "unit" }
+    >;
+    return `${escapeMarkdown(unitKey.kind)}; parentJobnetPath=${escapeMarkdown(unitKey.parentJobnetPath)}; unitName=${escapeMarkdown(unitKey.unitName)}; unitType=${escapeMarkdown(unitKey.unitType)}`;
+  },
+};
+
 const renderIdentityKey = (
   key: SemanticDiffIdentityExactKey,
   language?: string,
 ): string[] => {
-  const details =
-    key.kind === "jobnet"
-      ? `${escapeMarkdown(key.kind)}; jobGroupRelativePath=${escapeMarkdown(key.jobGroupRelativePath)}; unitType=${escapeMarkdown(key.unitType)}`
-      : `${escapeMarkdown(key.kind)}; parentJobnetPath=${escapeMarkdown(key.parentJobnetPath)}; unitName=${escapeMarkdown(key.unitName)}; unitType=${escapeMarkdown(key.unitType)}`;
+  const details = identityKeyRenderers[key.kind](key);
   return [indentedLine(`${label("Key", language)}: ${details}`)];
 };
 
