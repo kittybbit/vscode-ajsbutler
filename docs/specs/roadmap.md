@@ -28,17 +28,6 @@ entry conditions that make planning each item useful.
 
 ## Semantic Diff Roadmap
 
-### Wave 3: Review Exploration And Comparison Entry
-
-#### Improve The Semantic Diff Comparison Workflow
-
-- Origin: proposal F-1.
-- Provide user-facing comparison naming, file and Git HEAD comparison sources,
-  comparison-period input, and handoff to the applicable review view or output.
-- Entry condition: the Explorer handoff and internal schedule-impact artifact
-  and session contracts are available. File, Git HEAD, and comparison-period
-  boundaries are stable; public calendar presentation is not a prerequisite.
-
 ### Wave 4: Schedule Impact Presentation
 
 #### Add A Schedule Impact Calendar
