@@ -1,6 +1,14 @@
 import * as vscode from "vscode";
+import {
+  executeCompareSemanticDiffCommand,
+  type SemanticDiffCommandDeps,
+} from "../../presentation/vscode/commands/semanticDiffCommand";
 
 const LANGUAGE_ID = "jp1ajs";
+
+const reportWebScenario = (message: string): void => {
+  globalThis.console.log(message);
+};
 
 const activateExtension = async () => {
   const extension = vscode.extensions.getExtension(
@@ -45,6 +53,55 @@ export async function run(): Promise<void> {
       throw new Error(`Expected command to be registered: ${command}`);
     }
   }
+
+  let sourceReadCount = 0;
+  let reportCount = 0;
+  let sessionCount = 0;
+  const web7Deps: SemanticDiffCommandDeps = {
+    getActiveEditor: () => undefined,
+    showQuickPick: async () => undefined,
+    showOpenDialog: async () => {
+      sourceReadCount += 1;
+      return undefined;
+    },
+    showErrorMessage: async () => undefined,
+    readFile: async () => {
+      sourceReadCount += 1;
+      return new Uint8Array();
+    },
+    openReport: async () => {
+      reportCount += 1;
+    },
+    buildSemanticDiffReportData: () => {
+      reportCount += 1;
+      throw new Error("WEB-7 report build must not run");
+    },
+    sourceHandleIdAllocator: () => {
+      sessionCount += 1;
+      return "web-7-source" as never;
+    },
+  };
+  const web7Result = await executeCompareSemanticDiffCommand(web7Deps);
+  const web7GuardPassed =
+    "error" in web7Result && web7Result.error.code === "no-active-editor";
+  if (
+    !web7GuardPassed ||
+    sourceReadCount !== 0 ||
+    reportCount !== 0 ||
+    sessionCount !== 0
+  ) {
+    throw new Error(
+      `WEB-7 no-active-editor guard failed: ${JSON.stringify({
+        result: web7Result,
+        sourceReadCount,
+        reportCount,
+        sessionCount,
+      })}`,
+    );
+  }
+  reportWebScenario(
+    `WEB-7 passed: browser=1 sourceReads=${sourceReadCount} reports=${reportCount} sessions=${sessionCount}`,
+  );
 
   const invalidDocument = await vscode.workspace.openTextDocument({
     language: LANGUAGE_ID,

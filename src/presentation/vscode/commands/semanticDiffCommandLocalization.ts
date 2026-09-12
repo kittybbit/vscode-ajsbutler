@@ -206,6 +206,37 @@ const createLocalization = (
 const ENGLISH = createLocalization("en");
 const JAPANESE = createLocalization("ja");
 
+type GitHeadUnavailableMessage = Pick<
+  SemanticDiffCommandLocalization,
+  | "gitHeadRepositoryMissing"
+  | "gitHeadMissing"
+  | "gitHeadSourceMissing"
+  | "gitHeadBinary"
+  | "gitHeadUnsupported"
+  | "gitHeadTooLarge"
+  | "gitHeadReadFailed"
+  | "gitHeadUnavailable"
+>;
+
+const GIT_HEAD_UNAVAILABLE_MESSAGES: Record<
+  GitHeadDefinitionUnavailableReason,
+  keyof GitHeadUnavailableMessage
+> = {
+  "repository-not-found": "gitHeadRepositoryMissing",
+  "head-missing": "gitHeadMissing",
+  "head-source-missing": "gitHeadSourceMissing",
+  binary: "gitHeadBinary",
+  submodule: "gitHeadBinary",
+  "unsupported-encoding": "gitHeadUnsupported",
+  "too-large": "gitHeadTooLarge",
+  "read-failed": "gitHeadReadFailed",
+  "extension-missing": "gitHeadUnavailable",
+  "extension-disabled": "gitHeadUnavailable",
+  "activation-failed": "gitHeadUnavailable",
+  "api-unavailable": "gitHeadUnavailable",
+  "virtual-repository-unsupported": "gitHeadUnavailable",
+};
+
 export const getSemanticDiffCommandLocalization = (
   language: string | undefined,
 ): SemanticDiffCommandLocalization =>
@@ -214,28 +245,4 @@ export const getSemanticDiffCommandLocalization = (
 export const localizeGitHeadUnavailableReason = (
   localization: SemanticDiffCommandLocalization,
   reason: GitHeadDefinitionUnavailableReason,
-): string => {
-  switch (reason) {
-    case "repository-not-found":
-      return localization.gitHeadRepositoryMissing;
-    case "head-missing":
-      return localization.gitHeadMissing;
-    case "head-source-missing":
-      return localization.gitHeadSourceMissing;
-    case "binary":
-    case "submodule":
-      return localization.gitHeadBinary;
-    case "unsupported-encoding":
-      return localization.gitHeadUnsupported;
-    case "too-large":
-      return localization.gitHeadTooLarge;
-    case "read-failed":
-      return localization.gitHeadReadFailed;
-    case "extension-missing":
-    case "extension-disabled":
-    case "activation-failed":
-    case "api-unavailable":
-    case "virtual-repository-unsupported":
-      return localization.gitHeadUnavailable;
-  }
-};
+): string => localization[GIT_HEAD_UNAVAILABLE_MESSAGES[reason]];

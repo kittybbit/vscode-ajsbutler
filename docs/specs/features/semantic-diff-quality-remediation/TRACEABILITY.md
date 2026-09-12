@@ -76,16 +76,15 @@ desktop evidence boundary.
 - Slice 6 implementation review: `Ready` with no findings. Completion Approval
   is `Approved` on 2026-09-12 under the user's automatic no-findings slice
   approval policy; completion commit `3af9494d` is complete.
-- Slice 7 state commit gate: the pre-harness boundary is superseded; the
-  approved web-harness replan/state commit is eligible and pending
-  `approval-committer`.
+- Slice 7 state commit gate: the pre-harness boundary is superseded; approved
+  web-harness replan/state commit `800612e4` is complete.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
 - Plan commit gate: complete; focused plan commit `d3693d76`.
 - Replan commit gate: complete; focused replan/state commit `2734813c` for the
   revised Slice 6 boundary.
-- Web-harness replan commit gate: eligible and pending; exact state paths are
-  this feature's `TASKS.md` and `TRACEABILITY.md`, with no runtime, test,
+- Web-harness replan commit gate: complete at `800612e4`; exact state paths
+  were this feature's `TASKS.md` and `TRACEABILITY.md`, with no runtime, test,
   generated, dependency, or production webpack changes.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
@@ -602,14 +601,15 @@ desktop evidence boundary.
   approval is superseded for this delta. Final independent plan review is
   `Ready` with no findings and Human Approval is `Approved` on 2026-09-12 for
   the exact harness/config paths plus the existing Slice 7 production/test
-  scope. The focused replan/state commit is eligible and pending; current
-  Slice 7 production changes remain preserved.
+  scope. Focused replan/state commit `800612e4` is complete; current Slice 7
+  production changes remain preserved.
 
 ## Web Smoke Scenario Traceability
 
-After the web-harness replan is reviewed, approved, committed, and executed,
-the bundle-backed scenarios below are the exact web-host evidence for the
-affected slices. Until then, they are planned claims, not passing evidence:
+After the web-harness replan was reviewed, approved, committed, and executed,
+the bundle-backed scenarios below define the exact web-host evidence for the
+affected slices. WEB-7 execution is recorded in the Slice 7 evidence below;
+WEB-8 through WEB-10 remain planned claims for later slices:
 
 <!-- markdownlint-disable MD013 -->
 
@@ -734,3 +734,62 @@ dependencies remain unchanged.
   success.
 - Remote confirmation occurs after all approved commits are published. It does
   not replace local validation or independent per-slice review.
+
+## Slice 7 Implementation Evidence (2026-09-12)
+
+- Status: Implementation complete; independent implementation review and
+  Completion Approval are complete. Review base is approved replan/state
+  commit `800612e4`; no completion commit was created.
+- Production paths: `semanticDiffCommand.ts`,
+  `semanticDiffCommandLocalization.ts`, and `semanticDiffCommandSteps.ts`.
+  Test/harness paths: `package.json`, `webpack.web-test.config.js`,
+  `src/test/suite/webSmokeWebEntry.ts`, `src/test/runWebTest.ts`, and
+  `src/test/suite/webSmoke.ts`, all within the revised approval boundary.
+- The command workflow now shares private typed continuations for active
+  editor, source, period, prepared before/after, file, Git, and localized Git
+  failure phases. Existing one-read, cancellation, source-byte, captured-HEAD,
+  error-code/reason/retryability, cleanup, and telemetry behavior is preserved;
+  no public command, DTO, schema, or host API changed.
+- The isolated test-only WebWorker bundle derives the existing web target's
+  browser-safe fallbacks, `commonjs vscode` external, and CSP-safe production
+  settings. `runWebTest.ts` loads the emitted `webSmoke.bundle.js`, and the
+  explicit `.js` suffix is required by the WebWorker loader's extension
+  resolution. Production webpack entries and dependencies remain untouched.
+- WEB-7 passed in the real Chromium host via the required clean route
+  `pnpm run test:prepare && pnpm run test:web:run` (exit `0`), with exact
+  observed counts `browser=1`, `sourceReads=0`, `reports=0`, and `sessions=0`.
+  Activation, command registration, injected `no-active-editor`, and absence
+  of read/report/session side effects were verified. Existing later viewer
+  smoke activity retains known `EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` stream
+  diagnostics. WEB-8 through WEB-10, interactive pickers/dialogs, and real
+  Explorer/Calendar Webview DOM behavior are not claimed.
+- Desktop `pnpm test` passed with exit `0`, covering 68 approved Slice 7 test
+  cases (43 command, 5 period, 7 source capture, 13 Git adapter). Production
+  `pnpm run build` passed with existing bundle-size warnings. `pnpm run
+test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
+  Markdown lint, and `git diff --check` passed.
+- Slice 7-owned Qlty findings are clear. The retained smell inventory belongs
+  to Slice 8 artifact/Explorer/finalization functions and whole-file
+  complexity: `buildWorkflowArtifacts`, `openWorkflowArtifacts`,
+  `runFileComparisonWorkflow`, `buildPresentationArtifactsStep`,
+  `openExplorerStep`, `registerSourceBinding`, `beginWorkflowCapture`,
+  `beginPresentationSourceCapture`, `buildExplorerContextStep`, and
+  `executeCompareSemanticDiffCommand`.
+- Compatibility and readiness: no VS Code engine change, Node built-in,
+  filesystem/Git behavior, dependency, lockfile, telemetry payload, public
+  schema, Calendar Slice 3, Dependabot, or production bundle change was
+  introduced. The known stream diagnostics and unclaimed Webview DOM boundary
+  remain explicit residual risks for later integrated validation.
+- Recommended route: independent implementation review, then explicit
+  Completion Approval is satisfied by the user's standing automatic
+  no-findings slice-approval instruction after reviewer verdict `Ready` with
+  no findings. Exact changed paths approved for the completion commit are
+  `package.json`, `webpack.web-test.config.js`,
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandLocalization.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandSteps.ts`,
+  `src/test/runWebTest.ts`, `src/test/suite/webSmoke.ts`,
+  `src/test/suite/webSmokeWebEntry.ts`, and this feature's `TASKS.md` and
+  `TRACEABILITY.md`. The four focused desktop test files remain unchanged
+  validation-only paths. WEB-8 through WEB-10 remain later approved slices;
+  no stage/commit was performed here.
