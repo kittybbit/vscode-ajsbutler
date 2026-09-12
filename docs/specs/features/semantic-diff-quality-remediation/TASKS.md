@@ -6,16 +6,17 @@
 - Approved or active slice: Slices 1-4 are complete at `fa933763`, `ecea8714`,
   `6441de1e`, and `e89e6cab`; Slice 5 is complete at `a69fcd12` after focused
   state commit `4f3119d7`; Slice 6 replan is complete at `3af9494d`; Slice 7
-  implementation is complete; its prior approval is superseded by
+  implementation is complete at `b0095565`; its prior approval is superseded by
   the reviewed and Human Approved web-harness replan below.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
 - Web-harness replan/state commit `800612e4` is complete; the approved Slice 7
-  implementation may proceed under the recorded boundary.
-- Next decision: delegate the exact approved Slice 7 paths to
-  `approval-committer` for the completion commit. Independent implementation
-  review is `Ready` with no findings and Completion Approval is `Approved`.
+  implementation and completion commit `b0095565` are complete under the
+  recorded boundary.
+- Next decision: delegate the exact approved Slice 8 paths below to
+  `approval-committer` for its focused state commit. Slice 8 may then proceed
+  to implementation and independent review under the existing plan.
 
 ## Sync Rule
 
@@ -26,9 +27,9 @@
 
 ## Plan Status
 
-- Status: Replanned; Slices 1-6 complete; Slice 7 implementation complete;
-  web-harness replan for Slices 7-10 approved and focused replan/state commit
-  `800612e4` complete
+- Status: Replanned; Slices 1-7 complete; Slice 8 active under the approved
+  ten-slice plan; web-harness replan for Slices 7-10 approved and focused
+  replan/state commit `800612e4` complete
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure and the revised
   Slice 6 private helper paths required by this replan.
@@ -37,9 +38,9 @@
 - Human approval: Prior Slice 7 approval is superseded; the exact web-harness
   delta and existing Slice 7 production/test scope were Approved in the
   current conversation on 2026-09-12.
-- Active implementation slice: Slice 7 completion is approved, with the
-  approved web-harness replan committed at `800612e4`; the completion commit is
-  next.
+- Active implementation slice: Slice 8 artifact, Explorer, and finalization
+  workflow; exact scope is Human Approved below and its focused state commit
+  is pending.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -1008,7 +1009,7 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 
 ### Slice 8: Command artifact, Explorer, and finalization workflow
 
-- Status: Proposed.
+- Status: Human Approved; active next slice, pending focused state commit.
 - Scope: simplify artifact building, source binding, Explorer/report opening,
   compatibility flow, and final result handling.
 - User / Domain Value: preserves one successful read-only Explorer session and
@@ -1037,8 +1038,11 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   file-dialog, or Webview DOM automation.
 - Production Readiness: all failures release resources; cancellation opens
   nothing; no VS Code API newer than `^1.75.0`.
-- Approval Boundary: exact file/tests plus evidence documents.
-- Dependencies: Slice 7 committed.
+- Approval Boundary: exact production, test, web-harness scenario, and
+  evidence paths listed above; no new module path, public contract, or
+  production configuration is included.
+- Dependencies: Slice 7 completion commit `b0095565` and the committed
+  test-only web-harness replan `800612e4`.
 - Risks: double disposal, source leak, duplicate telemetry, or false success.
 - Out of Scope: UI files and public commands/actions/DTOs.
 
@@ -1345,3 +1349,45 @@ issues`; Slice 7-owned smell findings are clear.
   `approval-committer` for the Slice 7 completion commit. No stage/commit was
   performed by this implementation handoff; Slice 8 remains unapproved for
   implementation here.
+
+## Slice 8 Activation And Approval (2026-09-13)
+
+- Status: Human Approved; active next slice, pending focused state commit.
+- Basis: the complete ten-slice plan and independent plan review `Ready` with
+  no findings; Slice 7 implementation review `Ready` with no findings and
+  completion commit `b0095565`; the user's standing automatic no-findings
+  slice-approval instruction and current authorization to continue the
+  approved slices.
+- Approved production path:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`.
+- Approved test paths:
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerFlow.test.ts`,
+  `src/test/suite/semanticDiffFlowHighlights.test.ts`,
+  `src/test/suite/semanticDiffWiring.test.ts`, and
+  `src/test/suite/webSmoke.ts` for the actual WEB-8 scenario through the
+  already approved test-only web harness.
+- Approved evidence paths: this feature's `TASKS.md` and
+  `TRACEABILITY.md`.
+- Approved boundary: simplify artifact building, source binding,
+  Explorer/report opening, compatibility flow, and final result handling;
+  preserve comparison/open counts, binding/rollback, Explorer defaults,
+  copy/save actions, Flow focus/highlights, sidecar context, result codes,
+  telemetry, and cleanup. Private signature changes are allowed only when
+  required for this slice to compile. No new module path, public command,
+  action, DTO, UI file, or design decision is approved.
+- Web validation boundary: execute WEB-8 through the committed bundle-backed
+  `test:web` route with deterministic in-memory source, artifact, report/open,
+  Explorer, and session doubles. This does not claim interactive picker,
+  file-dialog, registered-command UI, or Explorer Webview DOM execution.
+- State commit gate: eligible; pending `approval-committer`. No runtime,
+  test, generated artifact, configuration, dependency, `CHANGELOG.md`,
+  Calendar Slice 3, Dependabot, or Slice 9-10 change is included in this
+  state commit.
+- Replan trigger: if Qlty total/file complexity cannot be cleared within
+  the exact approved production path and its private helpers, or if a new
+  module path, architecture boundary, behavior, public contract, or test
+  expectation is required, stop and return the smallest affected scope to
+  Main for Replanning Mode. Do not enlarge this slice silently.

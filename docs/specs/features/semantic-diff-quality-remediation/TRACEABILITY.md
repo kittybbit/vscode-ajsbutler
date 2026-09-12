@@ -86,6 +86,15 @@ desktop evidence boundary.
 - Web-harness replan commit gate: complete at `800612e4`; exact state paths
   were this feature's `TASKS.md` and `TRACEABILITY.md`, with no runtime, test,
   generated, dependency, or production webpack changes.
+- Slice 7 completion gate: independent implementation review `Ready` with no
+  findings; Completion Approval is `Approved` under the user's standing
+  automatic no-findings slice-approval instruction; exact completion commit
+  `b0095565` is complete.
+- Current Slice 8 activation: the existing reviewed plan scope is Human
+  Approved on 2026-09-13 under the user's standing automatic no-findings
+  slice-approval instruction and current authorization to continue approved
+  slices. Its focused state commit is eligible and pending
+  `approval-committer`.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
@@ -122,6 +131,16 @@ desktop evidence boundary.
   `src/test/suite/semanticDiffSourceCapture.test.ts`,
   `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`, and
   `src/test/suite/webSmoke.ts` (WEB-7).
+- Exact Slice 8 production path:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`.
+- Exact Slice 8 test paths:
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerFlow.test.ts`,
+  `src/test/suite/semanticDiffFlowHighlights.test.ts`,
+  `src/test/suite/semanticDiffWiring.test.ts`, and
+  `src/test/suite/webSmoke.ts` (WEB-8).
 - Proposed web-harness delta paths:
   `package.json` (including the exact `test:prepare:web:bundle` script,
   `test:prepare:web` wiring, and direct `test:web:run` bundle prerequisite),
@@ -793,3 +812,44 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
   `TRACEABILITY.md`. The four focused desktop test files remain unchanged
   validation-only paths. WEB-8 through WEB-10 remain later approved slices;
   no stage/commit was performed here.
+
+## Slice 8 Activation And Approval (2026-09-13)
+
+- Status: Human Approved; active next slice, pending focused state commit.
+- Basis: the complete ten-slice plan and independent plan review `Ready` with
+  no findings; Slice 7 implementation review `Ready` with no findings and
+  completion commit `b0095565`; the user's standing automatic no-findings
+  slice-approval instruction and current authorization to continue the
+  approved slices.
+- Exact production path:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`.
+- Exact test paths:
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerFlow.test.ts`,
+  `src/test/suite/semanticDiffFlowHighlights.test.ts`,
+  `src/test/suite/semanticDiffWiring.test.ts`, and
+  `src/test/suite/webSmoke.ts` for WEB-8.
+- Exact evidence paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Scope and acceptance: simplify artifact building, source binding,
+  Explorer/report opening, compatibility flow, and final result handling;
+  preserve comparison/open counts, binding/rollback, Explorer defaults,
+  copy/save actions, Flow focus/highlights, sidecar context, result codes,
+  telemetry, and cleanup. Private signature changes are allowed only when
+  required for this slice to compile. No new module path, public command,
+  action, DTO, UI file, or design decision is approved.
+- Web validation: run WEB-8 through the committed bundle-backed WebWorker
+  harness with deterministic in-memory source, artifact, report/open,
+  Explorer, and session doubles. Interactive pickers, file dialogs,
+  registered-command UI, and Explorer Webview DOM execution remain
+  unclaimed.
+- State commit gate: eligible; pending `approval-committer`. This state-only
+  activation does not include runtime, test, generated artifact,
+  configuration, dependency, `CHANGELOG.md`, Calendar Slice 3, Dependabot,
+  or Slice 9-10 changes.
+- Replan trigger: if Qlty total/file complexity cannot be cleared within
+  the exact approved production path and private helpers, or if a new module
+  path, architecture boundary, behavior, public contract, or test
+  expectation is required, stop and return the smallest affected scope to
+  Main for Replanning Mode rather than enlarging the slice.
