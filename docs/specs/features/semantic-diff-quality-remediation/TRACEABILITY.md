@@ -213,7 +213,9 @@ the review base.
 
 ## Slice 4 Activation And Approval (2026-09-12)
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Human Approved; implementation complete; independent implementation
+  review `Ready` with no findings; Completion Approval `Approved` on
+  2026-09-12; focused completion commit pending.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production path: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
@@ -227,9 +229,78 @@ the review base.
   assembly. Acceptance retains exact match kinds, ordinals, timeline order,
   source references, validation errors, frozen output, and facts, with zero
   remaining mapped smell in this file.
-- State commit gate: eligible; pending `approval-committer`. No runtime, test,
-  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
-  Dependabot change is included in that state commit.
+- Completion commit gate: eligible and pending `approval-committer`; no
+  runtime, test, configuration, generated, dependency, `CHANGELOG.md`,
+  Calendar Slice 3, or Dependabot change is included beyond the approved
+  implementation scope.
+
+## Slice 4 Implementation Evidence (2026-09-12)
+
+- Status: Implementation complete; independent implementation review `Ready`
+  with no findings; Completion Approval `Approved` on 2026-09-12 under the
+  user's automatic no-findings slice approval policy; no completion commit has
+  been made.
+- Basis: the approved ten-slice plan, independent plan review `Ready` with no
+  findings, and Human Approval for this exact Slice 4 boundary.
+- Approved production path changed:
+  `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
+- Approved test paths:
+  `src/test/suite/semanticDiffScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`,
+  `src/test/suite/semanticDiffPresentationArtifacts.test.ts`, and
+  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`; all remain
+  unchanged and are covered by the full Desktop run.
+- Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Implementation: extracted private pure phases for match classification and
+  append, source-change reference selection, timeline attachment and
+  defensive validation, root construction, evaluated facts, and final
+  assembly. Existing Slice 3 helpers and map-based validation remain intact;
+  no DTO, schema, or new public export was introduced.
+- Review-fix: corrected source-change owner conflict polarity so only a
+  different existing owner throws, restored lazy comparator evaluation, and
+  restored the original run-present outcome precedence.
+- Acceptance evidence: existing match kinds, ordinals, timeline ordering,
+  source-reference precedence, validation errors, frozen output, and facts are
+  preserved without test expectation changes. Invalid target IDs are emitted
+  only for jobnet/unit targets, matching the prior behavior.
+- Qlty evidence: scoped `qlty smells --no-snippets` and `qlty check` both pass
+  with zero issues for the production file. No suppression, ignore, baseline,
+  threshold, configuration, dependency, or architecture exception was added.
+- Validation evidence: direct Mocha results are
+  `semanticDiffScheduleImpact.test.ts` 11/11,
+  `semanticDiffScheduleCalendar.test.ts` 30/30,
+  `semanticDiffPresentationArtifacts.test.ts` 2/2, and
+  `compareSemanticDiffWithArtifacts.test.ts` 10/10 (53/53 total).
+  `rtk pnpm run test:compile`, target-file ESLint, full Desktop tests,
+  `rtk pnpm run test:web` after Web preparation, `rtk pnpm run build`,
+  `rtk pnpm run lint:md`, and `rtk git diff --check` all pass. Production
+  build output retains the existing bundle-size warnings; host runners retain
+  existing Electron/stream diagnostic logs while exiting successfully.
+- Large-input evidence: the targeted `sample1_large_utf8` self-comparison
+  passes 1/1 with `changes=0`, `identityDecisions=868`, and
+  `exactJobGroups=48`. The unapproved sample category-coverage test is not a
+  Slice 4 acceptance claim; its existing `end-control` category assertion
+  remains outside this slice.
+- Compatibility evidence: no parser, public DTO/JSON/report schema, VS Code
+  API, desktop/web entry point, telemetry, calendar transport, or JP1/AJS
+  schedule meaning changed. Inherited Dependabot documentation edits remain
+  untouched and excluded.
+- Production readiness: ready for independent implementation re-review; no
+  Slice 4 blocker is known. Review should verify source-reference precedence,
+  throw timing, and stable ordering against the characterization suites. The
+  unapproved sample category assertion is a separate follow-up.
+- Review result: `implementation-reviewer` returned `Ready` with no findings;
+  the source-reference precedence, validation timing, and ordering findings
+  were resolved within Slice 4.
+- Exact completion scope for `approval-committer`:
+  `src/application/semantic-diff/semanticDiffScheduleImpact.ts`, this
+  feature's `TASKS.md`, and this feature's `TRACEABILITY.md`. The four
+  approved test paths remain unchanged and are validation evidence only.
+- Completion commit status: eligible and pending `approval-committer`; this
+  approval-record update made no runtime or test changes and did not stage or
+  commit. Dependabot documents remain untouched.
+- Recommended route: delegate the exact completion scope above to
+  `approval-committer`.
 
 ## Web Smoke Scenario Traceability
 

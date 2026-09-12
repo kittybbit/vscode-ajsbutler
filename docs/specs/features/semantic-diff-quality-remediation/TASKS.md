@@ -5,13 +5,15 @@
 - Purpose: remove PR #317 Qlty blockers without observable behavior change.
 - Approved or active slice: Slices 1-2 are complete at `fa933763` and
   `ecea8714`; Slice 3 is complete at `6441de1e` after focused state commit
-  `d3e895e7`; Slice 4 is Human Approved and awaits its focused state commit.
-  Implementation remains one slice at a time.
+  `d3e895e7`; Slice 4 implementation is complete, independent review is
+  `Ready` with no findings, and Completion Approval is approved; its focused
+  completion commit remains pending. Implementation remains one slice at a
+  time.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Next decision: delegate the exact approved Slice 4 scope to
-  `approval-committer` for the focused state commit.
+- Next decision: delegate the exact completed Slice 4 scope to
+  `approval-committer` for the focused completion commit.
 
 ## Sync Rule
 
@@ -22,13 +24,13 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slices 1-3 complete; Slice 4 approved, state commit
-  pending
+- Status: Approved plan; Slices 1-3 complete; Slice 4 implementation complete,
+  review `Ready`, Completion Approval approved, completion commit pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure.
 - Review status: Ready; no findings.
 - Human approval: Approved on 2026-09-12 for Slice 4.
-- Active implementation slice: Slice 4, awaiting focused state commit.
+- Active implementation slice: Slice 4, completion commit pending.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -416,7 +418,9 @@ and assigned findings to these 18 production files.
 
 ### Slice 4: Schedule-impact matching, timeline, and final assembly
 
-- Status: Active; Human Approved; focused state commit pending.
+- Status: Implementation complete; independent implementation review `Ready`
+  with no findings; Completion Approval `Approved` on 2026-09-12; focused
+  completion commit pending.
 - Scope: simplify `matchRuns` through the exported sidecar/fact builders.
 - User / Domain Value: preserves the final calendar sidecar and references.
 - Cohesive Change Group: extract match classification/append helpers; use
@@ -440,6 +444,58 @@ and assigned findings to these 18 production files.
 - Dependencies: Slice 3 committed.
 - Risks: changed winning source reference, throw timing, or stable ordering.
 - Out of Scope: report, JSON schema, and calendar transport.
+
+#### Slice 4 Implementation Evidence (2026-09-12)
+
+- Approved production path changed:
+  `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
+- Approved test paths were unchanged; the full Desktop suite covers the four
+  approved impact, calendar, presentation-artifact, and artifact-comparison
+  suites.
+- Implementation: decomposed run classification/append, source-reference
+  lookup, timeline attachment and defensive validation, root creation,
+  evaluated facts, and final assembly into private pure phases. Existing
+  Slice 3 helpers, map-based validation, and all public exports remain in
+  place.
+- Review-fix: corrected source-change owner conflict polarity to throw only
+  when a reference is already owned by a different effect, restored lazy
+  comparator evaluation, and restored run-present outcome precedence.
+- Behavior evidence: match kinds and ordinals, timeline order, winning source
+  references, validation errors, deep-frozen output, and schedule facts remain
+  characterized without expectation changes. Invalid target IDs remain
+  limited to jobnet/unit targets.
+- Qlty evidence: scoped `qlty smells --no-snippets` and `qlty check` pass with
+  zero issues. No suppression, ignore, baseline, threshold, configuration,
+  dependency, or architecture exception was added.
+- Validation evidence: direct Mocha counts are impact 11/11, calendar 30/30,
+  presentation artifacts 2/2, and comparison artifacts 10/10 (53/53 total).
+  Test compile, target ESLint, full Desktop runner, Web smoke after Web
+  preparation, production build, Markdown lint, and `git diff --check` pass.
+  The production build retains its existing bundle-size warnings; host
+  runners also retain their existing Electron/stream diagnostic logs while
+  exiting successfully.
+- Large-input evidence: the targeted `sample1_large_utf8` self-comparison
+  passes 1/1 with `changes=0`, `identityDecisions=868`, and
+  `exactJobGroups=48`. The unapproved sample category-coverage test is not
+  claimed as Slice 4 acceptance; its existing `end-control` category
+  assertion remains outside this slice.
+- Compatibility and readiness: no DTO/schema, parser, VS Code API,
+  desktop/web entry point, telemetry, calendar transport, or JP1/AJS schedule
+  meaning changed. The implementation is ready for independent review.
+- Review route: independent implementation review completed with `Ready`; the
+  exact completion scope is now routed to `approval-committer`. This
+  implementation did not stage or commit.
+- Review result: independent `implementation-reviewer` returned `Ready` with
+  no findings. Completion Approval is `Approved` on 2026-09-12 under the
+  user's automatic no-findings slice approval policy.
+- Exact completion scope: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
+  this feature's `TASKS.md`, and this feature's `TRACEABILITY.md`. The four
+  approved test paths remain unchanged and are validation evidence only.
+- Completion commit gate: eligible and pending `approval-committer`; this
+  approval-record update made no runtime or test changes and did not stage or
+  commit. No Slice 4 blocker is known; the unapproved sample category
+  assertion remains a separate follow-up, and inherited Dependabot
+  documentation edits are preserved outside this slice.
 
 ### Slice 5: Presentation artifacts, report rendering, and format repair
 
