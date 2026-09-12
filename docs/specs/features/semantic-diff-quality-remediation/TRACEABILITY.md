@@ -44,7 +44,12 @@ the review base.
   completion commit `6441de1e` are complete after independent implementation
   review `Ready` with no Findings and Completion Approval `Approved` under the
   user's automatic no-findings slice approval policy.
-- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 4 scope
+- Prior Human Approval: `Approved` on 2026-09-12 for the exact Slice 4 scope
+  as the next slice; completion commit `e89e6cab` is complete after focused
+  state commit `19e60b20`, independent implementation review `Ready` with no
+  findings, and Completion Approval `Approved` under the user's automatic
+  no-findings slice approval policy.
+- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 5 scope
   as the next slice.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
@@ -57,13 +62,22 @@ the review base.
   completion commit is `ecea8714`.
 - Exact Slice 3 paths and completion evidence remain recorded below; its
   completion commit is `6441de1e`.
-- Exact Slice 4 paths: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
-  `src/test/suite/semanticDiffScheduleImpact.test.ts`,
-  `src/test/suite/semanticDiffScheduleCalendar.test.ts`,
-  `src/test/suite/semanticDiffPresentationArtifacts.test.ts`, and
-  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`.
+- Exact Slice 4 paths and completion evidence remain recorded below; its
+  completion commit is `e89e6cab`.
+- Exact Slice 5 production paths:
+  `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
+  and `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`.
+- Exact Slice 5 documentation path: the reported `CHANGELOG.md` sentence
+  wrapping only, with release-note wording unchanged.
+- Exact Slice 5 test paths:
+  `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`,
+  `src/test/suite/semanticDiffPresentationArtifacts.test.ts`,
+  `src/test/suite/renderSemanticDiffMarkdown.test.ts`,
+  `src/test/suite/semanticDiffMarkdownProjections.test.ts`,
+  `src/test/suite/buildSemanticDiffReportData.test.ts`, and
+  `src/test/suite/semanticDiffJson.test.ts`.
 - `CHANGELOG.md` remains assigned to Slice 5 by the approved plan and is not
-  part of the Slice 4 implementation scope.
+  subject to any change beyond the reported sentence wrapping.
 
 ## Slice 3 Implementation Evidence (2026-09-12)
 
@@ -211,11 +225,11 @@ the review base.
   dependency, `CHANGELOG.md`, Calendar Slice 3, or Dependabot change was
   included in those commits.
 
-## Slice 4 Activation And Approval (2026-09-12)
+## Slice 4 Completion Evidence (2026-09-12)
 
-- Status: Human Approved; implementation complete; independent implementation
-  review `Ready` with no findings; Completion Approval `Approved` on
-  2026-09-12; focused completion commit pending.
+- Status: Complete; focused state commit `19e60b20`; implementation complete;
+  independent implementation review `Ready` with no findings; Completion
+  Approval `Approved` on 2026-09-12; focused completion commit `e89e6cab`.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production path: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
@@ -229,17 +243,16 @@ the review base.
   assembly. Acceptance retains exact match kinds, ordinals, timeline order,
   source references, validation errors, frozen output, and facts, with zero
   remaining mapped smell in this file.
-- Completion commit gate: eligible and pending `approval-committer`; no
-  runtime, test, configuration, generated, dependency, `CHANGELOG.md`,
-  Calendar Slice 3, or Dependabot change is included beyond the approved
-  implementation scope.
+- Completion commit: `e89e6cab`; completion is committed. No runtime, test,
+  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
+  Dependabot change was included beyond the approved implementation scope.
 
 ## Slice 4 Implementation Evidence (2026-09-12)
 
-- Status: Implementation complete; independent implementation review `Ready`
-  with no findings; Completion Approval `Approved` on 2026-09-12 under the
-  user's automatic no-findings slice approval policy; no completion commit has
-  been made.
+- Status: Complete; focused state commit `19e60b20`; independent implementation
+  review `Ready` with no findings; Completion Approval `Approved` on 2026-09-12
+  under the user's automatic no-findings slice approval policy; completion
+  commit `e89e6cab`.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and Human Approval for this exact Slice 4 boundary.
 - Approved production path changed:
@@ -296,11 +309,34 @@ the review base.
   `src/application/semantic-diff/semanticDiffScheduleImpact.ts`, this
   feature's `TASKS.md`, and this feature's `TRACEABILITY.md`. The four
   approved test paths remain unchanged and are validation evidence only.
-- Completion commit status: eligible and pending `approval-committer`; this
-  approval-record update made no runtime or test changes and did not stage or
-  commit. Dependabot documents remain untouched.
-- Recommended route: delegate the exact completion scope above to
-  `approval-committer`.
+- Completion commit status: `e89e6cab`; completion is committed and this state
+  synchronization made no runtime or test changes and did not stage or commit.
+  Dependabot documents remain untouched.
+
+## Slice 5 Activation And Approval (2026-09-12)
+
+- Status: Human Approved; active next slice, pending focused state commit.
+- Basis: the approved ten-slice plan, independent plan review `Ready` with no
+  findings, and the user's automatic no-findings slice approval instruction.
+- Approved production paths:
+  `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
+  and `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`.
+- Approved documentation path: the reported `CHANGELOG.md` sentence wrapping
+  only; release-note wording remains unchanged.
+- Approved test paths:
+  `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`,
+  `src/test/suite/semanticDiffPresentationArtifacts.test.ts`,
+  `src/test/suite/renderSemanticDiffMarkdown.test.ts`,
+  `src/test/suite/semanticDiffMarkdownProjections.test.ts`,
+  `src/test/suite/buildSemanticDiffReportData.test.ts`, and
+  `src/test/suite/semanticDiffJson.test.ts`.
+- Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved boundary: preserve parse errors/count, period omission, sidecar
+  availability, localized text/order/escape, report and JSON facts, and exact
+  release-note wording while clearing the assigned presentation findings.
+- State commit gate: eligible; pending `approval-committer`. No other runtime,
+  test, configuration, generated, dependency, Calendar Slice 3, or Dependabot
+  change is included in that state commit.
 
 ## Web Smoke Scenario Traceability
 
