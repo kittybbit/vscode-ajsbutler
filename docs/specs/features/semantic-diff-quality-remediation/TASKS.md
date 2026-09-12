@@ -11,12 +11,14 @@
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Web-harness replan/state commit `800612e4` is complete; the approved Slice 7
-  implementation and completion commit `b0095565` are complete under the
-  recorded boundary.
-- Next decision: delegate the exact approved Slice 8 paths below to
-  `approval-committer` for its focused state commit. Slice 8 may then proceed
-  to implementation and independent review under the existing plan.
+- Web-harness replan/state commit `800612e4` and Slice 7 completion commit
+  `b0095565` are complete under the recorded boundary.
+- Slice 8 requires the minimal replan below: its same-file helper extraction
+  reduced Qlty total complexity from `254` to `253`, still above the configured
+  threshold `55`. The partial Slice 8 command diff is preserved.
+- The bounded eight-module Slice 8 replan has independent plan review `Ready`
+  with no findings and Human Approval `Approved` on 2026-09-13. Its focused
+  replan/state commit is pending; implementation remains gated on that commit.
 
 ## Sync Rule
 
@@ -27,20 +29,22 @@
 
 ## Plan Status
 
-- Status: Replanned; Slices 1-7 complete; Slice 8 active under the approved
-  ten-slice plan; web-harness replan for Slices 7-10 approved and focused
-  replan/state commit `800612e4` complete
+- Status: Replanned; Slices 1-7 complete; Slice 8 partial implementation
+  preserved; minimal complexity replan independently reviewed and Human
+  Approved, with focused replan/state commit pending; web-harness replan for
+  Slices 7-10 approved and focused replan/state commit `800612e4` complete
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure and the revised
   Slice 6 private helper paths required by this replan.
-- Review status: Original and revised plan review, including the web-harness
-  delta, Ready with no findings.
-- Human approval: Prior Slice 7 approval is superseded; the exact web-harness
-  delta and existing Slice 7 production/test scope were Approved in the
-  current conversation on 2026-09-12.
-- Active implementation slice: Slice 8 artifact, Explorer, and finalization
-  workflow; exact scope is Human Approved below and its focused state commit
-  is pending.
+- Review status: Original and web-harness plan reviews are Ready; the revised
+  Slice 8 complexity replan review is Ready with no findings.
+- Human approval: Slice 7 and the web-harness delta are Approved and complete;
+  the revised Slice 8 eight-module production-path boundary is Human Approved
+  on 2026-09-13. The prior Slice 8 single-file approval remains superseded.
+- Active implementation slice: Slice 8 minimal replan for artifact, Explorer,
+  and finalization responsibilities; partial command implementation remains
+  preserved and no implementation may resume before its focused replan/state
+  commit.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -213,6 +217,185 @@ under the approved boundary.
   Approval `Approved`, and focused replan/state commit `800612e4` complete;
   WEB-7 execution and Slice 7 implementation may continue. WEB-8 through
   WEB-10 remain later slices with their own completion gates.
+
+## Slice 8 Complexity Replanning (2026-09-13)
+
+- Finding: the Slice 8 implementation attempted the approved same-file
+  private-helper decomposition, but targeted Qlty reported
+  `semanticDiffCommand.ts` total complexity `254` before and `253` after the
+  change, against the configured file-complexity threshold `55`. The measured
+  total includes private functions in the same file, so continuing within the
+  original single-file boundary cannot satisfy the feature's quality gate.
+- Partial implementation evidence: test compilation, the relevant desktop
+  checks, the test-only web bundle/build, and the desktop runner passed for
+  the partial command change. WEB-8 has not been implemented or claimed, and
+  no completion review or completion commit exists. The partial production
+  diff remains preserved in `semanticDiffCommand.ts` only.
+- Why the plan cannot continue unchanged: the original Slice 8 boundary
+  permits only private helpers in `semanticDiffCommand.ts`, but that leaves
+  the file-level Qlty blocker in place. A responsibility-preserving module
+  boundary is required; suppression, ignore rules, baseline manipulation,
+  threshold relaxation, or an architecture exception remain prohibited.
+- Smallest revision: redistribute the existing private source, selection,
+  binding, artifact, Explorer, and dispatch phases into eight cohesive
+  command-owned modules. Keep `semanticDiffCommand.ts` as the public command
+  contract and finalization boundary. The period and execution seams are
+  bounded additions required by the review findings; this remains an internal
+  responsibility move and does not add product behavior, public APIs, DTOs,
+  commands, actions, dependencies, or production webpack changes.
+- Revised exact production paths:
+  1. `src/presentation/vscode/commands/semanticDiffCommand.ts` — retain
+     exported command types/constants and public execute entry; delegate
+     workflow/explorer/report execution and final result mapping.
+  2. `src/presentation/vscode/commands/semanticDiffCommandWorkflowInput.ts` —
+     own after-editor snapshots, source text/size validation, parse failure
+     message selection, and the `MAX_SEMANTIC_DIFF_SOURCE_BYTES` value/export.
+  3. `src/presentation/vscode/commands/semanticDiffCommandWorkflowSelection.ts`
+     — own source-selection pickers, cancellation, source failure projection,
+     and selection-to-step mapping.
+  4. `src/presentation/vscode/commands/semanticDiffCommandWorkflowPeriod.ts`
+     — own period mode/date input, validation, period result projection, and
+     `selectWorkflowPeriodStep`; this seam prevents Selection's `51 + 3 = 54`
+     proxy from approaching the threshold.
+  5. `src/presentation/vscode/commands/semanticDiffCommandWorkflowSource.ts`
+     — own before-file/Git reads, Git guards, source request preparation, and
+     every workflow capture descriptor builder, including the builders at the
+     former lines `1161-1187`.
+  6. `src/presentation/vscode/commands/semanticDiffCommandSourceBinding.ts` —
+     own every source bind/register/rollback/unregister/release adapter,
+     including workflow binding and Explorer cleanup.
+  7. `src/presentation/vscode/commands/semanticDiffCommandWorkflowArtifacts.ts`
+     — own workflow artifact input/result/error projection, failure mapping,
+     file/calendar compatibility orchestration, and artifact opening after all
+     binding helpers have moved out.
+  8. `src/presentation/vscode/commands/semanticDiffCommandExplorerWorkflow.ts`
+     — own every presentation descriptor/input builder (including the former
+     lines `1491-1531`), artifact/result projection, Explorer context/request,
+     selection, opening, and orchestration.
+  9. `src/presentation/vscode/commands/semanticDiffCommandWorkflowExecution.ts`
+     — own ordered command runner selection and the `commandExecution`
+     dispatch responsibility; the public contract remains in command.ts.
+- Exact current function ownership, with no duplicate ownership, is recorded
+  in the Slice 8 plan below. The planned readonly contexts, pure guards,
+  result builders, cleanup adapters, and dispatch selectors replace current
+  branches and parameter lists; they are not parallel implementations.
+- Qlty sizing evidence and targets use the current function-complexity sums
+  behind the measured command-file total (`254` before and `253` after the
+  partial extraction), not a fabricated `<20` SourceBinding assumption:
+
+  | File | Owned proxy | Allowance | Target / margin |
+  | --- | ---: | ---: | ---: |
+  | WorkflowInput | 27 | +2 | <=29 / 26 |
+  | WorkflowSelection | 18 | +4 | <=25 / 30 |
+  | WorkflowPeriod | 36 | +6 | <=42 / 13 |
+  | WorkflowSource | 45 | +4 | <=50 / 5 |
+  | SourceBinding | 48-51 | simplification only | <=50 / 5 |
+  | WorkflowArtifacts | 48-49 | replacement only | <=50 / 5 |
+  | ExplorerWorkflow | 46-47 | replacement only | <=50 / 5 |
+  | WorkflowExecution | 12 | +3 | <=15 / 40 |
+  | Retained command.ts | 22 | +4 | <=26 / 29 |
+
+  The WorkflowSelection proxy is `51` minus the period functions plus
+  `selectionToStep` (`3`). WorkflowPeriod is `31` for its other period
+  functions plus `selectWorkflowPeriodStep` (`5`), giving `36`. WorkflowSource
+  is calculated consistently as `39 - 3 + 2 + 5 + 2 = 45`: remove
+  `selectionToStep`, add the two descriptor builders, and add
+  `beginWorkflowCapture` (`5`) and `workflowCaptureDependenciesAvailable`
+  (`2`) that the prior source table omitted. The SourceBinding range is the
+  combined bind/cleanup region, including workflow adapters; it is not a
+  `<20` module. WorkflowArtifacts is the old `56` less its moved
+  binding/cleanup contribution (`7-8`). Explorer is `48 + 2` presentation
+  descriptor builders' net counted contribution (`3`) minus `4-5`
+  cleanup-adapter complexity, or `46-47`; each function is counted once. The
+  execution proxy is dispatch complexity
+  `9` plus three one-step selectors.
+
+  Every target retains the hard Qlty file gate of `<=55`; the table targets
+  intentionally leave margin below that gate and are not passing evidence.
+
+  These are implementation sizing bounds anchored to current Qlty function
+  findings and ownership, not passing evidence. Each changed file and named
+  function must receive an actual scoped Qlty result. If any file exceeds
+  `55`, implementation stops and returns the smallest cohesive seam for a
+  further replan rather than suppressing the finding.
+- Import topology: command.ts imports helper entry points, including
+  WorkflowExecution. Helpers use `import type` for command contracts and
+  generic step combinators from `semanticDiffCommandSteps.ts`. WorkflowPeriod
+  may consume the source-picker primitives from WorkflowSelection, but
+  WorkflowSelection never imports WorkflowPeriod. WorkflowArtifacts consumes
+  WorkflowInput, WorkflowPeriod, WorkflowSource, and SourceBinding in that
+  order; ExplorerWorkflow consumes WorkflowInput, WorkflowSource, and
+  SourceBinding plus existing report/selection helpers; WorkflowExecution
+  consumes the artifact/Explorer runners and command contracts type-only. No
+  helper imports a command runtime value. The public
+  `MAX_SEMANTIC_DIFF_SOURCE_BYTES` export is preserved through WorkflowInput
+  and a command.ts re-export, avoiding a runtime cycle. No domain/application
+  dependency or Node built-in is introduced.
+- Preserved behavior: active-editor and source reads remain one-shot;
+  cancellation creates no partial session; source bytes, ordering, result
+  codes, localization, captured Git HEAD, public command/result types,
+  report/Explorer output, rollback/release timing, and telemetry privacy stay
+  byte- and contract-compatible. Slice 7 WEB-7 remains a regression gate;
+  WEB-8 uses deterministic in-memory doubles through the already committed
+  test-only WebWorker harness.
+- Revised validation: run the approved command, schedule-impact,
+  Explorer/Flow, wiring, and `webSmoke.ts` suites; assert WEB-7 regression and
+  WEB-8 success; run test compile, desktop suite, direct web preparation and
+  runner, production build, architecture dependency checks, scoped Qlty
+  format/check/smells, Markdown lint, and `git diff --check`. Qlty must show
+  no mapped smells and file complexity at or below `55` for every revised
+  production path. Existing runner stream diagnostics remain recorded if
+  they do not affect exit status.
+- Approval boundary: the prior Slice 8 Human Approval remains historical for
+  behavior and existing test/harness intent but is superseded for its
+  single-file production-path assumption. The eight helper paths, including
+  the newly introduced WorkflowPeriod and WorkflowExecution paths, and their
+  import topology require independent plan review and new explicit Human
+  Approval. The standing automatic no-findings completion authorization does
+  not authorize these new design paths. No implementation, test, generated,
+  configuration, or commit action is authorized by this replan alone.
+
+## Slice 8 Replan Human Approval (2026-09-13)
+
+- Status: Approved for the revised eight-module production-path boundary;
+  focused replan/state commit is pending.
+- Approved at: 2026-09-13 in the current conversation.
+- Approval basis: the revised Slice 8 plan was independently reviewed as
+  `Ready` with no findings, and the user explicitly approved this exact
+  replan boundary.
+- Approved production paths:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowInput.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSelection.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowPeriod.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSource.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandSourceBinding.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowArtifacts.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandExplorerWorkflow.ts`,
+  and
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowExecution.ts`.
+- Approved test and evidence paths:
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffExplorerFlow.test.ts`,
+  `src/test/suite/semanticDiffFlowHighlights.test.ts`,
+  `src/test/suite/semanticDiffWiring.test.ts`,
+  `src/test/suite/webSmoke.ts`, and this feature's `TASKS.md` and
+  `TRACEABILITY.md`.
+- Approved boundary: move existing private command workflow responsibilities
+  into the listed command-owned modules, preserve the public command and
+  behavior contracts, and apply only the planned context, guard, result, and
+  dispatch transformations. No new product behavior, public API, DTO,
+  dependency, production webpack change, or architecture exception is
+  approved.
+- Preserved scope: completed Slices 1-7, the committed test-only web-harness
+  replan `800612e4`, Calendar Slice 3, Dependabot, Slice 9-10, and the partial
+  Slice 8 implementation remain otherwise unchanged. Completion review and
+  completion approval are still pending.
+- Recommended next route: delegate these exact planning paths to
+  `approval-committer` for the focused replan/state commit, then resume Slice 8
+  implementation only after that commit succeeds.
 
 ## Completion Approval
 
@@ -1009,17 +1192,143 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 
 ### Slice 8: Command artifact, Explorer, and finalization workflow
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Replanned and Human Approved; partial implementation preserved;
+  focused replan/state commit pending.
 - Scope: simplify artifact building, source binding, Explorer/report opening,
   compatibility flow, and final result handling.
 - User / Domain Value: preserves one successful read-only Explorer session and
   explicit output actions.
-- Cohesive Change Group: use private context objects for `workflowFailure` and
-  `buildWorkflowArtifacts`; extract typed continuations from artifact/open,
-  file workflow, Explorer context/open, and final execute functions; retain
-  rollback/release and telemetry at the command boundary.
-- Exact Production Path:
-  `src/presentation/vscode/commands/semanticDiffCommand.ts`.
+- Cohesive Change Group: move the existing private workflow phases into eight
+  cohesive command-owned helper modules so Qlty file complexity is measured
+  per responsibility. The bounded review requires separate period
+  orchestration and execution seams in addition to the original six. Keep
+  `semanticDiffCommand.ts` as the public contract/finalization boundary;
+  retain typed contexts/continuations, rollback/release, and telemetry.
+- Exact Production Paths:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowInput.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSelection.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowPeriod.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSource.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandSourceBinding.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowArtifacts.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandExplorerWorkflow.ts`,
+  and
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowExecution.ts`.
+- Exact current function ownership (each private function is assigned once):
+  - WorkflowInput: `sourceTextFailureDetail`, `sourceSizeFailureDetail`,
+    `sourceValidationFailure`, `sourceTextFailure`, `parseFailureKind`,
+    `parseFailureMessage`, `readWorkflowEditor`, `snapshotFromWorkflowEditor`,
+    `describeWorkflowAfter`, `validateWorkflowAfterText`,
+    `workflowAfterSnapshot`, and `readWorkflowAfterSnapshot`.
+  - WorkflowSelection: `workflowQuickPick`, `workflowPickItems`,
+    `workflowPickOptions`, `selectWorkflowItem`, `selectWorkflowSelection`,
+    `sourceSelectionFromItem`, `selectWorkflowSource`, `workflowCancellation`,
+    `workflowSourceFailure`, and `selectionToStep`.
+  - WorkflowPeriod: `periodValidationMessage`, `showWorkflowInput`,
+    `periodModeFromItem`, `selectWorkflowPeriodMode`,
+    `workflowFromDateOptions`, `workflowToDateOptions`, `readWorkflowDate`,
+    `periodInputsFromValues`, `readWorkflowPeriodValues`,
+    `readWorkflowPeriodInputs`, `periodSelectionFromDates`,
+    `periodSelectionFromInputs`, `readWorkflowPeriodDates`,
+    `selectWorkflowPeriod`, `workflowPeriodFailure`, and
+    `selectWorkflowPeriodStep`.
+  - WorkflowSource: `readWorkflowBefore`, `readWorkflowDocument`,
+    `describeWorkflowBefore`, `selectWorkflowFile`, `readWorkflowSourceFile`,
+    `missingGitHeadReader`, `missingGitHeadProvider`,
+    `gitHeadDependencyFailure`, `readGitHeadResult`, `validateGitHeadResult`,
+    `workflowFromGitHead`, `readWorkflowGitHead`, `prepareWorkflowSource`,
+    `beginWorkflowCapture`, `workflowCaptureDependenciesAvailable`,
+    `createWorkflowAfterDescriptor`, and `createWorkflowCaptureInput`.
+  - SourceBinding: `sourceBindingFailure`, `rollbackSourceCapture`,
+    `prepareSourceBinding`, `prepareAndValidateSourceBinding`,
+    `rollbackFailedBinding`, `validateSourceBinding`,
+    `registerSourceBinding`, `registerSourceEntry`,
+    `bindAndRegisterExplorerSources`, `registerPreparedSourceBinding`,
+    `createSourceCaptureRelease`, `unregisterAndReleaseWorkflowCapture`,
+    `bindWorkflowCapture`, `workflowSourceEntry`, `registerWorkflowSource`,
+    and `cleanupExplorerRequest`.
+  - WorkflowArtifacts: `buildWorkflowArtifacts`, `createWorkflowRelease`,
+    `createWorkflowArtifactInput`, `workflowArtifactResult`,
+    `workflowArtifactError`, `workflowOpenFailure`,
+    `openRegisteredWorkflowArtifacts`, `openWorkflowArtifacts`,
+    `runFileComparisonWorkflow`, `prepareCalendarCompatibilitySource`, and
+    `runCalendarCompatibilityWorkflow`.
+  - ExplorerWorkflow: `beginPresentationSourceCapture`,
+    `createPresentationSourceDescriptors`, `createPresentationCaptureInput`,
+    `presentationArtifactInput`, `presentationParseFailure`,
+    `presentationArtifactResult`, `presentationArtifactError`,
+    `buildPresentationArtifactsStep`, `createExplorerContextStep`,
+    `buildExplorerContextStep`, `explorerContextStep`, `explorerRequestStep`,
+    `failedExplorerOpen`, `openScheduleAwareExplorer`, `openDefaultExplorer`,
+    `openExplorerStep`, `selectExplorerBefore`, and `runExplorerCommand`.
+  - WorkflowExecution: `executeWorkflowCommand`, `executeExplorerCommand`,
+    `executeReportCommand`, and `commandExecution`.
+  - Retained `semanticDiffCommand.ts`: `renderReportStep`,
+    `displayReportStep`, `runSemanticDiffCommand`, `finalizeCommandFailure`,
+    `finalizeSemanticDiffCommand`, `finalizeExplorerCommand`,
+    `finalizeWorkflowExplorerCommand`, and
+    `executeCompareSemanticDiffCommand`.
+- `workflowFailure` is only the current `const workflowFailure = failedStep`
+  alias, not an additional workflow function or module responsibility. Remove
+  the alias and call the existing `failedStep` constructor directly from each
+  owning helper. This avoids an unowned runtime alias and adds no public
+  export, branch, or behavior.
+- Planned context/guard/adapter helpers are replacements, not parallel paths:
+  `SourceBindingRegistrationContext`, `isMissingSourceRegistration`,
+  `buildSourceCaptureEntry`, `invokeSourceRegistration`,
+  `WorkflowArtifactResultContext`, `isWorkflowParseFailure`,
+  `releaseWorkflowCaptureOnFailure`, `buildWorkflowArtifactState`,
+  `WorkflowOpenFailureContext`, `selectWorkflowFailureMessage`,
+  `PresentationArtifactResultContext`, `isPresentationParseFailure`,
+  `buildPresentationArtifactState`, `ExplorerRequestContext`,
+  `isExplorerBindingFailure`, `buildExplorerRequest`,
+  `hasCalendarAdapter`, `selectCalendarRunner`, and
+  `selectExecutionRunner`. They are private, readonly/pure where stated, and
+  add no read, cleanup, notification, telemetry event, or public export.
+- The period module is the smallest cohesive seam required because assigning
+  `selectionToStep` to WorkflowSelection makes the original selection proxy
+  `51 + 3 = 54` before context helpers. Moving the period-only functions and
+  `selectWorkflowPeriodStep` keeps both source selection and period
+  orchestration independently below the threshold with measurable margin.
+- The execution module is a second bounded seam: it owns only ordered command
+  runner selection and preserves the public command/finalization contract.
+
+- Required function transformations:
+  - `registerSourceBinding` (complexity 5) moves to
+    `semanticDiffCommandSourceBinding.ts`. Replace the options-plus-binding
+    parameter set with one readonly registration context, use a pure missing
+    registration guard and entry builder, and isolate the host call in a
+    small boolean/result adapter. Target: one context parameter and function
+    complexity at most `4`.
+  - `workflowArtifactResult` (complexity 5, six parameters) moves to
+    `semanticDiffCommandWorkflowArtifacts.ts` with one readonly result
+    context. Separate the parse-failure guard/release from the successful
+    artifact-state builder; preserve release-on-failure and exact period/source
+    state. Target: one context parameter and function complexity at most `3`.
+  - `workflowOpenFailure` (four parameters) remains the artifact workflow's
+    failure projection, while unregister/release moves to the source-binding
+    cleanup helper. Use one readonly open-failure context and a pure code-to-
+    localization message selector. Target: one context parameter and no more
+    than `3` complexity.
+  - `presentationArtifactResult` (four parameters) moves to
+    `semanticDiffCommandExplorerWorkflow.ts`. Use one readonly presentation
+    result context, a pure parse-failure predicate, and a successful result
+    builder. Target: one context parameter and no more than `3` complexity.
+  - `explorerRequestStep` (four parameters) moves to the Explorer workflow.
+    Use one readonly Explorer request context, a pure binding-failure guard,
+    and a ready-request builder. Target: one context parameter and no more
+    than `2` complexity.
+  - `commandExecution` (complexity 9) remains the command dispatch
+    responsibility but moves to `semanticDiffCommandWorkflowExecution.ts`.
+    Extract pure `hasCalendarAdapter` and calendar/non-calendar execution
+    selectors, then select the runner through a small ordered dispatch map.
+    Preserve calendar compatibility precedence, Explorer fallback, and report
+    fallback. Target: dispatch function complexity at most `4`.
+- Transformation rule: readonly contexts and pure guards/results replace the
+  existing branches and parameter lists; they must not add a second cleanup,
+  read, notification, telemetry event, or public export. Each named function
+  and each revised module is checked independently with Qlty before review.
 - Allowed Test Paths: `src/test/suite/semanticDiffCommand.test.ts`,
   `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
   `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
@@ -1029,18 +1338,27 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   `src/test/suite/webSmoke.ts`.
 - Acceptance: comparison/open counts, binding/rollback, Explorer default,
   copy/save, Flow focus/highlights, sidecar context, result codes, and
-  telemetry outcomes are unchanged; command file has no mapped smell.
-- Validation: listed command/Explorer/Flow/wiring tests on desktop; web
-  `rtk pnpm run test:web` smoke scenario `WEB-8` in `webSmoke.ts`; scoped
-  Qlty. `WEB-8` runs the command core with deterministic in-memory source,
-  artifact, report/open, and Explorer/session doubles, asserting one successful
+  telemetry outcomes are unchanged; the retained command path and all eight
+  helper paths are clear of mapped Qlty smells and each changed module is at
+  or below the configured file-complexity threshold `55`.
+- Validation: listed command/Explorer/Flow/wiring tests on desktop; WEB-7
+  regression and WEB-8 execution through the committed bundle-backed
+  `rtk pnpm run test:web` route; test compile, production build, architecture
+  checks, and scoped Qlty `fmt`, `check`, and `smells --no-snippets`. WEB-8
+  runs the command core with deterministic in-memory source, artifact,
+  report/open, and Explorer/session doubles, asserting one successful
   finalization and one cleanup path without relying on interactive Quick Pick,
-  file-dialog, or Webview DOM automation.
+  file-dialog, or Webview DOM automation. Any bundle/import failure is a gate
+  failure, not a skipped success.
 - Production Readiness: all failures release resources; cancellation opens
   nothing; no VS Code API newer than `^1.75.0`.
-- Approval Boundary: exact production, test, web-harness scenario, and
-  evidence paths listed above; no new module path, public contract, or
-  production configuration is included.
+- Approval Boundary: the revised exact production paths and existing test,
+  web-harness scenario, and evidence paths listed above; private relocation
+  of completed Slice 7 phases is allowed only to preserve behavior and clear
+  file complexity. The period and execution paths are additional bounded
+  design seams discovered by review and therefore require new explicit Human
+  Approval along with the other helper paths; no public contract, production
+  configuration, dependency, or feature behavior change is included.
 - Dependencies: Slice 7 completion commit `b0095565` and the committed
   test-only web-harness replan `800612e4`.
 - Risks: double disposal, source leak, duplicate telemetry, or false success.
@@ -1352,14 +1670,16 @@ issues`; Slice 7-owned smell findings are clear.
 
 ## Slice 8 Activation And Approval (2026-09-13)
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Superseded by the Slice 8 complexity replan for its single-file
+  production boundary; the recorded behavior, test, WEB-8, and exclusion
+  scope remains preserved.
 - Basis: the complete ten-slice plan and independent plan review `Ready` with
   no findings; Slice 7 implementation review `Ready` with no findings and
   completion commit `b0095565`; the user's standing automatic no-findings
   slice-approval instruction and current authorization to continue the
   approved slices.
-- Approved production path:
-  `src/presentation/vscode/commands/semanticDiffCommand.ts`.
+- Prior approved production path:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts` only.
 - Approved test paths:
   `src/test/suite/semanticDiffCommand.test.ts`,
   `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`,
@@ -1371,23 +1691,19 @@ issues`; Slice 7-owned smell findings are clear.
   already approved test-only web harness.
 - Approved evidence paths: this feature's `TASKS.md` and
   `TRACEABILITY.md`.
-- Approved boundary: simplify artifact building, source binding,
+- Prior approved boundary: simplify artifact building, source binding,
   Explorer/report opening, compatibility flow, and final result handling;
   preserve comparison/open counts, binding/rollback, Explorer defaults,
   copy/save actions, Flow focus/highlights, sidecar context, result codes,
   telemetry, and cleanup. Private signature changes are allowed only when
-  required for this slice to compile. No new module path, public command,
-  action, DTO, UI file, or design decision is approved.
+  required for this slice to compile. The prior boundary did not authorize
+  new module paths.
 - Web validation boundary: execute WEB-8 through the committed bundle-backed
   `test:web` route with deterministic in-memory source, artifact, report/open,
   Explorer, and session doubles. This does not claim interactive picker,
   file-dialog, registered-command UI, or Explorer Webview DOM execution.
-- State commit gate: eligible; pending `approval-committer`. No runtime,
-  test, generated artifact, configuration, dependency, `CHANGELOG.md`,
-  Calendar Slice 3, Dependabot, or Slice 9-10 change is included in this
-  state commit.
-- Replan trigger: if Qlty total/file complexity cannot be cleared within
-  the exact approved production path and its private helpers, or if a new
-  module path, architecture boundary, behavior, public contract, or test
-  expectation is required, stop and return the smallest affected scope to
-  Main for Replanning Mode. Do not enlarge this slice silently.
+- State commit gate: superseded for the single-file boundary; the revised
+  eight-helper-module plan requires independent plan review and new Human
+  Approval before its focused state commit. No implementation, test, generated
+  artifact, configuration, dependency, `CHANGELOG.md`, Calendar Slice 3,
+  Dependabot, or Slice 9-10 change is authorized by this historical record.
