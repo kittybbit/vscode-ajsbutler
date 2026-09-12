@@ -17,7 +17,7 @@
 | Calendar host session and parent lifetime  | Requirements; Overlap Decision                    | 10       | Session, Explorer panel, bootstrap session, sidecar, subscription, and wiring suites listed in `TASKS.md`, plus `webSmoke.ts` `WEB-10`; failure, reveal, ordering, rollback, one-time release, controlled web-host composition                                                                                                                                                                                                                                                               |
 | PR #317 local Qlty gate                    | Requirements; Acceptance Criteria                 | 1-10     | Per-slice ownership; final `rtk pnpm run qlty`; no suppression, ignore, threshold, baseline, architecture, dependency, or generated change                                                                                                                                                                                                                                                                                                                                                   |
 | PR #317 remote Qlty gate                   | Requirements; Acceptance Criteria                 | After 10 | Publish committed slices; `rtk gh pr checks 317`; remote `qlty check` and `qlty fmt` successful                                                                                                                                                                                                                                                                                                                                                                                              |
-| Desktop/web and VS Code `^1.75.0`          | Compatibility                                     | 1-10     | Focused desktop suites; `rtk pnpm run test:web` executes only `src/test/suite/webSmoke.ts` and must report `WEB-7` through `WEB-10` as defined in `TASKS.md`; final `rtk pnpm test`, `rtk pnpm run build`, architecture and package-manifest tests                                                                                                                                                                                                                                           |
+| Desktop/web and VS Code `^1.75.0`          | Compatibility                                     | 1-10     | Focused desktop suites; `rtk pnpm run test:web` executes `src/test/runWebTest.ts`, which loads the test-only bundle sourced from `src/test/suite/webSmoke.ts` and must report `WEB-7` through `WEB-10` as defined in `TASKS.md`; final `rtk pnpm test`, `rtk pnpm run build`, architecture and package-manifest tests                                                                                                                                                                        |
 | Preserve excluded work                     | Overlap Decision; Non-Goals                       | 1-10     | Diff confirms Dependabot docs/patch/dependencies, Calendar Slice 3, parser/generated, Qlty config, README/use cases/roadmap, and `FlowContents.tsx` unchanged by this feature                                                                                                                                                                                                                                                                                                                |
 
 <!-- markdownlint-enable MD013 -->
@@ -30,7 +30,9 @@ validation, the remote PR gate, and Feature Exit.
 Every arrow is a committed approval boundary. Slices 3-4 revisit
 `semanticDiffScheduleImpact.ts`, and Slices 7-8 revisit
 `semanticDiffCommand.ts`; each later slice uses its committed predecessor as
-the review base.
+the review base. The test-only web-harness replan is a prerequisite for
+WEB-7 through WEB-10 claims, but does not alter the production slice order or
+desktop evidence boundary.
 
 ## Approval Record
 
@@ -61,20 +63,30 @@ the review base.
   for the revised exact five-production-file/four-test Slice 6 boundary, after
   independent plan review `Ready` with no findings; its completion commit is
   `3af9494d`. The original Slice 6 approval remains superseded.
-- Current Human Approval: `Approved` on 2026-09-12 in the current conversation
-  for the exact Slice 7 three-production-file/five-test boundary below, after
-  independent plan review `Ready` with no findings and under the user's
-  automatic no-findings slice approval policy.
+- Prior Human Approval: `Approved` on 2026-09-12 in the current conversation
+  for the exact pre-harness Slice 7 three-production-file/five-test boundary;
+  that approval is superseded because direct WebWorker imports cannot resolve
+  the required relative production dependencies.
+- Current Slice 7-10 status: web-harness replan independently reviewed `Ready`
+  with no findings and Human Approved in the current conversation on
+  2026-09-12. The approved delta adds
+  `package.json`, `webpack.web-test.config.js`,
+  `src/test/suite/webSmokeWebEntry.ts`, `src/test/runWebTest.ts`, and the
+  existing `src/test/suite/webSmoke.ts` orchestration.
 - Slice 6 implementation review: `Ready` with no findings. Completion Approval
   is `Approved` on 2026-09-12 under the user's automatic no-findings slice
   approval policy; completion commit `3af9494d` is complete.
-- Slice 7 state commit gate: eligible and pending `approval-committer`; no
-  Slice 7 implementation or completion approval has occurred.
+- Slice 7 state commit gate: the pre-harness boundary is superseded; the
+  approved web-harness replan/state commit is eligible and pending
+  `approval-committer`.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
 - Plan commit gate: complete; focused plan commit `d3693d76`.
 - Replan commit gate: complete; focused replan/state commit `2734813c` for the
   revised Slice 6 boundary.
+- Web-harness replan commit gate: eligible and pending; exact state paths are
+  this feature's `TASKS.md` and `TRACEABILITY.md`, with no runtime, test,
+  generated, dependency, or production webpack changes.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
@@ -111,6 +123,12 @@ the review base.
   `src/test/suite/semanticDiffSourceCapture.test.ts`,
   `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`, and
   `src/test/suite/webSmoke.ts` (WEB-7).
+- Proposed web-harness delta paths:
+  `package.json` (including the exact `test:prepare:web:bundle` script,
+  `test:prepare:web` wiring, and direct `test:web:run` bundle prerequisite),
+  `webpack.web-test.config.js`,
+  `src/test/suite/webSmokeWebEntry.ts`, and `src/test/runWebTest.ts`; the
+  existing `src/test/suite/webSmoke.ts` remains the scenario source.
 - Slice 6 validation boundary: complete adapter/provider suite on desktop; web
   validation is limited to the final production build and baseline
   `webSmoke.ts` run. WEB-7 through WEB-10 are future Slice 7-10 scenarios and
@@ -538,11 +556,60 @@ the review base.
   only; runtime, tests, configuration, generated artifacts, and `SPECS.md`
   remain excluded from that commit.
 
+## Slices 7-10 Web Harness Replanning (2026-09-12)
+
+- Trigger evidence: `src/test/runWebTest.ts` passed the compiled
+  `src/test/suite/webSmoke.ts` directly to `@vscode/test-web`. The WebWorker
+  extension host's fake `require` resolves `vscode` only, so relative imports
+  for Semantic Diff command, transport, bridge, panel, session, and bootstrap
+  dependencies fail. The attempted WEB-7 import was removed to preserve the
+  baseline; the prior passing run therefore did not execute WEB-7.
+- Selected option: isolated test-only webpack bundle rather than production
+  web-entry pollution or fake-`require` extension. The bundle must derive the
+  existing web target's browser fallbacks, `target: webworker`,
+  `commonjs vscode` external, and CSP-safe production settings.
+- Exact revised harness/config paths:
+  `package.json`, new `webpack.web-test.config.js`, new
+  `src/test/suite/webSmokeWebEntry.ts`, `src/test/runWebTest.ts`, and existing
+  `src/test/suite/webSmoke.ts`. No dependency or `pnpm-lock.yaml` change is
+  planned.
+- Bundle wiring: the preparation script runs the existing web production
+  build and test compilation, then runs the exact
+  `test:prepare:web:bundle` webpack command and emits
+  `out/test/suite/webSmoke.bundle.js`. The new entry re-exports `run` from
+  `webSmoke.ts`; `runWebTest.ts` passes the emitted bundle as
+  `extensionTestsPath`. The test-only config derives the production web
+  target, retaining `target: webworker`, the `commonjs vscode` external,
+  browser fallbacks/condition names, process provider, and production
+  `devtool: false`, while changing only test entry/output/cache. The bundle
+  must have no unhandled relative imports, and a build/import failure is a
+  gate failure, not a skipped scenario. The direct `test:web:run` script must
+  run `pnpm run test:prepare:web:bundle && node ./out/test/runWebTest.js`.
+  This closes the `test:full` route, which calls `test:web:run` directly after
+  its general build/test compilation; it does not call `test:web` or recurse
+  into `test:web:run`. Validate that direct route from a clean checkout with
+  `pnpm run test:prepare && pnpm run test:web:run`.
+- Feasibility boundary: WEB-7 imports the Slice 7 command/localization/steps
+  seams and runs activation/registration plus the injected no-active-editor
+  command core. WEB-8 uses future Slice 8 command/artifact/Explorer seams with
+  in-memory doubles; WEB-9 uses future Slice 9 transport/bridge seams with
+  controlled post-message ports; WEB-10 uses future Slice 10
+  session/panel/bootstrap seams with controlled sidecar and parent handles.
+  WEB-8 and WEB-10 are host-composition claims only, not interactive UI or
+  real Calendar Webview DOM claims. Any unresolved Node/VS Code-only import
+  blocks the relevant claim and is recorded as residual risk.
+- Approval boundary: the prior Slice 7 three-production-file/five-test
+  approval is superseded for this delta. Final independent plan review is
+  `Ready` with no findings and Human Approval is `Approved` on 2026-09-12 for
+  the exact harness/config paths plus the existing Slice 7 production/test
+  scope. The focused replan/state commit is eligible and pending; current
+  Slice 7 production changes remain preserved.
+
 ## Web Smoke Scenario Traceability
 
-The web command is not a suite discovery mechanism. `src/test/runWebTest.ts`
-passes only `src/test/suite/webSmoke.ts` as `extensionTestsPath`. These
-scenarios are the exact web-host evidence for the affected slices:
+After the web-harness replan is reviewed, approved, committed, and executed,
+the bundle-backed scenarios below are the exact web-host evidence for the
+affected slices. Until then, they are planned claims, not passing evidence:
 
 <!-- markdownlint-disable MD013 -->
 
@@ -555,9 +622,10 @@ scenarios are the exact web-host evidence for the affected slices:
 
 <!-- markdownlint-enable MD013 -->
 
-The web scenarios are additive characterization coverage in an existing test
-file and require no production, configuration, test-runner, public-schema,
-Calendar Slice 3, or Dependabot change.
+The web scenarios remain additive characterization coverage in the existing
+test file. The new bundle entry/config and runner/script wiring are test-only;
+production web output, public schema, Calendar Slice 3, Dependabot, and
+dependencies remain unchanged.
 
 ## Slice 6 Implementation Evidence (2026-09-12)
 
@@ -602,10 +670,10 @@ Calendar Slice 3, or Dependabot change.
   its eligible focused state commit. Dependabot documents remain dirty but
   untouched and excluded.
 
-## Slice 7 Activation And Approval (2026-09-12)
+## Slice 7 Prior Activation And Approval Superseded (2026-09-12)
 
-- Status: Human Approved; active next slice; focused state commit eligible and
-  pending `approval-committer`.
+- Status: Superseded by the Slices 7-10 web-harness replan; no active
+  implementation approval.
 - Basis: Slice 6 completion commit `3af9494d`, independent plan review `Ready`
   with no findings, and the user's automatic no-findings slice approval policy.
 - Approved production paths:
@@ -622,13 +690,13 @@ Calendar Slice 3, or Dependabot change.
   before/after reads, and Git failure localization. Artifact/Explorer
   finalization is out of scope except for private signature changes required
   for compilation; no public command or behavior change is authorized.
-- Web boundary: execute WEB-7 in `webSmoke.ts` for activation/registration
-  and the injected no-active-editor command-core guard. Interactive pickers,
+- Web boundary: the old direct `webSmoke.ts` claim is superseded because its
+  relative imports failed in the WebWorker host. Interactive pickers,
   file/Git dialogs, and the full source-selection matrix remain desktop-only
   evidence.
-- Exact state-commit paths: this feature's `TASKS.md` and `TRACEABILITY.md`
-  only. Runtime, tests, configuration, generated artifacts, `SPECS.md`,
-  `CHANGELOG.md`, Calendar Slice 3, and Dependabot changes remain excluded.
+- State commit gate: superseded and not eligible. The partial Slice 7 command
+  production diff remains preserved; newly proposed bundle/config paths are
+  not included in this historical approval.
 
 ## Refactor Helper Ownership
 
@@ -657,10 +725,12 @@ Calendar Slice 3, or Dependabot change.
   are conditional characterization additions in listed files.
 - Earlier slices may leave only findings explicitly owned by later slices.
   Complete local success is mandatory after Slice 10.
-- `rtk pnpm run test:web` runs only `webSmoke.ts`; it does not prove that every
+- `rtk pnpm run test:web` runs `runWebTest.ts`, which must load the generated
+  `webSmoke.bundle.js` after the harness replan; it does not prove that every
   focused desktop suite runs in a web host. The concrete Webview panel DOM and
   in-panel script boundary therefore remains an explicit host-boundary
   residual risk; desktop session/wiring suites remain the planned evidence for
-  observable host composition.
+  observable host composition. A bundle/import failure is not a skipped
+  success.
 - Remote confirmation occurs after all approved commits are published. It does
   not replace local validation or independent per-slice review.
