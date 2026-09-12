@@ -37,7 +37,9 @@ the review base.
 - Independent plan review: `Ready`; no findings.
 - Plan Human Approval history: `Approved` on 2026-09-12 for the complete
   ten-slice plan and the exact Slice 1 scope as the next slice.
-- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 2 scope
+- Prior Human Approval: `Approved` on 2026-09-12 for the exact Slice 2 scope
+  as the next slice; its completion commit is `ecea8714`.
+- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 3 scope
   as the next slice.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
@@ -46,15 +48,14 @@ the review base.
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
   its completion commit is `fa933763`.
-- Exact Slice 2 paths: `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`,
-  `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`,
-  `src/application/semantic-diff/compareScheduleDiff.ts`,
-  `src/test/suite/semanticDiffScheduleRules.test.ts`,
-  `src/test/suite/semanticDiffSchedule.test.ts`,
-  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`, and
-  `src/test/suite/semanticDiffScheduleImpact.test.ts`.
+- Exact Slice 2 paths and completion evidence remain recorded below; its
+  completion commit is `ecea8714`.
+- Exact Slice 3 paths: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
+  `src/test/suite/semanticDiffScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`, and
+  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`.
 - `CHANGELOG.md` remains assigned to Slice 5 by the approved plan and is not
-  part of the Slice 2 implementation scope.
+  part of the Slice 3 implementation scope.
 
 ## Slice 1 Implementation Evidence
 
@@ -97,7 +98,7 @@ the review base.
 - Status: complete; independent implementation review `Ready` with no
   findings; Completion Approval `Approved` on 2026-09-12 under the user's
   automatic no-findings slice approval policy; focused completion commit
-  pending.
+  `ecea8714`.
 - Implementation: extracted the total unsupported-reason message lookup,
   typed UTC-date validation helpers, schedule run grouping/sorting, canonical
   run decision projection, and changed/added/removed application projections.
@@ -135,11 +136,29 @@ the review base.
   no-findings slice approval policy.
 - Exact completion scope: the three approved production paths above plus this
   feature's `TASKS.md` and `TRACEABILITY.md`; the four approved test paths were
-  unchanged. The completion commit is eligible and remains pending
-  `approval-committer`.
+  unchanged. Completion commit `ecea8714` is complete, and this state
+  synchronization did not stage or commit it.
 - No files outside the approved production, test, and evidence paths were
   changed by this slice; inherited Dependabot documentation edits are
   preserved and excluded.
+
+## Slice 3 Activation And Approval (2026-09-12)
+
+- Status: Human Approved; active next slice, pending focused state commit.
+- Basis: the approved ten-slice plan, independent plan review `Ready` with no
+  findings, and the user's automatic no-findings slice approval instruction.
+- Approved production path: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
+- Approved test paths: `src/test/suite/semanticDiffScheduleImpact.test.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`, and
+  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`.
+- Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved boundary: refactor schedule-impact indexing, issue, and root
+  assembly through `createRootStatuses`; run matching, timeline, and final
+  assembly are out of scope. Calendar public Slice 3 behavior remains
+  excluded.
+- State commit gate: eligible; pending `approval-committer`. No runtime, test,
+  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
+  Dependabot change is included in that state commit.
 
 ## Web Smoke Scenario Traceability
 
