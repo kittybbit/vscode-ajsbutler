@@ -51,6 +51,10 @@ the review base.
   no-findings slice approval policy.
 - Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 5 scope
   as the next slice.
+- Slice 5 Completion Approval: `Approved` on 2026-09-12 under the user's
+  automatic no-findings slice approval policy after independent implementation
+  review `Ready` with no findings; the exact completion scope is eligible for
+  `approval-committer` pending its commit gate.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
 - Plan commit gate: complete; focused plan commit `d3693d76`.
@@ -315,7 +319,8 @@ the review base.
 
 ## Slice 5 Activation And Approval (2026-09-12)
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Complete activation; Human Approved; focused state commit
+  `4f3119d7` is complete.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production paths:
@@ -334,9 +339,59 @@ the review base.
 - Approved boundary: preserve parse errors/count, period omission, sidecar
   availability, localized text/order/escape, report and JSON facts, and exact
   release-note wording while clearing the assigned presentation findings.
-- State commit gate: eligible; pending `approval-committer`. No other runtime,
-  test, configuration, generated, dependency, Calendar Slice 3, or Dependabot
-  change is included in that state commit.
+- State commit gate: complete; focused state commit `4f3119d7`. The Slice 5
+  completion commit is eligible and pending `approval-committer`. No other
+  runtime, test, configuration, generated, dependency, Calendar Slice 3, or
+  Dependabot change is included in the completion scope.
+
+## Slice 5 Implementation Evidence (2026-09-12)
+
+- Status: implementation complete; independent implementation review `Ready`
+  with no findings; Completion Approval `Approved` on 2026-09-12 under the
+  user's automatic no-findings slice approval policy; completion commit is
+  eligible and pending `approval-committer`.
+- Exact changed production paths:
+  `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
+  and `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`.
+- Exact documentation path changed: `CHANGELOG.md`, with only the reported
+  1.1.0 sentence wrapped and no wording change. Evidence paths are this
+  feature's `TASKS.md` and `TRACEABILITY.md`.
+- Artifact construction is split into source parsing, parser-error projection,
+  period-aware comparison-input construction, and comparison-result artifact
+  assembly. The adapter still parses before and after once each, preserves
+  side-specific parser errors, omits comparison options without a period, and
+  forwards the supplied period by identity. Sidecar availability remains
+  derived from supplied schedule-projection facts without rerunning comparison.
+- Markdown output is assembled through dedicated target-side,
+  identity-evidence, attribute-category, schedule-summary, and schedule-side
+  helpers. English/Japanese localization, fallback, Markdown escaping,
+  ordering, omission, report facts, and JSON source facts remain unchanged.
+- Scoped `qlty smells --no-snippets` and `qlty check` over both approved
+  production files report zero issues. Target ESLint and
+  `rtk git diff --check` pass; no Qlty suppression, ignore, baseline,
+  threshold, configuration, dependency, or architecture exception was added.
+- Validation results: `rtk pnpm run test:compile`, target ESLint, scoped Qlty,
+  `rtk pnpm run lint:md`, production build, desktop test runner, and web test
+  runner pass. The production build retains existing bundle-size warnings;
+  the web runner retains existing Chromium `EPIPE`/premature-close logs while
+  exiting successfully.
+- The six approved focused suites were executed directly under the TDD Mocha
+  UI: `42 passing`, `3 failing`, exactly matching the pre-Slice-5 HEAD
+  baseline. Current and baseline output have byte parity (the populated Full
+  Markdown snapshot is 3610 bytes in both runs, against the existing 3617-byte
+  expectation). The three failures are the job-group exact-key Markdown
+  assertion, the typed schedule-removal audit substring assertion, and that
+  populated Full Markdown byte snapshot; they are recorded as baseline
+  findings rather than Slice 5 regressions.
+- Compatibility and production-readiness evidence: no public DTO/JSON/report
+  schema, parser, comparison or schedule meaning, VS Code API, desktop/web
+  entry point, telemetry, Dependabot documents, or Calendar Slice 3 path
+  changed. No new release content or durable specification update is needed.
+- Recommended route: `approval-committer` should verify the exact changed
+  paths and commit the approved Slice 5 scope. Parse/period precedence,
+  identity and target rendering, schedule summary selection, exact Markdown
+  escaping/order, and the three reproduced baseline failures were independently
+  reviewed with `Ready` and no findings.
 
 ## Web Smoke Scenario Traceability
 

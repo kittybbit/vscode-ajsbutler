@@ -22,13 +22,14 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slices 1-4 complete; Slice 5 approved, state commit
-  pending
+- Status: Approved plan; Slices 1-4 complete; Slice 5 implementation complete,
+  completion commit eligible pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure.
 - Review status: Ready; no findings.
 - Human approval: Approved on 2026-09-12 for Slice 5.
-- Active implementation slice: Slice 5, awaiting focused state commit.
+- Active implementation slice: none; Slice 5 completion commit is eligible and
+  pending `approval-committer`.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -84,12 +85,17 @@ slices must retain their exact approved paths and gates.
 
 ## Completion Approval
 
-- Status: Pending for Slice 5
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved for Slice 5 under the user's automatic no-findings slice
+  approval policy.
+- Approved at: 2026-09-12
+- Approved scope: the exact Slice 5 production, documentation, test, and
+  evidence paths recorded below.
+- Approved paths: `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`,
+  `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`,
+  `CHANGELOG.md` (reported 1.1.0 sentence wrapping only), the six allowed test
+  paths, and this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Implementation review verdict: `Ready`; no findings.
+- Commit status: Eligible; completion commit pending `approval-committer`.
 
 Each slice requires independent review and Completion Approval before its
 exact implementation and evidence are committed.
@@ -500,7 +506,8 @@ and assigned findings to these 18 production files.
 
 ## Slice 5 Activation And Approval (2026-09-12)
 
-- Status: Active; Human Approved; focused state commit pending.
+- Status: Complete activation; Human Approved; focused state commit
+  `4f3119d7` is complete.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production paths: `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
@@ -518,9 +525,10 @@ and assigned findings to these 18 production files.
 - Approved boundary: preserve parse errors/count, period omission, sidecar
   availability, localized text/order/escape, report and JSON facts, and exact
   release-note wording while clearing the assigned presentation findings.
-- State commit gate: eligible; pending `approval-committer`. No other runtime,
-  test, configuration, generated, dependency, Calendar Slice 3, or Dependabot
-  change is included in that state commit.
+- State commit gate: complete; focused state commit `4f3119d7`. The Slice 5
+  completion commit is eligible and pending `approval-committer`. No other
+  runtime, test, configuration, generated, dependency, Calendar Slice 3, or
+  Dependabot change is included in the completion scope.
 
 ### Slice 5: Presentation artifacts, report rendering, and format repair
 
@@ -557,6 +565,51 @@ and assigned findings to these 18 production files.
 - Risks: blank lines, escaping, localization fallback, parse precedence, or
   JSON omission could change.
 - Out of Scope: new release content, locale, or schema version.
+
+### Slice 5 Implementation Evidence (2026-09-12)
+
+- Status: implementation complete; independent implementation review `Ready`
+  with no findings; Completion Approval `Approved` on 2026-09-12 under the
+  user's automatic no-findings slice approval policy; completion commit is
+  eligible and pending `approval-committer`.
+- Exact implementation scope: the two approved production paths,
+  `CHANGELOG.md` sentence wrapping, and this feature's evidence documents.
+- Artifact construction now separates source parsing, parser-error projection,
+  period-aware comparison input construction, and comparison-result artifact
+  assembly. Each source is still parsed exactly once, parse-error side/count
+  precedence is unchanged, and schedule sidecars are still built only from
+  supplied evaluated facts.
+- Markdown localization now uses dedicated target-side, identity-evidence,
+  attribute-category, schedule-summary, and schedule-side renderers. Existing
+  English/Japanese text, fallback selection, Markdown escaping, ordering,
+  omission, report facts, and JSON inputs remain unchanged.
+- The only CHANGELOG edit wraps the existing 1.1.0 sentence at the reported
+  formatting boundary; its wording is unchanged.
+- Scoped Qlty `smells --no-snippets` and `check` over both approved production
+  files report zero issues. No suppression, ignore, baseline, threshold,
+  configuration, dependency, or architecture exception was added.
+- Validation passed: `rtk pnpm run test:compile`, target ESLint, scoped Qlty,
+  `rtk pnpm run lint:md`, `rtk git diff --check`, production build, desktop
+  test runner, and web test runner. The production build retains the existing
+  bundle-size warnings, and the web runner retains its existing Chromium
+  `EPIPE`/premature-close diagnostics while exiting successfully.
+- The six approved focused files ran through direct TDD Mocha with
+  `42 passing` and `3 failing`, exactly matching the pre-Slice-5 HEAD
+  baseline. The current and baseline outputs also have byte parity (the
+  populated Full Markdown snapshot is 3610 bytes in both runs, while the
+  existing expectation is 3617), and the three failures reproduce against
+  the pre-Slice-5 HEAD implementation and are retained as baseline findings:
+  the job-group exact-key Markdown assertion, the typed schedule-removal
+  audit substring assertion, and the populated Full Markdown byte snapshot.
+  No changed Slice 5 path introduced a new focused failure in the direct
+  baseline comparison.
+- Compatibility evidence: no public DTO/schema, parser, comparison meaning,
+  schedule facts, VS Code API, desktop/web entry point, telemetry, or
+  Dependabot/Calendar Slice 3 scope changed. No README, durable specification,
+  or new release content was added.
+- Production readiness: ready for the completion commit, with the three
+  pre-existing focused baseline failures explicitly unresolved and outside the
+  approved behavior-preserving refactor.
 
 ### Slice 6: Git HEAD source and snapshot cache decomposition
 

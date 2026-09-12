@@ -20,7 +20,10 @@ import {
   compareSemanticDiffWithArtifacts,
   type CompareSemanticDiffWithArtifacts,
 } from "./compareSemanticDiffWithArtifacts";
-import type { CompareSemanticDiffOptions } from "./compareSemanticDiff";
+import type {
+  CompareSemanticDiffInput,
+  CompareSemanticDiffOptions,
+} from "./compareSemanticDiff";
 
 export type SemanticDiffScheduleImpactUnavailableReason =
   | "not-requested"
@@ -62,6 +65,19 @@ export type BuildSemanticDiffPresentationArtifacts = (
   scopedParser?: AjsParserPort,
 ) => BuildSemanticDiffPresentationArtifactsResult;
 
+type ParseResult = ReturnType<AjsParserPort["parse"]>;
+type SuccessfulParseResult = Extract<ParseResult, { ok: true }>;
+
+type ParsedSources = Readonly<{
+  before: ParseResult;
+  after: ParseResult;
+}>;
+
+type ParsedDocuments = Readonly<{
+  before: SuccessfulParseResult["document"];
+  after: SuccessfulParseResult["document"];
+}>;
+
 const unavailableReason = (
   facts: ScheduleProjectionFacts,
 ): SemanticDiffScheduleImpactUnavailableReason =>
@@ -88,9 +104,7 @@ export const buildSemanticDiffPresentationArtifactsFromComparison = (
   return Object.freeze({ context, scheduleImpact });
 };
 
-const parserErrors = (
-  result: ReturnType<AjsParserPort["parse"]>,
-): SemanticDiffParserError[] => {
+const parserErrors = (result: ParseResult): SemanticDiffParserError[] => {
   if (result.ok === true) return [];
   return result.errors.map(({ line, column, message }) => ({
     line,
@@ -98,6 +112,43 @@ const parserErrors = (
     message,
   }));
 };
+
+const parseSources = (
+  parser: AjsParserPort,
+  input: BuildSemanticDiffPresentationArtifactsInput,
+): ParsedSources => ({
+  before: parser.parse(input.beforeContent),
+  after: parser.parse(input.afterContent),
+});
+
+const parsedDocuments = (
+  sources: ParsedSources,
+): ParsedDocuments | undefined =>
+  sources.before.ok && sources.after.ok
+    ? { before: sources.before.document, after: sources.after.document }
+    : undefined;
+
+const parserFailure = (
+  sources: ParsedSources,
+): Extract<BuildSemanticDiffReportDataResult, { ok: false }> => ({
+  ok: false,
+  errors: {
+    before: parserErrors(sources.before),
+    after: parserErrors(sources.after),
+  },
+});
+
+const comparisonInput = (
+  documents: ParsedDocuments,
+  period: CompareSemanticDiffOptions["scheduleComparisonPeriod"],
+): CompareSemanticDiffInput =>
+  period === undefined
+    ? { before: documents.before, after: documents.after }
+    : {
+        before: documents.before,
+        after: documents.after,
+        options: { scheduleComparisonPeriod: period },
+      };
 
 /**
  * Creates the source-text boundary for presentation artifacts.  Parsing,
@@ -115,28 +166,11 @@ export const createBuildSemanticDiffPresentationArtifacts =
   ): BuildSemanticDiffPresentationArtifacts =>
   (input, scopedParser) => {
     const activeParser = scopedParser ?? parser;
-    const before = activeParser.parse(input.beforeContent);
-    const after = activeParser.parse(input.afterContent);
-    if (before.ok === false || after.ok === false) {
-      return {
-        ok: false,
-        errors: {
-          before: parserErrors(before),
-          after: parserErrors(after),
-        },
-      };
-    }
-
-    const comparisonInput =
-      input.options?.scheduleComparisonPeriod === undefined
-        ? { before: before.document, after: after.document }
-        : {
-            before: before.document,
-            after: after.document,
-            options: {
-              scheduleComparisonPeriod: input.options.scheduleComparisonPeriod,
-            },
-          };
-    const comparison = compareWithArtifacts(comparisonInput);
+    const sources = parseSources(activeParser, input);
+    const documents = parsedDocuments(sources);
+    if (!documents) return parserFailure(sources);
+    const comparison = compareWithArtifacts(
+      comparisonInput(documents, input.options?.scheduleComparisonPeriod),
+    );
     return builder(comparison);
   };
