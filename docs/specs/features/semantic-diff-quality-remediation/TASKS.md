@@ -5,14 +5,13 @@
 - Purpose: remove PR #317 Qlty blockers without observable behavior change.
 - Approved or active slice: Slices 1-4 are complete at `fa933763`, `ecea8714`,
   `6441de1e`, and `e89e6cab`; Slice 5 is complete at `a69fcd12` after focused
-  state commit `4f3119d7`; Slice 6 has a preserved partial implementation but
-  its two-file approval is superseded by the replan below. Implementation
-  remains one slice at a time.
+  state commit `4f3119d7`; Slice 6 replan implementation is review-ready with
+  Completion Approval recorded, and its exact completion commit is pending.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Next decision: return the revised Slice 6 scope to the independent plan
-  reviewer before any new state commit or implementation work.
+- Next decision: route the Completion-Approved revised Slice 6 implementation
+  to the exact completion commit gate; no completion commit has been made.
 
 ## Sync Rule
 
@@ -23,16 +22,17 @@
 
 ## Plan Status
 
-- Status: Replanned; Slices 1-5 complete; Slice 6 partial implementation
-  preserved; revised Slice 6 approved, focused replan/state commit pending
+- Status: Replanned; Slices 1-5 complete; Slice 6 implementation complete,
+  independent implementation review `Ready` with no findings, Completion
+  Approval `Approved`, and exact completion commit pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure and the revised
   Slice 6 private helper paths required by this replan.
 - Review status: Original and revised plan review Ready with no findings.
 - Human approval: Revised Slice 6 scope Approved on 2026-09-12 in the current
   conversation; original Slice 6 approval remains superseded.
-- Active implementation slice: Slice 6 replan, awaiting its eligible focused
-  replan/state commit.
+- Active implementation slice: Slice 6 replan, Completion-Approved and awaiting
+  its exact completion commit.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -74,9 +74,11 @@
     `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
     `src/test/suite/vscodeGitHeadPathGuards.test.ts`, and
     `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`.
-  - Desktop validation: complete adapter/provider suite. Web validation is
-    limited to the final production build and existing WEB-7 through WEB-10
-    smoke scenarios; web smoke does not claim Git adapter/provider execution.
+  - Desktop validation: complete adapter/provider suite. Slice 6 web
+    validation is limited to the production web build and baseline
+    `webSmoke.ts` run. WEB-7 through WEB-10 are future Slice 7-10 scenarios
+    and were not executed for Slice 6; no Git adapter/provider web execution
+    is claimed.
   - `CHANGELOG.md` remains limited to the reported Slice 5 sentence wrapping;
     its release-note wording must remain unchanged.
 
@@ -95,7 +97,7 @@ commit; later slices must retain their exact approved paths and gates.
 
 ## Replan Commit Gate
 
-- Status: Eligible; focused replan/state commit pending `approval-committer`.
+- Status: Complete; focused replan/state commit `2734813c`.
 - Basis: revised independent plan review `Ready` with no findings and Human
   Approval `Approved` in the current conversation on 2026-09-12.
 - Exact commit paths: this feature's `TASKS.md` and `TRACEABILITY.md` only;
@@ -104,17 +106,29 @@ commit; later slices must retain their exact approved paths and gates.
   Slice 6 test paths recorded above, with no implementation changes included.
 - Prohibited in this commit: runtime, test, generated, configuration,
   dependency, `CHANGELOG.md`, Calendar Slice 3, and Dependabot changes.
-- Implementation remains blocked until this focused replan/state commit is
-  complete.
+- Implementation proceeded only after this focused replan/state commit was
+  complete. No runtime or test changes were included in that state commit.
 
 ## Completion Approval
 
-- Status: Pending for Slice 6 replan
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved for Slice 6 replan implementation under the user's automatic
+  no-findings slice approval policy
+- Approved at: 2026-09-12
+- Approved scope: the five revised production paths, three new focused test
+  paths, the unchanged integration test as validation evidence, and this
+  feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved paths: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`,
+  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`,
+  `src/infrastructure/git/VscodeGitHeadApiResolution.ts`,
+  `src/infrastructure/git/VscodeGitHeadPathGuards.ts`,
+  `src/infrastructure/git/VscodeGitHeadObjectPipeline.ts`,
+  `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
+  `src/test/suite/vscodeGitHeadPathGuards.test.ts`,
+  `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`, and the two evidence
+  docs. `vscodeGitHeadDefinitionSourceAdapter.test.ts` is unchanged and
+  remains integration validation only.
+- Implementation review verdict: `Ready`; no findings
+- Commit status: Eligible; exact completion commit pending
 
 Each slice requires independent review and Completion Approval before its
 exact implementation and evidence are committed.
@@ -650,9 +664,9 @@ inventory surfaces or a change to any other slice's boundary.
   `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
 - Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
 - Prior approved validation boundary: complete adapter/provider suite on
-  desktop; web validation is limited to the final production build and existing
-  WEB-7
-  through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
+  desktop; Slice 6 web validation is limited to the final production build and
+  baseline `webSmoke.ts`, with no Git adapter/provider execution claim. WEB-7
+  through WEB-10 are future Slice 7-10 scenarios and were not executed here.
 - State commit gate: superseded and not eligible. No runtime, test,
   configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
   Dependabot change is included in the preserved partial diff.
@@ -708,18 +722,18 @@ inventory surfaces or a change to any other slice's boundary.
 - Validation: compile; all four listed desktop test files; targeted ESLint;
   scoped Qlty `fmt`, `check`, and `smells --no-snippets`; `lint:md`; and
   `git diff --check`. Run the complete desktop adapter/provider suite and
-  production build. Run `rtk pnpm run test:web` only for the existing
-  `src/test/suite/webSmoke.ts` WEB-7 through WEB-10 host scenarios; this is
-  final-build plus smoke evidence and makes no Git adapter/provider execution
-  claim. Whole-file Qlty must clear the mapped smell, including reducing the
-  adapter complexity to at most 55, without a threshold or acceptance
-  exception.
+  production build. Run `rtk pnpm run test:web` only as the baseline
+  `src/test/suite/webSmoke.ts` plus production web-build check. WEB-7 through
+  WEB-10 are future Slice 7-10 scenarios and were not executed for Slice 6;
+  no Git adapter/provider web execution is claimed. Whole-file Qlty must
+  clear the mapped smell, including reducing the adapter complexity to at
+  most 55, without a threshold or acceptance exception.
 - Approval boundary delta: the prior two-production-file/one-test approval is
   superseded. The revised boundary is the five exact production paths, four
   exact test paths, and this feature's `TASKS.md` and `TRACEABILITY.md`; the
   already-committed `SPECS.md` remains unchanged. Independent plan review is
-  `Ready` and the revised Human Approval is `Approved`; the focused
-  replan/state commit is eligible and pending before implementation resumes.
+  `Ready` and the revised Human Approval is `Approved`; focused replan/state
+  commit `2734813c` is complete.
 - Validation and evidence must preserve the current partial Git diff and the
   unrelated dirty Dependabot documents; no code, test, configuration,
   generated, dependency, `CHANGELOG.md`, or other feature scope is authorized
@@ -727,9 +741,9 @@ inventory surfaces or a change to any other slice's boundary.
 
 ### Slice 6: Git HEAD source and snapshot cache decomposition
 
-- Status: Replanned; partial implementation preserved; independent plan review
-  Ready and revised Human Approval Approved; focused replan/state commit
-  eligible and pending.
+- Status: Replanned; implementation complete; independent plan review Ready and
+  revised Human Approval Approved; focused replan/state commit `2734813c`
+  complete; implementation review pending.
 - Scope: simplify optional Git API discovery, rename/path selection, object
   validation, source reading, and cache lifetime.
 - User / Domain Value: preserves reliable immutable `HEAD` comparison on
@@ -756,24 +770,24 @@ inventory surfaces or a change to any other slice's boundary.
   bound, URI lookup, and idempotent release are unchanged.
 - Validation: compile, the four listed tests, targeted ESLint, scoped Qlty
   format/check/smells, `lint:md`, and `git diff --check`; complete
-  adapter/provider suite and production build on desktop; web final build plus
-  existing WEB-7 through WEB-10 `webSmoke.ts` scenarios only, with no Git
-  adapter/provider execution claim. Whole-file complexity must be at most 55
-  with no suppression or acceptance exception.
+  adapter/provider suite and production build on desktop; baseline
+  `webSmoke.ts` plus production web-build check only. WEB-7 through WEB-10
+  are future Slice 7-10 scenarios and were not executed for Slice 6, with no
+  Git adapter/provider web execution claim. Whole-file complexity must be at
+  most 55 with no suppression or acceptance exception.
 - Production Readiness: no Git executable, filesystem, `.git`, or Node
   built-in access; release large cached content on existing paths.
 - Approval Boundary: revised five production paths, four test paths, and
   evidence documents; the prior two-file approval is superseded and the
   revised replan boundary is approved.
 - Dependencies: Slice 5 committed; revised Slice 6 plan independently
-  reviewed and Human Approved. The eligible focused replan/state commit must
-  complete before implementation resumes.
+  reviewed and Human Approved; focused replan/state commit `2734813c` complete.
 - Risks: moving types or imports across private infrastructure seams could
   change guard precedence or misclassify untracked, binary, unavailable,
   rename, or oversized content; direct helper tests must not become public API.
 - Out of Scope: index/working-tree fallback or telemetry.
 
-## Slice 6 Implementation Handoff (2026-09-12)
+## Slice 6 Prior Implementation Handoff (superseded, 2026-09-12)
 
 - Status: Partial implementation evidence preserved; no completion approval or
   implementation commit has been made. The prior two-file approval cannot
@@ -788,11 +802,13 @@ inventory surfaces or a change to any other slice's boundary.
   test file contains 13 adapter/provider tests; the complete desktop runner
   exited 0.
 - Validation evidence: `rtk pnpm run test:compile`, production `rtk pnpm run
-build`, `rtk pnpm run test:web` (exit 0), desktop `node
+build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 ./out/test/runTest.js` (exit 0), `rtk qlty check` for both production paths,
   and `rtk git diff --check` passed. Production builds retain existing bundle
-  size warnings; web smoke remains the defined WEB-7 through WEB-10 host
-  evidence and does not claim Git adapter execution.
+  size warnings; Slice 6 web evidence is limited to the production web build
+  and baseline `webSmoke.ts`. WEB-7 through WEB-10 are future Slice 7-10
+  evidence and were not executed; no Git adapter/provider web execution is
+  claimed.
 - Qlty evidence: individual function, formatting, and lint findings are
   clear, but `qlty smells --no-snippets` reports file complexity 98 for
   `VscodeGitHeadDefinitionSourceAdapter.ts` against the repository threshold
@@ -1057,3 +1073,58 @@ After Slice 10 is reviewed, approved, and committed:
 - [ ] Complete, review, approve, and commit Slices 6-10 in order.
 - [ ] Pass integrated local and remote gates.
 - [ ] Perform Feature Exit and approved closure commit.
+
+## Slice 6 Implementation Evidence (2026-09-12)
+
+- Status: Implementation complete; independent implementation review `Ready`
+  with no findings; Completion Approval `Approved` on 2026-09-12 under the
+  user's automatic no-findings slice approval policy; exact completion commit
+  remains pending.
+- Basis: revised Slice 6 plan review `Ready`, explicit Human Approval, and
+  focused replan/state commit `2734813c`.
+- Changed production paths: the existing
+  `VscodeGitHeadContentProvider.ts` and
+  `VscodeGitHeadDefinitionSourceAdapter.ts`, plus the three approved private
+  infrastructure seams `VscodeGitHeadApiResolution.ts`,
+  `VscodeGitHeadPathGuards.ts`, and `VscodeGitHeadObjectPipeline.ts`.
+- Changed test paths: `vscodeGitHeadApiResolution.test.ts`,
+  `vscodeGitHeadPathGuards.test.ts`, and
+  `vscodeGitHeadObjectPipeline.test.ts`. The existing adapter/provider test
+  file remains unchanged and is the integration characterization suite.
+- The API seam owns extension activation, enabled-state, repository, URI,
+  captured-HEAD, and capability guards. The path seam owns normalized file
+  paths, traversal/prefix checks, and active unambiguous rename candidates.
+  The object seam owns object mode/type, MIME/encoding, binary/NUL, decoded
+  byte limits, and read-failure classification. These are infrastructure-
+  internal exports only and are not re-exported through the application port.
+- API characterization covers throwing host accessors at their original
+  boundaries: `enabled` and `getAPI` accessor failures remain
+  `activation-failed`, while a returned API's `getRepository` accessor failure
+  remains `api-unavailable`.
+- Direct TDD execution of the four approved files passed `26` tests: existing
+  adapter/provider `13`, API seam `6`, path seam `3`, and object seam `4`.
+  The full desktop runner exited `0`; no existing expectation changed.
+- Validation passed: `rtk pnpm run test:compile`, targeted ESLint, scoped
+  Qlty `fmt`, `check`, and `smells --no-snippets` across all 11 approved
+  production/test/evidence paths, `rtk pnpm run lint:md`,
+  `rtk git diff --check`, and the architecture dependency suite (`25`
+  passing). Production `rtk pnpm run build` passed with only existing asset
+  size warnings.
+- `rtk pnpm run test:web` passed with exit `0`. Slice 6 evidence is limited to
+  the production web build and baseline `webSmoke.ts` run. WEB-7 through
+  WEB-10 are future Slice 7-10 scenarios and were not executed; no Git
+  adapter/provider web execution is claimed. The runner retained its existing
+  `ERR_STREAM_PREMATURE_CLOSE` diagnostic.
+- Compatibility and production readiness: public adapter/provider classes
+  and factories, receiver semantics, guard precedence, captured HEAD,
+  rename/path selection, unavailable reasons, textconv/decoded-byte limits,
+  cache bounds, and idempotent release remain unchanged. No Node built-in,
+  filesystem, `.git`, Git executable, telemetry, public schema, web entry
+  point, dependency, configuration, generated artifact, Calendar Slice 3, or
+  Dependabot change was introduced.
+- Qlty file complexity `98` is cleared by the genuine module split; no
+  suppression, threshold, baseline, or acceptance exception was added.
+- Traceability is updated by this evidence entry. Recommended next route is
+  the exact completion commit gate for the approved five production paths,
+  three new test paths, and evidence docs. The dirty Dependabot documents
+  remain preserved and excluded.

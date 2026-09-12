@@ -37,6 +37,10 @@ const keyForUri = (uri: vscode.Uri): string | undefined =>
     ? uri.path.slice(1)
     : undefined;
 
+const contentForEntry = (
+  entry: SnapshotEntry | undefined,
+): string | undefined => (entry && !entry.released ? entry.content : undefined);
+
 /** Serves immutable Git HEAD snapshots without rereading the provider. */
 export class VscodeGitHeadContentProvider
   implements vscode.TextDocumentContentProvider, vscode.Disposable
@@ -47,31 +51,43 @@ export class VscodeGitHeadContentProvider
   public provideTextDocumentContent(uri: vscode.Uri): string {
     if (this.disposed) return "";
     const key = keyForUri(uri);
-    const entry = key ? this.snapshots.get(key) : undefined;
-    return entry && !entry.released ? entry.content : "";
+    return contentForEntry(key ? this.snapshots.get(key) : undefined) ?? "";
   }
 
   public reserve(content: string): GitHeadSnapshotReservationResult {
-    if (this.disposed || this.snapshots.size >= MAX_GIT_HEAD_SNAPSHOT_ENTRIES) {
+    const entry = this.reserveEntry(content);
+    if (!entry) {
       return { kind: "unavailable", reason: "capacity-exceeded" };
+    }
+    return { kind: "reserved", reservation: this.createReservation(entry) };
+  }
+
+  private reserveEntry(content: string): SnapshotEntry | undefined {
+    if (this.disposed || this.snapshots.size >= MAX_GIT_HEAD_SNAPSHOT_ENTRIES) {
+      return undefined;
     }
     const key = createProviderKey();
     const entry: SnapshotEntry = { key, content, released: false };
     this.snapshots.set(key, entry);
-    let released = false;
-    const reservation: GitHeadSnapshotReservation = {
+    return entry;
+  }
+
+  private createReservation(entry: SnapshotEntry): GitHeadSnapshotReservation {
+    return {
       uri: vscode.Uri.from({
         scheme: GIT_HEAD_CONTENT_SCHEME,
-        path: `/${key}`,
+        path: `/${entry.key}`,
       }),
-      release: (): void => {
-        if (released) return;
-        released = true;
-        entry.released = true;
-        if (this.snapshots.get(key) === entry) this.snapshots.delete(key);
-      },
+      release: (): void => this.releaseEntry(entry),
     };
-    return { kind: "reserved", reservation };
+  }
+
+  private releaseEntry(entry: SnapshotEntry): void {
+    if (entry.released) return;
+    entry.released = true;
+    if (this.snapshots.get(entry.key) === entry) {
+      this.snapshots.delete(entry.key);
+    }
   }
 
   public get size(): number {
@@ -81,6 +97,10 @@ export class VscodeGitHeadContentProvider
   public dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.releaseAllEntries();
+  }
+
+  private releaseAllEntries(): void {
     for (const entry of this.snapshots.values()) entry.released = true;
     this.snapshots.clear();
   }
