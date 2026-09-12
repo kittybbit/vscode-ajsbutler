@@ -2,23 +2,23 @@
 
 <!-- markdownlint-disable MD013 -->
 
-| Use case / requirement                     | SPECS.md section                                  | Slice    | Test or validation                                                                                                                                                                                                                                                                         |
-| ------------------------------------------ | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Structural identity and deterministic diff | Requirements; Compatibility                       | 1        | `semanticDiffStructuralRules.test.ts`, `compareSemanticDiff.test.ts`, `semanticDiffSampleCoverage.test.ts`, `semanticDiffJson.test.ts`; reorder, `sample1_large_utf8`, duplicate identity, relation, order                                                                                 |
-| Supported/unsupported schedule comparison  | Requirements; Compatibility                       | 2        | `semanticDiffScheduleRules.test.ts`, `semanticDiffSchedule.test.ts`, `compareSemanticDiffWithArtifacts.test.ts`, `semanticDiffScheduleImpact.test.ts`; periods, reasons, zero-runs, changed time, malformed input                                                                          |
-| Schedule-impact root and issue model       | Requirements; Architecture                        | 3        | `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, `compareSemanticDiffWithArtifacts.test.ts`; IDs, candidates, issue maps, side roots, duplication, freeze                                                                                                     |
-| Schedule-impact timeline and sidecar       | Requirements; Architecture                        | 4        | `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, `semanticDiffPresentationArtifacts.test.ts`, `compareSemanticDiffWithArtifacts.test.ts`; matching, timeline, source references, validation, large/duplicate input                                            |
-| Report, JSON, and presentation artifacts   | Requirements; Compatibility                       | 5        | Artifact, report, Markdown, and JSON suites listed in `TASKS.md`; exact localization, projection, ordering, omission, parser failures                                                                                                                                                      |
-| Formatting-only release-note repair        | Acceptance Criteria; Durable Documentation Impact | 5        | `rtk pnpm run lint:md`, Qlty format, `rtk git diff --check`, wording-preservation review                                                                                                                                                                                                   |
-| Immutable Git HEAD and snapshot source     | Requirements; Compatibility                       | 6        | `vscodeGitHeadDefinitionSourceAdapter.test.ts`; complete adapter/provider suite on desktop; web validation limited to the final production build and WEB-7 through WEB-10 smoke, with no Git adapter/provider execution claim; HEAD, path/rename, decoded content, failures, cache/release |
-| Command source selection/cancellation      | Requirements; Compatibility                       | 7        | `semanticDiffCommand.test.ts`, `parseSemanticDiffComparisonPeriod.test.ts`, `semanticDiffSourceCapture.test.ts`, Git adapter suite, and `webSmoke.ts` `WEB-7`; one read, cancellation, failures, size, privacy, web activation/registration/no-active-editor guard                         |
-| Explorer/report workflow and cleanup       | Requirements; Compatibility                       | 8        | Command, schedule adapter, Explorer/Flow, highlight, and wiring suites listed in `TASKS.md`, plus `webSmoke.ts` `WEB-8`; one comparison/open, rollback, cleanup, actions, telemetry, web in-memory finalization                                                                            |
-| Calendar transport and bridge              | Requirements; Overlap Decision                    | 9        | `scheduleImpactCalendarTransport.test.ts`, new narrow `scheduleImpactCalendarBridge.test.ts`, and `webSmoke.ts` `WEB-9`; envelope, JSON, bytes, IDs, stale/session, listener/dispose, controlled web-host lifecycle                                                                        |
-| Calendar host session and parent lifetime  | Requirements; Overlap Decision                    | 10       | Session, Explorer panel, bootstrap session, sidecar, subscription, and wiring suites listed in `TASKS.md`, plus `webSmoke.ts` `WEB-10`; failure, reveal, ordering, rollback, one-time release, controlled web-host composition                                                             |
-| PR #317 local Qlty gate                    | Requirements; Acceptance Criteria                 | 1-10     | Per-slice ownership; final `rtk pnpm run qlty`; no suppression, ignore, threshold, baseline, architecture, dependency, or generated change                                                                                                                                                 |
-| PR #317 remote Qlty gate                   | Requirements; Acceptance Criteria                 | After 10 | Publish committed slices; `rtk gh pr checks 317`; remote `qlty check` and `qlty fmt` successful                                                                                                                                                                                            |
-| Desktop/web and VS Code `^1.75.0`          | Compatibility                                     | 1-10     | Focused desktop suites; `rtk pnpm run test:web` executes only `src/test/suite/webSmoke.ts` and must report `WEB-7` through `WEB-10` as defined in `TASKS.md`; final `rtk pnpm test`, `rtk pnpm run build`, architecture and package-manifest tests                                         |
-| Preserve excluded work                     | Overlap Decision; Non-Goals                       | 1-10     | Diff confirms Dependabot docs/patch/dependencies, Calendar Slice 3, parser/generated, Qlty config, README/use cases/roadmap, and `FlowContents.tsx` unchanged by this feature                                                                                                              |
+| Use case / requirement                     | SPECS.md section                                  | Slice    | Test or validation                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Structural identity and deterministic diff | Requirements; Compatibility                       | 1        | `semanticDiffStructuralRules.test.ts`, `compareSemanticDiff.test.ts`, `semanticDiffSampleCoverage.test.ts`, `semanticDiffJson.test.ts`; reorder, `sample1_large_utf8`, duplicate identity, relation, order                                                                                                                                                                                             |
+| Supported/unsupported schedule comparison  | Requirements; Compatibility                       | 2        | `semanticDiffScheduleRules.test.ts`, `semanticDiffSchedule.test.ts`, `compareSemanticDiffWithArtifacts.test.ts`, `semanticDiffScheduleImpact.test.ts`; periods, reasons, zero-runs, changed time, malformed input                                                                                                                                                                                      |
+| Schedule-impact root and issue model       | Requirements; Architecture                        | 3        | `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, `compareSemanticDiffWithArtifacts.test.ts`; IDs, candidates, issue maps, side roots, duplication, freeze                                                                                                                                                                                                                 |
+| Schedule-impact timeline and sidecar       | Requirements; Architecture                        | 4        | `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, `semanticDiffPresentationArtifacts.test.ts`, `compareSemanticDiffWithArtifacts.test.ts`; matching, timeline, source references, validation, large/duplicate input                                                                                                                                                        |
+| Report, JSON, and presentation artifacts   | Requirements; Compatibility                       | 5        | Artifact, report, Markdown, and JSON suites listed in `TASKS.md`; exact localization, projection, ordering, omission, parser failures                                                                                                                                                                                                                                                                  |
+| Formatting-only release-note repair        | Acceptance Criteria; Durable Documentation Impact | 5        | `rtk pnpm run lint:md`, Qlty format, `rtk git diff --check`, wording-preservation review                                                                                                                                                                                                                                                                                                               |
+| Immutable Git HEAD and snapshot source     | Requirements; Compatibility                       | 6        | `vscodeGitHeadDefinitionSourceAdapter.test.ts`, `vscodeGitHeadApiResolution.test.ts`, `vscodeGitHeadPathGuards.test.ts`, `vscodeGitHeadObjectPipeline.test.ts`; complete adapter/provider suite on desktop; web validation limited to final production build and WEB-7 through WEB-10 smoke, with no Git adapter/provider execution claim; HEAD, path/rename, decoded content, failures, cache/release |
+| Command source selection/cancellation      | Requirements; Compatibility                       | 7        | `semanticDiffCommand.test.ts`, `parseSemanticDiffComparisonPeriod.test.ts`, `semanticDiffSourceCapture.test.ts`, Git adapter suite, and `webSmoke.ts` `WEB-7`; one read, cancellation, failures, size, privacy, web activation/registration/no-active-editor guard                                                                                                                                     |
+| Explorer/report workflow and cleanup       | Requirements; Compatibility                       | 8        | Command, schedule adapter, Explorer/Flow, highlight, and wiring suites listed in `TASKS.md`, plus `webSmoke.ts` `WEB-8`; one comparison/open, rollback, cleanup, actions, telemetry, web in-memory finalization                                                                                                                                                                                        |
+| Calendar transport and bridge              | Requirements; Overlap Decision                    | 9        | `scheduleImpactCalendarTransport.test.ts`, new narrow `scheduleImpactCalendarBridge.test.ts`, and `webSmoke.ts` `WEB-9`; envelope, JSON, bytes, IDs, stale/session, listener/dispose, controlled web-host lifecycle                                                                                                                                                                                    |
+| Calendar host session and parent lifetime  | Requirements; Overlap Decision                    | 10       | Session, Explorer panel, bootstrap session, sidecar, subscription, and wiring suites listed in `TASKS.md`, plus `webSmoke.ts` `WEB-10`; failure, reveal, ordering, rollback, one-time release, controlled web-host composition                                                                                                                                                                         |
+| PR #317 local Qlty gate                    | Requirements; Acceptance Criteria                 | 1-10     | Per-slice ownership; final `rtk pnpm run qlty`; no suppression, ignore, threshold, baseline, architecture, dependency, or generated change                                                                                                                                                                                                                                                             |
+| PR #317 remote Qlty gate                   | Requirements; Acceptance Criteria                 | After 10 | Publish committed slices; `rtk gh pr checks 317`; remote `qlty check` and `qlty fmt` successful                                                                                                                                                                                                                                                                                                        |
+| Desktop/web and VS Code `^1.75.0`          | Compatibility                                     | 1-10     | Focused desktop suites; `rtk pnpm run test:web` executes only `src/test/suite/webSmoke.ts` and must report `WEB-7` through `WEB-10` as defined in `TASKS.md`; final `rtk pnpm test`, `rtk pnpm run build`, architecture and package-manifest tests                                                                                                                                                     |
+| Preserve excluded work                     | Overlap Decision; Non-Goals                       | 1-10     | Diff confirms Dependabot docs/patch/dependencies, Calendar Slice 3, parser/generated, Qlty config, README/use cases/roadmap, and `FlowContents.tsx` unchanged by this feature                                                                                                                                                                                                                          |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -54,11 +54,18 @@ the review base.
   state commit `4f3119d7`, independent implementation review `Ready` with no
   findings, and Completion Approval `Approved` under the user's automatic
   no-findings slice approval policy.
-- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 6 scope
-  as the next slice.
+- Prior Human Approval: `Approved` on 2026-09-12 for the original exact Slice 6
+  scope as the next slice; that two-production-file/one-test approval is
+  superseded by the file-complexity replan below.
+- Current Human Approval: `Approved` on 2026-09-12 in the current conversation
+  for the revised exact five-production-file/four-test Slice 6 boundary, after
+  independent plan review `Ready` with no findings. The original Slice 6
+  approval remains superseded.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
 - Plan commit gate: complete; focused plan commit `d3693d76`.
+- Replan commit gate: eligible; focused replan/state commit pending
+  `approval-committer` for the revised Slice 6 boundary.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
@@ -71,11 +78,20 @@ the review base.
   completion commit is `e89e6cab`.
 - Exact Slice 5 paths and completion evidence remain recorded below; its
   completion commit is `a69fcd12`.
-- Exact Slice 6 production paths:
+- Prior exact Slice 6 production paths:
   `src/infrastructure/git/VscodeGitHeadContentProvider.ts` and
   `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
-- Exact Slice 6 test path:
-  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+- Revised exact Slice 6 production paths:
+  `src/infrastructure/git/VscodeGitHeadContentProvider.ts`,
+  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`,
+  `src/infrastructure/git/VscodeGitHeadApiResolution.ts`,
+  `src/infrastructure/git/VscodeGitHeadPathGuards.ts`, and
+  `src/infrastructure/git/VscodeGitHeadObjectPipeline.ts`.
+- Revised exact Slice 6 test paths:
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`,
+  `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
+  `src/test/suite/vscodeGitHeadPathGuards.test.ts`, and
+  `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`.
 - Slice 6 validation boundary: complete adapter/provider suite on desktop; web
   validation is limited to the final production build and existing WEB-7
   through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
@@ -391,23 +407,113 @@ the review base.
   Markdown escaping/order, and the three reproduced baseline failures were
   independently reviewed with `Ready` and no findings.
 
-## Slice 6 Activation And Approval (2026-09-12)
+## Slice 6 Prior Approval Superseded (2026-09-12)
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Superseded by Replanning; no active implementation approval.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
-- Approved production paths:
+- Prior approved production paths:
   `src/infrastructure/git/VscodeGitHeadContentProvider.ts` and
   `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
-- Approved test path:
+- Prior approved test path:
   `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
 - Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
-- Approved validation boundary: complete adapter/provider suite on desktop; web
+- Prior approved validation boundary: complete adapter/provider suite on
+  desktop; web
   validation is limited to the final production build and existing WEB-7
   through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
-- State commit gate: eligible; pending `approval-committer`. No runtime, test,
-  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
-  Dependabot change is included in that state commit.
+- State commit gate: superseded and not eligible. The partial Git diff and
+  unrelated dirty Dependabot documents remain untouched.
+
+## Slice 6 Implementation Handoff (2026-09-12)
+
+- Status: Partial implementation evidence preserved; completion review and
+  completion commit remain pending because the prior two-file boundary cannot
+  clear the remaining file-complexity smell.
+- Changed production paths remain only the two originally approved files;
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts` was unchanged.
+  The three helper modules and three helper tests are proposed replan paths,
+  not implementation changes in this handoff.
+- The approved test file contains 13 adapter/provider tests. The complete
+  desktop runner exited 0, and no test expectation was changed.
+- Validation: `rtk pnpm run test:compile`, scoped `rtk qlty check`,
+  `rtk git diff --check`, production build, desktop runner, and web runner
+  passed. Build bundle-size warnings are pre-existing. Web validation is
+  limited to the existing WEB-7 through WEB-10 smoke boundary; it makes no
+  Git adapter/provider execution claim.
+- Qlty: scoped formatting, lint, and function-level smell findings are clear;
+  file complexity remains 98 versus the configured threshold 55 for
+  `VscodeGitHeadDefinitionSourceAdapter.ts`. The exact Slice 6 approval listed
+  only the two existing production paths, so a new helper module requires the
+  revised planning and approval boundary below.
+- Compatibility: captured HEAD/path selection, rename fallback, object/text
+  guards, decoded-byte limits, failure reasons, and idempotent snapshot
+  release remain characterized. No parser, public schema, telemetry, VS Code
+  API, Node built-in, or desktop/web entry-point change was made.
+- Recommended route: Main should route this residual to independent plan review
+  after recording the revised module seam; no acceptance exception is proposed.
+
+## Slice 6 Replanned Scope (2026-09-12)
+
+- Trigger: the existing two-file Git implementation passed compile, build,
+  desktop, web, lint, diff, and scoped checks, with zero function-level Qlty
+  smells, but `VscodeGitHeadDefinitionSourceAdapter.ts` remains at whole-file
+  complexity 98 against threshold 55. The old approved boundary cannot clear
+  this genuine infrastructure responsibility without adding private module
+  seams.
+- Revised exact production paths:
+  `src/infrastructure/git/VscodeGitHeadContentProvider.ts`,
+  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`,
+  `src/infrastructure/git/VscodeGitHeadApiResolution.ts`,
+  `src/infrastructure/git/VscodeGitHeadPathGuards.ts`, and
+  `src/infrastructure/git/VscodeGitHeadObjectPipeline.ts`.
+- Revised exact test paths:
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`,
+  `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
+  `src/test/suite/vscodeGitHeadPathGuards.test.ts`, and
+  `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`.
+- Seam mapping: API resolution owns extension discovery/activation, enabled
+  state, repository/document-URI resolution, HEAD and capability context;
+  path guards own normalized URI/root/traversal checks and active, unambiguous
+  rename candidates; the object pipeline owns object mode/type, MIME/encoding,
+  binary/NUL/decoded-byte, and read-failure guards. They are
+  infrastructure-internal exports for focused tests only, with no application
+  port or public package re-export.
+- Preserved behavior and boundaries: adapter/provider class and factory,
+  infrastructure construction, receiver semantics, guard precedence, captured
+  HEAD, path/rename selection, failure reasons, byte limits, cache lifetime,
+  and idempotent release remain unchanged. No Git executable, filesystem,
+  `.git`, or Node built-in access is allowed; no Qlty suppression, threshold
+  relaxation, baseline manipulation, or acceptance exception is allowed.
+- Test/validation boundary: helper characterization tests cover each seam;
+  the existing adapter/provider suite remains the integration regression for
+  receiver semantics and cross-seam precedence. Run compile, all four listed
+  tests, targeted ESLint, scoped Qlty format/check/smells, `lint:md`,
+  `git diff --check`, complete desktop adapter/provider validation, and the
+  production build. `rtk pnpm run test:web` is limited to existing
+  `src/test/suite/webSmoke.ts` WEB-7 through WEB-10 host scenarios and makes no
+  Git adapter/provider execution claim.
+- Gate: the prior Slice 6 approval is superseded. Revised independent plan
+  review is `Ready` with no findings and current Human Approval is `Approved`
+  on 2026-09-12; the focused replan/state commit is eligible and pending
+  before implementation resumes.
+
+## Slice 6 Replan Approval (2026-09-12)
+
+- Status: Human Approved; focused replan/state commit eligible and pending.
+- Approval source: current conversation, after independent plan review `Ready`
+  with no findings.
+- Approved scope: the revised five exact production paths and four exact test
+  paths listed above, with the three private infrastructure seams limited to
+  API/context resolution, path/rename guards, and object/content pipeline.
+- Approved behavior boundary: preserve the adapter/provider public APIs,
+  infrastructure construction, receiver semantics, guard precedence, captured
+  HEAD, path/rename rules, object/content failure reasons, byte limits, cache
+  lifetime, and idempotent release. No Qlty suppression or threshold,
+  acceptance, Calendar Slice 3, or Dependabot change is approved.
+- Exact state-commit paths: this feature's `TASKS.md` and `TRACEABILITY.md`
+  only; runtime, tests, configuration, generated artifacts, and `SPECS.md`
+  remain excluded.
 
 ## Web Smoke Scenario Traceability
 
@@ -434,17 +540,17 @@ Calendar Slice 3, or Dependabot change.
 
 <!-- markdownlint-disable MD013 -->
 
-| Concern                                | Slice | Allowed owner/location                                                        | Prohibited movement                                              |
-| -------------------------------------- | ----- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Structural matching/grouping           | 1     | Private pure helpers in domain structural rules                               | No application/presentation identity policy                      |
-| Schedule interpretation/run comparison | 2     | Domain schedule services; projection only in `compareScheduleDiff.ts`         | No host calendar/locale or presentation policy                   |
-| Root/candidate/issue side mapping      | 3     | Private contexts and side mappers in `semanticDiffScheduleImpact.ts`          | No new public DTO or cross-layer helper                          |
-| Run/timeline/source phases             | 4     | Private matching, projection, validation helpers in the same application file | No weakened validation/schema change                             |
-| Report line assembly                   | 5     | Private helpers in `semanticDiffMarkdownLocalization.ts`                      | No domain decisions in presentation                              |
-| Git path/object/cache                  | 6     | Private guards in existing adapter/provider                                   | No filesystem, Git executable, `.git`, Node built-in             |
-| Command error/source/output workflow   | 7-8   | Private types, contexts, continuations in existing command files              | No `FlowContents.tsx`, telemetry, or public command change       |
-| Calendar message validation            | 9     | Private validator helpers in transport; bridge state stays in bridge          | No trust relaxation or domain import into bridge                 |
-| Panel/session/parent lifetime          | 10    | Private panel/session helpers; concrete composition in bootstrap              | No presentation object in application/domain or Calendar Slice 3 |
+| Concern                                | Slice | Allowed owner/location                                                                                                                                                         | Prohibited movement                                              |
+| -------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Structural matching/grouping           | 1     | Private pure helpers in domain structural rules                                                                                                                                | No application/presentation identity policy                      |
+| Schedule interpretation/run comparison | 2     | Domain schedule services; projection only in `compareScheduleDiff.ts`                                                                                                          | No host calendar/locale or presentation policy                   |
+| Root/candidate/issue side mapping      | 3     | Private contexts and side mappers in `semanticDiffScheduleImpact.ts`                                                                                                           | No new public DTO or cross-layer helper                          |
+| Run/timeline/source phases             | 4     | Private matching, projection, validation helpers in the same application file                                                                                                  | No weakened validation/schema change                             |
+| Report line assembly                   | 5     | Private helpers in `semanticDiffMarkdownLocalization.ts`                                                                                                                       | No domain decisions in presentation                              |
+| Git path/object/cache                  | 6     | Private infrastructure seams in `VscodeGitHeadApiResolution.ts`, `VscodeGitHeadPathGuards.ts`, and `VscodeGitHeadObjectPipeline.ts`, composed by the existing adapter/provider | No filesystem, Git executable, `.git`, Node built-in             |
+| Command error/source/output workflow   | 7-8   | Private types, contexts, continuations in existing command files                                                                                                               | No `FlowContents.tsx`, telemetry, or public command change       |
+| Calendar message validation            | 9     | Private validator helpers in transport; bridge state stays in bridge                                                                                                           | No trust relaxation or domain import into bridge                 |
+| Panel/session/parent lifetime          | 10    | Private panel/session helpers; concrete composition in bootstrap                                                                                                               | No presentation object in application/domain or Calendar Slice 3 |
 
 <!-- markdownlint-enable MD013 -->
 

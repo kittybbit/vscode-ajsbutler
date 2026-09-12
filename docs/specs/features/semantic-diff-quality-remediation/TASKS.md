@@ -5,13 +5,14 @@
 - Purpose: remove PR #317 Qlty blockers without observable behavior change.
 - Approved or active slice: Slices 1-4 are complete at `fa933763`, `ecea8714`,
   `6441de1e`, and `e89e6cab`; Slice 5 is complete at `a69fcd12` after focused
-  state commit `4f3119d7`; Slice 6 is Human Approved and awaits its focused
-  state commit. Implementation remains one slice at a time.
+  state commit `4f3119d7`; Slice 6 has a preserved partial implementation but
+  its two-file approval is superseded by the replan below. Implementation
+  remains one slice at a time.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Next decision: delegate the exact approved Slice 6 scope to
-  `approval-committer` for the focused state commit.
+- Next decision: return the revised Slice 6 scope to the independent plan
+  reviewer before any new state commit or implementation work.
 
 ## Sync Rule
 
@@ -22,13 +23,16 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slices 1-5 complete; Slice 6 approved, state commit
-  pending
+- Status: Replanned; Slices 1-5 complete; Slice 6 partial implementation
+  preserved; revised Slice 6 approved, focused replan/state commit pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
-  inventory, plus the one `CHANGELOG.md` formatting failure.
-- Review status: Ready; no findings.
-- Human approval: Approved on 2026-09-12 for Slice 6.
-- Active implementation slice: Slice 6, awaiting focused state commit.
+  inventory, plus the one `CHANGELOG.md` formatting failure and the revised
+  Slice 6 private helper paths required by this replan.
+- Review status: Original and revised plan review Ready with no findings.
+- Human approval: Revised Slice 6 scope Approved on 2026-09-12 in the current
+  conversation; original Slice 6 approval remains superseded.
+- Active implementation slice: Slice 6 replan, awaiting its eligible focused
+  replan/state commit.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -48,26 +52,36 @@
 
 ## Human Approval
 
-- Status: Approved
+- Status: Approved for revised Slice 6 replan scope; original Slice 6 approval
+  superseded
 - Approved at: 2026-09-12
-- Approved scope: The complete ten-slice plan and the exact Slice 6 scope as
-  the next implementation slice; implementation advances one slice at a time
-  after its independent review and completion gate.
+- Approval source: current conversation, after independent plan review `Ready`
+  with no findings.
+- Approved scope: the revised Slice 6 five-production-file/four-test boundary
+  below; the original two-file/one-test Slice 6 approval no longer authorizes
+  implementation. The complete ten-slice plan remains approved from the prior
+  plan gate.
 - Approved paths:
   - Selected evidence docs: this feature's `TASKS.md` and
     `TRACEABILITY.md`; the planning package's `SPECS.md` remains in the
     already-committed plan package.
-  - Slice 6 production: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`
-    and `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
-  - Slice 6 test: `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+  - Slice 6 production: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`,
+    `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`,
+    `src/infrastructure/git/VscodeGitHeadApiResolution.ts`,
+    `src/infrastructure/git/VscodeGitHeadPathGuards.ts`, and
+    `src/infrastructure/git/VscodeGitHeadObjectPipeline.ts`.
+  - Slice 6 tests: `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`,
+    `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
+    `src/test/suite/vscodeGitHeadPathGuards.test.ts`, and
+    `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`.
   - Desktop validation: complete adapter/provider suite. Web validation is
     limited to the final production build and existing WEB-7 through WEB-10
     smoke scenarios; web smoke does not claim Git adapter/provider execution.
   - `CHANGELOG.md` remains limited to the reported Slice 5 sentence wrapping;
     its release-note wording must remain unchanged.
 
-Slice 6 implementation starts only after its focused state commit; later
-slices must retain their exact approved paths and gates.
+Slice 6 implementation starts only after its eligible focused replan/state
+commit; later slices must retain their exact approved paths and gates.
 
 ## Plan Commit Gate
 
@@ -79,9 +93,23 @@ slices must retain their exact approved paths and gates.
 - Prohibited in this commit: runtime, test, generated, configuration,
   dependency, `CHANGELOG.md`, Calendar Slice 3, and Dependabot changes.
 
+## Replan Commit Gate
+
+- Status: Eligible; focused replan/state commit pending `approval-committer`.
+- Basis: revised independent plan review `Ready` with no findings and Human
+  Approval `Approved` in the current conversation on 2026-09-12.
+- Exact commit paths: this feature's `TASKS.md` and `TRACEABILITY.md` only;
+  the already-committed `SPECS.md` remains unchanged.
+- Approved boundary: the five exact Slice 6 production paths and four exact
+  Slice 6 test paths recorded above, with no implementation changes included.
+- Prohibited in this commit: runtime, test, generated, configuration,
+  dependency, `CHANGELOG.md`, Calendar Slice 3, and Dependabot changes.
+- Implementation remains blocked until this focused replan/state commit is
+  complete.
+
 ## Completion Approval
 
-- Status: Pending for Slice 6
+- Status: Pending for Slice 6 replan
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
@@ -249,7 +277,10 @@ Remote PR evidence for commit `57c2a8fa`:
 - GitHub Verify, Analyze, and CodeQL checks passed.
 
 The local `qlty smells --no-snippets` inventory analyzed 28 branch-diff files
-and assigned findings to these 18 production files.
+and assigned findings to these 18 originally inventoried production files. The
+Slice 6 replan adds three private infrastructure helper paths below solely to
+remove the discovered adapter file-complexity smell; they are not new Qlty
+inventory surfaces or a change to any other slice's boundary.
 
 <!-- markdownlint-disable MD013 -->
 
@@ -270,8 +301,10 @@ and assigned findings to these 18 production files.
 
 ## Planning Decisions
 
-- The 18 inventoried production files are the complete production edit
-  boundary. A new production file or path is a replan trigger.
+- The 18 inventoried production files were the original production edit
+  boundary. Slice 6 is now explicitly replanned to add only the three listed
+  private Git infrastructure seams; any other new production file or path is a
+  replan trigger.
 - Private helpers stay in the file and architecture layer that owns the
   decision. No metric-only layer, policy object, or public abstraction is
   planned.
@@ -606,54 +639,175 @@ and assigned findings to these 18 production files.
   pre-existing focused baseline failures explicitly unresolved and outside the
   approved behavior-preserving refactor.
 
-## Slice 6 Activation And Approval (2026-09-12)
+## Slice 6 Prior Approval Superseded (2026-09-12)
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Superseded by Replanning; no active implementation approval.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
-- Approved production paths: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`
+- Prior approved production paths: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`
   and `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
-- Approved test path:
+- Prior approved test path:
   `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
 - Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
-- Approved validation boundary: complete adapter/provider suite on desktop; web
-  validation is limited to the final production build and existing WEB-7
+- Prior approved validation boundary: complete adapter/provider suite on
+  desktop; web validation is limited to the final production build and existing
+  WEB-7
   through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
-- State commit gate: eligible; pending `approval-committer`. No runtime, test,
+- State commit gate: superseded and not eligible. No runtime, test,
   configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
-  Dependabot change is included in that state commit.
+  Dependabot change is included in the preserved partial diff.
+
+## Slice 6 Replanning (2026-09-12)
+
+- Trigger: the existing Git two-file implementation completed compile, build,
+  desktop, web, lint, diff, and scoped checks; function-level Qlty smells are
+  zero, but whole-file complexity remains 98 for
+  `VscodeGitHeadDefinitionSourceAdapter.ts` against the repository threshold
+  of 55. The approved two-file boundary cannot remove that genuine
+  infrastructure responsibility without a new module seam.
+- Replan decision: keep the current partial Git diff and split the smallest
+  cohesive private infrastructure responsibilities into API/context
+  resolution, path/rename guards, and object/content reading. No Qlty
+  suppression, ignore, threshold relaxation, baseline manipulation, or
+  acceptance exception is permitted.
+- Revised exact production paths:
+  - `src/infrastructure/git/VscodeGitHeadContentProvider.ts`
+  - `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`
+  - `src/infrastructure/git/VscodeGitHeadApiResolution.ts`
+  - `src/infrastructure/git/VscodeGitHeadPathGuards.ts`
+  - `src/infrastructure/git/VscodeGitHeadObjectPipeline.ts`
+- Proposed seam ownership:
+  - `VscodeGitHeadApiResolution.ts`: Git extension/API discovery, activation
+    and enabled-state guards, repository and document-URI resolution, HEAD
+    and read-capability context construction.
+  - `VscodeGitHeadPathGuards.ts`: normalized file/root URI checks, traversal
+    and path-prefix guards, active rename status selection, and unambiguous
+    candidate construction.
+  - `VscodeGitHeadObjectPipeline.ts`: object mode/type and MIME/encoding
+    guards, binary/NUL/decoded-byte validation, and source-content read failure
+    classification.
+    These are infrastructure-internal exports for focused tests only; they are
+    not re-exported through the application port or public package API.
+- Compatibility boundary: retain the same infrastructure layer and concrete
+  composition construction, adapter class/factory and provider public APIs,
+  receiver semantics, guard precedence, captured HEAD, path/rename policy,
+  object/content failure reasons, byte limits, cache lifetime, and idempotent
+  release behavior. No Git executable, filesystem, `.git`, or Node built-in
+  access may be introduced. Calendar Slice 3 and Dependabot work remain out
+  of scope.
+- Revised exact test paths:
+  - `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`
+  - `src/test/suite/vscodeGitHeadApiResolution.test.ts`
+  - `src/test/suite/vscodeGitHeadPathGuards.test.ts`
+  - `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`
+- Focused test responsibilities: API/repository/context unavailable and
+  activation cases; URI/root/traversal and rename candidate policy; object,
+  MIME/encoding, binary/NUL, read-failure, and decoded-byte-limit guards; and
+  the existing adapter/provider integration coverage for receiver semantics,
+  guard precedence, captured HEAD, cache bounds, and idempotent release.
+- Validation: compile; all four listed desktop test files; targeted ESLint;
+  scoped Qlty `fmt`, `check`, and `smells --no-snippets`; `lint:md`; and
+  `git diff --check`. Run the complete desktop adapter/provider suite and
+  production build. Run `rtk pnpm run test:web` only for the existing
+  `src/test/suite/webSmoke.ts` WEB-7 through WEB-10 host scenarios; this is
+  final-build plus smoke evidence and makes no Git adapter/provider execution
+  claim. Whole-file Qlty must clear the mapped smell, including reducing the
+  adapter complexity to at most 55, without a threshold or acceptance
+  exception.
+- Approval boundary delta: the prior two-production-file/one-test approval is
+  superseded. The revised boundary is the five exact production paths, four
+  exact test paths, and this feature's `TASKS.md` and `TRACEABILITY.md`; the
+  already-committed `SPECS.md` remains unchanged. Independent plan review is
+  `Ready` and the revised Human Approval is `Approved`; the focused
+  replan/state commit is eligible and pending before implementation resumes.
+- Validation and evidence must preserve the current partial Git diff and the
+  unrelated dirty Dependabot documents; no code, test, configuration,
+  generated, dependency, `CHANGELOG.md`, or other feature scope is authorized
+  by this replan document alone.
 
 ### Slice 6: Git HEAD source and snapshot cache decomposition
 
-- Status: Active; Human Approved; focused state commit pending.
+- Status: Replanned; partial implementation preserved; independent plan review
+  Ready and revised Human Approval Approved; focused replan/state commit
+  eligible and pending.
 - Scope: simplify optional Git API discovery, rename/path selection, object
   validation, source reading, and cache lifetime.
 - User / Domain Value: preserves reliable immutable `HEAD` comparison on
   desktop and web.
-- Cohesive Change Group: replace compound rename/object expressions with
-  named infrastructure guards; use input/context objects; split
-  `sourcePathFor`, `resolveApiOnce`, `inspectPath`, and `readSelectedPath` into
-  ordered capability/repository/path/content phases; extract reserve
+- Cohesive Change Group: retain the current behavior-preserving adapter/provider
+  refactor, then extract the three private infrastructure seams for API/context
+  resolution, path/rename guards, and object/content pipeline. Keep
+  `sourcePathFor`, `resolveApiOnce`, `inspectPath`, and `readSelectedPath`
+  ordered by capability/repository/path/content phases; extract reserve
   eviction/release without exposing cache state.
 - Exact Production Paths:
-  `src/infrastructure/git/VscodeGitHeadContentProvider.ts` and
-  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
-- Allowed Test Path:
-  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+  `src/infrastructure/git/VscodeGitHeadContentProvider.ts`,
+  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`,
+  `src/infrastructure/git/VscodeGitHeadApiResolution.ts`,
+  `src/infrastructure/git/VscodeGitHeadPathGuards.ts`, and
+  `src/infrastructure/git/VscodeGitHeadObjectPipeline.ts`.
+- Allowed Test Paths:
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`,
+  `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
+  `src/test/suite/vscodeGitHeadPathGuards.test.ts`, and
+  `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`.
 - Acceptance: captured HEAD, active path first, unambiguous rename only,
   decoded/textconv content, unavailable reasons, binary/size rejection, cache
   bound, URI lookup, and idempotent release are unchanged.
-- Validation: complete adapter/provider suite on desktop; web validation is
-  limited to the final production build and the existing WEB-7 through WEB-10
-  smoke scenarios, with no claim that web smoke executes the Git
-  adapter/provider path; scoped Qlty.
+- Validation: compile, the four listed tests, targeted ESLint, scoped Qlty
+  format/check/smells, `lint:md`, and `git diff --check`; complete
+  adapter/provider suite and production build on desktop; web final build plus
+  existing WEB-7 through WEB-10 `webSmoke.ts` scenarios only, with no Git
+  adapter/provider execution claim. Whole-file complexity must be at most 55
+  with no suppression or acceptance exception.
 - Production Readiness: no Git executable, filesystem, `.git`, or Node
   built-in access; release large cached content on existing paths.
-- Approval Boundary: exact production/test paths plus evidence documents.
-- Dependencies: Slice 5 committed.
-- Risks: changed guard precedence can misclassify untracked, binary,
-  unavailable, rename, or oversized content.
+- Approval Boundary: revised five production paths, four test paths, and
+  evidence documents; the prior two-file approval is superseded and the
+  revised replan boundary is approved.
+- Dependencies: Slice 5 committed; revised Slice 6 plan independently
+  reviewed and Human Approved. The eligible focused replan/state commit must
+  complete before implementation resumes.
+- Risks: moving types or imports across private infrastructure seams could
+  change guard precedence or misclassify untracked, binary, unavailable,
+  rename, or oversized content; direct helper tests must not become public API.
 - Out of Scope: index/working-tree fallback or telemetry.
+
+## Slice 6 Implementation Handoff (2026-09-12)
+
+- Status: Partial implementation evidence preserved; no completion approval or
+  implementation commit has been made. The prior two-file approval cannot
+  continue unchanged because of the remaining whole-file complexity smell.
+- Existing uncommitted production changes remain limited to the two originally
+  approved Git infrastructure paths. The three helper modules and three new
+  helper tests are proposed replan paths, not implemented by this handoff. The
+  inherited Dependabot document changes remain untouched and excluded.
+- Behavior evidence: the adapter keeps one captured HEAD commit, checks the
+  active path before the unambiguous rename fallback, preserves object/text
+  and decoded-byte guards, and keeps snapshot release idempotent. The approved
+  test file contains 13 adapter/provider tests; the complete desktop runner
+  exited 0.
+- Validation evidence: `rtk pnpm run test:compile`, production `rtk pnpm run
+build`, `rtk pnpm run test:web` (exit 0), desktop `node
+./out/test/runTest.js` (exit 0), `rtk qlty check` for both production paths,
+  and `rtk git diff --check` passed. Production builds retain existing bundle
+  size warnings; web smoke remains the defined WEB-7 through WEB-10 host
+  evidence and does not claim Git adapter execution.
+- Qlty evidence: individual function, formatting, and lint findings are
+  clear, but `qlty smells --no-snippets` reports file complexity 98 for
+  `VscodeGitHeadDefinitionSourceAdapter.ts` against the repository threshold
+  of 55. The approved exact production-path boundary did not include a new
+  helper module, so reducing this remaining file-level smell requires the
+  revised planning/re-approval decision recorded above rather than a silent
+  scope expansion.
+- Compatibility and production readiness: no Git executable, filesystem,
+  `.git`, Node built-in, parser, public DTO, telemetry, VS Code API, or
+  desktop/web entry-point change was introduced. No README, CHANGELOG, or
+  durable specification update is required for this behavior-preserving
+  refactor.
+- Recommended route: delegate the eligible focused replan/state commit for the
+  approved five-file/four-test boundary; only after it completes may
+  implementation resume and later independent implementation review proceed.
 
 ### Slice 7: Command source acquisition and selection workflow
 
@@ -787,7 +941,8 @@ and assigned findings to these 18 production files.
   `src/test/suite/webSmoke.ts`.
 - Acceptance: one panel/session, reveal, request ordering, sidecar identity,
   failure post, parent/child disposal, rollback, and one-time release remain
-  exact; all 18 production files have zero mapped smells.
+  exact; all 18 originally inventoried production files and the three Slice 6
+  private helper paths have zero mapped smells.
 - Validation: listed session/panel/bootstrap/wiring tests on desktop; web
   `rtk pnpm run test:web` smoke scenario `WEB-10` in `webSmoke.ts`; scoped
   Qlty. `WEB-10` composes `createScheduleAwareExplorerSession` with controlled
@@ -869,7 +1024,8 @@ After Slice 10 is reviewed, approved, and committed:
 
 ## Replan Triggers
 
-- Production code outside the 18 inventoried paths or a new production file.
+- Production code outside the 18 originally inventoried paths or the three
+  explicitly approved Slice 6 private helper paths.
 - Observable behavior, public type/schema, command, transport, localization,
   telemetry, schedule meaning, or expected-test change.
 - Qlty config/suppression/ignore/threshold/baseline, dependency, generated
@@ -886,7 +1042,9 @@ After Slice 10 is reviewed, approved, and committed:
 
 ## Validation Checklist
 
-- [x] Complete ten-slice plan covers all 18 production files and CHANGELOG.
+- [x] Complete ten-slice plan covers all 18 originally inventoried production
+      files and CHANGELOG; the revised Slice 6 boundary adds three named
+      private helper paths.
 - [x] Exact paths, seams, dependencies, approvals, validation, risks, and
       replan triggers are recorded.
 - [x] Independent plan review returns `Ready` with no findings.
