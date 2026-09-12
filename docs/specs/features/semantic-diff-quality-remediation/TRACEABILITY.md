@@ -57,13 +57,19 @@ the review base.
 - Prior Human Approval: `Approved` on 2026-09-12 for the original exact Slice 6
   scope as the next slice; that two-production-file/one-test approval is
   superseded by the file-complexity replan below.
-- Current Human Approval: `Approved` on 2026-09-12 in the current conversation
+- Prior Human Approval: `Approved` on 2026-09-12 in the current conversation
   for the revised exact five-production-file/four-test Slice 6 boundary, after
-  independent plan review `Ready` with no findings. The original Slice 6
-  approval remains superseded.
+  independent plan review `Ready` with no findings; its completion commit is
+  `3af9494d`. The original Slice 6 approval remains superseded.
+- Current Human Approval: `Approved` on 2026-09-12 in the current conversation
+  for the exact Slice 7 three-production-file/five-test boundary below, after
+  independent plan review `Ready` with no findings and under the user's
+  automatic no-findings slice approval policy.
 - Slice 6 implementation review: `Ready` with no findings. Completion Approval
   is `Approved` on 2026-09-12 under the user's automatic no-findings slice
-  approval policy; the exact completion commit remains pending.
+  approval policy; completion commit `3af9494d` is complete.
+- Slice 7 state commit gate: eligible and pending `approval-committer`; no
+  Slice 7 implementation or completion approval has occurred.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
 - Plan commit gate: complete; focused plan commit `d3693d76`.
@@ -95,6 +101,16 @@ the review base.
   `src/test/suite/vscodeGitHeadApiResolution.test.ts`,
   `src/test/suite/vscodeGitHeadPathGuards.test.ts`, and
   `src/test/suite/vscodeGitHeadObjectPipeline.test.ts`.
+- Exact Slice 7 production paths:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandLocalization.ts`, and
+  `src/presentation/vscode/commands/semanticDiffCommandSteps.ts`.
+- Exact Slice 7 test paths:
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts`,
+  `src/test/suite/semanticDiffSourceCapture.test.ts`,
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`, and
+  `src/test/suite/webSmoke.ts` (WEB-7).
 - Slice 6 validation boundary: complete adapter/provider suite on desktop; web
   validation is limited to the final production build and baseline
   `webSmoke.ts` run. WEB-7 through WEB-10 are future Slice 7-10 scenarios and
@@ -545,10 +561,9 @@ Calendar Slice 3, or Dependabot change.
 
 ## Slice 6 Implementation Evidence (2026-09-12)
 
-- Status: Implementation complete; independent implementation review `Ready`
-  with no findings; Completion Approval `Approved` on 2026-09-12 under the
-  user's automatic no-findings slice approval policy; exact completion commit
-  remains pending.
+- Status: Complete; independent implementation review `Ready` with no
+  findings; Completion Approval `Approved` on 2026-09-12 under the user's
+  automatic no-findings slice approval policy; completion commit `3af9494d`.
 - Revised plan review is `Ready`, Human Approval is explicit, and focused
   replan/state commit `2734813c` is complete.
 - Production paths changed: `VscodeGitHeadContentProvider.ts`,
@@ -583,9 +598,37 @@ Calendar Slice 3, or Dependabot change.
   DTO/schema, VS Code entry point, Node built-in, filesystem, `.git`, Git
   executable, telemetry, dependency, configuration, generated artifact,
   Calendar Slice 3, or Dependabot behavior changed.
-- Recommended next route: exact completion commit gate for the approved five
-  production paths, three new test paths, and evidence docs. Dependabot
-  documents remain dirty but untouched and excluded.
+- Recommended next route: activation of the exact approved Slice 7 scope and
+  its eligible focused state commit. Dependabot documents remain dirty but
+  untouched and excluded.
+
+## Slice 7 Activation And Approval (2026-09-12)
+
+- Status: Human Approved; active next slice; focused state commit eligible and
+  pending `approval-committer`.
+- Basis: Slice 6 completion commit `3af9494d`, independent plan review `Ready`
+  with no findings, and the user's automatic no-findings slice approval policy.
+- Approved production paths:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandLocalization.ts`, and
+  `src/presentation/vscode/commands/semanticDiffCommandSteps.ts`.
+- Approved test paths:
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts`,
+  `src/test/suite/semanticDiffSourceCapture.test.ts`,
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`, and
+  `src/test/suite/webSmoke.ts` (WEB-7).
+- Approved boundary: source acquisition, period selection, prepared
+  before/after reads, and Git failure localization. Artifact/Explorer
+  finalization is out of scope except for private signature changes required
+  for compilation; no public command or behavior change is authorized.
+- Web boundary: execute WEB-7 in `webSmoke.ts` for activation/registration
+  and the injected no-active-editor command-core guard. Interactive pickers,
+  file/Git dialogs, and the full source-selection matrix remain desktop-only
+  evidence.
+- Exact state-commit paths: this feature's `TASKS.md` and `TRACEABILITY.md`
+  only. Runtime, tests, configuration, generated artifacts, `SPECS.md`,
+  `CHANGELOG.md`, Calendar Slice 3, and Dependabot changes remain excluded.
 
 ## Refactor Helper Ownership
 
