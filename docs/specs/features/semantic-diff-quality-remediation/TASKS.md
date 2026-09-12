@@ -3,13 +3,14 @@
 ## Agent Brief
 
 - Purpose: remove PR #317 Qlty blockers without observable behavior change.
-- Approved or active slice: Slice 1 is Human Approved and awaits the focused
-  planning-package commit; implementation remains one slice at a time.
+- Approved or active slice: Slice 1 completion approval is recorded and the
+  focused completion commit is pending; implementation remains one slice at a
+  time.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Next decision: delegate the approved planning package to
-  `approval-committer` for the plan gate.
+- Next decision: delegate the exact completed Slice 1 scope to
+  `approval-committer` for the focused completion commit.
 
 ## Sync Rule
 
@@ -20,12 +21,13 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slice 1 plan commit pending
+- Status: Approved plan; Slice 1 completion approved, commit pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure.
 - Review status: Ready; no findings.
 - Human approval: Approved on 2026-09-12.
-- Active implementation slice: Slice 1, awaiting plan commit.
+- Active implementation slice: Slice 1 completion approved; awaiting focused
+  completion commit.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -67,7 +69,7 @@ the next slice must retain its exact approved paths and gate.
 
 ## Plan Commit Gate
 
-- Status: Eligible; pending `approval-committer`.
+- Status: Complete; focused plan commit `d3693d76`.
 - Basis: independent plan review `Ready` with no findings and Human Approval
   for the complete ten-slice plan plus the exact Slice 1 scope.
 - Exact commit paths: this feature's `SPECS.md`, `TASKS.md`, and
@@ -77,15 +79,60 @@ the next slice must retain its exact approved paths and gate.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-12
+- Approved scope: Completed Slice 1 implementation and its validation
+  evidence, after independent implementation review returned `Ready` with no
+  findings; no test expectation or public contract changed.
+- Approved paths:
+  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  - `src/application/semantic-diff/compareSemanticDiff.ts`
+  - `docs/specs/features/semantic-diff-quality-remediation/TASKS.md`
+  - `docs/specs/features/semantic-diff-quality-remediation/TRACEABILITY.md`
+- Implementation review verdict: `Ready`; Findings none.
+- Commit status: Eligible; pending `approval-committer`.
 
 Each slice requires independent review and Completion Approval before its
 exact implementation and evidence are committed.
+
+## Slice 1 Implementation Evidence (2026-09-12)
+
+- Approved boundary: Slice 1 production and test paths listed in Human
+  Approval; no test expectation or public contract changed.
+- Changed production files: `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  and `src/application/semantic-diff/compareSemanticDiff.ts`.
+- Structural matching was decomposed into fingerprint grouping, group
+  classification, and deterministic result sorting helpers. Fingerprint
+  rename/move and relation change creation were decomposed into typed
+  decision/target helpers. Exact/fingerprint/candidate precedence, identity
+  decision IDs, relation pairs, and change ordering remain unchanged.
+- Existing characterization tests were sufficient; no test file required a
+  behavior or expectation update.
+- Scoped `qlty check` and `qlty smells --no-snippets` over the six approved
+  paths pass with zero issues. The pre-change slice baseline had three mapped
+  smells: `matchFingerprintUnits`, `createFingerprintMatchChanges`, and
+  `createRelationChanges`.
+- Validation passed: `rtk pnpm run test:compile`; structural rules Mocha
+  suite (20 passing); desktop preparation and `test:desktop:run` (exit 0);
+  web preparation and `test:web:run` (exit 0); production `rtk pnpm run build`
+  (exit 0, existing asset-size warnings); architecture dependency suite;
+  package manifest suite (5 passing); `rtk pnpm run lint:md`; and
+  `rtk git diff --check`.
+- `qlty smells --no-snippets --upstream origin/main` still reports findings
+  assigned to later approved slices only; the Slice 1 explicit-path check is
+  clean. No Qlty suppression, ignore, baseline, threshold, configuration,
+  dependency, generated, or architecture change was made.
+- Compatibility and production readiness: domain/application layers remain
+  host-neutral and browser-safe; no parser, VS Code API, desktop/web entry
+  point, telemetry, JSON/report contract, or JP1/AJS meaning changed. The
+  existing large, duplicate, malformed, reordered, rename/move, relation, and
+  `sample1_large_utf8` characterization coverage remains active.
+- Traceability: the Slice 1 structural identity row and validation evidence
+  are updated in `TRACEABILITY.md`.
+- Independent implementation review: `Ready`; Findings none.
+- Completion Approval: approved on 2026-09-12 under the user's automatic
+  no-findings approval instruction. The exact completion commit is eligible
+  and pending `approval-committer`; this agent did not stage or commit.
 
 ## Closure Approval
 
@@ -165,7 +212,7 @@ and assigned findings to these 18 production files.
 
 ### Slice 1: Structural correspondence and comparison decomposition
 
-- Status: Proposed; blocked by plan review, approval, and plan commit.
+- Status: Implementation complete; independent review pending.
 - Scope: simplify structural fingerprint matching and structural change
   creation while preserving deterministic identity, relation, and ordering.
 - User / Domain Value: preserves the completed Semantic Diff and job-group

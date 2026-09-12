@@ -335,23 +335,18 @@ const classifyFingerprintGroup = (input: {
   };
 };
 
-const matchFingerprintUnits = (
-  beforeUnits: AjsUnit[],
-  afterUnits: AjsUnit[],
+const fingerprintGroups = (
+  units: AjsUnit[],
+  identityById: Map<string, SemanticDiffIdentityFingerprint>,
+): Map<string, AjsUnit[]> =>
+  groupBy(units, (unit) => identityById.get(unit.id)?.fingerprint ?? "");
+
+const fingerprintGroupResults = (
+  beforeByFingerprint: Map<string, AjsUnit[]>,
+  afterByFingerprint: Map<string, AjsUnit[]>,
   context: FingerprintMatchContext,
-): {
-  matches: SemanticDiffUnitMatch[];
-  candidates: SemanticDiffCandidateGroup[];
-} => {
-  const beforeByFingerprint = groupBy(
-    beforeUnits,
-    (unit) => context.beforeIdentityById.get(unit.id)?.fingerprint ?? "",
-  );
-  const afterByFingerprint = groupBy(
-    afterUnits,
-    (unit) => context.afterIdentityById.get(unit.id)?.fingerprint ?? "",
-  );
-  const groupResults = [...beforeByFingerprint.entries()]
+): FingerprintGroupResult[] =>
+  [...beforeByFingerprint.entries()]
     .sort(([left], [right]) => compareOrdinal(left, right))
     .map(([fingerprint, beforeMatches]) =>
       classifyFingerprintGroup({
@@ -361,20 +356,42 @@ const matchFingerprintUnits = (
         context,
       }),
     );
-  const matches = groupResults.flatMap(({ match }) => (match ? [match] : []));
-  const candidates = groupResults.flatMap(({ candidate }) =>
-    candidate ? [candidate] : [],
-  );
 
-  return {
-    matches: matches.sort(
+const fingerprintMatches = (
+  groupResults: FingerprintGroupResult[],
+): SemanticDiffUnitMatch[] =>
+  groupResults
+    .flatMap(({ match }) => (match ? [match] : []))
+    .sort(
       (left, right) =>
         compareUnits(left.before, right.before) ||
         compareUnits(left.after, right.after),
-    ),
-    candidates: candidates.sort((left, right) =>
-      compareOrdinal(left.fingerprint, right.fingerprint),
-    ),
+    );
+
+const fingerprintCandidates = (
+  groupResults: FingerprintGroupResult[],
+): SemanticDiffCandidateGroup[] =>
+  groupResults
+    .flatMap(({ candidate }) => (candidate ? [candidate] : []))
+    .sort((left, right) => compareOrdinal(left.fingerprint, right.fingerprint));
+
+const matchFingerprintUnits = (
+  beforeUnits: AjsUnit[],
+  afterUnits: AjsUnit[],
+  context: FingerprintMatchContext,
+): {
+  matches: SemanticDiffUnitMatch[];
+  candidates: SemanticDiffCandidateGroup[];
+} => {
+  const groupResults = fingerprintGroupResults(
+    fingerprintGroups(beforeUnits, context.beforeIdentityById),
+    fingerprintGroups(afterUnits, context.afterIdentityById),
+    context,
+  );
+
+  return {
+    matches: fingerprintMatches(groupResults),
+    candidates: fingerprintCandidates(groupResults),
   };
 };
 

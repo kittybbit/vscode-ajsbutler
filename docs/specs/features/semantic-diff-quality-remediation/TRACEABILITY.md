@@ -39,7 +39,7 @@ the review base.
   the exact Slice 1 scope as the next slice.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
-- Plan commit gate: eligible and pending `approval-committer`.
+- Plan commit gate: complete; focused plan commit `d3693d76`.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths: `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`,
@@ -50,6 +50,41 @@ the review base.
   `src/test/suite/semanticDiffJson.test.ts`.
 - `CHANGELOG.md` remains assigned to Slice 5 by the approved plan and is not
   part of Slice 1.
+
+## Slice 1 Implementation Evidence
+
+- Status: implementation complete; independent implementation review is
+  `Ready` with no findings and Completion Approval is approved on 2026-09-12.
+- Approved paths changed: `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  and `src/application/semantic-diff/compareSemanticDiff.ts`. The four
+  approved test paths were unchanged because existing characterization tests
+  cover the refactored branches.
+- Behavior preserved: fingerprint grouping/classification, exact and
+  fingerprint precedence, rename/move change order, relation target shape,
+  relation pair canonicalization, identity decision IDs, and deterministic
+  ordering.
+- Qlty evidence: explicit six-path `qlty check` and `qlty smells
+  --no-snippets` both pass with zero issues. The three Slice 1 baseline smells
+  were `matchFingerprintUnits`, `createFingerprintMatchChanges`, and
+  `createRelationChanges`; no suppression, ignore, baseline, threshold,
+  configuration, or architecture exception was added.
+- Validation evidence: test compile, structural rules suite (20 passing),
+  desktop preparation and test run, web preparation and smoke run, production
+  build, architecture dependency suite, package manifest suite (5 passing),
+  Markdown lint, and `git diff --check` all passed. The production build kept
+  its existing asset-size warnings.
+- Compatibility evidence: no parser, public DTO/JSON/report schema, VS Code
+  API, desktop/web entry point, telemetry, or JP1/AJS behavior changed; large,
+  duplicate, malformed, reordered, rename/move, relation, and
+  `sample1_large_utf8` characterization scenarios remain covered.
+- Review result: independent `implementation-reviewer` returned `Ready` with
+  no findings. Completion Approval is approved under the user's automatic
+  no-findings approval instruction.
+- Exact completion scope: the two changed production files above plus this
+  feature's `TASKS.md` and `TRACEABILITY.md`; the four approved test paths
+  remain unchanged and are validation evidence only.
+- Completion commit: eligible and pending `approval-committer`; this agent
+  did not stage or commit.
 
 ## Web Smoke Scenario Traceability
 
