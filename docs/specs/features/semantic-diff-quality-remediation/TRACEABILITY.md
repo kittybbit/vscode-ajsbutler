@@ -49,12 +49,13 @@ the review base.
   state commit `19e60b20`, independent implementation review `Ready` with no
   findings, and Completion Approval `Approved` under the user's automatic
   no-findings slice approval policy.
-- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 5 scope
+- Prior Human Approval: `Approved` on 2026-09-12 for the exact Slice 5 scope
+  as the next slice; completion commit `a69fcd12` is complete after focused
+  state commit `4f3119d7`, independent implementation review `Ready` with no
+  findings, and Completion Approval `Approved` under the user's automatic
+  no-findings slice approval policy.
+- Current Human Approval: `Approved` on 2026-09-12 for the exact Slice 6 scope
   as the next slice.
-- Slice 5 Completion Approval: `Approved` on 2026-09-12 under the user's
-  automatic no-findings slice approval policy after independent implementation
-  review `Ready` with no findings; the exact completion scope is eligible for
-  `approval-committer` pending its commit gate.
 - Implementation sequencing: one slice at a time, with independent review and
   completion approval/commit before advancing.
 - Plan commit gate: complete; focused plan commit `d3693d76`.
@@ -68,20 +69,18 @@ the review base.
   completion commit is `6441de1e`.
 - Exact Slice 4 paths and completion evidence remain recorded below; its
   completion commit is `e89e6cab`.
-- Exact Slice 5 production paths:
-  `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
-  and `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`.
-- Exact Slice 5 documentation path: the reported `CHANGELOG.md` sentence
-  wrapping only, with release-note wording unchanged.
-- Exact Slice 5 test paths:
-  `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`,
-  `src/test/suite/semanticDiffPresentationArtifacts.test.ts`,
-  `src/test/suite/renderSemanticDiffMarkdown.test.ts`,
-  `src/test/suite/semanticDiffMarkdownProjections.test.ts`,
-  `src/test/suite/buildSemanticDiffReportData.test.ts`, and
-  `src/test/suite/semanticDiffJson.test.ts`.
-- `CHANGELOG.md` remains assigned to Slice 5 by the approved plan and is not
-  subject to any change beyond the reported sentence wrapping.
+- Exact Slice 5 paths and completion evidence remain recorded below; its
+  completion commit is `a69fcd12`.
+- Exact Slice 6 production paths:
+  `src/infrastructure/git/VscodeGitHeadContentProvider.ts` and
+  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
+- Exact Slice 6 test path:
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+- Slice 6 validation boundary: complete adapter/provider suite on desktop; web
+  validation is limited to the final production build and existing WEB-7
+  through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
+- `CHANGELOG.md` remains limited to the reported Slice 5 sentence wrapping;
+  its release-note wording is unchanged.
 
 ## Slice 3 Implementation Evidence (2026-09-12)
 
@@ -317,10 +316,11 @@ the review base.
   synchronization made no runtime or test changes and did not stage or commit.
   Dependabot documents remain untouched.
 
-## Slice 5 Activation And Approval (2026-09-12)
+## Slice 5 Completion Evidence (2026-09-12)
 
-- Status: Complete activation; Human Approved; focused state commit
-  `4f3119d7` is complete.
+- Status: Complete; focused state commit `4f3119d7`; implementation complete;
+  independent implementation review `Ready` with no findings; Completion
+  Approval `Approved` on 2026-09-12; completion commit `a69fcd12`.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production paths:
@@ -339,17 +339,16 @@ the review base.
 - Approved boundary: preserve parse errors/count, period omission, sidecar
   availability, localized text/order/escape, report and JSON facts, and exact
   release-note wording while clearing the assigned presentation findings.
-- State commit gate: complete; focused state commit `4f3119d7`. The Slice 5
-  completion commit is eligible and pending `approval-committer`. No other
-  runtime, test, configuration, generated, dependency, Calendar Slice 3, or
-  Dependabot change is included in the completion scope.
+- State commit gate: complete; focused state commit `4f3119d7`; completion
+  commit `a69fcd12` is complete. No other runtime, test, configuration,
+  generated, dependency, Calendar Slice 3, or Dependabot change was included
+  in those commits.
 
 ## Slice 5 Implementation Evidence (2026-09-12)
 
-- Status: implementation complete; independent implementation review `Ready`
-  with no findings; Completion Approval `Approved` on 2026-09-12 under the
-  user's automatic no-findings slice approval policy; completion commit is
-  eligible and pending `approval-committer`.
+- Status: complete; independent implementation review `Ready` with no findings;
+  Completion Approval `Approved` on 2026-09-12 under the user's automatic
+  no-findings slice approval policy; completion commit `a69fcd12`.
 - Exact changed production paths:
   `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
   and `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`.
@@ -387,11 +386,28 @@ the review base.
   schema, parser, comparison or schedule meaning, VS Code API, desktop/web
   entry point, telemetry, Dependabot documents, or Calendar Slice 3 path
   changed. No new release content or durable specification update is needed.
-- Recommended route: `approval-committer` should verify the exact changed
-  paths and commit the approved Slice 5 scope. Parse/period precedence,
-  identity and target rendering, schedule summary selection, exact Markdown
-  escaping/order, and the three reproduced baseline failures were independently
-  reviewed with `Ready` and no findings.
+- Completion commit: `a69fcd12`; completion is committed. Parse/period
+  precedence, identity and target rendering, schedule summary selection, exact
+  Markdown escaping/order, and the three reproduced baseline failures were
+  independently reviewed with `Ready` and no findings.
+
+## Slice 6 Activation And Approval (2026-09-12)
+
+- Status: Human Approved; active next slice, pending focused state commit.
+- Basis: the approved ten-slice plan, independent plan review `Ready` with no
+  findings, and the user's automatic no-findings slice approval instruction.
+- Approved production paths:
+  `src/infrastructure/git/VscodeGitHeadContentProvider.ts` and
+  `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
+- Approved test path:
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+- Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved validation boundary: complete adapter/provider suite on desktop; web
+  validation is limited to the final production build and existing WEB-7
+  through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
+- State commit gate: eligible; pending `approval-committer`. No runtime, test,
+  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
+  Dependabot change is included in that state commit.
 
 ## Web Smoke Scenario Traceability
 

@@ -3,14 +3,14 @@
 ## Agent Brief
 
 - Purpose: remove PR #317 Qlty blockers without observable behavior change.
-- Approved or active slice: Slices 1-3 are complete at `fa933763`, `ecea8714`,
-  and `6441de1e`; Slice 4 is complete at `e89e6cab` after focused state commit
-  `19e60b20`; Slice 5 is Human Approved and awaits its focused state commit.
-  Implementation remains one slice at a time.
+- Approved or active slice: Slices 1-4 are complete at `fa933763`, `ecea8714`,
+  `6441de1e`, and `e89e6cab`; Slice 5 is complete at `a69fcd12` after focused
+  state commit `4f3119d7`; Slice 6 is Human Approved and awaits its focused
+  state commit. Implementation remains one slice at a time.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Next decision: delegate the exact approved Slice 5 scope to
+- Next decision: delegate the exact approved Slice 6 scope to
   `approval-committer` for the focused state commit.
 
 ## Sync Rule
@@ -22,14 +22,13 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slices 1-4 complete; Slice 5 implementation complete,
-  completion commit eligible pending
+- Status: Approved plan; Slices 1-5 complete; Slice 6 approved, state commit
+  pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure.
 - Review status: Ready; no findings.
-- Human approval: Approved on 2026-09-12 for Slice 5.
-- Active implementation slice: none; Slice 5 completion commit is eligible and
-  pending `approval-committer`.
+- Human approval: Approved on 2026-09-12 for Slice 6.
+- Active implementation slice: Slice 6, awaiting focused state commit.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -51,26 +50,23 @@
 
 - Status: Approved
 - Approved at: 2026-09-12
-- Approved scope: The complete ten-slice plan and the exact Slice 5 scope as
+- Approved scope: The complete ten-slice plan and the exact Slice 6 scope as
   the next implementation slice; implementation advances one slice at a time
   after its independent review and completion gate.
 - Approved paths:
   - Selected evidence docs: this feature's `TASKS.md` and
     `TRACEABILITY.md`; the planning package's `SPECS.md` remains in the
     already-committed plan package.
-  - Slice 5 production and documentation: `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`,
-    `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`, and
-    the reported `CHANGELOG.md` sentence wrapping only, with wording unchanged.
-  - Slice 5 tests: `src/test/suite/buildSemanticDiffPresentationArtifactsAdapter.test.ts`,
-    `src/test/suite/semanticDiffPresentationArtifacts.test.ts`,
-    `src/test/suite/renderSemanticDiffMarkdown.test.ts`,
-    `src/test/suite/semanticDiffMarkdownProjections.test.ts`,
-    `src/test/suite/buildSemanticDiffReportData.test.ts`, and
-    `src/test/suite/semanticDiffJson.test.ts`.
-  - `CHANGELOG.md` is limited to the reported Slice 5 sentence wrapping; its
-    release-note wording must remain unchanged.
+  - Slice 6 production: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`
+    and `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
+  - Slice 6 test: `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+  - Desktop validation: complete adapter/provider suite. Web validation is
+    limited to the final production build and existing WEB-7 through WEB-10
+    smoke scenarios; web smoke does not claim Git adapter/provider execution.
+  - `CHANGELOG.md` remains limited to the reported Slice 5 sentence wrapping;
+    its release-note wording must remain unchanged.
 
-Slice 5 implementation starts only after its focused state commit; later
+Slice 6 implementation starts only after its focused state commit; later
 slices must retain their exact approved paths and gates.
 
 ## Plan Commit Gate
@@ -85,17 +81,12 @@ slices must retain their exact approved paths and gates.
 
 ## Completion Approval
 
-- Status: Approved for Slice 5 under the user's automatic no-findings slice
-  approval policy.
-- Approved at: 2026-09-12
-- Approved scope: the exact Slice 5 production, documentation, test, and
-  evidence paths recorded below.
-- Approved paths: `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`,
-  `src/presentation/semantic-diff/semanticDiffMarkdownLocalization.ts`,
-  `CHANGELOG.md` (reported 1.1.0 sentence wrapping only), the six allowed test
-  paths, and this feature's `TASKS.md` and `TRACEABILITY.md`.
-- Implementation review verdict: `Ready`; no findings.
-- Commit status: Eligible; completion commit pending `approval-committer`.
+- Status: Pending for Slice 6
+- Approved at: none
+- Approved scope: none
+- Approved paths: none
+- Implementation review verdict: Pending
+- Commit status: Not eligible
 
 Each slice requires independent review and Completion Approval before its
 exact implementation and evidence are committed.
@@ -504,10 +495,12 @@ and assigned findings to these 18 production files.
   unapproved sample category assertion remains a separate follow-up, and
   inherited Dependabot documentation edits are preserved outside this slice.
 
-## Slice 5 Activation And Approval (2026-09-12)
+## Slice 5 Completion Evidence (2026-09-12)
 
-- Status: Complete activation; Human Approved; focused state commit
-  `4f3119d7` is complete.
+- Status: Complete; focused state commit `4f3119d7`; independent implementation
+  review `Ready` with no findings; Completion Approval `Approved` on 2026-09-12
+  under the user's automatic no-findings slice approval policy; completion
+  commit `a69fcd12`.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production paths: `src/application/semantic-diff/buildSemanticDiffPresentationArtifacts.ts`
@@ -525,14 +518,16 @@ and assigned findings to these 18 production files.
 - Approved boundary: preserve parse errors/count, period omission, sidecar
   availability, localized text/order/escape, report and JSON facts, and exact
   release-note wording while clearing the assigned presentation findings.
-- State commit gate: complete; focused state commit `4f3119d7`. The Slice 5
-  completion commit is eligible and pending `approval-committer`. No other
-  runtime, test, configuration, generated, dependency, Calendar Slice 3, or
-  Dependabot change is included in the completion scope.
+- State commit gate: complete; focused state commit `4f3119d7`; completion
+  commit `a69fcd12` is complete. No other runtime, test, configuration,
+  generated, dependency, Calendar Slice 3, or Dependabot change was included
+  in those commits.
 
 ### Slice 5: Presentation artifacts, report rendering, and format repair
 
-- Status: Active; Human Approved; focused state commit pending.
+- Status: Complete; focused state commit `4f3119d7` and completion commit
+  `a69fcd12` complete; independent review `Ready`; Completion Approval
+  `Approved` on 2026-09-12.
 - Scope: simplify artifact construction and Markdown localization and wrap
   only the reported `CHANGELOG.md` sentence.
 - User / Domain Value: preserves Summary/Full/Audit output and parse failures
@@ -570,8 +565,8 @@ and assigned findings to these 18 production files.
 
 - Status: implementation complete; independent implementation review `Ready`
   with no findings; Completion Approval `Approved` on 2026-09-12 under the
-  user's automatic no-findings slice approval policy; completion commit is
-  eligible and pending `approval-committer`.
+  user's automatic no-findings slice approval policy; completion commit
+  `a69fcd12` is complete.
 - Exact implementation scope: the two approved production paths,
   `CHANGELOG.md` sentence wrapping, and this feature's evidence documents.
 - Artifact construction now separates source parsing, parser-error projection,
@@ -607,13 +602,30 @@ and assigned findings to these 18 production files.
   schedule facts, VS Code API, desktop/web entry point, telemetry, or
   Dependabot/Calendar Slice 3 scope changed. No README, durable specification,
   or new release content was added.
-- Production readiness: ready for the completion commit, with the three
+- Production readiness: completion commit `a69fcd12` is complete, with the three
   pre-existing focused baseline failures explicitly unresolved and outside the
   approved behavior-preserving refactor.
 
+## Slice 6 Activation And Approval (2026-09-12)
+
+- Status: Human Approved; active next slice, pending focused state commit.
+- Basis: the approved ten-slice plan, independent plan review `Ready` with no
+  findings, and the user's automatic no-findings slice approval instruction.
+- Approved production paths: `src/infrastructure/git/VscodeGitHeadContentProvider.ts`
+  and `src/infrastructure/git/VscodeGitHeadDefinitionSourceAdapter.ts`.
+- Approved test path:
+  `src/test/suite/vscodeGitHeadDefinitionSourceAdapter.test.ts`.
+- Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved validation boundary: complete adapter/provider suite on desktop; web
+  validation is limited to the final production build and existing WEB-7
+  through WEB-10 smoke scenarios, with no Git adapter/provider execution claim.
+- State commit gate: eligible; pending `approval-committer`. No runtime, test,
+  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
+  Dependabot change is included in that state commit.
+
 ### Slice 6: Git HEAD source and snapshot cache decomposition
 
-- Status: Proposed.
+- Status: Active; Human Approved; focused state commit pending.
 - Scope: simplify optional Git API discovery, rename/path selection, object
   validation, source reading, and cache lifetime.
 - User / Domain Value: preserves reliable immutable `HEAD` comparison on
@@ -645,7 +657,7 @@ and assigned findings to these 18 production files.
 
 ### Slice 7: Command source acquisition and selection workflow
 
-- Status: Proposed.
+- Status: Active; Human Approved; focused state commit pending.
 - Scope: simplify active capture through source/period selection and prepared
   before/after source, including Git failure localization.
 - User / Domain Value: preserves cancellation and source-selection behavior.
@@ -883,6 +895,7 @@ After Slice 10 is reviewed, approved, and committed:
 - [x] Complete, review, approve, and commit Slice 2.
 - [x] Complete, review, approve, and commit Slice 3.
 - [x] Complete, review, approve, and commit Slice 4.
-- [ ] Complete, review, approve, and commit Slices 5-10 in order.
+- [x] Complete, review, approve, and commit Slice 5.
+- [ ] Complete, review, approve, and commit Slices 6-10 in order.
 - [ ] Pass integrated local and remote gates.
 - [ ] Perform Feature Exit and approved closure commit.
