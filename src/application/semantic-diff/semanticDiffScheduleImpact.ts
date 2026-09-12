@@ -174,6 +174,9 @@ const compareOrdinal = (left: string, right: string): number =>
 
 const compareNumbers = (left: number, right: number): number => left - right;
 
+const compareInOrder = (comparisons: readonly (() => number)[]): number =>
+  comparisons.reduce((result, comparison) => result || comparison(), 0);
+
 const utf8Length = (value: string): number =>
   new TextEncoder().encode(value).byteLength;
 
@@ -297,70 +300,190 @@ type SourceKeyForRun = (
   run: { unitId?: string; unitPath: string },
 ) => string;
 
-const createSourceKeyForRun = (result: SemanticDiffResult): SourceKeyForRun => {
-  const identity = identityDecisionsByUnit(result.identityDecisions);
-  const identityByPath = {
+type IdentityIndex = ReturnType<typeof identityDecisionsByUnit> & {
+  byPath: {
+    before: Map<string, SemanticDiffIdentityDecision>;
+    after: Map<string, SemanticDiffIdentityDecision>;
+  };
+};
+
+const identityIndex = (
+  decisions: readonly SemanticDiffIdentityDecision[],
+): IdentityIndex => {
+  const byUnit = identityDecisionsByUnit(decisions);
+  const byPath = {
     before: new Map<string, SemanticDiffIdentityDecision>(),
     after: new Map<string, SemanticDiffIdentityDecision>(),
   };
-  result.identityDecisions.forEach((decision) => {
+  decisions.forEach((decision) => {
     decision.before.forEach((reference) =>
-      identityByPath.before.set(reference.absolutePath, decision),
+      byPath.before.set(reference.absolutePath, decision),
     );
     decision.after.forEach((reference) =>
-      identityByPath.after.set(reference.absolutePath, decision),
+      byPath.after.set(reference.absolutePath, decision),
     );
   });
-  return (root, side, run) => {
-    const decision =
-      (run.unitId ? identity[side].get(run.unitId) : undefined) ??
-      identityByPath[side].get(run.unitPath);
-    const matchedIdentity =
-      !root.scopeTransition &&
-      decision &&
-      (decision.status === "exact" ||
-        decision.status === "fingerprint-confirmed");
-    const matchedRootFallback =
-      !root.scopeTransition &&
-      !decision &&
-      (root.matchKind === "exact" || root.matchKind === "fingerprint");
-    if (matchedIdentity) {
-      const sideReferences = decision[side];
-      const sourceReference =
-        sideReferences.find(
-          (reference) =>
-            reference.id === run.unitId ||
-            reference.absolutePath === run.unitPath,
-        ) ?? sideReferences[0];
-      return encodeSemanticDiffScheduleImpactId(
-        "matched-source",
-        decision.id,
-        decision.after[0]?.absolutePath ??
-          decision.before[0]?.absolutePath ??
-          sourceReference?.absolutePath ??
-          run.unitPath,
-      );
-    }
-    if (matchedRootFallback) {
-      return encodeSemanticDiffScheduleImpactId(
-        "matched-source",
-        root.identityDecisionId ?? root.id,
-        run.unitPath,
-      );
-    }
-    return encodeSemanticDiffScheduleImpactId(
-      "one-sided-source",
-      side,
-      run.unitId ?? run.unitPath,
+  return { ...byUnit, byPath };
+};
+
+const decisionForRun = (
+  index: IdentityIndex,
+  side: SemanticDiffSide,
+  run: { unitId?: string; unitPath: string },
+): SemanticDiffIdentityDecision | undefined =>
+  (run.unitId ? index[side].get(run.unitId) : undefined) ??
+  index.byPath[side].get(run.unitPath);
+
+const isConfirmedIdentity = (
+  root: SourceKeyRootContext,
+  decision: SemanticDiffIdentityDecision | undefined,
+): decision is SemanticDiffIdentityDecision =>
+  !root.scopeTransition &&
+  decision !== undefined &&
+  (decision.status === "exact" || decision.status === "fingerprint-confirmed");
+
+const isMatchedRootFallback = (
+  root: SourceKeyRootContext,
+  decision: SemanticDiffIdentityDecision | undefined,
+): boolean =>
+  !root.scopeTransition &&
+  decision === undefined &&
+  (root.matchKind === "exact" || root.matchKind === "fingerprint");
+
+const matchedSourceKey = (
+  side: SemanticDiffSide,
+  run: { unitId?: string; unitPath: string },
+  decision: SemanticDiffIdentityDecision,
+): string => {
+  const sideReferences = decision[side];
+  const sourceReference =
+    sideReferences.find(
+      (reference) =>
+        reference.id === run.unitId || reference.absolutePath === run.unitPath,
+    ) ?? sideReferences[0];
+  return encodeSemanticDiffScheduleImpactId(
+    "matched-source",
+    decision.id,
+    decision.after[0]?.absolutePath ??
+      decision.before[0]?.absolutePath ??
+      sourceReference?.absolutePath ??
       run.unitPath,
-    );
-  };
+  );
+};
+
+const sourceKeyForConfirmedRun = (
+  side: SemanticDiffSide,
+  run: { unitId?: string; unitPath: string },
+  decision: SemanticDiffIdentityDecision,
+): string => matchedSourceKey(side, run, decision);
+
+const sourceKeyForMatchedRoot = (
+  root: SourceKeyRootContext,
+  run: { unitId?: string; unitPath: string },
+): string =>
+  encodeSemanticDiffScheduleImpactId(
+    "matched-source",
+    root.identityDecisionId ?? root.id,
+    run.unitPath,
+  );
+
+const sourceKeyForOneSidedRun = (
+  side: SemanticDiffSide,
+  run: { unitId?: string; unitPath: string },
+): string =>
+  encodeSemanticDiffScheduleImpactId(
+    "one-sided-source",
+    side,
+    run.unitId ?? run.unitPath,
+    run.unitPath,
+  );
+
+const sourceKeyForRun = (input: {
+  index: IdentityIndex;
+  root: SourceKeyRootContext;
+  side: SemanticDiffSide;
+  run: { unitId?: string; unitPath: string };
+}): string => {
+  const decision = decisionForRun(input.index, input.side, input.run);
+  if (isConfirmedIdentity(input.root, decision)) {
+    return sourceKeyForConfirmedRun(input.side, input.run, decision);
+  }
+  if (isMatchedRootFallback(input.root, decision)) {
+    return sourceKeyForMatchedRoot(input.root, input.run);
+  }
+  return sourceKeyForOneSidedRun(input.side, input.run);
+};
+
+const createSourceKeyForRun = (result: SemanticDiffResult): SourceKeyForRun => {
+  const index = identityIndex(result.identityDecisions);
+  return (root, side, run) => sourceKeyForRun({ index, root, side, run });
 };
 
 const identityMatchKind = (
   decision: SemanticDiffIdentityDecision,
 ): "exact" | "fingerprint" =>
   decision.status === "exact" ? "exact" : "fingerprint";
+
+type CandidateReference = SemanticDiffIdentityDecision["before"][number];
+
+const candidateForReference = (
+  reference: CandidateReference,
+  units: ReadonlyMap<string, AjsUnit>,
+): SemanticDiffScheduleImpactCandidate | undefined => {
+  const unit = units.get(reference.id);
+  if (!unit || !isRootJobnet(unit)) return undefined;
+  return {
+    id: reference.id,
+    unitId: reference.id,
+    unitName: unit.name,
+    unitPath: unit.absolutePath,
+  };
+};
+
+const compareCandidates = (
+  left: SemanticDiffScheduleImpactCandidate,
+  right: SemanticDiffScheduleImpactCandidate,
+): number =>
+  compareInOrder([
+    () => compareOrdinal(left.unitPath, right.unitPath),
+    () => compareOrdinal(left.unitId, right.unitId),
+    () => compareOrdinal(left.unitName, right.unitName),
+  ]);
+
+const candidateSide = (
+  references: readonly CandidateReference[],
+  units: ReadonlyMap<string, AjsUnit>,
+): SemanticDiffScheduleImpactCandidate[] =>
+  references
+    .flatMap((reference) => {
+      const candidate = candidateForReference(reference, units);
+      return candidate ? [candidate] : [];
+    })
+    .sort(compareCandidates);
+
+const candidateGroupForDecision = (
+  decision: SemanticDiffIdentityDecision,
+  beforeUnits: ReadonlyMap<string, AjsUnit>,
+  afterUnits: ReadonlyMap<string, AjsUnit>,
+): SemanticDiffScheduleImpactCandidateGroup | undefined => {
+  const before = candidateSide(decision.before, beforeUnits);
+  const after = candidateSide(decision.after, afterUnits);
+  if (before.length === 0 && after.length === 0) return undefined;
+  const canonicalPath = after[0]?.unitPath ?? before[0]!.unitPath;
+  return {
+    id: encodeSemanticDiffScheduleImpactId(
+      "candidate-group",
+      "pair",
+      canonicalPath,
+      "",
+      "",
+      "fingerprint",
+      0,
+    ),
+    before,
+    after,
+  };
+};
 
 const candidateGroups = (
   decisions: readonly SemanticDiffIdentityDecision[],
@@ -369,57 +492,9 @@ const candidateGroups = (
 ): SemanticDiffScheduleImpactCandidateGroup[] =>
   decisions
     .filter((decision) => decision.status === "candidate")
-    .map((decision) => {
-      const before = decision.before
-        .map((reference) => beforeUnits.get(reference.id))
-        .filter(
-          (unit): unit is AjsUnit => unit !== undefined && isRootJobnet(unit),
-        )
-        .map((reference) => ({
-          id: reference.id,
-          unitId: reference.id,
-          unitName: reference.name,
-          unitPath: reference.absolutePath,
-        }))
-        .sort(
-          (left, right) =>
-            compareOrdinal(left.unitPath, right.unitPath) ||
-            compareOrdinal(left.unitId, right.unitId) ||
-            compareOrdinal(left.unitName, right.unitName),
-        );
-      const after = decision.after
-        .map((reference) => afterUnits.get(reference.id))
-        .filter(
-          (unit): unit is AjsUnit => unit !== undefined && isRootJobnet(unit),
-        )
-        .map((reference) => ({
-          id: reference.id,
-          unitId: reference.id,
-          unitName: reference.name,
-          unitPath: reference.absolutePath,
-        }))
-        .sort(
-          (left, right) =>
-            compareOrdinal(left.unitPath, right.unitPath) ||
-            compareOrdinal(left.unitId, right.unitId) ||
-            compareOrdinal(left.unitName, right.unitName),
-        );
-      if (before.length === 0 && after.length === 0) return undefined;
-      const canonicalPath = after[0]?.unitPath ?? before[0]!.unitPath;
-      return {
-        id: encodeSemanticDiffScheduleImpactId(
-          "candidate-group",
-          "pair",
-          canonicalPath,
-          "",
-          "",
-          "fingerprint",
-          0,
-        ),
-        before,
-        after,
-      };
-    })
+    .map((decision) =>
+      candidateGroupForDecision(decision, beforeUnits, afterUnits),
+    )
     .filter((group) => group !== undefined)
     .sort((left, right) => compareOrdinal(left.id, right.id));
 
@@ -431,25 +506,28 @@ type IndexedRun = SemanticDiffScheduleRun & {
 
 type ScheduleRun = SemanticDiffScheduleRun & { unitId?: string };
 
-const indexedRuns = (
-  root: SourceKeyRootContext,
-  side: SemanticDiffSide,
-  runs: readonly ScheduleRun[],
-  sourceKeyForRun: SourceKeyForRun,
-): IndexedRun[] => {
+type IndexedRunsInput = {
+  root: SourceKeyRootContext;
+  side: SemanticDiffSide;
+  runs: readonly ScheduleRun[];
+  sourceKeyForRun: SourceKeyForRun;
+};
+
+const indexedRuns = (input: IndexedRunsInput): IndexedRun[] => {
   const grouped = new Map<string, ScheduleRun[]>();
-  [...runs]
-    .sort(
-      (left, right) =>
-        compareOrdinal(left.date, right.date) ||
-        compareNumbers(left.rule, right.rule) ||
-        compareOrdinal(left.time, right.time) ||
-        compareOrdinal(left.unitPath, right.unitPath) ||
-        compareOrdinal(left.unitName, right.unitName),
+  [...input.runs]
+    .sort((left, right) =>
+      compareInOrder([
+        () => compareOrdinal(left.date, right.date),
+        () => compareNumbers(left.rule, right.rule),
+        () => compareOrdinal(left.time, right.time),
+        () => compareOrdinal(left.unitPath, right.unitPath),
+        () => compareOrdinal(left.unitName, right.unitName),
+      ]),
     )
     .forEach((run) => {
       const key = encodeSemanticDiffScheduleImpactId(
-        sourceKeyForRun(root, side, {
+        input.sourceKeyForRun(input.root, input.side, {
           unitId: run.unitId,
           unitPath: run.unitPath,
         }),
@@ -469,34 +547,44 @@ const indexedRuns = (
     );
 };
 
-const issueKind = (
+const invalidReasons = new Set([
+  "invalid-start-time",
+  "invalid-calendar-day",
+  "unsupported-schedule-date",
+]);
+
+const uncalculatedReasons = new Set([
+  "missing-start-time",
+  "unpaired-start-time",
+]);
+
+const projectionIssueKinds: ReadonlyMap<
+  string,
+  SemanticDiffScheduleImpactIssueKind
+> = new Map([
+  ["calendar-selection\u0000missing-context", "missing-context"],
+  ["closed-day-substitution\u0000missing-context", "missing-context"],
+  ["calendar-selection\u0000invalid", "invalid"],
+  ["closed-day-substitution\u0000invalid", "invalid"],
+]);
+
+const projectionIssueKind = (
   decision: Pick<SemanticDiffScheduleUnsupportedDecision, "reason" | "status">,
+): SemanticDiffScheduleImpactIssueKind | undefined =>
+  projectionIssueKinds.get(`${decision.reason}\u0000${decision.status ?? ""}`);
+
+const reasonIssueKind = (
+  reason: SemanticDiffScheduleUnsupportedDecision["reason"],
 ): SemanticDiffScheduleImpactIssueKind => {
-  const carriesProjectionStatus =
-    decision.reason === "calendar-selection" ||
-    decision.reason === "closed-day-substitution";
-  if (carriesProjectionStatus && decision.status === "missing-context") {
-    return "missing-context";
-  }
-  if (carriesProjectionStatus && decision.status === "invalid") {
-    return "invalid";
-  }
-  const reasonCode = decision.reason;
-  if (
-    reasonCode === "invalid-start-time" ||
-    reasonCode === "invalid-calendar-day" ||
-    reasonCode === "unsupported-schedule-date"
-  ) {
-    return "invalid";
-  }
-  if (
-    reasonCode === "missing-start-time" ||
-    reasonCode === "unpaired-start-time"
-  ) {
-    return "uncalculated";
-  }
+  if (invalidReasons.has(reason)) return "invalid";
+  if (uncalculatedReasons.has(reason)) return "uncalculated";
   return "unsupported";
 };
+
+const issueKind = (
+  decision: Pick<SemanticDiffScheduleUnsupportedDecision, "reason" | "status">,
+): SemanticDiffScheduleImpactIssueKind =>
+  projectionIssueKind(decision) ?? reasonIssueKind(decision.reason);
 
 const issueKindOrder: Record<SemanticDiffScheduleImpactIssueKind, number> = {
   invalid: 0,
@@ -678,125 +766,183 @@ const scheduleRunsBySide = (
   return { before, after };
 };
 
+type ScheduleIssueContext = {
+  result: SemanticDiffResult;
+  evaluation: Extract<SemanticDiffScheduleEvaluation, { kind: "evaluated" }>;
+  rootsBySide: { before: AjsUnit[]; after: AjsUnit[] };
+  rootIdsByPath: { before: Map<string, string>; after: Map<string, string> };
+  excludedUnitIds: ReadonlySet<string>;
+  excludedRootPaths: ReadonlySet<string>;
+};
+
+const compareUnsupportedDecisions =
+  (
+    result: SemanticDiffResult,
+    rootsBySide: { before: AjsUnit[]; after: AjsUnit[] },
+  ) =>
+  (
+    left: SemanticDiffScheduleUnsupportedDecision,
+    right: SemanticDiffScheduleUnsupportedDecision,
+  ): number => {
+    const leftRoot = owningRoot(rootsBySide[left.side], left.unit.absolutePath);
+    const rightRoot = owningRoot(
+      rootsBySide[right.side],
+      right.unit.absolutePath,
+    );
+    const leftKind = issueKind(left);
+    const rightKind = issueKind(right);
+    return compareInOrder([
+      () =>
+        compareOrdinal(
+          leftRoot?.absolutePath ?? "",
+          rightRoot?.absolutePath ?? "",
+        ),
+      () => compareOrdinal(left.side, right.side),
+      () => compareNumbers(issueKindOrder[leftKind], issueKindOrder[rightKind]),
+      () => compareOrdinal(left.reason, right.reason),
+      () => compareOrdinal(issueTargetKind(left), issueTargetKind(right)),
+      () => compareOrdinal(left.unit.id, right.unit.id),
+      () => compareOrdinal(left.unit.absolutePath, right.unit.absolutePath),
+      () => compareOrdinal(left.parameter.key, right.parameter.key),
+      () =>
+        compareOrdinal(
+          detailOrderingKey(detailForUnsupported(result, left)),
+          detailOrderingKey(detailForUnsupported(result, right)),
+        ),
+      () => compareNumbers(left.scheduleRule ?? -1, right.scheduleRule ?? -1),
+      () => compareOrdinal(left.parameter.value, right.parameter.value),
+    ]);
+  };
+
+const isExcludedScheduleIssue = (
+  decision: SemanticDiffScheduleUnsupportedDecision,
+  context: ScheduleIssueContext,
+): boolean => {
+  if (context.excludedUnitIds.has(decision.unit.id)) return true;
+  return [...context.excludedRootPaths].some((path) =>
+    isWithinRoot(decision.unit.absolutePath, path),
+  );
+};
+
+type ScheduleIssueMetadata = {
+  rootId: string | null;
+  kind: SemanticDiffScheduleImpactIssueKind;
+  targetKind: string;
+  targetId: string;
+  targetPath: string;
+  parameterKey: string;
+  detail: SemanticDiffDetail;
+};
+
+const scheduleIssueMetadata = (
+  context: ScheduleIssueContext,
+  decision: SemanticDiffScheduleUnsupportedDecision,
+): ScheduleIssueMetadata | undefined => {
+  const root = owningRoot(
+    context.rootsBySide[decision.side],
+    decision.unit.absolutePath,
+  );
+  if (!root) return undefined;
+  return {
+    rootId: context.rootIdsByPath[decision.side].get(root.absolutePath) ?? null,
+    kind: issueKind(decision),
+    targetKind: issueTargetKind(decision),
+    targetId: decision.unit.id,
+    targetPath: decision.unit.absolutePath,
+    parameterKey: decision.parameter.key,
+    detail: detailForUnsupported(context.result, decision),
+  };
+};
+
+const scheduleIssueCountKey = (
+  decision: SemanticDiffScheduleUnsupportedDecision,
+  metadata: ScheduleIssueMetadata,
+): string =>
+  [
+    decision.side,
+    metadata.rootId,
+    metadata.kind,
+    decision.reason,
+    metadata.targetKind,
+    metadata.targetId,
+    metadata.targetPath,
+    metadata.parameterKey,
+  ].join("\u0000");
+
+const scheduleIssue = (
+  decision: SemanticDiffScheduleUnsupportedDecision,
+  metadata: ScheduleIssueMetadata,
+  occurrenceOrdinal: number,
+): SemanticDiffScheduleImpactIssue => ({
+  id: issueId({
+    side: decision.side,
+    rootId: metadata.rootId,
+    kind: metadata.kind,
+    reasonCode: decision.reason,
+    targetKind: metadata.targetKind,
+    targetId: metadata.targetId,
+    targetPath: metadata.targetPath,
+    parameterKey: metadata.parameterKey,
+    occurrenceOrdinal,
+  }),
+  occurrenceOrdinal,
+  kind: metadata.kind,
+  side: decision.side,
+  rootId: metadata.rootId,
+  reasonCode: unsupportedReason(decision.reason)
+    ? decision.reason
+    : "uncalculated",
+  targetKind: metadata.targetKind,
+  targetId: metadata.targetId,
+  targetPath: metadata.targetPath,
+  parameterKey: metadata.parameterKey,
+  detail: cloneDetail(metadata.detail),
+});
+
+const scheduleIssueForDecision = (
+  context: ScheduleIssueContext,
+  decision: SemanticDiffScheduleUnsupportedDecision,
+  counts: Map<string, number>,
+): SemanticDiffScheduleImpactIssue | undefined => {
+  if (isExcludedScheduleIssue(decision, context)) return undefined;
+  const metadata = scheduleIssueMetadata(context, decision);
+  if (!metadata) return undefined;
+  const countKey = scheduleIssueCountKey(decision, metadata);
+  const occurrenceOrdinal = counts.get(countKey) ?? 0;
+  counts.set(countKey, occurrenceOrdinal + 1);
+  return scheduleIssue(decision, metadata, occurrenceOrdinal);
+};
+
+const collectedScheduleIssues = (
+  context: ScheduleIssueContext,
+): SemanticDiffScheduleImpactIssue[] => {
+  const counts = new Map<string, number>();
+  return [...context.evaluation.unsupportedDecisions]
+    .sort(compareUnsupportedDecisions(context.result, context.rootsBySide))
+    .flatMap((decision) => {
+      const issue = scheduleIssueForDecision(context, decision, counts);
+      return issue ? [issue] : [];
+    });
+};
+
+const issuesForSide = (
+  issues: readonly SemanticDiffScheduleImpactIssue[],
+  side: SemanticDiffSide,
+): SemanticDiffScheduleImpactIssue[] =>
+  issues
+    .filter((issue) => issue.side === side)
+    .sort((left, right) => compareOrdinal(left.id, right.id));
+
 const scheduleIssues = (
-  result: SemanticDiffResult,
-  evaluation: Extract<SemanticDiffScheduleEvaluation, { kind: "evaluated" }>,
-  rootsBySide: { before: AjsUnit[]; after: AjsUnit[] },
-  rootIdsByPath: { before: Map<string, string>; after: Map<string, string> },
-  excludedUnitIds: ReadonlySet<string>,
-  excludedRootPaths: ReadonlySet<string>,
+  context: ScheduleIssueContext,
 ): {
   before: SemanticDiffScheduleImpactIssue[];
   after: SemanticDiffScheduleImpactIssue[];
 } => {
-  const bySide: {
-    before: SemanticDiffScheduleImpactIssue[];
-    after: SemanticDiffScheduleImpactIssue[];
-  } = {
-    before: [],
-    after: [],
-  };
-  const counts = new Map<string, number>();
-  [...evaluation.unsupportedDecisions]
-    .sort((left, right) => {
-      const leftRoot = owningRoot(
-        rootsBySide[left.side],
-        left.unit.absolutePath,
-      );
-      const rightRoot = owningRoot(
-        rootsBySide[right.side],
-        right.unit.absolutePath,
-      );
-      return (
-        compareOrdinal(
-          leftRoot?.absolutePath ?? "",
-          rightRoot?.absolutePath ?? "",
-        ) ||
-        compareOrdinal(left.side, right.side) ||
-        compareNumbers(
-          issueKindOrder[issueKind(left)],
-          issueKindOrder[issueKind(right)],
-        ) ||
-        compareOrdinal(left.reason, right.reason) ||
-        compareOrdinal(issueTargetKind(left), issueTargetKind(right)) ||
-        compareOrdinal(left.unit.id, right.unit.id) ||
-        compareOrdinal(left.unit.absolutePath, right.unit.absolutePath) ||
-        compareOrdinal(left.parameter.key, right.parameter.key) ||
-        compareOrdinal(
-          detailOrderingKey(detailForUnsupported(result, left)),
-          detailOrderingKey(detailForUnsupported(result, right)),
-        ) ||
-        compareNumbers(left.scheduleRule ?? -1, right.scheduleRule ?? -1) ||
-        compareOrdinal(left.parameter.value, right.parameter.value)
-      );
-    })
-    .forEach((decision) => {
-      if (
-        excludedUnitIds.has(decision.unit.id) ||
-        [...excludedRootPaths].some((path) =>
-          isWithinRoot(decision.unit.absolutePath, path),
-        )
-      ) {
-        return;
-      }
-      const root = owningRoot(
-        rootsBySide[decision.side],
-        decision.unit.absolutePath,
-      );
-      if (!root) return;
-      const rootId =
-        rootIdsByPath[decision.side].get(root.absolutePath) ?? null;
-      const detail = detailForUnsupported(result, decision);
-      const targetKind = issueTargetKind(decision);
-      const targetId = decision.unit.id;
-      const targetPath = decision.unit.absolutePath;
-      const parameterKey = decision.parameter.key;
-      const countKey = [
-        decision.side,
-        rootId,
-        issueKind(decision),
-        decision.reason,
-        targetKind,
-        targetId,
-        targetPath,
-        parameterKey,
-      ].join("\u0000");
-      const occurrenceOrdinal = counts.get(countKey) ?? 0;
-      counts.set(countKey, occurrenceOrdinal + 1);
-      const issue: SemanticDiffScheduleImpactIssue = {
-        id: issueId({
-          side: decision.side,
-          rootId,
-          kind: issueKind(decision),
-          reasonCode: decision.reason,
-          targetKind,
-          targetId,
-          targetPath,
-          parameterKey,
-          occurrenceOrdinal,
-        }),
-        occurrenceOrdinal,
-        kind: issueKind(decision),
-        side: decision.side,
-        rootId,
-        reasonCode: unsupportedReason(decision.reason)
-          ? decision.reason
-          : "uncalculated",
-        targetKind,
-        targetId,
-        targetPath,
-        parameterKey,
-        detail: cloneDetail(detail),
-      };
-      bySide[decision.side].push(issue);
-    });
+  const issues = collectedScheduleIssues(context);
   return {
-    before: bySide.before.sort((left, right) =>
-      compareOrdinal(left.id, right.id),
-    ),
-    after: bySide.after.sort((left, right) =>
-      compareOrdinal(left.id, right.id),
-    ),
+    before: issuesForSide(issues, "before"),
+    after: issuesForSide(issues, "after"),
   };
 };
 
@@ -824,17 +970,17 @@ const sideRoot = (input: {
   unitsByPath: ReadonlyMap<string, AjsUnit>;
   sourceKeyForRun: SourceKeyForRun;
 }): SemanticDiffScheduleImpactRootSide => {
-  const indexed = indexedRuns(
-    {
+  const indexed = indexedRuns({
+    root: {
       id: input.rootId,
       matchKind: input.rootContext.matchKind,
       identityDecisionId: input.rootContext.identityDecisionId,
-      ...input.rootContext,
+      scopeTransition: input.rootContext.scopeTransition,
     },
-    input.side,
-    input.runs,
-    input.sourceKeyForRun,
-  );
+    side: input.side,
+    runs: input.runs,
+    sourceKeyForRun: input.sourceKeyForRun,
+  });
   const outcome = outcomeFor({
     runs: input.runs,
     hasIssues: input.issues.length > 0,
@@ -876,18 +1022,16 @@ const rootIdFor = (
     0,
   );
 
-const makeRoot = (input: {
-  before: AjsUnit | null;
-  after: AjsUnit | null;
-  matchKind: SemanticDiffScheduleImpactRootMatchKind;
-  identityDecisionId: string | null;
+type RootIssueMap = Map<string, SemanticDiffScheduleImpactIssue[]>;
+
+type RootAssemblyContext = {
   rootRuns: {
     before: readonly ScheduleRun[];
     after: readonly ScheduleRun[];
   };
   rootIssues: {
-    before: Map<string, SemanticDiffScheduleImpactIssue[]>;
-    after: Map<string, SemanticDiffScheduleImpactIssue[]>;
+    before: RootIssueMap;
+    after: RootIssueMap;
   };
   noRuns: { before: Set<string>; after: Set<string> };
   unitsByPath: {
@@ -895,84 +1039,165 @@ const makeRoot = (input: {
     after: ReadonlyMap<string, AjsUnit>;
   };
   sourceKeyForRun: SourceKeyForRun;
+};
+
+type RootScopeTransition = SemanticDiffScheduleImpactRoot["scopeTransition"];
+
+const runsWithinRoot = (
+  runs: readonly ScheduleRun[],
+  root: AjsUnit,
+): readonly ScheduleRun[] =>
+  runs.filter((run) => isWithinRoot(run.unitPath, root.absolutePath));
+
+const buildRootSide = (input: {
+  root: AjsUnit | null;
+  side: SemanticDiffSide;
+  rootId: string;
+  matchKind: SemanticDiffScheduleImpactRootMatchKind;
+  identityDecisionId: string | null;
+  scopeTransition: RootScopeTransition;
+  context: RootAssemblyContext;
+}): SemanticDiffScheduleImpactRootSide | null => {
+  if (!input.root || !isRootJobnet(input.root)) return null;
+  return sideRoot({
+    unit: input.root,
+    side: input.side,
+    rootId: input.rootId,
+    rootContext: {
+      id: input.rootId,
+      matchKind: input.matchKind,
+      identityDecisionId: input.identityDecisionId,
+      scopeTransition: input.scopeTransition,
+    },
+    runs: runsWithinRoot(input.context.rootRuns[input.side], input.root),
+    issues:
+      input.context.rootIssues[input.side].get(input.root.absolutePath) ?? [],
+    explicitNoRuns: input.context.noRuns[input.side].has(input.root.id),
+    unitsByPath: input.context.unitsByPath[input.side],
+    sourceKeyForRun: input.context.sourceKeyForRun,
+  });
+};
+
+type RootTransitionInput = {
+  before: AjsUnit | null;
+  after: AjsUnit | null;
+  matchKind: SemanticDiffScheduleImpactRootMatchKind;
+  identityDecisionId: string | null;
+};
+
+const isRemovedRootScope = (
+  input: RootTransitionInput,
+  beforeIsRoot: boolean,
+  afterIsRoot: boolean,
+): boolean =>
+  [
+    input.matchKind === "removed-root-scope",
+    input.before !== null,
+    input.after !== null,
+    beforeIsRoot,
+    !afterIsRoot,
+  ].every(Boolean);
+
+const removedRootScopeTransition = (
+  input: RootTransitionInput,
+  beforeIsRoot: boolean,
+  afterIsRoot: boolean,
+): RootScopeTransition => {
+  if (!isRemovedRootScope(input, beforeIsRoot, afterIsRoot)) return null;
+  const after = input.after!;
+  return {
+    kind: "removed-root-scope",
+    counterpartPath: after.absolutePath,
+    identityDecisionId: input.identityDecisionId!,
+  };
+};
+
+const isAddedRootScope = (
+  input: RootTransitionInput,
+  beforeIsRoot: boolean,
+  afterIsRoot: boolean,
+): boolean =>
+  [
+    input.matchKind === "added-root-scope",
+    input.before !== null,
+    input.after !== null,
+    !beforeIsRoot,
+    afterIsRoot,
+  ].every(Boolean);
+
+const addedRootScopeTransition = (
+  input: RootTransitionInput,
+  beforeIsRoot: boolean,
+  afterIsRoot: boolean,
+): RootScopeTransition => {
+  if (!isAddedRootScope(input, beforeIsRoot, afterIsRoot)) return null;
+  const before = input.before!;
+  return {
+    kind: "added-root-scope",
+    counterpartPath: before.absolutePath,
+    identityDecisionId: input.identityDecisionId!,
+  };
+};
+
+const rootScopeTransition = (
+  input: RootTransitionInput,
+): RootScopeTransition => {
+  const beforeIsRoot = input.before !== null && isRootJobnet(input.before);
+  const afterIsRoot = input.after !== null && isRootJobnet(input.after);
+  const removed = removedRootScopeTransition(input, beforeIsRoot, afterIsRoot);
+  if (removed) return removed;
+  return addedRootScopeTransition(input, beforeIsRoot, afterIsRoot);
+};
+
+const rootProjectionSides: ReadonlyMap<string, "pair" | SemanticDiffSide> =
+  new Map([
+    ["true:true", "pair"],
+    ["true:false", "before"],
+    ["false:true", "after"],
+    ["false:false", "after"],
+  ]);
+
+const rootProjectionSide = (
+  beforeIsRoot: boolean,
+  afterIsRoot: boolean,
+): "pair" | SemanticDiffSide =>
+  rootProjectionSides.get(`${beforeIsRoot}:${afterIsRoot}`)!;
+
+const makeRoot = (input: {
+  before: AjsUnit | null;
+  after: AjsUnit | null;
+  matchKind: SemanticDiffScheduleImpactRootMatchKind;
+  identityDecisionId: string | null;
+  context: RootAssemblyContext;
 }): SemanticDiffScheduleImpactRoot => {
   const beforeIsRoot = input.before !== null && isRootJobnet(input.before);
   const afterIsRoot = input.after !== null && isRootJobnet(input.after);
-  const canonicalPath = input.after?.absolutePath ?? input.before!.absolutePath;
-  const side =
-    beforeIsRoot && afterIsRoot ? "pair" : beforeIsRoot ? "before" : "after";
+  const canonicalUnit = input.after ?? input.before;
+  if (!canonicalUnit) {
+    throw new Error("Schedule-impact roots require at least one side");
+  }
+  const canonicalPath = canonicalUnit.absolutePath;
+  const side = rootProjectionSide(beforeIsRoot, afterIsRoot);
   const id = rootIdFor(side, canonicalPath, input.matchKind);
-  const scopeTransition =
-    input.matchKind === "removed-root-scope" &&
-    input.before &&
-    input.after &&
-    beforeIsRoot &&
-    !afterIsRoot
-      ? {
-          kind: "removed-root-scope" as const,
-          counterpartPath: input.after.absolutePath,
-          identityDecisionId: input.identityDecisionId!,
-        }
-      : input.matchKind === "added-root-scope" &&
-          input.before &&
-          input.after &&
-          !beforeIsRoot &&
-          afterIsRoot
-        ? {
-            kind: "added-root-scope" as const,
-            counterpartPath: input.before.absolutePath,
-            identityDecisionId: input.identityDecisionId!,
-          }
-        : null;
-  const beforeIssues = input.before
-    ? (input.rootIssues.before.get(input.before.absolutePath) ?? [])
-    : [];
-  const afterIssues = input.after
-    ? (input.rootIssues.after.get(input.after.absolutePath) ?? [])
-    : [];
-  const runsForRoot = (
-    side: SemanticDiffSide,
-    root: AjsUnit,
-  ): readonly ScheduleRun[] =>
-    input.rootRuns[side].filter((run) =>
-      isWithinRoot(run.unitPath, root.absolutePath),
-    );
-  const before = beforeIsRoot
-    ? sideRoot({
-        unit: input.before,
-        side: "before",
-        rootId: id,
-        rootContext: {
-          id,
-          matchKind: input.matchKind,
-          identityDecisionId: input.identityDecisionId,
-          scopeTransition,
-        },
-        runs: runsForRoot("before", input.before),
-        issues: beforeIssues,
-        explicitNoRuns: input.noRuns.before.has(input.before.id),
-        unitsByPath: input.unitsByPath.before,
-        sourceKeyForRun: input.sourceKeyForRun,
-      })
-    : null;
-  const after = afterIsRoot
-    ? sideRoot({
-        unit: input.after,
-        side: "after",
-        rootId: id,
-        rootContext: {
-          id,
-          matchKind: input.matchKind,
-          identityDecisionId: input.identityDecisionId,
-          scopeTransition,
-        },
-        runs: runsForRoot("after", input.after),
-        issues: afterIssues,
-        explicitNoRuns: input.noRuns.after.has(input.after.id),
-        unitsByPath: input.unitsByPath.after,
-        sourceKeyForRun: input.sourceKeyForRun,
-      })
-    : null;
+  const scopeTransition = rootScopeTransition(input);
+  const before = buildRootSide({
+    root: input.before,
+    side: "before",
+    rootId: id,
+    matchKind: input.matchKind,
+    identityDecisionId: input.identityDecisionId,
+    scopeTransition,
+    context: input.context,
+  });
+  const after = buildRootSide({
+    root: input.after,
+    side: "after",
+    rootId: id,
+    matchKind: input.matchKind,
+    identityDecisionId: input.identityDecisionId,
+    scopeTransition,
+    context: input.context,
+  });
   return {
     id,
     matchKind: input.matchKind,
@@ -984,6 +1209,29 @@ const makeRoot = (input: {
   };
 };
 
+const issuesByRoot = (
+  issues: readonly SemanticDiffScheduleImpactIssue[],
+  roots: readonly AjsUnit[],
+): RootIssueMap => {
+  const byRoot = new Map<string, SemanticDiffScheduleImpactIssue[]>();
+  issues.forEach((issue) => addIssueToRootMap(byRoot, roots, issue));
+  return byRoot;
+};
+
+const addIssueToRootMap = (
+  byRoot: RootIssueMap,
+  roots: readonly AjsUnit[],
+  issue: SemanticDiffScheduleImpactIssue,
+): void => {
+  if (!issue.targetPath) return;
+  const root = owningRoot(roots, issue.targetPath);
+  if (!root) return;
+  byRoot.set(root.absolutePath, [
+    ...(byRoot.get(root.absolutePath) ?? []),
+    issue,
+  ]);
+};
+
 const rootIssueMaps = (
   issues: {
     before: SemanticDiffScheduleImpactIssue[];
@@ -993,65 +1241,51 @@ const rootIssueMaps = (
     before: readonly AjsUnit[];
     after: readonly AjsUnit[];
   },
-): {
-  before: Map<string, SemanticDiffScheduleImpactIssue[]>;
-  after: Map<string, SemanticDiffScheduleImpactIssue[]>;
-} => {
-  const before = new Map<string, SemanticDiffScheduleImpactIssue[]>();
-  const after = new Map<string, SemanticDiffScheduleImpactIssue[]>();
-  issues.before.forEach((issue) => {
-    const root = issue.targetPath
-      ? owningRoot(roots.before, issue.targetPath)
-      : undefined;
-    if (root)
-      before.set(root.absolutePath, [
-        ...(before.get(root.absolutePath) ?? []),
-        issue,
-      ]);
+): { before: RootIssueMap; after: RootIssueMap } => ({
+  before: issuesByRoot(issues.before, roots.before),
+  after: issuesByRoot(issues.after, roots.after),
+});
+
+const rootSideIdMap = (
+  roots: readonly SemanticDiffScheduleImpactRoot[],
+  side: SemanticDiffSide,
+): Map<string, string> => {
+  const ids = new Map<string, string>();
+  roots.forEach((root) => {
+    const projection = root[side];
+    if (projection) ids.set(projection.unitPath, root.id);
   });
-  issues.after.forEach((issue) => {
-    const root = issue.targetPath
-      ? owningRoot(roots.after, issue.targetPath)
-      : undefined;
-    if (root)
-      after.set(root.absolutePath, [
-        ...(after.get(root.absolutePath) ?? []),
-        issue,
-      ]);
-  });
-  return { before, after };
+  return ids;
 };
 
 const rootIdMaps = (
   roots: readonly SemanticDiffScheduleImpactRoot[],
-): { before: Map<string, string>; after: Map<string, string> } => {
-  const before = new Map<string, string>();
-  const after = new Map<string, string>();
-  roots.forEach((root) => {
-    if (root.before) before.set(root.before.unitPath, root.id);
-    if (root.after) after.set(root.after.unitPath, root.id);
-  });
-  return { before, after };
-};
+): { before: Map<string, string>; after: Map<string, string> } => ({
+  before: rootSideIdMap(roots, "before"),
+  after: rootSideIdMap(roots, "after"),
+});
 
 const compareIssues = (
   left: SemanticDiffScheduleImpactIssue,
   right: SemanticDiffScheduleImpactIssue,
 ): number =>
-  compareOrdinal(left.rootId ?? "", right.rootId ?? "") ||
-  compareOrdinal(left.side ?? "", right.side ?? "") ||
-  compareNumbers(issueKindOrder[left.kind], issueKindOrder[right.kind]) ||
-  compareOrdinal(left.reasonCode, right.reasonCode) ||
-  compareOrdinal(left.targetKind, right.targetKind) ||
-  compareOrdinal(left.targetId ?? "", right.targetId ?? "") ||
-  compareOrdinal(left.targetPath ?? "", right.targetPath ?? "") ||
-  compareOrdinal(left.parameterKey ?? "", right.parameterKey ?? "") ||
-  compareOrdinal(
-    detailOrderingKey(left.detail),
-    detailOrderingKey(right.detail),
-  ) ||
-  compareNumbers(left.occurrenceOrdinal, right.occurrenceOrdinal) ||
-  compareOrdinal(left.id, right.id);
+  compareInOrder([
+    () => compareOrdinal(left.rootId ?? "", right.rootId ?? ""),
+    () => compareOrdinal(left.side ?? "", right.side ?? ""),
+    () => compareNumbers(issueKindOrder[left.kind], issueKindOrder[right.kind]),
+    () => compareOrdinal(left.reasonCode, right.reasonCode),
+    () => compareOrdinal(left.targetKind, right.targetKind),
+    () => compareOrdinal(left.targetId ?? "", right.targetId ?? ""),
+    () => compareOrdinal(left.targetPath ?? "", right.targetPath ?? ""),
+    () => compareOrdinal(left.parameterKey ?? "", right.parameterKey ?? ""),
+    () =>
+      compareOrdinal(
+        detailOrderingKey(left.detail),
+        detailOrderingKey(right.detail),
+      ),
+    () => compareNumbers(left.occurrenceOrdinal, right.occurrenceOrdinal),
+    () => compareOrdinal(left.id, right.id),
+  ]);
 
 const createRootStatuses = (
   side: SemanticDiffSide,
@@ -1415,15 +1649,26 @@ const createRoots = (input: {
           .map((unit) => unit.absolutePath),
       ]),
   );
-  const issues = scheduleIssues(
-    input.result,
-    input.evaluation,
-    { before: beforeRoots, after: afterRoots },
-    { before: new Map(), after: new Map() },
-    candidateUnitIds,
-    candidateRootPaths,
-  );
+  const issueContext: ScheduleIssueContext = {
+    result: input.result,
+    evaluation: input.evaluation,
+    rootsBySide: { before: beforeRoots, after: afterRoots },
+    rootIdsByPath: { before: new Map(), after: new Map() },
+    excludedUnitIds: candidateUnitIds,
+    excludedRootPaths: candidateRootPaths,
+  };
+  const issues = scheduleIssues(issueContext);
   const roots: SemanticDiffScheduleImpactRoot[] = [];
+  const rootContext: RootAssemblyContext = {
+    rootRuns: runs,
+    rootIssues: rootIssueMaps(issues, {
+      before: beforeRoots,
+      after: afterRoots,
+    }),
+    noRuns,
+    unitsByPath: sourceUnitsByPath,
+    sourceKeyForRun,
+  };
   const makeInput = (
     before: AjsUnit | null,
     after: AjsUnit | null,
@@ -1435,14 +1680,7 @@ const createRoots = (input: {
       after,
       matchKind,
       identityDecisionId: decisionId,
-      rootRuns: runs,
-      rootIssues: rootIssueMaps(issues, {
-        before: beforeRoots,
-        after: afterRoots,
-      }),
-      noRuns,
-      unitsByPath: sourceUnitsByPath,
-      sourceKeyForRun,
+      context: rootContext,
     });
   input.result.identityDecisions.forEach((decision) => {
     if (!["exact", "fingerprint-confirmed"].includes(decision.status)) return;

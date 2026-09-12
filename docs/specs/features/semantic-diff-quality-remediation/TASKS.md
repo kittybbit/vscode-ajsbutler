@@ -4,13 +4,15 @@
 
 - Purpose: remove PR #317 Qlty blockers without observable behavior change.
 - Approved or active slice: Slice 1 is complete at `fa933763`; Slice 2 is
-  complete at `ecea8714`; Slice 3 is Human Approved and awaits its focused
-  state commit. Implementation remains one slice at a time.
+  complete at `ecea8714`; Slice 3 implementation is complete after focused
+  state commit `d3e895e7`; independent implementation review is `Ready` with
+  no Findings; Completion Approval is approved and its completion commit is
+  pending. Implementation remains one slice at a time.
 - Do not suppress, ignore, disable, or manipulate the Qlty baseline.
 - Do not edit inherited Dependabot documents or Calendar Slice 3 scope.
 - Read `SPECS.md`, this file, and the two source use cases first.
-- Next decision: delegate the exact approved Slice 3 scope to
-  `approval-committer` for the focused state commit.
+- Next decision: delegate the exact approved Slice 3 completion scope to
+  `approval-committer` for the focused completion commit.
 
 ## Sync Rule
 
@@ -21,13 +23,15 @@
 
 ## Plan Status
 
-- Status: Approved plan; Slices 1-2 complete; Slice 3 approved, state commit
-  pending
+- Status: Approved plan; Slices 1-2 complete; Slice 3 implementation and
+  focused state commit `d3e895e7` complete; implementation review `Ready`
+  with no Findings; Completion Approval approved; completion commit pending
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure.
 - Review status: Ready; no findings.
 - Human approval: Approved on 2026-09-12 for Slice 3.
-- Active implementation slice: Slice 3, awaiting focused state commit.
+- Active implementation slice: Slice 3 implementation complete; completion
+  commit pending `approval-committer`.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -63,8 +67,9 @@
   - `CHANGELOG.md` remains assigned to Slice 5 by the approved plan and is not
     part of the Slice 3 implementation scope.
 
-Slice 3 implementation starts only after its focused state commit; later
-slices must retain their exact approved paths and gates.
+Slice 3 implementation started after focused state commit `d3e895e7` and is
+complete pending independent re-review; later slices must retain their exact
+approved paths and gates.
 
 ## Plan Commit Gate
 
@@ -78,12 +83,19 @@ slices must retain their exact approved paths and gates.
 
 ## Completion Approval
 
-- Status: Pending for Slice 3
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved for Slice 3; completion commit pending.
+- Approved at: 2026-09-12 under the user's automatic no-findings slice
+  approval policy.
+- Approved scope: the completed Slice 3 implementation and its evidence, with
+  no behavior or scope change.
+- Approved paths:
+  - Runtime: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
+  - Allowed tests: `src/test/suite/semanticDiffScheduleImpact.test.ts`,
+    `src/test/suite/semanticDiffScheduleCalendar.test.ts`, and
+    `src/test/suite/compareSemanticDiffWithArtifacts.test.ts` (unchanged).
+  - Evidence: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Implementation review verdict: `Ready`; no Findings.
+- Commit status: Eligible; completion commit pending `approval-committer`.
 
 Each slice requires independent review and Completion Approval before its
 exact implementation and evidence are committed.
@@ -143,7 +155,9 @@ exact implementation and evidence are committed.
 
 ## Slice 3 Activation And Approval (2026-09-12)
 
-- Status: Human Approved; active next slice, pending focused state commit.
+- Status: Human Approved; implementation complete; independent review `Ready`
+  with no Findings; Completion Approval `Approved` on 2026-09-12; completion
+  commit eligible and pending.
 - Basis: the approved ten-slice plan, independent plan review `Ready` with no
   findings, and the user's automatic no-findings slice approval instruction.
 - Approved production path: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
@@ -154,9 +168,56 @@ exact implementation and evidence are committed.
 - Approved boundary: refactor the schedule-impact indexing, issue, and root
   assembly paths through `createRootStatuses`; run matching, timeline, and
   final assembly remain out of scope.
-- State commit gate: eligible; pending `approval-committer`. No runtime, test,
-  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
-  Dependabot change is included in that state commit.
+- State commit gate: complete; focused state commit `d3e895e7`. No runtime,
+  test, configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3,
+  or Dependabot change was included in that state commit.
+
+## Slice 3 Implementation Evidence (2026-09-12)
+
+- Status: implementation complete; independent implementation review `Ready`
+  with no Findings; Completion Approval `Approved` on 2026-09-12 under the
+  user's automatic no-findings slice approval policy.
+- Approved production path changed:
+  `src/application/semantic-diff/semanticDiffScheduleImpact.ts`.
+- Approved test paths were unchanged because the existing characterization
+  suites cover IDs, candidate ordering, issue details and ownership, root
+  correspondence and scope transitions, no-run outcomes, and deep freezing.
+- Implementation: split the identity index and source-key projection into
+  private typed helpers; shared the before/after candidate mapping and
+  root-side construction; separated schedule-issue sorting, exclusion,
+  metadata, occurrence, and object construction; and shared root issue and
+  root ID map construction. Encoded IDs, ordering, side-specific fields,
+  issue details, scope transitions, no-run flags, and immutable outputs remain
+  unchanged.
+- Validation evidence: `rtk pnpm run test:compile`, the three approved
+  focused suites (51 passing), `rtk pnpm exec eslint
+src/application/semantic-diff/semanticDiffScheduleImpact.ts`, and
+  `rtk git diff --check` passed. Scoped `rtk qlty check` returned `No issues`.
+  Slice 3-owned Qlty smell findings are clear; the whole-file smell inventory
+  remains non-empty with residual findings outside this boundary. The current
+  residual inventory is `scheduleRunsBySide`, `outcomeFor`, `matchRuns`,
+  `sourceChangeRefForTimelineItem`, `attachSourceChangeReferences`,
+  `validateSourceChangeReferences`, `createRoots`, `evaluatedFacts`,
+  `buildSemanticDiffScheduleImpact`, and `makeInput`/`rootIdForPath` within
+  the later root assembly, plus shared utility complexity in `compareOrdinal`,
+  `encodeSemanticDiffScheduleImpactId`, `rootUnits`, `visit`, `cloneDetail`,
+  and the two existing complex binary expressions in detail lookup and
+  timeline sorting. These residuals are retained for later approved slices.
+  The desktop test run passed with exit code 0; the final Web smoke run passed
+  with exit code 0 under host permissions. Production build and Markdown lint
+  passed; the build retained existing bundle-size warnings.
+- Compatibility and production readiness: application ownership and
+  host-neutral/browser-safe dependencies are unchanged; no parser, VS Code
+  API, public DTO/schema, schedule meaning, telemetry, desktop/web entry
+  point, or Dependabot/Calendar Slice 3 scope changed. Existing malformed,
+  duplicate, no-run, nested, and large-input characterization paths remain
+  covered.
+- Implementation feedback: nested before/after side mapping is a reusable
+  private boundary for future application refactors; retaining the original
+  global unsupported-decision sort before side partitioning preserves
+  occurrence ordinals and deterministic IDs.
+- Unresolved risks: completion commit remains pending; no behavior or scope
+  risk was found in the completed validation.
 
 ## Closure Approval
 
@@ -303,7 +364,9 @@ and assigned findings to these 18 production files.
 
 ### Slice 3: Schedule-impact indexing, issues, and root assembly
 
-- Status: Active; Human Approved; focused state commit pending.
+- Status: Implementation complete; focused state commit `d3e895e7` complete;
+  independent implementation review `Ready` with no Findings; Completion
+  Approval `Approved` on 2026-09-12; completion commit eligible and pending.
 - Scope: simplify identity indexing, candidates, run/issue indexing,
   root-side construction, and root maps through `createRootStatuses`.
 - User / Domain Value: retains the same calendar sidecar roots and issues.
@@ -329,6 +392,16 @@ and assigned findings to these 18 production files.
 - Dependencies: Slice 2 committed.
 - Risks: side helpers could erase side-specific IDs, nulls, or ordinals.
 - Out of Scope: run matching, timeline, source references, final assembly.
+- Independent implementation review: `Ready`; no Findings.
+- Completion Approval: `Approved` on 2026-09-12 under the user's automatic
+  no-findings slice approval policy.
+- Exact completion scope: the runtime path, three allowed test paths above
+  (unchanged), and this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Qlty result: Slice 3-owned findings are clear; residual whole-file findings
+  in later-boundary functions and shared utility complexity remain assigned to
+  later approved slices and are not claimed as Slice 3 success.
+- Completion commit: eligible; pending `approval-committer`; this agent did
+  not stage or commit it.
 
 ### Slice 4: Schedule-impact matching, timeline, and final assembly
 
