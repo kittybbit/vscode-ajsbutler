@@ -92,22 +92,54 @@ the review base.
 - Completion commit: `fa933763`; completion is committed and this agent did not
   stage or commit it.
 
-## Slice 2 Activation And Approval (2026-09-12)
+## Slice 2 Completion Evidence (2026-09-12)
 
-- Status: Human Approved; active next slice, pending focused state commit.
-- Basis: the approved ten-slice plan, independent plan review `Ready` with no
-  findings, and the user's automatic no-findings slice approval instruction.
-- Approved production paths: `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`,
+- Status: complete; independent implementation review `Ready` with no
+  findings; Completion Approval `Approved` on 2026-09-12 under the user's
+  automatic no-findings slice approval policy; focused completion commit
+  pending.
+- Implementation: extracted the total unsupported-reason message lookup,
+  typed UTC-date validation helpers, schedule run grouping/sorting, canonical
+  run decision projection, and changed/added/removed application projections.
+  The original domain/application ownership and all existing guards remain in
+  place.
+- Approved production paths changed:
+  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`,
   `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`, and
   `src/application/semantic-diff/compareScheduleDiff.ts`.
-- Approved test paths: `src/test/suite/semanticDiffScheduleRules.test.ts`,
-  `src/test/suite/semanticDiffSchedule.test.ts`,
-  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`, and
-  `src/test/suite/semanticDiffScheduleImpact.test.ts`.
-- Approved evidence docs: this feature's `TASKS.md` and `TRACEABILITY.md`.
-- State commit gate: eligible; pending `approval-committer`. No runtime, test,
-  configuration, generated, dependency, `CHANGELOG.md`, Calendar Slice 3, or
-  Dependabot change is included in that state commit.
+- Approved test paths were unchanged because the existing characterization
+  suites cover period bounds, unsupported reasons/raw evidence, zero runs,
+  run pairing, calendar outputs, and deterministic ordering.
+- Qlty baseline: the three production files had nine mapped smells covering
+  unsupported-message branching, UTC-date validation, run grouping/decision
+  complexity, and schedule-run projection. Explicit scoped `qlty check` and
+  `qlty smells --no-snippets` now pass with zero issues. No suppression,
+  ignore, baseline, threshold, configuration, dependency, or architecture
+  exception was added.
+- Validation evidence: test compile, full desktop test run, Web smoke after
+  Web preparation, production build, and scoped Qlty passed. The production
+  build retained its pre-existing asset-size warnings. Web smoke required the
+  host permission needed by Chromium and then completed successfully.
+- Compatibility evidence: period bounds, run IDs, nullability, unsupported
+  reasons, raw evidence, zero-run candidates, calendar results, and ordering
+  remain deep-equal compatible. No schedule meaning, host calendar, locale,
+  timezone, public DTO/schema, VS Code API, parser, or telemetry behavior
+  changed; the implementation keeps single-pass run grouping and avoids an
+  extra period-wide scan.
+- Documentation impact: only this feature's `TASKS.md` and
+  `TRACEABILITY.md` evidence changed; no README, CHANGELOG, or durable
+  product specification update is required for this behavior-preserving
+  refactor.
+- Review result: independent `implementation-reviewer` returned `Ready` with
+  no findings. Completion Approval is recorded under the user's automatic
+  no-findings slice approval policy.
+- Exact completion scope: the three approved production paths above plus this
+  feature's `TASKS.md` and `TRACEABILITY.md`; the four approved test paths were
+  unchanged. The completion commit is eligible and remains pending
+  `approval-committer`.
+- No files outside the approved production, test, and evidence paths were
+  changed by this slice; inherited Dependabot documentation edits are
+  preserved and excluded.
 
 ## Web Smoke Scenario Traceability
 

@@ -253,7 +253,8 @@ and assigned findings to these 18 production files.
 
 ### Slice 2: Schedule evaluation and run-diff decomposition
 
-- Status: Active; Human Approved; focused state commit pending.
+- Status: Complete; Completion Approval approved; focused completion commit
+  pending.
 - Scope: simplify supported/unsupported schedule decisions and canonical run
   comparison without changing JP1/AJS meaning.
 - User / Domain Value: preserves calculated, unsupported, and uncalculated
@@ -278,8 +279,14 @@ and assigned findings to these 18 production files.
 - Approval Boundary: exact production/tests plus feature evidence documents.
 - Dependencies: Slice 1 committed.
 - Risks: guard reordering could create a false supported no-run or alter run
-  pairing.
+  pairing; validation retained the existing ordering and guard characterization.
 - Out of Scope: wider schedule support or period changes.
+- Independent implementation review: `Ready`; no findings.
+- Completion Approval: `Approved` on 2026-09-12 under the user's automatic
+  no-findings slice approval policy.
+- Exact completion scope: the three production paths above plus this feature's
+  `TASKS.md` and `TRACEABILITY.md`; the four allowed test paths were unchanged.
+- Completion commit: eligible and pending `approval-committer`.
 
 ### Slice 3: Schedule-impact indexing, issues, and root assembly
 

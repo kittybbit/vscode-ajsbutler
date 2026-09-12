@@ -22,7 +22,7 @@ export type SemanticDiffScheduleRunDecision =
     };
 
 const compareStrings = (left: string, right: string): number =>
-  left < right ? -1 : left > right ? 1 : 0;
+  Number(left > right) - Number(left < right);
 
 type RunGroup = {
   sourceUnitPath: string;
@@ -45,27 +45,44 @@ type IndexedDecision = {
 const groupKey = (run: SemanticDiffScheduleRun): string =>
   JSON.stringify([run.unitPath, run.date, run.rule]);
 
+const createRunGroup = (
+  run: SemanticDiffScheduleRun,
+  side: "before" | "after",
+): RunGroup => ({
+  sourceUnitPath: run.unitPath,
+  date: run.date,
+  rule: run.rule,
+  before: side === "before" ? [run] : [],
+  after: side === "after" ? [run] : [],
+});
+
+const appendRunToGroup = (
+  group: RunGroup,
+  run: SemanticDiffScheduleRun,
+  side: "before" | "after",
+): void => {
+  group[side].push(run);
+};
+
+const addRun = (
+  groups: Map<string, RunGroup>,
+  run: SemanticDiffScheduleRun,
+  side: "before" | "after",
+): void => {
+  const key = groupKey(run);
+  const existing = groups.get(key);
+  if (existing) {
+    appendRunToGroup(existing, run, side);
+    return;
+  }
+  groups.set(key, createRunGroup(run, side));
+};
+
 const addRuns = (
   groups: Map<string, RunGroup>,
   runs: SemanticDiffScheduleRun[],
   side: "before" | "after",
-): void => {
-  for (const run of runs) {
-    const key = groupKey(run);
-    const existing = groups.get(key);
-    if (existing) {
-      existing[side].push(run);
-      continue;
-    }
-    groups.set(key, {
-      sourceUnitPath: run.unitPath,
-      date: run.date,
-      rule: run.rule,
-      before: side === "before" ? [run] : [],
-      after: side === "after" ? [run] : [],
-    });
-  }
-};
+): void => runs.forEach((run) => addRun(groups, run, side));
 
 const compareRuns = (
   left: SemanticDiffScheduleRun,
@@ -80,27 +97,46 @@ const compareGroups = (left: RunGroup, right: RunGroup): number =>
   compareStrings(left.date, right.date) ||
   left.rule - right.rule;
 
-const compareDecisions = (
+const decisionKindOrder: Record<
+  SemanticDiffScheduleRunDecision["kind"],
+  number
+> = {
+  added: 0,
+  "changed-time": 1,
+  removed: 2,
+};
+
+const compareDecisionIdentity = (
   left: IndexedDecision,
   right: IndexedDecision,
 ): number =>
-  (left.decision.kind === "added"
-    ? 0
-    : left.decision.kind === "changed-time"
-      ? 1
-      : 2) -
-    (right.decision.kind === "added"
-      ? 0
-      : right.decision.kind === "changed-time"
-        ? 1
-        : 2) ||
   compareStrings(left.sourceUnitPath, right.sourceUnitPath) ||
   compareStrings(left.date, right.date) ||
-  left.rule - right.rule ||
+  left.rule - right.rule;
+
+const compareDecisionValues = (
+  left: IndexedDecision,
+  right: IndexedDecision,
+): number =>
   compareStrings(left.decision.kind, right.decision.kind) ||
   compareStrings(left.beforeTime, right.beforeTime) ||
   compareStrings(left.afterTime, right.afterTime) ||
   left.occurrenceOrdinal - right.occurrenceOrdinal;
+
+const compareDecisions = (
+  left: IndexedDecision,
+  right: IndexedDecision,
+): number => {
+  const kindComparison =
+    decisionKindOrder[left.decision.kind] -
+    decisionKindOrder[right.decision.kind];
+  if (kindComparison !== 0) {
+    return kindComparison;
+  }
+  return (
+    compareDecisionIdentity(left, right) || compareDecisionValues(left, right)
+  );
+};
 
 const sortedGroups = (
   beforeRuns: SemanticDiffScheduleRun[],
@@ -118,90 +154,132 @@ const sortedGroups = (
     .sort(compareGroups);
 };
 
-export const compareScheduleRuns = (
-  beforeRuns: SemanticDiffScheduleRun[],
-  afterRuns: SemanticDiffScheduleRun[],
-  canonicalPathByPath: ReadonlyMap<string, string> = new Map(),
-): SemanticDiffScheduleRunDecision[] => {
-  const canonicalBefore = beforeRuns.map((run) => {
+const canonicalizeRuns = (
+  runs: SemanticDiffScheduleRun[],
+  canonicalPathByPath: ReadonlyMap<string, string>,
+): SemanticDiffScheduleRun[] =>
+  runs.map((run) => {
     const unitPath = canonicalPathByPath.get(run.unitPath) ?? run.unitPath;
     return unitPath === run.unitPath ? run : { ...run, unitPath };
   });
 
-  const indexed: IndexedDecision[] = [];
-  for (const group of sortedGroups(canonicalBefore, afterRuns)) {
-    const pairCount = Math.min(group.before.length, group.after.length);
-    for (
-      let occurrenceOrdinal = 0;
-      occurrenceOrdinal < pairCount;
-      occurrenceOrdinal += 1
-    ) {
-      const before = group.before[occurrenceOrdinal];
-      const after = group.after[occurrenceOrdinal];
-      if (before.time === after.time) {
-        continue;
-      }
-      indexed.push({
-        decision: {
-          kind: "changed-time",
-          unitPath: group.sourceUnitPath,
-          date: group.date,
-          before,
-          after,
-        },
-        sourceUnitPath: group.sourceUnitPath,
-        date: group.date,
-        rule: group.rule,
-        beforeTime: before.time,
-        afterTime: after.time,
-        occurrenceOrdinal,
-      });
-    }
+const createIndexedDecision = (input: {
+  decision: SemanticDiffScheduleRunDecision;
+  group: RunGroup;
+  beforeTime: string;
+  afterTime: string;
+  occurrenceOrdinal: number;
+}): IndexedDecision => ({
+  decision: input.decision,
+  sourceUnitPath: input.group.sourceUnitPath,
+  date: input.group.date,
+  rule: input.group.rule,
+  beforeTime: input.beforeTime,
+  afterTime: input.afterTime,
+  occurrenceOrdinal: input.occurrenceOrdinal,
+});
 
-    for (
-      let occurrenceOrdinal = pairCount;
-      occurrenceOrdinal < group.before.length;
-      occurrenceOrdinal += 1
-    ) {
-      const before = group.before[occurrenceOrdinal];
-      indexed.push({
-        decision: {
-          kind: "removed",
-          unitPath: group.sourceUnitPath,
-          date: group.date,
-          before,
-        },
-        sourceUnitPath: group.sourceUnitPath,
-        date: group.date,
-        rule: group.rule,
-        beforeTime: before.time,
-        afterTime: "",
-        occurrenceOrdinal,
-      });
-    }
-
-    for (
-      let occurrenceOrdinal = pairCount;
-      occurrenceOrdinal < group.after.length;
-      occurrenceOrdinal += 1
-    ) {
-      const after = group.after[occurrenceOrdinal];
-      indexed.push({
-        decision: {
-          kind: "added",
-          unitPath: group.sourceUnitPath,
-          date: group.date,
-          after,
-        },
-        sourceUnitPath: group.sourceUnitPath,
-        date: group.date,
-        rule: group.rule,
-        beforeTime: "",
-        afterTime: after.time,
-        occurrenceOrdinal,
-      });
-    }
+const changedTimeDecision = (input: {
+  group: RunGroup;
+  before: SemanticDiffScheduleRun;
+  after: SemanticDiffScheduleRun;
+  occurrenceOrdinal: number;
+}): IndexedDecision | undefined => {
+  if (input.before.time === input.after.time) {
+    return undefined;
   }
-
-  return indexed.sort(compareDecisions).map(({ decision }) => decision);
+  return createIndexedDecision({
+    decision: {
+      kind: "changed-time",
+      unitPath: input.group.sourceUnitPath,
+      date: input.group.date,
+      before: input.before,
+      after: input.after,
+    },
+    group: input.group,
+    beforeTime: input.before.time,
+    afterTime: input.after.time,
+    occurrenceOrdinal: input.occurrenceOrdinal,
+  });
 };
+
+const changedTimeDecisions = (
+  group: RunGroup,
+  pairCount: number,
+): IndexedDecision[] =>
+  group.before.slice(0, pairCount).flatMap((before, occurrenceOrdinal) => {
+    const after = group.after[occurrenceOrdinal];
+    return after
+      ? [
+          changedTimeDecision({
+            group,
+            before,
+            after,
+            occurrenceOrdinal,
+          }),
+        ].filter(
+          (decision): decision is IndexedDecision => decision !== undefined,
+        )
+      : [];
+  });
+
+const removedDecisions = (
+  group: RunGroup,
+  pairCount: number,
+): IndexedDecision[] =>
+  group.before.slice(pairCount).map((before, index) =>
+    createIndexedDecision({
+      decision: {
+        kind: "removed",
+        unitPath: group.sourceUnitPath,
+        date: group.date,
+        before,
+      },
+      group,
+      beforeTime: before.time,
+      afterTime: "",
+      occurrenceOrdinal: pairCount + index,
+    }),
+  );
+
+const addedDecisions = (
+  group: RunGroup,
+  pairCount: number,
+): IndexedDecision[] =>
+  group.after.slice(pairCount).map((after, index) =>
+    createIndexedDecision({
+      decision: {
+        kind: "added",
+        unitPath: group.sourceUnitPath,
+        date: group.date,
+        after,
+      },
+      group,
+      beforeTime: "",
+      afterTime: after.time,
+      occurrenceOrdinal: pairCount + index,
+    }),
+  );
+
+const decisionsForGroup = (group: RunGroup): IndexedDecision[] => {
+  const pairCount = Math.min(group.before.length, group.after.length);
+  return [
+    ...changedTimeDecisions(group, pairCount),
+    ...removedDecisions(group, pairCount),
+    ...addedDecisions(group, pairCount),
+  ];
+};
+
+const decisionsForGroups = (groups: RunGroup[]): IndexedDecision[] =>
+  groups.flatMap(decisionsForGroup);
+
+export const compareScheduleRuns = (
+  beforeRuns: SemanticDiffScheduleRun[],
+  afterRuns: SemanticDiffScheduleRun[],
+  canonicalPathByPath: ReadonlyMap<string, string> = new Map(),
+): SemanticDiffScheduleRunDecision[] =>
+  decisionsForGroups(
+    sortedGroups(canonicalizeRuns(beforeRuns, canonicalPathByPath), afterRuns),
+  )
+    .sort(compareDecisions)
+    .map(({ decision }) => decision);

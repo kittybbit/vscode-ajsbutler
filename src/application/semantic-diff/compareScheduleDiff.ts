@@ -10,6 +10,7 @@ import type {
   SemanticDiffDetail,
   SemanticDiffLimitation,
   SemanticDiffScheduleComparison,
+  SemanticDiffScheduleRun,
   SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
   SemanticDiffUnsupportedItem,
@@ -61,34 +62,41 @@ export type ScheduleDiffResultWithEvaluation = ScheduleDiffResult & {
 const ruleValueId = (parameter: AjsParameter): string =>
   `${parameter.key}:${parameter.value}`;
 
+type UnsupportedScheduleMessage = (
+  decision: SemanticDiffScheduleUnsupportedDecision,
+) => string;
+
+const unsupportedScheduleMessages: Readonly<
+  Record<
+    SemanticDiffScheduleUnsupportedDecision["reason"],
+    UnsupportedScheduleMessage
+  >
+> = {
+  "cycle-schedule": () => "cycle schedules are not calculated in this slice",
+  "closed-day-substitution": () =>
+    "closed-day substitution is not calculated in this slice",
+  "shift-days": () => "shift days are not calculated in this slice",
+  "calendar-selection": () =>
+    "calendar selection is not calculated in this slice",
+  "inherited-parent-rule": () =>
+    "inherited parent-rule schedules are not calculated in this slice",
+  "days-from-start": () =>
+    "schedule-by-days-from-start is not calculated in this slice",
+  "invalid-start-time": () =>
+    "start time is missing, unparsable, offset-based, day-crossing, or outside HH:MM",
+  "unpaired-start-time": () =>
+    "matching sd for this start-time rule is missing",
+  "unsupported-schedule-date": () =>
+    "schedule date is not a supported explicit calendar day in YYYY/MM/DD, MM/DD, or DD form",
+  "missing-start-time": (decision) =>
+    `matching st for schedule rule ${decision.scheduleRule} is missing or uncalculated`,
+  "invalid-calendar-day": () =>
+    "schedule date is not a valid calendar day in the comparison period",
+};
+
 const unsupportedScheduleMessage = (
   decision: SemanticDiffScheduleUnsupportedDecision,
-): string => {
-  switch (decision.reason) {
-    case "cycle-schedule":
-      return "cycle schedules are not calculated in this slice";
-    case "closed-day-substitution":
-      return "closed-day substitution is not calculated in this slice";
-    case "shift-days":
-      return "shift days are not calculated in this slice";
-    case "calendar-selection":
-      return "calendar selection is not calculated in this slice";
-    case "inherited-parent-rule":
-      return "inherited parent-rule schedules are not calculated in this slice";
-    case "days-from-start":
-      return "schedule-by-days-from-start is not calculated in this slice";
-    case "invalid-start-time":
-      return "start time is missing, unparsable, offset-based, day-crossing, or outside HH:MM";
-    case "unpaired-start-time":
-      return "matching sd for this start-time rule is missing";
-    case "unsupported-schedule-date":
-      return "schedule date is not a supported explicit calendar day in YYYY/MM/DD, MM/DD, or DD form";
-    case "missing-start-time":
-      return `matching st for schedule rule ${decision.scheduleRule} is missing or uncalculated`;
-    case "invalid-calendar-day":
-      return "schedule date is not a valid calendar day in the comparison period";
-  }
-};
+): string => unsupportedScheduleMessages[decision.reason](decision);
 
 const createUnsupportedItem = (
   decision: SemanticDiffScheduleUnsupportedDecision,
@@ -158,31 +166,58 @@ const createPeriodLimitation = (
   }),
 });
 
-const toScheduleRunChange = (
-  decision: SemanticDiffScheduleRunDecision,
-): SemanticDiffScheduleRunChange => {
-  const dateKey = `${decision.unitPath}:${decision.date}`;
-  if (decision.kind === "changed-time") {
-    return {
-      id: `schedule:changed-time:${dateKey}`,
-      kind: decision.kind,
-      unitPath: decision.unitPath,
-      date: decision.date,
-      before: decision.before,
-      after: decision.after,
-    };
-  }
+type ChangedTimeDecision = Extract<
+  SemanticDiffScheduleRunDecision,
+  { kind: "changed-time" }
+>;
 
-  const run = decision.kind === "removed" ? decision.before : decision.after;
+type SingleRunDecision = Exclude<
+  SemanticDiffScheduleRunDecision,
+  ChangedTimeDecision
+>;
+
+const toChangedTimeRunChange = (
+  decision: ChangedTimeDecision,
+): SemanticDiffScheduleRunChange => ({
+  id: `schedule:changed-time:${decision.unitPath}:${decision.date}`,
+  kind: decision.kind,
+  unitPath: decision.unitPath,
+  date: decision.date,
+  before: decision.before,
+  after: decision.after,
+});
+
+const singleRunChangeSides = (
+  decision: SingleRunDecision,
+): Pick<SemanticDiffScheduleRunChange, "before" | "after"> =>
+  decision.kind === "removed"
+    ? { before: decision.before, after: null }
+    : { before: null, after: decision.after };
+
+const singleRunChangeRun = (
+  decision: SingleRunDecision,
+): SemanticDiffScheduleRun =>
+  decision.kind === "removed" ? decision.before : decision.after;
+
+const toSingleRunChange = (
+  decision: SingleRunDecision,
+): SemanticDiffScheduleRunChange => {
+  const run = singleRunChangeRun(decision);
   return {
     id: `schedule:${decision.kind}:${decision.unitPath}:${decision.date}:${run.time}`,
     kind: decision.kind,
     unitPath: decision.unitPath,
     date: decision.date,
-    before: decision.kind === "removed" ? decision.before : null,
-    after: decision.kind === "added" ? decision.after : null,
+    ...singleRunChangeSides(decision),
   };
 };
+
+const toScheduleRunChange = (
+  decision: SemanticDiffScheduleRunDecision,
+): SemanticDiffScheduleRunChange =>
+  decision.kind === "changed-time"
+    ? toChangedTimeRunChange(decision)
+    : toSingleRunChange(decision);
 
 const createScheduleConstraint = (
   code: SemanticDiffConstraint["code"],
