@@ -307,17 +307,17 @@ under the approved boundary.
   behind the measured command-file total (`254` before and `253` after the
   partial extraction), not a fabricated `<20` SourceBinding assumption:
 
-  | File | Owned proxy | Allowance | Target / margin |
-  | --- | ---: | ---: | ---: |
-  | WorkflowInput | 27 | +2 | <=29 / 26 |
-  | WorkflowSelection | 18 | +4 | <=25 / 30 |
-  | WorkflowPeriod | 36 | +6 | <=42 / 13 |
-  | WorkflowSource | 45 | +4 | <=50 / 5 |
-  | SourceBinding | 48-51 | simplification only | <=50 / 5 |
-  | WorkflowArtifacts | 48-49 | replacement only | <=50 / 5 |
-  | ExplorerWorkflow | 46-47 | replacement only | <=50 / 5 |
-  | WorkflowExecution | 12 | +3 | <=15 / 40 |
-  | Retained command.ts | 22 | +4 | <=26 / 29 |
+  | File                | Owned proxy |           Allowance | Target / margin |
+  | ------------------- | ----------: | ------------------: | --------------: |
+  | WorkflowInput       |          27 |                  +2 |       <=29 / 26 |
+  | WorkflowSelection   |          18 |                  +4 |       <=25 / 30 |
+  | WorkflowPeriod      |          36 |                  +6 |       <=42 / 13 |
+  | WorkflowSource      |          45 |                  +4 |        <=50 / 5 |
+  | SourceBinding       |       48-51 | simplification only |        <=50 / 5 |
+  | WorkflowArtifacts   |       48-49 |    replacement only |        <=50 / 5 |
+  | ExplorerWorkflow    |       46-47 |    replacement only |        <=50 / 5 |
+  | WorkflowExecution   |          12 |                  +3 |       <=15 / 40 |
+  | Retained command.ts |          22 |                  +4 |       <=26 / 29 |
 
   The WorkflowSelection proxy is `51` minus the period functions plus
   `selectionToStep` (`3`). WorkflowPeriod is `31` for its other period
@@ -342,6 +342,7 @@ under the approved boundary.
   function must receive an actual scoped Qlty result. If any file exceeds
   `55`, implementation stops and returns the smallest cohesive seam for a
   further replan rather than suppressing the finding.
+
 - Import topology: command.ts imports helper entry points, including
   WorkflowExecution. Helpers use `import type` for command contracts and
   generic step combinators from `semanticDiffCommandSteps.ts`. WorkflowPeriod
@@ -1522,11 +1523,11 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 
   <!-- markdownlint-disable MD013 -->
 
-  | Revised file | Current evidence | Target |
-  | --- | --- | ---: |
-  | `scheduleImpactCalendarJson.ts` | JSON classifier/recursive group includes measured `10`, `7`, and `11` findings; helper contribution must be measured after move | file `<=50`, each function `<=4` complexity/returns |
-  | `scheduleImpactCalendarTransport.ts` | current total `95`, including JSON group and measured protocol findings `5`, `7`, `6`, `11` | file `<=50`, no mapped smell |
-  | `scheduleImpactCalendarBridge.ts` | factory `26`/five returns; callback `10` | file `<=45`, no mapped smell |
+  | Revised file                         | Current evidence                                                                                                                |                                              Target |
+  | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------: |
+  | `scheduleImpactCalendarJson.ts`      | JSON classifier/recursive group includes measured `10`, `7`, and `11` findings; helper contribution must be measured after move | file `<=50`, each function `<=4` complexity/returns |
+  | `scheduleImpactCalendarTransport.ts` | current total `95`, including JSON group and measured protocol findings `5`, `7`, `6`, `11`                                     |                        file `<=50`, no mapped smell |
+  | `scheduleImpactCalendarBridge.ts`    | factory `26`/five returns; callback `10`                                                                                        |                        file `<=45`, no mapped smell |
 
   <!-- markdownlint-enable MD013 -->
 
@@ -1536,6 +1537,7 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   implementation stops and returns the smallest further seam for another
   replan. No fabricated module total, suppression, or acceptance exception is
   allowed.
+
 - Preserved JSON and protocol behavior: strict plain JSON only; finite numbers,
   null, strings, and booleans remain accepted; undefined, functions, symbols,
   bigint, non-plain prototypes, own symbols, own `toJSON`, sparse arrays,
@@ -1795,12 +1797,12 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 
   <!-- markdownlint-disable MD013 -->
 
-  | Revised path | Current evidence | Conservative implementation budget |
-  | --- | --- | ---: |
-  | `scheduleImpactCalendarPanel.ts` | file `73`; open `64`/12 returns; post `10`; factory `7` | file `<=40`; open `<=12`/4 returns; factory `<=4` |
-  | new `scheduleImpactCalendarPanelRuntime.ts` | new seam; receives only extracted preparation/message/lifecycle decisions, not the old `open` function wholesale | file `<=45`; each helper `<=4`, composer `<=8` |
-  | `scheduleImpactCalendarSessionRegistry.ts` | open parameters `5`/complexity `5`; acceptRequest `5` | file `<=45`; open/accept `<=4`; no many-parameters |
-  | `createScheduleAwareExplorerSession.ts` | factory `28`; release `6`; no file-total finding reported | file `<=40`; factory `<=12`; release `<=4` |
+  | Revised path                                | Current evidence                                                                                                 |                 Conservative implementation budget |
+  | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------: |
+  | `scheduleImpactCalendarPanel.ts`            | file `73`; open `64`/12 returns; post `10`; factory `7`                                                          |  file `<=40`; open `<=12`/4 returns; factory `<=4` |
+  | new `scheduleImpactCalendarPanelRuntime.ts` | new seam; receives only extracted preparation/message/lifecycle decisions, not the old `open` function wholesale |     file `<=45`; each helper `<=4`, composer `<=8` |
+  | `scheduleImpactCalendarSessionRegistry.ts`  | open parameters `5`/complexity `5`; acceptRequest `5`                                                            | file `<=45`; open/accept `<=4`; no many-parameters |
+  | `createScheduleAwareExplorerSession.ts`     | factory `28`; release `6`; no file-total finding reported                                                        |         file `<=40`; factory `<=12`; release `<=4` |
 
   <!-- markdownlint-enable MD013 -->
 
@@ -1810,6 +1812,7 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   mapped smell remaining is a gate failure and requires another smallest-seam
   replan; no suppression, baseline change, threshold relaxation, or
   unverified “movement” claim is accepted.
+
 - Preserved behavior and boundaries: public Panel/Registry/Bootstrap exports,
   Registry overload compatibility, panel title and strict CSP shell, source
   capture and privacy behavior, sidecar identity, session filtering, request
@@ -2188,14 +2191,14 @@ issues`; Slice 7-owned smell findings are clear.
   runner exited `0`, including the architecture dependency suite.
 - Web evidence: the isolated test bundle compiled successfully and the real
   Chromium WebWorker runner exited `0`. It reported `WEB-7 passed:
-  browser=1 sourceReads=0 reports=0 sessions=0` and `WEB-8 passed:
-  bindings=2 registrations=2 opened=1 rollbacks=1`. The runner retained
+browser=1 sourceReads=0 reports=0 sessions=0` and `WEB-8 passed:
+bindings=2 registrations=2 opened=1 rollbacks=1`. The runner retained
   existing non-failing `EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` stream diagnostics
   after the scenarios completed.
 - Build and quality evidence: `pnpm run test:compile`, production `pnpm run
-  build`, scoped Qlty `check` and `smells --no-snippets` for all nine
+build`, scoped Qlty `check` and `smells --no-snippets` for all nine
   production paths plus `webSmoke.ts`, `pnpm run lint:md`, and `git diff
-  --check` passed. Qlty reported no issues, including no function findings or
+--check` passed. Qlty reported no issues, including no function findings or
   file-complexity finding above the configured `55` threshold.
 - Compatibility and readiness: command IDs, result types, localization,
   source-byte/read-count behavior, ordering, cancellation, Git capture,
@@ -2285,10 +2288,10 @@ issues`; Slice 7-owned smell findings are clear.
   lint and `git diff --check` passed.
 - Web evidence: the isolated test bundle compiled and the real Chromium
   WebWorker runner exited `0`, reporting `WEB-7 passed:
-  browser=1 sourceReads=0 reports=0 sessions=0`, `WEB-8 passed:
-  bindings=2 registrations=2 opened=1 rollbacks=1`, `WEB-9 passed:
-  requests=2 accepted=2 adds=1 removes=1`, and `WEB-10 passed:
-  registered=1 releases=1 rollback=1`. Existing post-scenario
+browser=1 sourceReads=0 reports=0 sessions=0`, `WEB-8 passed:
+bindings=2 registrations=2 opened=1 rollbacks=1`, `WEB-9 passed:
+requests=2 accepted=2 adds=1 removes=1`, and `WEB-10 passed:
+registered=1 releases=1 rollback=1`. Existing post-scenario
   `ECONNRESET`/`EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` diagnostics remain
   non-failing runner noise.
 - Production readiness: panel preparation failures and registration failures
@@ -2630,3 +2633,36 @@ issues`; Slice 7-owned smell findings are clear.
   verifying the dirty Transport/test hashes; implementation review,
   Completion Approval, and the final three-path formatter remain separate
   gates.
+
+## Slice 11 Implementation Review and Completion Approval (2026-09-13)
+
+- Independent implementation review: `Ready` with no findings. Review and
+  approval evidence were recorded at `2026-09-13T16:11:49+09:00` for the
+  exact approved runtime/test diff.
+- Completion Approval: `Approved` under the standing user instruction to
+  auto-approve slices with an independent no-findings review. The user's
+  explicit `承認します。` also approves the reviewed formatter-validation
+  fallback and its exact three documentation paths. This is not Closure
+  Approval.
+- Exact completed/approved paths: `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts`,
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts`, this feature's
+  `TASKS.md`, this feature's `TRACEABILITY.md`, and
+  `docs/specs/features/schedule-impact-calendar/TASKS.md`. The first two
+  contain the implementation diff; the last three are limited to the
+  approved formatter mutation, with the Calendar path formatting-only.
+- Completion evidence: Transport 7 passing, unchanged Bridge 2 passing,
+  test compilation, desktop runner exit 0, architecture 25 passing with zero
+  violations, production/web builds, scoped Qlty check/smells, and
+  `git diff --check` passed. Chromium reported WEB-7
+  `browser=1 sourceReads=0 reports=0 sessions=0`, WEB-8
+  `bindings=2 registrations=2 opened=1 rollbacks=1`, WEB-9
+  `requests=2 accepted=2 adds=1 removes=1`, and WEB-10
+  `registered=1 releases=1 rollback=1`.
+- Final formatter gate: run transient pinned Prettier `3.6.2` with its
+  default configuration on exactly the three paths above, prove semantic
+  Markdown equivalence before/after, then run path-only `--check`, Markdown
+  lint, diff checks, and the remote Cloud gates. No later evidence write may
+  occur without repeating that exact formatter pass.
+- Commit status: the approved implementation and formatter result remain
+  uncommitted pending the exact completion commit gate. Feature Exit and
+  closure approval remain separate subsequent lifecycle stages.

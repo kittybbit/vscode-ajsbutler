@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import {
   SCHEDULE_IMPACT_CALENDAR_MAX_MESSAGE_BYTES,
+  createScheduleImpactCalendarCloseMessage,
   createScheduleImpactCalendarError,
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarReadyRequest,
@@ -44,6 +45,38 @@ suite("Schedule impact calendar transport", () => {
       createScheduleImpactCalendarError("unknown-session"),
     );
     assert.ok(parseScheduleImpactCalendarHostMessage(failure));
+  });
+
+  test("dispatches each closed host type and rejects unrecognized discriminants", () => {
+    const messages = [
+      createScheduleImpactCalendarCloseMessage("calendar-1"),
+      createScheduleImpactCalendarSessionMessage("calendar-1", 1, {
+        value: "ok",
+      } as never),
+      createScheduleImpactCalendarFailureMessage(
+        null,
+        null,
+        createScheduleImpactCalendarError("unknown-session"),
+      ),
+    ];
+    messages.forEach((message) => {
+      const result = validateScheduleImpactCalendarMessage(message);
+      assert.strictEqual(result.ok, true);
+    });
+
+    ["unknown", "__proto__", "valueOf", "constructor", 42, {}].forEach(
+      (type) => {
+        const result = validateScheduleImpactCalendarMessage({
+          type,
+          sessionId: "calendar-1",
+          requestId: null,
+          ok: true,
+          payload: null,
+          error: null,
+        });
+        assert.deepStrictEqual(result, { ok: false, code: "invalid-request" });
+      },
+    );
   });
 
   test("rejects stale, malformed, and oversized messages before transport", () => {

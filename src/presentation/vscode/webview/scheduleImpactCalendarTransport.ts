@@ -334,24 +334,21 @@ const validateFailure = (
   );
 };
 
-type HostValidator = (
-  value: Record<string, unknown>,
-  options?: ScheduleImpactCalendarValidationOptions,
-) => ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage>;
-
-const hostValidators = new Map<string, HostValidator>([
-  ["close", validateClose as HostValidator],
-  ["session", validateSession as HostValidator],
-  ["failure", validateFailure as HostValidator],
-]);
-
 const validateHostShape = (
   value: unknown,
   options?: ScheduleImpactCalendarValidationOptions,
 ): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage> => {
   const envelope = hostEnvelope(value);
-  const validator = envelope && hostValidators.get(String(envelope.type));
-  return validator ? validator(envelope, options) : invalidResult();
+  let result: ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage> =
+    invalidResult();
+  if (envelope?.type === "close") {
+    result = validateClose(envelope, options);
+  } else if (envelope?.type === "session") {
+    result = validateSession(envelope, options);
+  } else if (envelope?.type === "failure") {
+    result = validateFailure(envelope, options);
+  }
+  return result;
 };
 
 const validateHostMessage = (

@@ -138,7 +138,6 @@
   - `src/test/suite/semanticDiffSchedule.test.ts`
   - `src/test/suite/semanticDiffContracts.test.ts`
 - Newly approved Replanning delta paths:
-
   - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
   - `src/application/semantic-diff/semanticDiffScheduleImpact.ts`
   - `src/test/suite/semanticDiffScheduleRules.test.ts`
