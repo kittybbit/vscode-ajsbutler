@@ -8,10 +8,10 @@ build and test workflows, and supported desktop and web environments.
 
 ## Minimal Context
 
-- Current decision: extend the completed security resolution with one
-  revalidated, compatible transitive-development-dependency resolution for
-  the newer advisory set, without broad dependency modernization or product
-  behavior changes.
+- Current decision: distinguish the committed, locally validated security
+  implementation from post-publication security verification and separately
+  owned OpenAPI reproducibility work, without broad dependency modernization
+  or product behavior changes.
 - Feature kind: transient branch feature.
 - Selected feature folder:
   `docs/specs/features/dependabot-security-updates/`.
@@ -252,12 +252,17 @@ build and test workflows, and supported desktop and web environments.
 - `pnpm audit --audit-level moderate` reports no high- or moderate-severity
   vulnerability in the resolved dependency graph, or any unavoidable result
   is returned to Main as an explicit blocker rather than dismissed silently.
-- The 17 Dependabot alerts that originated this feature and the current
-  compatible alerts 180, 181, 182, 183, 184, 186, 187, 188, 191, and 192 are
-  closed after the updated lockfile reaches GitHub; any newer alert for the
-  same resolved graph is also resolved or returned to Main as a blocker. The
-  low-severity alert 180 is included only because its package is already an
-  affected CSS-toolchain family in this replan.
+- Security verification is complete only after the updated lockfile reaches
+  the default branch and a GitHub Dependabot re-query confirms that the
+  originating alerts and affected compatible alerts 180, 181, 182, 183, 184,
+  186, 187, 188, 191, 192, and 193 as inventoried in `TRACEABILITY.md` are
+  closed with no affected remaining or
+  newly opened alert for the published graph. Any unresolved/new alert is
+  returned to Main for the security owner or Replanning and keeps security
+  verification incomplete; it must not be dismissed, waived, or claimed as
+  already resolved from local audit evidence. The low-severity alert 180 is
+  included only because its package is already an affected CSS-toolchain
+  family in this replan.
 - Dependency changes remain limited to the approved development-tooling
   resolution, the existing override section, the exact
   `postman-collection@4.5.0` patch registration and patch file, the minimal
@@ -278,15 +283,37 @@ build and test workflows, and supported desktop and web environments.
 - `engines.vscode`, production source, JP1/AJS behavior, architecture rules,
   README, and user-facing contracts remain unchanged.
 - The stale generated OpenAPI fixture remains unchanged and is reported as an
-  independent WebAPI follow-up; it is not silently counted as security-slice
-  success or mixed into this implementation.
+  independent reproducibility follow-up owned by the existing WebAPI
+  maintainer. Its done condition is that the exact fixture matches generator
+  output and `pnpm run openapi:check` exits 0. Once explicitly accepted and
+  durably assigned, it is not an implementation security blocker; it is not
+  silently counted as validation success or mixed into this implementation.
+
+### Implementation Closure Boundary
+
+- Complete, independently reviewed, Completion Approved, and committed
+  Slices 1 and 2, with the required local audit-clean and compatibility
+  evidence, can satisfy implementation Definition of Done without claiming
+  that post-publication security verification is complete.
+- Implementation Feature Exit is permissible only after explicit Human
+  Approval accepts the pending publication/re-query and separate OpenAPI
+  residuals, and durable follow-up records preserve their owners and done
+  conditions before this folder is removed. The security owner retains the
+  publication/re-query obligation and routing of unresolved/new alerts; the
+  existing WebAPI maintainer retains fixture reproducibility ownership. This
+  acceptance is not advisory dismissal or waiver. Independent Feature Exit,
+  explicit Closure Approval, and the focused closure commit remain required
+  under `docs/specs/README.md`; approval state belongs only in `TASKS.md`.
 
 ## Durable Document Impact
 
 - Requirements use cases: no update; observable product behavior does not
   change.
-- `docs/specs/roadmap.md`: no update; this is transient branch remediation,
-  not unfinished repository-level product work.
+- `docs/specs/roadmap.md`: implementation closure with accepted residuals
+  requires the smallest durable follow-up propagation passing the Durable
+  Documentation Gate, preserving publication/security-verification and
+  OpenAPI reproducibility owners and done conditions. No product roadmap or
+  use-case behavior change is introduced.
 - Architecture, context map, glossary, and vision: no update; no durable
   boundary or terminology decision changes.
 - README and CHANGELOG: no update expected because no externally observable

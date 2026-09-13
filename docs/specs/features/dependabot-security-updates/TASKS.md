@@ -4,12 +4,14 @@
 
 - Purpose: remove known high/moderate vulnerabilities from transitive
   development dependencies without changing extension behavior.
-- Approved or active slice: Slice 1 is complete and merged. Revised Slice 2
-  implementation is complete, independently reviewed Ready with no Findings,
-  and Completion Approved on 2026-09-12 under the no-Findings automatic-
-  approval policy. Its completion commit is eligible and pending. Feature Exit
-  remains blocked by publication/Dependabot re-query evidence and the stale
-  OpenAPI fixture follow-up.
+- Approved or active slice: Slice 1 and Slice 2 implementation are complete,
+  independently reviewed Ready with no Findings, Completion Approved, and
+  committed at `6e94136d` and `57c2a8fa` (both ancestors of the current HEAD).
+  This bounded replan separates that implementation DoD from post-merge
+  publication/re-query evidence. Feature Exit remains pending while the open
+  PR, remote alert re-query, and stale OpenAPI fixture follow-up are unresolved;
+  each residual requires its recorded owner/done condition or explicit Human
+  Approval before closure.
 - Do not: edit dependencies, lockfiles, runtime code, tests, generated
   artifacts, or configuration before an approved plan is committed.
 - Do not: broaden the work into general dependency modernization.
@@ -20,11 +22,12 @@
   `rtk pnpm run lint:md`.
 - Approval policy: see `docs/specs/README.md`.
 - Document roles: see `docs/specs/README.md`.
-- Next decision: send the exact completed Slice 2 paths to
-  `approval-committer` for the focused completion commit. Keep the
-  `Accept-Language: *` test residual, stale OpenAPI fixture, and Playwright
-  installer result as separate boundaries; do not claim remote alert closure
-  before publication and a Dependabot re-query.
+- Next decision: obtain independent review of this bounded replan and explicit
+  Human Approval for its closure-verification boundary. After PR publication,
+  Main re-queries Dependabot and records unresolved/new alerts as security-
+  owner work or a new replan; no dismissal, waiver, or already-resolved claim
+  is permitted. Keep the `Accept-Language: *` test, stale OpenAPI fixture, and
+  Playwright installer result as separate residual boundaries.
 
 ## Sync Rule
 
@@ -42,29 +45,28 @@
 
 ## Plan Status
 
-- Status: Slice 1 complete; Slice 2 implementation independently reviewed
-  Ready with no Findings and Completion Approved; completion commit pending;
-  Feature Exit blocked
-- Planning scope: Slice 1 remains complete. Replanned Slice 2 covers the
-  current compatible transitive development-dependency resolution, lockfile
-  audit closure, affected-tooling validation, and production-readiness
-  evidence.
-- Review status: Slice 1 plan and implementation reviews are Ready. The prior
-  Replanned Slice 2 review was Ready with no Findings, but its approval is
-  superseded by the implementation blocker. Revised Slice 2 plan and
-  implementation reviews are Ready with no Findings.
-- Human approval: Slice 1 approved; revised Slice 2 automatically Approved on
-  2026-09-12 under the no-Findings policy.
-- Active implementation slice: Slice 2 implementation complete; completion
-  commit pending
+- Status: Implementation complete and committed; bounded closure replan
+  independently reviewed Ready with no Findings and Human Approved; Closure
+  Approval and Feature Exit remain pending
+- Planning scope: Reconcile the actual Slice 1/Slice 2 commits and local audit
+  result, then separate implementation DoD from post-merge publication/
+  Dependabot verification and the independently owned OpenAPI fixture work.
+- Review status: Slice 1 and Slice 2 reviews remain Ready with no Findings.
+  This bounded closure replan is Pending independent plan review; prior Slice 2
+  approval and review do not approve this new verification boundary.
+- Human approval: Current bounded closure replan approved at
+  `2026-09-13 20:21:48 +0900` after explicit user approval; this is plan
+  approval for the recorded closure-verification scope, not Closure Approval.
+- Active implementation slice: None; both implementation slices are complete.
+  Post-merge verification and Feature Exit remain pending.
 - Implementation review verdict: Slice 1 Ready; Slice 2 Ready with no Findings
 
 ## Human Approval
 
-- Status: Slice 1 approved; revised Slice 2 plan approved on 2026-09-12 after
-  Ready/no-Findings review, with its focused replan committed at `1b8a2523`.
-  Slice 2 implementation review is Ready with no Findings and its Completion
-  Approval is recorded below under the no-Findings automatic-approval policy.
+- Status: Historical Slice 1 and Slice 2 approvals are complete. The current
+  bounded closure replan is independently reviewed Ready with no Findings and
+  Human Approved at `2026-09-13 20:21:48 +0900`; no implementation
+  authorization is requested.
 - Slice 1 approved at: 2026-08-10 (explicit user approval in Codex)
 - Approved scope: Slice 1 — resolve and validate the security-clean development
   graph within the documented dependency and compatibility boundaries. The
@@ -90,7 +92,9 @@ independent implementation review and the approved completion gate.
   lockfile paths; it does not cover the revised patch path.
 - Revised Replanned Slice 2 plan review: Ready; no Findings.
 - Revised Replanned Slice 2 Human Approval: Approved at 2026-09-12 under the
-  user's no-Findings automatic-approval policy.
+  user's no-Findings automatic-approval policy; this remains historical
+  implementation approval and is not approval for post-merge verification or
+  Feature Exit.
 - Revised Slice 2 planning package paths are exactly
   `docs/specs/features/dependabot-security-updates/SPECS.md`,
   `docs/specs/features/dependabot-security-updates/TASKS.md`, and
@@ -100,9 +104,36 @@ independent implementation review and the approved completion gate.
   `patchedDependencies` registration), `pnpm-lock.yaml`,
   `patches/postman-collection@4.5.0.patch`, and the minimal `.vscodeignore`
   exclusion for that patch path.
-- Revised Slice 2 focused replan commit: `1b8a2523`, committed after the
-  Ready/no-Findings review and 2026-09-12 approval. The implementation diff
-  remains uncommitted and is eligible for the focused completion commit.
+- Revised Slice 2 focused replan commit: `1b8a2523`, followed by focused
+  implementation/completion commit `57c2a8fa`. Both implementation commits
+  (`6e94136d` and `57c2a8fa`) are ancestors of the current HEAD.
+
+### Current bounded closure replan approval
+
+- Plan review: Ready with no Findings from independent `plan-reviewer` review.
+- Human Approval: Approved at `2026-09-13 20:21:48 +0900` after the explicit
+  user approval `承認します。`.
+- Approved plan paths: exactly
+  `docs/specs/features/dependabot-security-updates/SPECS.md`,
+  `docs/specs/features/dependabot-security-updates/TASKS.md`, and
+  `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
+- Approved scope: implementation closure for the completed Slice 1/Slice 2
+  commits, with the two owned residual routes (post-publication Dependabot
+  verification and WebAPI generated-fixture reproducibility) and exactly two
+  future `Verification Follow-ups` roadmap entries recorded as the durable
+  propagation condition. This approval permits neither a merge nor a
+  dismissal, waiver, or already-resolved claim, and it does not grant Closure
+  Approval.
+- Scope: update this feature's plan/traceability state for the completed
+  implementation, PR317 publication state, post-publication Dependabot
+  re-query, and separately owned OpenAPI fixture reproducibility follow-up.
+- Approved implementation paths: none. No dependency, lockfile, runtime,
+  test, generated-artifact, configuration, merge, push, stage, commit, or
+  feature-folder-removal action is authorized by this replan.
+- Exact planning paths changed by this role: `TASKS.md` and
+  `TRACEABILITY.md`. `SPECS.md` and `docs/specs/roadmap.md` are not edited in
+  this role; any required specification or durable propagation is returned to
+  Main for the authorized lifecycle stage.
 
 ## Completion Approval
 
@@ -145,7 +176,8 @@ independent implementation review and the approved completion gate.
   interruption is separate from the successful web test; and remote
   Dependabot closure awaits publication and post-publication re-query.
 - Implementation review verdict: Ready with no Findings.
-- Commit status: Eligible and pending; no completion commit has been made.
+- Commit status: Complete; focused completion-gate commit `57c2a8fa` is an
+  ancestor of the current HEAD.
 
 ## Closure Approval
 
@@ -155,6 +187,9 @@ independent implementation review and the approved completion gate.
 - Approved paths: none
 - Feature Exit verdict: Do not close (2026-09-12 review)
 - Commit status: Not eligible
+- Residual acceptance: none. Any acceptance of post-merge alert or OpenAPI
+  residual evidence requires explicit Human Approval; no automatic
+  no-Findings closure approval applies.
 
 ## Implementation Slices
 
@@ -286,11 +321,10 @@ independent implementation review and the approved completion gate.
 
 ### Slice 2: Resolve the revalidated advisory set
 
-- Status: Implemented locally after the Prism/Postman compatibility route;
-  independent implementation review is Ready with no Findings and Completion
-  Approval is recorded above. The focused revised-plan commit is `1b8a2523`;
-  the exact implementation diff remains uncommitted and eligible for the
-  focused completion commit.
+- Status: Complete; independent implementation review is Ready with no
+  Findings, Completion Approval is recorded above, and focused completion
+  commit `57c2a8fa` is an ancestor of the current HEAD. Post-merge publication
+  and remote verification are Feature Exit work, not implementation work.
 - Resolved implementation blocker (2026-09-12): the exact patch adapts
   `postman-collection@4.5.0`'s legacy dynamic-variable module to Faker 10.5.0;
   the package now loads and all 118 public generators return defined values.
@@ -390,11 +424,12 @@ independent implementation review and the approved completion gate.
     artifact, and retains valid bundles/assets and license/package
     attribution. If repository packaging evidence requires inclusion instead,
     stop and return the justification and equivalent archive checks to Main.
-  - The current GitHub alerts 180, 181, 182, 183, 184, 186, 187, 188, 191,
-    and 192 are eligible for closure only after this committed resolution is
-    published and Dependabot is re-queried. Local audit success must not claim
-    remote alert closure; a newer post-publication alert is a Feature Exit
-    blocker.
+  - Local implementation acceptance is complete with audit findings at zero.
+    Remote alert closure is not Slice 2 acceptance: after PR317 is merged and
+    the resolved graph is published, Feature Exit must re-query Dependabot.
+    Unresolved or newly opened alerts are routed to the security owner or a
+    new replan; they must not be dismissed, waived, or claimed already
+    resolved from local evidence.
   - The implementation diff is limited to `pnpm-workspace.yaml`'s existing
     override plus exact patch-registration entry, `pnpm-lock.yaml`, and
     `patches/postman-collection@4.5.0.patch`, plus the minimal
@@ -462,17 +497,17 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   - Run `rtk pnpm run openapi:check` as a non-regression observation. The
     known stale `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`
     remains an independent WebAPI follow-up; do not change it in this slice.
-    The security slice may complete with that exact residual unchanged, but
-    Feature Exit cannot close until the separate follow-up is resolved (or
-    Main records the SSOT-approved residual decision).
-  - After the implementation commit is published, re-query GitHub Dependabot
-    for Feature Exit evidence; this external check is outside local
-    completion evidence.
+    The security slice may complete with that exact residual unchanged. Feature
+    Exit may close only after the separate owner/done condition is recorded or
+    the residual is explicitly accepted by Human Approval, together with the
+    approved durable propagation.
+  - The implementation DoD ends with the committed slice and recorded local
+    evidence. Post-merge publication status and the Dependabot API re-query are
+    validated separately under the closure-verification boundary below.
 - Production Readiness:
-  - Status: Implementation complete locally; independent implementation
-    review is Ready with no Findings and Completion Approval is Approved. The
-    focused revised-plan commit is `1b8a2523`; the focused completion commit
-    remains eligible and pending.
+  - Status: Implementation complete and committed at `57c2a8fa`; independent
+    implementation review is Ready with no Findings and Completion Approval is
+    Approved. This status does not close Feature Exit.
   - Failure modes: fail closed on a remaining mapped advisory, new advisory,
     resolver failure, unexplained lockfile churn, peer mismatch, patch-
     application failure, incomplete legacy Faker facade, dynamic-variable
@@ -507,12 +542,14 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     VSIX exclusion changes bundle/assets/license behavior, if any lockfile/
     patch churn is unexplained, or if advisory remediation requires dismissal
     or an approval-boundary change.
-- Dependencies: Slice 1 completion, prior completion commit, Feature Exit
-  findings, and the held current pnpm implementation diff are preserved. The
-  revised Slice 2 plan review is Ready with no Findings, Human Approval is
-  recorded, and its focused plan commit is `1b8a2523`. Slice 2 now requires
-  independent implementation review, Completion Approval, and a focused
-  completion commit before Feature Exit is retried.
+- Dependencies: Slice 1 and Slice 2 implementation reviews, approvals, and
+  focused commits `6e94136d` and `57c2a8fa` are complete and preserved. This
+  bounded replan has a pending independent plan review and explicit Human
+  Approval. Feature Exit evaluates PR317 publication and the post-publication
+  Dependabot re-query when available; if either remains unresolved, the
+  residual must be explicitly human-approved with an owner/done condition.
+  The separate OpenAPI follow-up and any approved durable propagation remain
+  required closure inputs.
 - Risks:
   - Scoped Faker remapping moves the exact `postman-collection` edge from
     major 5 to 10. The pinned patch must cover all legacy dynamic-variable
@@ -541,50 +578,63 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   repair, Playwright installer remediation, and Feature Exit
   propagation/removal.
 
-### Current Slice 2 blocker handoff (2026-09-12)
+## Feature Exit verification boundary (not an implementation slice)
 
-- Finding addressed: the security-correct Faker 10.5.0 resolution makes the
-  legacy `postman-collection@4.5.0` dynamic-variable module fail at startup;
-  its `faker.address.city` access proves that changing only the resolver is
-  insufficient. The complete root fix is an exact pnpm patch that supplies a
-  documented Faker 10.5.0 compatibility facade for every legacy method used
-  by the public `$random*` generator path.
-- Alternatives rejected: retaining Faker 5.5.3 violates the active advisory;
-  Postman Collection 5.3.1 still declares Faker 5.5.3; Prism 5.16 retains the
-  http-spec/Postman chain and raises its Node floor; direct-parent refresh,
-  audit suppression, and smoke-test removal do not solve the compatibility
-  problem within this feature.
-- Current implementation evidence is retained but incomplete: the uncommitted
-  `pnpm-workspace.yaml` and `pnpm-lock.yaml` changes produce audit
-  high/moderate/low = 0 and pass frozen install, build, test compilation,
-  desktop/web, qlty, and lint checks, but Prism smoke is blocked by the
-  TypeError. Playwright installer exit 130/hang and the stale OpenAPI fixture
-  remain separately recorded residuals, not evidence of Prism success.
-- Revised route: after the recorded independent Ready/no-Findings review and
-  Human Approval, commit the plan package, adapt the held pnpm diff, add
-  `patches/postman-collection@4.5.0.patch`, regenerate only its registration
-  and lockfile hash consequences, add the exact `.vscodeignore` exclusion,
-  and validate audit plus the full Postman dynamic-variable and Prism smoke
-  contract. GitHub alert closure is claimed only after publication and a
-  post-publication Dependabot re-query.
+- Status: Pending; no implementation work is open. Publication evidence is
+  expected when PR317 reaches `main`; current evidence is `OPEN` with
+  `mergedAt: null`, so publication/re-query is an explicit residual.
+- Publication evidence: Main records PR317's merged state and published head
+  when available, then re-queries
+  `GET /repos/kittybbit/vscode-ajsbutler/dependabot/alerts?state=open&per_page=100`.
+  The current pre-publication snapshot is 11 open alerts (`180, 181, 182,
+183, 184, 186, 187, 188, 191, 192, 193`), with 193 covering the new
+  `js-yaml` advisory. Local audit zero is not remote closure evidence.
+- Done condition: the post-publication query records the complete open-alert
+  result and confirms whether the completed graph's alerts are closed. Any
+  unresolved or newly opened alert is routed to the security owner or a new
+  Replanning decision, with no dismissal, waiver, or claim that it was already
+  resolved. If publication/re-query remains unavailable, Main must present that
+  residual with its owner and decision to Human Approval; it cannot be silently
+  treated as closure evidence.
+- This preserves the existing `SPECS.md` security criterion: local
+  implementation DoD is satisfied, remote closure is claimed only from a
+  published-graph query, and any newer or unresolved alert is returned as an
+  explicit blocker. This replan adds the required Human Approval boundary for
+  accepting such a residual; it does not dismiss or waive the advisory.
+- Approval boundary: residual verification or an explicit residual acceptance
+  is valid only after Human Approval. The no-Findings automatic-approval policy
+  used for Slice 2 implementation does not apply to this evidence or Closure
+  Approval. This replan authorizes no merge, push, alert mutation, or commit.
+
+### Prior Slice 2 blocker (resolved)
+
+- Finding: Faker 10.5.0 exposed legacy `postman-collection@4.5.0` dynamic-
+  variable APIs, so resolver-only remediation could not pass Prism startup.
+- Resolution: the exact patched dependency facade and scoped lockfile update
+  were implemented, independently reviewed Ready, Completion Approved, and
+  committed in `57c2a8fa`. Local audit is zero and the recorded Postman/Prism
+  compatibility evidence passes.
+- The former implementation blocker, its alternatives, and its approval
+  boundary are closed history. Remaining publication, remote-alert, and
+  OpenAPI items are tracked only in the Feature Exit sections above.
 
 ## Implementation Evidence
 
-- Changed files are limited to the approved implementation paths:
-  `pnpm-workspace.yaml` and `pnpm-lock.yaml`. `package.json`, production
-  dependencies, runtime source, tests, generated artifacts, and user-facing
-  documentation were not changed. Existing pnpm changes remain in the
-  worktree and were not reverted.
+- Slice 1's approved implementation paths were `pnpm-workspace.yaml` and
+  `pnpm-lock.yaml`; its focused completion is integrated as `6e94136d`.
+  Slice 2's exact approved paths were `.vscodeignore`, `pnpm-workspace.yaml`,
+  `pnpm-lock.yaml`, and `patches/postman-collection@4.5.0.patch`; its focused
+  completion is `57c2a8fa`. `package.json`, production dependencies, runtime
+  source, tests, generated artifacts, and user-facing documentation were not
+  changed.
 - Security baseline and result: 17 open Dependabot alerts (11 high and
   6 moderate); before-resolution `pnpm audit` reported 23 advisories
   (17 high and 6 moderate); after resolution the audit reported 0, and
   `pnpm audit --audit-level moderate` succeeded.
-- GitHub API re-query evidence is fixed in `TRACEABILITY.md` as an
-  immutable 17-row open-alert table containing each alert number, package/path,
-  GHSA, severity, vulnerable range, first patched version, selected floor or
-  response, and stable repository URL. The 2026-09-12 Feature Exit requery
-  found 10 newer open alerts; the current findings are recorded in the Feature
-  Exit Revalidation section below and require Replanning.
+- GitHub API evidence is retained in `TRACEABILITY.md` as the immutable
+  17-row implementation snapshot plus the current 2026-09-13 Feature Exit
+  snapshot. The latter has 11 open alerts and remains pre-publication evidence;
+  it does not claim closure.
 - All ten selected security floors are met:
   `js-yaml@4.3.1`, `postcss@8.5.23`, `fast-uri@3.1.5`, `undici@7.29.0`,
   `brace-expansion@1.1.18`, `brace-expansion@5.0.9`, `shell-quote@1.9.0`,
@@ -607,9 +657,8 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
 - `openapi:check` failed only because
   `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml` is
   a stale baseline. The generated artifact and generator were not changed.
-  This remains a separate follow-up owned by Main/the existing WebAPI
-  maintainer, or a Feature Exit follow-up; it is not part of this Slice 1
-  document-only synchronization.
+  This remains a separate follow-up owned by the existing WebAPI maintainer;
+  it is not part of either implementation slice or this security resolution.
 
 ## Slice 2 Implementation Evidence (2026-09-12)
 
@@ -619,11 +668,13 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   the existing override section plus one exact `patchedDependencies` entry.
   `package.json`, direct/production dependencies, runtime source, tests,
   generated artifacts, and compatibility declarations are unchanged.
-- The 10 implementation-time GitHub alert numbers remain 180, 181, 182, 183,
+- The implementation-time GitHub tuple was the 10 alerts 180, 181, 182, 183,
   184, 186, 187, 188, 191, and 192. The implementation-time audit inventory
-  remains 15 advisory IDs / 16 findings (10 high, 5 moderate, 1 low) before
+  was 15 advisory IDs / 16 findings (10 high, 5 moderate, 1 low) before
   resolution and zero findings after resolution; the full package/path/range/
-  floor mapping is retained in `TRACEABILITY.md`.
+  floor mapping is retained in `TRACEABILITY.md`. The current 11-alert
+  pre-publication snapshot, including new alert 193, is tracked separately
+  under the Feature Exit verification boundary.
 - Node `20.20.2` and pnpm `10.33.0` frozen install succeeded. The resolved
   graph meets all floors: Faker `10.5.0`, `@humanfs/node` `0.16.8`,
   Browserslist `4.28.7` with baseline mapping `2.11.22` (floor `2.11.0`),
@@ -666,10 +717,10 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   from the successful web test. `openapi:check` still reports only the known
   stale generated fixture, which remains an independent follow-up.
 - Production readiness: implementation evidence is complete within scope;
-  independent implementation review is Ready with no Findings and Completion
-  Approval is Approved. Only the focused completion commit remains before the
-  Slice 2 gate is complete. Remote Dependabot closure is not claimed until
-  publication and a post-publication API re-query.
+  independent implementation review is Ready with no Findings, Completion
+  Approval is Approved, and commit `57c2a8fa` is complete. Remote Dependabot
+  closure is not claimed until publication and a post-publication API
+  re-query.
 
 ## Main Validation-Equivalence Decisions
 
@@ -690,13 +741,34 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
 
 ## OpenAPI Follow-up
 
-- Owner: Main will hand off the stale generated fixture to a separate task or
-  the existing WebAPI maintainer.
-- Route: handle it as separate work before Feature Exit; exclude it from Slice
-  1 and do not modify the generated artifact in this slice.
-- Done condition: `pnpm run openapi:check` exits 0 and
-  `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`
-  matches the generator output.
+- Owner: existing WebAPI maintainer; Main routes this as a separate focused
+  task tracked for Feature Exit. Closure requires its done condition below or
+  explicit Human Approval of this owned residual, together with approved
+  durable propagation.
+- Scope: approved generated-artifact reproducibility work only. The exact
+  artifact is `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`.
+  No runtime or generator edits are included in this replan.
+- Done condition: `pnpm run openapi:check` exits 0 and the exact generated
+  fixture matches generator output. Preserve the
+  `docs/specs/features/import-definition-via-webapi/` folder and OpenAPI
+  assets; do not edit another feature's `TASKS.md` without explicit ownership.
+- Durable Documentation Gate: Pass for the two unfinished repository-level
+  verification items below; each has a durable owner, reusable scope, and
+  objective done condition. If the approved propagation is not applied, Feature
+  Exit must not close.
+- Closure propagation proposal (not edited here): a later approved closure
+  package may add exactly two entries under `Verification Follow-ups` in
+  `docs/specs/roadmap.md`:
+  1. Security/tooling maintainers — post-publication Dependabot re-query for
+     the affected/current/new alert set; unresolved or new alerts route to the
+     security owner or Replanning, with no dismissal, waiver, or already-
+     resolved claim. Done when the published-graph query records the complete
+     alert result and its explicit disposition.
+  2. Existing WebAPI maintainer — reproducibility of
+     `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`.
+     Done when `pnpm run openapi:check` exits 0 and the fixture matches
+     generator output; no runtime or generator edit is implied.
+  These are closure propagation contents, not edits authorized by this replan.
 
 ## Implementation Feedback
 
@@ -714,17 +786,14 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
 ## Remaining Items And Handoff
 
 - Implementation review verdict: Slice 1 Ready; Slice 2 Ready with no Findings.
-  Slice 2 Completion Approval is Approved under the no-Findings automatic-
-  approval policy; its completion-gate commit remains pending.
-- GitHub Dependabot closure was rechecked on 2026-09-12 and found the 10 open
-  alerts listed above. A fresh local audit re-query found 15 advisory IDs and
-  16 findings before resolution; the held graph now reports zero. Remote alert
-  closure remains unclaimed until publication and a post-publication API
-  re-query. The revised plan has independent review `Ready` with no Findings,
-  Human Approval recorded on 2026-09-12, and focused replan commit `1b8a2523`.
-- The stale OpenAPI fixture baseline is unresolved and must be handled by
-  Main/the existing WebAPI maintainer as a separate task or Feature Exit
-  follow-up. No generated artifact change is included here.
+  Both Completion Approvals and focused commits `6e94136d` and `57c2a8fa` are
+  complete.
+- Current remote snapshot (2026-09-13) has 11 open alerts, including new
+  `js-yaml` alert 193; PR317 is still open and unmerged. Remote closure remains
+  unclaimed until publication and the post-publication API re-query.
+- The stale OpenAPI fixture is unresolved and assigned to the existing WebAPI
+  maintainer as separate focused reproducibility work. No generated artifact,
+  runtime, or generator change is included here.
 
 - Approval Boundary:
   - The exact plan-gate approved paths are the three feature
@@ -732,8 +801,8 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     `docs/specs/features/dependabot-security-updates/TASKS.md`, and
     `docs/specs/features/dependabot-security-updates/TRACEABILITY.md`.
     The revised Replanned Slice 2 package has independent review `Ready` with
-    no Findings and Human Approval recorded on 2026-09-12; its focused replan
-    commit is `1b8a2523`.
+    no Findings, Human Approval recorded on 2026-09-12, and focused replan
+    commit `1b8a2523`; this current closure replan is separate and pending.
   - The revised Slice 2 implementation target paths are exactly
     `pnpm-workspace.yaml` (existing overrides plus one exact
     `patchedDependencies` registration), `pnpm-lock.yaml`,
@@ -742,12 +811,13 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     production/runtime/test code, generated artifacts, all other
     configuration, and all other paths remain outside the implementation
     slice.
-  - Human Approval applies to the revised Slice 2 plan after its independent
-    review returned `Ready` with no Findings on 2026-09-12; the approved
-    planning package was committed at `1b8a2523` before implementation. Its
-    implementation re-review also returned `Ready` with no Findings, and
-    Completion Approval was automatically recorded on 2026-09-12. The exact
-    implementation diff remains uncommitted and eligible for completion commit.
+  - Historical Human Approval applies to the revised Slice 2 plan after its
+    independent review returned `Ready` with no Findings on 2026-09-12; the
+    package was committed at `1b8a2523` before implementation. Its
+    implementation re-review and Completion Approval are complete, with
+    `57c2a8fa` recording the exact implementation commit. Current closure
+    verification still requires a fresh independent plan review and explicit
+    Human Approval.
   - Stop for Replanning, do not stage or commit, and return the exact diff and
     explanation to Main if resolution requires a new direct-parent,
     `package.json`, production dependency/runtime/test/generated artifact,
@@ -757,13 +827,12 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
     approved override, targeted resolution, or unavoidable peer/integrity
     consequence, or when an additional resolution remains for an affected
     family beyond the planned floors.
-- Dependencies: Slice 1 Feature Intake, plan review, Human Approval,
-  implementation review, Completion Approval, and completion commit are
-  complete and preserved. The revised Slice 2 plan's independent review,
-  Human Approval, focused plan-gate commit `1b8a2523`, implementation review,
-  and Completion Approval are complete; its completion commit remains. Feature
-  Exit remains blocked until Slice 2 is committed, remote alerts are
-  re-queried after publication, and the separate OpenAPI follow-up is resolved.
+  - Dependencies: Slice 1 and Slice 2 Feature Intake, plan review, Human Approval,
+    implementation review, Completion Approval, and focused commits are complete
+    and preserved. Feature Exit remains pending while PR317 publication and the
+    remote-alert re-query are unresolved, unless Main obtains explicit Human
+    Approval for those owned residuals. The separate OpenAPI follow-up must be
+    resolved or assigned through the durable-document gate.
 - Risks:
   - A global js-yaml override continues to place 4.x on two legacy 3.x parent
     ranges; this is existing branch behavior, not a new major-line change, but
@@ -845,18 +914,27 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
 
 ## Feature Exit
 
-- Definition of Done status: not satisfied. Slice 1 implementation,
-  independent review, Completion Approval, and the focused completion-gate
-  branch commit are complete. Revised Slice 2 implementation review and
-  Completion Approval are complete, but its completion commit, post-publication
-  Dependabot re-query, and the separate stale OpenAPI fixture follow-up remain.
-- Durable documentation updates: none expected beyond temporary feature
-  artifacts; re-evaluate README and CHANGELOG impact at exit.
-- Roadmap propagation: not required; this remains transient dependency
-  remediation and no repository-level product ordering or future work changed.
-- Open risks: current advisory drift requires Replanning; the stale OpenAPI
-  fixture remains a separate follow-up owned by Main/the WebAPI maintainer.
-- Feature Exit review date: 2026-09-12
+- Definition of Done status: implementation DoD satisfied. Slice 1 and Slice 2
+  implementations, independent reviews, Completion Approvals, and focused
+  commits `6e94136d` and `57c2a8fa` are complete. Feature Exit remains pending:
+  PR317 publication/re-query and the separate stale OpenAPI fixture follow-up
+  are unresolved. Closure may proceed only after explicit Human Approval of
+  any residuals and approval of the durable-owner propagation proposal.
+- Durable documentation updates: README, CHANGELOG, use cases, architecture,
+  and product contracts remain unchanged because this feature changes no
+  observable behavior. The roadmap proposal below is the only candidate
+  durable propagation and is not applied in this planning stage.
+- Roadmap propagation: Durable Documentation Gate passes for the two unfinished
+  verification items. The later approved closure package must add the exact
+  two `Verification Follow-ups` entries defined above to
+  `docs/specs/roadmap.md`; if that propagation is not approved and applied,
+  Feature Exit remains `Do not close`. No roadmap edit is made in this replan.
+- Open risks: PR317 publication and remote alert drift; current alert 193 is
+  newly open despite local audit zero. The stale OpenAPI fixture remains a
+  separate follow-up owned by the existing WebAPI maintainer. Any residual
+  acceptance requires explicit Human Approval and an explicit owner/done
+  condition.
+- Feature Exit review date: 2026-09-13
 - Feature Exit recommendation: Do not close
 
 ## Validation
@@ -876,17 +954,27 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
       behavior-contract update is required.
 - [x] `openapi:check` executed; its only failure is the stale generated WebAPI
       fixture baseline recorded above and assigned as follow-up.
-- [x] Feature Exit validation and durable-document evaluation completed;
-      closure remains blocked by post-publication Dependabot re-query and the
-      stale OpenAPI fixture.
+- [x] Feature Exit preflight and durable-document evaluation completed;
+      closure remains pending while post-publication Dependabot re-query and
+      the stale OpenAPI fixture are unresolved, unless their owned residuals
+      receive explicit Human Approval.
 - [x] Replanned Slice 2 audit, floor assertions, lockfile-diff explanation,
       patch provenance, dynamic-variable contract, and affected-tooling
       validation complete; the independent reviewer and completion gate remain.
 - [x] Replanned Slice 2 independently reviewed, Human Approved, implemented,
-      reviewed, and Completion Approved; no Findings remain.
-- [ ] Replanned Slice 2 focused completion commit and publication evidence.
+      reviewed, Completion Approved, and committed at `57c2a8fa`; no Findings
+      remain.
+- [ ] PR317 publication and post-publication Dependabot re-query, or explicit
+      Human Approval of the owned publication/alert residual with routing of
+      any unresolved/new alert to the security owner or Replanning.
+- [ ] Security/tooling and WebAPI residual owners are recorded through the
+      plan-approved two-entry `docs/specs/roadmap.md` propagation; otherwise
+      Feature Exit remains `Do not close`.
+- [x] Current bounded closure replan Human Approval recorded for the exact
+      three plan paths and two owned residual routes above.
+- [ ] Closure Approval for residual acceptance and feature-folder removal.
 
-## Feature Exit Revalidation (2026-09-12)
+## Feature Exit Revalidation (2026-09-12 historical)
 
 - GitHub currently reports 10 open Dependabot alerts: 180, 181, 182, 183,
   184, 186, 187, 188, 191, and 192. The original alerts 156-176 are no
@@ -914,6 +1002,28 @@ patches/postman-collection@4.5.0.patch package.json` for unrelated churn
   product-contract changes are required by this review. The selected feature
   folder must remain until the advisory Replanning work and the independent
   OpenAPI follow-up are resolved.
+
+## Current closure revalidation (2026-09-13)
+
+- PR317 (`https://github.com/kittybbit/vscode-ajsbutler/pull/317`) remains
+  `OPEN` with `mergedAt: null`; the implementation commits are therefore not
+  published on `main` for closure evidence.
+- The live Dependabot API snapshot has 11 open alerts:
+  `180, 181, 182, 183, 184, 186, 187, 188, 191, 192, 193`. Alert 193 is the
+  new high `js-yaml` finding `GHSA-2883-xcg3-v3hh` / `CVE-2026-84375`, affecting
+  `>=4.0.0,<4.3.2` and patched by `4.3.2`. The completed graph already holds
+  `js-yaml@4.3.2`; this local fact does not claim remote closure.
+- Local `pnpm audit --json` reports zero findings. After publication, Main must
+  record the complete open-alert response. Any unresolved or newly opened
+  alert is routed to the security owner or a new Replanning decision; no
+  dismissal, waiver, or already-resolved claim is permitted.
+- The stale generated OpenAPI fixture remains unresolved at
+  `src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml`.
+  The existing WebAPI maintainer owns the separate focused reproducibility
+  follow-up; no runtime, generator, or other feature-folder change is included.
+- Current recommendation: Do not close. Residual verification can be accepted
+  only after explicit Human Approval, and the selected feature folder remains
+  until the approved closure package is committed.
 
 ## Notes
 
