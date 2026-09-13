@@ -23,7 +23,8 @@
   Approval `Approved` on 2026-09-13; its focused replan/state commit is
   `f0217e2f` complete. Slice 9 implementation and independent implementation
   review are complete with no findings; Completion Approval is `Approved`
-  under the standing automatic no-findings policy on 2026-09-13.
+  under the standing automatic no-findings policy on 2026-09-13; completion
+  commit `85d2e520` is complete.
 
 ## Sync Rule
 
@@ -45,21 +46,27 @@
   complete
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure and the revised
-  Slice 6 private helper paths required by this replan.
+  Slice 6 private helper paths and the one Slice 10 Panel runtime helper path
+  required by the recorded replans.
 - Review status: Original and web-harness plan reviews are Ready; the revised
   Slice 8 complexity replan review and revised Slice 9 validation-boundary
-  replan review are Ready with no findings.
+  replan review are Ready with no findings. Slice 10's minimal
+  validation-boundary replan review `slice10_replan_review` is `Ready` with no
+  findings.
 - Human approval: Slice 7 and the web-harness delta are Approved and complete;
   the revised Slice 8 eight-module production-path boundary is Human Approved
   on 2026-09-13. The revised Slice 9 three-production-path boundary is Human
   Approved on 2026-09-13 for the exact reviewed replan below; the prior
-  two-path approval from `77bc1889` remains superseded.
+  two-path approval from `77bc1889` remains superseded. Slice 10's new
+  Panel-runtime import boundary is Human Approved on 2026-09-13 for the exact
+  reviewed replan below.
 - Active implementation slice: Slice 9 calendar transport and webview bridge
   implementation is complete under the approved replan/state commit
   `f0217e2f`; independent implementation review is `Ready` with no findings
   and Completion Approval is `Approved` under the standing automatic
-  no-findings policy on 2026-09-13. The completion commit gate remains the
-  next operation. Slice 10 remains unapproved.
+  no-findings policy on 2026-09-13; completion commit `85d2e520` is complete.
+  Slice 10's reviewed replan is Human Approved; its focused replan/state
+  commit is pending, and implementation remains paused until that commit.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -616,6 +623,10 @@ inventory surfaces or a change to any other slice's boundary.
 | Markdown                 | `CHANGELOG.md:334`                                                                                                                                 | formatting-only wrap                                                             |
 
 <!-- markdownlint-enable MD013 -->
+
+Slice 10's replan adds only the private
+`src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts` seam;
+it is a responsibility-preserving panel helper, not a new product surface.
 
 ## Planning Decisions
 
@@ -1384,7 +1395,8 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 - Status: Replanned and Human Approved; Slice 9 implementation is complete;
   focused replan/state commit `f0217e2f` is complete; independent
   implementation review is `Ready` with no findings and Completion Approval is
-  `Approved` under the standing automatic no-findings policy on 2026-09-13.
+  `Approved` under the standing automatic no-findings policy on 2026-09-13;
+  completion commit `85d2e520` is complete.
 - Scope: simplify strict message validation/serialization and the webview
   request-response bridge without relaxing protocol behavior.
 - User / Domain Value: preserves rejection of malformed, stale,
@@ -1552,7 +1564,7 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   focused replan/state commit `f0217e2f` is complete. Implementation is
   complete; independent implementation review is `Ready` with no findings and
   Completion Approval is `Approved` under the standing automatic no-findings
-  policy on 2026-09-13.
+  policy on 2026-09-13; completion commit `85d2e520` is complete.
 - Approved at: 2026-09-13 in the current conversation.
 - Approval basis: independent replan review `slice9_replan_review` is `Ready`
   with no findings, followed by the user's explicit `承認します`.
@@ -1578,7 +1590,7 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 - Status: Implementation complete under the approved revised boundary;
   independent implementation review is `Ready` with no findings and
   Completion Approval is `Approved` under the standing automatic no-findings
-  policy on 2026-09-13.
+  policy on 2026-09-13; completion commit `85d2e520` is complete.
 - Review base and state gate: revised plan/state commit `f0217e2f`, with
   independent replan review `Ready` and Human Approval `Approved`.
 - Changed production paths: `scheduleImpactCalendarTransport.ts` retains the
@@ -1652,24 +1664,27 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   correction, focused Transport/Bridge tests, WEB-7/WEB-8/WEB-9, desktop and
   architecture checks, production build, scoped Qlty, Markdown lint, and diff
   checks are recorded above.
-- Commit status: no completion commit has been created; the exact approved
-  paths are ready for the approval-committer gate.
+- Commit status: completion commit `85d2e520` is complete for the exact
+  approved paths.
 - Preserved boundary: Slice 10 remains unapproved and no Calendar Slice 3 or
   unrelated production scope is authorized.
 
 ### Slice 10: Calendar host sessions, panel, and bootstrap lifetime
 
-- Status: Proposed.
+- Status: Replanned and Human Approved; focused replan/state commit pending.
 - Scope: simplify panel/session orchestration and Explorer-sidecar lifetime
   composition without exposing new calendar behavior.
 - User / Domain Value: preserves the completed internal calendar foundation
   and clears the final merge blockers.
-- Cohesive Change Group: separate panel creation, request dispatch, post,
-  error, and disposal; split registry `open`/`acceptRequest` into lookup,
-  monotonic request handling, message, and cleanup helpers; extract bootstrap
-  registration, listener attachment, and release phases.
+- Cohesive Change Group: move panel creation/preparation, request-message
+  handling, serialization/error fallback, and panel/child lifecycle into one
+  private runtime helper; keep cache/public factory orchestration in Panel;
+  transform Registry overload arguments through a rest-tuple input normalizer
+  while keeping its public overload signatures; split Bootstrap sidecar
+  context/release operations into pure or once-only helpers.
 - Exact Production Paths:
   `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts`,
+  new `src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts`,
   `src/presentation/vscode/webview/scheduleImpactCalendarSessionRegistry.ts`,
   and `src/bootstrap/extension/createScheduleAwareExplorerSession.ts`.
 - Allowed Test Paths:
@@ -1682,8 +1697,9 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   `src/test/suite/webSmoke.ts`.
 - Acceptance: one panel/session, reveal, request ordering, sidecar identity,
   failure post, parent/child disposal, rollback, and one-time release remain
-  exact; all 18 originally inventoried production files and the three Slice 6
-  private helper paths have zero mapped smells.
+  exact; all 18 originally inventoried production files, the three Slice 6
+  private helper paths, and the Slice 10 Panel runtime helper have zero mapped
+  smells.
 - Validation: listed session/panel/bootstrap/wiring tests on desktop; web
   `rtk pnpm run test:web` smoke scenario `WEB-10` in `webSmoke.ts`; scoped
   Qlty. `WEB-10` composes `createScheduleAwareExplorerSession` with controlled
@@ -1695,10 +1711,171 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
   session/wiring tests as the planned observable-composition evidence.
 - Production Readiness: no panel/session/sidecar leak; concrete VS Code
   composition remains outside application/domain.
-- Approval Boundary: exact files/tests plus evidence documents.
-- Dependencies: Slice 9 committed.
-- Risks: early release, missed rollback, retained listener, or double dispose.
+- Approval Boundary: the revised four production paths, the existing listed
+  test paths including `webSmoke.ts` `WEB-10`, and this feature's
+  `TASKS.md`/`TRACEABILITY.md`; the new runtime helper is internal and adds no
+  public API, command, Calendar Slice 3 UI, dependency, configuration, or
+  production webpack edge.
+- Dependencies: Slice 9 completion commit `85d2e520` and the committed
+  web-harness replan `800612e4`.
+- Risks: early release, missed rollback, retained listener, double dispose,
+  panel-create failure cleanup, stale session acceptance, or sidecar release
+  occurring more than once.
 - Out of Scope: Calendar Slice 3, calendar UI, and new commands.
+
+## Slice 10 Replanning (2026-09-13)
+
+- Trigger and evidence: the existing reviewed three-path plan was checked
+  against the current Qlty configuration, whose file-complexity hard gate is
+  `55`. `scheduleImpactCalendarPanel.ts` reports total complexity `73`,
+  `openScheduleImpactCalendarPanel` complexity `64` with `12` returns, and
+  nested `post` complexity `10`; the public factory reports complexity `7`.
+  `scheduleImpactCalendarSessionRegistry.ts` reports `open` with `5`
+  parameters and complexity `5`, and `acceptRequest` complexity `5`.
+  `createScheduleAwareExplorerSession.ts` reports factory complexity `28` and
+  `release` complexity `6`.
+- Why the approved plan cannot continue unchanged: the existing Panel file
+  is already `73` against the `55` gate, so same-file private helper movement
+  cannot be assumed to clear the file total or the nested `open` finding.
+  The panel preparation/message/lifecycle responsibility is cohesive but large
+  enough to require one new internal module. Registry overload normalization
+  and Bootstrap release/context transforms remain in their current ownership
+  paths; no metric-only layer or public abstraction is introduced.
+- Smallest revised boundary: add only
+  `src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts`.
+  It imports browser-safe transport and Registry types through the existing
+  presentation/vscode boundary and owns no Node built-ins, application
+  behavior, Calendar UI, or new public contract. The Panel, Registry, and
+  Bootstrap paths remain the public/composition owners already reviewed.
+- Exact function ownership:
+  - `scheduleImpactCalendarPanel.ts`: retain public types, `panelCaches`,
+    `title`, and the public `openScheduleImpactCalendarPanel`
+    and `createScheduleImpactCalendarPanel`. Add only pure cache lookup/
+    stale-entry helpers and a runtime-result adapter. The open function owns
+    Registry session creation, cache reuse, runtime invocation, and outer
+    rollback; target complexity `<=12`, returns `<=4`. The factory owns only
+    factory Registry selection, cache lookup, and handle decoration; target
+    complexity `<=4`.
+  - `scheduleImpactCalendarPanelRuntime.ts`: own the existing `createPanel`,
+    `buildCalendarShell`, and `escapeHtml`-adjacent preparation operations;
+    `prepareCalendarPanel` sets Webview options/html; `isLiveSession` is the
+    single repeated disposed/current guard; `postCalendarMessage` performs
+    serialization, failure fallback, and the final live check; a pure
+    `classifyCalendarRequest`/`acceptedCalendarRequest` helper preserves
+    validation, ready/refresh filtering, monotonic Registry acceptance, and
+    disposed-session errors; `createCalendarMessageListener` owns only the
+    listener callback; `safeDisposePanel`, `disposeCalendarChild`, and
+    `registerCalendarPanelLifecycle` own idempotent child/panel disposal,
+    listener removal, registration failure, and rollback. The exported
+    `createScheduleImpactCalendarPanelRuntime` only composes these helpers and
+    returns `{ panel, dispose }`; closure state remains `disposed`,
+    `childCleaned`, receive disposable, and panel-dispose disposable. Each
+    named helper target is `<=4` complexity/returns, except the composition
+    function target `<=8`; module target `<=45` to retain a `10` point margin
+    below the hard gate.
+  - `scheduleImpactCalendarSessionRegistry.ts`: retain class state, public
+    overload signatures, snapshot/handle shape, and session identity. Add a
+    `OpenSessionArguments` rest-tuple implementation signature and pure
+    `normalizeOpenSessionInput` transform so the implementation has one
+    parameter while legacy overload calls remain source-compatible. Use pure
+    current-session lookup, session-state creation, and monotonic request
+    guard helpers; `open` and `acceptRequest` each target `<=4` complexity and
+    no many-parameters finding. Target file total `<=45`.
+  - `createScheduleAwareExplorerSession.ts`: retain `availableSidecar` and
+    the existing `OpenSemanticDiffExplorer`/dependency types. Add pure
+    sidecar registration/context helpers, `createReleaseOnce`, a narrowly
+    scoped parent-dispose listener attachment helper, and a returned-handle
+    decorator. The public factory remains the sole Explorer open composition;
+    target complexity `<=12`; once-only release target `<=4`; target file
+    total `<=40`.
+- Named finding transformations and conservative budgets:
+
+  <!-- markdownlint-disable MD013 -->
+
+  | Revised path | Current evidence | Conservative implementation budget |
+  | --- | --- | ---: |
+  | `scheduleImpactCalendarPanel.ts` | file `73`; open `64`/12 returns; post `10`; factory `7` | file `<=40`; open `<=12`/4 returns; factory `<=4` |
+  | new `scheduleImpactCalendarPanelRuntime.ts` | new seam; receives only extracted preparation/message/lifecycle decisions, not the old `open` function wholesale | file `<=45`; each helper `<=4`, composer `<=8` |
+  | `scheduleImpactCalendarSessionRegistry.ts` | open parameters `5`/complexity `5`; acceptRequest `5` | file `<=45`; open/accept `<=4`; no many-parameters |
+  | `createScheduleAwareExplorerSession.ts` | factory `28`; release `6`; no file-total finding reported | file `<=40`; factory `<=12`; release `<=4` |
+
+  <!-- markdownlint-enable MD013 -->
+
+  These are conservative budgets, not passing evidence. Implementation must
+  run scoped Qlty `fmt`, `check`, and `smells --no-snippets` over all four
+  production paths. Any file above `55`, named function above its budget, or
+  mapped smell remaining is a gate failure and requires another smallest-seam
+  replan; no suppression, baseline change, threshold relaxation, or
+  unverified “movement” claim is accepted.
+- Preserved behavior and boundaries: public Panel/Registry/Bootstrap exports,
+  Registry overload compatibility, panel title and strict CSP shell, source
+  capture and privacy behavior, sidecar identity, session filtering, request
+  monotonicity, failure posts, parent/child disposal, rollback, listener
+  removal, and one-time release remain exact. The helper uses only existing
+  VS Code presentation composition and browser-safe transport imports; no
+  production source imports Node built-ins, and no new `vscode` dependency is
+  introduced outside the already permitted presentation/bootstrap boundary.
+- Revised validation: extend the existing desktop characterization paths for
+  Panel creation/preparation/message rejection/failure-post and panel-dispose
+  rollback; test Registry input-object and legacy overload forms, current
+  session reuse, stale request rejection, and epoch cleanup; test Bootstrap
+  available/unavailable sidecar context, open failure rollback, parent panel
+  disposal, explicit dispose, and repeated release. In `webSmoke.ts`, execute
+  controlled `WEB-10` with sidecar registration before parent open, successful
+  disposal release, parent-disposal release, open-failure rollback, and
+  repeated dispose/release assertions. Re-run WEB-7/WEB-8/WEB-9 unchanged to
+  guard command, artifact, and transport/bridge regressions. Run test compile,
+  focused desktop suites, the full desktop runner, production build,
+  architecture dependency checks, scoped Qlty, Markdown lint, and
+  `git diff --check`. Real Calendar `WebviewPanel` DOM and
+  `window.vscode` handshake remain unclaimed.
+- Approval boundary: the prior Slice 10 three-path proposal is superseded
+  only for its file-complexity/path assumption. The new runtime helper and
+  its import edge were independently reviewed as `Ready` with no findings and
+  Human Approved on 2026-09-13. No runtime, test, generated artifact,
+  configuration, dependency, public API, Calendar Slice 3, or production
+  webpack change is authorized until the focused replan/state commit.
+- Dependencies: Slice 9 completion commit `85d2e520` and committed
+  web-harness replan `800612e4`.
+- Unresolved risks: helper extraction could alter panel-create failure
+  cleanup, message validation/error precedence, stale-session filtering,
+  callback order, or idempotent disposal; these remain explicit review and
+  characterization gates.
+
+## Slice 10 Replan Human Approval (2026-09-13)
+
+- Status: Approved for the revised four-production-path boundary; focused
+  replan/state commit is pending. Implementation and completion review remain
+  separate subsequent gates.
+- Approved at: 2026-09-13 in the current conversation, after the user's
+  explicit `承認します`.
+- Approval basis: independent review `slice10_replan_review` is `Ready` with
+  no findings, followed by the user's explicit approval. The user's standing
+  automatic no-findings slice-approval authorization applies to this exact
+  reviewed scope; the newly added runtime import edge is explicitly included.
+- Approved production paths:
+  `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts`,
+  `src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts`,
+  `src/presentation/vscode/webview/scheduleImpactCalendarSessionRegistry.ts`,
+  and `src/bootstrap/extension/createScheduleAwareExplorerSession.ts`.
+- Approved test and validation paths:
+  `src/test/suite/scheduleImpactCalendarSession.test.ts`,
+  `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+  `src/test/suite/createScheduleAwareExplorerSession.test.ts`,
+  `src/test/suite/scheduleImpactSidecarRegistry.test.ts`,
+  `src/test/suite/extensionSubscriptions.test.ts`,
+  `src/test/suite/semanticDiffWiring.test.ts`, and
+  `src/test/suite/webSmoke.ts` for controlled `WEB-10` plus WEB-7/WEB-8/WEB-9
+  regression.
+- Approved evidence paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Preserved boundary: public Panel/Registry/Bootstrap contracts, Registry
+  overload compatibility, source/privacy behavior, sidecar/session identity,
+  strict filtering, rollback, listener cleanup, and one-time release remain
+  unchanged. Calendar Slice 3, public Calendar actions, dependencies,
+  configuration, production webpack, and new behavior are excluded.
+- Commit gate: the exact approved planning-package delta is eligible for one
+  focused replan/state commit by `approval-committer`; no stage or commit was
+  performed here. Implementation starts only after that commit.
 
 ## Web Extension Smoke Scope
 
