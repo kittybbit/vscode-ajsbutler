@@ -1669,6 +1669,38 @@ suite("Semantic diff command", () => {
     );
   });
 
+  test("releases without unregister when source registration is unavailable", async () => {
+    const events: string[] = [];
+    const harness = createWorkflowHarness({
+      registerSemanticDiffSourceCapture: undefined,
+      unregisterSemanticDiffSourceCapture: () => {
+        events.push("unregister");
+      },
+    });
+    const baseBegin = harness.deps.beginSemanticDiffSourceCapture!;
+    harness.deps.beginSemanticDiffSourceCapture = (input) => {
+      const capture = baseBegin(input);
+      return {
+        ...capture,
+        release: () => {
+          events.push("release");
+          capture.release();
+        },
+      };
+    };
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.deepStrictEqual(result, {
+      ok: false,
+      error: {
+        code: "source-capture-failed",
+        message: "Semantic diff source targets could not be registered.",
+      },
+    });
+    assert.deepStrictEqual(events, ["release"]);
+  });
+
   test("rejects a stale capture without creating a partial Explorer session", async () => {
     const harness = createWorkflowHarness();
     const baseBegin = harness.deps.beginSemanticDiffSourceCapture!;

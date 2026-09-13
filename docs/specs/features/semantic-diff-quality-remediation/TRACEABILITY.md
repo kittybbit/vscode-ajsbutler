@@ -1106,8 +1106,8 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
 
 ## Slice 8 Replan Human Approval (2026-09-13)
 
-- Status: Approved for the revised eight-module production-path boundary;
-  focused replan/state commit is pending.
+- Status: Approved and committed for the revised eight-module
+  production-path boundary; focused replan/state commit `814d8481`.
 - Approved at: 2026-09-13 in the current conversation.
 - Approval basis: the revised Slice 8 plan was independently reviewed as
   `Ready` with no findings, and the user explicitly approved this exact
@@ -1139,9 +1139,88 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
   dependency, production webpack change, or architecture exception is
   approved.
 - Preserved scope: completed Slices 1-7, the committed test-only web-harness
-  replan `800612e4`, Calendar Slice 3, Dependabot, Slice 9-10, and the partial
-  Slice 8 implementation remain otherwise unchanged. Completion review and
-  completion approval are still pending.
-- Recommended next route: delegate these exact planning paths to
-  `approval-committer` for the focused replan/state commit, then resume Slice 8
-  implementation only after that commit succeeds.
+  replan `800612e4`, Calendar Slice 3, Dependabot, and Slice 9-10 remain
+  otherwise unchanged. Slice 8 implementation review is `Ready` with no
+  findings and Completion Approval is recorded below; its focused completion
+  commit remains pending.
+- Recommended next route: delegate the exact approved Slice 8 completion paths
+  to `approval-committer` for one focused completion commit.
+
+## Slice 8 Implementation Evidence (2026-09-13)
+
+- Status: implementation complete under the approved revised boundary;
+  independent implementation review is `Ready` with no findings and
+  Completion Approval is `Approved` below; the focused completion commit is
+  pending.
+- Requirement mapping: the command facade and eight command-owned modules
+  cover workflow input, source selection, period selection, source/Git
+  preparation, capture binding, artifact construction, Explorer opening, and
+  ordered command dispatch. The public command/result contracts remain in
+  `semanticDiffCommand.ts`.
+- Changed production paths: the nine approved command files only. Changed
+  test paths: `src/test/suite/semanticDiffCommand.test.ts`, adding the
+  missing-registration cleanup characterization, and
+  `src/test/suite/webSmoke.ts`, adding WEB-8 deterministic in-memory
+  artifact/Explorer success and open-failure rollback assertions.
+- Review correction: missing source-registration capability now performs one
+  release without optional unregister, while an attempted registration that
+  throws still performs unregister plus release. The approved command suite
+  covers both outcomes.
+- Desktop validation: `pnpm run test:prepare:desktop` and the full desktop
+  runner exited `0`; this includes the architecture dependency suite.
+- Web validation: the approved isolated bundle compiled and the real
+  Chromium WebWorker runner exited `0`. It reported `WEB-7 passed:
+  browser=1 sourceReads=0 reports=0 sessions=0` and `WEB-8 passed:
+  bindings=2 registrations=2 opened=1 rollbacks=1`. Existing non-failing
+  `EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` stream diagnostics remain after the
+  successful scenarios.
+- Quality/build validation: `pnpm run test:compile`, production `pnpm run
+  build`, scoped Qlty `check` and `smells --no-snippets` for the nine
+  production paths and `webSmoke.ts`, `pnpm run lint:md`, and `git diff
+  --check` passed. Qlty reported no issues, including no function or file
+  complexity finding above threshold `55`.
+- Compatibility and production readiness: one-shot reads, exact source bytes,
+  cancellation, ordering, Git HEAD capture, result codes/localization,
+  binding rollback/release, Explorer/report output, telemetry privacy,
+  desktop/web entry points, and VS Code/browser compatibility remain intact.
+  No dependency, lockfile, production webpack, README, or CHANGELOG update
+  was needed.
+- Remaining risk: interactive pickers/dialogs and real Explorer Webview DOM
+  remain outside the approved WEB-8 host-composition boundary and continue to
+  be covered by focused desktop characterization suites.
+- Recommended route: independent implementation review is `Ready` with no
+  findings and Completion Approval is recorded below; delegate the exact path
+  set to `approval-committer` for its focused completion commit.
+
+## Slice 8 Completion Approval (2026-09-13)
+
+- Status: Approved under the user's explicit standing automatic no-findings
+  slice-approval policy.
+- Approved at: 2026-09-13 in the current conversation.
+- Basis: independent implementation review `Ready` with no findings after the
+  P2 registration-cleanup correction; review base and approved replan/state
+  commit are `814d8481`.
+- Exact approved completion paths:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowInput.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSelection.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowPeriod.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSource.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandSourceBinding.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowArtifacts.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandExplorerWorkflow.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowExecution.ts`,
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/webSmoke.ts`, this `TASKS.md`, and
+  `TRACEABILITY.md`.
+- Completion evidence: compile, desktop runner, production build, real
+  WEB-7/WEB-8 runner, scoped Qlty, Markdown lint, and diff checks are recorded
+  in the implementation evidence above; the P2 regression test confirms a
+  missing registration callback releases once without optional unregister.
+- Commit status: completion commit is pending the exact
+  `approval-committer` gate. No stage or commit was performed by this role.
+- Preserved boundary: Slice 9 and later remain unapproved and must not begin
+  until this exact completion commit succeeds and a new slice approval gate is
+  recorded.
+- Recommended next route: delegate the exact approved completion paths to
+  `approval-committer` for one focused Slice 8 completion commit.

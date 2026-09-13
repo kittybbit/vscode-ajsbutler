@@ -13,12 +13,11 @@
 - Read `SPECS.md`, this file, and the two source use cases first.
 - Web-harness replan/state commit `800612e4` and Slice 7 completion commit
   `b0095565` are complete under the recorded boundary.
-- Slice 8 requires the minimal replan below: its same-file helper extraction
-  reduced Qlty total complexity from `254` to `253`, still above the configured
-  threshold `55`. The partial Slice 8 command diff is preserved.
-- The bounded eight-module Slice 8 replan has independent plan review `Ready`
-  with no findings and Human Approval `Approved` on 2026-09-13. Its focused
-  replan/state commit is pending; implementation remains gated on that commit.
+- Slice 8's bounded eight-module replan has independent plan review `Ready`
+  with no findings, Human Approval `Approved` on 2026-09-13, focused
+  replan/state commit `814d8481`, and Completion Approval `Approved` under the
+  standing automatic no-findings policy. Its completion commit remains
+  pending the approval-committer gate.
 
 ## Sync Rule
 
@@ -29,10 +28,11 @@
 
 ## Plan Status
 
-- Status: Replanned; Slices 1-7 complete; Slice 8 partial implementation
-  preserved; minimal complexity replan independently reviewed and Human
-  Approved, with focused replan/state commit pending; web-harness replan for
-  Slices 7-10 approved and focused replan/state commit `800612e4` complete
+- Status: Replanned; Slices 1-8 implementation complete under focused
+  replan/state commit `814d8481`; Slice 8 independent implementation review is
+  `Ready` with no findings and Completion Approval is `Approved`; web-harness
+  replan for Slices 7-10 approved and focused replan/state commit `800612e4`
+  complete
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure and the revised
   Slice 6 private helper paths required by this replan.
@@ -41,10 +41,9 @@
 - Human approval: Slice 7 and the web-harness delta are Approved and complete;
   the revised Slice 8 eight-module production-path boundary is Human Approved
   on 2026-09-13. The prior Slice 8 single-file approval remains superseded.
-- Active implementation slice: Slice 8 minimal replan for artifact, Explorer,
-  and finalization responsibilities; partial command implementation remains
-  preserved and no implementation may resume before its focused replan/state
-  commit.
+- Active implementation slice: none; Slice 8 is complete through review and
+  Completion Approval, awaiting its focused completion commit. Slice 9 and
+  later remain unapproved.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -357,8 +356,8 @@ under the approved boundary.
 
 ## Slice 8 Replan Human Approval (2026-09-13)
 
-- Status: Approved for the revised eight-module production-path boundary;
-  focused replan/state commit is pending.
+- Status: Approved and committed for the revised eight-module
+  production-path boundary; focused replan/state commit `814d8481`.
 - Approved at: 2026-09-13 in the current conversation.
 - Approval basis: the revised Slice 8 plan was independently reviewed as
   `Ready` with no findings, and the user explicitly approved this exact
@@ -390,12 +389,12 @@ under the approved boundary.
   dependency, production webpack change, or architecture exception is
   approved.
 - Preserved scope: completed Slices 1-7, the committed test-only web-harness
-  replan `800612e4`, Calendar Slice 3, Dependabot, Slice 9-10, and the partial
-  Slice 8 implementation remain otherwise unchanged. Completion review and
-  completion approval are still pending.
-- Recommended next route: delegate these exact planning paths to
-  `approval-committer` for the focused replan/state commit, then resume Slice 8
-  implementation only after that commit succeeds.
+  replan `800612e4`, Calendar Slice 3, Dependabot, and Slice 9-10 remain
+  otherwise unchanged. Slice 8 implementation review is `Ready` with no
+  findings and Completion Approval is recorded below; its focused completion
+  commit remains pending.
+- Recommended next route: delegate the exact approved Slice 8 completion paths
+  to `approval-committer` for one focused completion commit.
 
 ## Completion Approval
 
@@ -1707,3 +1706,90 @@ issues`; Slice 7-owned smell findings are clear.
   Approval before its focused state commit. No implementation, test, generated
   artifact, configuration, dependency, `CHANGELOG.md`, Calendar Slice 3,
   Dependabot, or Slice 9-10 change is authorized by this historical record.
+
+## Slice 8 Implementation Evidence (2026-09-13)
+
+- Status: Implementation complete under the approved revised boundary;
+  independent implementation review and Completion Approval remain pending.
+- Review base and state gate: revised plan/state commit `814d8481`, with
+  independent plan review `Ready` and Human Approval `Approved`.
+- Changed production paths: `semanticDiffCommand.ts` retains the public
+  command contract and delegates to the eight command-owned workflow modules:
+  WorkflowInput, WorkflowSelection, WorkflowPeriod, WorkflowSource,
+  SourceBinding, WorkflowArtifacts, ExplorerWorkflow, and WorkflowExecution.
+  The moved phases preserve source reads, selection/cancellation, Git HEAD
+  handling, source binding, artifact construction, Explorer opening, cleanup,
+  and final result mapping.
+- Changed test paths: `src/test/suite/semanticDiffCommand.test.ts` adds the
+  missing-registration cleanup characterization, and
+  `src/test/suite/webSmoke.ts` adds deterministic WEB-8 artifact/Explorer
+  success and open-failure rollback assertions. No existing command,
+  schedule-impact, Explorer, Flow, or wiring expectation changed.
+- Review correction: source-registration outcomes now distinguish a missing
+  registration callback from a callback that throws. Missing registration
+  releases the capture exactly once without optional unregister; an attempted
+  registration failure performs unregister plus release. The approved command
+  characterization test covers this distinction.
+- Desktop evidence: `pnpm run test:prepare:desktop` and the full desktop
+  runner exited `0`, including the architecture dependency suite.
+- Web evidence: the isolated test bundle compiled successfully and the real
+  Chromium WebWorker runner exited `0`. It reported `WEB-7 passed:
+  browser=1 sourceReads=0 reports=0 sessions=0` and `WEB-8 passed:
+  bindings=2 registrations=2 opened=1 rollbacks=1`. The runner retained
+  existing non-failing `EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` stream diagnostics
+  after the scenarios completed.
+- Build and quality evidence: `pnpm run test:compile`, production `pnpm run
+  build`, scoped Qlty `check` and `smells --no-snippets` for all nine
+  production paths plus `webSmoke.ts`, `pnpm run lint:md`, and `git diff
+  --check` passed. Qlty reported no issues, including no function findings or
+  file-complexity finding above the configured `55` threshold.
+- Compatibility and readiness: command IDs, result types, localization,
+  source-byte/read-count behavior, ordering, cancellation, Git capture,
+  binding/rollback/release timing, Explorer/report output, telemetry privacy,
+  desktop/web entry points, VS Code engine, and Node/browser boundaries remain
+  unchanged. No dependency, lockfile, production webpack, README, or
+  CHANGELOG update was required.
+- Implementation feedback: the command facade now has a small stable public
+  contract while each extracted module owns one workflow responsibility;
+  type-only command-contract imports keep the helper graph one-way and avoid
+  runtime cycles.
+- Remaining risk: real Explorer Webview DOM and interactive picker/dialog
+  automation remain outside the approved WEB-8 host-composition boundary;
+  focused desktop characterization suites remain the coverage for those
+  adapters.
+- Recommended next route: the independent review is `Ready` with no findings
+  and Completion Approval is recorded below; delegate this exact path set to
+  `approval-committer` for its focused completion commit.
+
+## Slice 8 Completion Approval (2026-09-13)
+
+- Status: Approved under the user's explicit standing automatic no-findings
+  slice-approval policy.
+- Approved at: 2026-09-13 in the current conversation.
+- Basis: independent implementation review `Ready` with no findings after the
+  P2 registration-cleanup correction; review base and approved replan/state
+  commit are `814d8481`.
+- Exact approved completion paths:
+  `src/presentation/vscode/commands/semanticDiffCommand.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowInput.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSelection.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowPeriod.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowSource.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandSourceBinding.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowArtifacts.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandExplorerWorkflow.ts`,
+  `src/presentation/vscode/commands/semanticDiffCommandWorkflowExecution.ts`,
+  `src/test/suite/semanticDiffCommand.test.ts`,
+  `src/test/suite/webSmoke.ts`, this `TASKS.md`, and
+  `TRACEABILITY.md`.
+- Completion evidence: compile, desktop runner, production build, real
+  WEB-7/WEB-8 runner, scoped Qlty, Markdown lint, and diff checks are recorded
+  in the implementation evidence above; the P2 regression test confirms a
+  missing registration callback releases once without optional unregister.
+- Commit status: completion commit is pending the exact
+  `approval-committer` gate. No stage or commit was performed by this role.
+- Preserved boundary: Slice 9 and later remain unapproved and must not begin
+  until this exact completion commit succeeds and a new slice approval gate is
+  recorded.
+- Recommended next route: delegate the exact approved completion paths to
+  `approval-committer` for one focused Slice 8 completion commit.
