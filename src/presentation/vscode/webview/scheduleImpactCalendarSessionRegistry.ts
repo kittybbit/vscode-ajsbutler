@@ -50,6 +50,16 @@ export type OpenScheduleImpactCalendarSessionInput = Readonly<{
   reveal?: () => void;
 }>;
 
+type OpenSessionArguments =
+  | [input: OpenScheduleImpactCalendarSessionInput]
+  | [
+      parentSessionId: string,
+      context: SemanticDiffOutputContext,
+      sidecar: SemanticDiffScheduleImpact,
+      displayLanguage?: string,
+      reveal?: () => void,
+    ];
+
 const sessionPrefix = "sdc-calendar-session-";
 const actionPrefix = "sdc-calendar-action-";
 
@@ -60,6 +70,61 @@ const defaultAllocator = (prefix: string): (() => string) => {
 
 const defaultSessionIdAllocator = defaultAllocator(sessionPrefix);
 const defaultActionIdAllocator = defaultAllocator(actionPrefix);
+
+const normalizeOpenSessionInput = (
+  args: OpenSessionArguments,
+): OpenScheduleImpactCalendarSessionInput => {
+  const [inputOrParent, context, sidecar, displayLanguage, reveal] = args;
+  return typeof inputOrParent === "string"
+    ? {
+        parentSessionId: inputOrParent,
+        context: context as SemanticDiffOutputContext,
+        sidecar: sidecar as SemanticDiffScheduleImpact,
+        displayLanguage,
+        reveal,
+      }
+    : inputOrParent;
+};
+
+const createSession = (
+  input: OpenScheduleImpactCalendarSessionInput,
+  allocateSessionId: () => string,
+  allocateActionId: () => string,
+): MutableSession => ({
+  calendarSessionId: allocateSessionId() as ScheduleImpactCalendarSessionId,
+  parentSessionId: input.parentSessionId,
+  actionId: allocateActionId(),
+  context: input.context,
+  sidecar: input.sidecar,
+  displayLanguage: normalizeScheduleImpactCalendarLanguage(
+    input.displayLanguage,
+  ),
+  epoch: 1,
+  latestRequestId: 0,
+  disposed: false,
+  reveal: input.reveal ?? (() => undefined),
+});
+
+const hasLiveSession = (
+  session: MutableSession | undefined,
+): session is MutableSession => Boolean(session) && !session.disposed;
+
+const hasMatchingEpoch = (
+  session: MutableSession,
+  epoch: number | undefined,
+): boolean => epoch === undefined || session.epoch === epoch;
+
+const hasNewRequest = (session: MutableSession, requestId: number): boolean =>
+  Number.isSafeInteger(requestId) && requestId > session.latestRequestId;
+
+const canAcceptRequest = (
+  session: MutableSession | undefined,
+  requestId: number,
+  epoch: number | undefined,
+): session is MutableSession =>
+  hasLiveSession(session) &&
+  hasMatchingEpoch(session, epoch) &&
+  hasNewRequest(session, requestId);
 
 export class ScheduleImpactCalendarSessionRegistry {
   private readonly sessions = new Map<
@@ -94,22 +159,9 @@ export class ScheduleImpactCalendarSessionRegistry {
     reveal?: () => void,
   ): ScheduleImpactCalendarSessionHandle;
   public open(
-    inputOrParent: OpenScheduleImpactCalendarSessionInput | string,
-    context?: SemanticDiffOutputContext,
-    sidecar?: SemanticDiffScheduleImpact,
-    displayLanguage?: string,
-    reveal?: () => void,
+    ...args: OpenSessionArguments
   ): ScheduleImpactCalendarSessionHandle {
-    const input: OpenScheduleImpactCalendarSessionInput =
-      typeof inputOrParent === "string"
-        ? {
-            parentSessionId: inputOrParent,
-            context: context as SemanticDiffOutputContext,
-            sidecar: sidecar as SemanticDiffScheduleImpact,
-            displayLanguage,
-            reveal,
-          }
-        : inputOrParent;
+    const input = normalizeOpenSessionInput(args);
     const currentId = this.parentSessions.get(input.parentSessionId);
     const current = currentId ? this.sessions.get(currentId) : undefined;
     if (current && !current.disposed) {
@@ -119,22 +171,12 @@ export class ScheduleImpactCalendarSessionRegistry {
     }
     if (currentId) this.remove(currentId);
 
-    const sessionId =
-      this.allocateSessionId() as ScheduleImpactCalendarSessionId;
-    const session: MutableSession = {
-      calendarSessionId: sessionId,
-      parentSessionId: input.parentSessionId,
-      actionId: this.allocateActionId(),
-      context: input.context,
-      sidecar: input.sidecar,
-      displayLanguage: normalizeScheduleImpactCalendarLanguage(
-        input.displayLanguage,
-      ),
-      epoch: 1,
-      latestRequestId: 0,
-      disposed: false,
-      reveal: input.reveal ?? (() => undefined),
-    };
+    const session = createSession(
+      input,
+      this.allocateSessionId,
+      this.allocateActionId,
+    );
+    const sessionId = session.calendarSessionId;
     this.sessions.set(sessionId, session);
     this.parentSessions.set(input.parentSessionId, sessionId);
     return this.toHandle(session);
@@ -176,19 +218,7 @@ export class ScheduleImpactCalendarSessionRegistry {
     const session = this.sessions.get(
       sessionId as ScheduleImpactCalendarSessionId,
     );
-    if (
-      !session ||
-      session.disposed ||
-      (epoch !== undefined && session.epoch !== epoch)
-    ) {
-      return false;
-    }
-    if (
-      !Number.isSafeInteger(requestId) ||
-      requestId <= session.latestRequestId
-    ) {
-      return false;
-    }
+    if (!canAcceptRequest(session, requestId, epoch)) return false;
     session.latestRequestId = requestId;
     return true;
   }

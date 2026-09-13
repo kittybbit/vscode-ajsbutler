@@ -22,6 +22,43 @@ suite("Schedule impact calendar session registry", () => {
     assert.strictEqual(registry.resolve(first.calendarSessionId), undefined);
   });
 
+  test("accepts the object overload and ignores requests from another epoch", () => {
+    let reveals = 0;
+    const registry = new ScheduleImpactCalendarSessionRegistry();
+    const session = registry.open({
+      parentSessionId: "sde-session-object",
+      context,
+      sidecar,
+      reveal: () => {
+        reveals += 1;
+      },
+    });
+    const reused = registry.open({
+      parentSessionId: "sde-session-object",
+      context,
+      sidecar,
+    });
+    assert.strictEqual(reused.calendarSessionId, session.calendarSessionId);
+    assert.strictEqual(reveals, 1);
+    assert.strictEqual(
+      registry.acceptRequest(session.sessionId, 1, session.epoch + 1),
+      false,
+    );
+    assert.strictEqual(registry.acceptRequest(session.sessionId, 1), true);
+  });
+
+  test("removes an orphaned parent mapping before opening a replacement", () => {
+    const registry = new ScheduleImpactCalendarSessionRegistry();
+    const first = registry.open("sde-session-orphan", context, sidecar);
+    assert.strictEqual(registry.releaseParent("sde-session-orphan"), 1);
+    assert.strictEqual(
+      registry.resolveForParent("sde-session-orphan"),
+      undefined,
+    );
+    const second = registry.open("sde-session-orphan", context, sidecar);
+    assert.notStrictEqual(first.calendarSessionId, second.calendarSessionId);
+  });
+
   test("rejects stale requests and cascades parent disposal", () => {
     const registry = new ScheduleImpactCalendarSessionRegistry();
     const session = registry.open("sde-session-2", context, sidecar);

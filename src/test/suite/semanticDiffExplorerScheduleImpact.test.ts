@@ -40,7 +40,15 @@ type FakePanel = {
   disposeCount: number;
 };
 
-const fakePanel = (title: string): FakePanel => {
+type FakePanelOptions = Readonly<{
+  throwOnHtml?: boolean;
+  throwOnPanelListener?: boolean;
+}>;
+
+const fakePanel = (
+  title: string,
+  options: FakePanelOptions = {},
+): FakePanel => {
   let receive: ((value: unknown) => void) | undefined;
   let registeredReceive: ((value: unknown) => void) | undefined;
   let receiveDisposed = false;
@@ -48,10 +56,17 @@ const fakePanel = (title: string): FakePanel => {
   const messages: unknown[] = [];
   let disposed = false;
   let disposeCount = 0;
+  let html = "";
   const webview = {
     cspSource: "https://fake.invalid",
     options: {},
-    html: "",
+    get html() {
+      return html;
+    },
+    set html(value: string) {
+      if (options.throwOnHtml) throw new Error("calendar HTML failed");
+      html = value;
+    },
     onDidReceiveMessage: (listener: (value: unknown) => void) => {
       receive = listener;
       registeredReceive = listener;
@@ -78,6 +93,9 @@ const fakePanel = (title: string): FakePanel => {
       disposeListeners.forEach((listener) => listener());
     },
     onDidDispose: (listener: () => void) => {
+      if (options.throwOnPanelListener) {
+        throw new Error("calendar panel listener failed");
+      }
       disposeListeners.add(listener);
       return { dispose: () => disposeListeners.delete(listener) };
     },
@@ -246,5 +264,113 @@ suite("Semantic Diff Explorer schedule boundary", () => {
       requestId: 2,
     });
     assert.deepStrictEqual(fake.messages, messagesBeforeLateCallback);
+  });
+
+  test("rejects malformed calendar messages and preserves serialization fallback", () => {
+    const registry = new ScheduleImpactCalendarSessionRegistry();
+    const fake = fakePanel("Schedule Impact Calendar");
+    const cyclicSidecar = {} as Record<string, unknown>;
+    cyclicSidecar.self = cyclicSidecar;
+    const handle = openScheduleImpactCalendarPanel(
+      {
+        extensionContext,
+        sessionRegistry: registry,
+        createWebviewPanel: () => fake.panel,
+      },
+      {
+        parentSessionId: "sde-session-invalid-message",
+        context: context(),
+        sidecar: cyclicSidecar as never,
+      },
+    );
+    fake.emit({ type: "unknown" });
+    assert.strictEqual(fake.messages.length, 1);
+    assert.strictEqual(
+      (fake.messages[0] as { error: { code: string } }).error.code,
+      "invalid-request",
+    );
+    fake.emit({
+      type: "ready",
+      sessionId: handle.calendarSessionId,
+      requestId: 1,
+    });
+    assert.strictEqual(fake.messages.length, 2);
+    assert.strictEqual(
+      (fake.messages[1] as { error: { code: string } }).error.code,
+      "invalid-request",
+    );
+    handle.dispose();
+  });
+
+  test("rolls back the session and panel when preparation fails", () => {
+    const registry = new ScheduleImpactCalendarSessionRegistry();
+    const fake = fakePanel("Schedule Impact Calendar", { throwOnHtml: true });
+    assert.throws(
+      () =>
+        openScheduleImpactCalendarPanel(
+          {
+            extensionContext,
+            sessionRegistry: registry,
+            createWebviewPanel: () => fake.panel,
+          },
+          {
+            parentSessionId: "sde-session-preparation-failure",
+            context: context(),
+            sidecar,
+          },
+        ),
+      /calendar HTML failed/,
+    );
+    assert.strictEqual(registry.size, 0);
+    assert.strictEqual(fake.disposeCount, 1);
+  });
+
+  test("rolls back the Registry when panel creation itself fails", () => {
+    const registry = new ScheduleImpactCalendarSessionRegistry();
+    assert.throws(
+      () =>
+        openScheduleImpactCalendarPanel(
+          {
+            extensionContext,
+            sessionRegistry: registry,
+            createWebviewPanel: () => {
+              throw new Error("calendar panel creation failed");
+            },
+          },
+          {
+            parentSessionId: "sde-session-panel-creation-failure",
+            context: context(),
+            sidecar,
+          },
+        ),
+      /calendar panel creation failed/,
+    );
+    assert.strictEqual(registry.size, 0);
+  });
+
+  test("rolls back when panel disposal listener registration fails", () => {
+    const registry = new ScheduleImpactCalendarSessionRegistry();
+    const fake = fakePanel("Schedule Impact Calendar", {
+      throwOnPanelListener: true,
+    });
+    assert.throws(
+      () =>
+        openScheduleImpactCalendarPanel(
+          {
+            extensionContext,
+            sessionRegistry: registry,
+            createWebviewPanel: () => fake.panel,
+          },
+          {
+            parentSessionId: "sde-session-listener-failure",
+            context: context(),
+            sidecar,
+          },
+        ),
+      /calendar panel listener failed/,
+    );
+    assert.strictEqual(registry.size, 0);
+    assert.strictEqual(fake.disposeCount, 1);
+    assert.strictEqual(fake.receiveListenerDisposed(), true);
   });
 });

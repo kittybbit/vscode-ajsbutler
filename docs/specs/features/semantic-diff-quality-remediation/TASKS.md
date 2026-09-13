@@ -2229,3 +2229,115 @@ issues`; Slice 7-owned smell findings are clear.
   scope; Slice 10 remains unapproved.
 - Recommended next route: delegate the exact Slice 9 activation paths below to
   `approval-committer` for one focused state commit.
+
+## Slice 10 Implementation Evidence (2026-09-13)
+
+- Status: Implementation complete under the approved revised four-production-
+  path boundary. Independent implementation review and Completion Approval
+  remain pending; no completion commit has been made.
+- Review base and state gate: approved Slice 10 replan/state commit
+  `f83b379a`, with independent replan review `Ready` and Human Approval
+  `Approved`.
+- Changed production paths: `scheduleImpactCalendarPanel.ts` retains the
+  public panel/cache facade and delegates preparation, transport, request
+  filtering, listener registration, rollback, and disposal to the new private
+  `scheduleImpactCalendarPanelRuntime.ts`; the Registry preserves its object
+  and legacy overloads while using tuple normalization and pure request
+  guards; Bootstrap separates sidecar registration, once-only release, parent
+  disposal, failure cleanup, and handle decoration.
+- Changed test paths: `scheduleImpactCalendarSession.test.ts`,
+  `semanticDiffExplorerScheduleImpact.test.ts`,
+  `createScheduleAwareExplorerSession.test.ts`, and `webSmoke.ts` add
+  characterization for overload compatibility, epoch/stale filtering,
+  malformed and un-serializable panel messages, preparation/listener failure
+  rollback, registration ordering, parent disposal, open failure rollback,
+  and idempotent release. The approved `scheduleImpactSidecarRegistry.test.ts`,
+  `extensionSubscriptions.test.ts`, and `semanticDiffWiring.test.ts` paths
+  remain validation-only integration coverage.
+- Behavior and compatibility: public exports, panel title and strict CSP
+  shell, source/privacy boundary, current-session filtering, monotonic
+  request IDs, failure precedence, listener cleanup, child/panel disposal,
+  sidecar identity, parent/child ordering, one-time release, VS Code
+  `^1.75.0`, browser-safe production imports, and telemetry payload policy
+  remain unchanged. No dependency, configuration, production webpack entry,
+  public Calendar action, Calendar Slice 3 UI, or Node built-in was added.
+- Validation evidence: `pnpm run test:compile`, desktop preparation and the
+  full desktop runner exited `0`, including the architecture dependency
+  suite. Production `pnpm run build` exited `0` with only existing bundle-size
+  warnings. Scoped Qlty `fmt`, `check`, and `smells --no-snippets` over all
+  four production and four changed test paths reported no issues. Markdown
+  lint and `git diff --check` passed.
+- Web evidence: the isolated test bundle compiled and the real Chromium
+  WebWorker runner exited `0`, reporting `WEB-7 passed:
+  browser=1 sourceReads=0 reports=0 sessions=0`, `WEB-8 passed:
+  bindings=2 registrations=2 opened=1 rollbacks=1`, `WEB-9 passed:
+  requests=2 accepted=2 adds=1 removes=1`, and `WEB-10 passed:
+  registered=1 releases=1 rollback=1`. Existing post-scenario
+  `ECONNRESET`/`EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` diagnostics remain
+  non-failing runner noise.
+- Production readiness: panel preparation failures and registration failures
+  close the Registry session and safely dispose the panel; message handling
+  rejects malformed, cross-session, stale, and un-serializable payloads
+  without post-dispose activity; Bootstrap registration is visible before
+  Explorer open and releases on success, parent disposal, explicit dispose,
+  and open failure at most once. Real Calendar Webview DOM and
+  `window.vscode` handshake execution remain unclaimed by this host-smoke
+  boundary.
+- Implementation feedback: context-shaped private helpers made the runtime
+  lifecycle and Bootstrap ownership explicit while preserving the facade's
+  existing public contract. Qlty hard-gate findings were cleared through
+  genuine responsibility seams; no suppression, threshold, baseline, or
+  acceptance exception was used.
+- Recommended route: delegate the exact changed paths to the independent
+  `implementation-reviewer`. If the review is `Ready` with no findings, the
+  standing automatic no-findings policy can record Completion Approval and
+  route the exact completion paths to `approval-committer`.
+
+## Slice 10 Review Correction (2026-09-13)
+
+- Independent implementation review identified that a failure thrown by
+  `panel.onDidDispose` after receive-listener registration left that listener
+  installed while the outer rollback closed the Registry and disposed the
+  panel. The approved lifecycle cleanup path now invokes the shared child
+  cleanup before rethrowing the original listener error, marking the runtime
+  disposed and disposing the receive listener before panel rollback.
+- Added characterization for this listener cleanup and for a
+  `createWebviewPanel` failure that occurs before a panel exists; both retain
+  the original error and leave the Registry empty. No public contract or
+  failure precedence changed.
+- Revalidation after the correction: `test:compile`, desktop preparation and
+  full runner, real Chromium WebSmoke (`WEB-7` through `WEB-10`), production
+  build, scoped Qlty, Markdown lint, and `git diff --check` passed. Completion
+  Approval remains pending the independent re-review.
+
+## Slice 10 Completion Approval (2026-09-13)
+
+- Status: Approved under the user's explicit standing automatic no-findings
+  slice-approval policy after independent implementation review `Ready` with
+  no findings.
+- Approved at: 2026-09-13 in the current conversation under the user's
+  standing automatic no-findings policy.
+- Review base: Slice 10 replan/state commit `f83b379a`; the review included the
+  listener-registration cleanup correction and direct panel-creation rollback
+  characterization.
+- Exact approved changed paths for the completion gate:
+  `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts`,
+  `src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts`,
+  `src/presentation/vscode/webview/scheduleImpactCalendarSessionRegistry.ts`,
+  `src/bootstrap/extension/createScheduleAwareExplorerSession.ts`,
+  `src/test/suite/scheduleImpactCalendarSession.test.ts`,
+  `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+  `src/test/suite/createScheduleAwareExplorerSession.test.ts`,
+  `src/test/suite/webSmoke.ts`, and this feature's `TASKS.md` and
+  `TRACEABILITY.md`.
+- Completion evidence: compile, desktop runner, architecture checks,
+  production build, Chromium WEB-7/WEB-8/WEB-9/WEB-10, scoped Qlty,
+  Markdown lint, and diff checks are recorded above. The latest correction
+  preserves original listener/panel errors while cleaning the receive
+  listener and Registry state.
+- Commit status: completion commit is pending; no stage or commit was
+  performed by this implementation handoff.
+- Recommended route: delegate the exact approved paths to
+  `approval-committer` for the Slice 10 completion commit. Feature Exit and
+  final bulk closure approval remain pending until all ten slices are
+  committed and integrated.

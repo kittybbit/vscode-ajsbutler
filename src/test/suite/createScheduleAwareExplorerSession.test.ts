@@ -102,6 +102,62 @@ suite("Schedule-aware Explorer session", () => {
     assert.strictEqual(registry.size, 0);
   });
 
+  test("registers before opening, rolls back failures, and releases only once", async () => {
+    const successRegistry = new ScheduleImpactSidecarRegistry();
+    const successContext = context();
+    const successSidecar = {} as SemanticDiffScheduleImpact;
+    const successPanel = panel();
+    let successRegistrationVisible = false;
+    let successReleases = 0;
+    const successParent = {
+      sessionId: "sde-session-success" as never,
+      panel: successPanel,
+      dispose: () => successPanel.dispose(),
+    } as SemanticDiffExplorerSessionHandle;
+    const successOpen = createScheduleAwareExplorerSession({
+      sidecarRegistry: successRegistry,
+      releaseCalendarParent: () => {
+        successReleases += 1;
+      },
+      openExplorer: async (receivedContext) => {
+        successRegistrationVisible =
+          successRegistry.resolve(receivedContext) === successSidecar;
+        return successParent;
+      },
+    });
+    const success = await successOpen({
+      context: successContext,
+      scheduleImpact: { kind: "available", sidecar: successSidecar },
+    });
+    assert.strictEqual(successRegistrationVisible, true);
+    successPanel.dispose();
+    success.dispose();
+    assert.strictEqual(successRegistry.size, 0);
+    assert.strictEqual(successReleases, 1);
+
+    const failureRegistry = new ScheduleImpactSidecarRegistry();
+    const failureContext = context();
+    const failureSidecar = {} as SemanticDiffScheduleImpact;
+    let failureRegistrationVisible = false;
+    const failureOpen = createScheduleAwareExplorerSession({
+      sidecarRegistry: failureRegistry,
+      openExplorer: async (receivedContext) => {
+        failureRegistrationVisible =
+          failureRegistry.resolve(receivedContext) === failureSidecar;
+        throw new Error("WEB-10 open failure");
+      },
+    });
+    await assert.rejects(
+      failureOpen({
+        context: failureContext,
+        scheduleImpact: { kind: "available", sidecar: failureSidecar },
+      }),
+      /WEB-10 open failure/,
+    );
+    assert.strictEqual(failureRegistrationVisible, true);
+    assert.strictEqual(failureRegistry.size, 0);
+  });
+
   test("rolls back an available registration when Explorer creation fails", async () => {
     const registry = new ScheduleImpactSidecarRegistry();
     const open = createScheduleAwareExplorerSession({

@@ -1,3 +1,4 @@
+import type * as vscode from "vscode";
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
@@ -21,6 +22,116 @@ const availableSidecar = (
     ? artifacts.scheduleImpact.sidecar
     : undefined;
 
+const registerSidecar = (
+  deps: ScheduleAwareExplorerSessionDeps,
+  context: SemanticDiffOutputContext,
+  sidecar: SemanticDiffScheduleImpact | undefined,
+): void => {
+  if (sidecar) deps.sidecarRegistry.register(context, sidecar);
+};
+
+const releaseSidecar = (
+  deps: ScheduleAwareExplorerSessionDeps,
+  context: SemanticDiffOutputContext,
+  sidecar: SemanticDiffScheduleImpact | undefined,
+): void => {
+  if (sidecar) deps.sidecarRegistry.release(context);
+};
+
+const releaseParent = (
+  deps: ScheduleAwareExplorerSessionDeps,
+  getParentSessionId: () => string | undefined,
+): void => {
+  const parentSessionId = getParentSessionId();
+  if (parentSessionId) deps.releaseCalendarParent?.(parentSessionId);
+};
+
+type ReleaseContext = Readonly<{
+  deps: ScheduleAwareExplorerSessionDeps;
+  context: SemanticDiffOutputContext;
+  sidecar: SemanticDiffScheduleImpact | undefined;
+  getParentSessionId: () => string | undefined;
+}>;
+
+const createReleaseOnce = ({
+  deps,
+  context,
+  sidecar,
+  getParentSessionId,
+}: ReleaseContext): (() => void) => {
+  let released = false;
+  return (): void => {
+    if (released) return;
+    released = true;
+    releaseSidecar(deps, context, sidecar);
+    releaseParent(deps, getParentSessionId);
+  };
+};
+
+const attachParentDisposal = (
+  handle: SemanticDiffExplorerSessionHandle,
+  release: () => void,
+): vscode.Disposable => handle.panel.onDidDispose(release);
+
+const disposeAfterListenerFailure = (
+  handle: SemanticDiffExplorerSessionHandle,
+): void => {
+  try {
+    handle.dispose();
+  } catch {
+    // Preserve the listener/registration error as the operation result.
+  }
+};
+
+const decorateHandle = (
+  handle: SemanticDiffExplorerSessionHandle,
+  panelDispose: vscode.Disposable,
+  release: () => void,
+): SemanticDiffExplorerSessionHandle => ({
+  ...handle,
+  dispose: (): void => {
+    try {
+      handle.dispose();
+    } finally {
+      panelDispose.dispose();
+      release();
+    }
+  },
+});
+
+const attachParentDisposalSafely = (
+  handle: SemanticDiffExplorerSessionHandle,
+  release: () => void,
+): vscode.Disposable => {
+  try {
+    return attachParentDisposal(handle, release);
+  } catch (error) {
+    release();
+    disposeAfterListenerFailure(handle);
+    throw error;
+  }
+};
+
+const openExplorerWithSidecar = async ({
+  deps,
+  context,
+  sidecar,
+  release,
+  setParentSessionId,
+}: Readonly<{
+  deps: ScheduleAwareExplorerSessionDeps;
+  context: SemanticDiffOutputContext;
+  sidecar: SemanticDiffScheduleImpact | undefined;
+  release: () => void;
+  setParentSessionId: (sessionId: string) => void;
+}>): Promise<SemanticDiffExplorerSessionHandle> => {
+  const handle = await deps.openExplorer(context);
+  setParentSessionId(handle.sessionId);
+  if (!sidecar) return handle;
+  const panelDispose = attachParentDisposalSafely(handle, release);
+  return decorateHandle(handle, panelDispose, release);
+};
+
 /**
  * Composes the existing Explorer opener with the calendar sidecar lifetime.
  * The sidecar is registered before opening the parent and is released on any
@@ -36,50 +147,27 @@ export const createScheduleAwareExplorerSession =
   async (artifacts) => {
     const sidecar = availableSidecar(artifacts);
     const context = artifacts.context;
-    if (sidecar) {
-      deps.sidecarRegistry.register(context, sidecar);
-    }
+    registerSidecar(deps, context, sidecar);
 
-    let handle: SemanticDiffExplorerSessionHandle | undefined;
     let parentSessionId: string | undefined;
-    let released = false;
-    const release = (): void => {
-      if (released) return;
-      released = true;
-      if (sidecar) deps.sidecarRegistry.release(context);
-      if (parentSessionId) deps.releaseCalendarParent?.(parentSessionId);
-    };
+    const release = createReleaseOnce({
+      deps,
+      context,
+      sidecar,
+      getParentSessionId: () => parentSessionId,
+    });
 
     try {
       // This is intentionally the sole parent open call for both impact states.
-      handle = await deps.openExplorer(context);
-      parentSessionId = handle.sessionId;
-      if (!sidecar) return handle;
-
-      let panelDispose: { dispose(): void } | undefined;
-      try {
-        panelDispose = handle.panel.onDidDispose(release);
-      } catch (error) {
-        release();
-        try {
-          handle.dispose();
-        } catch {
-          // Preserve the listener/registration error as the operation result.
-        }
-        throw error;
-      }
-
-      return {
-        ...handle,
-        dispose: (): void => {
-          try {
-            handle?.dispose();
-          } finally {
-            panelDispose?.dispose();
-            release();
-          }
+      return await openExplorerWithSidecar({
+        deps,
+        context,
+        sidecar,
+        release,
+        setParentSessionId: (sessionId) => {
+          parentSessionId = sessionId;
         },
-      };
+      });
     } catch (error) {
       release();
       throw error;
