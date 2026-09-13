@@ -112,8 +112,11 @@ desktop evidence boundary.
 - Slice 9 current replan gate: independent replan review
   `slice9_replan_review` is `Ready` with no findings, and the revised
   three-production-path boundary is Human Approved on 2026-09-13 in the
-  current conversation. Its focused replan/state commit is pending; the
-  partial Transport diff remains preserved.
+  current conversation. Its focused replan/state commit `f0217e2f` is
+  complete. Slice 9 implementation and independent implementation review are
+  complete with no findings; Completion Approval is `Approved` under the
+  standing automatic no-findings policy on 2026-09-13. The partial Transport
+  diff is preserved within the completed implementation.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
@@ -1357,7 +1360,10 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
 ## Slice 9 Replan Human Approval (2026-09-13)
 
 - Status: Human Approved for the revised three-production-path
-  validation-boundary replan; focused replan/state commit is pending.
+  validation-boundary replan; focused replan/state commit `f0217e2f` is
+  complete. Implementation and independent implementation review are
+  complete; the review is `Ready` with no findings and Completion Approval is
+  `Approved` under the standing automatic no-findings policy on 2026-09-13.
 - Approved at: 2026-09-13 in the current conversation, after the user's
   explicit `承認します`.
 - Independent review: `slice9_replan_review` is `Ready` with no findings.
@@ -1372,7 +1378,92 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
 - Approved evidence paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
 - Boundary: the JSON helper remains internal and adds no public API, message
   type, dependency, configuration, Calendar Slice 3 UI, or Slice 10 scope;
-  the partial Transport implementation remains preserved. Completion review
-  and Completion Approval are separate later gates.
-- Next route: `approval-committer` may commit this exact docs-only replan
-  state, with no runtime, test, configuration, or generated-file changes.
+  the partial Transport implementation remains preserved. Completion Approval
+  is recorded; the completion commit gate is the next operation.
+- Next route: delegate the exact Slice 9 changed paths to the independent
+  implementation reviewer. No stage or commit was performed by this
+  implementation handoff.
+
+## Slice 9 Implementation Evidence (2026-09-13)
+
+- Status: Implementation complete under the approved revised boundary;
+  independent implementation review is `Ready` with no findings and
+  Completion Approval is `Approved` under the standing automatic no-findings
+  policy on 2026-09-13.
+- Review base and state gate: revised plan/state commit `f0217e2f`, with
+  independent replan review `Ready` and Human Approval `Approved`.
+- Requirement mapping: strict browser-safe JSON validation and encoded-byte
+  policy remain transport-owned through the internal JSON helper; public
+  transport constructors and result types remain unchanged. The browser
+  bridge keeps request numbering, response cursor filtering, listener
+  registration/removal, and idempotent disposal in closure-owned state.
+- Changed production paths: `scheduleImpactCalendarTransport.ts`, new
+  `scheduleImpactCalendarJson.ts`, and
+  `scheduleImpactCalendarBridge.ts`. Changed test paths:
+  `scheduleImpactCalendarTransport.test.ts`,
+  `scheduleImpactCalendarBridge.test.ts`, and `webSmoke.ts` for WEB-9.
+- Review correction: host validator dispatch uses a `Map` instead of a
+  prototype-bearing object lookup, so reserved malformed types (`__proto__`,
+  `valueOf`, and `constructor`) safely reject as `invalid-request`; focused
+  Transport and Bridge tests cover the regression.
+- Compatibility evidence: branded IDs, monotonic request IDs, session matching,
+  stale detection, failure details, strict rejection of non-finite values,
+  non-plain prototypes, symbols, toJSON, sparse arrays, cycles, and
+  serialization failures, default/custom byte limits, listener cleanup, and
+  post-dispose suppression remain covered. No public message type, command,
+  Calendar Slice 3 UI, VS Code engine, Node dependency, telemetry payload, or
+  production webpack entry changed.
+- Validation evidence: `rtk pnpm run test:compile` passed; direct Transport
+  and Bridge suites passed with `8 passing`; desktop preparation and the full
+  VS Code runner exited `0`, including architecture dependency checks.
+  Production `rtk pnpm run build` exited `0` with only existing bundle-size
+  warnings. Scoped Qlty `fmt`, `check`, and `smells --no-snippets` over all
+  three production paths reported no issues. Markdown lint and
+  `git diff --check` passed.
+- Web evidence: the prepared isolated test bundle and real Chromium WebWorker
+  runner exited `0` under required host permission. It reported `WEB-7 passed:
+  browser=1 sourceReads=0 reports=0 sessions=0`, `WEB-8 passed:
+  bindings=2 registrations=2 opened=1 rollbacks=1`, and `WEB-9 passed:
+  requests=2 accepted=2 adds=1 removes=1`. The initial unprivileged Chromium
+  launch failed at MachPort startup and was not counted. Known non-failing
+  `ECONNRESET`/`EPIPE`/`ERR_STREAM_PREMATURE_CLOSE` stream diagnostics remain
+  after scenario completion.
+- Production readiness: input remains distrusted and bounded by the existing
+  traversal and encoded-byte limit; bridge disposal is idempotent and removes
+  its listener once. Real Calendar Webview DOM and `window.vscode` handshake
+  execution remain explicitly unclaimed by WEB-9.
+- Documentation impact: only this feature's `TASKS.md` and `TRACEABILITY.md`
+  evidence paths changed; no README, CHANGELOG, dependency, or durable product
+  specification update is required.
+- Implementation feedback: decision data and typed result builders preserve
+  invalid/unknown/stale/too-large precedence, while closure-owned Bridge state
+  keeps the browser contract narrow and prevents post-dispose activity.
+- Unresolved risk: concrete Calendar Webview DOM integration remains outside
+  this slice and is retained for the unapproved Calendar host/session work in
+  Slice 10.
+- Recommended route: delegate the exact approved paths to the
+  approval-committer for the completion commit gate. Slice 10 remains
+  unapproved.
+
+## Slice 9 Completion Approval (2026-09-13)
+
+- Status: Approved under the user's explicit standing automatic no-findings
+  slice-approval policy.
+- Approved at: 2026-09-13 in the current conversation.
+- Basis: independent implementation review is `Ready` with no findings;
+  review base and approved replan/state commit are `f0217e2f`.
+- Exact approved changed paths:
+  `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts`,
+  `src/presentation/vscode/webview/scheduleImpactCalendarJson.ts`,
+  `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`,
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts`,
+  `src/test/suite/scheduleImpactCalendarBridge.test.ts`,
+  `src/test/suite/webSmoke.ts`, this `TASKS.md`, and `TRACEABILITY.md`.
+- Completion evidence: strict transport validation and reserved-type lookup
+  correction, focused Transport/Bridge tests, WEB-7/WEB-8/WEB-9, desktop and
+  architecture checks, production build, scoped Qlty, Markdown lint, and diff
+  checks are recorded above.
+- Commit status: no completion commit has been created; the exact approved
+  paths are ready for the approval-committer gate.
+- Preserved boundary: Slice 10 remains unapproved and no Calendar Slice 3 or
+  unrelated production scope is authorized.

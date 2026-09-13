@@ -7,6 +7,11 @@ import type { SemanticDiffSourceCapture } from "../../application/semantic-diff/
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
+import { createScheduleImpactCalendarBridge } from "../../presentation/webview/editor/scheduleImpactCalendarBridge";
+import {
+  createScheduleImpactCalendarFailureMessage,
+  createScheduleImpactCalendarSessionMessage,
+} from "../../presentation/vscode/webview/scheduleImpactCalendarTransport";
 
 const LANGUAGE_ID = "jp1ajs";
 
@@ -229,6 +234,86 @@ export async function run(): Promise<void> {
   }
   reportWebScenario(
     `WEB-8 passed: bindings=${web8Bindings} registrations=${web8Registrations} opened=${web8Opened} rollbacks=${web8Releases}`,
+  );
+
+  const web9Messages: unknown[] = [];
+  const web9Listeners = new Set<(event: MessageEvent) => void>();
+  let web9Adds = 0;
+  let web9Removes = 0;
+  const web9Target = {
+    addEventListener: (
+      _type: "message",
+      listener: (event: MessageEvent) => void,
+    ) => {
+      web9Adds += 1;
+      web9Listeners.add(listener);
+    },
+    removeEventListener: (
+      _type: "message",
+      listener: (event: MessageEvent) => void,
+    ) => {
+      web9Removes += 1;
+      web9Listeners.delete(listener);
+    },
+  };
+  const dispatchWeb9Message = (data: unknown): void => {
+    web9Listeners.forEach((listener) => listener({ data } as MessageEvent));
+  };
+  const web9Bridge = createScheduleImpactCalendarBridge(
+    "web-9-session",
+    { postMessage: (message: unknown) => web9Messages.push(message) },
+    web9Target,
+  );
+  let web9Received = 0;
+  const stopWeb9Listening = web9Bridge.onMessage(() => {
+    web9Received += 1;
+  });
+  const web9ReadyId = web9Bridge.sendReady();
+  const web9RefreshId = web9Bridge.sendRefresh();
+  const web9Session = createScheduleImpactCalendarSessionMessage(
+    "web-9-session",
+    web9ReadyId,
+    {} as never,
+  );
+  dispatchWeb9Message({ type: "malformed" });
+  dispatchWeb9Message({ ...web9Session, sessionId: "other-session" });
+  dispatchWeb9Message(web9Session);
+  dispatchWeb9Message(web9Session);
+  const web9Failure = createScheduleImpactCalendarFailureMessage(
+    "web-9-session",
+    web9RefreshId,
+    { code: "host-disposed", detail: null },
+  );
+  dispatchWeb9Message(web9Failure);
+  dispatchWeb9Message(web9Failure);
+  stopWeb9Listening();
+  dispatchWeb9Message({ ...web9Failure, requestId: web9RefreshId + 1 });
+  web9Bridge.dispose();
+  web9Bridge.dispose();
+  dispatchWeb9Message({ ...web9Failure, requestId: web9RefreshId + 2 });
+  if (
+    web9ReadyId !== 1 ||
+    web9RefreshId !== 2 ||
+    web9Messages.length !== 2 ||
+    web9Received !== 2 ||
+    web9Adds !== 1 ||
+    web9Removes !== 1 ||
+    web9Bridge.sendReady() !== 0 ||
+    web9Bridge.sendRefresh() !== 0
+  ) {
+    throw new Error(
+      `WEB-9 bridge lifecycle failed: ${JSON.stringify({
+        readyId: web9ReadyId,
+        refreshId: web9RefreshId,
+        messages: web9Messages.length,
+        received: web9Received,
+        adds: web9Adds,
+        removes: web9Removes,
+      })}`,
+    );
+  }
+  reportWebScenario(
+    `WEB-9 passed: requests=${web9Messages.length} accepted=${web9Received} adds=${web9Adds} removes=${web9Removes}`,
   );
 
   const invalidDocument = await vscode.workspace.openTextDocument({

@@ -1,4 +1,9 @@
 import type { SemanticDiffScheduleImpact } from "../../../application/semantic-diff/semanticDiffScheduleImpact";
+import {
+  allChecksPass,
+  encodedScheduleImpactCalendarJsonBytes,
+  isScheduleImpactCalendarJsonValue,
+} from "./scheduleImpactCalendarJson";
 
 export const SCHEDULE_IMPACT_CALENDAR_MAX_MESSAGE_BYTES = 8 * 1024 * 1024;
 
@@ -97,241 +102,263 @@ const isSessionId = (
 const isRequestId = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 
-const isJsonValue = (
-  value: unknown,
-  ancestors = new Set<object>(),
-): boolean => {
-  if (value === null) return true;
-  switch (typeof value) {
-    case "string":
-    case "boolean":
-      return true;
-    case "number":
-      return Number.isFinite(value);
-    case "undefined":
-    case "function":
-    case "symbol":
-    case "bigint":
-      return false;
-    case "object":
-      break;
-    default:
-      return false;
-  }
-
-  if (ancestors.has(value)) return false;
-  ancestors.add(value);
-  try {
-    if (Object.prototype.hasOwnProperty.call(value, "toJSON")) return false;
-    if (Array.isArray(value)) {
-      if (Object.getOwnPropertySymbols(value).length > 0) return false;
-      for (let index = 0; index < value.length; index += 1) {
-        if (!Object.prototype.hasOwnProperty.call(value, index)) return false;
-        if (!isJsonValue(value[index], ancestors)) return false;
-      }
-      return Object.keys(value).every((key) => {
-        const index = Number(key);
-        return (
-          Number.isSafeInteger(index) &&
-          index >= 0 &&
-          String(index) === key &&
-          index < value.length
-        );
-      });
-    }
-    if (Object.getPrototypeOf(value) !== Object.prototype) return false;
-    if (Object.getOwnPropertySymbols(value).length > 0) return false;
-    return Object.keys(value).every((key) =>
-      isJsonValue(value[key], ancestors),
-    );
-  } catch {
-    return false;
-  } finally {
-    ancestors.delete(value);
-  }
-};
-
 const messageSizeError = (
   value: unknown,
   options: ScheduleImpactCalendarValidationOptions | undefined,
 ): ScheduleImpactCalendarErrorCode | undefined => {
-  if (!isJsonValue(value)) return "invalid-request";
-  try {
-    const encodedBytes = new TextEncoder().encode(
-      JSON.stringify(value),
-    ).byteLength;
-    return encodedBytes >
-      (options?.maxBytes ?? SCHEDULE_IMPACT_CALENDAR_MAX_MESSAGE_BYTES)
-      ? "payload-too-large"
-      : undefined;
-  } catch {
-    return undefined;
-  }
+  const validJson = isScheduleImpactCalendarJsonValue(value);
+  if (!validJson) return "invalid-request";
+  const bytes = encodedScheduleImpactCalendarJsonBytes(value);
+  const maxBytes =
+    options?.maxBytes ?? SCHEDULE_IMPACT_CALENDAR_MAX_MESSAGE_BYTES;
+  const sizeErrors: readonly [undefined, ScheduleImpactCalendarErrorCode] = [
+    undefined,
+    "payload-too-large",
+  ];
+  return sizeErrors[Number(bytes !== undefined && bytes > maxBytes)];
 };
+
+const matchesSession = (
+  sessionId: string,
+  expectedSessionId: string | undefined,
+): ScheduleImpactCalendarErrorCode | undefined =>
+  expectedSessionId !== undefined && sessionId !== expectedSessionId
+    ? "unknown-session"
+    : undefined;
+
+const matchesRequestId = (
+  requestId: number,
+  minimumRequestId: number | undefined,
+): ScheduleImpactCalendarErrorCode | undefined =>
+  minimumRequestId !== undefined && requestId <= minimumRequestId
+    ? "stale-request"
+    : undefined;
 
 const matchesRequestOptions = (
   sessionId: string,
   requestId: number,
   options: ScheduleImpactCalendarValidationOptions | undefined,
-): ScheduleImpactCalendarErrorCode | undefined => {
-  if (
-    options?.expectedSessionId !== undefined &&
-    sessionId !== options.expectedSessionId
-  ) {
-    return "unknown-session";
-  }
-  if (
-    options?.minimumRequestId !== undefined &&
-    requestId <= options.minimumRequestId
-  ) {
-    return "stale-request";
-  }
-  return undefined;
+): ScheduleImpactCalendarErrorCode | undefined =>
+  matchesSession(sessionId, options?.expectedSessionId) ??
+  matchesRequestId(requestId, options?.minimumRequestId);
+
+const invalidResult = <T>(
+  code: ScheduleImpactCalendarErrorCode = "invalid-request",
+): ScheduleImpactCalendarValidationResult<T> => ({ ok: false, code });
+
+const validResult = <T>(
+  value: T,
+): ScheduleImpactCalendarValidationResult<T> => ({ ok: true, value });
+
+const resultFromError = <T>(
+  error: ScheduleImpactCalendarErrorCode | undefined,
+  value: T,
+): ScheduleImpactCalendarValidationResult<T> =>
+  error ? invalidResult(error) : validResult(value);
+
+const withMessageSize = <T>(
+  value: unknown,
+  options: ScheduleImpactCalendarValidationOptions | undefined,
+  validate: () => ScheduleImpactCalendarValidationResult<T>,
+): ScheduleImpactCalendarValidationResult<T> => {
+  const sizeError = messageSizeError(value, options);
+  return sizeError ? invalidResult(sizeError) : validate();
+};
+
+const isRequestType = (value: unknown): value is "ready" | "refresh" =>
+  value === "ready" || value === "refresh";
+
+const requestEnvelope = (
+  value: unknown,
+): Record<string, unknown> | undefined =>
+  isPlainRecord(value) && ownKeys(value, ["type", "sessionId", "requestId"])
+    ? value
+    : undefined;
+
+const hasRequestFields = (value: Record<string, unknown>): boolean =>
+  allChecksPass([
+    () => isRequestType(value.type),
+    () => isSessionId(value.sessionId),
+    () => isRequestId(value.requestId),
+  ]);
+
+const validateRequestShape = (
+  value: unknown,
+  options?: ScheduleImpactCalendarValidationOptions,
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarRequest> => {
+  const envelope = requestEnvelope(value);
+  return envelope && hasRequestFields(envelope)
+    ? resultFromError<ScheduleImpactCalendarRequest>(
+        matchesRequestOptions(
+          envelope.sessionId as string,
+          envelope.requestId as number,
+          options,
+        ),
+        {
+          type: envelope.type as "ready" | "refresh",
+          sessionId: envelope.sessionId as ScheduleImpactCalendarSessionId,
+          requestId: envelope.requestId as number,
+        },
+      )
+    : invalidResult();
 };
 
 const validateRequest = (
   value: unknown,
   options?: ScheduleImpactCalendarValidationOptions,
-): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarRequest> => {
-  const sizeError = messageSizeError(value, options);
-  if (sizeError) return { ok: false, code: sizeError };
-  if (
-    !isPlainRecord(value) ||
-    !ownKeys(value, ["type", "sessionId", "requestId"])
-  ) {
-    return { ok: false, code: "invalid-request" };
-  }
-  if (
-    (value.type !== "ready" && value.type !== "refresh") ||
-    !isSessionId(value.sessionId) ||
-    !isRequestId(value.requestId)
-  ) {
-    return { ok: false, code: "invalid-request" };
-  }
-  const optionError = matchesRequestOptions(
-    value.sessionId,
-    value.requestId,
-    options,
-  );
-  if (optionError) return { ok: false, code: optionError };
-  return {
-    ok: true,
-    value: {
-      type: value.type,
-      sessionId: value.sessionId,
-      requestId: value.requestId,
-    },
-  };
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarRequest> =>
+  withMessageSize(value, options, () => validateRequestShape(value, options));
+
+const errorCodes = new Set<ScheduleImpactCalendarErrorCode>([
+  "invalid-request",
+  "unknown-session",
+  "stale-request",
+  "disposed-session",
+  "payload-too-large",
+  "host-disposed",
+]);
+
+const errorDetailSides = new Set([null, "before", "after"]);
+
+const isErrorDetailTarget = (value: unknown): boolean =>
+  value === null || typeof value === "string";
+
+const isErrorDetail = (value: unknown): boolean => {
+  if (value === null) return true;
+  if (!isPlainRecord(value)) return false;
+  return allChecksPass([
+    () => ownKeys(value, ["side", "targetId"]),
+    () => errorDetailSides.has(value.side as string | null),
+    () => isErrorDetailTarget(value.targetId),
+  ]);
 };
 
-const validateError = (
-  value: unknown,
-): value is ScheduleImpactCalendarError => {
-  if (!isPlainRecord(value) || !ownKeys(value, ["code", "detail"]))
-    return false;
-  if (
-    value.code !== "invalid-request" &&
-    value.code !== "unknown-session" &&
-    value.code !== "stale-request" &&
-    value.code !== "disposed-session" &&
-    value.code !== "payload-too-large" &&
-    value.code !== "host-disposed"
-  ) {
-    return false;
-  }
-  if (value.detail === null) return true;
-  return (
-    isPlainRecord(value.detail) &&
-    ownKeys(value.detail, ["side", "targetId"]) &&
-    (value.detail.side === null ||
-      value.detail.side === "before" ||
-      value.detail.side === "after") &&
-    (value.detail.targetId === null ||
-      typeof value.detail.targetId === "string")
+const validateError = (value: unknown): value is ScheduleImpactCalendarError =>
+  isPlainRecord(value) &&
+  ownKeys(value, ["code", "detail"]) &&
+  errorCodes.has(value.code as ScheduleImpactCalendarErrorCode) &&
+  isErrorDetail(value.detail);
+
+const hostEnvelope = (value: unknown): Record<string, unknown> | undefined =>
+  isPlainRecord(value) &&
+  ownKeys(value, ["type", "sessionId", "requestId", "ok", "payload", "error"])
+    ? value
+    : undefined;
+
+const hasCloseFields = (value: Record<string, unknown>): boolean =>
+  allChecksPass([
+    () => isSessionId(value.sessionId),
+    () => value.requestId === null,
+    () => value.ok === true,
+    () => value.payload === null,
+    () => value.error === null,
+  ]);
+
+const validateClose = (
+  value: Record<string, unknown>,
+  options?: ScheduleImpactCalendarValidationOptions,
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarCloseMessage> => {
+  if (!hasCloseFields(value)) return invalidResult();
+  const sessionError = matchesSession(
+    value.sessionId as string,
+    options?.expectedSessionId,
   );
+  return resultFromError(
+    sessionError,
+    value as ScheduleImpactCalendarCloseMessage,
+  );
+};
+
+const hasSessionFields = (value: Record<string, unknown>): boolean =>
+  allChecksPass([
+    () => isSessionId(value.sessionId),
+    () => isRequestId(value.requestId),
+    () => value.ok === true,
+    () => value.error === null,
+    () => isPlainRecord(value.payload),
+    () => isScheduleImpactCalendarJsonValue(value.payload),
+  ]);
+
+const validateSession = (
+  value: Record<string, unknown>,
+  options?: ScheduleImpactCalendarValidationOptions,
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarSessionMessage> => {
+  if (!hasSessionFields(value)) return invalidResult();
+  const optionError = matchesRequestOptions(
+    value.sessionId as string,
+    value.requestId as number,
+    options,
+  );
+  return resultFromError(
+    optionError,
+    value as ScheduleImpactCalendarSessionMessage,
+  );
+};
+
+const hasFailureFields = (value: Record<string, unknown>): boolean =>
+  allChecksPass([
+    () => value.sessionId === null || isSessionId(value.sessionId),
+    () => value.requestId === null || isRequestId(value.requestId),
+    () => value.ok === false,
+    () => value.payload === null,
+    () => validateError(value.error),
+  ]);
+
+const failureSessionError = (
+  value: Record<string, unknown>,
+  expectedSessionId: string | undefined,
+): ScheduleImpactCalendarErrorCode | undefined =>
+  value.sessionId === null
+    ? undefined
+    : matchesSession(value.sessionId as string, expectedSessionId);
+
+const failureRequestError = (
+  value: Record<string, unknown>,
+  minimumRequestId: number | undefined,
+): ScheduleImpactCalendarErrorCode | undefined =>
+  value.requestId === null || minimumRequestId === undefined
+    ? undefined
+    : matchesRequestId(value.requestId as number, minimumRequestId);
+
+const validateFailure = (
+  value: Record<string, unknown>,
+  options?: ScheduleImpactCalendarValidationOptions,
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarFailureMessage> => {
+  if (!hasFailureFields(value)) return invalidResult();
+  const sessionError = failureSessionError(value, options?.expectedSessionId);
+  if (sessionError) return invalidResult(sessionError);
+  const requestError = failureRequestError(value, options?.minimumRequestId);
+  return resultFromError(
+    requestError,
+    value as ScheduleImpactCalendarFailureMessage,
+  );
+};
+
+type HostValidator = (
+  value: Record<string, unknown>,
+  options?: ScheduleImpactCalendarValidationOptions,
+) => ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage>;
+
+const hostValidators = new Map<string, HostValidator>([
+  ["close", validateClose as HostValidator],
+  ["session", validateSession as HostValidator],
+  ["failure", validateFailure as HostValidator],
+]);
+
+const validateHostShape = (
+  value: unknown,
+  options?: ScheduleImpactCalendarValidationOptions,
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage> => {
+  const envelope = hostEnvelope(value);
+  const validator = envelope && hostValidators.get(String(envelope.type));
+  return validator ? validator(envelope, options) : invalidResult();
 };
 
 const validateHostMessage = (
   value: unknown,
   options?: ScheduleImpactCalendarValidationOptions,
-): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage> => {
-  const sizeError = messageSizeError(value, options);
-  if (sizeError) return { ok: false, code: sizeError };
-  if (
-    !isPlainRecord(value) ||
-    !ownKeys(value, [
-      "type",
-      "sessionId",
-      "requestId",
-      "ok",
-      "payload",
-      "error",
-    ])
-  ) {
-    return { ok: false, code: "invalid-request" };
-  }
-  if (value.type === "close") {
-    if (
-      !isSessionId(value.sessionId) ||
-      value.requestId !== null ||
-      value.ok !== true ||
-      value.payload !== null ||
-      value.error !== null
-    )
-      return { ok: false, code: "invalid-request" };
-    if (
-      options?.expectedSessionId !== undefined &&
-      value.sessionId !== options.expectedSessionId
-    ) {
-      return { ok: false, code: "unknown-session" };
-    }
-    return { ok: true, value: value as ScheduleImpactCalendarCloseMessage };
-  }
-  if (value.type === "session") {
-    if (
-      !isSessionId(value.sessionId) ||
-      !isRequestId(value.requestId) ||
-      value.ok !== true ||
-      value.error !== null ||
-      !isPlainRecord(value.payload) ||
-      !isJsonValue(value.payload)
-    )
-      return { ok: false, code: "invalid-request" };
-    const optionError = matchesRequestOptions(
-      value.sessionId,
-      value.requestId,
-      options,
-    );
-    if (optionError) return { ok: false, code: optionError };
-    return { ok: true, value: value as ScheduleImpactCalendarSessionMessage };
-  }
-  if (value.type === "failure") {
-    if (
-      (value.sessionId !== null && !isSessionId(value.sessionId)) ||
-      (value.requestId !== null && !isRequestId(value.requestId)) ||
-      value.ok !== false ||
-      value.payload !== null ||
-      !validateError(value.error)
-    )
-      return { ok: false, code: "invalid-request" };
-    if (
-      value.sessionId !== null &&
-      options?.expectedSessionId !== undefined &&
-      value.sessionId !== options.expectedSessionId
-    ) {
-      return { ok: false, code: "unknown-session" };
-    }
-    const failureRequestId = value.requestId;
-    if (
-      isRequestId(failureRequestId) &&
-      options?.minimumRequestId !== undefined &&
-      failureRequestId <= options.minimumRequestId
-    )
-      return { ok: false, code: "stale-request" };
-    return { ok: true, value: value as ScheduleImpactCalendarFailureMessage };
-  }
-  return { ok: false, code: "invalid-request" };
-};
+): ScheduleImpactCalendarValidationResult<ScheduleImpactCalendarHostMessage> =>
+  withMessageSize(value, options, () => validateHostShape(value, options));
 
 export const createScheduleImpactCalendarError = (
   code: ScheduleImpactCalendarErrorCode,

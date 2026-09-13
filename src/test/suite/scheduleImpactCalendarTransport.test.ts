@@ -122,4 +122,71 @@ suite("Schedule impact calendar transport", () => {
         assert.strictEqual(serialized.error.code, "invalid-request");
     });
   });
+
+  test("preserves strict container rules and validation error precedence", () => {
+    const inherited = Object.create({ inherited: true }) as {
+      value?: string;
+    };
+    inherited.value = "not plain";
+    const sparse = [] as unknown[];
+    sparse.length = 1;
+    const payloads = [
+      inherited,
+      { toJSON: () => ({}) },
+      { [Symbol("payload")]: "symbol" },
+      sparse,
+      { number: Number.POSITIVE_INFINITY },
+    ];
+    payloads.forEach((payload) => {
+      const message = createScheduleImpactCalendarSessionMessage(
+        "calendar-1",
+        1,
+        payload as never,
+      );
+      assert.strictEqual(
+        parseScheduleImpactCalendarHostMessage(message),
+        undefined,
+      );
+      const serialized = serializeScheduleImpactCalendarMessage(message);
+      assert.strictEqual(serialized.ok, false);
+      if (!serialized.ok)
+        assert.strictEqual(serialized.error.code, "invalid-request");
+    });
+
+    const oversized = createScheduleImpactCalendarSessionMessage(
+      "calendar-1",
+      1,
+      { value: "x".repeat(100) } as never,
+    );
+    const tooLarge = validateScheduleImpactCalendarMessage(oversized, {
+      expectedSessionId: "other-session",
+      maxBytes: 10,
+    });
+    assert.strictEqual(tooLarge.ok, false);
+    if (!tooLarge.ok) assert.strictEqual(tooLarge.code, "payload-too-large");
+    const unknown = validateScheduleImpactCalendarMessage(oversized, {
+      expectedSessionId: "other-session",
+    });
+    assert.strictEqual(unknown.ok, false);
+    if (!unknown.ok) assert.strictEqual(unknown.code, "unknown-session");
+    const stale = validateScheduleImpactCalendarMessage(oversized, {
+      minimumRequestId: 1,
+    });
+    assert.strictEqual(stale.ok, false);
+    if (!stale.ok) assert.strictEqual(stale.code, "stale-request");
+  });
+
+  test("rejects reserved host type names as malformed messages", () => {
+    ["__proto__", "valueOf", "constructor"].forEach((type) => {
+      const result = parseScheduleImpactCalendarHostMessage({
+        type,
+        sessionId: "calendar-1",
+        requestId: null,
+        ok: true,
+        payload: null,
+        error: null,
+      });
+      assert.strictEqual(result, undefined);
+    });
+  });
 });
