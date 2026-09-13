@@ -98,12 +98,18 @@ desktop evidence boundary.
 - Current Slice 8 replan: the revised independent plan review is `Ready` with
   no findings, and the eight new helper modules and their import topology were
   Human Approved in the current conversation on 2026-09-13. The focused
-  replan/state commit is pending; completion review and approval remain
-  separate gates.
+  replan/state commit `814d8481` is complete; independent implementation
+  review is `Ready` with no findings, Completion Approval is `Approved`, and
+  completion commit `483216a1` is complete.
 - Slice 8 replan approval gate: Human Approval is `Approved` on 2026-09-13
   for the exact nine production paths, seven test/validation paths, and the
-  two evidence docs recorded below. The focused replan/state commit is
-  pending.
+  two evidence docs recorded below; focused replan/state commit `814d8481` and
+  completion commit `483216a1` are complete.
+- Slice 9 activation gate: Slice 8 completion commit `483216a1` is complete;
+  the existing full-plan review remains `Ready` with no findings, and the
+  unchanged Slice 9 transport/bridge scope is Human Approved on 2026-09-13
+  under the user's standing automatic no-findings authorization. Its focused
+  state commit is pending.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
@@ -1141,17 +1147,16 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
 - Preserved scope: completed Slices 1-7, the committed test-only web-harness
   replan `800612e4`, Calendar Slice 3, Dependabot, and Slice 9-10 remain
   otherwise unchanged. Slice 8 implementation review is `Ready` with no
-  findings and Completion Approval is recorded below; its focused completion
-  commit remains pending.
-- Recommended next route: delegate the exact approved Slice 8 completion paths
-  to `approval-committer` for one focused completion commit.
+  findings, Completion Approval is `Approved`, and completion commit
+  `483216a1` is complete.
+- Recommended next route: activate the exact approved Slice 9 transport and
+  bridge paths under the unchanged reviewed plan.
 
 ## Slice 8 Implementation Evidence (2026-09-13)
 
 - Status: implementation complete under the approved revised boundary;
   independent implementation review is `Ready` with no findings and
-  Completion Approval is `Approved` below; the focused completion commit is
-  pending.
+  Completion Approval is `Approved`; completion commit `483216a1` is complete.
 - Requirement mapping: the command facade and eight command-owned modules
   cover workflow input, source selection, period selection, source/Git
   preparation, capture binding, artifact construction, Explorer opening, and
@@ -1217,10 +1222,37 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
   WEB-7/WEB-8 runner, scoped Qlty, Markdown lint, and diff checks are recorded
   in the implementation evidence above; the P2 regression test confirms a
   missing registration callback releases once without optional unregister.
-- Commit status: completion commit is pending the exact
-  `approval-committer` gate. No stage or commit was performed by this role.
-- Preserved boundary: Slice 9 and later remain unapproved and must not begin
-  until this exact completion commit succeeds and a new slice approval gate is
-  recorded.
-- Recommended next route: delegate the exact approved completion paths to
-  `approval-committer` for one focused Slice 8 completion commit.
+- Commit status: complete; exact Slice 8 completion commit `483216a1`.
+- Preserved boundary: Slice 9 is activated below under its unchanged reviewed
+  scope; Slice 10 remains unapproved.
+- Recommended next route: delegate the exact Slice 9 activation paths below to
+  `approval-committer` for one focused state commit.
+
+## Slice 9 Activation And Approval (2026-09-13)
+
+- Status: Human Approved; active next slice; focused state commit is pending.
+- Basis: Slice 8 completion commit `483216a1` is committed and the existing
+  complete-plan review is `Ready` with no findings. The user's standing
+  automatic no-findings slice-approval authorization applies to this unchanged
+  reviewed Slice 9 scope; no new design, path, dependency, or behavior was
+  introduced.
+- Approved production paths:
+  `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts` and
+  `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`.
+- Approved test paths:
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts`,
+  `src/test/suite/scheduleImpactCalendarBridge.test.ts`, and
+  `src/test/suite/webSmoke.ts` for `WEB-9`.
+- Approved evidence paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved boundary: simplify the existing transport validation/serialization
+  and bridge request-response lifecycle while preserving branded IDs,
+  monotonicity, session/stale/error handling, JSON and byte limits,
+  notifications, listener removal, and idempotent disposal. `WEB-9` remains a
+  controlled post-message port/target lifecycle check; real Calendar
+  WebviewPanel DOM and `window.vscode` handshakes remain unclaimed.
+- Preserved scope: Slice 8 completion `483216a1`, Calendar Slice 3, Slice 10,
+  Dependabot, production webpack, dependencies, public message types, and
+  public commands remain unchanged. Completion review and completion approval
+  are separate later gates.
+- State commit gate: eligible for the exact paths above; delegate this
+  planning-package activation to `approval-committer` before implementation.

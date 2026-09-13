@@ -16,8 +16,7 @@
 - Slice 8's bounded eight-module replan has independent plan review `Ready`
   with no findings, Human Approval `Approved` on 2026-09-13, focused
   replan/state commit `814d8481`, and Completion Approval `Approved` under the
-  standing automatic no-findings policy. Its completion commit remains
-  pending the approval-committer gate.
+  standing automatic no-findings policy. Its completion commit is `483216a1`.
 
 ## Sync Rule
 
@@ -28,11 +27,10 @@
 
 ## Plan Status
 
-- Status: Replanned; Slices 1-8 implementation complete under focused
-  replan/state commit `814d8481`; Slice 8 independent implementation review is
-  `Ready` with no findings and Completion Approval is `Approved`; web-harness
-  replan for Slices 7-10 approved and focused replan/state commit `800612e4`
-  complete
+- Status: Replanned; Slices 1-8 implementation and completion commits are
+  complete, with Slice 8 completion commit `483216a1`; Slice 9 is the active
+  Human Approved slice under the unchanged reviewed plan; web-harness replan
+  for Slices 7-10 approved and focused replan/state commit `800612e4` complete
 - Planning scope: all 99 remote Qlty blockers represented by the 18-file local
   inventory, plus the one `CHANGELOG.md` formatting failure and the revised
   Slice 6 private helper paths required by this replan.
@@ -40,10 +38,11 @@
   Slice 8 complexity replan review is Ready with no findings.
 - Human approval: Slice 7 and the web-harness delta are Approved and complete;
   the revised Slice 8 eight-module production-path boundary is Human Approved
-  on 2026-09-13. The prior Slice 8 single-file approval remains superseded.
-- Active implementation slice: none; Slice 8 is complete through review and
-  Completion Approval, awaiting its focused completion commit. Slice 9 and
-  later remain unapproved.
+  on 2026-09-13, and Slice 9 is Human Approved on 2026-09-13 under the
+  unchanged reviewed plan and standing automatic no-findings policy. The
+  prior Slice 8 single-file approval remains superseded.
+- Active implementation slice: Slice 9 calendar transport and webview bridge;
+  its exact state commit is pending. Slice 10 remains unapproved.
 - Slice count and order: ten slices in the dependency order below.
 
 ## Replanning Finding
@@ -391,10 +390,10 @@ under the approved boundary.
 - Preserved scope: completed Slices 1-7, the committed test-only web-harness
   replan `800612e4`, Calendar Slice 3, Dependabot, and Slice 9-10 remain
   otherwise unchanged. Slice 8 implementation review is `Ready` with no
-  findings and Completion Approval is recorded below; its focused completion
-  commit remains pending.
-- Recommended next route: delegate the exact approved Slice 8 completion paths
-  to `approval-committer` for one focused completion commit.
+  findings, Completion Approval is `Approved`, and completion commit
+  `483216a1` is complete.
+- Recommended next route: activate the exact approved Slice 9 transport and
+  bridge paths under the unchanged reviewed plan.
 
 ## Completion Approval
 
@@ -1365,7 +1364,7 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 
 ### Slice 9: Calendar transport validation and webview bridge
 
-- Status: Proposed.
+- Status: Human Approved; active next slice, focused state commit pending.
 - Scope: simplify strict message validation/serialization and the webview
   request-response bridge without relaxing protocol behavior.
 - User / Domain Value: preserves rejection of malformed, stale,
@@ -1393,9 +1392,38 @@ build`, baseline `rtk pnpm run test:web` (exit 0), desktop `node
 - Production Readiness: retain payload limit and input distrust; no Node
   dependency or unbounded new traversal.
 - Approval Boundary: exact files/tests plus evidence documents.
-- Dependencies: Slice 8 committed.
+- Dependencies: Slice 8 completion commit `483216a1`.
 - Risks: changed error precedence among invalid, unknown, stale, and too-large.
 - Out of Scope: message types and Calendar Slice 3 UI.
+
+## Slice 9 Activation And Approval (2026-09-13)
+
+- Status: Human Approved; active next slice; focused state commit is pending.
+- Basis: Slice 8 completion commit `483216a1` is committed and the existing
+  complete-plan review is `Ready` with no findings. The user's standing
+  automatic no-findings slice-approval authorization applies to this unchanged
+  reviewed Slice 9 scope; no new design, path, dependency, or behavior was
+  introduced.
+- Approved production paths:
+  `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts` and
+  `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`.
+- Approved test paths:
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts`,
+  `src/test/suite/scheduleImpactCalendarBridge.test.ts`, and
+  `src/test/suite/webSmoke.ts` for `WEB-9`.
+- Approved evidence paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
+- Approved boundary: simplify the existing transport validation/serialization
+  and bridge request-response lifecycle while preserving branded IDs,
+  monotonicity, session/stale/error handling, JSON and byte limits,
+  notifications, listener removal, and idempotent disposal. `WEB-9` remains a
+  controlled post-message port/target lifecycle check; real Calendar
+  WebviewPanel DOM and `window.vscode` handshakes remain unclaimed.
+- Preserved scope: Slice 8 completion `483216a1`, Calendar Slice 3, Slice 10,
+  Dependabot, production webpack, dependencies, public message types, and
+  public commands remain unchanged. Completion review and completion approval
+  are separate later gates.
+- State commit gate: eligible for the exact paths above; delegate this
+  planning-package activation to `approval-committer` before implementation.
 
 ### Slice 10: Calendar host sessions, panel, and bootstrap lifetime
 
@@ -1710,7 +1738,8 @@ issues`; Slice 7-owned smell findings are clear.
 ## Slice 8 Implementation Evidence (2026-09-13)
 
 - Status: Implementation complete under the approved revised boundary;
-  independent implementation review and Completion Approval remain pending.
+  independent implementation review `Ready` with no findings and Completion
+  Approval `Approved`; completion commit `483216a1` is complete.
 - Review base and state gate: revised plan/state commit `814d8481`, with
   independent plan review `Ready` and Human Approval `Approved`.
 - Changed production paths: `semanticDiffCommand.ts` retains the public
@@ -1757,9 +1786,9 @@ issues`; Slice 7-owned smell findings are clear.
   automation remain outside the approved WEB-8 host-composition boundary;
   focused desktop characterization suites remain the coverage for those
   adapters.
-- Recommended next route: the independent review is `Ready` with no findings
-  and Completion Approval is recorded below; delegate this exact path set to
-  `approval-committer` for its focused completion commit.
+- Recommended next route: activate the exact approved Slice 9 transport and
+  bridge paths under the unchanged reviewed plan; its focused state commit
+  requires the approval-committer gate before implementation.
 
 ## Slice 8 Completion Approval (2026-09-13)
 
@@ -1786,10 +1815,8 @@ issues`; Slice 7-owned smell findings are clear.
   WEB-7/WEB-8 runner, scoped Qlty, Markdown lint, and diff checks are recorded
   in the implementation evidence above; the P2 regression test confirms a
   missing registration callback releases once without optional unregister.
-- Commit status: completion commit is pending the exact
-  `approval-committer` gate. No stage or commit was performed by this role.
-- Preserved boundary: Slice 9 and later remain unapproved and must not begin
-  until this exact completion commit succeeds and a new slice approval gate is
-  recorded.
-- Recommended next route: delegate the exact approved completion paths to
-  `approval-committer` for one focused Slice 8 completion commit.
+- Commit status: complete; exact Slice 8 completion commit `483216a1`.
+- Preserved boundary: Slice 9 is activated below under its unchanged reviewed
+  scope; Slice 10 remains unapproved.
+- Recommended next route: delegate the exact Slice 9 activation paths below to
+  `approval-committer` for one focused state commit.
