@@ -1,8 +1,10 @@
 import * as assert from "assert";
 import type {
+  AjsDocument,
   AjsParameter,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
+import type { SemanticDiffScheduleRun } from "../../domain/models/semantic-diff/SemanticDiff";
 import {
   compareScheduleRuns,
   evaluateSemanticDiffSchedule,
@@ -40,7 +42,85 @@ const jobnet = (
   children: [],
 });
 
+const group = (
+  children: AjsUnit[],
+  parameterValues: Record<string, string | string[]> = {},
+): AjsUnit => ({
+  ...jobnet("/root", parameterValues),
+  name: "root",
+  unitType: "g",
+  parentId: undefined,
+  isRoot: true,
+  isRootJobnet: false,
+  hasSchedule: false,
+  parameters: parameters({ ty: "g", ...parameterValues }),
+  children,
+});
+
+const document = (children: AjsUnit[]): AjsDocument => ({
+  rootUnits: [group(children)],
+  warnings: [],
+});
+
 suite("Semantic Diff Schedule Rules", () => {
+  const scheduleRun = (
+    unitPath: string,
+    rule: number,
+    date: string,
+    time: string,
+    unitName = unitPath.split("/").at(-1) ?? unitPath,
+  ): SemanticDiffScheduleRun => ({
+    unitPath,
+    unitName,
+    rule,
+    date,
+    time,
+  });
+
+  test("pairs duplicate runs by source path, date, and rule", () => {
+    const date = "2026-04-01";
+    const before = [
+      scheduleRun("/root/main", 1, date, "08:00"),
+      scheduleRun("/root/main", 2, date, "10:00"),
+      scheduleRun("/root/main", 2, date, "12:00"),
+      scheduleRun("/root/main", 3, date, "08:00"),
+      scheduleRun("/root/main", 4, date, "09:00"),
+      scheduleRun("/root/main/nested", 1, date, "09:00"),
+      scheduleRun("/root/main/nested", 1, date, "09:00"),
+    ];
+    const after = [
+      scheduleRun("/root/main", 1, date, "09:00"),
+      scheduleRun("/root/main", 2, date, "11:00"),
+      scheduleRun("/root/main", 3, date, "09:00"),
+      scheduleRun("/root/main", 4, date, "08:00"),
+      scheduleRun("/root/main/nested", 1, date, "09:00"),
+      scheduleRun("/root/main/nested", 1, date, "09:00"),
+      scheduleRun("/root/main/nested", 1, date, "10:00"),
+    ];
+    const decisions = compareScheduleRuns(before, after);
+    assert.deepStrictEqual(
+      decisions.map((decision) => [
+        decision.kind,
+        decision.unitPath,
+        "before" in decision ? decision.before.rule : decision.after.rule,
+        "before" in decision ? decision.before.time : "",
+        "after" in decision ? decision.after.time : "",
+      ]),
+      [
+        ["added", "/root/main/nested", 1, "", "10:00"],
+        ["changed-time", "/root/main", 1, "08:00", "09:00"],
+        ["changed-time", "/root/main", 2, "10:00", "11:00"],
+        ["changed-time", "/root/main", 3, "08:00", "09:00"],
+        ["changed-time", "/root/main", 4, "09:00", "08:00"],
+        ["removed", "/root/main", 2, "12:00", ""],
+      ],
+    );
+    assert.deepStrictEqual(
+      compareScheduleRuns([...before].reverse(), [...after].reverse()),
+      decisions,
+    );
+  });
+
   test("evaluates explicit runs within the bounded period", () => {
     const beforeRoot = jobnet("/root/main", {
       sd: "2026/04/10",
@@ -87,6 +167,10 @@ suite("Semantic Diff Schedule Rules", () => {
     );
     assert.deepStrictEqual(result.unsupportedDecisions, []);
     assert.deepStrictEqual(result.zeroRunCandidates, []);
+    assert.deepStrictEqual(result.zeroRunCandidatesBySide, {
+      before: [],
+      after: [],
+    });
     assert.deepStrictEqual(
       result.pairEvaluations.map((pair) => [
         pair.after.unit.id,
@@ -145,6 +229,31 @@ suite("Semantic Diff Schedule Rules", () => {
       [],
     );
     assert.deepStrictEqual(result.pairEvaluations, []);
+  });
+
+  test("retains zero-run candidates independently for both sides", () => {
+    const before = jobnet("/root/no-runs", {
+      sd: "2026/03/01",
+      st: "09:00",
+    });
+    const after = jobnet("/root/no-runs", {
+      sd: "2026/06/01",
+      st: "09:00",
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [before],
+      afterUnits: [after],
+      matches: [{ before, after }],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+    });
+
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(result.zeroRunCandidates, [after]);
+    assert.deepStrictEqual(result.zeroRunCandidatesBySide, {
+      before: [before],
+      after: [after],
+    });
   });
 
   test("classifies mixed supported and unsupported evidence without losing pairs", () => {
@@ -382,6 +491,12 @@ suite("Semantic Diff Schedule Rules", () => {
         ["malformed", "unsupported-schedule-date", undefined],
       ].sort(),
     );
+    assert.strictEqual(
+      result.unsupportedDecisions.find(
+        (decision) => decision.reason === "missing-start-time",
+      )?.status,
+      undefined,
+    );
   });
 
   test("keeps keyed unsupported handlers associated with their rules", () => {
@@ -412,6 +527,152 @@ suite("Semantic Diff Schedule Rules", () => {
         ],
         ["cftd", 5, "days-from-start", [{ key: "cftd", value: "5,be,2,3" }]],
       ],
+    );
+  });
+
+  test("carries calendar projection status on unsupported decisions", () => {
+    const missing = jobnet("/root/missing-context", {
+      jc: "/root/no-calendar",
+      sd: "2026/04/+01",
+      st: "09:00",
+    });
+    const missingResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [missing],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      afterDocument: document([missing]),
+    });
+    assert.strictEqual(missingResult.kind, "evaluated");
+    if (missingResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      missingResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.key,
+        decision.reason,
+        decision.status,
+      ]),
+      [
+        ["sd", "calendar-selection", "missing-context"],
+        ["jc", "calendar-selection", "missing-context"],
+      ],
+    );
+
+    const invalid = jobnet("/root/invalid-context", {
+      sd: "2026/04/+01",
+      st: "09:00",
+    });
+    const invalidResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [invalid],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      afterDocument: {
+        rootUnits: [
+          {
+            ...group([invalid], { sdd: ["01", "02"] }),
+            id: "/root",
+          },
+        ],
+        warnings: [],
+      },
+    });
+    assert.strictEqual(invalidResult.kind, "evaluated");
+    if (invalidResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      invalidResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.key,
+        decision.reason,
+        decision.status,
+      ]),
+      [["sd", "calendar-selection", "invalid"]],
+    );
+
+    const unsupported = jobnet("/root/unsupported-calendar", {
+      jc: "calendar",
+      sd: "2026/04/01",
+      st: "09:00",
+    });
+    const unsupportedResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [unsupported],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+    });
+    assert.strictEqual(unsupportedResult.kind, "evaluated");
+    if (unsupportedResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      unsupportedResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.key,
+        decision.reason,
+        decision.status,
+      ]),
+      [["jc", "calendar-selection", "unsupported"]],
+    );
+
+    const missingSubstitution = jobnet("/root/missing-substitution", {
+      sd: "2026/04/04",
+      st: "09:00",
+      sh: "no",
+    });
+    const missingSubstitutionResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [missingSubstitution],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      afterDocument: document([missingSubstitution]),
+    });
+    assert.strictEqual(missingSubstitutionResult.kind, "evaluated");
+    if (missingSubstitutionResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      missingSubstitutionResult.unsupportedDecisions.map((decision) => [
+        decision.parameter.key,
+        decision.reason,
+        decision.status,
+      ]),
+      [["sh", "closed-day-substitution", "missing-context"]],
+    );
+
+    const invalidSubstitution = jobnet("/root/invalid-substitution", {
+      sd: "1,2026/04/04",
+      st: "1,09:00",
+      sh: "1,unknown",
+      shd: "1,0",
+    });
+    const invalidSubstitutionResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [invalidSubstitution],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      afterDocument: document([invalidSubstitution]),
+    });
+    assert.strictEqual(invalidSubstitutionResult.kind, "evaluated");
+    if (invalidSubstitutionResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      invalidSubstitutionResult.unsupportedDecisions
+        .filter((decision) => decision.parameter.key === "sh")
+        .map((decision) => [decision.reason, decision.status]),
+      [["closed-day-substitution", "invalid"]],
+    );
+
+    const unsupportedSubstitution = jobnet("/root/unsupported-substitution", {
+      sd: "04/04",
+      st: "09:00",
+      sh: "be",
+    });
+    const unsupportedSubstitutionResult = evaluateSemanticDiffSchedule({
+      beforeUnits: [],
+      afterUnits: [unsupportedSubstitution],
+      matches: [],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      afterDocument: document([unsupportedSubstitution]),
+    });
+    assert.strictEqual(unsupportedSubstitutionResult.kind, "evaluated");
+    if (unsupportedSubstitutionResult.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      unsupportedSubstitutionResult.unsupportedDecisions
+        .filter((decision) => decision.parameter.key === "sh")
+        .map((decision) => [decision.reason, decision.status]),
+      [["closed-day-substitution", "unsupported"]],
     );
   });
 

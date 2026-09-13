@@ -10,6 +10,52 @@ const readSample = (name: string): string =>
   readFileSync(join(__dirname, "../../..", "sample", name), "utf8");
 
 suite("Semantic diff sample coverage", () => {
+  test("self-comparison of the large UTF-8 sample is reflexive", () => {
+    const parser = new AntlrAjsParser({
+      sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+    });
+    const beforeParse = parser.parse(readSample("sample1_large_utf8"));
+    const afterParse = parser.parse(readSample("sample1_large_utf8"));
+
+    assert.strictEqual(beforeParse.ok, true);
+    assert.strictEqual(afterParse.ok, true);
+    if (!beforeParse.ok || !afterParse.ok) return;
+
+    const result = compareSemanticDiff({
+      before: beforeParse.document,
+      after: afterParse.document,
+    });
+    const exactJobGroups = result.identityDecisions.filter(
+      (decision) =>
+        decision.status === "exact" &&
+        decision.evidence.kind === "exact-key" &&
+        decision.evidence.key.kind === "job-group" &&
+        decision.before[0]?.name === "nest_jg",
+    );
+
+    assert.strictEqual(beforeParse.document.rootUnits.length > 0, true);
+    assert.strictEqual(result.changes.length, 0);
+    assert.strictEqual(
+      result.identityDecisions.some(
+        (decision) => decision.status === "candidate",
+      ),
+      false,
+    );
+    assert.strictEqual(result.identityDecisions.length, 868);
+    assert.strictEqual(exactJobGroups.length, 48);
+    assert.strictEqual(
+      new Set(
+        exactJobGroups.map((decision) =>
+          decision.evidence.kind === "exact-key" &&
+          decision.evidence.key.kind === "job-group"
+            ? `${decision.evidence.key.jobGroupPath}:${decision.evidence.key.unitType}`
+            : "",
+        ),
+      ).size,
+      48,
+    );
+  });
+
   test("sample definitions cover implemented semantic diff evaluation categories", () => {
     const parser = new AntlrAjsParser({
       sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),

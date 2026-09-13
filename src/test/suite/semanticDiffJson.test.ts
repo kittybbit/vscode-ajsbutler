@@ -342,11 +342,12 @@ const reference = (
   id: string,
   name = id,
   absolutePath = `/root/${id}`,
+  unitType = "j",
 ): SemanticDiffIdentityDecision["before"][number] => ({
   id,
   name,
   absolutePath,
-  unitType: "j",
+  unitType,
 });
 
 const relationPair = (): SemanticDiffRelationPair => ({
@@ -1116,6 +1117,21 @@ suite("Semantic Diff JSON v1", () => {
         },
       },
     };
+    const exactJobGroup: SemanticDiffIdentityDecision = {
+      id: "identity:exact-job-group",
+      status: "exact",
+      rule: "exact-key",
+      before: [reference("exact-job-group", "group", "/group", "g")],
+      after: [reference("exact-job-group-after", "group", "/group", "g")],
+      evidence: {
+        kind: "exact-key",
+        key: {
+          kind: "job-group",
+          jobGroupPath: "group",
+          unitType: "g",
+        },
+      },
+    };
     const exactUnit: SemanticDiffIdentityDecision = {
       id: "identity:exact-unit",
       status: "exact",
@@ -1140,6 +1156,7 @@ suite("Semantic Diff JSON v1", () => {
             exactUnit,
             commandCandidate,
             exactJobnet,
+            exactJobGroup,
           ],
         }),
       ),
@@ -1153,7 +1170,7 @@ suite("Semantic Diff JSON v1", () => {
             decision.evidence.kind === "exact-key" &&
             decision.evidence.key.kind,
         ),
-      ["jobnet", "unit"],
+      ["job-group", "jobnet", "unit"],
     );
     assert.deepStrictEqual(
       document.result.identityDecisions
@@ -1165,6 +1182,118 @@ suite("Semantic Diff JSON v1", () => {
         ),
       ["command-text-v1", "executable-file-v1"],
     );
+  });
+
+  test("orders multiple job-group exact keys by path and type independent of input order", () => {
+    const sharedBefore = reference(
+      "shared-before",
+      "group",
+      "/shared/group",
+      "g",
+    );
+    const sharedAfter = reference(
+      "shared-after",
+      "group",
+      "/shared/group",
+      "g",
+    );
+    const decision = (
+      id: string,
+      jobGroupPath: string,
+      unitType: string,
+    ): SemanticDiffIdentityDecision => ({
+      id,
+      status: "exact",
+      rule: "exact-key",
+      before: [sharedBefore],
+      after: [sharedAfter],
+      evidence: {
+        kind: "exact-key",
+        key: { kind: "job-group", jobGroupPath, unitType },
+      },
+    });
+    const decisions = [
+      decision("identity:group-z-g", "z/nest_jg", "g"),
+      decision("identity:group-a-mg", "a/nest_jg", "mg"),
+      decision("identity:group-a-g", "a/nest_jg", "g"),
+    ];
+    const serialize = (identityDecisions: SemanticDiffIdentityDecision[]) =>
+      serializeSemanticDiffJson(
+        buildSemanticDiffOutputContext(baseResult({ identityDecisions })),
+      );
+
+    const serialized = serialize(decisions);
+    assert.strictEqual(serialized, serialize([...decisions].reverse()));
+
+    const document = JSON.parse(serialized) as ReturnType<
+      typeof buildSemanticDiffJsonV1
+    >;
+    assert.deepStrictEqual(
+      document.result.identityDecisions.map((identityDecision) => {
+        if (identityDecision.evidence.kind !== "exact-key") {
+          assert.fail("expected exact-key evidence");
+        }
+        if (identityDecision.evidence.key.kind !== "job-group") {
+          assert.fail("expected job-group exact-key evidence");
+        }
+        assert.deepStrictEqual(Object.keys(identityDecision.evidence.key), [
+          "kind",
+          "jobGroupPath",
+          "unitType",
+        ]);
+        return [
+          identityDecision.evidence.key.jobGroupPath,
+          identityDecision.evidence.key.unitType,
+        ];
+      }),
+      [
+        ["a/nest_jg", "g"],
+        ["a/nest_jg", "mg"],
+        ["z/nest_jg", "g"],
+      ],
+    );
+  });
+
+  test("projects the job-group exact-key wire shape in schema version 1", () => {
+    const decision: SemanticDiffIdentityDecision = {
+      id: "identity:job-group",
+      status: "exact",
+      rule: "exact-key",
+      before: [reference("before-group", "group", "/root/before-group", "g")],
+      after: [reference("after-group", "group", "/root/after-group", "g")],
+      evidence: {
+        kind: "exact-key",
+        key: {
+          kind: "job-group",
+          jobGroupPath: "nested/group",
+          unitType: "g",
+        },
+      },
+    };
+    const document = buildSemanticDiffJsonV1(
+      buildSemanticDiffOutputContext(
+        baseResult({ identityDecisions: [decision] }),
+      ),
+    );
+    const projected = document.result.identityDecisions[0]!;
+
+    assert.strictEqual(document.schemaVersion, 1);
+    assert.deepStrictEqual(projected.evidence, {
+      kind: "exact-key",
+      key: {
+        kind: "job-group",
+        jobGroupPath: "nested/group",
+        unitType: "g",
+      },
+    });
+    if (projected.evidence.kind !== "exact-key") {
+      assert.fail("expected exact-key evidence");
+    }
+    assert.deepStrictEqual(Object.keys(projected.evidence.key), [
+      "kind",
+      "jobGroupPath",
+      "unitType",
+    ]);
   });
 
   test("preserves fingerprint ID-remap relation evidence in JSON", () => {

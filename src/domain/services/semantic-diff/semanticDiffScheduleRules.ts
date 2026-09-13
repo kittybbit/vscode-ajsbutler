@@ -49,6 +49,10 @@ export type SemanticDiffScheduleUnsupportedDecision = {
   unit: AjsUnit;
   parameter: AjsParameter;
   reason: SemanticDiffScheduleUnsupportedReason;
+  status?: Extract<
+    SemanticDiffScheduleStatus,
+    "invalid" | "missing-context" | "unsupported"
+  >;
   scheduleRule?: number;
 };
 
@@ -81,6 +85,10 @@ export type SemanticDiffScheduleEvaluation =
       runDecisions: SemanticDiffScheduleRunDecision[];
       unsupportedDecisions: SemanticDiffScheduleUnsupportedDecision[];
       zeroRunCandidates: AjsUnit[];
+      zeroRunCandidatesBySide: {
+        before: AjsUnit[];
+        after: AjsUnit[];
+      };
       pairEvaluations: SemanticDiffSchedulePairEvaluation[];
     };
 
@@ -113,20 +121,31 @@ const isJobnetUnit = (unit: AjsUnit): boolean => jobnetTypes.has(unit.unitType);
 const hasDirectScheduleParameters = (unit: AjsUnit): boolean =>
   unit.parameters.some((parameter) => scheduleParameterKeys.has(parameter.key));
 
-const toUtcDate = (value: string): Date | undefined => {
+type UtcDateParts = readonly [year: number, month: number, day: number];
+
+const parseUtcDateParts = (value: string): UtcDateParts | undefined => {
   const matched = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!matched) {
+  return matched
+    ? [Number(matched[1]), Number(matched[2]), Number(matched[3])]
+    : undefined;
+};
+
+const matchesUtcDateParts = (
+  date: Date,
+  [year, month, day]: UtcDateParts,
+): boolean =>
+  date.getUTCFullYear() === year &&
+  date.getUTCMonth() === month - 1 &&
+  date.getUTCDate() === day;
+
+const toUtcDate = (value: string): Date | undefined => {
+  const parts = parseUtcDateParts(value);
+  if (!parts) {
     return undefined;
   }
-  const year = Number(matched[1]);
-  const month = Number(matched[2]);
-  const day = Number(matched[3]);
+  const [year, month, day] = parts;
   const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
-    ? date
-    : undefined;
+  return matchesUtcDateParts(date, parts) ? date : undefined;
 };
 
 const parsePeriod = (
@@ -137,6 +156,42 @@ const parsePeriod = (
   return from && to && from < to ? period : undefined;
 };
 
+const projectionStatusReasons = new Set<SemanticDiffScheduleUnsupportedReason>([
+  "calendar-selection",
+  "closed-day-substitution",
+]);
+
+const isProjectionStatus = (
+  status: SemanticDiffScheduleStatus,
+): status is Extract<
+  SemanticDiffScheduleStatus,
+  "invalid" | "missing-context" | "unsupported"
+> =>
+  status === "invalid" ||
+  status === "missing-context" ||
+  status === "unsupported";
+
+const unsupportedDecisionStatus = (
+  rule: SemanticDiffScheduleRuleInterpretation,
+): SemanticDiffScheduleUnsupportedDecision["status"] =>
+  rule.reason &&
+  projectionStatusReasons.has(rule.reason) &&
+  isProjectionStatus(rule.status)
+    ? rule.status
+    : undefined;
+
+const optionalDecisionStatus = (
+  status: SemanticDiffScheduleUnsupportedDecision["status"],
+):
+  | Pick<SemanticDiffScheduleUnsupportedDecision, "status">
+  | Record<never, never> => (status === undefined ? {} : { status });
+
+const optionalScheduleRule = (
+  rule: number | undefined,
+):
+  | Pick<SemanticDiffScheduleUnsupportedDecision, "scheduleRule">
+  | Record<never, never> => (rule === undefined ? {} : { scheduleRule: rule });
+
 const unsupportedDecision = (
   side: SemanticDiffScheduleSide,
   interpretation: SemanticDiffScheduleInterpretation,
@@ -145,12 +200,14 @@ const unsupportedDecision = (
   if (!rule.reason) {
     return undefined;
   }
+  const status = unsupportedDecisionStatus(rule);
   return {
     side,
     unit: interpretation.unit,
     parameter: rule.parameter,
     reason: rule.reason,
-    ...(rule.rule === undefined ? {} : { scheduleRule: rule.rule }),
+    ...optionalDecisionStatus(status),
+    ...optionalScheduleRule(rule.rule),
   };
 };
 
@@ -413,6 +470,10 @@ export const evaluateSemanticDiffSchedule = (
       ...after.unsupportedDecisions,
     ],
     zeroRunCandidates: after.zeroRunCandidates,
+    zeroRunCandidatesBySide: {
+      before: before.zeroRunCandidates,
+      after: after.zeroRunCandidates,
+    },
     pairEvaluations: toPairEvaluations(
       input.matches,
       before.unitEvaluations,

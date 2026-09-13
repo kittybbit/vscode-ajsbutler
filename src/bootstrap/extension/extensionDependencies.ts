@@ -15,6 +15,7 @@ import {
 } from "../../application/editor-feedback/findParameterHover";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { createImportAjsDefinitionViaWebApi } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
+import type { ReadGitHeadDefinition } from "../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import {
   createBuildUnitList,
   type BuildUnitList,
@@ -23,6 +24,10 @@ import {
   createBuildSemanticDiffReportData,
   type BuildSemanticDiffReportData,
 } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import {
+  createBuildSemanticDiffPresentationArtifacts,
+  type BuildSemanticDiffPresentationArtifacts,
+} from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import { createBeginSemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import {
@@ -48,6 +53,7 @@ import { createTelemetry } from "./createTelemetry";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import type { ExtensionHostKind } from "./extensionRuntime";
 import { createWebApiImportCapability } from "./webapiImportWiring";
+import { createVscodeGitHeadDefinitionSourceAdapter } from "../../infrastructure/git/VscodeGitHeadDefinitionSourceAdapter";
 
 export type ExtensionDependencies = {
   host: ExtensionHostKind;
@@ -57,10 +63,12 @@ export type ExtensionDependencies = {
   findParameterHover: FindParameterHover;
   semanticDiff: {
     buildSemanticDiffReportData: BuildSemanticDiffReportData;
+    buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
     beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
     sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
     sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
     actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
+    readGitHeadDefinition?: ReadGitHeadDefinition;
   };
   webApiImport: ImportAjsDefinitionCapability;
 };
@@ -159,6 +167,8 @@ export const createExtensionDependencies = (
     telemetry,
   );
   const enrichedParser = new AntlrAjsParser({ sourceIndexIdAllocator });
+  const buildPresentationArtifacts =
+    createBuildSemanticDiffPresentationArtifacts(parser);
   const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
   const webApiImport = createWebApiImportCapability(host, () =>
     factories.createDesktopWebApiImportCapability(context),
@@ -172,6 +182,7 @@ export const createExtensionDependencies = (
     findParameterHover: createFindParameterHover(parameterSyntaxLookup),
     semanticDiff: {
       buildSemanticDiffReportData: createBuildSemanticDiffReportData(parser),
+      buildSemanticDiffPresentationArtifacts: buildPresentationArtifacts,
       beginSemanticDiffSourceCapture: createBeginSemanticDiffSourceCapture(
         enrichedParser,
         captureScopeIdAllocator,
@@ -179,6 +190,7 @@ export const createExtensionDependencies = (
       sourceHandleIdAllocator,
       sessionIdAllocator,
       actionIdAllocator,
+      readGitHeadDefinition: createVscodeGitHeadDefinitionSourceAdapter(),
     },
     webApiImport,
   };

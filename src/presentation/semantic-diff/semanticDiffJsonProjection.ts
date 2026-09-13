@@ -275,6 +275,16 @@ const projectExactKeyEvidence = (
     { kind: "exact-key" }
   >,
 ): SemanticDiffJsonIdentityEvidence => {
+  if (evidence.key.kind === "job-group") {
+    return {
+      kind: "exact-key",
+      key: {
+        kind: "job-group",
+        jobGroupPath: evidence.key.jobGroupPath,
+        unitType: evidence.key.unitType,
+      },
+    };
+  }
   if (evidence.key.kind === "jobnet") {
     return {
       kind: "exact-key",

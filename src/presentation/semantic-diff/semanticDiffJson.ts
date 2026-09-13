@@ -123,6 +123,11 @@ export type SemanticDiffJsonIdentityEvidence =
       kind: "exact-key";
       key:
         | {
+            kind: "job-group";
+            jobGroupPath: string;
+            unitType: string;
+          }
+        | {
             kind: "jobnet";
             jobGroupRelativePath: string;
             unitType: string;

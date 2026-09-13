@@ -9,6 +9,8 @@ import type {
   SemanticDiffIdentityEvidence,
   SemanticDiffIdentityFingerprintEvidence,
   SemanticDiffIdentityUnitReference,
+  SemanticDiffIdentityExactKey,
+  SemanticDiffJobGroupIdentityKey,
   SemanticDiffJobnetIdentityKey,
   SemanticDiffRelationIdentityKey,
   SemanticDiffUnitIdentityKey,
@@ -74,6 +76,7 @@ export type SemanticDiffRelationDecision = {
 };
 
 const jobnetTypes = new Set<AjsUnitType>(["n", "rn", "rm", "rr"]);
+const jobGroupTypes = new Set<AjsUnitType>(["g", "mg"]);
 const executionEnvironmentKeys = new Set(["eu", "un", "rg", "qu"]);
 const startConditionKeys = new Set(["eun", "cond", "ar"]);
 const endControlKeys = new Set(["ej", "ejc", "ejf", "jdf"]);
@@ -141,6 +144,9 @@ const groupBy = <T>(
 export const isSemanticDiffJobnetUnit = (unit: AjsUnit): boolean =>
   jobnetTypes.has(unit.unitType);
 
+export const isSemanticDiffJobGroupUnit = (unit: AjsUnit): boolean =>
+  jobGroupTypes.has(unit.unitType);
+
 export const semanticDiffParentJobnetPath = (
   unit: AjsUnit,
   unitById: Map<string, AjsUnit>,
@@ -161,6 +167,21 @@ const toRelativePath = (absolutePath: string, jobGroupPath?: string): string =>
     ? absolutePath.slice(jobGroupPath.length).replace(/^\//, "")
     : absolutePath.replace(/^\//, "");
 
+const toJobGroupPath = (absolutePath: string, jobGroupPath?: string): string =>
+  jobGroupPath &&
+  (absolutePath === jobGroupPath || absolutePath.startsWith(`${jobGroupPath}/`))
+    ? absolutePath.slice(jobGroupPath.length).replace(/^\//, "")
+    : absolutePath.replace(/^\//, "");
+
+export const semanticDiffJobGroupIdentityKey = (
+  unit: AjsUnit,
+  jobGroupPath?: string,
+): SemanticDiffJobGroupIdentityKey => ({
+  kind: "job-group",
+  jobGroupPath: toJobGroupPath(unit.absolutePath, jobGroupPath),
+  unitType: unit.unitType,
+});
+
 export const semanticDiffJobnetIdentityKey = (
   unit: AjsUnit,
   jobGroupPath?: string,
@@ -180,16 +201,26 @@ export const semanticDiffUnitIdentityKey = (
   unitType: unit.unitType,
 });
 
+const semanticDiffExactIdentityKey = (
+  unit: AjsUnit,
+  unitById: Map<string, AjsUnit>,
+  jobGroupPath?: string,
+): SemanticDiffIdentityExactKey => {
+  if (isSemanticDiffJobGroupUnit(unit)) {
+    return semanticDiffJobGroupIdentityKey(unit, jobGroupPath);
+  }
+  if (isSemanticDiffJobnetUnit(unit)) {
+    return semanticDiffJobnetIdentityKey(unit, jobGroupPath);
+  }
+  return semanticDiffUnitIdentityKey(unit, unitById);
+};
+
 const unitExactKey = (
   unit: AjsUnit,
   unitById: Map<string, AjsUnit>,
   jobGroupPath?: string,
 ): string =>
-  JSON.stringify(
-    isSemanticDiffJobnetUnit(unit)
-      ? semanticDiffJobnetIdentityKey(unit, jobGroupPath)
-      : semanticDiffUnitIdentityKey(unit, unitById),
-  );
+  JSON.stringify(semanticDiffExactIdentityKey(unit, unitById, jobGroupPath));
 
 /**
  * Preserve the historical fallback representation while exposing the
@@ -304,23 +335,18 @@ const classifyFingerprintGroup = (input: {
   };
 };
 
-const matchFingerprintUnits = (
-  beforeUnits: AjsUnit[],
-  afterUnits: AjsUnit[],
+const fingerprintGroups = (
+  units: AjsUnit[],
+  identityById: Map<string, SemanticDiffIdentityFingerprint>,
+): Map<string, AjsUnit[]> =>
+  groupBy(units, (unit) => identityById.get(unit.id)?.fingerprint ?? "");
+
+const fingerprintGroupResults = (
+  beforeByFingerprint: Map<string, AjsUnit[]>,
+  afterByFingerprint: Map<string, AjsUnit[]>,
   context: FingerprintMatchContext,
-): {
-  matches: SemanticDiffUnitMatch[];
-  candidates: SemanticDiffCandidateGroup[];
-} => {
-  const beforeByFingerprint = groupBy(
-    beforeUnits,
-    (unit) => context.beforeIdentityById.get(unit.id)?.fingerprint ?? "",
-  );
-  const afterByFingerprint = groupBy(
-    afterUnits,
-    (unit) => context.afterIdentityById.get(unit.id)?.fingerprint ?? "",
-  );
-  const groupResults = [...beforeByFingerprint.entries()]
+): FingerprintGroupResult[] =>
+  [...beforeByFingerprint.entries()]
     .sort(([left], [right]) => compareOrdinal(left, right))
     .map(([fingerprint, beforeMatches]) =>
       classifyFingerprintGroup({
@@ -330,20 +356,42 @@ const matchFingerprintUnits = (
         context,
       }),
     );
-  const matches = groupResults.flatMap(({ match }) => (match ? [match] : []));
-  const candidates = groupResults.flatMap(({ candidate }) =>
-    candidate ? [candidate] : [],
-  );
 
-  return {
-    matches: matches.sort(
+const fingerprintMatches = (
+  groupResults: FingerprintGroupResult[],
+): SemanticDiffUnitMatch[] =>
+  groupResults
+    .flatMap(({ match }) => (match ? [match] : []))
+    .sort(
       (left, right) =>
         compareUnits(left.before, right.before) ||
         compareUnits(left.after, right.after),
-    ),
-    candidates: candidates.sort((left, right) =>
-      compareOrdinal(left.fingerprint, right.fingerprint),
-    ),
+    );
+
+const fingerprintCandidates = (
+  groupResults: FingerprintGroupResult[],
+): SemanticDiffCandidateGroup[] =>
+  groupResults
+    .flatMap(({ candidate }) => (candidate ? [candidate] : []))
+    .sort((left, right) => compareOrdinal(left.fingerprint, right.fingerprint));
+
+const matchFingerprintUnits = (
+  beforeUnits: AjsUnit[],
+  afterUnits: AjsUnit[],
+  context: FingerprintMatchContext,
+): {
+  matches: SemanticDiffUnitMatch[];
+  candidates: SemanticDiffCandidateGroup[];
+} => {
+  const groupResults = fingerprintGroupResults(
+    fingerprintGroups(beforeUnits, context.beforeIdentityById),
+    fingerprintGroups(afterUnits, context.afterIdentityById),
+    context,
+  );
+
+  return {
+    matches: fingerprintMatches(groupResults),
+    candidates: fingerprintCandidates(groupResults),
   };
 };
 
@@ -429,9 +477,11 @@ const exactIdentityDecision = (
 ): SemanticDiffIdentityDecision => {
   const before = sortedIdentityReferences([match.before]);
   const after = sortedIdentityReferences([match.after]);
-  const key = isSemanticDiffJobnetUnit(match.before)
-    ? semanticDiffJobnetIdentityKey(match.before, jobGroupPath)
-    : semanticDiffUnitIdentityKey(match.before, beforeUnitById);
+  const key = semanticDiffExactIdentityKey(
+    match.before,
+    beforeUnitById,
+    jobGroupPath,
+  );
   const evidence: SemanticDiffIdentityEvidence = {
     kind: "exact-key",
     key,

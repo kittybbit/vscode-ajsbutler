@@ -5,6 +5,8 @@ import { join } from "path";
 type CommandContribution = {
   command: string;
   icon?: string;
+  title?: string;
+  shortTitle?: string;
 };
 
 type MenuContribution = {
@@ -58,6 +60,14 @@ suite("Package manifest", () => {
     assert.strictEqual(
       byCommand.get("ajsbutler.compareSemanticDiff")?.icon,
       "$(diff)",
+    );
+    assert.strictEqual(
+      byCommand.get("ajsbutler.compareSemanticDiff")?.title,
+      "Compare Definition",
+    );
+    assert.strictEqual(
+      byCommand.get("ajsbutler.compareSemanticDiff")?.shortTitle,
+      "Compare Definition",
     );
     assert.strictEqual(
       byCommand.get("ajsbutler.copySemanticDiffMarkdown")?.icon,

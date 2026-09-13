@@ -20,6 +20,7 @@ antlr/
 
 # repository tooling
 pnpm-workspace.yaml
+patches/postman-collection@4.5.0.patch
 scripts/
 
 # vscode

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Fixed Semantic Diff false-positive candidate changes when repeated nested
+  `g`/`mg` job groups have distinct canonical paths, while preserving
+  conservative ambiguity for duplicate paths.
+- Improved Semantic Diff with the `Compare Definition` workflow: choose a
+  definition file or an optional Git `HEAD` source, carry an optional schedule
+  period, and open one reusable Explorer context. Git access is feature
+  detected, uses the captured commit and decoded provider output, and degrades
+  safely when the Git API or repository is unavailable; no Git executable,
+  direct `.git` access, or implicit report copy is used.
 - Added a read-only Semantic Diff Explorer with summary cards, hierarchical
   change review, confirmation-required filtering, exact before/after source
   navigation, and existing Flow Viewer focus/highlight integration. The
@@ -322,7 +331,8 @@
 
 - Extended backward compatibility for Visual Studio Code from v1.84.0 to v1.82.0.
 - Added support for saving in CSV format.
-- Changed the font color for default and inherited values to distinguish them from configured settings.
+- Changed the font color for default and inherited values to distinguish them
+  from configured settings.
 
 ## [1.0.0]
 

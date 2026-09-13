@@ -1,4 +1,5 @@
 import type * as vscode from "vscode";
+import type { GitHeadDefinitionUnavailableReason } from "../../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import type {
   ImmutableSourceDescriptor,
@@ -6,23 +7,45 @@ import type {
 } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffOutputMode } from "../../semantic-diff/semanticDiffOutput";
-import type {
-  SemanticDiffCommandDeps,
-  SemanticDiffCommandResult,
-} from "./semanticDiffCommand";
+import type { SemanticDiffCommandDeps } from "./semanticDiffCommand";
 
-export type SemanticDiffCommandErrorCode = Extract<
-  SemanticDiffCommandResult,
-  { ok: false }
->["error"]["code"];
+type SemanticDiffCommandErrorCodes = {
+  "no-active-editor": unknown;
+  "active-editor-failed": unknown;
+  "after-non-text": unknown;
+  "after-too-large": unknown;
+  "source-picker-failed": unknown;
+  "git-head-unavailable": unknown;
+  cancelled: unknown;
+  "before-file-read-failed": unknown;
+  "before-file-non-text": unknown;
+  "before-file-too-large": unknown;
+  "mode-picker-failed": unknown;
+  "read-failed": unknown;
+  "parse-failed": unknown;
+  "comparison-failed": unknown;
+  "source-capture-failed": unknown;
+  "render-failed": unknown;
+  "display-failed": unknown;
+  "explorer-open-failed": unknown;
+};
+
+export type SemanticDiffCommandErrorCode = keyof SemanticDiffCommandErrorCodes;
+
+export type SemanticDiffCommandError = {
+  code: SemanticDiffCommandErrorCode;
+  message: string;
+  reason?: GitHeadDefinitionUnavailableReason;
+};
+
+export type SemanticDiffCommandFailureResult = {
+  ok: false;
+  error: SemanticDiffCommandError;
+};
 
 export type CommandFailure = {
   kind: "failed";
-  error: {
-    code: SemanticDiffCommandErrorCode;
-    message: string;
-    notify: boolean;
-  };
+  error: SemanticDiffCommandError & { notify: boolean };
 };
 
 export type CommandStep<T> = { kind: "ready"; value: T } | CommandFailure;
@@ -65,14 +88,25 @@ export const readyStep = <T>(value: T): CommandStep<T> => ({
   value,
 });
 
-export const failedStep = (
+type FailedStepArguments = readonly [
   code: SemanticDiffCommandErrorCode,
   message: string,
-  notify: boolean,
-): CommandFailure => ({
-  kind: "failed",
-  error: { code, message, notify },
-});
+  notify?: boolean,
+  reason?: GitHeadDefinitionUnavailableReason,
+];
+
+export const failedStep = (...args: FailedStepArguments): CommandFailure => {
+  const [code, message, notify, reason] = args;
+  return {
+    kind: "failed",
+    error: {
+      code,
+      message,
+      notify: notify ?? true,
+      ...(reason ? { reason } : {}),
+    },
+  };
+};
 
 export const continueCommandStep = async <T, U>(
   step: CommandStep<T>,
@@ -89,9 +123,10 @@ export const mapCommandStep = <T, U>(
 export const commandError = (
   code: SemanticDiffCommandErrorCode,
   message: string,
-): Extract<SemanticDiffCommandResult, { ok: false }> => ({
+  reason?: GitHeadDefinitionUnavailableReason,
+): SemanticDiffCommandFailureResult => ({
   ok: false,
-  error: { code, message },
+  error: { code, message, ...(reason ? { reason } : {}) },
 });
 
 export const safeShowErrorMessage = async (

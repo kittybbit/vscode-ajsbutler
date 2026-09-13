@@ -26,6 +26,7 @@ Viewer and export behavior:
 Comparison and reporting:
 
 - build semantic diff
+- compare AJS definitions
 - present semantic diff report
 
 Shared JP1/AJS meaning belongs in

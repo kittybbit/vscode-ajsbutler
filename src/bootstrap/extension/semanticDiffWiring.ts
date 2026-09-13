@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
+import type { BuildSemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
@@ -22,20 +23,31 @@ import type {
   SemanticDiffExplorerSessionIdAllocator,
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
 import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes";
 import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 import {
   createSemanticDiffFlowAction,
   SemanticDiffFlowOverlayRegistry,
   type SemanticDiffFlowSourceSnapshot,
 } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
+import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
+import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendarSessionRegistry";
+import type { ReadGitHeadDefinition } from "../../application/semantic-diff/GitHeadDefinitionSourcePort";
+import {
+  GIT_HEAD_CONTENT_SCHEME,
+  VscodeGitHeadContentProvider,
+} from "../../infrastructure/git/VscodeGitHeadContentProvider";
 
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
+  buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
   beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
   actionIdAllocator: SemanticDiffExplorerActionIdAllocator;
+  readGitHeadDefinition?: ReadGitHeadDefinition;
   flowBridge?: SemanticDiffFlowViewerBridge;
 };
 
@@ -158,17 +170,12 @@ const createFlowHost = ({
     }),
 });
 
-const createSourceCaptureRegistrar =
+export const createSourceCaptureRegistrar =
   (
     contextRegistry: SemanticDiffExplorerContextRegistry,
   ): SourceCaptureRegistration =>
-  (...args) => {
-    const [context, binding, sources, release] = args;
-    contextRegistry.registerSourceCapture(context, {
-      binding,
-      sources,
-      release,
-    });
+  (context, entry: SemanticDiffSourceCaptureEntry) => {
+    contextRegistry.registerSourceCapture(context, entry);
   };
 
 const createReportDocuments = (): SemanticDiffReportDocumentProvider =>
@@ -230,17 +237,26 @@ const createCompareCommand = ({
   deps,
   reportDocuments,
   openExplorer,
+  openScheduleAwareExplorerSession,
   contextRegistry,
+  gitHeadContentProvider,
 }: Readonly<{
   deps: SemanticDiffWiringDeps;
   reportDocuments: SemanticDiffReportDocumentProvider;
   openExplorer: ReturnType<typeof createOpenExplorer>;
+  openScheduleAwareExplorerSession: ReturnType<
+    typeof createScheduleAwareExplorerSession
+  >;
   contextRegistry: SemanticDiffExplorerContextRegistry;
+  gitHeadContentProvider: VscodeGitHeadContentProvider;
 }>): vscode.Disposable => {
   const commandDeps: SemanticDiffCommandDeps = {
     getActiveEditor: () => vscode.window.activeTextEditor,
     showQuickPick: (items, options) =>
       vscode.window.showQuickPick(items, options),
+    showWorkflowQuickPick: (items, options) =>
+      vscode.window.showQuickPick(items, options),
+    showInputBox: (options) => vscode.window.showInputBox(options),
     showOpenDialog: (options) => vscode.window.showOpenDialog(options),
     showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     readFile: (uri) => vscode.workspace.fs.readFile(uri),
@@ -251,13 +267,20 @@ const createCompareCommand = ({
     buildSemanticDiffOutputContext,
     presentSemanticDiffOutput,
     openExplorer,
+    openScheduleAwareExplorerSession,
     beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
     sourceHandleIdAllocator: deps.sourceHandleIdAllocator,
+    readGitHeadDefinition: deps.readGitHeadDefinition,
+    gitHeadSnapshotProvider: gitHeadContentProvider,
     registerSemanticDiffSourceCapture:
       createSourceCaptureRegistrar(contextRegistry),
     unregisterSemanticDiffSourceCapture: (context) =>
       contextRegistry.unregisterSourceCapture(context),
   };
+  if (deps.buildSemanticDiffPresentationArtifacts) {
+    commandDeps.buildSemanticDiffPresentationArtifacts =
+      deps.buildSemanticDiffPresentationArtifacts;
+  }
   return vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
     executeCompareSemanticDiffCommand(commandDeps),
   );
@@ -277,8 +300,22 @@ export const createSemanticDiffSubscriptions = (
     flowOverlayRegistry,
     getSourceSnapshot,
   });
+  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
+  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
+  const gitHeadContentProvider = new VscodeGitHeadContentProvider();
+  const openScheduleAwareExplorerSession = createScheduleAwareExplorerSession({
+    openExplorer,
+    sidecarRegistry,
+    releaseCalendarParent: (parentSessionId) =>
+      calendarSessionRegistry.releaseParent(parentSessionId),
+  });
 
   return [
+    gitHeadContentProvider,
+    vscode.workspace.registerTextDocumentContentProvider(
+      GIT_HEAD_CONTENT_SCHEME,
+      gitHeadContentProvider,
+    ),
     vscode.workspace.registerTextDocumentContentProvider(
       SEMANTIC_DIFF_REPORT_SCHEME,
       reportDocuments,
@@ -287,7 +324,9 @@ export const createSemanticDiffSubscriptions = (
       deps,
       reportDocuments,
       openExplorer,
+      openScheduleAwareExplorerSession,
       contextRegistry,
+      gitHeadContentProvider,
     }),
     vscode.commands.registerCommand(
       COPY_SEMANTIC_DIFF_MARKDOWN_COMMAND,

@@ -4,7 +4,10 @@ import { runTests } from "@vscode/test-web";
 async function main() {
   try {
     const extensionDevelopmentPath = path.resolve(__dirname, "../../");
-    const extensionTestsPath = path.resolve(__dirname, "./suite/webSmoke");
+    const extensionTestsPath = path.resolve(
+      __dirname,
+      "./suite/webSmoke.bundle.js",
+    );
     const testRunnerDataDir = path.resolve(
       extensionDevelopmentPath,
       ".vscode-test-web",

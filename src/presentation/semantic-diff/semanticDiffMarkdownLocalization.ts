@@ -14,6 +14,7 @@ import type {
   SemanticDiffResult,
   SemanticDiffSummary,
   SemanticDiffTarget,
+  SemanticDiffUnitTarget,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
 import { semanticDiffReportText } from "./semanticDiffReportText";
@@ -64,8 +65,13 @@ const attributeCategoryOrder: SemanticDiffAttributeCategory[] = [
 ];
 
 export const isJapanese = (language: string | undefined): boolean =>
-  language?.toLowerCase() === "ja" ||
-  language?.toLowerCase().startsWith("ja-") === true;
+  /^ja(?:-|$)/.test(language?.toLowerCase() ?? "");
+
+const selectLanguageValue = <T>(
+  language: string | undefined,
+  english: T,
+  japanese: T,
+): T => (isJapanese(language) ? japanese : english);
 
 export const label = (english: string, language?: string): string =>
   labelKeys[english]
@@ -77,17 +83,29 @@ export const localizedKind = (value: string, language?: string): string => {
   return translated === `semanticDiff.kind.${value}` ? value : translated;
 };
 
+const englishPluralSuffix = (count: number): string => (count === 1 ? "" : "s");
+
+const englishPluralize = (count: number, countLabel: string): string =>
+  `${count} ${countLabel}${englishPluralSuffix(count)}`;
+
+const japanesePluralize = (count: number, countLabel: string): string =>
+  semanticDiffReportText("generated.count", "ja", {
+    count: String(count),
+    label: countLabel,
+  });
+
 export const pluralize = (
   count: number,
   countLabel: string,
   language?: string,
-): string =>
-  isJapanese(language)
-    ? semanticDiffReportText("generated.count", language, {
-        count: String(count),
-        label: countLabel,
-      })
-    : `${count} ${countLabel}${count === 1 ? "" : "s"}`;
+): string => {
+  const pluralizer = selectLanguageValue(
+    language,
+    englishPluralize,
+    japanesePluralize,
+  );
+  return pluralizer(count, countLabel);
+};
 
 export const escapeMarkdown = (value: string): string =>
   value.replace(/([\\`*_{}[\]()#+!|>])/g, "\\$1");
@@ -103,7 +121,7 @@ export const localizedIdentityStrategy = (
 ): string => semanticDiffReportText(`identity.strategy.${strategy}`, language);
 
 export const optionalText = (value: string | undefined): string =>
-  value && value.length > 0 ? value : "(not specified)";
+  value || "(not specified)";
 
 export const bulletLine = (value: string): string => `- ${value}`;
 
@@ -117,10 +135,9 @@ const describeRelationEndpoint = (
   return `${source} -> ${destination} (${endpoint.type})`;
 };
 
-const describeRelationTarget = (target: SemanticDiffTarget): string => {
-  if (target.kind !== "relation") return "";
-  return describeRelationEndpoint(target.relation);
-};
+const describeRelationTarget = (
+  target: Extract<SemanticDiffTarget, { kind: "relation" }>,
+): string => describeRelationEndpoint(target.relation);
 
 const describeJobGroupTarget = (
   target: Extract<SemanticDiffTarget, { kind: "job-group" }>,
@@ -150,7 +167,7 @@ const describeAttributeTarget = (
   });
 
 type TargetDescriptionRenderer = (
-  target: SemanticDiffTarget,
+  target: SemanticDiffTarget | undefined,
   language?: string,
 ) => string;
 
@@ -185,26 +202,33 @@ const targetDescriptionRenderers: Record<
     ),
 };
 
+const noTargetDescription: TargetDescriptionRenderer = (_target, language) =>
+  semanticDiffReportText("generated.none", language);
+
 export const describeTarget = (
   target: SemanticDiffTarget | undefined,
   language?: string,
 ): string =>
-  target
-    ? targetDescriptionRenderers[target.kind](target, language)
-    : semanticDiffReportText("generated.none", language);
+  (targetDescriptionRenderers[target?.kind ?? ""] ?? noTargetDescription)(
+    target,
+    language,
+  );
+
+type UnitTargetRenderer = (
+  target: SemanticDiffTarget | undefined,
+) => SemanticDiffUnitReference | undefined;
+
+const unitTargetRenderers: Partial<
+  Record<SemanticDiffTarget["kind"], UnitTargetRenderer>
+> = {
+  jobnet: (target) => (target as SemanticDiffUnitTarget).unit,
+  unit: (target) => (target as SemanticDiffUnitTarget).unit,
+};
 
 const unitTarget = (
   target: SemanticDiffTarget | undefined,
-): SemanticDiffUnitReference | undefined => {
-  if (!target) return undefined;
-  switch (target.kind) {
-    case "jobnet":
-    case "unit":
-      return target.unit;
-    default:
-      return undefined;
-  }
-};
+): SemanticDiffUnitReference | undefined =>
+  unitTargetRenderers[target?.kind as SemanticDiffTarget["kind"]]?.(target);
 
 const unitNames = (change: SemanticDiffChange) => ({
   before: unitTarget(change.before),
@@ -241,10 +265,11 @@ const isAttributeTarget = (
 const localizedMovedChange = (names: UnitNames, language?: string): string => {
   const unit =
     names.before?.name ?? names.after?.name ?? localizedKind("unit", language);
-  if (isJapanese(language)) {
-    return semanticDiffReportText("generated.moved", language, { unit });
-  }
-  return `${unit} moved from ${parentPath(names.before?.absolutePath)} to ${parentPath(names.after?.absolutePath)}`;
+  return selectLanguageValue(
+    language,
+    `${unit} moved from ${parentPath(names.before?.absolutePath)} to ${parentPath(names.after?.absolutePath)}`,
+    semanticDiffReportText("generated.moved", language, { unit }),
+  );
 };
 
 const attributeTarget = (
@@ -286,40 +311,62 @@ type UnitChangeRenderer = (
   language?: string,
 ) => string;
 
-const unitChangeRenderers: readonly {
-  matches: (change: SemanticDiffChange) => boolean;
-  render: UnitChangeRenderer;
-}[] = [
-  {
-    matches: (change) => change.confirmationLevel === "candidate",
-    render: (_change, names, language) =>
-      localizedCandidateChange(names, language),
-  },
-  {
-    matches: (change) => change.kind === "renamed",
-    render: (_change, names, language) =>
-      localizedRenamedChange(names, language),
-  },
-  {
-    matches: (change) => change.kind === "moved",
-    render: (_change, names, language) => localizedMovedChange(names, language),
-  },
-  {
-    matches: (change) => change.elementKind === "attribute",
-    render: (change, names, language) =>
-      localizedAttributeChange(change, language),
-  },
-];
+const candidateUnitChangeRenderer: UnitChangeRenderer = (
+  _change,
+  names,
+  language,
+) => localizedCandidateChange(names, language);
+
+const renamedUnitChangeRenderer: UnitChangeRenderer = (
+  _change,
+  names,
+  language,
+) => localizedRenamedChange(names, language);
+
+const movedUnitChangeRenderer: UnitChangeRenderer = (
+  _change,
+  names,
+  language,
+) => localizedMovedChange(names, language);
+
+const attributeUnitChangeRenderer: UnitChangeRenderer = (
+  change,
+  _names,
+  language,
+) => localizedAttributeChange(change, language);
+
+const unitChangeRenderersByConfirmation: Partial<
+  Record<SemanticDiffChange["confirmationLevel"], UnitChangeRenderer>
+> = { candidate: candidateUnitChangeRenderer };
+
+const unitChangeRenderersByKind: Partial<
+  Record<SemanticDiffChange["kind"], UnitChangeRenderer>
+> = {
+  renamed: renamedUnitChangeRenderer,
+  moved: movedUnitChangeRenderer,
+};
+
+const unitChangeRenderersByElement: Partial<
+  Record<SemanticDiffChange["elementKind"], UnitChangeRenderer>
+> = { attribute: attributeUnitChangeRenderer };
+
+const defaultUnitChangeRenderer: UnitChangeRenderer = (
+  change,
+  names,
+  language,
+) => localizedElementChange(change, names, language);
 
 const localizedUnitChange = (
   change: SemanticDiffChange,
   language: string | undefined,
 ): string => {
   const names = unitNames(change);
-  const renderer = unitChangeRenderers.find(({ matches }) => matches(change));
-  return renderer
-    ? renderer.render(change, names, language)
-    : localizedElementChange(change, names, language);
+  const renderer =
+    unitChangeRenderersByConfirmation[change.confirmationLevel] ??
+    unitChangeRenderersByKind[change.kind] ??
+    unitChangeRenderersByElement[change.elementKind] ??
+    defaultUnitChangeRenderer;
+  return renderer(change, names, language);
 };
 
 const localizedRelationChange = (
@@ -351,18 +398,22 @@ const identityReference = (reference: SemanticDiffUnitReference): string =>
 
 const nestedBulletLine = (value: string): string => `    - ${value}`;
 
+const emptyIdentityFieldValue = (
+  field: SemanticDiffIdentityField,
+  language?: string,
+): string =>
+  ({
+    absent: semanticDiffReportText("generated.none", language),
+    present: '""',
+  })[field.presence];
+
 const renderedIdentityFieldValues = (
   field: SemanticDiffIdentityField,
   language?: string,
-): string => {
-  if (field.values.length > 0) {
-    return field.values.map(escapeMarkdown).join(", ");
-  }
-  if (field.presence === "absent") {
-    return semanticDiffReportText("generated.none", language);
-  }
-  return '""';
-};
+): string =>
+  field.values.length > 0
+    ? field.values.map(escapeMarkdown).join(", ")
+    : emptyIdentityFieldValue(field, language);
 
 const identityFieldValue = (
   field: SemanticDiffIdentityField,
@@ -386,14 +437,40 @@ const renderIdentityFields = (
   ),
 ];
 
+type IdentityKeyRenderer = (key: SemanticDiffIdentityExactKey) => string;
+
+const identityKeyRenderers: Record<
+  SemanticDiffIdentityExactKey["kind"],
+  IdentityKeyRenderer
+> = {
+  "job-group": (key) => {
+    const jobGroupKey = key as Extract<
+      SemanticDiffIdentityExactKey,
+      { kind: "job-group" }
+    >;
+    return `${escapeMarkdown(jobGroupKey.kind)}; jobGroupPath=${escapeMarkdown(jobGroupKey.jobGroupPath)}; unitType=${escapeMarkdown(jobGroupKey.unitType)}`;
+  },
+  jobnet: (key) => {
+    const jobnetKey = key as Extract<
+      SemanticDiffIdentityExactKey,
+      { kind: "jobnet" }
+    >;
+    return `${escapeMarkdown(jobnetKey.kind)}; jobGroupRelativePath=${escapeMarkdown(jobnetKey.jobGroupRelativePath)}; unitType=${escapeMarkdown(jobnetKey.unitType)}`;
+  },
+  unit: (key) => {
+    const unitKey = key as Extract<
+      SemanticDiffIdentityExactKey,
+      { kind: "unit" }
+    >;
+    return `${escapeMarkdown(unitKey.kind)}; parentJobnetPath=${escapeMarkdown(unitKey.parentJobnetPath)}; unitName=${escapeMarkdown(unitKey.unitName)}; unitType=${escapeMarkdown(unitKey.unitType)}`;
+  },
+};
+
 const renderIdentityKey = (
   key: SemanticDiffIdentityExactKey,
   language?: string,
 ): string[] => {
-  const details =
-    key.kind === "jobnet"
-      ? `${escapeMarkdown(key.kind)}; jobGroupRelativePath=${escapeMarkdown(key.jobGroupRelativePath)}; unitType=${escapeMarkdown(key.unitType)}`
-      : `${escapeMarkdown(key.kind)}; parentJobnetPath=${escapeMarkdown(key.parentJobnetPath)}; unitName=${escapeMarkdown(key.unitName)}; unitType=${escapeMarkdown(key.unitType)}`;
+  const details = identityKeyRenderers[key.kind](key);
   return [indentedLine(`${label("Key", language)}: ${details}`)];
 };
 
@@ -426,22 +503,186 @@ export const renderIdentityDecisionEvidence = (
       `${label("Rule", language)}: ${escapeMarkdown(localizedIdentityRule(decision.rule, language))} (${escapeMarkdown(decision.rule)})`,
     ),
   ];
-  if (decision.evidence.kind === "exact-key") {
-    return [...lines, ...renderIdentityKey(decision.evidence.key, language)];
-  }
-  lines.push(
-    indentedLine(
-      `${label("Strategy", language)}: ${escapeMarkdown(localizedIdentityStrategy(decision.evidence.strategyId, language))} (${escapeMarkdown(decision.evidence.strategyId)})`,
+  return [
+    ...lines,
+    ...identityEvidenceRenderers[decision.evidence.kind](decision, language),
+  ];
+};
+
+type FingerprintIdentityDecision = Extract<
+  SemanticDiffIdentityDecision,
+  { evidence: { kind: "fingerprint" } }
+>;
+
+const identityCandidateRenderers: Record<
+  SemanticDiffIdentityDecision["status"],
+  (decision: SemanticDiffIdentityDecision, language?: string) => string[]
+> = {
+  exact: () => [],
+  "fingerprint-confirmed": () => [],
+  added: () => [],
+  removed: () => [],
+  candidate: (decision, language) =>
+    renderIdentityCandidates(decision, language),
+};
+
+const renderFingerprintIdentityEvidence = (
+  decision: FingerprintIdentityDecision,
+  language?: string,
+): string[] => [
+  indentedLine(
+    `${label("Strategy", language)}: ${escapeMarkdown(localizedIdentityStrategy(decision.evidence.strategyId, language))} (${escapeMarkdown(decision.evidence.strategyId)})`,
+  ),
+  indentedLine(
+    `${label("Unit type", language)}: ${escapeMarkdown(decision.evidence.unitType)}`,
+  ),
+  ...renderIdentityFields(decision.evidence.fields, language),
+  ...identityCandidateRenderers[decision.status](decision, language),
+];
+
+type IdentityEvidenceRenderer = (
+  decision: SemanticDiffIdentityDecision,
+  language?: string,
+) => string[];
+
+const identityEvidenceRenderers: Record<
+  SemanticDiffIdentityDecision["evidence"]["kind"],
+  IdentityEvidenceRenderer
+> = {
+  "exact-key": (decision, language) =>
+    renderIdentityKey(
+      (
+        decision as Extract<
+          SemanticDiffIdentityDecision,
+          { evidence: { kind: "exact-key" } }
+        >
+      ).evidence.key,
+      language,
     ),
-    indentedLine(
-      `${label("Unit type", language)}: ${escapeMarkdown(decision.evidence.unitType)}`,
+  fingerprint: (decision, language) =>
+    renderFingerprintIdentityEvidence(
+      decision as FingerprintIdentityDecision,
+      language,
     ),
-    ...renderIdentityFields(decision.evidence.fields, language),
+};
+
+type ChangeSide = "Before" | "After";
+
+const changeSides = (
+  change: SemanticDiffChange,
+): readonly [ChangeSide, SemanticDiffTarget | undefined][] => [
+  ["Before", change.before],
+  ["After", change.after],
+];
+
+const relationEndpointForSide = (
+  change: Extract<SemanticDiffChange, { elementKind: "relation" }>,
+  side: ChangeSide,
+): SemanticDiffRelationEndpoint | SemanticDiffRelationReference | null =>
+  side === "Before" ? change.relationPair.before : change.relationPair.after;
+
+const renderRelationSide = (
+  change: Extract<SemanticDiffChange, { elementKind: "relation" }>,
+  side: ChangeSide,
+  language?: string,
+): string[] => {
+  const relationEndpoint = relationEndpointForSide(change, side);
+  if (!relationEndpoint) return [];
+  return [
+    indentedLine(
+      `${label(side, language)}: ${escapeMarkdown(`${localizedKind("relation", language)} ${describeRelationEndpoint(relationEndpoint)}`)}`,
+    ),
+  ];
+};
+
+const renderTargetSide = (
+  target: SemanticDiffTarget | undefined,
+  side: ChangeSide,
+  language?: string,
+): string[] =>
+  target
+    ? [
+        indentedLine(
+          `${label(side, language)}: ${escapeMarkdown(describeTarget(target, language))}`,
+        ),
+      ]
+    : [];
+
+type ChangeSideRenderInput = Readonly<{
+  change: SemanticDiffChange;
+  side: ChangeSide;
+  target: SemanticDiffTarget | undefined;
+  language?: string;
+}>;
+
+type ChangeSideRenderer = (input: ChangeSideRenderInput) => string[];
+
+const relationChangeSideRenderer: ChangeSideRenderer = ({
+  change,
+  side,
+  language,
+}) =>
+  renderRelationSide(
+    change as Extract<SemanticDiffChange, { elementKind: "relation" }>,
+    side,
+    language,
   );
-  if (decision.status === "candidate") {
-    lines.push(...renderIdentityCandidates(decision, language));
-  }
-  return lines;
+
+const targetChangeSideRenderer: ChangeSideRenderer = ({
+  side,
+  target,
+  language,
+}) => renderTargetSide(target, side, language);
+
+const changeSideRenderers: Record<
+  SemanticDiffChange["elementKind"],
+  ChangeSideRenderer
+> = {
+  "job-group": targetChangeSideRenderer,
+  jobnet: targetChangeSideRenderer,
+  unit: targetChangeSideRenderer,
+  relation: relationChangeSideRenderer,
+  attribute: targetChangeSideRenderer,
+};
+
+const renderChangeSide = ({
+  change,
+  side,
+  target,
+  language,
+}: ChangeSideRenderInput): string[] =>
+  changeSideRenderers[change.elementKind]({
+    change,
+    side,
+    target,
+    language,
+  });
+
+const renderChangeSides = (
+  change: SemanticDiffChange,
+  language?: string,
+): string[] =>
+  changeSides(change).flatMap(([side, target]) =>
+    renderChangeSide({ change, side, target, language }),
+  );
+
+const identityDecisionForChange = (
+  change: SemanticDiffChange,
+  identityDecisions: ReadonlyMap<string, SemanticDiffIdentityDecision>,
+): SemanticDiffIdentityDecision | undefined =>
+  identityDecisions.get(
+    (change as Partial<{ identityDecisionId: string }>).identityDecisionId!,
+  );
+
+const renderChangeIdentityEvidence = (
+  change: SemanticDiffChange,
+  language: string | undefined,
+  identityDecisions: ReadonlyMap<string, SemanticDiffIdentityDecision>,
+): string[] => {
+  const identityDecision = identityDecisionForChange(change, identityDecisions);
+  return identityDecision
+    ? renderIdentityDecisionEvidence(identityDecision, language)
+    : [];
 };
 
 export const renderChangeDetails = (
@@ -451,45 +692,49 @@ export const renderChangeDetails = (
     string,
     SemanticDiffIdentityDecision
   > = new Map(),
-): string[] => {
-  const lines = [
-    bulletLine(
-      `[${localizedKind(change.confirmationLevel, language)}] ${localizedKind(change.kind, language)} ${localizedKind(change.elementKind, language)}: ${escapeMarkdown(localizedChangeSummary(change, language))}`,
+): string[] => [
+  bulletLine(
+    `[${localizedKind(change.confirmationLevel, language)}] ${localizedKind(change.kind, language)} ${localizedKind(change.elementKind, language)}: ${escapeMarkdown(localizedChangeSummary(change, language))}`,
+  ),
+  ...renderChangeSides(change, language),
+  ...renderChangeIdentityEvidence(change, language, identityDecisions),
+];
+
+const attributeChangesFor = (
+  changes: SemanticDiffChange[],
+  category: SemanticDiffAttributeCategory,
+): SemanticDiffChange[] =>
+  changes
+    .filter(
+      (change) =>
+        change.elementKind === "attribute" &&
+        change.attributeCategory === category,
+    )
+    .sort((left, right) => left.id.localeCompare(right.id));
+
+type AttributeCategoryRenderInput = Readonly<{
+  changes: SemanticDiffChange[];
+  category: SemanticDiffAttributeCategory;
+  language: string | undefined;
+  identityDecisions: ReadonlyMap<string, SemanticDiffIdentityDecision>;
+}>;
+
+const renderAttributeCategory = ({
+  changes,
+  category,
+  language,
+  identityDecisions,
+}: AttributeCategoryRenderInput): string[] => {
+  const categoryChanges = attributeChangesFor(changes, category);
+  if (categoryChanges.length === 0) return [];
+  return [
+    `### ${semanticDiffReportText(`category.${category}`, language)}`,
+    "",
+    ...categoryChanges.flatMap((change) =>
+      renderChangeDetails(change, language, identityDecisions),
     ),
+    "",
   ];
-  const sides = [
-    ["Before", change.before],
-    ["After", change.after],
-  ] as const;
-  sides.forEach(([side, target]) => {
-    if (change.elementKind === "relation") {
-      const relationEndpoint =
-        side === "Before"
-          ? change.relationPair.before
-          : change.relationPair.after;
-      if (relationEndpoint) {
-        lines.push(
-          indentedLine(
-            `${label(side, language)}: ${escapeMarkdown(`${localizedKind("relation", language)} ${describeRelationEndpoint(relationEndpoint)}`)}`,
-          ),
-        );
-      }
-    } else if (target) {
-      lines.push(
-        indentedLine(
-          `${label(side, language)}: ${escapeMarkdown(describeTarget(target, language))}`,
-        ),
-      );
-    }
-  });
-  const identityDecision =
-    change.elementKind !== "job-group" && change.elementKind !== "relation"
-      ? identityDecisions.get(change.identityDecisionId)
-      : undefined;
-  if (identityDecision) {
-    lines.push(...renderIdentityDecisionEvidence(identityDecision, language));
-  }
-  return lines;
 };
 
 export const renderAttributeChanges = (
@@ -500,26 +745,15 @@ export const renderAttributeChanges = (
     SemanticDiffIdentityDecision
   > = new Map(),
 ): string[] => {
-  const attributeChanges = changes.filter(
-    (change) => change.elementKind === "attribute",
+  const lines = attributeCategoryOrder.flatMap((category) =>
+    renderAttributeCategory({
+      changes,
+      category,
+      language,
+      identityDecisions,
+    }),
   );
-  if (attributeChanges.length === 0) {
-    return [bulletLine(label("None", language))];
-  }
-  return attributeCategoryOrder.flatMap((category) => {
-    const categoryChanges = attributeChanges
-      .filter((change) => change.attributeCategory === category)
-      .sort((left, right) => left.id.localeCompare(right.id));
-    if (categoryChanges.length === 0) return [];
-    return [
-      `### ${semanticDiffReportText(`category.${category}`, language)}`,
-      "",
-      ...categoryChanges.flatMap((change) =>
-        renderChangeDetails(change, language, identityDecisions),
-      ),
-      "",
-    ];
-  });
+  return lines.length === 0 ? [bulletLine(label("None", language))] : lines;
 };
 
 type SemanticDiffConfirmationReasonCode =
@@ -532,12 +766,13 @@ type ConfirmationTextContext = {
   beforeValues: string[];
 };
 
-const confirmationUnitName = (
-  target: SemanticDiffTarget,
-): string | undefined =>
-  target.kind === "unit" || target.kind === "jobnet"
-    ? target.unit.name
-    : undefined;
+const confirmationUnitName = (target: SemanticDiffTarget): string | undefined =>
+  (
+    ({
+      unit: target as SemanticDiffUnitTarget,
+      jobnet: target as SemanticDiffUnitTarget,
+    })[target.kind] as SemanticDiffUnitTarget | undefined
+  )?.unit.name;
 
 const confirmationTextContext = (
   item: SemanticDiffConfirmationRequiredItem,
@@ -618,20 +853,24 @@ const confirmationContent = (
   context: ConfirmationTextContext,
   language?: string,
 ): string =>
-  isJapanese(language)
-    ? semanticDiffReportText("generated.confirmation", language, {
-        unit: context.unitName ?? localizedKind("unit", language),
-        parameter: context.parameterKey,
-      })
-    : englishConfirmationContent[item.reasonCode](context);
+  selectLanguageValue(
+    language,
+    englishConfirmationContent[item.reasonCode](context),
+    semanticDiffReportText("generated.confirmation", language, {
+      unit: context.unitName ?? localizedKind("unit", language),
+      parameter: context.parameterKey,
+    }),
+  );
 
 const confirmationRationale = (
   item: SemanticDiffConfirmationRequiredItem,
   language?: string,
 ): string =>
-  isJapanese(language)
-    ? semanticDiffReportText("generated.confirmationRationale", language)
-    : englishConfirmationRationale[item.reasonCode];
+  selectLanguageValue(
+    language,
+    englishConfirmationRationale[item.reasonCode],
+    semanticDiffReportText("generated.confirmationRationale", language),
+  );
 
 const renderRelatedTargets = (
   targets: SemanticDiffTarget[],
@@ -649,9 +888,11 @@ const renderConstraintLabel = (
   constraint: SemanticDiffConstraint,
   language?: string,
 ): string =>
-  isJapanese(language)
-    ? semanticDiffReportText("generated.constraint", language)
-    : localizedConstraint(constraint);
+  selectLanguageValue(
+    language,
+    localizedConstraint(constraint),
+    semanticDiffReportText("generated.constraint", language),
+  );
 
 const renderConstraintLines = (
   constraints: SemanticDiffConstraint[],
@@ -684,41 +925,70 @@ export const renderConfirmationRequiredItem = (
   ];
 };
 
-export const renderScheduleRunChange = (
+const scheduleSummaryKeys: Record<
+  SemanticDiffScheduleRunChange["kind"],
+  | "generated.scheduleChanged"
+  | "generated.scheduleAdded"
+  | "generated.scheduleRemoved"
+> = {
+  "changed-time": "generated.scheduleChanged",
+  added: "generated.scheduleAdded",
+  removed: "generated.scheduleRemoved",
+};
+
+const localizedScheduleRunSummary = (
   change: SemanticDiffScheduleRunChange,
   language?: string,
-): string[] => {
-  const summary = isJapanese(language)
-    ? semanticDiffReportText(
-        change.kind === "changed-time"
-          ? "generated.scheduleChanged"
-          : change.kind === "added"
-            ? "generated.scheduleAdded"
-            : "generated.scheduleRemoved",
-        language,
-        { path: change.unitPath, date: change.date },
-      )
-    : scheduleRunSummary(change);
-  const lines = [
-    bulletLine(
-      `[${localizedKind(change.kind, language)}] ${escapeMarkdown(summary)}`,
-    ),
-  ];
-  const sides = [
-    ["Before", change.before],
-    ["After", change.after],
-  ] as const;
-  sides.forEach(([side, run]) => {
-    if (run) {
-      lines.push(
+): string =>
+  selectLanguageValue(
+    language,
+    scheduleRunSummary(change),
+    semanticDiffReportText(scheduleSummaryKeys[change.kind], language, {
+      path: change.unitPath,
+      date: change.date,
+    }),
+  );
+
+const scheduleRunSides = (
+  change: SemanticDiffScheduleRunChange,
+): readonly [
+  ChangeSide,
+  NonNullable<SemanticDiffScheduleRunChange["before"]> | null,
+][] => [
+  ["Before", change.before],
+  ["After", change.after],
+];
+
+const renderScheduleRunSide = (
+  side: ChangeSide,
+  run: NonNullable<SemanticDiffScheduleRunChange["before"]> | null,
+  language?: string,
+): string[] =>
+  run
+    ? [
         indentedLine(
           `${label(side, language)}: ${escapeMarkdown(`${run.date} ${run.time} ${label("rule", language)} ${run.rule}`)}`,
         ),
-      );
-    }
-  });
-  return lines;
-};
+      ]
+    : [];
+
+const renderScheduleRunSides = (
+  change: SemanticDiffScheduleRunChange,
+  language?: string,
+): string[] =>
+  scheduleRunSides(change).flatMap(([side, run]) =>
+    renderScheduleRunSide(side, run, language),
+  );
+
+export const renderScheduleRunChange = (
+  change: SemanticDiffScheduleRunChange,
+  language?: string,
+): string[] => [
+  bulletLine(
+    `[${localizedKind(change.kind, language)}] ${escapeMarkdown(localizedScheduleRunSummary(change, language))}`,
+  ),
+  ...renderScheduleRunSides(change, language),
+];
 
 type SemanticDiffConstraint =
   SemanticDiffConfirmationRequiredItem["constraints"][number];
@@ -745,13 +1015,31 @@ const constraintTextByCode: Record<
 const localizedConstraint = (constraint: SemanticDiffConstraint): string =>
   constraintTextByCode[constraint.code](constraint);
 
-const scheduleRunSummary = (change: SemanticDiffScheduleRunChange): string => {
-  if (change.kind === "changed-time") {
-    return `${change.unitPath} run on ${change.date} changed from ${change.before?.time ?? ""} to ${change.after?.time ?? ""}`;
-  }
+type ScheduleRunSummaryRenderer = (
+  change: SemanticDiffScheduleRunChange,
+) => string;
+
+const changedTimeScheduleRunSummary: ScheduleRunSummaryRenderer = (change) =>
+  `${change.unitPath} run on ${change.date} changed from ${change.before?.time ?? ""} to ${change.after?.time ?? ""}`;
+
+const singleScheduleRunSummary = (
+  change: SemanticDiffScheduleRunChange,
+): string => {
   const run = change.kind === "removed" ? change.before : change.after;
   return `${change.unitPath} run on ${change.date} ${run?.time ?? ""} ${change.kind}`.trim();
 };
+
+const scheduleRunSummaryRenderers: Record<
+  SemanticDiffScheduleRunChange["kind"],
+  ScheduleRunSummaryRenderer
+> = {
+  "changed-time": changedTimeScheduleRunSummary,
+  added: singleScheduleRunSummary,
+  removed: singleScheduleRunSummary,
+};
+
+const scheduleRunSummary = (change: SemanticDiffScheduleRunChange): string =>
+  scheduleRunSummaryRenderers[change.kind](change);
 
 const hasFindings = (result: SemanticDiffResult): boolean =>
   [

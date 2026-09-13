@@ -1,0 +1,917 @@
+diff --git a/lib/superstring/dynamic-variables.js b/lib/superstring/dynamic-variables.js
+index d026487c70597aa6e5f59023da8c5f4293761bf3..5422e021d66bf26add0560abc3af090613339b74 100644
+--- a/lib/superstring/dynamic-variables.js
++++ b/lib/superstring/dynamic-variables.js
+@@ -1,4 +1,4 @@
+-var faker = require('@faker-js/faker/locale/en'),
++var faker = require('@faker-js/faker').faker,
+     uuid = require('uuid'),
+ 
+     // locale list generated from: https://github.com/chromium/chromium/blob/master/ui/base/l10n/l10n_util.cc
+@@ -73,10 +73,282 @@ var faker = require('@faker-js/faker/locale/en'),
+         '/var/spool',
+         '/var/tmp',
+         '/var/yp'
+-    ],
++    ];
+ 
+-    // generators for $random* variables
+-    dynamicGenerators = {
++// Keep the dynamic-variable generator contract stable while adapting the
++// legacy method table used by this package to Faker 10's module layout.
++function fakerGenerator (fakerModule, method) {
++    return function () {
++        return fakerModule[method].apply(fakerModule, arguments);
++    };
++}
++
++function legacyCoordinate (method, defaultMax, args) {
++    var max = args.length > 0 && args[0] ? args[0] : defaultMax,
++        min = args.length > 1 && args[1] ? args[1] : -defaultMax,
++        precision = args.length > 2 && args[2] ? args[2] : 4;
++
++    return faker.location[method]({ max: max, min: min, precision: precision }).toFixed(precision);
++}
++
++function legacyLatitude () {
++    return legacyCoordinate('latitude', 90, arguments);
++}
++
++function legacyLongitude () {
++    return legacyCoordinate('longitude', 180, arguments);
++}
++
++function legacyDate (method, rangeName, args) {
++    var options = {};
++
++    if (args.length === 0) {
++        return faker.date[method]();
++    }
++
++    if (args[0]) {
++        options[rangeName] = args[0];
++    }
++    if (args.length > 1 && typeof args[1] !== 'undefined') {
++        options.refDate = args[1];
++    }
++
++    return faker.date[method](options);
++}
++
++function legacyDatePast () {
++    return legacyDate('past', 'years', arguments);
++}
++
++function legacyDateFuture () {
++    return legacyDate('future', 'years', arguments);
++}
++
++function legacyDateRecent () {
++    return legacyDate('recent', 'days', arguments);
++}
++
++function legacyFinanceAmount () {
++    var args = arguments,
++        options;
++
++    if (args.length === 0) {
++        return faker.finance.amount();
++    }
++
++    options = {
++        min: args[0] || 0,
++        max: args[1] || 1000,
++        dec: typeof args[2] === 'undefined' ? 2 : args[2],
++        symbol: args[3] || ''
++    };
++    if (options.min < 0 || options.max < 0) {
++        return options.symbol + 0;
++    }
++    if (args.length > 4 && typeof args[4] !== 'undefined') {
++        options.autoFormat = args[4];
++    }
++
++    return faker.finance.amount(options);
++}
++
++function legacyFinanceIban () {
++    var args = arguments,
++        options = {};
++
++    if (args.length === 0) {
++        return faker.finance.iban();
++    }
++    if (args.length > 0 && typeof args[0] !== 'undefined') {
++        options.formatted = !!args[0];
++    }
++    if (args.length > 1 && args[1]) {
++        options.countryCode = args[1];
++    }
++
++    return faker.finance.iban(options);
++}
++
++function maskedCreditCard () {
++    var args = arguments,
++        length = args.length > 0 && args[0] ? Number(args[0]) : 4,
++        parens = args.length > 1 && (args[1] === null || !!args[1]),
++        ellipsis = args.length > 2 && (args[2] === null || !!args[2]),
++        mask;
++
++    length = length > 0 ? Math.ceil(length) : 0;
++    mask = new Array(length + 1).join('#');
++    if (ellipsis) {
++        mask = '...' + mask;
++    }
++    if (parens) {
++        mask = '(' + mask + ')';
++    }
++
++    return mask.replace(/#/g, function () {
++        return faker.number.int(9).toString();
++    });
++}
++
++function legacyEmail (method, args) {
++    var options = {};
++
++    if (args.length === 0) {
++        return faker.internet[method]();
++    }
++    if (args[0]) {
++        options.firstName = args[0];
++    }
++    if (args.length > 1 && args[1]) {
++        options.lastName = args[1];
++    }
++    if (method === 'email' && args.length > 2 && args[2]) {
++        options.provider = args[2];
++    }
++
++    return faker.internet[method](options);
++}
++
++function legacyEmailAddress () {
++    return legacyEmail('email', arguments);
++}
++
++function legacyExampleEmail () {
++    return legacyEmail('exampleEmail', arguments);
++}
++
++function legacyUsername () {
++    var args = arguments,
++        options = {};
++
++    if (args.length === 0) {
++        return faker.internet.username();
++    }
++    if (args[0]) {
++        options.firstName = args[0];
++    }
++    if (args.length > 1 && args[1]) {
++        options.lastName = args[1];
++    }
++
++    return faker.internet.username(options);
++}
++
++function legacyPassword () {
++    var args = arguments,
++        options = {};
++
++    if (args.length === 0) {
++        return faker.internet.password();
++    }
++    options.length = args[0] || 15;
++    if (args.length > 1 && typeof args[1] !== 'undefined') {
++        options.memorable = args[1];
++    }
++    if (args.length > 2 && args[2] !== null && typeof args[2] !== 'undefined') {
++        options.pattern = typeof args[2] === 'string' ? new RegExp(args[2]) : args[2];
++    }
++    if (args.length > 3 && args[3] !== null && typeof args[3] !== 'undefined') {
++        options.prefix = args[3];
++    }
++
++    return faker.internet.password(options);
++}
++
++function legacyFullName () {
++    var args = arguments,
++        options = {};
++
++    if (args.length === 0) {
++        return faker.person.fullName();
++    }
++    if (args[0]) {
++        options.firstName = args[0];
++    }
++    if (args.length > 1 && args[1]) {
++        options.lastName = args[1];
++    }
++    if (args.length > 2 && typeof args[2] === 'number') {
++        options.sex = args[2] === 0 ? 'male' : 'female';
++    }
++
++    return faker.person.fullName(options);
++}
++
++function legacyHexColor () {
++    var args = arguments,
++        redBase = args.length > 0 && args[0] ? args[0] : 0,
++        greenBase = args.length > 1 && args[1] ? args[1] : 0,
++        blueBase = args.length > 2 && args[2] ? args[2] : 0,
++        red = Math.floor((faker.number.int(256) + redBase) / 2).toString(16),
++        green = Math.floor((faker.number.int(256) + greenBase) / 2).toString(16),
++        blue = Math.floor((faker.number.int(256) + blueBase) / 2).toString(16);
++
++    return '#' + (red.length === 1 ? '0' : '') + red +
++        (green.length === 1 ? '0' : '') + green +
++        (blue.length === 1 ? '0' : '') + blue;
++}
++
++function legacyImageUrl (args, category, generic) {
++    var width = args.length > 0 && args[0] ? args[0] : 640,
++        height = args.length > 1 && args[1] ? args[1] : 480,
++        randomize = generic ? args[3] : args[2],
++        https = generic ? args[4] : undefined,
++        protocol = https === true ? 'https://' : 'http://',
++        url = protocol + 'placeimg.com/' + width + '/' + height;
++
++    if (typeof category !== 'undefined') {
++        url += '/' + category;
++    }
++    if (randomize) {
++        url += '?' + faker.number.int();
++    }
++
++    return url;
++}
++
++function legacyImageUrlGenerator () {
++    return legacyImageUrl(arguments, arguments[2], true);
++}
++
++function legacyCategoryImage (category) {
++    return function () {
++        return legacyImageUrl(arguments, category, false);
++    };
++}
++
++function legacyImageDataUri () {
++    var args = arguments,
++        options = {};
++
++    if (args.length === 0) {
++        return faker.image.dataUri();
++    }
++    if (typeof args[0] !== 'undefined') {
++        options.width = args[0];
++    }
++    if (typeof args[1] !== 'undefined') {
++        options.height = args[1];
++    }
++    if (typeof args[2] !== 'undefined') {
++        options.color = args[2];
++    }
++
++    return faker.image.dataUri(options);
++}
++
++function randomCompanySuffix () {
++    return faker.helpers.arrayElement(['Inc', 'and Sons', 'LLC', 'Group']);
++}
++
++function phoneNumberWithoutExtension () {
++    return '!##-!##-####'.replace(/[!#]/g, function (symbol) {
++        return symbol === '!' ? faker.number.int({ min: 2, max: 9 }) : faker.number.int(9);
++    });
++}
++
++// generators for $random* variables
++var dynamicGenerators = {
+         $guid: {
+             description: 'A v4 style guid',
+             generator: function () {
+@@ -105,21 +377,19 @@ var faker = require('@faker-js/faker/locale/en'),
+             }
+         },
+ 
+-        // faker.phone.phoneNumber returns phone number with or without
+-        // extension randomly. this only returns a phone number without extension.
++        // This strips the optional extension emitted by Faker's phone generator.
+         $randomPhoneNumber: {
+             description: 'A random 10-digit phone number',
+             generator: function () {
+-                return faker.phone.phoneNumberFormat(0);
++                return phoneNumberWithoutExtension();
+             }
+         },
+ 
+-        // faker.phone.phoneNumber returns phone number with or without
+-        // extension randomly. this only returns a phone number with extension.
++        // Prefix the extension to the extension-free phone number.
+         $randomPhoneNumberExt: {
+             description: 'A random phone number with extension (12 digits)',
+             generator: function () {
+-                return faker.datatype.number({ min: 1, max: 99 }) + '-' + faker.phone.phoneNumberFormat(0);
++                return faker.number.int({ min: 1, max: 99 }) + '-' + phoneNumberWithoutExtension();
+             }
+         },
+ 
+@@ -128,7 +398,7 @@ var faker = require('@faker-js/faker/locale/en'),
+         $randomLocale: {
+             description: 'A random two-letter language code (ISO 639-1)',
+             generator: function () {
+-                return faker.random.arrayElement(LOCALES);
++                return faker.helpers.arrayElement(LOCALES);
+             }
+         },
+ 
+@@ -138,11 +408,11 @@ var faker = require('@faker-js/faker/locale/en'),
+             description: 'Some random words',
+             generator: function () {
+                 var words = [],
+-                    count = faker.datatype.number({ min: 2, max: 5 }),
++                    count = faker.number.int({ min: 2, max: 5 }),
+                     i;
+ 
+                 for (i = 0; i < count; i++) {
+-                    words.push(faker.random.word());
++                    words.push(faker.word.sample());
+                 }
+ 
+                 return words.join(' ');
+@@ -162,460 +432,460 @@ var faker = require('@faker-js/faker/locale/en'),
+         $randomDirectoryPath: {
+             description: 'A random directory path',
+             generator: function () {
+-                return faker.random.arrayElement(DIRECTORY_PATHS);
++                return faker.helpers.arrayElement(DIRECTORY_PATHS);
+             }
+         },
+ 
+         $randomCity: {
+             description: 'A random city name',
+-            generator: faker.address.city
++            generator: fakerGenerator(faker.location, 'city')
+         },
+         $randomStreetName: {
+             description: 'A random street name',
+-            generator: faker.address.streetName
++            generator: fakerGenerator(faker.location, 'street')
+         },
+         $randomStreetAddress: {
+             description: 'A random street address (e.g. 1234 Main Street)',
+-            generator: faker.address.streetAddress
++            generator: fakerGenerator(faker.location, 'streetAddress')
+         },
+         $randomCountry: {
+             description: 'A random country',
+-            generator: faker.address.country
++            generator: fakerGenerator(faker.location, 'country')
+         },
+         $randomCountryCode: {
+             description: 'A random 2-letter country code (ISO 3166-1 alpha-2)',
+-            generator: faker.address.countryCode
++            generator: fakerGenerator(faker.location, 'countryCode')
+         },
+         $randomLatitude: {
+             description: 'A random latitude coordinate',
+-            generator: faker.address.latitude
++            generator: legacyLatitude
+         },
+         $randomLongitude: {
+             description: 'A random longitude coordinate',
+-            generator: faker.address.longitude
++            generator: legacyLongitude
+         },
+ 
+         $randomColor: {
+             description: 'A random color',
+-            generator: faker.commerce.color
++            generator: fakerGenerator(faker.color, 'human')
+         },
+         $randomDepartment: {
+             description: 'A random commerce category (e.g. electronics, clothing)',
+-            generator: faker.commerce.department
++            generator: fakerGenerator(faker.commerce, 'department')
+         },
+         $randomProductName: {
+             description: 'A random product name (e.g. handmade concrete tuna)',
+-            generator: faker.commerce.productName
++            generator: fakerGenerator(faker.commerce, 'productName')
+         },
+         $randomProductAdjective: {
+             description: 'A random product adjective (e.g. tasty, eco-friendly)',
+-            generator: faker.commerce.productAdjective
++            generator: fakerGenerator(faker.commerce, 'productAdjective')
+         },
+         $randomProductMaterial: {
+             description: 'A random product material (e.g. steel, plastic, leather)',
+-            generator: faker.commerce.productMaterial
++            generator: fakerGenerator(faker.commerce, 'productMaterial')
+         },
+         $randomProduct: {
+             description: 'A random product (e.g. shoes, table, chair)',
+-            generator: faker.commerce.product
++            generator: fakerGenerator(faker.commerce, 'product')
+         },
+ 
+         $randomCompanyName: {
+             description: 'A random company name',
+-            generator: faker.company.companyName
++            generator: fakerGenerator(faker.company, 'name')
+         },
+         $randomCompanySuffix: {
+             description: 'A random company suffix (e.g. Inc, LLC, Group)',
+-            generator: faker.company.companySuffix
++            generator: randomCompanySuffix
+         },
+         $randomCatchPhrase: {
+             description: 'A random catchphrase',
+-            generator: faker.company.catchPhrase
++            generator: fakerGenerator(faker.company, 'catchPhrase')
+         },
+         $randomBs: {
+             description: 'A random phrase of business speak',
+-            generator: faker.company.bs
++            generator: fakerGenerator(faker.company, 'buzzPhrase')
+         },
+         $randomCatchPhraseAdjective: {
+             description: 'A random catchphrase adjective',
+-            generator: faker.company.catchPhraseAdjective
++            generator: fakerGenerator(faker.company, 'catchPhraseAdjective')
+         },
+         $randomCatchPhraseDescriptor: {
+             description: 'A random catchphrase descriptor',
+-            generator: faker.company.catchPhraseDescriptor
++            generator: fakerGenerator(faker.company, 'catchPhraseDescriptor')
+         },
+         $randomCatchPhraseNoun: {
+             description: 'Randomly generates a catchphrase noun',
+-            generator: faker.company.catchPhraseNoun
++            generator: fakerGenerator(faker.company, 'catchPhraseNoun')
+         },
+         $randomBsAdjective: {
+             description: 'A random business speak adjective',
+-            generator: faker.company.bsAdjective
++            generator: fakerGenerator(faker.company, 'buzzAdjective')
+         },
+         $randomBsBuzz: {
+             description: 'A random business speak buzzword',
+-            generator: faker.company.bsBuzz
++            generator: fakerGenerator(faker.company, 'buzzVerb')
+         },
+         $randomBsNoun: {
+             description: 'A random business speak noun',
+-            generator: faker.company.bsNoun
++            generator: fakerGenerator(faker.company, 'buzzNoun')
+         },
+ 
+         $randomDatabaseColumn: {
+             description: 'A random database column name (e.g. updatedAt, token, group)',
+-            generator: faker.database.column
++            generator: fakerGenerator(faker.database, 'column')
+         },
+         $randomDatabaseType: {
+             description: 'A random database type (e.g. tiny int, double, point)',
+-            generator: faker.database.type
++            generator: fakerGenerator(faker.database, 'type')
+         },
+         $randomDatabaseCollation: {
+             description: 'A random database collation (e.g. cp1250_bin)',
+-            generator: faker.database.collation
++            generator: fakerGenerator(faker.database, 'collation')
+         },
+         $randomDatabaseEngine: {
+             description: 'A random database engine (e.g. Memory, Archive, InnoDB)',
+-            generator: faker.database.engine
++            generator: fakerGenerator(faker.database, 'engine')
+         },
+ 
+         $randomDatePast: {
+             description: 'A random past datetime',
+-            generator: faker.date.past
++            generator: legacyDatePast
+         },
+         $randomDateFuture: {
+             description: 'A random future datetime',
+-            generator: faker.date.future
++            generator: legacyDateFuture
+         },
+         $randomDateRecent: {
+             description: 'A random recent datetime',
+-            generator: faker.date.recent
++            generator: legacyDateRecent
+         },
+         $randomMonth: {
+             description: 'A random month',
+-            generator: faker.date.month
++            generator: fakerGenerator(faker.date, 'month')
+         },
+         $randomWeekday: {
+             description: 'A random weekday',
+-            generator: faker.date.weekday
++            generator: fakerGenerator(faker.date, 'weekday')
+         },
+ 
+         $randomBankAccount: {
+             description: 'A random 8-digit bank account number',
+-            generator: faker.finance.account
++            generator: fakerGenerator(faker.finance, 'accountNumber')
+         },
+         $randomBankAccountName: {
+             description: 'A random bank account name (e.g. savings account, checking account)',
+-            generator: faker.finance.accountName
++            generator: fakerGenerator(faker.finance, 'accountName')
+         },
+         $randomCreditCardMask: {
+             description: 'A random masked credit card number',
+-            generator: faker.finance.mask
++            generator: maskedCreditCard
+         },
+         $randomPrice: {
+             description: 'A random price between 0.00 and 1000.00',
+-            generator: faker.finance.amount
++            generator: legacyFinanceAmount
+         },
+         $randomTransactionType: {
+             description: 'A random transaction type (e.g. invoice, payment, deposit)',
+-            generator: faker.finance.transactionType
++            generator: fakerGenerator(faker.finance, 'transactionType')
+         },
+         $randomCurrencyCode: {
+             description: 'A random 3-letter currency code (ISO-4217)',
+-            generator: faker.finance.currencyCode
++            generator: fakerGenerator(faker.finance, 'currencyCode')
+         },
+         $randomCurrencyName: {
+             description: 'A random currency name',
+-            generator: faker.finance.currencyName
++            generator: fakerGenerator(faker.finance, 'currencyName')
+         },
+         $randomCurrencySymbol: {
+             description: 'A random currency symbol',
+-            generator: faker.finance.currencySymbol
++            generator: fakerGenerator(faker.finance, 'currencySymbol')
+         },
+         $randomBitcoin: {
+             description: 'A random bitcoin address',
+-            generator: faker.finance.bitcoinAddress
++            generator: fakerGenerator(faker.finance, 'bitcoinAddress')
+         },
+         $randomBankAccountIban: {
+             description: 'A random 15-31 character IBAN (International Bank Account Number)',
+-            generator: faker.finance.iban
++            generator: legacyFinanceIban
+         },
+         $randomBankAccountBic: {
+             description: 'A random BIC (Bank Identifier Code)',
+-            generator: faker.finance.bic
++            generator: fakerGenerator(faker.finance, 'bic')
+         },
+ 
+         $randomAbbreviation: {
+             description: 'A random abbreviation',
+-            generator: faker.hacker.abbreviation
++            generator: fakerGenerator(faker.hacker, 'abbreviation')
+         },
+         $randomAdjective: {
+             description: 'A random adjective',
+-            generator: faker.hacker.adjective
++            generator: fakerGenerator(faker.hacker, 'adjective')
+         },
+         $randomNoun: {
+             description: 'A random noun',
+-            generator: faker.hacker.noun
++            generator: fakerGenerator(faker.hacker, 'noun')
+         },
+         $randomVerb: {
+             description: 'A random verb',
+-            generator: faker.hacker.verb
++            generator: fakerGenerator(faker.hacker, 'verb')
+         },
+         $randomIngverb: {
+             description: 'A random verb ending in “-ing”',
+-            generator: faker.hacker.ingverb
++            generator: fakerGenerator(faker.hacker, 'ingverb')
+         },
+         $randomPhrase: {
+             description: 'A random phrase',
+-            generator: faker.hacker.phrase
++            generator: fakerGenerator(faker.hacker, 'phrase')
+         },
+ 
+         $randomAvatarImage: {
+             description: 'A random avatar image',
+             generator: () => {
+                 // ref: https://github.com/faker-js/faker/blob/v8.4.1/src/modules/image/index.ts#L61
+-                return faker.random.arrayElement([
++                return faker.helpers.arrayElement([
+                     // eslint-disable-next-line max-len
+-                    `https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/${faker.datatype.number(1249)}.jpg`,
+-                    `https://avatars.githubusercontent.com/u/${faker.datatype.number(100000000)}`
++                    `https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/${faker.number.int({ max: 1249 })}.jpg`,
++                    `https://avatars.githubusercontent.com/u/${faker.number.int({ max: 100000000 })}`
+                 ]);
+             }
+         },
+         $randomImageUrl: {
+             description: 'A URL for a random image',
+-            generator: faker.image.imageUrl
++            generator: legacyImageUrlGenerator
+         },
+         $randomAbstractImage: {
+             description: 'A URL for a random abstract image',
+-            generator: faker.image.abstract
++            generator: legacyCategoryImage('abstract')
+         },
+         $randomAnimalsImage: {
+             description: 'A URL for a random animal image',
+-            generator: faker.image.animals
++            generator: legacyCategoryImage('animals')
+         },
+         $randomBusinessImage: {
+             description: 'A URL for a random stock business image',
+-            generator: faker.image.business
++            generator: legacyCategoryImage('business')
+         },
+         $randomCatsImage: {
+             description: 'A URL for a random cat image',
+-            generator: faker.image.cats
++            generator: legacyCategoryImage('cats')
+         },
+         $randomCityImage: {
+             description: 'A URL for a random city image',
+-            generator: faker.image.city
++            generator: legacyCategoryImage('city')
+         },
+         $randomFoodImage: {
+             description: 'A URL for a random food image',
+-            generator: faker.image.food
++            generator: legacyCategoryImage('food')
+         },
+         $randomNightlifeImage: {
+             description: 'A URL for a random nightlife image',
+-            generator: faker.image.nightlife
++            generator: legacyCategoryImage('nightlife')
+         },
+         $randomFashionImage: {
+             description: 'A URL for a random fashion image',
+-            generator: faker.image.fashion
++            generator: legacyCategoryImage('fashion')
+         },
+         $randomPeopleImage: {
+             description: 'A URL for a random image of a person',
+-            generator: faker.image.people
++            generator: legacyCategoryImage('people')
+         },
+         $randomNatureImage: {
+             description: 'A URL for a random nature image',
+-            generator: faker.image.nature
++            generator: legacyCategoryImage('nature')
+         },
+         $randomSportsImage: {
+             description: 'A URL for a random sports image',
+-            generator: faker.image.sports
++            generator: legacyCategoryImage('sports')
+         },
+         $randomTransportImage: {
+             description: 'A URL for a random transportation image',
+-            generator: faker.image.transport
++            generator: legacyCategoryImage('transport')
+         },
+         $randomImageDataUri: {
+             description: 'A random image data URI',
+-            generator: faker.image.dataUri
++            generator: legacyImageDataUri
+         },
+ 
+         $randomEmail: {
+             description: 'A random email address',
+-            generator: faker.internet.email
++            generator: legacyEmailAddress
+         },
+         $randomExampleEmail: {
+             description: 'A random email address from an “example” domain (e.g. ben@example.com)',
+-            generator: faker.internet.exampleEmail
++            generator: legacyExampleEmail
+         },
+         $randomUserName: {
+             description: 'A random username',
+-            generator: faker.internet.userName
++            generator: legacyUsername
+         },
+         $randomProtocol: {
+             description: 'A random internet protocol',
+-            generator: faker.internet.protocol
++            generator: fakerGenerator(faker.internet, 'protocol')
+         },
+         $randomUrl: {
+             description: 'A random URL',
+-            generator: faker.internet.url
++            generator: fakerGenerator(faker.internet, 'url')
+         },
+         $randomDomainName: {
+             description: 'A random domain name (e.g. gracie.biz, trevor.info)',
+-            generator: faker.internet.domainName
++            generator: fakerGenerator(faker.internet, 'domainName')
+         },
+         $randomDomainSuffix: {
+             description: 'A random domain suffix (e.g. .com, .net, .org)',
+-            generator: faker.internet.domainSuffix
++            generator: fakerGenerator(faker.internet, 'domainSuffix')
+         },
+         $randomDomainWord: {
+             description: 'A random unqualified domain name (a name with no dots)',
+-            generator: faker.internet.domainWord
++            generator: fakerGenerator(faker.internet, 'domainWord')
+         },
+         $randomIP: {
+             description: 'A random IPv4 address',
+-            generator: faker.internet.ip
++            generator: fakerGenerator(faker.internet, 'ipv4')
+         },
+         $randomIPV6: {
+             description: 'A random IPv6 address',
+-            generator: faker.internet.ipv6
++            generator: fakerGenerator(faker.internet, 'ipv6')
+         },
+         $randomUserAgent: {
+             description: 'A random user agent',
+-            generator: faker.internet.userAgent
++            generator: fakerGenerator(faker.internet, 'userAgent')
+         },
+         $randomHexColor: {
+             description: 'A random hex value',
+-            generator: faker.internet.color
++            generator: legacyHexColor
+         },
+         $randomMACAddress: {
+             description: 'A random MAC address',
+-            generator: faker.internet.mac
++            generator: fakerGenerator(faker.internet, 'mac')
+         },
+         $randomPassword: {
+             description: 'A random 15-character alpha-numeric password',
+-            generator: faker.internet.password
++            generator: legacyPassword
+         },
+ 
+         $randomLoremWord: {
+             description: 'A random word of lorem ipsum text',
+-            generator: faker.lorem.word
++            generator: fakerGenerator(faker.lorem, 'word')
+         },
+         $randomLoremWords: {
+             description: 'Some random words of lorem ipsum text',
+-            generator: faker.lorem.words
++            generator: fakerGenerator(faker.lorem, 'words')
+         },
+         $randomLoremSentence: {
+             description: 'A random sentence of lorem ipsum text',
+-            generator: faker.lorem.sentence
++            generator: fakerGenerator(faker.lorem, 'sentence')
+         },
+         $randomLoremSlug: {
+             description: 'A random lorem ipsum URL slug',
+-            generator: faker.lorem.slug
++            generator: fakerGenerator(faker.lorem, 'slug')
+         },
+         $randomLoremSentences: {
+             description: 'A random 2-6 sentences of lorem ipsum text',
+-            generator: faker.lorem.sentences
++            generator: fakerGenerator(faker.lorem, 'sentences')
+         },
+         $randomLoremParagraph: {
+             description: 'A random paragraph of lorem ipsum text',
+-            generator: faker.lorem.paragraph
++            generator: fakerGenerator(faker.lorem, 'paragraph')
+         },
+         $randomLoremParagraphs: {
+             description: '3 random paragraphs of lorem ipsum text',
+-            generator: faker.lorem.paragraphs
++            generator: fakerGenerator(faker.lorem, 'paragraphs')
+         },
+         $randomLoremText: {
+             description: 'A random amount of lorem ipsum text',
+-            generator: faker.lorem.text
++            generator: fakerGenerator(faker.lorem, 'text')
+         },
+         $randomLoremLines: {
+             description: '1-5 random lines of lorem ipsum',
+-            generator: faker.lorem.lines
++            generator: fakerGenerator(faker.lorem, 'lines')
+         },
+ 
+         $randomFirstName: {
+             description: 'A random first name',
+-            generator: faker.name.firstName
++            generator: fakerGenerator(faker.person, 'firstName')
+         },
+         $randomLastName: {
+             description: 'A random last name',
+-            generator: faker.name.lastName
++            generator: fakerGenerator(faker.person, 'lastName')
+         },
+         $randomFullName: {
+             description: 'A random first and last name',
+-            generator: faker.name.findName
++            generator: legacyFullName
+         },
+         $randomJobTitle: {
+             description: 'A random job title (e.g. senior software developer)',
+-            generator: faker.name.jobTitle
++            generator: fakerGenerator(faker.person, 'jobTitle')
+         },
+         $randomNamePrefix: {
+             description: 'A random name prefix (e.g. Mr., Mrs., Dr.)',
+-            generator: faker.name.prefix
++            generator: fakerGenerator(faker.person, 'prefix')
+         },
+         $randomNameSuffix: {
+             description: 'A random name suffix (e.g. Jr., MD, PhD)',
+-            generator: faker.name.suffix
++            generator: fakerGenerator(faker.person, 'suffix')
+         },
+         $randomJobDescriptor: {
+             description: 'A random job descriptor (e.g., senior, chief, corporate, etc.)',
+-            generator: faker.name.jobDescriptor
++            generator: fakerGenerator(faker.person, 'jobDescriptor')
+         },
+         $randomJobArea: {
+             description: 'A random job area (e.g. branding, functionality, usability)',
+-            generator: faker.name.jobArea
++            generator: fakerGenerator(faker.person, 'jobArea')
+         },
+         $randomJobType: {
+             description: 'A random job type (e.g. supervisor, manager, coordinator, etc.)',
+-            generator: faker.name.jobType
++            generator: fakerGenerator(faker.person, 'jobType')
+         },
+ 
+         $randomUUID: {
+             description: 'A random 36-character UUID',
+-            generator: faker.datatype.uuid
++            generator: fakerGenerator(faker.string, 'uuid')
+         },
+         $randomBoolean: {
+             description: 'A random boolean value (true/false)',
+-            generator: faker.datatype.boolean
++            generator: fakerGenerator(faker.datatype, 'boolean')
+         },
+         $randomWord: {
+             description: 'A random word',
+-            generator: faker.random.word
++            generator: fakerGenerator(faker.word, 'sample')
+         },
+         $randomAlphaNumeric: {
+             description: 'A random alpha-numeric character',
+-            generator: faker.random.alphaNumeric
++            generator: fakerGenerator(faker.string, 'alphanumeric')
+         },
+ 
+         $randomFileName: {
+             description: 'A random file name (includes uncommon extensions)',
+-            generator: faker.system.fileName
++            generator: fakerGenerator(faker.system, 'fileName')
+         },
+         $randomCommonFileName: {
+             description: 'A random file name',
+-            generator: faker.system.commonFileName
++            generator: fakerGenerator(faker.system, 'commonFileName')
+         },
+         $randomMimeType: {
+             description: 'A random MIME type',
+-            generator: faker.system.mimeType
++            generator: fakerGenerator(faker.system, 'mimeType')
+         },
+         $randomCommonFileType: {
+             description: 'A random, common file type (e.g., video, text, image, etc.)',
+-            generator: faker.system.commonFileType
++            generator: fakerGenerator(faker.system, 'commonFileType')
+         },
+         $randomCommonFileExt: {
+             description: 'A random, common file extension (.doc, .jpg, etc.)',
+-            generator: faker.system.commonFileExt
++            generator: fakerGenerator(faker.system, 'commonFileExt')
+         },
+         $randomFileType: {
+             description: 'A random file type (includes uncommon file types)',
+-            generator: faker.system.fileType
++            generator: fakerGenerator(faker.system, 'fileType')
+         },
+         $randomFileExt: {
+             description: 'A random file extension (includes uncommon extensions)',
+-            generator: faker.system.fileExt
++            generator: fakerGenerator(faker.system, 'fileExt')
+         },
+         $randomSemver: {
+             description: 'A random semantic version number',
+-            generator: faker.system.semver
++            generator: fakerGenerator(faker.system, 'semver')
+         }
+     };
+ 

@@ -63,6 +63,26 @@ const exactIdentityDecision = (
   },
 });
 
+const exactJobGroupIdentityDecision = (
+  id: string,
+  before: AjsUnit,
+  after: AjsUnit,
+): SemanticDiffIdentityDecision => ({
+  id,
+  status: "exact",
+  rule: "exact-key",
+  before: [unitReference(before)],
+  after: [unitReference(after)],
+  evidence: {
+    kind: "exact-key",
+    key: {
+      kind: "job-group",
+      jobGroupPath: "nested/nest_jg",
+      unitType: before.unitType,
+    },
+  },
+});
+
 const buildResult = (
   overrides: Partial<SemanticDiffResult> = {},
 ): SemanticDiffResult => ({
@@ -437,6 +457,72 @@ suite("Render Semantic Diff Markdown", () => {
 
     assert.ok(report.includes("- Result: no semantic changes detected."));
     assert.strictEqual(report.includes("Identity evidence"), false);
+  });
+
+  test("renders job-group path and type in exact identity evidence", () => {
+    const before = unit({
+      id: "/root/nested/nest_jg",
+      name: "nest_jg",
+      absolutePath: "/root/nested/nest_jg",
+      unitType: "g",
+    });
+    const after = unit({
+      id: "after-nest-jg",
+      name: "nest_jg",
+      absolutePath: "/root/nested/nest_jg",
+      unitType: "g",
+    });
+    const identityDecisionId = "identity:test:job-group";
+    const report = renderSemanticDiffMarkdown(
+      buildResult({
+        changes: [
+          {
+            id: "unit:changed:/root/nested/nest_jg",
+            kind: "changed",
+            elementKind: "unit",
+            confirmationLevel: "confirmed",
+            identityDecisionId,
+            before: { kind: "unit", unit: unitReference(before) },
+            after: { kind: "unit", unit: unitReference(after) },
+            relationPair: null,
+          },
+        ],
+        identityDecisions: [
+          exactJobGroupIdentityDecision(identityDecisionId, before, after),
+        ],
+      }),
+    );
+    const japanese = renderSemanticDiffMarkdown(
+      buildResult({
+        changes: [
+          {
+            id: "unit:changed:/root/nested/nest_jg",
+            kind: "changed",
+            elementKind: "unit",
+            confirmationLevel: "confirmed",
+            identityDecisionId,
+            before: { kind: "unit", unit: unitReference(before) },
+            after: { kind: "unit", unit: unitReference(after) },
+            relationPair: null,
+          },
+        ],
+        identityDecisions: [
+          exactJobGroupIdentityDecision(identityDecisionId, before, after),
+        ],
+      }),
+      "ja-JP",
+    );
+
+    assert.ok(
+      report.includes(
+        "Key: job-group; jobGroupPath=nested/nest_jg; unitType=g",
+      ),
+    );
+    assert.ok(
+      japanese.includes(
+        "キー: job-group; jobGroupPath=nested/nest_jg; unitType=g",
+      ),
+    );
   });
 
   test("localizes generated wording while preserving raw JP1/AJS values and parser messages", () => {

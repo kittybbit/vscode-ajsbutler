@@ -334,29 +334,75 @@ export const compareIdentityFields = (
     compareStringArrays(left.values, right.values),
   ]);
 
+type SemanticDiffJsonExactKey = Extract<
+  SemanticDiffJsonIdentityEvidence,
+  { kind: "exact-key" }
+>["key"];
+
+type ExactKeyComparator = (
+  left: SemanticDiffJsonExactKey,
+  right: SemanticDiffJsonExactKey,
+) => number;
+
+const exactKeyComparators: Record<
+  SemanticDiffJsonExactKey["kind"],
+  ExactKeyComparator
+> = {
+  "job-group": (left, right) => {
+    const leftKey = left as Extract<
+      SemanticDiffJsonExactKey,
+      { kind: "job-group" }
+    >;
+    const rightKey = right as Extract<
+      SemanticDiffJsonExactKey,
+      { kind: "job-group" }
+    >;
+    return firstDifference([
+      compareOrdinal(leftKey.jobGroupPath, rightKey.jobGroupPath),
+      compareOrdinal(leftKey.unitType, rightKey.unitType),
+    ]);
+  },
+  jobnet: (left, right) => {
+    const leftKey = left as Extract<
+      SemanticDiffJsonExactKey,
+      { kind: "jobnet" }
+    >;
+    const rightKey = right as Extract<
+      SemanticDiffJsonExactKey,
+      { kind: "jobnet" }
+    >;
+    return firstDifference([
+      compareOrdinal(
+        leftKey.jobGroupRelativePath,
+        rightKey.jobGroupRelativePath,
+      ),
+      compareOrdinal(leftKey.unitType, rightKey.unitType),
+    ]);
+  },
+  unit: (left, right) => {
+    const leftKey = left as Extract<SemanticDiffJsonExactKey, { kind: "unit" }>;
+    const rightKey = right as Extract<
+      SemanticDiffJsonExactKey,
+      { kind: "unit" }
+    >;
+    return firstDifference([
+      compareOrdinal(leftKey.parentJobnetPath, rightKey.parentJobnetPath),
+      compareOrdinal(leftKey.unitName, rightKey.unitName),
+      compareOrdinal(leftKey.unitType, rightKey.unitType),
+    ]);
+  },
+};
+
 const compareExactKeyEvidence = (
   left: Extract<SemanticDiffJsonIdentityEvidence, { kind: "exact-key" }>,
   right: Extract<SemanticDiffJsonIdentityEvidence, { kind: "exact-key" }>,
-): number => {
-  const keyKindComparison = compareOrdinal(left.key.kind, right.key.kind);
-  if (keyKindComparison !== 0) return keyKindComparison;
-  if (left.key.kind === "jobnet") {
-    const rightKey = right.key as typeof left.key;
-    return firstDifference([
-      compareOrdinal(
-        left.key.jobGroupRelativePath,
-        rightKey.jobGroupRelativePath,
-      ),
-      compareOrdinal(left.key.unitType, rightKey.unitType),
-    ]);
-  }
-  const rightKey = right.key as typeof left.key;
-  return firstDifference([
-    compareOrdinal(left.key.parentJobnetPath, rightKey.parentJobnetPath),
-    compareOrdinal(left.key.unitName, rightKey.unitName),
-    compareOrdinal(left.key.unitType, rightKey.unitType),
+): number =>
+  firstDifference([
+    compareOrdinal(left.key.kind, right.key.kind),
+    left.key.kind === right.key.kind
+      ? exactKeyComparators[left.key.kind](left.key, right.key)
+      : 0,
   ]);
-};
 
 const compareFingerprintEvidence = (
   left: Extract<SemanticDiffJsonIdentityEvidence, { kind: "fingerprint" }>,
