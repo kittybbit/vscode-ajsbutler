@@ -356,6 +356,21 @@ Findings and Completion Approval is recorded above; focused completion commit
   - `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`
   - `webpack.config.js`
 
+### Slice 3 Formatting Correction Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-14; approved in current conversation
+- Basis: independent `implementation-reviewer` verdict Ready; Findings none;
+  Main applies the user's automatic no-findings slice approval instruction.
+- Approved scope: format-only final view test correction identified by Feature
+  Exit, with its approval evidence. No assertions, fixtures or behavior change;
+  whitespace-insensitive diff is empty. Preserve completion commit `ffb92f1e`.
+- Validation: full `rtk pnpm run qlty:check` reports No issues; diff check passed.
+- Approved paths:
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+- Commit status: Pending; separate focused corrective completion commit.
+
 ## Closure Approval
 
 - Status: Pending

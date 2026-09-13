@@ -281,7 +281,9 @@ suite("Schedule impact calendar view", () => {
       name: "同一性候補",
     });
     assert.ok(candidateRegion.textContent?.includes("ID: candidate-before-1"));
-    assert.ok(candidateRegion.textContent?.includes("ソースユニット名: before-job"));
+    assert.ok(
+      candidateRegion.textContent?.includes("ソースユニット名: before-job"),
+    );
     assert.ok(changedItem?.textContent?.includes("ソース変更参照: change-1:0"));
     const legend = view.getByTestId("schedule-impact-calendar-legend");
     assert.strictEqual(
