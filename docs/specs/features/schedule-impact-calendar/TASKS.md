@@ -5,13 +5,13 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Slice 2 implementation and completion are complete under the reviewed
-  and approved full-plan gate. Slice 1 is completion-committed at `51a8ae4a`;
-  its runtime and focused test changes remain preserved. Slice 2 is
-  completion-committed at `b9cee633`.
-- Approved or active slice: none for this dependency run. Slices 1 and 2 are
-  complete and committed; public Slice 3 remains planned, not active, and out
-  of scope.
+- Mode: Replanning Mode for public Slice 3 after the comparison-workflow
+  dependency completed on the current `main`. Slice 1 is
+  completion-committed at `51a8ae4a`; Slice 2 is completion-committed at
+  `b9cee633`. Their runtime and focused test changes remain preserved.
+- Approved or active slice: none. Slices 1 and 2 are complete and committed;
+  the targeted Slice 3 plan revision is pending independent plan review and
+  the plan gate. No implementation work is active in this replan.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -52,16 +52,25 @@
   surface, Slice 2/3 work, or UI is introduced. The third replan includes the
   prepared and validated `SPECS.md` clarification for source-unit-aware
   duplicate pairing; it requires no result/report/JSON schema change.
+- Replanning trigger: current `main` commit `8e6922f8` completed the
+  `semantic-diff-comparison-workflow` feature and its dependency remediation.
+  The old dependency-run-only Slice 3 state is stale: production workflow now
+  selects file or Git HEAD and an optional half-open period in
+  `runFileComparisonWorkflow`, builds `SemanticDiffPresentationArtifacts` in
+  `buildWorkflowArtifacts`, and opens the parent through
+  `openScheduleAwareExplorerSession`. Slice 3 must consume that completed
+  artifact handoff instead of treating the workflow as unfinished.
 - The plan remains three slices: pure comparison artifacts and sidecar
   projection; internal command/bootstrap session and transport foundation;
   then the public accessible timeline and documentation.
 - Current boundaries remain: one identity pass and one schedule evaluation,
   immutable `{ result, summary }` context, host-private sidecar, no Explorer
   transport change, and no schedule recalculation or candidate merging.
-- Public calendar exposure remains gated by the completion-committed
-  `semantic-diff-comparison-workflow` and a period-bearing context. Slices 1
-  and 2 are complete and committed on this branch, including Slice 2 at
-  `b9cee633`; public Slice 3 is planned, not active, and remains unreachable.
+- Public calendar exposure is now gated by the workflow's successful
+  evaluated-period artifact (`scheduleImpact.kind === "available"`) and the
+  public Slice 3 implementation. Slices 1 and 2 are complete and committed
+  on this branch, including Slice 2 at `b9cee633`; Slice 3 is planned, not
+  active, and remains unavailable until its public action and view exist.
 - The original independent plan review, first replan review, and second
   replan review are complete with `Ready` verdicts and no Findings. The third
   package has final independent `plan-reviewer` `Ready` review with no
@@ -77,11 +86,11 @@
 - This file is the sole plan and current-state owner for this feature. Other
   feature folders inherited from the base branch remain outside this feature's
   scope.
-- `docs/specs/roadmap.md` now records the calendar as a Wave 4 item and its
-  public entry condition as the completion-committed
-  `semantic-diff-comparison-workflow` plus a period-bearing context. The
-  dependency chain remains internal Calendar Slices 1–2 → workflow → public
-  Calendar Slice 3.
+- `docs/specs/roadmap.md` records the calendar as a Wave 4 item whose public
+  entry condition is now satisfied by completion commit `8e6922f8`: the
+  comparison workflow and period-bearing artifact handoff are available.
+  The dependency chain remains internal Calendar Slices 1–2 → completed
+  workflow → public Calendar Slice 3.
 - Keep this file focused on implementation slices, approval, validation, risk,
   production readiness, and Feature Exit readiness.
 
@@ -90,22 +99,25 @@
 - Status: Slice 1 implementation is complete under approved third-replan
   commit `11615026` and completion-committed at `51a8ae4a`; Slice 2
   implementation is complete and completion-committed at `b9cee633` under
-  the approved full-plan gate.
+  the approved full-plan gate. Slice 3 is the next planned implementation
+  slice after this targeted dependency replan.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
   timeline, outcome/run filtering, localization, bounded rendering, workflow
   period-bearing action gating, validation, and durable user documentation.
 - Review status: Original plan, first Replanning package, second Replanning
-  package, and third targeted package are `Ready` with no Findings.
+  package, and third targeted package are `Ready` with no Findings. The
+  targeted Slice 3 dependency reconciliation is pending independent review.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
   plan/replan commit `11615026` is complete; implementation review is `Ready`
   with no Findings, Completion Approval is recorded, and the focused
-  completion commit `51a8ae4a` is complete.
-- Active implementation slice: None for this dependency run; Slice 3 remains
-  planned, not active, and out of scope.
+  completion commit `51a8ae4a` is complete. The revised Slice 3 activation
+  scope has no new Human Approval recorded in this replan.
+- Active implementation slice: None; Slice 3 is planned and pending the
+  revised plan gate.
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused commit after the
   plan gate.
@@ -138,6 +150,7 @@
   - `src/test/suite/semanticDiffSchedule.test.ts`
   - `src/test/suite/semanticDiffContracts.test.ts`
 - Newly approved Replanning delta paths:
+
   - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
   - `src/application/semantic-diff/semanticDiffScheduleImpact.ts`
   - `src/test/suite/semanticDiffScheduleRules.test.ts`
@@ -189,6 +202,29 @@ reviewed third targeted paths above. The focused plan/replan commit
 Findings and Completion Approval is recorded above; focused completion commit
 `51a8ae4a` is complete.
 
+### Slice 3 Replan Human Approval
+
+- Status: Approved
+- Approved at: 2026-09-14; approved in current conversation
+- Basis: independent `plan-reviewer` re-review verdict `Ready for approval`;
+  Findings none. Main applies the user's current automatic no-findings
+  slice approval authorization; final batch human review remains pending.
+- Approved scope: exactly Slice 3, `Expose The Accessible Localized
+  Schedule-Impact Timeline`, including the corrected workflow guards and
+  additive host-private Explorer action adapter described in its planned
+  paths and approval scope. Slices 1 and 2 and upstream remediation remain
+  preserved. No public message union, result/report/JSON schema, schedule
+  meaning, workflow input, package contribution, or compatibility change.
+- Approved paths for this focused plan/replan commit:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+- Implementation paths: only the exact paths and calendar helper directory
+  listed under Slice 3 `Planned paths and approval scope`, plus these selected
+  feature evidence files. No unlisted runtime/test/config changes.
+- Review status: Ready; both prior Findings resolved; no remaining Findings.
+- Plan commit status: Pending; implementation starts after the focused commit.
+- Active implementation slice: Slice 3 after that focused commit.
+
 ## Completion Approval
 
 - Status: Approved
@@ -232,8 +268,8 @@ Findings and Completion Approval is recorded above; focused completion commit
   bootstrap composition, exact-context sidecar registry, calendar-aware
   Explorer companion, internal calendar session/panel/transport foundation,
   browser-safe bridge, lifecycle and transport tests, and current validation
-  evidence. Slice 3 is not active and remains out of scope for this dependency
-  run.
+  evidence. Slice 3 was not active and remained out of scope at that
+  completion gate; its dependency is now reconciled below.
 - Approved paths:
   - `src/bootstrap/extension/scheduleImpactSidecarRegistry.ts`
   - `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts`
@@ -287,17 +323,28 @@ Findings and Completion Approval is recorded above; focused completion commit
   action/message transport. This feature uses the existing Explorer session
   creation contract through a calendar-owned companion adapter, and adds one
   host-private schedule action and child panel without changing the Explorer
-  predecessor or adding a new hook, message union member, or existing action.
-- Required predecessor for the public action: the completion-committed
-  `semantic-diff-comparison-workflow` contract supplies the period-bearing
-  context and owns comparison sources, period input, and default viewer
-  handoff. Slice 3 remains unreachable until this dependency is complete.
+  predecessor or adding a new public hook, message union member, or existing
+  action. A host-private callback adapter is part of this Slice 3 integration.
+  The Explorer trigger uses the existing `SemanticDiffExplorerActionId`
+  allocator and `sde-action-*` validation namespace; the child calendar's
+  `sdc-calendar-action-*` handle remains private to calendar transport and
+  never enters the Explorer request/response validation set.
+- Required predecessor for the public action: completed workflow commit
+  `8e6922f8` supplies comparison sources, period input, source capture, and
+  default Explorer handoff. In production its
+  `runFileComparisonWorkflow`/`buildWorkflowArtifacts` path yields an
+  evaluated `SemanticDiffPresentationArtifacts` only after a valid period.
+  A no-period selection continues through comparison and opens the ordinary
+  Explorer with `scheduleImpact.kind === "unavailable"` and reason
+  `not-requested`; invalid workflow input fails in
+  `selectWorkflowPeriodStep` before artifact building or Explorer opening.
+  Slice 3 consumes the evaluated handoff and does not change the workflow.
 - Dependency gate: Slice 1 requires the schedule-semantics and
   structured-output completion commits; Slice 2 additionally requires the
-  Explorer session creation contract; Slice 3 additionally requires the
-  `semantic-diff-comparison-workflow` completion commit and a period-bearing
-  context. If any predecessor changes the consumed contract, Main must route
-  another Replanning before implementation.
+  Explorer session creation contract; Slice 3 additionally consumes the
+  completion-committed workflow at `8e6922f8` and its successful evaluated
+  period artifact. If any consumed predecessor contract changes, Main must
+  route another Replanning before implementation.
 - Compatibility boundary: preserve VS Code `^1.75.0`, browser-safe shared
   code, JP1/AJS3 v13 evidence limits, JSON version 1, existing reports,
   Explorer, Flow, source, copy behavior, and desktop/web parity.
@@ -558,17 +605,24 @@ no runs`, `Partial`, and `Uncalculated`. Run-state options are exactly
   so reopen resolves the same immutable pair without rerunning comparison or
   schedule projection. Late child work after close is ignored. The sidecar is
   not copied through or added to the Explorer transport.
-- The available calendar action resolves the sidecar through the host-private
-  parent Explorer registry and creates one child calendar session from the
-  parent session. An unavailable/invalid result creates no registry entry or
-  calendar panel/action, while the normal Explorer parent remains available.
+- The available calendar action allocates a compatible Explorer trigger ID
+  from the existing `sde-action-*` allocator, registers it in the parent
+  action membership only when the sidecar is available, and dispatches its
+  host-private callback before normal metadata actions. The callback resolves
+  the sidecar through the host-private parent Explorer registry by exact
+  context identity and creates or reveals one child calendar session from the
+  parent session. An unavailable artifact input creates no calendar action or
+  panel while the ordinary Explorer parent remains available; invalid workflow
+  input never reaches this registration/open path.
 - Parent and child identities are separate: the existing immutable Explorer
   `parentSessionId` and parent `disposeEpoch` remain Explorer-owned; the
   calendar registry allocates a fresh opaque `calendarSessionId`, a private
-  `calendarActionId`, and a child `calendarEpoch`. The action callback carries
-  these IDs in a host-private type and is not accepted by the Explorer's
-  public message union. A parent owns its child IDs; the calendar registry
-  owns child epoch and request state; neither registry may mutate the other's
+  child `calendarActionId` (`sdc-calendar-action-*`), and a child
+  `calendarEpoch`. The Explorer trigger remains an `sde-action-*` action in
+  the existing public action request shape, while the callback and child
+  IDs remain host-private and the child ID is never accepted by the Explorer
+  action membership. A parent owns its child IDs; the calendar registry owns
+  child epoch and request state; neither registry may mutate the other's
   epoch.
 - Calendar transport is a closed union separate from Explorer transport.
   Requests are exactly `{type: "ready" | "refresh", sessionId,
@@ -655,9 +709,9 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   no-change guard covered by tests.
 - Documentation: add the durable schedule-impact use case, index it, update
   README and CHANGELOG only when Slice 3 makes the view observable, and run
-  Markdown lint. The roadmap already records the Wave 4 placement and the
-  completion-committed `semantic-diff-comparison-workflow` plus
-  period-bearing-context entry condition; this feature preserves that wording.
+  Markdown lint. The roadmap records the Wave 4 placement and the completed
+  workflow/period-bearing artifact entry condition; this feature consumes that
+  wording without editing the roadmap.
 
 ## Implementation Slices
 
@@ -1040,9 +1094,9 @@ scheduleProjectionFacts })`, its exactly-one output-context call, the internal
   is included. A public
   DTO/result/report/JSON, schedule-meaning,
   identity-policy, or scope change remains a Main-owned Replanning trigger.
-- Recommended route: Slices 1 and 2 are completion-committed; Main may
-  continue the comparison workflow dependency. Public Slice 3 remains
-  blocked until that workflow is complete and a period-bearing context exists.
+- Recommended route: Slices 1 and 2 are completion-committed. The comparison
+  workflow dependency is now complete at `8e6922f8`; Main may route the
+  revised public Slice 3 plan through independent review and the plan gate.
 
 ### Slice 2: Build The Internal Calendar Session And Transport Foundation
 
@@ -1165,8 +1219,8 @@ BuildSemanticDiffReportDataInput & { options?: Pick<CompareSemanticDiffOptions,
   without recalculation, and late child work cannot mutate or resurrect a
   session.
   Host action resolution never sends the sidecar through the Explorer wire;
-  parent/child IDs and calendar action/request IDs are
-  distinct; owner registries enforce epochs; exact closed
+  parent/child IDs and internal calendar action/request IDs are distinct;
+  owner registries enforce epochs; exact closed
   request/host/failure/close envelopes reject extra/missing/wrong/non-finite
   fields; every encoded calendar message
   is checked at and over 8 MiB; one open panel is reused; child disposal
@@ -1250,25 +1304,32 @@ tsconfig.json --noEmit`, `rtk pnpm run test:compile`, focused transport/
   complexity/duplication findings), markdown lint, and `git diff --check` are
   the current validation evidence.
   Completion Approval and the focused completion commit are recorded above;
-  the next route for this dependency run is the comparison workflow.
+  the completed comparison workflow is now the dependency consumed by public
+  Slice 3.
 - Out of Scope: public Explorer action, candidate/root UI, timeline/filter/
   legend, React rendering, documentation, package contributions, Flow/source
   changes, persistence, and schedule calculation.
 
 ### Slice 3: Expose The Accessible Localized Schedule-Impact Timeline
 
-- Status: Planned; blocked on completion-committed Slice 2,
-  `semantic-diff-comparison-workflow`, a period-bearing context, and Human
-  Approval. The public action remains hidden/disabled and the documented view
-  is temporarily unreachable until the workflow dependency is complete.
-- Scope: expose one additive `Schedule impact` action from the existing
-  Explorer surface; resolve the host-private sidecar into a child calendar
-  session; add localized accessible timeline/status sections, separate root
-  outcome and run-state filters, explicit root-scope transition labels in the
-  filters/legend without treating them as run states, candidate before/after
-  display, bounded virtualization, desktop/web parity, webpack bundle wiring,
-  and durable user documentation. Explorer's public message contract remains
-  unchanged.
+- Status: Planned; Slice 1 and Slice 2 are complete, and the
+  `semantic-diff-comparison-workflow` dependency is satisfied by `8e6922f8`.
+  This targeted Slice 3 revision is pending independent plan review and the
+  plan gate; no implementation slice is active.
+- Scope: consume the completed workflow's successful evaluated-period
+  `SemanticDiffPresentationArtifacts` through the existing
+  `openScheduleAwareExplorerSession` companion, then expose one additive
+  `Schedule impact` action from the existing Explorer surface. Resolve the
+  host-private sidecar into a child calendar session; add localized accessible
+  timeline/status sections, separate root outcome and run-state filters,
+  explicit root-scope transition labels in the filters/legend without treating
+  them as run states, candidate before/after display, bounded virtualization,
+  desktop/web parity, webpack bundle wiring, and durable user documentation.
+  A no-period workflow selection opens the ordinary Explorer with unavailable/
+  not-requested impact and no calendar action or panel. Invalid workflow input
+  fails before comparison, artifact construction, or Explorer opening. Direct
+  adapter invalid-period fixtures remain separate evidence for unavailable
+  impact. Explorer's existing public message contract remains unchanged.
 - User / Domain Value: reviewers can inspect exact supported schedule effects,
   valid no-runs, partial roots, explicit uncalculated issues, and ambiguous
   candidates in the selected period without confusing them or losing facts.
@@ -1282,15 +1343,39 @@ tsconfig.json --noEmit`, `rtk pnpm run test:compile`, focused transport/
     `scheduleImpactCalendarAccessibility.ts`, and filter/focus helpers) for
     canonical timeline, candidate section, outcome/issue sections, filters,
     keyboard, announcements, high contrast, reflow, and virtualization.
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`,
+    `semanticDiffExplorerPanelTypes.ts`, `semanticDiffExplorerPanelHtml.ts`,
+    `semanticDiffExplorerPanelInstall.ts`, `semanticDiffExplorerPanelActions.ts`,
+    and `semanticDiffExplorerPanelRequests.ts`,
+    `semanticDiffExplorerPanelTransport.ts`,
+    `semanticDiffExplorerRegistry.ts`, and
+    `semanticDiffExplorerPanelLifecycle.ts`, plus
+    `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`,
+    `semanticDiffExplorerHostState.ts`, `semanticDiffExplorerHostMessageState.ts`,
+    and `semanticDiffExplorerView.tsx` for the host-private action ID,
+    button, callback, focus recovery, and announcement. Allocate the trigger
+    with the existing `actionIdAllocator` (`sde-action-*`), register it only
+    for an available sidecar in the host action membership/registry, validate
+    it through the existing session-scoped `actionIds`, and dispatch the private
+    calendar callback before normal source/flow/output metadata dispatch.
+    Resolve the sidecar by the immutable context object, open or reveal the
+    child through `openScheduleImpactCalendarPanel`, and preserve the existing
+    Explorer message union and action-result envelope. The calendar session's
+    `sdc-calendar-action-*` ID must remain outside this membership.
+  - `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts` and
+    `scheduleImpactCalendarPanelRuntime.ts` to mount the calendar bundle while
+    retaining the existing child-session/transport lifecycle.
   - `src/resource/i18n/scheduleImpactCalendar.ts`,
     `src/resource/i18n/scheduleImpactCalendar_en.ts`, and
     `src/resource/i18n/scheduleImpactCalendar_ja.ts` for labels, badges,
     errors, and English fallback; `displayLanguage` comes only from the
     immutable parent session.
-  - `src/bootstrap/extension/semanticDiffWiring.ts` for the existing Explorer
-    action adapter, period-bearing-context gate, and host-private sidecar
-    resolution. No change to `semantic-diff-comparison-workflow` is planned in
-    this feature; its completion commit is an explicit dependency.
+  - `src/bootstrap/extension/semanticDiffWiring.ts` and
+    `src/bootstrap/extension/createScheduleAwareExplorerSession.ts` for the
+    existing Explorer action adapter, evaluated-artifact gate, and
+    host-private sidecar/panel resolution. No change to the completed
+    comparison workflow is planned in this feature; `8e6922f8` is an explicit
+    dependency guard.
     `webpack.config.js` for the additive `scheduleImpactCalendar` web entry.
     `package.json` remains unchanged and is checked by
     `src/test/suite/packageManifest.test.ts` for no command/menu/activation/
@@ -1299,19 +1384,41 @@ tsconfig.json --noEmit`, `rtk pnpm run test:compile`, focused transport/
     `src/test/suite/scheduleImpactCalendarView.test.tsx`,
     `src/test/suite/scheduleImpactCalendarAccessibility.test.tsx`,
     `src/test/suite/scheduleImpactCalendarLocalization.test.ts`, and
-    `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts` for projection,
-    DOM/keyboard/a11y/locale/action/session/desktop-web coverage.
+    `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+    `src/test/suite/semanticDiffExplorerRegistry.test.ts`, and
+    `src/test/suite/semanticDiffExplorerPanel.test.ts` for projection,
+    DOM/keyboard/a11y/locale/action/session/desktop-web coverage, compatible
+    `sde-action-*` registration/validation, private-before-normal dispatch,
+    and lifecycle cleanup; extend
+    `src/test/suite/semanticDiffCommand.test.ts` and
+    `src/test/suite/semanticDiffCommandScheduleImpact.test.ts` only as
+    workflow-consumption guards for exact evaluated artifact, no-period
+    ordinary-Explorer/unavailable behavior, invalid-input pre-comparison
+    failure, and direct adapter invalid-period states.
+    `src/test/suite/semanticDiffWiring.test.ts` and
+    `src/test/suite/createScheduleAwareExplorerSession.test.ts` cover the
+    completed workflow handoff and exact immutable-context sidecar/parent/
+    child action lifecycle, including dispose, reopen, stale, failure, and
+    unavailable cases.
   - `docs/requirements/use-cases/uc-present-schedule-impact.md` (new durable
     use case), `docs/requirements/use-cases/README.md` (index), `README.md`,
     and `CHANGELOG.md` when externally observable behavior is delivered.
-- Acceptance: with a completion-committed
-  `semantic-diff-comparison-workflow` and period-bearing context, one action
-  opens/reveals one child session without re-running. When the period is
-  absent, the action is hidden or disabled and the documented view is
-  temporarily unreachable; no registration or panel is created. After the
-  workflow dependency is available, the action resolves the retained sidecar
-  through the Slice 2 companion. Exact period, paths, IDs, side states,
-  duplicate occurrences, candidate
+- Acceptance: with the completed workflow at `8e6922f8`, a successful
+  `runFileComparisonWorkflow` valid-period selection produces an evaluated
+  artifact, registers one compatible `sde-action-*` trigger for that parent,
+  and one click opens or reveals one child session without re-running. The
+  trigger is accepted by the existing session-scoped Explorer validator and
+  is handled by the private calendar callback before source/flow/output
+  metadata dispatch; its result uses the existing action-result envelope.
+  With a no-period selection, the workflow continues through comparison and
+  opens the ordinary Explorer with unavailable/not-requested impact, without
+  registering or exposing a calendar trigger or creating a calendar panel.
+  With invalid workflow input, `selectWorkflowPeriodStep` fails before
+  comparison, artifact construction, or Explorer opening; direct adapter
+  invalid-period fixtures remain separate evidence for unavailable impact.
+  The available action resolves the retained sidecar by exact immutable
+  context identity through the Slice 2 companion and opens/reveals the child.
+  Exact period, paths, IDs, side states, duplicate occurrences, candidate
   groups, composite source-change references, timeline effects, `Valid no
 runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
   both their supported timeline runs and issue section. Both-root pairs,
@@ -1324,7 +1431,10 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
   to English without changing sort/date/IDs. Empty, zero-only, mixed, invalid,
   malformed, stale, oversized, disposed, reopened, candidate-only, and
   10,000-entry cases have explicit accessible outcomes with no silent
-  merge/truncation.
+  merge/truncation. Existing workflow tests prove source/period selection,
+  exact `options.scheduleComparisonPeriod` forwarding, cancellation before
+  comparison, and the single artifact/Explorer handoff; Slice 3 does not
+  alter those flows.
 - Validation: pure projection/filter/ordering/ID-display tests; root
   correspondence matrix and scope-transition metadata fixtures; React DOM,
   keyboard/focus/live-region, root-outcome/run-state/scope-transition filter
@@ -1332,8 +1442,12 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
   collision fixtures; axe, forced colors,
   200%/400% reflow, reduced motion;
   virtualization threshold/20-row overscan/first-last/count tests; locale and
-  timezone parity; workflow completion/period-bearing-context hidden-disabled
-  and enabled-action tests; action/parent-child session/reopen/dispose/late tests;
+  timezone parity; completed workflow source/period/evaluated-artifact guards,
+  no-period ordinary-Explorer/unavailable behavior, invalid-input failure
+  before comparison/open, and direct adapter invalid-period fixtures;
+  `sde-action-*` allocation/registration/session validation, private-before-
+  normal dispatch, exact-context sidecar resolution, and action/parent-child
+  session/reopen/dispose/stale/failure/unavailable tests;
   bundle/CSP/manifest and architecture checks; report/JSON/Flow/source/copy/
   schedule regressions; desktop and web suites; `rtk pnpm run qlty` and
   `rtk pnpm run lint:md`.
@@ -1347,15 +1461,21 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
   CHANGELOG entry. A visual month/week grid, schedule meaning, JSON/report/
   Flow/source contract, new command or activation, comparison workflow input,
   persistence, telemetry, editing, or predecessor change requires Replanning.
-- Dependencies: completion-committed Slice 2 and the completion-committed
-  `semantic-diff-comparison-workflow`, with a period-bearing context supplied
-  by that workflow. The action is intentionally hidden/disabled until the
-  workflow dependency is complete and Slice 3 is implemented and approved;
-  the documented view is temporarily unreachable before then. Slice 3 does
-  not alter the Explorer contract; it adds only a host-private action
-  integration. The Wave 4 roadmap entry already records this dependency before
-  public delivery.
-- Risks: action wiring drift, hidden focus, screen-reader gaps, locale leakage,
+- Dependencies: completion-committed Slice 2 and completed workflow commit
+  `8e6922f8`, including `runFileComparisonWorkflow`,
+  `selectWorkflowPeriodStep`, `buildWorkflowArtifacts`, exact period
+  forwarding, and `openScheduleAwareExplorerSession`. A valid evaluated
+  artifact is required for the action; no-period continues to the ordinary
+  Explorer with unavailable/not-requested impact, while invalid workflow
+  input fails before comparison/artifact/open. Direct adapter invalid-period
+  fixtures remain distinct. The Explorer trigger uses `sde-action-*` from the
+  existing allocator and session validation; `sdc-calendar-action-*` stays
+  child-transport-private. Slice 3 does not alter the workflow, Explorer
+  message union, or action-result envelope; it adds only the host-private
+  action and visible calendar integration. The Wave 4 roadmap entry records
+  the same completed-workflow prerequisite.
+- Risks: action ID allocation/registry drift, private callback ordering,
+  hidden focus, screen-reader gaps, locale leakage,
   root/run filter conflation, timezone conversion, large DOM, candidate
   misclassification, or stale child identity. A11y, locale, root/candidate,
   lifecycle, scale, and predecessor regression matrices are the gate.
@@ -1370,10 +1490,10 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
   this replan alone.
 - The dependency chain is strict: schedule/structured-output predecessor
   contracts → Slice 1 pure comparison artifacts/sidecar → Slice 2 command and
-  bootstrap integration plus internal calendar foundation → completion-committed
-  `semantic-diff-comparison-workflow` with period-bearing context → Slice 3
-  public action and visible timeline. Slice 2 must not expose a user-reachable
-  action; Slice 3 is the first public surface.
+  bootstrap integration plus internal calendar foundation → completed workflow
+  commit `8e6922f8` with its evaluated-period artifact handoff → Slice 3 public
+  action and visible timeline. Slice 2 must not expose a user-reachable action;
+  Slice 3 is the first public surface.
 - Every slice preserves the existing Explorer public message union,
   immutable `SemanticDiffOutputContext` shape `{ result, summary }`, stable
   `scheduleComparison.runChanges` ID/order semantics, JSON version 1, report
@@ -1436,7 +1556,7 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   internal artifact contract, and pure application builder are Slice 1-owned;
   command caller/injection, bootstrap registry, same-context Explorer
   resolution, companion atomic lifecycle, transport, and lifecycle are Slice
-  2-owned; public action, workflow period gate, presentation, filters/legend,
+  2-owned; public action, completed-workflow artifact gate, presentation, filters/legend,
   localization, and durable use-case documentation are Slice 3-owned. No
   requirement is left to an unassigned slice.
 
@@ -1447,8 +1567,8 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 - Durable documentation: `uc-present-schedule-impact.md` and its index entry
   must be complete when the feature becomes observable; README and CHANGELOG
   evaluation is recorded in Slice 3. `docs/specs/roadmap.md` already records
-  the Wave 4 entry and the `semantic-diff-comparison-workflow` completion plus
-  period-bearing-context dependency.
+  the Wave 4 entry and the completed workflow/period-bearing-artifact
+  dependency.
 - Open risks: predecessor completion may expose insufficient complete side
   arrays or issue ownership; any such contract widening returns to Main for
   Replanning before implementation.
@@ -1529,10 +1649,15 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       stream-cleanup warnings; quality smells remained advisory only.
 - [ ] Slice 3 proves separate root-outcome/run-state filters, scope-transition
       filters/legend, partial/timeline/issue sections, candidate groups,
-      English/Japanese/fallback resources, workflow completion and
-      period-bearing-context hidden/disabled then enabled action behavior,
-      accessible keyboard/desktop/web behavior, bounded rendering, and durable
-      use-case/index/docs lint plus the corrected roadmap dependency.
+      English/Japanese/fallback resources, consumption of the completed
+      workflow's evaluated-period artifact, no-period ordinary-Explorer/
+      unavailable behavior, invalid-input failure before comparison/open,
+      direct adapter invalid-period fixtures, compatible `sde-action-*`
+      registration/validation, private-before-normal dispatch, exact-context
+      sidecar resolution, accessible keyboard/desktop/web behavior, bounded
+      rendering, and durable use-case/index/docs lint. The completed workflow
+      guards cover source/period selection, exact forwarding, cancellation,
+      and one artifact/Explorer handoff; this slice does not modify them.
 - [x] Existing Semantic Diff result/context, JSON/report, Explorer, Flow,
       source, copy, schedule, and normal viewer regressions remain passing.
 - [x] Risk-based validation for the current Slice 1 implementation completed:
@@ -1547,6 +1672,12 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 - [x] The authorized feature-author prepared and validated the `SPECS.md`
       source-unit-identity/date/rule normative pairing rule with preserved
       root/side semantics and deterministic duplicate handling.
+- [x] Replanning trigger verified against current `main` commit `8e6922f8`:
+      comparison workflow completion, source/period selection, evaluated
+      artifact production, and schedule-aware Explorer handoff are present;
+      the old dependency-run-only Slice 3 gate is removed from the active plan.
+- [ ] Independent `plan-reviewer` review of this targeted Slice 3 dependency
+      reconciliation returns `Ready` with no Findings before implementation.
 
 ## Notes
 
@@ -1577,7 +1708,11 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   disposal subscription, and parent `onDidDispose` release. Failure/cancel
   must roll back atomically; child close retains the sidecar/context; reopen
   and late-work tests must prove reuse without recalculation.
-- The public action remains hidden/disabled without a period-bearing context
-  from the completion-committed `semantic-diff-comparison-workflow`. The Wave 4
-  roadmap entry and its internal Calendar Slices 1–2 → workflow → public Slice
-  3 dependency are already synchronized.
+- The public action is exposed only for a successful evaluated-period artifact
+  from the completed workflow commit `8e6922f8`. A no-period selection opens
+  the ordinary Explorer with unavailable/not-requested impact and no calendar
+  action or panel; invalid workflow input fails before comparison, artifact,
+  or Explorer opening. Direct adapter invalid-period fixtures separately prove
+  unavailable impact. The Wave 4 roadmap entry and the internal Calendar
+  Slices 1–2 → completed workflow → public Slice 3 dependency are
+  synchronized.
