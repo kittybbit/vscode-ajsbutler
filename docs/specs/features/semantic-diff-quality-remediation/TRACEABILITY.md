@@ -105,11 +105,15 @@ desktop evidence boundary.
   for the exact nine production paths, seven test/validation paths, and the
   two evidence docs recorded below; focused replan/state commit `814d8481` and
   completion commit `483216a1` are complete.
-- Slice 9 activation gate: Slice 8 completion commit `483216a1` is complete;
-  the existing full-plan review remains `Ready` with no findings, and the
-  unchanged Slice 9 transport/bridge scope is Human Approved on 2026-09-13
-  under the user's standing automatic no-findings authorization. Its focused
-  state commit is pending.
+- Slice 9 prior activation gate: initial two-path approval/state commit
+  `77bc1889` is superseded for the production-path boundary because partial
+  Transport work left file complexity at `95` against the hard threshold
+  `55`. The partial Transport diff remains preserved.
+- Slice 9 current replan gate: independent replan review
+  `slice9_replan_review` is `Ready` with no findings, and the revised
+  three-production-path boundary is Human Approved on 2026-09-13 in the
+  current conversation. Its focused replan/state commit is pending; the
+  partial Transport diff remains preserved.
 - Exact planning-package commit paths: this feature's `SPECS.md`, `TASKS.md`,
   and `TRACEABILITY.md` only.
 - Exact Slice 1 paths remain recorded in its implementation evidence below;
@@ -760,6 +764,10 @@ dependencies remain unchanged.
 
 <!-- markdownlint-enable MD013 -->
 
+Slice 9's revised ownership moves the strict JSON policy to the planned
+`scheduleImpactCalendarJson.ts` helper while protocol validators remain in
+Transport and mutable bridge state/lifecycle remains in Bridge.
+
 ## Acceptance Coverage Notes
 
 - Existing expected values are the compatibility baseline. Changing them
@@ -1223,36 +1231,148 @@ test:compile`, scoped Qlty check (`No issues`), final scoped smell inventory,
   in the implementation evidence above; the P2 regression test confirms a
   missing registration callback releases once without optional unregister.
 - Commit status: complete; exact Slice 8 completion commit `483216a1`.
-- Preserved boundary: Slice 9 is activated below under its unchanged reviewed
-  scope; Slice 10 remains unapproved.
-- Recommended next route: delegate the exact Slice 9 activation paths below to
-  `approval-committer` for one focused state commit.
+- Preserved boundary: Slice 9 is activated below under its reviewed and
+  Human Approved revised scope; Slice 10 remains unapproved.
+- Recommended next route: delegate the exact approved Slice 9 replan paths
+  below to `approval-committer` for one focused replan/state commit.
 
 ## Slice 9 Activation And Approval (2026-09-13)
 
-- Status: Human Approved; active next slice; focused state commit is pending.
-- Basis: Slice 8 completion commit `483216a1` is committed and the existing
-  complete-plan review is `Ready` with no findings. The user's standing
-  automatic no-findings slice-approval authorization applies to this unchanged
-  reviewed Slice 9 scope; no new design, path, dependency, or behavior was
-  introduced.
-- Approved production paths:
+- Status: Superseded by the Slice 9 validation-boundary replan below.
+- Basis: initial activation commit `77bc1889` recorded the two existing
+  production paths before partial Transport implementation exposed an
+  unresolved file-level Qlty blocker.
+- Prior approved production paths:
   `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts` and
   `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`.
-- Approved test paths:
+- Prior approved test paths:
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts`,
+  `src/test/suite/scheduleImpactCalendarBridge.test.ts`, and
+  `src/test/suite/webSmoke.ts` for `WEB-9`.
+- Prior approved boundary: simplify existing transport/bridge behavior without
+  message, API, or UI changes. The new JSON helper module was not included.
+- State commit gate: superseded and not eligible. The partial Transport
+  implementation remains preserved; revised plan review and new Human Approval
+  are required before further implementation or a state commit.
+
+## Slice 9 Replanning (2026-09-13)
+
+- Trigger and evidence: after activation commit `77bc1889`, partial Transport
+  extraction reduced file total complexity from `113` to `95`, while the hard
+  Qlty file threshold remains `55`. The Bridge and WEB-9 scenario are
+  untouched; test compilation passed for the partial Transport change, but no
+  completion review or completion commit exists.
+- Why the plan cannot continue unchanged: same-file helper movement leaves the
+  measured Transport total above the gate across strict JSON traversal/size
+  policy and protocol envelope/field/error decisions. Suppression, ignore
+  rules, baseline manipulation, threshold relaxation, and trust weakening are
+  prohibited.
+- Smallest revised boundary: add one command-owned browser-safe JSON helper
+  module and simplify the retained Transport and Bridge in their existing
+  ownership paths. This is an internal responsibility move only; public
+  message types, constructors, parser/serializer results, bridge API,
+  Calendar Slice 3, and production webpack remain unchanged.
+- Revised exact production paths:
+  `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts`, new
+  `src/presentation/vscode/webview/scheduleImpactCalendarJson.ts`, and
+  `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`.
+- Exact function ownership, with each responsibility assigned once:
+  - `scheduleImpactCalendarJson.ts`: `JsonNodeKind`, scalar-kind dispatch,
+    `classifyJsonNode`, `hasOnlyJsonArrayKeys`, `allChecksPass`,
+    `hasJsonArrayElements`, `isJsonArray`, `isJsonObject`, `isJsonValue`, and
+    `encodedJsonBytes`. The classifier uses table-driven scalar/container
+    decisions; array traversal keeps sparse-array detection and recursive
+    ancestor tracking; object traversal keeps plain-prototype, symbol,
+    `toJSON`, and cycle rejection.
+  - `scheduleImpactCalendarTransport.ts`: public transport types/constants and
+    constructors; `ownKeys`, `isPlainRecord`, `isSessionId`, `isRequestId`,
+    `matchesSession`, `matchesRequestId`, `matchesRequestOptions`,
+    `invalidResult`, `validResult`, `withMessageSize`, `isRequestType`,
+    `requestEnvelope`, `messageSizeError`, `validateRequestShape`,
+    `validateRequest`, `errorCodes`, `isErrorDetail`, `validateError`,
+    `hostEnvelope`, `hasCloseFields`, `validateClose`, `hasSessionFields`,
+    `validateSession`, `hasFailureFields`, `validateFailure`, the host
+    validator table, `validateHostShape`, `validateHostMessage`, public
+    parse/validate predicates, and serialization. Ordered protocol field
+    predicates and separate session/request error helpers preserve invalid,
+    unknown-session, stale-request, and payload-too-large precedence.
+  - `scheduleImpactCalendarBridge.ts`: retain
+    `createScheduleImpactCalendarBridge` as the public factory; extract the
+    closed-state request sender, host-message acceptance, listener
+    registration/removal, and idempotent disposal operations as private
+    closure-owned helpers. The bridge alone owns request numbering,
+    `latestResponseId`, listener state, and post-dispose suppression.
+- Required complexity simplification: current Qlty findings
+  `classifyJsonNode` (`10`), `hasJsonArrayElements` (`7`), `isJsonValue` (`11`
+  and five returns), `messageSizeError` (`5`), `validateRequestShape` (`7`),
+  `isErrorDetail` (`6`), and `validateFailure` (`11`) must each be rewritten
+  through ordered decision data, pure guards, or result builders without
+  protocol precedence change. Bridge findings are
+  `createScheduleImpactCalendarBridge` (`26` and five returns) and
+  `onWindowMessage` (`10`); extracted helpers must leave the public factory
+  and callback at no more than four complexity and four returns.
+- Sizing evidence and hard targets (targets are not passing evidence):
+
+  <!-- markdownlint-disable MD013 -->
+
+  | Revised file | Current evidence | Target |
+  | --- | --- | ---: |
+  | `scheduleImpactCalendarJson.ts` | JSON classifier/recursive group includes measured `10`, `7`, and `11` findings; helper contribution must be measured after move | file `<=50`, each function `<=4` complexity/returns |
+  | `scheduleImpactCalendarTransport.ts` | current total `95`, including JSON group and measured protocol findings `5`, `7`, `6`, `11` | file `<=50`, no mapped smell |
+  | `scheduleImpactCalendarBridge.ts` | factory `26`/five returns; callback `10` | file `<=45`, no mapped smell |
+
+  <!-- markdownlint-enable MD013 -->
+
+  Every revised file requires an actual scoped Qlty `fmt`, `check`, and
+  `smells --no-snippets` result. The hard gate remains `<=55`; if any revised
+  file or named function exceeds its target or retains a mapped smell,
+  implementation stops and returns the smallest further seam for another
+  replan. No fabricated module total, suppression, or acceptance exception is
+  allowed.
+- Preserved JSON and protocol behavior: strict plain JSON only; finite numbers,
+  null, strings, and booleans remain accepted; undefined, functions, symbols,
+  bigint, non-plain prototypes, own symbols, own `toJSON`, sparse arrays,
+  cycles, getter/serialization failures, and oversized encoded payloads remain
+  rejected with the existing result codes. Branded/session/request IDs,
+  malformed envelope rejection, error detail shape, session matching, stale
+  ordering, and serialization byte limits remain exact.
+- Revised validation: add transport edge-case characterization in the existing
+  transport test path for prototypes, symbols, `toJSON`, sparse arrays,
+  circular values, non-finite numbers, byte boundaries, and error precedence;
+  add the planned direct Bridge lifecycle test; execute WEB-9 through the
+  committed bundle-backed `test:web` route using controlled post-message port
+  and event-target doubles. Run test compile, focused desktop tests, the
+  desktop runner, production build, architecture dependency checks, scoped
+  Qlty format/check/smells, Markdown lint, and `git diff --check`. Real
+  Calendar Webview DOM and `window.vscode` handshake remain unclaimed.
+- Approval boundary: the prior `77bc1889` two-path activation is superseded
+  for its production-path assumption. The new JSON module, its import edge,
+  and revised function ownership require independent plan review and new
+  Human Approval. No implementation, test, generated artifact, configuration,
+  dependency, public message type, Calendar Slice 3 UI, or Slice 10 change is
+  authorized by this replan alone.
+- Dependencies: Slice 8 completion commit `483216a1` and committed web-harness
+  replan `800612e4`; partial Transport work remains the review base.
+
+## Slice 9 Replan Human Approval (2026-09-13)
+
+- Status: Human Approved for the revised three-production-path
+  validation-boundary replan; focused replan/state commit is pending.
+- Approved at: 2026-09-13 in the current conversation, after the user's
+  explicit `承認します`.
+- Independent review: `slice9_replan_review` is `Ready` with no findings.
+- Approved production paths:
+  `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts`,
+  `src/presentation/vscode/webview/scheduleImpactCalendarJson.ts`, and
+  `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`.
+- Approved test and validation paths:
   `src/test/suite/scheduleImpactCalendarTransport.test.ts`,
   `src/test/suite/scheduleImpactCalendarBridge.test.ts`, and
   `src/test/suite/webSmoke.ts` for `WEB-9`.
 - Approved evidence paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
-- Approved boundary: simplify the existing transport validation/serialization
-  and bridge request-response lifecycle while preserving branded IDs,
-  monotonicity, session/stale/error handling, JSON and byte limits,
-  notifications, listener removal, and idempotent disposal. `WEB-9` remains a
-  controlled post-message port/target lifecycle check; real Calendar
-  WebviewPanel DOM and `window.vscode` handshakes remain unclaimed.
-- Preserved scope: Slice 8 completion `483216a1`, Calendar Slice 3, Slice 10,
-  Dependabot, production webpack, dependencies, public message types, and
-  public commands remain unchanged. Completion review and completion approval
-  are separate later gates.
-- State commit gate: eligible for the exact paths above; delegate this
-  planning-package activation to `approval-committer` before implementation.
+- Boundary: the JSON helper remains internal and adds no public API, message
+  type, dependency, configuration, Calendar Slice 3 UI, or Slice 10 scope;
+  the partial Transport implementation remains preserved. Completion review
+  and Completion Approval are separate later gates.
+- Next route: `approval-committer` may commit this exact docs-only replan
+  state, with no runtime, test, configuration, or generated-file changes.
