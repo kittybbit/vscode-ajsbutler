@@ -11,6 +11,7 @@ type ExplorerHtmlOptions = Readonly<{
   panel: vscode.WebviewPanel;
   sessionId: SemanticDiffExplorerSessionId;
   outputActionId: SemanticDiffExplorerActionId;
+  calendarActionId?: SemanticDiffExplorerActionId;
 }>;
 
 const htmlEscape = (value: string): string =>
@@ -23,7 +24,8 @@ const htmlEscape = (value: string): string =>
 export const buildSemanticDiffExplorerHtml = (
   options: ExplorerHtmlOptions,
 ): string => {
-  const { context, panel, sessionId, outputActionId } = options;
+  const { context, panel, sessionId, outputActionId, calendarActionId } =
+    options;
   const nonce = uuid();
   const bundleUri = panel.webview.asWebviewUri(
     vscode.Uri.joinPath(
@@ -34,6 +36,7 @@ export const buildSemanticDiffExplorerHtml = (
   const title = htmlEscape(panel.title);
   const session = htmlEscape(sessionId);
   const actionId = htmlEscape(outputActionId);
+  const calendarId = htmlEscape(calendarActionId ?? "");
   return `<!DOCTYPE html>
 <html lang="${htmlEscape(vscode.env.language)}">
 <head>
@@ -45,7 +48,7 @@ export const buildSemanticDiffExplorerHtml = (
 html,body,#root{width:100%;height:100%;margin:0;padding:0}body{box-sizing:border-box;font-family:var(--vscode-font-family, sans-serif)}*,*:before,*:after{box-sizing:inherit}
 </style>
 </head>
-<body data-semantic-diff-session-id="${session}" data-semantic-diff-output-action-id="${actionId}">
+<body data-semantic-diff-session-id="${session}" data-semantic-diff-output-action-id="${actionId}" data-semantic-diff-calendar-action-id="${calendarId}">
 <div id="root"></div>
 <script nonce="${nonce}" src="${bundleUri}"></script>
 </body>

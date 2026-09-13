@@ -11,6 +11,7 @@ import type { SemanticDiffResult } from "../../application/semantic-diff/semanti
 import { createScheduleAwareExplorerSession } from "../../bootstrap/extension/createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
 import {
+  createScheduleImpactCalendarPanel,
   openScheduleImpactCalendarPanel,
   type ScheduleImpactCalendarPanelHandle,
 } from "../../presentation/vscode/webview/scheduleImpactCalendarPanel";
@@ -175,6 +176,47 @@ suite("Semantic Diff Explorer schedule boundary", () => {
       calendarRegistry.resolve(childHandle.calendarSessionId),
       undefined,
     );
+  });
+
+  test("removes disposed panels from the cache before reopening", () => {
+    const calendarRegistry = new ScheduleImpactCalendarSessionRegistry();
+    const panels: FakePanel[] = [];
+    const open = createScheduleImpactCalendarPanel({
+      extensionContext,
+      sessionRegistry: calendarRegistry,
+      createWebviewPanel: () => {
+        const panel = fakePanel("Schedule Impact Calendar");
+        panels.push(panel);
+        return panel.panel;
+      },
+    });
+    const input = {
+      parentSessionId: "sde-session-reopen",
+      context: context(),
+      sidecar,
+      displayLanguage: "en",
+    };
+
+    const first = open(input);
+    first.panel.dispose();
+    assert.strictEqual(calendarRegistry.size, 0);
+
+    const second = open(input);
+    assert.notStrictEqual(second.calendarSessionId, first.calendarSessionId);
+    assert.strictEqual(panels.length, 2);
+
+    assert.strictEqual(
+      calendarRegistry.releaseParent(input.parentSessionId),
+      1,
+    );
+    assert.strictEqual(calendarRegistry.size, 0);
+    assert.strictEqual(panels[1]?.disposeCount, 1);
+
+    const third = open(input);
+    assert.notStrictEqual(third.calendarSessionId, second.calendarSessionId);
+    assert.strictEqual(panels.length, 3);
+    third.dispose();
+    assert.strictEqual(calendarRegistry.size, 0);
   });
 
   test("uses the immutable normalized session language for title and HTML", () => {

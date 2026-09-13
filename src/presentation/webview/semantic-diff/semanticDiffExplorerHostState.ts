@@ -25,6 +25,7 @@ type ExplorerBridge = Readonly<{
   hostFailure: string | undefined;
   language: string;
   outputActionId: SemanticDiffExplorerActionId | undefined;
+  calendarActionId: SemanticDiffExplorerActionId | undefined;
   sendAction: (actionId: string, element?: HTMLElement) => void;
 }>;
 
@@ -47,6 +48,9 @@ const useExplorerHostRefs = (): Readonly<{
   const outputActionId = useRef<SemanticDiffExplorerActionId | undefined>(
     undefined,
   );
+  const calendarActionId = useRef<SemanticDiffExplorerActionId | undefined>(
+    undefined,
+  );
   const pendingActions = useRef(new Map<number, HTMLElement>());
   const stateRef = useRef<ExplorerHostState | undefined>(undefined);
   const closedSessionId = useRef<SemanticDiffExplorerSessionId | undefined>(
@@ -58,6 +62,7 @@ const useExplorerHostRefs = (): Readonly<{
       initialSessionId,
       closedSessionId,
       outputActionId,
+      calendarActionId,
       readySent,
       requestId,
       pendingActions,
@@ -161,6 +166,7 @@ export const useSemanticDiffExplorerHost = (): ExplorerBridge => {
     hostFailure,
     language,
     outputActionId: hostRefs.refs.outputActionId.current,
+    calendarActionId: hostRefs.refs.calendarActionId.current,
     sendAction,
   };
 };

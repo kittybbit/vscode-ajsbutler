@@ -28,6 +28,7 @@ Comparison and reporting:
 - build semantic diff
 - compare AJS definitions
 - present semantic diff report
+- present schedule impact
 
 Shared JP1/AJS meaning belongs in
 [`domain-rules/`](../domain-rules/README.md). Privacy, quality, and operational

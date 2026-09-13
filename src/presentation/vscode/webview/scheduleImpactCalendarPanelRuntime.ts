@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { v4 as uuid } from "uuid";
 import type {
   ScheduleImpactCalendarErrorCode,
   ScheduleImpactCalendarMessage,
@@ -38,19 +39,33 @@ const escapeHtml = (value: string): string =>
 
 const buildCalendarShell = (
   panel: vscode.WebviewPanel,
+  extensionContext: vscode.ExtensionContext,
   sessionId: string,
   language: "en" | "ja",
-): string => `<!DOCTYPE html>
+): string => {
+  const nonce = uuid();
+  const bundleUri =
+    typeof panel.webview.asWebviewUri === "function"
+      ? panel.webview.asWebviewUri(
+          vscode.Uri.joinPath(
+            extensionContext.extensionUri,
+            "./out/scheduleImpactCalendar.js",
+          ),
+        )
+      : "./out/scheduleImpactCalendar.js";
+  return `<!DOCTYPE html>
 <html lang="${escapeHtml(language)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${panel.webview.cspSource} 'unsafe-inline';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src ${panel.webview.cspSource} 'nonce-${nonce}'; style-src ${panel.webview.cspSource} 'unsafe-inline';">
 </head>
 <body data-schedule-impact-calendar-session-id="${escapeHtml(sessionId)}">
 <div id="root"></div>
+<script nonce="${nonce}" src="${bundleUri}"></script>
 </body>
 </html>`;
+};
 
 const createPanel = (
   deps: ScheduleImpactCalendarPanelRuntimeDeps,
@@ -74,6 +89,7 @@ const prepareCalendarPanel = (
   };
   panel.webview.html = buildCalendarShell(
     panel,
+    deps.extensionContext,
     session.calendarSessionId,
     session.displayLanguage,
   );

@@ -46,6 +46,7 @@ export type SemanticDiffExplorerViewProps = Readonly<{
   language?: string;
   themeMode?: SemanticDiffExplorerThemeMode;
   outputAction?: (element?: HTMLElement) => void;
+  calendarAction?: (element?: HTMLElement) => void;
   action?: (actionId: string, element?: HTMLElement) => void;
   hostAnnouncement?: string;
   virtualizedScrollToIndex?: (index: number) => void;
@@ -60,6 +61,11 @@ const explorerStatus = (
     empty: labels.empty,
     "filter-empty": labels.filterEmpty,
   })[viewModel.status];
+
+const calendarActionLabel = (language: string): string =>
+  language.toLowerCase().startsWith("ja")
+    ? "スケジュール影響"
+    : "Schedule impact";
 
 const ExplorerCards = ({
   viewModel,
@@ -127,12 +133,16 @@ const ExplorerHeader = ({
   setFilter,
   setAnnouncement,
   outputAction,
+  calendarAction,
+  language,
 }: Readonly<{
   labels: SemanticDiffExplorerLabels;
+  language: string;
   filter: SemanticDiffExplorerViewModel["filter"];
   setFilter: (value: SemanticDiffExplorerViewModel["filter"]) => void;
   setAnnouncement: (value: string) => void;
   outputAction?: (element?: HTMLElement) => void;
+  calendarAction?: (element?: HTMLElement) => void;
 }>): React.ReactElement => {
   const filterRef = useRef<HTMLSelectElement>(null);
   const handleFilterChange = (
@@ -163,6 +173,16 @@ const ExplorerHeader = ({
         >
           {labels.output}
         </Button>
+        {calendarAction && (
+          <Button
+            type="button"
+            variant="outlined"
+            onClick={(event) => calendarAction(event.currentTarget)}
+            sx={semanticDiffExplorerFocusSx}
+          >
+            {calendarActionLabel(language)}
+          </Button>
+        )}
         <FormControl sx={{ minWidth: 14 * 16, maxWidth: "100%" }}>
           <InputLabel htmlFor="semantic-diff-explorer-filter">
             {labels.filter}
@@ -332,6 +352,7 @@ export const SemanticDiffExplorerView = ({
   language = "en",
   themeMode = "light",
   outputAction,
+  calendarAction,
   action,
   hostAnnouncement,
   virtualizedScrollToIndex,
@@ -363,10 +384,12 @@ export const SemanticDiffExplorerView = ({
       >
         <ExplorerHeader
           labels={labels}
+          language={language}
           filter={filter}
           setFilter={setFilter}
           setAnnouncement={setAnnouncement}
           outputAction={outputAction}
+          calendarAction={calendarAction}
         />
         <ExplorerCards
           viewModel={filteredViewModel}

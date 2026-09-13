@@ -15,6 +15,15 @@ import type {
   SemanticDiffExplorerContextRegistry,
 } from "./semanticDiffExplorerRegistry";
 import type { presentSemanticDiffOutput } from "../../../semantic-diff/semanticDiffOutput";
+import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
+import type { ScheduleImpactCalendarSessionRegistry } from "../../webview/scheduleImpactCalendarSessionRegistry";
+import type { ScheduleImpactCalendarPanelHandle } from "../../webview/scheduleImpactCalendarPanel";
+
+export type SemanticDiffScheduleImpactLookup = Readonly<{
+  resolve(
+    context: SemanticDiffOutputContext,
+  ): SemanticDiffScheduleImpact | undefined;
+}>;
 
 /** The host-only handle intentionally does not expose the application session. */
 export type SemanticDiffExplorerSessionHandle = Readonly<{
@@ -57,4 +66,15 @@ export type SemanticDiffExplorerPanelDeps = Readonly<{
       }>
   >;
   disposeFlowSession?: (sessionId: SemanticDiffExplorerSessionId) => void;
+  /** Host-private calendar sidecar lookup. The context object is the key. */
+  scheduleImpactSidecarRegistry?: SemanticDiffScheduleImpactLookup;
+  calendarSessionRegistry?: ScheduleImpactCalendarSessionRegistry;
+  openScheduleImpactCalendarPanel?: (
+    input: Readonly<{
+      parentSessionId: string;
+      context: SemanticDiffOutputContext;
+      sidecar: SemanticDiffScheduleImpact;
+      displayLanguage?: string;
+    }>,
+  ) => ScheduleImpactCalendarPanelHandle;
 }>;

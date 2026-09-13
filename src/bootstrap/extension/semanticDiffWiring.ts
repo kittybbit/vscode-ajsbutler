@@ -199,12 +199,16 @@ const createOpenExplorer = ({
   contextRegistry,
   flowOverlayRegistry,
   getSourceSnapshot,
+  sidecarRegistry,
+  calendarSessionRegistry,
 }: Readonly<{
   deps: SemanticDiffWiringDeps;
   reportDocuments: SemanticDiffReportDocumentProvider;
   contextRegistry: SemanticDiffExplorerContextRegistry;
   flowOverlayRegistry: SemanticDiffFlowOverlayRegistry;
   getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
+  sidecarRegistry: ScheduleImpactSidecarRegistry;
+  calendarSessionRegistry: ScheduleImpactCalendarSessionRegistry;
 }>) =>
   createOpenSemanticDiffExplorer({
     extensionContext: deps.extensionContext,
@@ -217,6 +221,8 @@ const createOpenExplorer = ({
     showTextDocument: (document, options) =>
       vscode.window.showTextDocument(document, options),
     contextRegistry,
+    scheduleImpactSidecarRegistry: sidecarRegistry,
+    calendarSessionRegistry,
     sessionIdAllocator: deps.sessionIdAllocator,
     actionIdAllocator: deps.actionIdAllocator,
     flowAction: deps.flowBridge
@@ -293,15 +299,17 @@ export const createSemanticDiffSubscriptions = (
   const flowOverlayRegistry = new SemanticDiffFlowOverlayRegistry();
   const getSourceSnapshot = createSourceSnapshotGetter(contextRegistry);
   const reportDocuments = createReportDocuments();
+  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
+  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
   const openExplorer = createOpenExplorer({
     deps,
     reportDocuments,
     contextRegistry,
     flowOverlayRegistry,
     getSourceSnapshot,
+    sidecarRegistry,
+    calendarSessionRegistry,
   });
-  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
-  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
   const gitHeadContentProvider = new VscodeGitHeadContentProvider();
   const openScheduleAwareExplorerSession = createScheduleAwareExplorerSession({
     openExplorer,

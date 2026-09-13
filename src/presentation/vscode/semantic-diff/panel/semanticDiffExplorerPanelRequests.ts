@@ -1,4 +1,5 @@
 import {
+  createSemanticDiffExplorerActionResultMessage,
   createSemanticDiffExplorerFailureMessage,
   createSemanticDiffExplorerSessionMessage,
   createSemanticDiffExplorerError,
@@ -26,6 +27,66 @@ type PanelRequestOptions = Readonly<{
   ): Promise<void>;
   actionOptions: Parameters<typeof processSemanticDiffExplorerAction>[2];
 }>;
+
+const processCalendarAction = async (
+  request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
+  epoch: number,
+  options: PanelRequestOptions,
+): Promise<void> => {
+  const { actionOptions } = options;
+  const calendarActionId = actionOptions.calendarActionId;
+  if (calendarActionId === undefined || request.actionId !== calendarActionId) {
+    return;
+  }
+  const sidecar = actionOptions.deps.scheduleImpactSidecarRegistry?.resolve(
+    actionOptions.context,
+  );
+  if (!sidecar || !actionOptions.openScheduleImpactCalendarPanel) {
+    await options.post(
+      createSemanticDiffExplorerFailureMessage(
+        options.session.sessionId,
+        request.requestId,
+        request.actionId,
+        createSemanticDiffExplorerError("unknown-action"),
+      ),
+      epoch,
+    );
+    return;
+  }
+  try {
+    actionOptions.openScheduleImpactCalendarPanel({
+      parentSessionId: options.session.sessionId,
+      context: actionOptions.context,
+      sidecar,
+      displayLanguage: options.session.displayLanguage,
+    });
+    await options.post(
+      createSemanticDiffExplorerActionResultMessage(
+        options.session.sessionId,
+        request.requestId,
+        request.actionId,
+        {
+          kind: "output",
+          status: "completed",
+          side: null,
+          targetId: null,
+        },
+      ),
+      epoch,
+    );
+  } catch {
+    await options.post(
+      createSemanticDiffExplorerActionResultMessage(
+        options.session.sessionId,
+        request.requestId,
+        request.actionId,
+        null,
+        createSemanticDiffExplorerError("output-failed"),
+      ),
+      epoch,
+    );
+  }
+};
 
 const invalidRequestMessage = (
   value: unknown,
@@ -84,6 +145,12 @@ const processRequest = async (
   if (request.type === "ready" || request.type === "refresh") {
     await processReadyRequest(request, epoch, options);
   } else {
+    const isCalendarAction =
+      options.actionOptions.calendarActionId === request.actionId;
+    if (isCalendarAction) {
+      await processCalendarAction(request, epoch, options);
+      return;
+    }
     await processSemanticDiffExplorerAction(
       request,
       epoch,

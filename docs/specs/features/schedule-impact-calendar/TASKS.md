@@ -5,13 +5,14 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Replanning Mode for public Slice 3 after the comparison-workflow
+- Mode: Implementation Mode for public Slice 3 after the comparison-workflow
   dependency completed on the current `main`. Slice 1 is
   completion-committed at `51a8ae4a`; Slice 2 is completion-committed at
   `b9cee633`. Their runtime and focused test changes remain preserved.
-- Approved or active slice: none. Slices 1 and 2 are complete and committed;
-  the targeted Slice 3 plan revision is pending independent plan review and
-  the plan gate. No implementation work is active in this replan.
+- Approved or active slice: Slice 3 implementation under the focused approved
+  plan commit `70ff7da7`. Slices 1 and 2 are complete and committed; the
+  independent implementation review and final batch Completion Approval are
+  pending.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -69,8 +70,8 @@
 - Public calendar exposure is now gated by the workflow's successful
   evaluated-period artifact (`scheduleImpact.kind === "available"`) and the
   public Slice 3 implementation. Slices 1 and 2 are complete and committed
-  on this branch, including Slice 2 at `b9cee633`; Slice 3 is planned, not
-  active, and remains unavailable until its public action and view exist.
+  on this branch, including Slice 2 at `b9cee633`; Slice 3 is the active
+  implementation slice on the approved plan commit `70ff7da7`.
 - The original independent plan review, first replan review, and second
   replan review are complete with `Ready` verdicts and no Findings. The third
   package has final independent `plan-reviewer` `Ready` review with no
@@ -99,25 +100,28 @@
 - Status: Slice 1 implementation is complete under approved third-replan
   commit `11615026` and completion-committed at `51a8ae4a`; Slice 2
   implementation is complete and completion-committed at `b9cee633` under
-  the approved full-plan gate. Slice 3 is the next planned implementation
-  slice after this targeted dependency replan.
+  the approved full-plan gate. Slice 3 implementation is complete under the
+  focused approved plan commit `70ff7da7`; independent implementation review
+  and final batch Completion Approval remain pending.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
   timeline, outcome/run filtering, localization, bounded rendering, workflow
   period-bearing action gating, validation, and durable user documentation.
 - Review status: Original plan, first Replanning package, second Replanning
-  package, and third targeted package are `Ready` with no Findings. The
-  targeted Slice 3 dependency reconciliation is pending independent review.
+  package, and third targeted package are `Ready` with no Findings. Slice 3
+  implementation review is pending.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
   plan/replan commit `11615026` is complete; implementation review is `Ready`
   with no Findings, Completion Approval is recorded, and the focused
   completion commit `51a8ae4a` is complete. The revised Slice 3 activation
-  scope has no new Human Approval recorded in this replan.
-- Active implementation slice: None; Slice 3 is planned and pending the
-  revised plan gate.
+  scope is approved in focused plan commit `70ff7da7` under the automatic
+  no-findings slice approval instruction; final batch human review remains
+  pending.
+- Active implementation slice: Slice 3 implementation is complete and awaits
+  independent implementation review.
 - Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
   implementation review, Completion Approval, and focused commit after the
   plan gate.
@@ -209,12 +213,12 @@ Findings and Completion Approval is recorded above; focused completion commit
 - Basis: independent `plan-reviewer` re-review verdict `Ready for approval`;
   Findings none. Main applies the user's current automatic no-findings
   slice approval authorization; final batch human review remains pending.
-- Approved scope: exactly Slice 3, `Expose The Accessible Localized
-  Schedule-Impact Timeline`, including the corrected workflow guards and
+- Approved scope: exactly Slice 3, including the corrected workflow guards and
   additive host-private Explorer action adapter described in its planned
   paths and approval scope. Slices 1 and 2 and upstream remediation remain
   preserved. No public message union, result/report/JSON schema, schedule
   meaning, workflow input, package contribution, or compatibility change.
+- Slice name: `Expose The Accessible Localized Schedule-Impact Timeline`.
 - Approved paths for this focused plan/replan commit:
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
@@ -222,8 +226,9 @@ Findings and Completion Approval is recorded above; focused completion commit
   listed under Slice 3 `Planned paths and approval scope`, plus these selected
   feature evidence files. No unlisted runtime/test/config changes.
 - Review status: Ready; both prior Findings resolved; no remaining Findings.
-- Plan commit status: Pending; implementation starts after the focused commit.
-- Active implementation slice: Slice 3 after that focused commit.
+- Plan commit status: Complete at `70ff7da7`.
+- Active implementation slice: Slice 3 implementation complete; independent
+  implementation review is pending.
 
 ## Completion Approval
 
@@ -294,6 +299,62 @@ Findings and Completion Approval is recorded above; focused completion commit
   stale/late work suppression, normalized language, public-contract guards,
   and desktop/web plus quality evidence recorded in this task.
 - Commit status: Complete; focused Slice 2 completion commit `b9cee633`.
+
+### Slice 3 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-14; approved in current conversation
+- Basis: independent `implementation-reviewer` final verdict `Ready`;
+  Findings none. Main applies the user's explicit automatic no-findings
+  slice approval instruction. Final batch human approval remains pending.
+- Approved scope: exact completed Slice 3 public calendar, private compatible
+  Explorer action, sidecar/panel lifecycle, full raw metadata, conjunctive
+  filters, localized legend, accessible virtualized navigation, bounded lists,
+  tests, user documentation, and selected feature evidence below.
+- Validation: direct calendar view/accessibility/projection/localization suites
+  10 passing; compile, desktop/web extension-host checks, production and
+  desktop/web development builds, quality checks, Markdown lint and diff checks
+  passed. Prior review Findings are resolved. Existing host cleanup and bundle
+  size warnings remain; no compatibility-floor or public-contract change.
+- Implementation review verdict: Ready; Findings none.
+- Commit status: Pending; one focused completed-slice commit is authorized.
+- Approved paths:
+  - `CHANGELOG.md`
+  - `README.md`
+  - `docs/requirements/use-cases/README.md`
+  - `docs/requirements/use-cases/uc-present-schedule-impact.md`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelActions.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelHtml.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelInstall.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelLifecycle.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelRequests.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelTypes.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarAccessibility.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarFocus.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarModel.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerHostMessageState.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerHostState.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`
+  - `src/resource/i18n/scheduleImpactCalendar.ts`
+  - `src/resource/i18n/scheduleImpactCalendar_en.ts`
+  - `src/resource/i18n/scheduleImpactCalendar_ja.ts`
+  - `src/test/suite/scheduleImpactCalendarAccessibility.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
+  - `src/test/suite/scheduleImpactCalendarProjection.test.ts`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
+  - `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`
+  - `webpack.config.js`
 
 ## Closure Approval
 
@@ -1312,10 +1373,11 @@ tsconfig.json --noEmit`, `rtk pnpm run test:compile`, focused transport/
 
 ### Slice 3: Expose The Accessible Localized Schedule-Impact Timeline
 
-- Status: Planned; Slice 1 and Slice 2 are complete, and the
+- Status: Implementation complete under focused approved plan commit
+  `70ff7da7`; Slice 1 and Slice 2 are complete, and the
   `semantic-diff-comparison-workflow` dependency is satisfied by `8e6922f8`.
-  This targeted Slice 3 revision is pending independent plan review and the
-  plan gate; no implementation slice is active.
+  Independent implementation review and final batch Completion Approval are
+  pending.
 - Scope: consume the completed workflow's successful evaluated-period
   `SemanticDiffPresentationArtifacts` through the existing
   `openScheduleAwareExplorerSession` companion, then expose one additive
@@ -1482,6 +1544,70 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
 - Out of Scope: schedule calculation, month/week grid, runtime history,
   external calendars, WebAPI comparison, Flow/source redesign, JSON/report
   changes, editing, persistence, new telemetry, and package contributions.
+
+### Slice 3 Implementation Evidence
+
+- Status: Slice 3 implementation is complete under focused approved plan
+  commit `70ff7da7`; independent implementation review and final batch
+  Completion Approval remain pending. No commit was created by the
+  implementer.
+- Changed paths: the host-private Explorer calendar action adapter and
+  lifecycle plumbing; the browser-safe calendar entry, model, filters,
+  accessibility/focus helpers, view, and localized resources; the calendar
+  panel CSP/bundle shell; webpack entry; integration/projection/view/
+  localization/accessibility tests; and the approved use-case/index,
+  README, CHANGELOG, and feature evidence updates. The unlisted semantic-diff
+  localization helper was not changed.
+- Acceptance evidence: available sidecars allocate one `sde-action-*` ID,
+  register it only in the parent Explorer membership, validate it through the
+  existing session request gate, and dispatch the private calendar callback
+  before normal report handling. The callback resolves the sidecar with the
+  exact immutable context, opens/reveals the child through the existing panel
+  factory, and returns the existing action-result envelope. Calendar transport
+  IDs remain outside Explorer membership. The view preserves the half-open
+  period, deterministic date/time/rule/occurrence ordering, separate
+  conjunctive root/outcome/run-state filters, root-scope transition metadata,
+  candidate and issue sections, localized EN/JA fallback, accessible names,
+  focus recovery, reduced-motion styles, and bounded virtualization. The
+  review correction pass also exposes every timeline/run/candidate/issue
+  identity and structured detail, filters root statuses/no-runs/issues with
+  global counts preserved, adds a text/icon/pattern legend, implements roving
+  keyboard focus with live announcements, removes disposed panel handles from
+  both caches, and bounds every repeated section for large results.
+- The second review correction adds root and valid-no-runs rows with stable
+  root IDs, localized before/after side facts, explicit absent-side wording,
+  and root-scope transition identity decision IDs. Virtualized timeline,
+  candidate, and issue lists now use imperative scrolling with deferred
+  post-mount focus recovery so keyboard End/Arrow navigation reaches
+  offscreen last entries.
+- Validation completed after the correction pass: `rtk pnpm run
+test:compile`; projection/localization/accessibility/view tests covering
+  metadata, paired/one-sided/root-scope facts, root/outcome no-match
+  matrices, keyboard navigation, legend patterns, and a 10,000-entry DOM
+  bound plus first/last focus reachability for timeline, candidates, and
+  issues; the focused host action and repeated panel lifecycle tests are
+  compiled and included in the
+  extension-host run; production and desktop/web development builds; desktop
+  extension-host tests; web extension-host tests; `rtk pnpm run qlty:check`
+  (no issues); `rtk pnpm run qlty:smells` (advisory complexity/duplication
+  findings only); `rtk pnpm run lint:md`; and `git diff --check`. Desktop
+  retains the existing macOS codesign warning; web retains the existing
+  EPIPE/Premature-close stream-cleanup warnings.
+- Compatibility/readiness: package contributions, VS Code `^1.75.0`, public
+  Explorer message union/action-result envelope, result/report/JSON contracts,
+  workflow input, schedule calculation, Flow/source behavior, and telemetry
+  remain unchanged. Shared calendar code has no Node built-in dependency;
+  the panel uses a nonce-bound CSP and the bundle is loaded through
+  `asWebviewUri` for desktop/web parity. Raw values are rendered as React text
+  nodes and lifecycle disposal remains parent-owned.
+- Unresolved risks: the independent implementation reviewer must re-check the
+  correction pass against the approved acceptance matrix. Quality smell
+  findings are advisory and limited to the newly added UI/adapter complexity
+  and duplicated locale shape.
+- Recommended route: Main should route this corrected diff to the independent
+  `implementation-reviewer` for re-review; any further Findings return to
+  this implementer within the approved Slice 3 paths. Completion Approval and
+  the focused commit stay with Main and the approval-committer gate.
 
 ## Cross-Slice Approval And Production Readiness
 

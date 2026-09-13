@@ -86,6 +86,63 @@
   Approval and completion commit `b9cee633` are recorded; comparison workflow
   commit `8e6922f8` is now the consumed public Slice 3 dependency.
 
+## Slice 3 Implementation Evidence
+
+- Approved boundary: public Slice 3 implementation follows focused approved
+  plan commit `70ff7da7`; Slices 1 and 2 and the completed workflow at
+  `8e6922f8` remain preserved. Independent implementation review and final
+  batch Completion Approval are pending.
+- Runtime evidence: the available evaluated artifact receives one compatible
+  `sde-action-*` Explorer trigger. The host validates it through the existing
+  session-scoped action lookup, handles the private calendar callback before
+  normal report/source/Flow dispatch, resolves the sidecar by exact immutable
+  context identity, and returns the unchanged action-result envelope. The
+  child calendar transport keeps its `sdc-calendar-action-*` ID outside the
+  Explorer membership and parent disposal releases child/session resources.
+  The browser-safe view sorts immutable timeline facts deterministically,
+  groups by date, exposes separate conjunctive root/outcome/run-state filters,
+  preserves root-scope transitions, candidates, and issues, and applies
+  localized EN/JA fallback with accessible labels, focus recovery, CSP, and
+  bounded rendering. The review correction pass also exposes every
+  timeline/run/candidate/issue identity and structured detail, filters root
+  statuses/no-runs/issues with global counts preserved, adds a localized
+  text/icon/pattern legend, implements roving keyboard focus with live
+  announcements, removes disposed panel handles from both caches, and bounds
+  every repeated section for large results. The second review correction adds
+  root and valid-no-runs rows with stable root IDs, localized before/after
+  side facts, explicit absent-side wording, and root-scope transition identity
+  decision IDs. Virtualized timeline, candidate, and issue lists now use
+  imperative scrolling with deferred post-mount focus recovery so keyboard
+  End/Arrow navigation reaches offscreen last entries.
+- Changed paths: approved Explorer/panel/bootstrap/webview/resource/webpack
+  paths, calendar helper directory, named Slice 3 tests, and durable
+  use-case/index/README/CHANGELOG/evidence files. No unlisted localization
+  helper was changed; package contributions and public message contracts are
+  unchanged.
+- Validation evidence after the correction pass: `rtk pnpm run test:compile`;
+  projection/localization/accessibility/view tests covering metadata,
+  paired/one-sided/root-scope facts, root/outcome no-match matrices, keyboard
+  navigation, legend patterns, and a 10,000-entry DOM bound plus first/last
+  focus reachability for timeline, candidates, and issues; focused Explorer
+  action and repeated panel lifecycle coverage compiled for the extension-host
+  run; production and desktop/web development builds; desktop and web
+  extension-host tests;
+  `qlty:check` (no issues); `qlty:smells` (advisory complexity/duplication
+  findings only); markdown lint; and `git diff --check`. Desktop retains the
+  existing macOS codesign warning and web retains the existing
+  EPIPE/Premature-close stream-cleanup warnings.
+- Compatibility/readiness: no new Node or VS Code dependency enters shared
+  webview code. The calendar panel uses a nonce-bound CSP and
+  `asWebviewUri`; inherited display language controls EN/JA fallback; raw
+  values are React-escaped; no telemetry or public result/report/JSON/Explorer
+  transport change is introduced.
+- Unresolved risk: the independent implementation reviewer must re-check the
+  correction pass against the approved acceptance matrix.
+- Recommended route: Main routes this corrected diff to the independent
+  `implementation-reviewer` for re-review; further Findings return through
+  Main to the implementer within the approved Slice 3 paths. Completion
+  Approval and commit remain gated.
+
 ## Slice 3 Replanning Evidence
 
 - Trigger addressed: current `main` commit `8e6922f8` completion-committed the

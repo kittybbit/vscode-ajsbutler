@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a read-only, localized Schedule Impact timeline to Semantic Diff
+  Explorer for valid comparison periods, including supported runs, explicit
+  no-run or uncalculated outcomes, identity candidates, independent filters,
+  keyboard accessibility, and bounded large-result rendering.
 - Fixed Semantic Diff false-positive candidate changes when repeated nested
   `g`/`mg` job groups have distinct canonical paths, while preserving
   conservative ambiguity for duplicate paths.
