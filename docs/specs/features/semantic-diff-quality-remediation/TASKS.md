@@ -32,6 +32,9 @@
   a CodeQL finding in Transport and Qlty formatting findings for exactly three
   documentation paths. Slice 11 below is a bounded quality-gate replan; no
   implementation is authorized by this record alone.
+- Slice 11 planning-state commit `3358e5f0` is complete. The previously
+  approved Transport/test implementation is now present as an uncommitted
+  working-tree diff; completion review and Completion Approval remain pending.
 
 ## Sync Rule
 
@@ -42,24 +45,28 @@
 
 ## Plan Status
 
-- Status: Human Approved for Slice 11 after Feature Exit `DoNotClose`; Slices
-  1-10 are complete and committed, with Slice 10 completion commit
-  `089b3825`. Slice 11 is the active bounded quality-gate correction and its
-  focused replan/state commit is pending.
+- Status: Replanned after Slice 11 implementation exposed a formatter
+  validation boundary blocker. Slices 1-10 are complete and committed, with
+  Slice 10 completion commit `089b3825`; Slice 11 planning-state commit
+  `3358e5f0` is complete. Its previously approved runtime/test implementation
+  remains uncommitted and preserved while this formatter-only replan proceeds
+  through its approved gates.
 - Planning scope: the completed ten-slice remediation plus the one remaining
   CodeQL finding in `scheduleImpactCalendarTransport.ts` and the exact three
   remote formatter paths: this feature's `TASKS.md`, this feature's
   `TRACEABILITY.md`, and `docs/specs/features/schedule-impact-calendar/TASKS.md`.
   The Calendar path is formatting-only and must not change lifecycle, content,
   or status state.
-- Review status: historical ten-slice plan/replan reviews are `Ready` with no
-  findings; Slice 11 independent plan review is `Ready` with no findings.
-- Human approval: all ten completed slices retain their recorded approvals;
-  Slice 11 Human Approval is `Approved` on 2026-09-13 for the exact revised
-  boundary below.
-- Active implementation slice: none. Slice 11 implementation remains paused
-  until independent review, Human Approval, and the focused replan/state
-  commit complete.
+- Review status: historical ten-slice plan/replan reviews and the prior Slice
+  11 plan review are `Ready` with no findings; the formatter-validation
+  replan is independently reviewed `Ready` with no findings.
+- Human approval: all ten completed slices and the prior Slice 11 runtime/test
+  boundary retain their recorded approvals; the formatter-validation replan
+  is `Approved` at `2026-09-13T15:57:35+09:00` for the exact planning paths
+  recorded below.
+- Active implementation slice: Slice 11 runtime/test implementation is
+  present only as the preserved uncommitted diff from `3358e5f0`; formatter
+  mutation and Completion Approval remain pending the new replan gates.
 - Slice count and order: eleven slices in dependency order; Slice 11 follows
   the ten completed implementation slices and precedes integrated gates and
   Feature Exit.
@@ -1986,8 +1993,12 @@ After Slice 11 is reviewed, approved, and committed:
       completion commit is `089b3825`.
 - [x] Independently review and obtain Human Approval for Slice 11's exact
       replan boundary.
-- [ ] Commit the approved Slice 11 planning state.
-- [ ] Implement, review, complete, and commit Slice 11; apply the explicitly
+- [x] Commit the prior approved Slice 11 planning state (`3358e5f0`).
+- [ ] Independently review and obtain new Human Approval for the
+      formatter-validation fallback replan.
+- [ ] Isolate and commit the approved formatter-validation plan state while
+      preserving the dirty runtime/test implementation.
+- [ ] Review, approve, complete, and commit Slice 11; apply the explicitly
       approved three-path formatter only after Completion Approval.
 - [ ] Pass integrated local and remote gates.
 - [ ] Perform Feature Exit and approved closure commit.
@@ -2347,10 +2358,15 @@ issues`; Slice 7-owned smell findings are clear.
 
 ## Slice 11: Remote quality-gate completion remediation
 
-- Status: Human Approved; focused replan/state commit is pending.
-- Scope: clear the single remote CodeQL finding in the completed Calendar
-  transport path and repair the exact three remote formatter paths without
-  changing runtime behavior, public contracts, or feature lifecycle state.
+- Status: Replanned for formatter-validation fallback; prior runtime/test
+  implementation scope is complete in the working tree after planning-state
+  commit `3358e5f0`, while independent implementation review and Completion
+  Approval remain pending. The formatter-validation replan is independently
+  reviewed `Ready` and Human Approved for the exact planning paths below.
+- Scope: retain the approved Transport direct-dispatch correction and focused
+  test exactly as implemented, then validate and repair only the exact three
+  remote formatter paths without changing runtime behavior, public contracts,
+  or feature lifecycle state. This replan adds no production or test path.
 - User / Domain Value: complete PR #317's legitimate quality gate so Feature
   Exit can be re-run against the fully committed branch.
 - Cohesive Change Group: replace Transport's dynamic host-validator invocation
@@ -2358,49 +2374,70 @@ issues`; Slice 7-owned smell findings are clear.
   direct named calls to `validateClose`, `validateSession`, and
   `validateFailure`; add or adjust only the focused Transport characterization
   needed to prove the dispatch and preserve Bridge behavior through its
-  existing regression suite; and apply the Cloud-equivalent formatter to
-  exactly these documentation paths: this feature's `TASKS.md`, this feature's
-  `TRACEABILITY.md`, and `docs/specs/features/schedule-impact-calendar/TASKS.md`.
-  The Calendar path is formatting-only: lifecycle, content, and status meaning
+  existing regression suite; and apply the bounded pinned Prettier `3.6.2`
+  default-config validation to exactly these documentation paths: this
+  feature's `TASKS.md`, this feature's `TRACEABILITY.md`, and
+  `docs/specs/features/schedule-impact-calendar/TASKS.md`. The actual remote
+  Cloud Qlty `fmt` result after the normal PR push remains authoritative. The
+  Calendar path is formatting-only: lifecycle, content, and status meaning
   must remain unchanged.
-- Exact Production Path:
+- Exact Production Path (preserved prior approval):
   `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts`.
-- Exact Test Paths: `src/test/suite/scheduleImpactCalendarTransport.test.ts`
-  for the direct-dispatch/reserved-type regression; re-run
+- Exact Test Path (preserved prior approval):
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts` for the
+  direct-dispatch/non-coercion regression; re-run
   `src/test/suite/scheduleImpactCalendarBridge.test.ts` unchanged as the
-  focused Bridge regression boundary. No Bridge source or test edit is
-  required unless implementation evidence shows a regression guard is
-  necessary within this exact boundary.
+  focused Bridge regression boundary. This replan authorizes no runtime or
+  test-path expansion.
 - Exact Documentation Paths:
   `docs/specs/features/semantic-diff-quality-remediation/TASKS.md`,
   `docs/specs/features/semantic-diff-quality-remediation/TRACEABILITY.md`, and
   `docs/specs/features/schedule-impact-calendar/TASKS.md`. Only the first two
   are role-owned planning artifacts in this replan; the Calendar plan is a
   downstream formatting-only mechanical path.
-- Acceptance: host messages with `close`, `session`, and `failure` use strict
-  equality and exactly three direct named validation calls; unknown, reserved,
-  non-string, and object discriminants return `invalid-request` through
-  `validateScheduleImpactCalendarMessage` without string coercion or arbitrary
-  invocation. Strict JSON validation, error precedence, message types,
-  browser-safe imports, and function/file Qlty thresholds stay unchanged.
-  Remote CodeQL and Qlty formatter checks pass with no suppression, dismissal,
-  ignored path, baseline, threshold, or config change.
-- Validation: run the focused Transport and unchanged Bridge suites, test
+- Acceptance: the preserved implementation makes host messages with `close`,
+  `session`, and `failure` use strict equality and exactly three direct named
+  validation calls; unknown, reserved, non-string, and object discriminants
+  return `invalid-request` through `validateScheduleImpactCalendarMessage`
+  without string coercion or arbitrary invocation. Strict JSON validation,
+  error precedence, message types, browser-safe imports, and function/file
+  Qlty thresholds stay unchanged. Remote CodeQL and Qlty formatter checks
+  pass with no suppression, dismissal, ignored path, baseline, threshold, or
+  config change.
+- Preserved implementation evidence: the working-tree diff from planning
+  commit `3358e5f0` changes only
+  `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts` and
+  `src/test/suite/scheduleImpactCalendarTransport.test.ts`. The direct
+  Transport tests report 7 passing, the unchanged Bridge regression reports 2
+  passing, the desktop runner exits `0`, the architecture suite reports 25
+  passing, scoped Qlty reports no issues/smells, and Web Smoke reports the
+  existing WEB-7 through WEB-10 counters. This evidence is preserved for
+  independent implementation review; Completion Approval has not been
+  recorded.
+- Validation: re-run the focused Transport and unchanged Bridge suites, test
   compile, the complete desktop suite, bundle-backed Chromium WEB-7 through
   WEB-10, production build, architecture dependency checks, scoped Qlty
   `fmt`, `check`, and `smells --no-snippets`, Markdown lint, and
-  `git diff --check`. The authoritative Cloud build is
+  `git diff --check` after the formatter-validation replan is approved and
+  committed. The authoritative Cloud build is
   `01a0989c-5572-7169-87b4-43f4728ad729` at HEAD `089b3825`, using Qlty
   `0.644.0` on `linux-x64`, Node `22.23.1`, and Prettier `3.6.2`. Its
   formatter ran `sh -c "prettier --config  -w <absolute target paths>"` with
   no visible config value and no `prose-wrap` flag: invocation `U6leZO`
   targeted Calendar TASKS plus this feature's TRACEABILITY and exited `0`
   with 2 issues; invocation `hu2e7x` targeted this feature's TASKS and exited
-  `0` with 1 issue. The blank config display does not establish hidden config
-  contents, so local parity must be verified from the actual Cloud-produced
-  change/output; do not infer `prose-wrap` behavior. For a bounded local
-  check, use a pinned transient Prettier `3.6.2` executable with no repository
-  dependency or lockfile change:
+  `0` with 1 issue. The blank config display has no downloadable formatter
+  artifact, so no Cloud/local byte parity is claimed and no hidden config or
+  `prose-wrap` behavior may be inferred.
+- Formatter-validation fallback: after implementation review `Ready`,
+  Completion Approval, and explicit approval for the exact three formatter
+  paths, run a pinned transient Prettier `3.6.2` executable using its default
+  local configuration on only the approved paths below. Perform semantic
+  Markdown equivalence checks before/after formatting: headings, list and
+  table cell text, code spans/fences, links, approval records, lifecycle and
+  status statements must be unchanged apart from formatting whitespace. Then
+  run the matching path-only read-only check and Markdown lint. No repository
+  dependency, configuration, or lockfile change is allowed:
 
   ```text
   pnpm dlx --package prettier@3.6.2 prettier --write \
@@ -2413,43 +2450,56 @@ issues`; Slice 7-owned smell findings are clear.
     docs/specs/features/semantic-diff-quality-remediation/TRACEABILITY.md
   ```
 
-  These commands are bounded validation instructions, not evidence yet. If
-  the formatter config/parity cannot be confirmed from Cloud evidence, stop
-  rather than guessing. The explicit three-path formatter mutation is the
-  final documentation mutation after Completion Approval; then run the
-  non-mutating three-path check and `git diff --check`, and finally re-run the
-  remote Verify, Qlty `check`/`fmt`, and CodeQL gates for PR #317.
-- Gate order: commit the approved Slice 11 planning state first; implement the
-  Transport correction and any focused test change; update implementation
-  evidence; obtain independent implementation review `Ready`; record
-  Completion Approval; obtain explicit approval for the exact three-path
-  formatter mutation; run only that formatter as the final mutation; then run
-  non-mutating checks and commit the completed slice. Any later write to
-  TASKS/TRACEABILITY requires repeating the explicitly approved path-only
-  formatter pass before the next gate. Remote updates must not alter files
-  outside the three formatter paths after that pass.
+- These commands are planned validation/mutation instructions, not current
+  evidence. The local pinned check currently reports the three Cloud-flagged
+  paths as unformatted; the fallback may proceed only if semantic equivalence
+  holds. Cloud byte parity cannot be confirmed from the blank config display,
+  so do not infer hidden config or `prose-wrap` behavior. The actual remote
+  Cloud Qlty `fmt` pass after the normal PR push remains authoritative; if it
+  fails, return to Main for another bounded replan with no broad formatting or
+  configuration change. Remote updates must not alter files outside the exact
+  three formatter paths.
+- Gate isolation and order: the current original worktree contains the
+  preserved uncommitted runtime/test diff, so the replan-state commit must not
+  be attempted there. From `3358e5f0`, create a dedicated temporary worktree
+  for the two planning documents, verify the original HEAD and hashes of both
+  dirty runtime/test paths before transfer, apply only this replan there, and
+  verify those hashes remain unchanged before creating the focused docs-only
+  plan/state commit. Fast-forward the original branch from that commit only
+  after verifying the runtime/test hashes again; preserve the dirty runtime
+  and test changes. Then follow: runtime/test implementation evidence →
+  independent implementation review `Ready` → Completion Approval → explicit
+  approval for the exact three formatter paths → default-config pinned
+  Prettier `--write` on only those paths as the final documentation mutation →
+  semantic equivalence, path-only `--check`, Markdown lint, diff/scope checks,
+  and completion commit. If later evidence writes touch TASKS/TRACEABILITY,
+  repeat the explicitly approved path-only formatter pass before the next
+  gate. Completion Approval cannot precede implementation review.
 - Production Readiness: preserve strict JSON distrust and byte limits,
   malformed/reserved-type rejection, deterministic validation/error ordering,
   session/request IDs, transport envelopes, Bridge listener/disposal behavior,
   desktop/web compatibility, and VS Code `^1.75.0`. Formatting must preserve
   all approval evidence and document semantics.
-- Approval Boundary: all ten completion commits, including `089b3825`, are
-  preserved. This new post-Feature-Exit correction requires independent plan
-  review and new Human Approval before any runtime, test, or formatter edit;
-  its focused replan/state commit must precede implementation. Completion
-  Approval must follow implementation review and precede the final explicit
-  three-path formatter approval/mutation. The Calendar TASKS path is limited
-  to mechanical formatting and carries no lifecycle/content/status
-  authorization. No `pnpm-lock.yaml` or other third path is in scope.
-- Dependencies: clean branch at `089b3825`, completed Slices 1-10, and the
-  committed web-harness and prior Slice 9 transport boundaries.
-- Risks: CodeQL may continue to report dynamic dispatch if any indirect call or
-  type coercion remains; the Cloud formatter's hidden config cannot be inferred
-  from its blank display, so unverified local parity could leave the
-  three-path remote gate red; and wrapping must not alter Markdown tables, code
-  spans, links, approval evidence, or Calendar plan meaning. Any extra path,
-  behavior change, or approval-boundary change returns to Main for a further
-  replan.
+- Approval Boundary: all ten completion commits, including `089b3825`, and the
+  approved Slice 11 runtime/test scope are preserved. This formatter-only
+  replan requires independent plan review and new Human Approval; its focused
+  plan/state commit must be isolated from the dirty runtime/test worktree and
+  precede any final formatter mutation. Completion Approval must follow
+  implementation review and precede the final explicit three-path formatter
+  approval/mutation. The Calendar TASKS path is limited to mechanical
+  formatting and carries no lifecycle/content/status authorization. No
+  `pnpm-lock.yaml` or other third path is in scope.
+- Dependencies: planning-state commit `3358e5f0`, preserved Transport/test
+  implementation diff, completed Slices 1-10, and the committed web-harness and
+  prior Slice 9 transport boundaries.
+- Risks: CodeQL may regress if the direct three-branch dispatch is changed;
+  the Cloud formatter's hidden config cannot be inferred from its blank
+  display, so local default formatting is only a bounded fallback and not
+  pre-established Cloud byte parity; wrapping must not alter Markdown tables,
+  code spans, links, approval evidence, or Calendar plan meaning; and an
+  unsafe worktree fast-forward could overwrite runtime/test changes. Any extra
+  path, behavior change, formatter failure, or approval-boundary change returns
+  to Main for a further replan.
 - Out of Scope: `pnpm-lock.yaml`, Qlty configuration or policy changes,
   suppression/dismissal, broad repository formatting, Bridge production
   changes, Calendar Slice 3 behavior, new commands, dependencies, generated
@@ -2468,8 +2518,9 @@ issues`; Slice 7-owned smell findings are clear.
 - Why the current plan cannot continue unchanged: all ten implementation
   slices are complete, but the remote security/format gates still block the
   Feature Exit acceptance criteria. The completed Slice 9 Transport behavior
-  must receive a bounded corrective slice; formatting evidence must also be
-  reconciled with the Cloud formatter's options. No third remote path is
+  must receive a bounded corrective slice. The earlier Cloud-formatter-options
+  reconciliation criterion is historical and superseded by the bounded
+  formatter-validation fallback recorded below. No third remote path is
   inferred: `pnpm-lock.yaml` is explicitly excluded by Qlty base/head
   configuration and remains out of scope.
 - Smallest revision: add Slice 11 with one existing Transport production path,
@@ -2484,9 +2535,11 @@ issues`; Slice 7-owned smell findings are clear.
 
 ## Slice 11 Human Approval (2026-09-13)
 
-- Status: Approved for the exact reviewed Slice 11 replan; focused
-  replan/state commit is pending. No implementation or formatter mutation is
-  authorized until that commit.
+- Status: Prior approval remains valid for the exact reviewed runtime/test
+  boundary; planning-state commit `3358e5f0` is complete and the implementation
+  diff is preserved for review. The formatter-validation fallback below
+  supersedes only that validation criterion; its separate approval is recorded
+  below. No formatter mutation or Completion Approval is recorded.
 - Approved at: 2026-09-13 in the current conversation, after independent
   plan review `Ready` with no findings; the user explicitly replied
   `進めてください。`.
@@ -2510,6 +2563,70 @@ issues`; Slice 7-owned smell findings are clear.
   desktop/web compatibility, Qlty policy, `pnpm-lock.yaml`, Calendar Slice 3,
   Dependabot work, and all paths not listed above.
 - Recommended next route: delegate the exact approved planning-document paths
-  to `approval-committer` for one focused replan/state commit. Implementation
-  follows only after that commit; completion review and the final formatter
-  mutation remain separate gates.
+  to `approval-committer` for one focused formatter-validation replan/state
+  commit. Completion review and the final formatter mutation remain separate
+  gates.
+
+## Slice 11 Formatter-Validation Replanning (2026-09-13)
+
+- Trigger/evidence: after planning-state commit `3358e5f0`, the approved
+  Transport/test implementation is complete in the working tree and all
+  implementation checks pass, but the pinned Prettier `3.6.2` read-only check
+  still reports the exact three Cloud-flagged documentation paths as
+  unformatted. The authenticated Cloud formatter exposes no config artifact
+  or value beyond its blank `--config` display, so required Cloud/local byte
+  parity cannot be established before mutation.
+- Why the approved plan cannot continue unchanged: the previous plan's now-
+  superseded Cloud-equivalent formatter-result criterion cannot be reproduced
+  or compared byte-for-byte from available evidence. The runtime/test
+  implementation and its approved scope remain unchanged; only formatter
+  validation and its final documentation-mutation gate need revision.
+- Smallest revised boundary: use pinned transient Prettier `3.6.2` with its
+  default local configuration as a bounded fallback on exactly the three
+  approved documentation paths, verify semantic Markdown equivalence and
+  path-only read-only checks/Markdown lint, then rely on the actual remote
+  Cloud Qlty `fmt` result after the normal PR push as authoritative. If the
+  remote result fails, stop and return to Main for another bounded replan; do
+  not broaden formatting or change Qlty configuration, dependencies, or the
+  lockfile.
+- Gate isolation: the original worktree retains the uncommitted Transport and
+  test files. Before the next plan/state commit, use a dedicated temporary
+  worktree from `3358e5f0`, verify HEAD and hashes for both dirty paths before
+  and after transferring the two planning-document changes, create the
+  focused docs-only commit there, then fast-forward the original branch only
+  after verifying those runtime/test hashes remain unchanged. No Calendar
+  document is edited during this replan.
+- Approval boundary: prior Slice 11 runtime/test approval and implementation
+  evidence remain preserved. This formatter-validation fallback changes only
+  the validation/approval boundary and is independently reviewed `Ready` and
+  Human Approved below. Completion Approval is not recorded. The final
+  formatter mutation remains reserved for after Completion Approval.
+- Recommended route: route only the two selected planning documents to
+  `approval-committer` for the isolated plan/state commit. Do not format,
+  modify tests/runtime, stage, commit, or push from this replan.
+
+## Slice 11 Formatter-Validation Replan Human Approval (2026-09-13)
+
+- Status: `Approved` for the exact formatter-validation fallback replan after
+  independent plan review `Ready` with no findings. This approval does not
+  grant Completion Approval or authorize formatter mutation.
+- Approved at: `2026-09-13T15:57:35+09:00`; the user explicitly replied
+  `承認します。`.
+- Approved planning/state paths for the next isolated plan commit:
+  `docs/specs/features/semantic-diff-quality-remediation/TASKS.md` and
+  `docs/specs/features/semantic-diff-quality-remediation/TRACEABILITY.md`.
+- Approved formatter execution paths, reserved for after implementation
+  review `Ready`, Completion Approval, and explicit final formatter approval:
+  these two planning documents plus
+  `docs/specs/features/schedule-impact-calendar/TASKS.md`. The Calendar path
+  is formatting-only and may not change lifecycle, content, or status state.
+- Preserved boundary: the approved Transport/test implementation, all ten
+  completion commits through `089b3825`, strict JSON/protocol behavior,
+  message/error precedence, Bridge behavior, desktop/web compatibility,
+  Qlty policy, `pnpm-lock.yaml`, Calendar Slice 3, Dependabot work, and all
+  paths outside the listed boundaries remain unchanged.
+- Recommended next route: `approval-committer` may prepare one isolated
+  plan/state commit containing only the two approved planning documents after
+  verifying the dirty Transport/test hashes; implementation review,
+  Completion Approval, and the final three-path formatter remain separate
+  gates.
