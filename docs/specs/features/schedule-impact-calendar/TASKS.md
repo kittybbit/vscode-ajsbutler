@@ -5,14 +5,16 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Implementation Mode for public Slice 3 after the comparison-workflow
-  dependency completed on the current `main`. Slice 1 is
-  completion-committed at `51a8ae4a`; Slice 2 is completion-committed at
-  `b9cee633`. Their runtime and focused test changes remain preserved.
-- Approved or active slice: Slice 3 implementation under the focused approved
-  plan commit `70ff7da7`. Slices 1 and 2 are complete and committed; the
-  independent implementation review and final batch Completion Approval are
-  pending.
+- Mode: Replanning Mode after the first three implementation slices completed
+  on the current `main`. Slice 1 is completion-committed at `51a8ae4a`, Slice
+  2 at `b9cee633`, and Slice 3 at `ffb92f1e`, with the format-only correction
+  committed at `09148de4`.
+- Approved or active slice: none. Slice 1, Slice 2, and Slice 3 have
+  independent `Ready` reviews, automatic no-findings Completion Approval, and
+  focused completion commits. The prior Feature Exit and Closure Approval
+  proposal is preserved as deferred; this replan adds the user-requested
+  calendar MUI Slice 4 and Explorer package/component Slice 5 before Feature
+  Exit can reopen.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -22,8 +24,8 @@
   `schedule-semantics-expansion`, `semantic-diff-structured-outputs`, and
   `semantic-diff-explorer` plans.
 - Validate the revised planning documents with `rtk pnpm run lint:md` and
-  `git diff --check`; record third-delta implementation results only after
-  its exact approved paths are implemented and rerun.
+  `git diff --check`; record Slice 4/5 implementation results only after the
+  exact approved paths are implemented and rerun.
 
 ## Current Plan Basis
 
@@ -61,24 +63,46 @@
   `buildWorkflowArtifacts`, and opens the parent through
   `openScheduleAwareExplorerSession`. Slice 3 must consume that completed
   artifact handoff instead of treating the workflow as unfinished.
-- The plan remains three slices: pure comparison artifacts and sidecar
+- Replanning trigger: after Slice 3 completed, the user explicitly requested
+  that the schedule-impact calendar be created with MUI and organized like
+  the other webviews. The current calendar view is behaviorally complete and
+  already uses some MUI primitives, but its session/view state and all
+  timeline, filter, root, no-run, candidate, issue, and legend sections remain
+  in one roughly 1,000-line component. This is a presentation-only structural
+  refactor within the selected feature purpose; it does not add schedule
+  meaning or change the sidecar/session contract.
+- Replanning trigger: the user then additionally requested that the Semantic
+  Diff Explorer's component and package structure follow the existing Flow and
+  Unit List webview pattern. The current Explorer uses a separate
+  `webview/semantic-diff` entry and combines loaded view composition in one
+  module, while its host-state, view-state, tree-data, row/detail, and action
+  helpers are already separable. Slice 5 moves only that presentation package
+  into `editor/semanticDiffExplorer` and keeps compatibility facades, the
+  host protocol, hierarchy, callbacks, and bundle output. This satisfies the
+  `SPECS.md` non-goal by preserving Explorer behavior; no normative SPECS
+  amendment is required.
+- The plan now has five slices: pure comparison artifacts and sidecar
   projection; internal command/bootstrap session and transport foundation;
-  then the public accessible timeline and documentation.
+  the public accessible timeline and documentation; the MUI webview
+  component decomposition and layout refinement requested after Slice 3; and
+  the requested presentation-only Explorer composition alignment.
 - Current boundaries remain: one identity pass and one schedule evaluation,
   immutable `{ result, summary }` context, host-private sidecar, no Explorer
   transport change, and no schedule recalculation or candidate merging.
-- Public calendar exposure is now gated by the workflow's successful
-  evaluated-period artifact (`scheduleImpact.kind === "available"`) and the
-  public Slice 3 implementation. Slices 1 and 2 are complete and committed
-  on this branch, including Slice 2 at `b9cee633`; Slice 3 is the active
-  implementation slice on the approved plan commit `70ff7da7`.
+- Public calendar exposure is gated by the workflow's successful evaluated-
+  period artifact (`scheduleImpact.kind === "available"`) and the completed
+  Slice 3 implementation. Slices 1, 2, and 3 are complete and committed on
+  this branch, including Slice 3 at `ffb92f1e` and its format correction at
+  `09148de4`; Slice 4 and Slice 5 are the only planned implementation work,
+  in that order.
 - The original independent plan review, first replan review, and second
   replan review are complete with `Ready` verdicts and no Findings. The third
   package has final independent `plan-reviewer` `Ready` review with no
   Findings and Main's automatic Human Approval. Its focused plan/replan commit
   `11615026` is complete; implementation review is `Ready` with no Findings,
   Completion Approval is recorded below, and focused completion commit
-  `51a8ae4a` is complete.
+  `51a8ae4a` is complete. Slice 4 and the newly added Slice 5 remain pending
+  independent plan review.
 
 ## Sync Rule
 
@@ -87,11 +111,11 @@
 - This file is the sole plan and current-state owner for this feature. Other
   feature folders inherited from the base branch remain outside this feature's
   scope.
-- `docs/specs/roadmap.md` records the calendar as a Wave 4 item whose public
-  entry condition is now satisfied by completion commit `8e6922f8`: the
-  comparison workflow and period-bearing artifact handoff are available.
-  The dependency chain remains internal Calendar Slices 1–2 → completed
-  workflow → public Calendar Slice 3.
+- `docs/specs/roadmap.md` still contains the completed Wave 4 calendar item;
+  the deferred closure package retains its proposed removal while preserving
+  the deferred schedule-semantics follow-ups. The dependency chain is
+  internal Calendar Slices 1–2 → completed workflow → public Calendar Slice 3
+  → presentation-only MUI Slice 4 → presentation-only Explorer Slice 5.
 - Keep this file focused on implementation slices, approval, validation, risk,
   production readiness, and Feature Exit readiness.
 
@@ -101,16 +125,22 @@
   commit `11615026` and completion-committed at `51a8ae4a`; Slice 2
   implementation is complete and completion-committed at `b9cee633` under
   the approved full-plan gate. Slice 3 implementation is complete under the
-  focused approved plan commit `70ff7da7`; independent implementation review
-  and final batch Completion Approval remain pending.
+  focused approved plan commit `70ff7da7`, reviewed `Ready` with no Findings,
+  and completion-committed at `ffb92f1e` plus format correction `09148de4`.
+  The explicit MUI/component-organization request reopens planning for Slice
+  4; Feature Exit and its prior Closure Approval proposal are deferred until
+  Slice 4 and Slice 5 complete.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
   timeline, outcome/run filtering, localization, bounded rendering, workflow
-  period-bearing action gating, validation, and durable user documentation.
+  period-bearing action gating, calendar MUI component organization, Explorer
+  editor-package component organization, validation, and durable user
+  documentation.
 - Review status: Original plan, first Replanning package, second Replanning
-  package, and third targeted package are `Ready` with no Findings. Slice 3
-  implementation review is pending.
+  package, third targeted package, and Slice 3 implementation review are
+  `Ready` with no Findings. The Slice 4 and Slice 5 replans are pending
+  independent `plan-reviewer` review.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -118,13 +148,16 @@
   with no Findings, Completion Approval is recorded, and the focused
   completion commit `51a8ae4a` is complete. The revised Slice 3 activation
   scope is approved in focused plan commit `70ff7da7` under the automatic
-  no-findings slice approval instruction; final batch human review remains
+  no-findings slice approval instruction. No Human Approval is asserted for
+  Slice 4 or Slice 5 by this replan; the final batch human decision remains
   pending.
-- Active implementation slice: Slice 3 implementation is complete and awaits
-  independent implementation review.
-- Slice order: Slice 1, Slice 2, then Slice 3. Each slice requires its own
-  implementation review, Completion Approval, and focused commit after the
-  plan gate.
+- Active implementation slice: none; Slices 1–3 are complete and committed.
+  Slice 4 and Slice 5 are planned and waiting for independent plan review and
+  the replan plan gate. Feature Exit is deferred until both are complete and
+  committed.
+- Slice order: Slice 1, Slice 2, Slice 3, Slice 4, then Slice 5. Each slice
+  requires its own implementation review, Completion Approval, and focused
+  commit after the plan gate; Feature Exit follows Slice 5.
 
 ## Human Approval
 
@@ -212,7 +245,7 @@ Findings and Completion Approval is recorded above; focused completion commit
 - Approved at: 2026-09-14; approved in current conversation
 - Basis: independent `plan-reviewer` re-review verdict `Ready for approval`;
   Findings none. Main applies the user's current automatic no-findings
-  slice approval authorization; final batch human review remains pending.
+  slice approval authorization. Explicit Closure Approval remains pending.
 - Approved scope: exactly Slice 3, including the corrected workflow guards and
   additive host-private Explorer action adapter described in its planned
   paths and approval scope. Slices 1 and 2 and upstream remediation remain
@@ -227,8 +260,50 @@ Findings and Completion Approval is recorded above; focused completion commit
   feature evidence files. No unlisted runtime/test/config changes.
 - Review status: Ready; both prior Findings resolved; no remaining Findings.
 - Plan commit status: Complete at `70ff7da7`.
-- Active implementation slice: Slice 3 implementation complete; independent
-  implementation review is pending.
+- Active implementation slice: none; Slice 3 implementation review is
+  `Ready` with no Findings and its completion commit is `ffb92f1e`.
+
+### Slice 4 Replan Human Approval
+
+- Status: Approved
+- Approved at: 2026-09-14; approved in current conversation
+- Basis: independent `plan-reviewer` combined Slice 4/5 verdict
+  Ready for approval; Findings none. Main applies the user's persistent
+  automatic no-findings slice approval instruction and explicit MUI/component/
+  package organization requests. Final batch human closure approval is pending.
+- Approved scope: exactly Slice 4 planned paths, presentation component
+  boundaries and validation below. Preserve completed slices and behavior,
+  DTOs, messages, actions, session lifecycle and compatibility.
+- Approved paths for this combined focused replan commit:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+- Implementation paths: only the exact Slice 4 planned paths below and
+  selected feature evidence documents.
+- Commit status: Pending; implementation starts after the focused replan
+  commit. Slice 4 precedes Slice 5 and each requires independent review.
+- Deferred roadmap closure proposal: preserved separately for final Feature
+  Exit; excluded from this replan and both implementation slices.
+
+### Slice 5 Replan Human Approval
+
+- Status: Approved
+- Approved at: 2026-09-14; approved in current conversation
+- Basis: independent `plan-reviewer` combined Slice 4/5 verdict
+  Ready for approval; Findings none. Main applies the user's persistent
+  automatic no-findings slice approval instruction and explicit MUI/component/
+  package organization requests. Final batch human closure approval is pending.
+- Approved scope: exactly Slice 5 planned paths, presentation component
+  boundaries and validation below. Preserve completed slices and behavior,
+  DTOs, messages, actions, session lifecycle and compatibility.
+- Approved paths for this combined focused replan commit:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+- Implementation paths: only the exact Slice 5 planned paths below and
+  selected feature evidence documents.
+- Commit status: Pending; implementation starts after the focused replan
+  commit. Slice 4 precedes Slice 5 and each requires independent review.
+- Deferred roadmap closure proposal: preserved separately for final Feature
+  Exit; excluded from this replan and both implementation slices.
 
 ## Completion Approval
 
@@ -317,7 +392,7 @@ Findings and Completion Approval is recorded above; focused completion commit
   passed. Prior review Findings are resolved. Existing host cleanup and bundle
   size warnings remain; no compatibility-floor or public-contract change.
 - Implementation review verdict: Ready; Findings none.
-- Commit status: Pending; one focused completed-slice commit is authorized.
+- Commit status: Complete; focused Slice 3 completion commit `ffb92f1e`.
 - Approved paths:
   - `CHANGELOG.md`
   - `README.md`
@@ -369,16 +444,21 @@ Findings and Completion Approval is recorded above; focused completion commit
 - Approved paths:
   - `src/test/suite/scheduleImpactCalendarView.test.tsx`
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
-- Commit status: Pending; separate focused corrective completion commit.
+- Commit status: Complete; focused format correction commit `09148de4`.
 
 ## Closure Approval
 
-- Status: Pending
+- Status: Pending explicit human Closure Approval
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Pending
-- Commit status: Not eligible
+- Feature Exit verdict: Close
+- Commit status: Eligible only after explicit Closure Approval
+- Proposed closure propagation: remove the completed Wave 4 calendar entry
+  from `docs/specs/roadmap.md`.
+- Proposed selected-feature removal: delete only
+  `docs/specs/features/schedule-impact-calendar/` after Closure Approval;
+  inherited feature folders remain preserved.
 
 ## Planning Inputs And Boundaries
 
@@ -785,9 +865,8 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   no-change guard covered by tests.
 - Documentation: add the durable schedule-impact use case, index it, update
   README and CHANGELOG only when Slice 3 makes the view observable, and run
-  Markdown lint. The roadmap records the Wave 4 placement and the completed
-  workflow/period-bearing artifact entry condition; this feature consumes that
-  wording without editing the roadmap.
+  Markdown lint. The closure package removes the completed Wave 4 roadmap
+  entry while retaining the deferred schedule-semantics follow-ups.
 
 ## Implementation Slices
 
@@ -1391,8 +1470,10 @@ tsconfig.json --noEmit`, `rtk pnpm run test:compile`, focused transport/
 - Status: Implementation complete under focused approved plan commit
   `70ff7da7`; Slice 1 and Slice 2 are complete, and the
   `semantic-diff-comparison-workflow` dependency is satisfied by `8e6922f8`.
-  Independent implementation review and final batch Completion Approval are
-  pending.
+  Independent implementation review is `Ready` with no Findings, and
+  Completion Approval is recorded. The focused completion commit is
+  `ffb92f1e`; the format-only correction is completion-committed at
+  `09148de4`. Explicit Closure Approval remains pending.
 - Scope: consume the completed workflow's successful evaluated-period
   `SemanticDiffPresentationArtifacts` through the existing
   `openScheduleAwareExplorerSession` companion, then expose one additive
@@ -1549,8 +1630,8 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
   existing allocator and session validation; `sdc-calendar-action-*` stays
   child-transport-private. Slice 3 does not alter the workflow, Explorer
   message union, or action-result envelope; it adds only the host-private
-  action and visible calendar integration. The Wave 4 roadmap entry records
-  the same completed-workflow prerequisite.
+  action and visible calendar integration. The completed Wave 4 calendar item
+  is removed from the roadmap during closure.
 - Risks: action ID allocation/registry drift, private callback ordering,
   hidden focus, screen-reader gaps, locale leakage,
   root/run filter conflation, timezone conversion, large DOM, candidate
@@ -1563,9 +1644,10 @@ runs`, and `Uncalculated schedule portions` are rendered. Partial roots show
 ### Slice 3 Implementation Evidence
 
 - Status: Slice 3 implementation is complete under focused approved plan
-  commit `70ff7da7`; independent implementation review and final batch
-  Completion Approval remain pending. No commit was created by the
-  implementer.
+  commit `70ff7da7`; independent implementation review is `Ready` with no
+  Findings, Completion Approval is recorded, and the focused completion commit
+  is `ffb92f1e`. The format-only correction is completion-committed at
+  `09148de4`; explicit Closure Approval remains pending.
 - Changed paths: the host-private Explorer calendar action adapter and
   lifecycle plumbing; the browser-safe calendar entry, model, filters,
   accessibility/focus helpers, view, and localized resources; the calendar
@@ -1615,14 +1697,336 @@ test:compile`; projection/localization/accessibility/view tests covering
   the panel uses a nonce-bound CSP and the bundle is loaded through
   `asWebviewUri` for desktop/web parity. Raw values are rendered as React text
   nodes and lifecycle disposal remains parent-owned.
-- Unresolved risks: the independent implementation reviewer must re-check the
-  correction pass against the approved acceptance matrix. Quality smell
+- Unresolved risks: no implementation or product risks remain. Quality smell
   findings are advisory and limited to the newly added UI/adapter complexity
-  and duplicated locale shape.
-- Recommended route: Main should route this corrected diff to the independent
-  `implementation-reviewer` for re-review; any further Findings return to
-  this implementer within the approved Slice 3 paths. Completion Approval and
-  the focused commit stay with Main and the approval-committer gate.
+  and duplicated locale shape. Existing desktop codesign, web stream-cleanup,
+  and webpack size warnings remain documented compatibility observations.
+- Recommended route at Slice 3 completion: Feature Exit was ready for explicit
+  Closure Approval; the subsequent user requests reopened planning for the
+  presentation-only Slice 4 calendar MUI decomposition and Slice 5 Explorer
+  package/component alignment. Preserve this closure proposal as deferred;
+  after Slices 4 and 5 complete and the final Closure Approval is recorded,
+  Main may route the proposed roadmap propagation and selected feature-folder
+  removal to `approval-committer` as one focused closure commit.
+
+### Slice 4: Organize The Calendar Webview With MUI Components
+
+- Status: Planned in Replanning Mode after Slice 3 completion commit
+  `ffb92f1e` and format correction `09148de4`; pending independent plan
+  review, the replan plan gate, implementation review, Completion Approval,
+  and a focused completion commit. Slice 5 follows this slice. The prior
+  Feature Exit/Closure Approval proposal is deferred until Slices 4 and 5 are
+  complete.
+- Scope: refactor the browser-safe calendar presentation into the same
+  entry-to-contents composition used by the table and Flow webviews. Keep the
+  thin `scheduleImpactCalendar.tsx` bootstrap entry, move session loading and
+  theme/global-style ownership into a lean `ScheduleImpactCalendarApp`, and
+  move model/filter/announcement composition into
+  `ScheduleImpactCalendarContents`. Organize the visible view around MUI
+  `AppBar`/`Toolbar`, `Box`, `Stack`, `Paper`, `List`/`ListItem`, `Chip`,
+  `Alert`, `Typography`, and MUI form controls. Preserve all existing facts,
+  filters, focus behavior, virtualization, lifecycle messages, and localized
+  labels while making the component boundaries explicit.
+- User / Domain Value: the schedule-impact calendar is maintainable and
+  visually consistent with the existing table and Flow webviews, with MUI
+  layout and control semantics that continue to support accessible inspection
+  of the completed comparison.
+- Cohesive Change Group: presentation-only component extraction and MUI shell
+  refinement. No application/domain meaning, bridge/session protocol,
+  Explorer action, or calendar sidecar change is part of this slice.
+- Planned paths and approval scope:
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`:
+    retain the session hook and provided-sidecar test seam, own
+    `ThemeProvider`, `CssBaseline`, `GlobalStyles` (including the shared
+    `viewerThemeGlobalStyles` and semantic-diff global styles), and render
+    loading/error states or `ScheduleImpactCalendarContents`. Preserve the
+    existing `ScheduleImpactCalendarView` export from this path for current
+    view tests while delegating its composition to the new contents module.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`:
+    own labels, model/filter state, live announcements, the 100vh MUI
+    `Stack`/`Box` surface, and the ordered child composition. The contents
+    component consumes the calendar sidecar DTO and the inherited language;
+    it does not read `MyContexts` or parser data.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`:
+    render the sticky MUI `AppBar`/`Toolbar` title, half-open period, and
+    global/visible result `Chip`/status text using the existing localized
+    labels and accessible title identity.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarFilters.tsx`:
+    extract the existing root, outcome, and run-state selectors into MUI
+    `Stack`, `FormControl`, `InputLabel`, and `NativeSelect` controls. Keep
+    the three independent conjunctive filter values, option IDs, focus
+    restoration, scope-transition labels, and filter-change announcement.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`:
+    group the root-status, valid-no-runs, candidate, issue, and legend
+    sections. Use MUI `Box`, `Stack`, `Paper`, `List`/`ListItem`, `Chip`, and
+    `Alert` for the existing explicit states and empty/no-result messages;
+    retain stable section labels, global/visible counts, root/candidate/issue
+    IDs, structured details, and localized absent-side wording.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`:
+    extract the date-grouped timeline, timeline item/run detail rendering,
+    and timeline-specific imperative focus/virtualization handling. Keep
+    `Virtuoso`, overscan, threshold, stable item IDs, date grouping, roving
+    keyboard navigation, deferred focus recovery, `Paper` cards, and the
+    existing accessible names unchanged.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarBoundedList.tsx`:
+    extract the shared bounded repeated-section list and its private
+    `useScheduleImpactCalendarBoundedList` focus/virtualization helper for
+    root, no-run, candidate, and issue rows. Reuse the current numeric
+    position/set-size and first/last focus behavior; do not introduce a
+    generic dependency or merge it with the timeline's identity-keyed focus
+    state when their contracts differ.
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx` (new focused
+    component test): assert the App → Contents → Header/Filters/Sections/
+    Timeline composition, MUI semantic roles and control labels, sticky
+    layout/status/empty-state rendering, and preservation of stable IDs and
+    filter behavior without snapshots that couple to incidental MUI markup.
+    Extend the existing calendar view/accessibility tests only where the
+    extracted component boundary requires it.
+  - Existing direct regression scope remains the ten suites
+    `scheduleImpactCalendarAccessibility.test.tsx`,
+    `scheduleImpactCalendarBridge.test.ts`,
+    `scheduleImpactCalendarLocalization.test.ts`,
+    `scheduleImpactCalendarProjection.test.ts`,
+    `scheduleImpactCalendarSession.test.ts`,
+    `scheduleImpactCalendarTransport.test.ts`,
+    `scheduleImpactCalendarView.test.tsx`,
+    `semanticDiffExplorerPanel.test.ts`,
+    `semanticDiffExplorerRegistry.test.ts`, and
+    `semanticDiffExplorerScheduleImpact.test.ts`; their existing lifecycle,
+    action, transport, DTO, a11y, locale, scale, and desktop/web assertions
+    remain in the Slice 4 validation set.
+- Acceptance: the unchanged thin calendar entry mounts a lean App that
+  supplies the existing theme and global styles, handles missing/failing
+  sessions, and delegates a supplied sidecar to Contents. Contents renders a
+  table/Flow-style 100vh MUI shell with a sticky Header, MUI filters, and
+  ordered root/no-run/candidate/issue/legend/timeline sections. The Header
+  preserves the title, half-open period, result counts, and accessible status;
+  Filters preserve independent conjunctive root/outcome/run-state behavior,
+  option IDs, focus recovery, and scope-transition wording; Sections preserve
+  all root, no-run, candidate, issue, legend, stable identity, count, and
+  explicit empty/error text; Timeline preserves date/time/rule/occurrence
+  ordering, side details, virtualization, roving focus, live announcements,
+  and 10,000-entry bounded rendering. MUI `Alert` is used only to present an
+  existing explicit empty/error/no-result state and does not invent a new
+  schedule status. EN/JA/fallback labels, high contrast, reduced motion,
+  200%/400% reflow, CSP, desktop/web behavior, and the calendar session
+  lifecycle remain unchanged.
+- Validation: run the new component behavior test and the ten existing
+  calendar/Explorer regression suites; `rtk pnpm run test:compile`;
+  production `rtk pnpm run build`; desktop and web development builds via
+  `rtk pnpm run development:desktop` and `rtk pnpm run development:web`;
+  desktop and web extension-host coverage through the repository's full test
+  preparation/run path; MUI role/label, filter, focus, live-region,
+  forced-colors, reduced-motion, reflow, localization, stable-ID, and
+  virtualization/DOM-bound checks; `rtk pnpm run qlty`; `rtk pnpm run
+lint:md`; and `git diff --check`.
+- Production Readiness: keep all shared code browser-safe and below the
+  existing architecture boundaries; preserve nonce-bound CSP and existing
+  bundle loading; retain stable DOM IDs, label keys, focus targets, counts,
+  and virtualization thresholds; ensure MUI layout works at high contrast,
+  forced colors, reduced motion, narrow widths, and large result sets; avoid
+  extra renders by keeping model derivation and callbacks in Contents; and
+  record no README/CHANGELOG change because this is an internal presentation
+  refactor with no new observable behavior.
+- Approval Boundary: only the calendar presentation App, the seven named
+  calendar component/helper files, and the focused component/regression test
+  updates listed above. `scheduleImpactCalendar.tsx` remains the existing
+  thin entry. The sidecar/application DTO and model contract, session bridge
+  and transport, Explorer registry/action IDs, bootstrap/panel lifecycle,
+  workflow period gate, `webpack.config.js`, package contributions, resource
+  keys, `MyContexts`, table/Flow components, schedule calculation, telemetry,
+  result/report/JSON contracts, and user-facing documentation are outside
+  this slice.
+- Dependencies: Slice 3 completion commit `ffb92f1e` plus format correction
+  `09148de4`; the completed workflow dependency `8e6922f8`; and the existing
+  shared MUI theme/style modules. Slice 4 has no dependency on the deferred
+  roadmap/feature-folder closure proposal. Implementation may start only
+  after independent plan review, the replan plan commit, and the normal
+  per-slice implementation gate; the user's automatic no-findings approval
+  applies after a clean independent implementation review, with the final
+  human approval still batched after all five slices.
+- Risks: moving state or refs can change filter reset, focus recovery, or
+  virtualized offscreen navigation; MUI semantic wrappers can change list and
+  label relationships; sticky/nested scrolling can regress narrow/reflow
+  behavior; extraction can introduce import cycles or duplicate theme roots;
+  and an over-eager shared hook can mix numeric section positions with
+  identity-keyed timeline focus. Tests must exercise lifecycle reopen/failure,
+  keyboard first/last and deferred focus, high contrast/reflow, all explicit
+  empty states, large lists, and unchanged DTO/bridge behavior.
+- Out of Scope: schedule recalculation or meaning, sidecar/model/DTO changes,
+  Explorer action/registry/transport changes, command/workflow/bootstrap/panel
+  changes, parser or `MyContexts` integration, table/Flow redesign, visual
+  month/week grid, external calendars, persistence, telemetry, new packages,
+  manifest/webpack/activation changes, and README/CHANGELOG changes.
+
+### Slice 5: Organize The Semantic Diff Explorer Webview Components
+
+- Status: Planned in Replanning Mode after the user additionally requested
+  that the Semantic Diff Explorer use the same component organization as the
+  other webviews. Slice 5 is ordered after the calendar MUI refactor in Slice
+  4 and is pending independent plan review, the replan plan gate,
+  implementation review, Completion Approval, and a focused completion commit.
+- Scope: preserve the existing Explorer host bridge while moving its webview
+  entry and components into an `editor/semanticDiffExplorer` package shaped
+  like `editor/ajsFlow` and `editor/ajsTable`. Separate the current loaded view
+  into a lean App, Contents/controller, Header/filter, summary-card, and
+  tree-panel composition. Use the existing MUI
+  `ThemeProvider`, `CssBaseline`, `GlobalStyles`, `Stack`, `Box`, `AppBar`,
+  `Toolbar`, `Paper`, `Card`, `Chip`, `Button`, and form-control patterns used
+  by the table and Flow webviews. Keep the Explorer hierarchy, row/detail
+  rendering, filter meaning, selection/focus state, output/source/Flow actions,
+  calendar action, host announcements, localization, theme-mode behavior, and
+  virtualization unchanged.
+- User / Domain Value: the existing Semantic Diff Explorer becomes easier to
+  maintain and consistent with the table/Flow webview composition without
+  changing the comparison facts or the actions reviewers use to inspect them.
+- Cohesive Change Group: presentation-only extraction of existing Explorer
+  React composition and MUI shell ownership. This slice does not reimplement
+  the Explorer hierarchy, alter application DTOs/messages, or change the
+  calendar action adapter.
+- Boundary check: `SPECS.md`'s non-goal against reimplementing the Explorer
+  hierarchy, Flow graph, diff overlays, source navigation, or public transport
+  remains satisfied because this slice only relocates existing rendering and
+  handlers behind compatible component props. No normative `SPECS.md` change
+  is required. A behavior, hierarchy, action, message, or public-contract
+  change discovered during implementation must return to Replanning and may
+  require a feature-author decision.
+- Planned paths and approval scope:
+  - `src/presentation/webview/editor/semanticDiffExplorer.tsx` (new thin
+    bundle entry): mirror `editor/flowViewer.tsx` and `editor/tableViewer.tsx`
+    by calling `bootstrapViewer` with the package App. Update the
+    `semanticDiffExplorer` entry in `webpack.config.js` to this path while
+    retaining the existing output bundle name and host HTML URL.
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp.tsx`
+    (new): own `useSemanticDiffExplorerHost`, theme-mode observation,
+    normalized labels, loading/failure rendering, and the single MUI theme/
+    global-style shell. Pass the existing view model, action IDs/callbacks,
+    host announcement, language, and theme mode to Contents. Preserve the
+    ready message, session filtering, stale/closed behavior, and pending
+    action element used for focus restoration.
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+    (new): own filter, tree-expansion, selection, and local announcement
+    controller composition. Render the table/Flow-style 100vh `Stack` shell,
+    semantic viewer surface, status/live region, and ordered Header, summary,
+    and tree-panel children. Keep the current `SemanticDiffExplorerViewProps`
+    action callback signatures and `virtualizedScrollToIndex` seam.
+  - `src/presentation/webview/editor/semanticDiffExplorer/Header.tsx` (new):
+    extract the
+    existing output and optional schedule-impact buttons and the
+    confirmation-required filter into a sticky MUI `AppBar`/`Toolbar` with
+    `Button`, `FormControl`, `InputLabel`, and `NativeSelect`. Preserve action
+    element forwarding for focus recovery, filter focus/announcement,
+    disabled/unavailable semantics, localized labels, and the existing
+    `sde-action-*` caller behavior.
+  - `src/presentation/webview/editor/semanticDiffExplorer/SummaryCards.tsx`
+    (new): extract
+    the summary card grid using MUI `Card`, `CardContent`, `Typography`, and
+    `Chip`-compatible facts while preserving card IDs, counts, accessible
+    names, responsive min-width, and detail values.
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+    (new):
+    extract the tree container, row handlers, `Virtuoso` threshold/overscan,
+    `aria-activedescendant` ownership, keyboard routing, row registration,
+    and action callback plumbing. Continue to consume the existing
+    `ExplorerRowView`/row-detail implementation from
+    `semanticDiffExplorerTree.tsx`; do not duplicate or reinterpret its leaf
+    facts, action availability, or detail formatting.
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`:
+    preserve the current module as a compatibility facade that exports the
+    new editor-package App as its default and keeps `applyExplorerFilter`
+    available to existing callers and tests. Keep
+    `src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx` as
+    a compatibility entry forwarding to the new editor package so old test or
+    host references remain valid; webpack uses the new editor entry.
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`:
+    preserve the current `SemanticDiffExplorerView` export and its direct
+    test-facing theme-mode API as a compatibility wrapper around the editor
+    package Contents;
+    retain the existing flatten/focus helper exports and `applyExplorerFilter`
+    re-export. The production App owns the one theme shell; direct View
+    callers continue to receive the current theme/global-style behavior.
+    Existing host, message, view-state, keyboard, focus, tree-data, row/detail,
+    localization, and theme-mode modules remain behavior owners and are not
+    redesigned.
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx` (new focused
+    component test): assert entry-compatible App loading/loaded composition,
+    Contents-to-Header/SummaryCards/ExplorerTreePanel boundaries, MUI roles
+    and labels, sticky layout, status/live-region behavior, output/calendar
+    callback element forwarding, and preservation of existing IDs without
+    snapshot coupling to incidental MUI markup.
+  - Existing Explorer regression scope remains
+    `src/test/suite/semanticDiffExplorerDom.test.tsx`,
+    `src/test/suite/semanticDiffExplorerThemeMode.test.ts`,
+    `src/test/suite/semanticDiffExplorerProjection.test.ts`,
+    `src/test/suite/semanticDiffExplorerMessages.test.ts`,
+    `src/test/suite/semanticDiffExplorerFlow.test.ts`,
+    `src/test/suite/semanticDiffExplorerSourceAction.test.ts`,
+    `src/test/suite/semanticDiffExplorerReportAction.test.ts`,
+    `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`,
+    `src/test/suite/semanticDiffExplorerPanel.test.ts`,
+    `src/test/suite/semanticDiffExplorerRegistry.test.ts`, and
+    `src/test/suite/muiTheme.test.ts`; run these unchanged except for import
+    compatibility assertions required by the extracted modules.
+- Acceptance: the existing Explorer bundle entry still mounts the new App;
+  App sends the same ready request, renders the same loading/failure state,
+  observes the same theme mode, and supplies one MUI theme/global-style
+  boundary to loaded Contents. Contents preserves the existing filter,
+  expanded-tree, latent-selection, status, announcement, and virtualization
+  behavior. Header preserves output, optional schedule-impact, and filter
+  controls, including callback element identity and unavailable action
+  semantics. SummaryCards preserve count/detail labels and responsive
+  layout. ExplorerTreePanel preserves tree roles, row IDs/levels/positions,
+  leaf detail/action buttons, keyboard navigation, deferred virtualized focus,
+  and source/Flow/report/calendar action routing. Existing localization,
+  high-contrast/forced-colors, reduced-motion, 200%/400% reflow, desktop/web,
+  session close/reopen, and stale/failure handling remain unchanged. No new
+  control or user workflow is added.
+- Validation: run the focused component test and all listed Explorer,
+  calendar-action, host-session, MUI-theme, flow/source/report regression
+  suites; `rtk pnpm run test:compile`; production `rtk pnpm run build`;
+  `rtk pnpm run development:desktop`; `rtk pnpm run development:web`;
+  desktop and web extension-host coverage through the repository's full test
+  preparation/run path; DOM/axe, role/label, action element-forwarding,
+  keyboard/focus, virtualized 10,000-row, theme-mode, forced-colors,
+  reduced-motion, localization, and reflow checks; `rtk pnpm run qlty`;
+  `rtk pnpm run lint:md`; and `git diff --check`.
+- Production Readiness: keep webview imports browser-safe and inside the
+  presentation boundary; keep the existing nonce-bound CSP and bundle URL;
+  avoid duplicate ThemeProviders in production; preserve target-size and
+  focus styles, row identity, virtualized DOM bounds, and callback lifecycles;
+  verify that App/Contents extraction does not change render timing or host
+  session cleanup; and make no README/CHANGELOG update because this is an
+  internal composition refactor with no new observable behavior.
+- Approval Boundary: only the new editor package App, Contents, Header,
+  SummaryCards, ExplorerTreePanel, and thin package entry; the two existing
+  compatibility facades/entry; the exact `webpack.config.js` entry path update;
+  and the focused component/regression test updates listed above. The
+  application DTO/message union, host bridge/session lifecycle, action
+  registry/transport, calendar sidecar, workflow, bootstrap/panel, bundle
+  output name, package contributions, parser data, Flow/source/report
+  behavior, and public contracts are outside this slice.
+- Dependencies: Slice 4's completion commit and the completed Slice 3
+  Explorer/calendar integration, plus the existing MUI theme and Explorer
+  host/view-state modules. Slice 5 is independent of the deferred roadmap and
+  feature-folder closure proposal. Implementation requires independent plan
+  review and the replan plan commit; the user's automatic no-findings
+  approval applies only after a clean implementation review, with the final
+  human approval still batched after all five slices.
+- Risks: moving theme ownership can change direct View test behavior or inject
+  duplicate global styles; splitting callbacks can lose the originating
+  button element used for focus restoration; tree ref/selection state can
+  drift across filter and virtualized updates; sticky/nested scrolling can
+  regress reflow or high contrast; and compatibility facades can create
+  cycles. Validate loading/loaded themes, stale/closed sessions, action
+  failures, hidden selection, first/last virtualized focus, all locales, and
+  DOM bounds before completion approval.
+- Out of Scope: Explorer hierarchy or leaf/detail meaning, Flow graph/source
+  navigation/report behavior, application/domain DTOs, public messages/action
+  envelopes, calendar session/sidecar/transport, host registry/bootstrap,
+  workflow/input/period logic, new controls, new actions, schedule semantics,
+  parser/MyContexts integration, package manifest/activation/contribution
+  changes, bundle output changes,
+  persistence, telemetry, and README/CHANGELOG changes.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -1633,8 +2037,9 @@ test:compile`; projection/localization/accessibility/view tests covering
   contracts → Slice 1 pure comparison artifacts/sidecar → Slice 2 command and
   bootstrap integration plus internal calendar foundation → completed workflow
   commit `8e6922f8` with its evaluated-period artifact handoff → Slice 3 public
-  action and visible timeline. Slice 2 must not expose a user-reachable action;
-  Slice 3 is the first public surface.
+  action and visible timeline → Slice 4 calendar MUI composition → Slice 5
+  Explorer MUI composition. Slice 2 must not expose a user-reachable action;
+  Slice 3 remains the first public surface and Slices 4–5 preserve it.
 - Every slice preserves the existing Explorer public message union,
   immutable `SemanticDiffOutputContext` shape `{ result, summary }`, stable
   `scheduleComparison.runChanges` ID/order semantics, JSON version 1, report
@@ -1673,7 +2078,8 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   root-to-non-root `removed-root-scope`/`added-root-scope` one-sided metadata,
   non-root exclusion, rename/move pair, and separate ambiguous candidates.
   Scope-transition metadata never creates cross-side run pairing, and Slice 3
-  filters/legend distinguish it from run-state effects.
+  filters/legend distinguish it from run-state effects. Slices 4 and 5 only
+  reorganize presentation components and do not alter this matrix.
 - No calendar sidecar, transport, or UI path may import parser internals,
   infrastructure, Node built-ins, VS Code, or UI frameworks across the
   documented architecture boundaries. Concrete host construction remains in
@@ -1687,32 +2093,49 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   candidate policy, root correspondence or scope-transition meaning,
   application wrapper output, sidecar registry ownership/API, action/command/
   contribution, persistence, external data, Flow/source redesign, visual
-  calendar grid, or compatibility-floor increase.
+  calendar grid, or compatibility-floor increase. A change from the Slice 4/5
+  presentation-only boundaries into Explorer hierarchy, action, message, or
+  model behavior also requires Replanning and may require a new feature-author
+  decision.
 
 ## Traceability
 
-- `TRACEABILITY.md` is required and maps CAL requirements to the three slices,
+- `TRACEABILITY.md` is required and maps CAL requirements to the five slices,
   concrete approval paths, tests, and durable documentation.
 - The sidecar identity, composite source-change resolution, root matrix,
   internal artifact contract, and pure application builder are Slice 1-owned;
   command caller/injection, bootstrap registry, same-context Explorer
   resolution, companion atomic lifecycle, transport, and lifecycle are Slice
-  2-owned; public action, completed-workflow artifact gate, presentation, filters/legend,
-  localization, and durable use-case documentation are Slice 3-owned. No
-  requirement is left to an unassigned slice.
+  2-owned; public action, completed-workflow artifact gate, presentation,
+  filters/legend, localization, and durable use-case documentation are Slice
+  3-owned; calendar MUI component organization is Slice 4-owned; and
+  Explorer MUI component organization is Slice 5-owned. No requirement is
+  left to an unassigned slice.
 
 ## Feature Exit
 
-- Definition of Done status: Not started; all three slices require independent
-  implementation review, Completion Approval, and focused commits.
-- Durable documentation: `uc-present-schedule-impact.md` and its index entry
-  must be complete when the feature becomes observable; README and CHANGELOG
-  evaluation is recorded in Slice 3. `docs/specs/roadmap.md` already records
-  the Wave 4 entry and the completed workflow/period-bearing-artifact
-  dependency.
-- Open risks: predecessor completion may expose insufficient complete side
-  arrays or issue ownership; any such contract widening returns to Main for
-  Replanning before implementation.
+- Definition of Done status: Deferred while Slice 4 and Slice 5 are planned.
+  Slices 1–3 are complete, independently reviewed `Ready` with no Findings,
+  automatically Completion-approved under the user's instruction, and
+  focused-commit complete. Slices 4 and 5 must each be independently reviewed,
+  automatically Completion-approved only after no Findings, and focused-commit
+  complete before Feature Exit can reopen for the final batch human approval.
+- Durable documentation: `uc-present-schedule-impact.md`, its index entry,
+  README, and CHANGELOG updates are complete. Architecture and glossary
+  propagation are not required. The closure package removes the completed
+  Wave 4 calendar item from `docs/specs/roadmap.md`.
+- Production readiness: desktop and web checks, compatibility guards,
+  accessibility, bounded rendering, lifecycle cleanup, privacy, and public
+  contract preservation are evidenced above. Existing macOS codesign,
+  web-stream cleanup, webpack-size, and advisory smell findings remain
+  documented observations.
+- Remaining risks: the planned presentation extractions may affect focus,
+  theme/global-style ownership, responsive layout, or callback identity; these
+  are Slice 4/5 implementation-review gates. Explicit human Closure Approval
+  remains deferred until both slices complete.
+- Proposed closure scope: update `docs/specs/roadmap.md` as above, then remove
+  only `docs/specs/features/schedule-impact-calendar/`; inherited feature
+  folders remain preserved.
 
 ## Validation
 
@@ -1788,7 +2211,7 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       markdown lint, and `git diff --check`. Desktop exited 0 with the known
       macOS codesign warning; web exited 0 with known EPIPE/Premature-close
       stream-cleanup warnings; quality smells remained advisory only.
-- [ ] Slice 3 proves separate root-outcome/run-state filters, scope-transition
+- [x] Slice 3 proves separate root-outcome/run-state filters, scope-transition
       filters/legend, partial/timeline/issue sections, candidate groups,
       English/Japanese/fallback resources, consumption of the completed
       workflow's evaluated-period artifact, no-period ordinary-Explorer/
@@ -1799,6 +2222,10 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       rendering, and durable use-case/index/docs lint. The completed workflow
       guards cover source/period selection, exact forwarding, cancellation,
       and one artifact/Explorer handoff; this slice does not modify them.
+- [x] Slice 3 received independent `implementation-reviewer` `Ready` review
+      with no Findings. Main recorded automatic Completion Approval under the
+      user's no-findings instruction; focused implementation commit `ffb92f1e`
+      and format correction commit `09148de4` are complete.
 - [x] Existing Semantic Diff result/context, JSON/report, Explorer, Flow,
       source, copy, schedule, and normal viewer regressions remain passing.
 - [x] Risk-based validation for the current Slice 1 implementation completed:
@@ -1817,8 +2244,8 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       comparison workflow completion, source/period selection, evaluated
       artifact production, and schedule-aware Explorer handoff are present;
       the old dependency-run-only Slice 3 gate is removed from the active plan.
-- [ ] Independent `plan-reviewer` review of this targeted Slice 3 dependency
-      reconciliation returns `Ready` with no Findings before implementation.
+- [x] Independent `plan-reviewer` review of this targeted Slice 3 dependency
+      reconciliation returned `Ready` with no Findings before implementation.
 
 ## Notes
 
