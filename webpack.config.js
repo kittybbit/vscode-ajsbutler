@@ -206,7 +206,7 @@ const editorConfig = (env, argv) => {
             tableViewer: "./src/presentation/webview/editor/tableViewer.tsx",
             flowViewer: "./src/presentation/webview/editor/flowViewer.tsx",
             semanticDiffExplorer:
-                "./src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx",
+                "./src/presentation/webview/editor/semanticDiffExplorer.tsx",
             scheduleImpactCalendar:
                 "./src/presentation/webview/editor/scheduleImpactCalendar.tsx",
         },

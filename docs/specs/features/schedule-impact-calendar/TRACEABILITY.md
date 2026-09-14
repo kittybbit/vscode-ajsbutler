@@ -327,6 +327,38 @@
   `plan-reviewer` review. No implementation or closure verdict is asserted by
   this section.
 
+## Slice 5 Implementation Evidence
+
+- Status: Implemented on 2026-09-15; pending independent
+  `implementation-reviewer` review, automatic no-findings Completion Approval,
+  and the focused completion commit.
+- Changed paths: new editor package entry and App/Contents/Header/
+  SummaryCards/ExplorerTreePanel modules; semantic-diff App/View/entry
+  compatibility facades; `webpack.config.js`; and the focused Explorer
+  component test. No DTO, message, action, session, transport, workflow,
+  bootstrap, calendar, Flow/source/report, manifest, resource, or user-doc
+  paths changed.
+- Acceptance evidence: the editor entry mounts the extracted App; the App
+  preserves host loading/failure and single theme ownership; Contents keeps
+  filtering, selection, announcements, tree expansion, and virtualization;
+  Header forwards originating action elements; SummaryCards preserves IDs,
+  counts, details, and accessible names; ExplorerTreePanel delegates existing
+  row/detail/keyboard/focus behavior without reinterpreting facts. The focused
+  test covers compatibility App identity, ready/loading behavior, MUI roles,
+  sticky header, status/live regions, output/calendar element forwarding, and
+  stable row IDs. Existing Explorer/calendar UI regressions are green.
+- Validation: `rtk pnpm run test:compile`; direct focused component and
+  Explorer/calendar UI suites (`62 passing`). Production and desktop/web
+  development builds, desktop/web extension-host checks, full qlty, Markdown
+  lint, and diff check remain the final post-edit readiness checks.
+- Compatibility/readiness: webpack keeps the `semanticDiffExplorer` output
+  name while consuming the editor entry. Legacy imports remain available, the
+  production App has one MUI theme/global-style boundary, and shared imports
+  remain browser-safe. No external behavior, public contract, telemetry, or
+  compatibility-floor change was introduced.
+- Review route: Main should route this Slice 5 package to the independent
+  `implementation-reviewer`; no completion or closure verdict is asserted.
+
 ## Dependency And Approval Trace
 
 - Slice 1 uses the schedule-semantics predecessor evaluation and the
