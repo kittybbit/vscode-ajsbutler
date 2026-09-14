@@ -1,5 +1,5 @@
-import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
-import type { SemanticDiffScheduleImpact } from "../../../application/semantic-diff/semanticDiffScheduleImpact";
+import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
 import type { ScheduleImpactCalendarSessionId } from "./scheduleImpactCalendarTransport";
 
 export type ScheduleImpactCalendarDisplayLanguage = "en" | "ja";

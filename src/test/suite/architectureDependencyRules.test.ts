@@ -48,6 +48,33 @@ const movedSemanticDiffModules = [
   "semanticDiffExplorerSourceActionRunner",
   "semanticDiffReportDocument",
 ] as const;
+const scheduleImpactCalendarHostRoot = path.join(
+  repoRoot,
+  "src/presentation/vscode/webview/scheduleImpactCalendar",
+);
+const scheduleImpactCalendarHostModules = [
+  "scheduleImpactCalendarJson.ts",
+  "scheduleImpactCalendarPanel.ts",
+  "scheduleImpactCalendarPanelRuntime.ts",
+  "scheduleImpactCalendarSessionRegistry.ts",
+  "scheduleImpactCalendarTransport.ts",
+] as const;
+const semanticDiffExplorerEditorRoot = path.join(
+  repoRoot,
+  "src/presentation/webview/editor/semanticDiffExplorer",
+);
+const semanticDiffExplorerBrowserModules = [
+  "semanticDiffExplorerFocus.ts",
+  "semanticDiffExplorerHostMessageState.ts",
+  "semanticDiffExplorerHostState.ts",
+  "semanticDiffExplorerKeyboard.ts",
+  "semanticDiffExplorerLocalization.ts",
+  "semanticDiffExplorerThemeMode.ts",
+  "semanticDiffExplorerTree.tsx",
+  "semanticDiffExplorerTreeData.ts",
+  "semanticDiffExplorerView.tsx",
+  "semanticDiffExplorerViewState.ts",
+] as const;
 
 const sourceFilesUnder = (directory: string): string[] =>
   fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -385,6 +412,87 @@ suite("Architecture dependency rules", () => {
       },
     );
     assert.deepStrictEqual(imports, []);
+  });
+
+  test("keeps Calendar and Explorer browser modules in canonical packages", () => {
+    scheduleImpactCalendarHostModules.forEach((file) => {
+      assert.ok(fs.existsSync(path.join(scheduleImpactCalendarHostRoot, file)));
+      assert.strictEqual(
+        fs.existsSync(
+          path.join(repoRoot, "src/presentation/vscode/webview", file),
+        ),
+        false,
+        `${file} must not remain in the flat host webview package`,
+      );
+    });
+    semanticDiffExplorerBrowserModules.forEach((file) => {
+      assert.ok(fs.existsSync(path.join(semanticDiffExplorerEditorRoot, file)));
+      assert.strictEqual(
+        fs.existsSync(
+          path.join(repoRoot, "src/presentation/webview/semantic-diff", file),
+        ),
+        false,
+        `${file} must not remain in the removed browser package`,
+      );
+    });
+    assert.strictEqual(
+      fs.existsSync(
+        path.join(repoRoot, "src/presentation/webview/semantic-diff"),
+      ),
+      false,
+    );
+
+    const staleImports = sourceFilesUnder(path.join(repoRoot, "src")).flatMap(
+      (filePath) => {
+        const file = path
+          .relative(repoRoot, filePath)
+          .split(path.sep)
+          .join("/");
+        return collectImportReferencesFromSource(
+          file,
+          fs.readFileSync(filePath, "utf8"),
+        ).filter(
+          ({ specifier }) =>
+            specifier.includes("webview/semantic-diff/semanticDiffExplorer") ||
+            specifier.includes("webview/editor/scheduleImpactCalendarBridge") ||
+            /webview\/scheduleImpactCalendar(?:Json|Panel|PanelRuntime|SessionRegistry|Transport)/u.test(
+              specifier,
+            ),
+        );
+      },
+    );
+    assert.deepStrictEqual(staleImports, []);
+
+    const webpackSource = fs.readFileSync(
+      path.join(repoRoot, "webpack.config.js"),
+      "utf8",
+    );
+    assert.match(
+      webpackSource,
+      /semanticDiffExplorer:\s*"\.\/src\/presentation\/webview\/editor\/semanticDiffExplorer\.tsx"/u,
+    );
+    assert.match(
+      webpackSource,
+      /scheduleImpactCalendar:\s*"\.\/src\/presentation\/webview\/editor\/scheduleImpactCalendar\.tsx"/u,
+    );
+
+    const browserImports = semanticDiffExplorerBrowserModules.flatMap(
+      (file) => {
+        const filePath = path.join(semanticDiffExplorerEditorRoot, file);
+        const relative = path
+          .relative(repoRoot, filePath)
+          .split(path.sep)
+          .join("/");
+        return collectImportReferencesFromSource(
+          relative,
+          fs.readFileSync(filePath, "utf8"),
+        ).filter(
+          ({ specifier }) =>
+            specifier === "vscode" || specifier.startsWith("node:"),
+        );
+      },
+    );
+    assert.deepStrictEqual(browserImports, []);
   });
 
   test("keeps Semantic Diff adapter category graph acyclic", () => {

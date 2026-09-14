@@ -9,7 +9,7 @@ import type { SemanticDiffExplorerViewModel } from "../../../../application/sema
 import {
   semanticDiffExplorerCardLabel,
   type SemanticDiffExplorerLabels,
-} from "../../semantic-diff/semanticDiffExplorerLocalization";
+} from "./semanticDiffExplorerLocalization";
 
 export type SemanticDiffExplorerSummaryCardsProps = Readonly<{
   viewModel: SemanticDiffExplorerViewModel;

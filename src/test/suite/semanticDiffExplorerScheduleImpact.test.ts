@@ -14,8 +14,8 @@ import {
   createScheduleImpactCalendarPanel,
   openScheduleImpactCalendarPanel,
   type ScheduleImpactCalendarPanelHandle,
-} from "../../presentation/vscode/webview/scheduleImpactCalendarPanel";
-import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendarSessionRegistry";
+} from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry";
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelTypes";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
 

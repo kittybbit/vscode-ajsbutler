@@ -1,7 +1,7 @@
 import type {
   SemanticDiffExplorerLeaf,
   SemanticDiffExplorerTreeNode,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 
 export type ExplorerRow = Readonly<{
   id: string;

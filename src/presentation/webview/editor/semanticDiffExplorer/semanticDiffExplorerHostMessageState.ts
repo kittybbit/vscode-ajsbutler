@@ -3,11 +3,11 @@ import {
   createSemanticDiffExplorerReadyRequest,
   parseSemanticDiffExplorerHostMessage,
   type SemanticDiffExplorerHostMessage,
-} from "../../../application/semantic-diff/semanticDiffExplorerMessages";
+} from "../../../../application/semantic-diff/semanticDiffExplorerMessages";
 import type {
   SemanticDiffExplorerActionId,
   SemanticDiffExplorerSessionId,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import type { ExplorerHostState } from "./semanticDiffExplorerHostState";
 

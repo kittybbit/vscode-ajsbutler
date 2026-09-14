@@ -421,6 +421,37 @@
   `plan-reviewer` review. No Human Approval, implementation evidence, or
   Closure verdict is asserted by this section.
 
+## Slice 6 Implementation Evidence
+
+- Status: Implemented on 2026-09-15; pending independent
+  `implementation-reviewer` review, automatic no-findings Completion Approval,
+  and the focused completion commit.
+- Changed paths: five Calendar host/session/JSON/transport files moved into
+  `presentation/vscode/webview/scheduleImpactCalendar/`; the browser bridge
+  moved into `editor/scheduleImpactCalendar/`; ten Explorer browser modules
+  moved into `editor/semanticDiffExplorer/`; obsolete browser facades/entry
+  removed; listed consumers/tests canonicalized; architecture/location test
+  expanded; and selected feature evidence updated.
+- Acceptance evidence: one canonical Calendar host package and one canonical
+  Explorer browser package are enforced by filesystem assertions; stale flat
+  imports and the removed browser folder are absent; webpack still targets the
+  editor entries; moved browser modules have no VS Code/Node imports; and the
+  canonical component test verifies editor App identity plus existing MUI,
+  status/live-region, focus/action callback, and stable-ID behavior. Existing
+  Explorer, Calendar, host-session, transport, Flow/source/report, and web
+  smoke regressions remain green.
+- Validation: direct canonical Explorer/Calendar matrix (`74 passing`),
+  architecture/location suite, test compile, production and desktop/web
+  development builds, desktop and web extension-host runs, full qlty, Markdown
+  lint, and diff check all pass. Existing macOS codesign, web stream-cleanup,
+  and webpack-size warnings remain environmental observations.
+- Compatibility/readiness: module exports, public messages/actions/DTOs,
+  session/transport lifecycle, CSP, `asWebviewUri` paths, bundle filenames,
+  desktop/web support, and VS Code compatibility remain unchanged. The
+  relocation introduces no user-visible behavior or telemetry change.
+- Review route: Main should route this Slice6 package to the independent
+  `implementation-reviewer`; no completion or closure verdict is asserted.
+
 ## Dependency And Approval Trace
 
 - Slice 1 uses the schedule-semantics predecessor evaluation and the

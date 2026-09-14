@@ -6,12 +6,12 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import type { SemanticDiffExplorerLeaf } from "../../../application/semantic-diff/semanticDiffExplorer";
+import type { SemanticDiffExplorerLeaf } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type {
   SemanticDiffDetail,
   SemanticDiffTarget,
   SemanticDiffUnitTarget,
-} from "../../../application/semantic-diff/semanticDiffDto";
+} from "../../../../application/semantic-diff/semanticDiffDto";
 import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import {
   allExpandableNodeIds,
@@ -21,7 +21,7 @@ import {
 import {
   semanticDiffExplorerFocusSx,
   semanticDiffExplorerSelectionSx,
-} from "../shared/muiTheme";
+} from "../../shared/muiTheme";
 import { focusExplorerRowAfterVirtualizedScroll } from "./semanticDiffExplorerFocus";
 
 export type { ExplorerRow } from "./semanticDiffExplorerTreeData";

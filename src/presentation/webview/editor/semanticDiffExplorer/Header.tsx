@@ -9,7 +9,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import type { SemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
-import type { SemanticDiffExplorerLabels } from "../../semantic-diff/semanticDiffExplorerLocalization";
+import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import { semanticDiffExplorerFocusSx } from "../../shared/muiTheme";
 
 const calendarActionLabel = (language: string): string =>

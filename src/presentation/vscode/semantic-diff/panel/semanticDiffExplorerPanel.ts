@@ -14,8 +14,8 @@ import { installSemanticDiffExplorerPanel } from "./semanticDiffExplorerPanelIns
 import { postSemanticDiffExplorerMessage } from "./semanticDiffExplorerPanelTransport";
 import { disposeSemanticDiffExplorerPanel } from "./semanticDiffExplorerPanelLifecycle";
 import { SEMANTIC_DIFF_EXPLORER_VIEW_TYPE } from "./semanticDiffExplorerConstants";
-import { createScheduleImpactCalendarPanel } from "../../webview/scheduleImpactCalendarPanel";
-import type { ScheduleImpactCalendarPanelHandle } from "../../webview/scheduleImpactCalendarPanel";
+import { createScheduleImpactCalendarPanel } from "../../webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
+import type { ScheduleImpactCalendarPanelHandle } from "../../webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
 import type {
   SemanticDiffExplorerPanelDeps,
   SemanticDiffExplorerSessionHandle,

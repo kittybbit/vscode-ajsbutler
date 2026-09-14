@@ -12,15 +12,15 @@ import {
 import {
   getSemanticDiffExplorerLabels,
   type SemanticDiffExplorerLabels,
-} from "../../semantic-diff/semanticDiffExplorerLocalization";
+} from "./semanticDiffExplorerLocalization";
 import {
   useSemanticDiffExplorerHost,
   type ExplorerHostState,
-} from "../../semantic-diff/semanticDiffExplorerHostState";
+} from "./semanticDiffExplorerHostState";
 import {
   useSemanticDiffExplorerThemeMode,
   type SemanticDiffExplorerThemeMode,
-} from "../../semantic-diff/semanticDiffExplorerThemeMode";
+} from "./semanticDiffExplorerThemeMode";
 import SemanticDiffExplorerContents from "./SemanticDiffExplorerContents";
 
 const ExplorerLoadingView = ({

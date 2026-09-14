@@ -22,7 +22,7 @@ import {
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
 import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
-import type { ScheduleImpactCalendarPanelHandle } from "../../presentation/vscode/webview/scheduleImpactCalendarPanel";
+import type { ScheduleImpactCalendarPanelHandle } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,

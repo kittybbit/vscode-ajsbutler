@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
-import type { SemanticDiffScheduleImpact } from "../../../application/semantic-diff/semanticDiffScheduleImpact";
+import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
 import {
   ScheduleImpactCalendarSessionRegistry,
   type ScheduleImpactCalendarSessionHandle,

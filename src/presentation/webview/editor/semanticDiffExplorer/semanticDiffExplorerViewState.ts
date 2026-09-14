@@ -13,7 +13,7 @@ import type { VirtuosoHandle } from "react-virtuoso";
 import {
   filterSemanticDiffExplorerViewModel,
   type SemanticDiffExplorerViewModel,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 import {
   allExpandableNodeIds,
   flattenSemanticDiffExplorerTree,

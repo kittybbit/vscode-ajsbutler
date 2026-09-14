@@ -5,13 +5,13 @@ import type { SemanticDiffExplorerViewModel } from "../../../../application/sema
 import {
   getSemanticDiffExplorerLabels,
   type SemanticDiffExplorerLabels,
-} from "../../semantic-diff/semanticDiffExplorerLocalization";
+} from "./semanticDiffExplorerLocalization";
 import {
   useExplorerFilterState,
   useExplorerSelection,
   useExplorerTreeState,
-} from "../../semantic-diff/semanticDiffExplorerViewState";
-import type { SemanticDiffExplorerThemeMode } from "../../semantic-diff/semanticDiffExplorerThemeMode";
+} from "./semanticDiffExplorerViewState";
+import type { SemanticDiffExplorerThemeMode } from "./semanticDiffExplorerThemeMode";
 import SemanticDiffExplorerHeader from "./Header";
 import SemanticDiffExplorerSummaryCards from "./SummaryCards";
 import SemanticDiffExplorerTreePanel from "./ExplorerTreePanel";

@@ -7,9 +7,9 @@ import type {
   SemanticDiffExplorerLeaf,
   SemanticDiffExplorerViewModel,
 } from "../../application/semantic-diff/semanticDiffExplorer";
-import SemanticDiffExplorerApp from "../../presentation/webview/semantic-diff/semanticDiffExplorer";
+import SemanticDiffExplorerApp from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
 import SemanticDiffExplorerContents from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents";
-import { SemanticDiffExplorerApp as EditorSemanticDiffExplorerApp } from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
+import { SemanticDiffExplorerApp as CanonicalSemanticDiffExplorerApp } from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
 
 type GlobalValue = {
   key: string;
@@ -182,8 +182,11 @@ suite("Semantic Diff Explorer components", () => {
     restoreDom(dom, globals);
   });
 
-  test("keeps the compatibility App on the editor package and composes MUI boundaries", () => {
-    assert.strictEqual(SemanticDiffExplorerApp, EditorSemanticDiffExplorerApp);
+  test("composes the canonical editor App and MUI boundaries", () => {
+    assert.strictEqual(
+      SemanticDiffExplorerApp,
+      CanonicalSemanticDiffExplorerApp,
+    );
     const messages: unknown[] = [];
     Object.defineProperty(dom.window, "vscode", {
       configurable: true,

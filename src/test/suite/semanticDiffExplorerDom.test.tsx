@@ -10,7 +10,7 @@ import {
   render,
   within,
 } from "@testing-library/react";
-import SemanticDiffExplorerApp from "../../presentation/webview/semantic-diff/semanticDiffExplorer";
+import SemanticDiffExplorerApp from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import {
   createSemanticDiffExplorerActionIdAllocator,
@@ -28,8 +28,8 @@ import {
   SemanticDiffExplorerView,
   focusExplorerRowAfterVirtualizedScroll,
   flattenSemanticDiffExplorerTree,
-} from "../../presentation/webview/semantic-diff/semanticDiffExplorerView";
-import { getSemanticDiffExplorerLabels } from "../../presentation/webview/semantic-diff/semanticDiffExplorerLocalization";
+} from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerView";
+import { getSemanticDiffExplorerLabels } from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerLocalization";
 import {
   createSemanticDiffTheme,
   semanticDiffExplorerFocusSx,

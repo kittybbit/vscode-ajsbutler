@@ -5,9 +5,9 @@ import {
   ExplorerRowView,
   renderExplorerRowLabel,
   type ExplorerRow,
-} from "../../semantic-diff/semanticDiffExplorerTree";
-import { handleExplorerTreeKey } from "../../semantic-diff/semanticDiffExplorerKeyboard";
-import type { SemanticDiffExplorerLabels } from "../../semantic-diff/semanticDiffExplorerLocalization";
+} from "./semanticDiffExplorerTree";
+import { handleExplorerTreeKey } from "./semanticDiffExplorerKeyboard";
+import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import { semanticDiffExplorerFocusSx } from "../../shared/muiTheme";
 
 export type SemanticDiffExplorerTreePanelProps = Readonly<{

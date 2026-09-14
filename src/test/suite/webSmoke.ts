@@ -9,11 +9,11 @@ import type { SemanticDiffOutputContext } from "../../application/semantic-diff/
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
 import { createScheduleAwareExplorerSession } from "../../bootstrap/extension/createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
-import { createScheduleImpactCalendarBridge } from "../../presentation/webview/editor/scheduleImpactCalendarBridge";
+import { createScheduleImpactCalendarBridge } from "../../presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBridge";
 import {
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarSessionMessage,
-} from "../../presentation/vscode/webview/scheduleImpactCalendarTransport";
+} from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport";
 
 const LANGUAGE_ID = "jp1ajs";
 

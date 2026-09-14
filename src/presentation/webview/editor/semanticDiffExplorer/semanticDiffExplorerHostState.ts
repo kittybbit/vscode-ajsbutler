@@ -5,12 +5,12 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import { createSemanticDiffExplorerActionRequest } from "../../../application/semantic-diff/semanticDiffExplorerMessages";
+import { createSemanticDiffExplorerActionRequest } from "../../../../application/semantic-diff/semanticDiffExplorerMessages";
 import type {
   SemanticDiffExplorerActionId,
   SemanticDiffExplorerSessionId,
   SemanticDiffExplorerViewModel,
-} from "../../../application/semantic-diff/semanticDiffExplorer";
+} from "../../../../application/semantic-diff/semanticDiffExplorer";
 import { getSemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import { useExplorerHostMessageListener } from "./semanticDiffExplorerHostMessageState";
 

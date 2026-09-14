@@ -1,4 +1,4 @@
-import type { SemanticDiffScheduleImpact } from "../../../application/semantic-diff/semanticDiffScheduleImpact";
+import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
 import {
   allChecksPass,
   encodedScheduleImpactCalendarJsonBytes,

@@ -32,7 +32,7 @@ import {
 } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
 import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
-import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendarSessionRegistry";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry";
 import type { ReadGitHeadDefinition } from "../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import {
   GIT_HEAD_CONTENT_SCHEME,

@@ -544,6 +544,79 @@ Findings and Completion Approval is recorded above; focused completion commit
 - Commit status: Complete; focused completed Slice 5 commit `f47edeb0`.
 - Next stage: independent Feature Exit; final batch human Closure Approval.
 
+### Slice 6 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-15; approved in current conversation
+- Basis: independent `implementation-reviewer` final verdict Ready; Findings
+  none. Main applies the user's persistent automatic no-findings slice approval.
+- Approved scope: exact completed Slice 6 canonical package moves, obsolete
+  source removals, listed consumer/test import updates, placement assertions
+  and selected feature evidence below. No behavior or contract changes.
+- Validation: complete direct regression matrix 74 passing; architecture/
+  location suite 26 passing; independent UI subset 56 passing; compile,
+  production/dev builds, desktop/web hosts, quality No issues, Markdown lint
+  and diff checks pass. Existing architecture catalog remains unchanged.
+- Approved paths:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelActions.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelTypes.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarJson.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanel.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarJson.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarPanel.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarSessionRegistry.ts`
+  - `src/presentation/vscode/webview/scheduleImpactCalendarTransport.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBridge.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendarBridge.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/Header.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SummaryCards.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerFocus.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerHostMessageState.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerHostState.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerKeyboard.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerLocalization.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerThemeMode.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTreeData.ts`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerView.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerViewState.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorer.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerEntry.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerFocus.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerHostMessageState.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerHostState.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerKeyboard.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerLocalization.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerThemeMode.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerTreeData.ts`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerView.tsx`
+  - `src/presentation/webview/semantic-diff/semanticDiffExplorerViewState.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/scheduleImpactCalendarBridge.test.ts`
+  - `src/test/suite/scheduleImpactCalendarSession.test.ts`
+  - `src/test/suite/scheduleImpactCalendarTransport.test.ts`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
+  - `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`
+  - `src/test/suite/semanticDiffExplorerThemeMode.test.ts`
+  - `src/test/suite/webSmoke.ts`
+- Commit status: Pending; focused Slice 6 completion commit.
+- Next stage: independent Feature Exit, then final batch human closure approval.
+
 ## Closure Approval
 
 - Status: Deferred pending Slice 6 completion and a new independent Feature
@@ -2361,6 +2434,54 @@ lint:md`; and `git diff --check`.
   behavior, workflow or bootstrap semantics, webpack output/activation/
   contribution changes, schedule meaning, UI redesign, persistence,
   telemetry, and README/CHANGELOG changes.
+
+### Slice 6 Implementation Evidence
+
+- Status: Implemented on 2026-09-15; pending independent
+  `implementation-reviewer` review, automatic no-findings Completion Approval,
+  and the focused completion commit. No Slice6 behavior or contract changes
+  were introduced.
+- Changed paths: the five calendar host files now under
+  `src/presentation/vscode/webview/scheduleImpactCalendar/`; the browser
+  bridge now under
+  `src/presentation/webview/editor/scheduleImpactCalendar/`; the ten
+  Explorer browser helpers/tree/View modules now under
+  `src/presentation/webview/editor/semanticDiffExplorer/`; removal of the two
+  obsolete `webview/semantic-diff` browser facades/entry; canonical import
+  updates in listed host/browser/test consumers; the focused architecture
+  location assertion; and Slice6 evidence in this feature record.
+- Implementation result: feature-owned host/session/JSON/transport ownership
+  is co-located without changing exported symbols or lifecycle. Calendar UI
+  consumes the package-local bridge, Explorer App/Contents/components and
+  compatibility View consume package-local helpers, and the editor entry is
+  the sole Explorer bundle entry. Shared ViewerFactory, mediator/store,
+  semantic-diff host category packages, workflow, bootstrap semantics, CSP,
+  bundle names, DTOs, messages, actions, and user-visible facts remain
+  unchanged.
+- Acceptance evidence: the architecture/location test verifies one Calendar
+  host package, one Explorer browser package, absence of stale flat imports and
+  the removed browser folder, canonical webpack entries, and no VS Code/Node
+  imports in moved browser modules. The focused Explorer component test now
+  asserts the canonical editor App identity while retaining MUI composition,
+  status/live-region, sticky-header, action-element, and stable-ID coverage.
+- Validation completed after the Slice6 diff: `rtk pnpm run test:compile`;
+  direct canonical Explorer/calendar/host/browser regression Mocha matrix
+  (`74 passing`); architecture/location suite; production
+  `rtk pnpm run build`; `rtk pnpm run development:desktop`; `rtk pnpm run
+development:web`; desktop host run (exit 0); permitted web host run (exit 0,
+  WEB-7 through WEB-10 passed); full `rtk pnpm run qlty:check` (No issues);
+  Markdown lint (0 errors); and `rtk git diff --check`.
+- Compatibility/readiness: public exports, action IDs, message envelopes,
+  DTOs, session/transport behavior, nonce-bound CSP, `asWebviewUri` bundle
+  URLs, output filenames, desktop/web support, and VS Code compatibility are
+  preserved. Moved browser modules remain browser-safe and no
+  README/CHANGELOG update is required for this internal relocation.
+- Unresolved risks: no known implementation or scope risk remains. Independent
+  review should verify canonical ownership, deleted facades, relative import
+  boundaries, and unchanged CSP/output behavior.
+- Review route: return this Slice6 diff and evidence to Main for independent
+  `implementation-reviewer` review, then the normal automatic no-findings
+  Completion Approval and focused completion commit.
 
 ## Cross-Slice Approval And Production Readiness
 

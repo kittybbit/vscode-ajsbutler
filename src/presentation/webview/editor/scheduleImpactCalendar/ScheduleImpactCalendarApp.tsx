@@ -6,7 +6,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import { ThemeProvider } from "@mui/material/styles";
 import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
 import { getScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
-import { createScheduleImpactCalendarBridge } from "../scheduleImpactCalendarBridge";
+import { createScheduleImpactCalendarBridge } from "./scheduleImpactCalendarBridge";
 import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import {
   createSemanticDiffTheme,

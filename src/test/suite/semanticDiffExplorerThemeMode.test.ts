@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import {
   observeSemanticDiffExplorerThemeMode,
   resolveSemanticDiffExplorerThemeMode,
-} from "../../presentation/webview/semantic-diff/semanticDiffExplorerThemeMode";
+} from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerThemeMode";
 
 type MediaListener = () => void;
 

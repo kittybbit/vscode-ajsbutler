@@ -2,14 +2,14 @@ import React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import { ThemeProvider } from "@mui/material/styles";
-import { filterSemanticDiffExplorerViewModel } from "../../../application/semantic-diff/semanticDiffExplorer";
+import { filterSemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import {
   createSemanticDiffTheme,
   semanticDiffExplorerGlobalStyles,
-} from "../shared/muiTheme";
+} from "../../shared/muiTheme";
 import SemanticDiffExplorerContents, {
   type SemanticDiffExplorerContentsProps,
-} from "../editor/semanticDiffExplorer/SemanticDiffExplorerContents";
+} from "./SemanticDiffExplorerContents";
 import {
   flattenSemanticDiffExplorerTree,
   focusExplorerRowAfterVirtualizedScroll,

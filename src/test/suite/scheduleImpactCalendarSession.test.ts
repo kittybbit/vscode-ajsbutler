@@ -2,7 +2,7 @@ import * as assert from "assert";
 import {
   ScheduleImpactCalendarSessionRegistry,
   normalizeScheduleImpactCalendarLanguage,
-} from "../../presentation/vscode/webview/scheduleImpactCalendarSessionRegistry";
+} from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
 
