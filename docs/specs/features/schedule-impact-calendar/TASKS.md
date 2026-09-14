@@ -446,6 +446,31 @@ Findings and Completion Approval is recorded above; focused completion commit
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
 - Commit status: Complete; focused format correction commit `09148de4`.
 
+### Slice 4 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-15; approved in current conversation
+- Basis: independent `implementation-reviewer` verdict Ready; Findings none.
+  Main applies the user's persistent automatic no-findings slice approval.
+- Approved scope: exactly completed Slice 4 calendar MUI/component extraction
+  and its focused component test/evidence; preserve all earlier behavior.
+- Validation: direct focused suites 11 passing, compile, production and
+  desktop/web development builds, desktop/web host checks, full qlty check
+  No issues, Markdown lint and diff checks pass.
+- Approved paths:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarBoundedList.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarFilters.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+- Commit status: Pending; focused completed Slice 4 commit.
+- Next stage: approved Slice 5 after this focused commit.
+
 ## Closure Approval
 
 - Status: Pending explicit human Closure Approval
@@ -1858,6 +1883,52 @@ lint:md`; and `git diff --check`.
   changes, parser or `MyContexts` integration, table/Flow redesign, visual
   month/week grid, external calendars, persistence, telemetry, new packages,
   manifest/webpack/activation changes, and README/CHANGELOG changes.
+
+### Slice 4 Implementation Evidence
+
+- Status: Implemented on 2026-09-15; pending independent
+  `implementation-reviewer` review, automatic no-findings Completion Approval,
+  and the focused completion commit. Slice 5 remains pending and was not
+  started.
+- Changed paths: the approved calendar App, Contents, Header, Filters,
+  Sections, Timeline, and BoundedList modules under
+  `src/presentation/webview/editor/scheduleImpactCalendar/`, plus the focused
+  `src/test/suite/scheduleImpactCalendarComponents.test.tsx`.
+- Implementation result: the thin calendar entry and session seam remain
+  unchanged. App owns the session fallback, one ThemeProvider, CssBaseline,
+  and both viewer and semantic-diff global styles. Contents owns model/filter
+  state, live announcements, and the 100vh Stack shell. Header, Filters,
+  Sections, Timeline, and BoundedList own their planned presentation and focus
+  boundaries. MUI AppBar/Toolbar/Chip, Stack/Box, List/ListItem, Paper, and
+  Alert primitives provide the table/Flow-style composition while preserving
+  stable IDs, labels, side metadata, counts, filters, localization, explicit
+  empty/error states, and bounded virtualized navigation.
+- Acceptance evidence: the focused component test covers the App → Contents →
+  Header/Filters/Sections/Timeline composition, MUI landmarks and controls,
+  stable timeline/candidate/issue IDs, and conjunctive outcome filtering.
+  Existing calendar view/accessibility/projection/localization tests remain
+  green with the extracted boundaries and retain the 10,000-entry bound and
+  first/last keyboard reachability.
+- Validation completed after the final Slice 4 diff: `rtk pnpm run
+test:compile`; direct calendar component, view, accessibility,
+  localization, and projection Mocha run (`11 passing`); production
+  `rtk pnpm run build`; `rtk pnpm run development:desktop`; `rtk pnpm run
+development:web`; desktop `rtk node ./out/test/runTest.js` (exit 0);
+  permitted web `rtk pnpm run test:web:run` (exit 0, WEB-7 through WEB-10
+  passed); full `rtk pnpm run qlty:check` (`No issues`); `rtk pnpm run
+lint:md` (0 errors); and `git diff --check`.
+- Compatibility/readiness: no application/domain/DTO, bridge/session
+  transport, Explorer, action, workflow, package contribution, resource key,
+  CSP, or telemetry behavior changed. Shared calendar code remains
+  browser-safe and desktop/web bundles compile. Existing webpack size
+  warnings, desktop macOS codesign warning, and web stream-cleanup warnings
+  remain environmental observations and do not change the Slice 4 result.
+- Unresolved risks: no known implementation risks remain. Independent review
+  should verify component ownership, semantic MUI wrappers, stable labels and
+  IDs, empty/error Alert usage, and preservation of focus/virtualization.
+- Review route: return this completed Slice 4 diff and evidence to Main for
+  independent `implementation-reviewer` review, then the normal automatic
+  no-findings Completion Approval and focused completion commit.
 
 ### Slice 5: Organize The Semantic Diff Explorer Webview Components
 

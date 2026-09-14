@@ -240,6 +240,35 @@
   `plan-reviewer` review. No Human Approval or implementation evidence is
   asserted by this section.
 
+## Slice 4 Implementation Evidence
+
+- Implemented on 2026-09-15 within the approved presentation-only boundary.
+  `ScheduleImpactCalendarApp` now owns session fallback and the single theme
+  surface; `ScheduleImpactCalendarContents` owns model/filter/announcement
+  composition; Header, Filters, Sections, Timeline, and BoundedList are
+  explicit MUI component modules. The existing thin entry, DTO, bridge,
+  lifecycle, localization resources, and bundle wiring remain unchanged.
+- The new component test verifies the composed MUI landmarks and controls,
+  stable timeline/candidate/issue IDs, ordered sections, and outcome filter
+  behavior. Existing focused calendar tests continue to cover localization,
+  side metadata, live semantics, conjunctive filters, roving focus, deferred
+  virtualized focus, 10,000-entry bounds, and explicit states.
+- Final validation: `rtk pnpm run test:compile`; focused component plus
+  calendar view/accessibility/localization/projection Mocha run (`11 passing`);
+  production build; desktop and web development builds; desktop extension-host
+  run (exit 0); permitted web extension-host run (exit 0, WEB-7 through WEB-10
+  passed); full `rtk pnpm run qlty:check` (`No issues`); Markdown lint (0
+  errors); and `git diff --check`.
+- Compatibility and readiness: no schedule meaning, application contract,
+  session transport, Explorer action, workflow gate, package contribution,
+  resource key, CSP, or telemetry behavior changed. Desktop/web compilation
+  succeeds and the shared code remains browser-safe. Existing bundle-size,
+  desktop codesign, and web stream-cleanup warnings remain documented
+  observations.
+- Implementation review route: Main should route this Slice 4 package to the
+  independent `implementation-reviewer`. Slice 5 remains unstarted until
+  Slice 4 review and completion commit are complete.
+
 ## Slice 5 Replanning Evidence
 
 - Trigger addressed: the user additionally requested that the Semantic Diff
