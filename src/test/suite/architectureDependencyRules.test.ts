@@ -69,7 +69,6 @@ const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerHostState.ts",
   "semanticDiffExplorerKeyboard.ts",
   "semanticDiffExplorerLocalization.ts",
-  "semanticDiffExplorerThemeMode.ts",
   "semanticDiffExplorerTree.tsx",
   "semanticDiffExplorerTreeData.ts",
   "semanticDiffExplorerView.tsx",
@@ -441,6 +440,15 @@ suite("Architecture dependency rules", () => {
       ),
       false,
     );
+    assert.strictEqual(
+      fs.existsSync(
+        path.join(
+          semanticDiffExplorerEditorRoot,
+          "semanticDiffExplorerThemeMode.ts",
+        ),
+      ),
+      false,
+    );
 
     const staleImports = sourceFilesUnder(path.join(repoRoot, "src")).flatMap(
       (filePath) => {
@@ -462,6 +470,16 @@ suite("Architecture dependency rules", () => {
       },
     );
     assert.deepStrictEqual(staleImports, []);
+
+    const explorerSource = sourceFilesUnder(semanticDiffExplorerEditorRoot).map(
+      (filePath) => fs.readFileSync(filePath, "utf8"),
+    );
+    explorerSource.forEach((source) => {
+      assert.strictEqual(
+        /matchMedia|MutationObserver|vscode-(?:dark|light)/u.test(source),
+        false,
+      );
+    });
 
     const webpackSource = fs.readFileSync(
       path.join(repoRoot, "webpack.config.js"),

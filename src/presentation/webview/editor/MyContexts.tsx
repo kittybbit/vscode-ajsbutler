@@ -12,7 +12,10 @@ import {
   RESOURCE,
   type ViewerResourceStateDto,
 } from "../viewerHostMessages";
-import { createViewerResourceRequest } from "../viewerRequestMessages";
+import {
+  createViewerResourceRequest,
+  type ViewerResourceRequestData,
+} from "../viewerRequestMessages";
 
 export type MyAppResource = Partial<
   Omit<ViewerResourceStateDto, "scrollType">
@@ -29,13 +32,21 @@ const myAppContext = createContext<MyAppContext>({
   updateMyAppResource: () => {},
 });
 export const useMyAppContext = () => useContext(myAppContext);
-export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
+export type MyAppContextProviderProps = Readonly<{
+  children: ReactNode;
+  scrollType?: ViewerResourceRequestData["scrollType"];
+}>;
+
+export const MyAppContextProvider = ({
+  children,
+  scrollType = "table",
+}: MyAppContextProviderProps) => {
   console.log("render MyAppContextProvider.");
 
   const [myAppResource, setMyAppResourceInternal] = useState<MyAppResource>({
     isDarkMode: undefined,
     lang: undefined,
-    scrollType: "table",
+    scrollType,
   });
   const setMyAppResource = (myAppResource: SetStateAction<MyAppResource>) =>
     startTransition(() => setMyAppResourceInternal(myAppResource));
@@ -46,13 +57,11 @@ export const MyAppContextProvider = ({ children }: { children: ReactNode }) => {
   };
   useEffect(() => {
     window.EventBridge.addCallback(RESOURCE, resourceCallbackFn);
-    window.vscode.postMessage(
-      createViewerResourceRequest(myAppResource.scrollType),
-    );
+    window.vscode.postMessage(createViewerResourceRequest(scrollType));
     return () => {
       window.EventBridge.removeCallback(RESOURCE, resourceCallbackFn);
     };
-  }, []);
+  }, [scrollType]);
 
   const updateMyAppResource = (newValue: Partial<MyAppResource>) => {
     setMyAppResource((prev) => {

@@ -19,6 +19,7 @@ import {
   createSemanticDiffExplorerActionRequest,
   createSemanticDiffExplorerReadyRequest,
 } from "../../application/semantic-diff/semanticDiffExplorerMessages";
+import { createViewerResourceRequest } from "../../presentation/webview/viewerRequestMessages";
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
 import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
@@ -125,6 +126,47 @@ const createHarness = () => {
   });
   return { opener, panels, contextRegistry, actionRegistry };
 };
+
+suite("Semantic Diff Explorer panel", () => {
+  test("dispatches the shared resource request before semantic validation", async () => {
+    const harness = createHarness();
+    const handle = await harness.opener(emptyContext());
+    const fake = harness.panels[0]!;
+
+    fake.emit(createViewerResourceRequest("window"));
+    await flush();
+
+    assert.strictEqual(fake.messages.length, 1);
+    assert.strictEqual((fake.messages[0] as { type: string }).type, "resource");
+    assert.strictEqual(
+      (fake.messages[0] as { data: { scrollType: string } }).data.scrollType,
+      "window",
+    );
+
+    fake.emit(createSemanticDiffExplorerReadyRequest(handle.sessionId, 1));
+    await flush();
+    assert.strictEqual(fake.messages.length, 2);
+    assert.strictEqual((fake.messages[1] as { type: string }).type, "session");
+
+    fake.emit({ type: "resource", data: { scrollType: "invalid" } });
+    await flush();
+    assert.strictEqual(fake.messages.length, 3);
+    assert.deepStrictEqual(fake.messages[2], {
+      type: "failure",
+      sessionId: null,
+      requestId: null,
+      actionId: null,
+      ok: false,
+      payload: null,
+      error: { code: "invalid-request", detail: null },
+    });
+
+    handle.dispose();
+    fake.emit(createViewerResourceRequest("window"));
+    await flush();
+    assert.strictEqual(fake.messages.length, 3);
+  });
+});
 
 const createSourceEntry = (context: ReturnType<typeof emptyContext>) => {
   const indexIds = createSemanticDiffSourceIndexIdAllocator();

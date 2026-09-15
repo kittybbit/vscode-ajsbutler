@@ -30,6 +30,8 @@ import {
   flattenSemanticDiffExplorerTree,
 } from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerView";
 import { getSemanticDiffExplorerLabels } from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerLocalization";
+import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
+import { createViewerResourceStateMessage } from "../../presentation/webview/viewerHostMessages";
 import {
   createSemanticDiffTheme,
   semanticDiffExplorerFocusSx,
@@ -349,14 +351,32 @@ const contrastRatio = (first: string, second: string): number => {
 suite("Semantic diff Explorer DOM", () => {
   let dom: JSDOM;
   let globals: GlobalValue[];
+  let eventBridge: ReturnType<typeof createViewerEventBridge>;
 
   setup(() => {
     ({ dom, globals } = installDom());
+    eventBridge = createViewerEventBridge();
+    Object.defineProperty(dom.window, "EventBridge", {
+      configurable: true,
+      value: eventBridge,
+    });
   });
   teardown(() => {
     cleanup();
     restoreDom(dom, globals);
   });
+
+  const dispatchResource = (isDarkMode: boolean, lang: string): void => {
+    act(() => {
+      eventBridge.dispatch({
+        data: createViewerResourceStateMessage({
+          isDarkMode,
+          lang,
+          scrollType: "window",
+        }),
+      } as MessageEvent);
+    });
+  };
 
   test("uses MUI standard colors and the stricter focus/target baseline", () => {
     const lightTheme = createSemanticDiffTheme({ mode: "light" });
@@ -615,8 +635,10 @@ suite("Semantic diff Explorer DOM", () => {
     ).vscode = { postMessage: (value) => messages.push(value) };
 
     const view = render(<SemanticDiffExplorerApp />);
-    assert.strictEqual(messages.length, 1);
-    assert.strictEqual((messages[0] as { type: string }).type, "ready");
+    assert.strictEqual((messages[0] as { type: string }).type, "resource");
+    dispatchResource(false, "en");
+    assert.strictEqual(messages.length, 2);
+    assert.strictEqual((messages[1] as { type: string }).type, "ready");
 
     await act(async () => {
       dom.window.dispatchEvent(
@@ -706,6 +728,7 @@ suite("Semantic diff Explorer DOM", () => {
       }
     ).vscode = { postMessage: () => undefined };
     const view = render(<SemanticDiffExplorerApp />);
+    dispatchResource(false, "en");
 
     await act(async () => {
       dom.window.dispatchEvent(
@@ -745,8 +768,9 @@ suite("Semantic diff Explorer DOM", () => {
       postMessage: (value) => messages.push(value),
     };
     const view = render(<SemanticDiffExplorerApp />);
-    assert.strictEqual(messages.length, 1);
-    assert.strictEqual((messages[0] as { type: string }).type, "ready");
+    dispatchResource(false, "en");
+    assert.strictEqual(messages.length, 2);
+    assert.strictEqual((messages[1] as { type: string }).type, "ready");
 
     await act(async () => {
       dom.window.dispatchEvent(
@@ -776,10 +800,9 @@ suite("Semantic diff Explorer DOM", () => {
     );
   });
 
-  test("follows host theme changes in loading and loaded states", async () => {
+  test("follows shared resource theme and locale in loading and loaded states", async () => {
     const { session } = createSessionFixture();
     const messages: unknown[] = [];
-    dom.window.document.body.className = "vscode-light";
     dom.window.document.body.dataset.semanticDiffSessionId = session.sessionId;
     (
       dom.window as unknown as {
@@ -788,18 +811,31 @@ suite("Semantic diff Explorer DOM", () => {
     ).vscode = { postMessage: (value) => messages.push(value) };
 
     const view = render(<SemanticDiffExplorerApp />);
+    dispatchResource(false, "en");
     assert.strictEqual(
       view.getByRole("main").dataset.semanticDiffThemeMode,
       "light",
     );
+    assert.match(
+      [...dom.window.document.querySelectorAll("style")]
+        .map((style) => style.textContent ?? "")
+        .join("\n"),
+      /background-color:#fff/,
+    );
 
-    await act(async () => {
-      dom.window.document.body.className = "vscode-dark";
-      await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 0));
-    });
+    dispatchResource(true, "ja-JP");
     assert.strictEqual(
       view.getByRole("main").dataset.semanticDiffThemeMode,
       "dark",
+    );
+    assert.ok(
+      view.getByRole("heading", { name: "セマンティック差分エクスプローラー" }),
+    );
+    assert.match(
+      [...dom.window.document.querySelectorAll("style")]
+        .map((style) => style.textContent ?? "")
+        .join("\n"),
+      /background-color:#121212/,
     );
 
     await act(async () => {
@@ -818,15 +854,7 @@ suite("Semantic diff Explorer DOM", () => {
       "dark",
     );
 
-    await act(async () => {
-      dom.window.document.body.className = "vscode-light";
-      await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 0));
-    });
-    assert.strictEqual(
-      view.getByRole("main").dataset.semanticDiffThemeMode,
-      "light",
-    );
-    assert.strictEqual(messages.length, 1);
+    assert.strictEqual(messages.length, 2);
   });
 
   test("supports tree parent/child keyboard semantics and sibling aria positions", () => {

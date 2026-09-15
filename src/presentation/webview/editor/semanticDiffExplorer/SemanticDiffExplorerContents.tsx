@@ -11,10 +11,11 @@ import {
   useExplorerSelection,
   useExplorerTreeState,
 } from "./semanticDiffExplorerViewState";
-import type { SemanticDiffExplorerThemeMode } from "./semanticDiffExplorerThemeMode";
 import SemanticDiffExplorerHeader from "./Header";
 import SemanticDiffExplorerSummaryCards from "./SummaryCards";
 import SemanticDiffExplorerTreePanel from "./ExplorerTreePanel";
+
+export type SemanticDiffExplorerThemeMode = "light" | "dark";
 
 export type SemanticDiffExplorerContentsProps = Readonly<{
   viewModel: SemanticDiffExplorerViewModel;

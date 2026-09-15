@@ -17,11 +17,24 @@ import {
   useSemanticDiffExplorerHost,
   type ExplorerHostState,
 } from "./semanticDiffExplorerHostState";
-import {
-  useSemanticDiffExplorerThemeMode,
-  type SemanticDiffExplorerThemeMode,
-} from "./semanticDiffExplorerThemeMode";
+import { MyAppContextProvider, useMyAppContext } from "../MyContexts";
 import SemanticDiffExplorerContents from "./SemanticDiffExplorerContents";
+
+type SemanticDiffExplorerThemeMode = "light" | "dark";
+
+const ExplorerThemeShell = ({
+  children,
+  themeMode,
+}: Readonly<{
+  children: React.ReactNode;
+  themeMode: SemanticDiffExplorerThemeMode;
+}>): React.ReactElement => (
+  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
+    <CssBaseline />
+    <GlobalStyles styles={semanticDiffExplorerGlobalStyles} />
+    {children}
+  </ThemeProvider>
+);
 
 const ExplorerLoadingView = ({
   labels,
@@ -34,27 +47,23 @@ const ExplorerLoadingView = ({
   announcement: string;
   themeMode: SemanticDiffExplorerThemeMode;
 }>): React.ReactElement => (
-  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
-    <CssBaseline />
-    <GlobalStyles styles={semanticDiffExplorerGlobalStyles} />
-    <Stack
-      component="main"
-      aria-labelledby="semantic-diff-explorer-title"
-      data-semantic-diff-theme-mode={themeMode}
-      spacing={1}
-      sx={{ minHeight: "100vh", p: 2 }}
-    >
-      <Typography component="h1" variant="h4" id="semantic-diff-explorer-title">
-        {labels.title}
-      </Typography>
-      <Typography component="p" role="status" aria-live="polite">
-        {failure ?? labels.loading}
-      </Typography>
-      <Typography component="div" aria-live="polite" aria-atomic="true">
-        {announcement}
-      </Typography>
-    </Stack>
-  </ThemeProvider>
+  <Stack
+    component="main"
+    aria-labelledby="semantic-diff-explorer-title"
+    data-semantic-diff-theme-mode={themeMode}
+    spacing={1}
+    sx={{ minHeight: "100vh", p: 2 }}
+  >
+    <Typography component="h1" variant="h4" id="semantic-diff-explorer-title">
+      {labels.title}
+    </Typography>
+    <Typography component="p" role="status" aria-live="polite">
+      {failure ?? labels.loading}
+    </Typography>
+    <Typography component="div" aria-live="polite" aria-atomic="true">
+      {announcement}
+    </Typography>
+  </Stack>
 );
 
 const ExplorerLoadedView = ({
@@ -81,45 +90,52 @@ const ExplorerLoadedView = ({
     ? (element?: HTMLElement): void => sendAction(calendarActionId, element)
     : undefined;
   return (
-    <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
-      <CssBaseline />
-      <GlobalStyles styles={semanticDiffExplorerGlobalStyles} />
-      <SemanticDiffExplorerContents
-        viewModel={state.viewModel}
-        language={language}
-        themeMode={themeMode}
-        outputAction={outputAction}
-        calendarAction={calendarAction}
-        action={sendAction}
-        hostAnnouncement={announcement}
-      />
-    </ThemeProvider>
+    <SemanticDiffExplorerContents
+      viewModel={state.viewModel}
+      language={language}
+      themeMode={themeMode}
+      outputAction={outputAction}
+      calendarAction={calendarAction}
+      action={sendAction}
+      hostAnnouncement={announcement}
+    />
   );
 };
 
-export const SemanticDiffExplorerApp = (): React.ReactElement => {
+const SemanticDiffExplorerInnerApp = (): React.ReactElement => {
   const bridge = useSemanticDiffExplorerHost();
-  const themeMode = useSemanticDiffExplorerThemeMode();
-  const labels = getSemanticDiffExplorerLabels(bridge.language);
-  return bridge.state ? (
-    <ExplorerLoadedView
-      state={bridge.state}
-      language={bridge.language}
-      outputActionId={bridge.outputActionId}
-      calendarActionId={bridge.calendarActionId}
-      sendAction={bridge.sendAction}
-      announcement={bridge.hostAnnouncement}
-      themeMode={themeMode}
-    />
-  ) : (
-    <ExplorerLoadingView
-      labels={labels}
-      failure={bridge.hostFailure}
-      announcement={bridge.hostAnnouncement}
-      themeMode={themeMode}
-    />
+  const { isDarkMode, lang = "en" } = useMyAppContext();
+  const themeMode = isDarkMode ? "dark" : "light";
+  const labels = getSemanticDiffExplorerLabels(lang);
+  return (
+    <ExplorerThemeShell themeMode={themeMode}>
+      {bridge.state ? (
+        <ExplorerLoadedView
+          state={bridge.state}
+          language={lang}
+          outputActionId={bridge.outputActionId}
+          calendarActionId={bridge.calendarActionId}
+          sendAction={bridge.sendAction}
+          announcement={bridge.hostAnnouncement}
+          themeMode={themeMode}
+        />
+      ) : (
+        <ExplorerLoadingView
+          labels={labels}
+          failure={bridge.hostFailure}
+          announcement={bridge.hostAnnouncement}
+          themeMode={themeMode}
+        />
+      )}
+    </ExplorerThemeShell>
   );
 };
+
+export const SemanticDiffExplorerApp = (): React.ReactElement => (
+  <MyAppContextProvider scrollType="window">
+    <SemanticDiffExplorerInnerApp />
+  </MyAppContextProvider>
+);
 
 export const applyExplorerFilter = filterSemanticDiffExplorerViewModel;
 export default SemanticDiffExplorerApp;

@@ -216,6 +216,7 @@ const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
     openScheduleImpactCalendarPanel: resources.openScheduleImpactCalendarPanel,
   };
   const requestOptions = {
+    panel,
     session,
     actionIds: registeredActionIds,
     isDisposed: () => disposed,

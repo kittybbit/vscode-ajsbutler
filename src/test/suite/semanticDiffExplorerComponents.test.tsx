@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
 import React from "react";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import type {
   SemanticDiffExplorerActionSet,
   SemanticDiffExplorerLeaf,
@@ -10,6 +10,8 @@ import type {
 import SemanticDiffExplorerApp from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
 import SemanticDiffExplorerContents from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents";
 import { SemanticDiffExplorerApp as CanonicalSemanticDiffExplorerApp } from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
+import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
+import { createViewerResourceStateMessage } from "../../presentation/webview/viewerHostMessages";
 
 type GlobalValue = {
   key: string;
@@ -74,6 +76,10 @@ const installDom = (): { dom: JSDOM; globals: GlobalValue[] } => {
       removeListener: () => undefined,
       dispatchEvent: () => false,
     }),
+  });
+  Object.defineProperty(dom.window, "EventBridge", {
+    configurable: true,
+    value: createViewerEventBridge(),
   });
   return { dom, globals };
 };
@@ -195,9 +201,19 @@ suite("Semantic Diff Explorer components", () => {
     dom.window.document.body.dataset.semanticDiffSessionId =
       "sde-session-components";
     const loading = render(<SemanticDiffExplorerApp />);
+    assert.strictEqual((messages[0] as { type: string }).type, "resource");
+    act(() => {
+      dom.window.EventBridge.dispatch({
+        data: createViewerResourceStateMessage({
+          isDarkMode: false,
+          lang: "en",
+          scrollType: "window",
+        }),
+      } as MessageEvent);
+    });
     assert.ok(loading.getByRole("heading", { name: "Semantic Diff Explorer" }));
     assert.ok(loading.getByRole("status").textContent?.includes("Loading"));
-    assert.strictEqual((messages[0] as { type: string }).type, "ready");
+    assert.strictEqual((messages[1] as { type: string }).type, "ready");
     loading.unmount();
 
     const actions: Array<{ id: string; element: HTMLElement | undefined }> = [];

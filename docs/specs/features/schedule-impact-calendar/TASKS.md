@@ -11,11 +11,11 @@
   Slice 1 is completion-committed at `51a8ae4a`, Slice 2 at
   `b9cee633`, Slice 3 at `ffb92f1e`, the format-only correction at `09148de4`,
   Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, and Slice 6 at `c36ee1cf`.
-- Approved or active slice: Slice 7 is planned and pending independent plan
-  review and its own Human Approval/plan commit. Slices 1–6 have independent `Ready`
-  reviews with no Findings, automatic no-findings Completion Approval, and
-  focused completion commits. Feature Exit is reopened and deferred until
-  Slice 7 is reviewed, implemented, and completion-committed.
+- Approved or active slice: Slice 7 is implemented under focused plan commit
+  `0b914f48` and pending independent implementation review. Slices 1–6 have
+  independent `Ready` reviews with no Findings, automatic no-findings
+  Completion Approval, and focused completion commits. Feature Exit is
+  reopened and deferred until Slice 7 is reviewed and completion-committed.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -154,8 +154,9 @@
   The explicit MUI/component-organization request reopened planning for Slice
   4 and Slice 5; both presentation-only slices are now complete. The later
   placement request reopened planning for Slice 6, which is now complete. The
-  explicit Explorer theme request reopens planning for Slice 7 and defers
-  Feature Exit again.
+  explicit Explorer theme request reopened planning for Slice 7; its approved
+  plan commit is `0b914f48` and implementation is complete pending
+  independent review.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
@@ -163,9 +164,9 @@
   period-bearing action gating, calendar MUI component organization, Explorer
   editor-package component organization, validation, and durable user
   documentation.
-- Review status: all plan/replan packages through Slice 6 and all six
+- Review status: all plan/replan packages through Slice 7 and all six prior
   implementation slices are independently `Ready` with no Findings. Slice 7
-  is pending independent plan review.
+  implementation is pending independent implementation review.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -176,12 +177,12 @@
   replan is approved in `271c6027`. Automatic no-findings Completion Approval
   and focused completion commits `d4344a26` and `f47edeb0` are recorded below.
   Slice 6 replan `e51d6def`, implementation review, automatic Completion
-  Approval, and completion commit `c36ee1cf` are also recorded. Slice 7 has no
-  Human Approval asserted here; the final batch human Closure Approval remains
-  pending after Slice 7.
-- Active implementation slice: none; Slices 1–6 are complete, reviewed,
-  automatically Completion-approved, and committed. Slice 7 is planned but
-  awaits plan review and approval. Feature Exit is deferred until Slice 7
+  Approval, and completion commit `c36ee1cf` are also recorded. Slice 7 replan
+  Human Approval and focused plan commit `0b914f48` are recorded. The final
+  batch human Closure Approval remains pending after Slice 7.
+- Active implementation slice: Slice 7 implementation is complete and awaits
+  independent review; Slices 1–6 are complete, reviewed, automatically
+  Completion-approved, and committed. Feature Exit is deferred until Slice 7
   completes.
 - Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, then
   Slice 7. Each slice requires its own implementation review, Completion
@@ -382,7 +383,7 @@ Findings and Completion Approval is recorded above; focused completion commit
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
 - Implementation paths: exactly Slice 7 listed paths and selected evidence.
-- Commit status: Pending; implementation starts after focused replan commit.
+- Commit status: Complete; focused replan commit `0b914f48`.
 - Deferred Feature Exit/roadmap cleanup remains excluded; final batch human
   closure approval is pending.
 
@@ -657,20 +658,50 @@ Findings and Completion Approval is recorded above; focused completion commit
 
 ### Slice 7 Replan Human Approval
 
-- Status: Pending independent `plan-reviewer` review and explicit approval for
-  the exact Slice 7 theme/context and generic-resource dispatch paths below.
+- Status: Superseded by the approved result below.
 - Basis: the user explicitly requested that Explorer use the same webview
   resource/context mechanism as the other viewers after reporting that its MUI
-  theme is not applied. No Slice 7 Human Approval is asserted yet.
+  theme is not applied. The exact boundary was independently reviewed
+  `Ready` with no Findings and approved in the result below.
 - Proposed scope: only `MyAppContextProvider` scroll-type support, Explorer
   App/Contents/View context-derived theme/locale wiring, deletion of the
   bespoke theme listener/module and test, common resource pre-dispatch through
   `parseViewerRequest`/`postResourceMessage`, and the listed focused tests and
   validation. Preserve the custom Explorer protocol, session/action behavior,
   calendar integration, schedule semantics, and the deferred closure proposal.
-- Review route: return this bounded replan to Main for independent
-  `plan-reviewer` review; implementation remains blocked until the reviewed
-  plan is approved and committed.
+- Review route: the approved result records independent `plan-reviewer`
+  review, Human Approval, and focused plan commit `0b914f48`; implementation
+  is complete and pending independent implementation review.
+
+### Slice 7 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-15; approved in current conversation
+- Basis: independent `implementation-reviewer` final verdict Ready; Findings
+  none. Main applies the user's persistent automatic no-findings slice approval.
+- Approved scope: exact completed Slice 7 shared viewer resource context/theme
+  correction, removal of Explorer-specific detection, listed tests and evidence.
+- Validation: complete matrix 87 passing; independent subset 65 passing;
+  architecture 26 passing; compile, production/dev builds, desktop/web hosts,
+  qlty No issues, Markdown lint and diff checks pass. Common VS Code
+  theme/language source is used and Table/Flow defaults remain intact.
+- Approved paths:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelRequests.ts`
+  - `src/presentation/webview/editor/MyContexts.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerThemeMode.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
+  - `src/test/suite/semanticDiffExplorerThemeContext.test.tsx`
+  - `src/test/suite/semanticDiffExplorerThemeMode.test.ts`
+- Commit status: Pending; focused Slice 7 completion commit.
+- Next stage: independent Feature Exit and final batch human closure approval.
 
 ## Closure Approval
 
@@ -2538,9 +2569,11 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
 
 ### Slice 7: Use The Shared Viewer Resource Context For Explorer Theme
 
-- Status: Planned after the explicit user report that the Explorer MUI theme
-  is not applied. Pending independent `plan-reviewer` review and a separate
-  Human Approval/plan commit; no implementation approval is asserted here.
+- Status: Approved and implemented on 2026-09-15 after the explicit user
+  report that the Explorer MUI theme is not applied. Independent
+  `plan-reviewer` review was `Ready` with no Findings, Human Approval and
+  focused plan commit `0b914f48` are complete, and Completion Approval remains
+  pending independent implementation review.
 - Trigger: production Explorer rendering still calls the bespoke
   `useSemanticDiffExplorerThemeMode`, which reads DOM theme state and owns a
   `MutationObserver`/`matchMedia` listener. The other webviews obtain theme and
@@ -2681,9 +2714,41 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
   compatibility purpose. If implementation would require changing the shared
   resource DTO, public Explorer protocol, or documented semantic behavior,
   stop and return to Main for Replanning and feature-author routing.
-- Review route: return this bounded Slice 7 plan to Main for independent
-  `plan-reviewer` review. No implementation, Human Approval, Completion
-  Approval, Feature Exit verdict, or closure approval is asserted here.
+- Review route: the bounded Slice 7 plan received independent `plan-reviewer`
+  `Ready` review with no Findings, Human Approval, and focused plan commit
+  `0b914f48`. Implementation is complete and pending independent
+  implementation review; no Completion Approval, Feature Exit verdict, or
+  closure approval is asserted here.
+
+### Slice 7 Implementation Evidence
+
+- Status: Implementation complete on 2026-09-15; independent implementation
+  review and Completion Approval remain pending.
+- Changed paths: the shared `MyAppContextProvider` now accepts an optional
+  `scrollType` while retaining the `table` default; Explorer production now
+  requests the `window` resource and derives its single MUI theme shell and
+  locale from the validated shared resource; direct View/Contents test seams
+  retain explicit theme/language injection; the obsolete Explorer theme
+  listener/module and test were removed; and the approved Explorer panel
+  request plumbing dispatches valid common resource requests through the
+  existing parser and response helper before semantic validation.
+- Acceptance evidence: shared context tests cover table default, window
+  requests, dynamic dark/light and English/Japanese resources; Explorer DOM
+  tests cover resource-gated loading, MUI palette/global styles, localized
+  labels, direct View injection, and unchanged session/actions; panel tests
+  cover common-resource dispatch, malformed fail-closed behavior, unchanged
+  semantic request IDs, disposal, and reopen behavior. The architecture guard
+  enforces removal of the bespoke theme module and DOM/theme detection from the
+  Explorer package.
+- Validation completed: focused shared resource/Explorer/Calendar/viewer
+  matrix (`87 passing`), architecture/dependency suite (`26 passing`),
+  `rtk pnpm run test:compile`, production and desktop/web development builds,
+  desktop host (exit 0), web host (WEB-7 through WEB-10 passed), full qlty
+  check (No issues), Markdown lint (0 errors), and `rtk git diff --check`.
+- Compatibility/readiness: the shared resource DTO/parser, custom Explorer
+  request union, session/action IDs, semantic envelopes, calendar callback,
+  CSP, bundle names, Table/Flow provider default, desktop/web support, and
+  telemetry remain unchanged. No README/CHANGELOG update is required.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -2932,8 +2997,9 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       the old dependency-run-only Slice 3 gate is removed from the active plan.
 - [x] Independent `plan-reviewer` review of this targeted Slice 3 dependency
       reconciliation returned `Ready` with no Findings before implementation.
-- [ ] Slice 7 shared-resource/theme replan receives independent `plan-reviewer`
-      `Ready` review and explicit Human Approval before implementation.
+- [x] Slice 7 shared-resource/theme replan received independent
+      `plan-reviewer` `Ready` review with no Findings, explicit Human Approval,
+      and focused plan commit `0b914f48` before implementation.
 
 ## Notes
 

@@ -482,10 +482,36 @@
   compile, architecture, desktop/web builds, host/smoke checks, quality,
   Markdown lint, and diff checks cover browser safety and packaging.
 - Dependency/approval delta: Slice 7 follows completion-committed Slice 6
-  `c36ee1cf`; it has an independent plan-review and Human Approval/plan-commit
-  gate, then its own implementation review and automatic no-findings
-  Completion Approval under the user's standing instruction. Feature Exit is
-  deferred until Slice 7 is complete. No Slice 7 approval is asserted here.
+  `c36ee1cf`; its independent plan-review returned `Ready` with no Findings,
+  Human Approval was recorded, and focused plan commit `0b914f48` is complete.
+  Implementation is complete and awaits independent implementation review and
+  automatic no-findings Completion Approval under the user's standing
+  instruction. Feature Exit is deferred until Slice 7 is complete.
+
+## Slice 7 Implementation Evidence
+
+- Implementation date: 2026-09-15. The shared `MyAppContextProvider` accepts
+  an optional `scrollType` and preserves the existing `table` default. The
+  Explorer entry uses `window`, waits for the validated common resource, and
+  derives one MUI theme shell and display language from `isDarkMode` and `lang`.
+- The direct View/Contents seam continues to accept explicit theme/language
+  values for tests. The bespoke Explorer theme listener/module and test were
+  removed. The Explorer host handles valid common `resource` requests with
+  `parseViewerRequest` and `postResourceMessage` before custom semantic
+  validation, while malformed requests, custom IDs/envelopes, session/action
+  behavior, and disposal remain unchanged.
+- Evidence covers provider table/window request behavior, dynamic light/dark
+  and EN/JA resource updates, resource-gated loading, MUI palette/global
+  styles, localized DOM labels, direct View injection, common-resource host
+  dispatch, malformed fail-closed behavior, semantic request identity,
+  disposal/reopen, and removal of DOM/theme detection from the Explorer
+  package.
+- Validation completed: focused shared resource/Explorer/Calendar/viewer
+  matrix (`87 passing`), architecture/dependency suite (`26 passing`), test
+  compile, production and desktop/web development builds, desktop host (exit
+  0), web host (WEB-7 through WEB-10 passed), full qlty check (No issues),
+  Markdown lint (0 errors), and `git diff --check`. No Slice 7 Completion
+  Approval or Feature Exit verdict is asserted here.
 
 ## Dependency And Approval Trace
 
@@ -581,7 +607,8 @@
   lifecycle, root and run outcomes, identity candidates, deterministic
   ordering, localization, accessibility, bounded rendering, and preservation
   of existing result/report/JSON, Explorer, Flow, source, telemetry, and
-  desktop/web contracts. Slice 7 remains planned and unimplemented.
+  desktop/web contracts. Slice 7 implementation is complete and awaits
+  independent implementation review and Completion Approval.
 - Durable propagation is complete for the observable use case, use-case index,
   README, and CHANGELOG. Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
@@ -589,11 +616,11 @@
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 7 must preserve fail-closed custom validation while
-  accepting the generic resource request, avoid a missing-resource startup
-  wait, and keep one production theme boundary across desktop/web. Existing
+- Remaining risks: independent review must confirm fail-closed custom
+  validation while accepting the generic resource request, resource-gated
+  startup, and one production theme boundary across desktop/web. Existing
   macOS codesign, web-stream cleanup, webpack-size, and advisory smell
   findings remain documented compatibility observations.
-- Closure recommendation: defer Feature Exit until Slice 7 receives its plan
-  and completion gates; then rerun independent Feature Exit and request the
-  final batch human Closure Approval.
+- Closure recommendation: defer Feature Exit until Slice 7 receives its
+  implementation review and completion gates; then rerun independent Feature
+  Exit and request the final batch human Closure Approval.

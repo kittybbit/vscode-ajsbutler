@@ -1,3 +1,4 @@
+import type * as vscode from "vscode";
 import {
   createSemanticDiffExplorerActionResultMessage,
   createSemanticDiffExplorerFailureMessage,
@@ -8,6 +9,8 @@ import {
   type SemanticDiffExplorerHostMessage,
   type SemanticDiffExplorerRequest,
 } from "../../../../application/semantic-diff/semanticDiffExplorerMessages";
+import { parseViewerRequest } from "../../../webview/viewerRequestMessages";
+import { postResourceMessage } from "../../webview/messageHandlers";
 import type {
   SemanticDiffExplorerActionLookup,
   SemanticDiffExplorerSession,
@@ -15,6 +18,7 @@ import type {
 import { processSemanticDiffExplorerAction } from "./semanticDiffExplorerPanelActions";
 
 type PanelRequestOptions = Readonly<{
+  panel: vscode.WebviewPanel;
   session: SemanticDiffExplorerSession;
   actionIds: SemanticDiffExplorerActionLookup;
   isDisposed: () => boolean;
@@ -27,6 +31,16 @@ type PanelRequestOptions = Readonly<{
   ): Promise<void>;
   actionOptions: Parameters<typeof processSemanticDiffExplorerAction>[2];
 }>;
+
+const processCommonResourceRequest = (
+  value: unknown,
+  options: PanelRequestOptions,
+): boolean => {
+  const request = parseViewerRequest(value);
+  if (!request || request.type !== "resource") return false;
+  if (!options.isDisposed()) postResourceMessage(request.data, options.panel);
+  return true;
+};
 
 const processCalendarAction = async (
   request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
@@ -164,6 +178,7 @@ export const handleSemanticDiffExplorerRequest = async (
   options: PanelRequestOptions,
 ): Promise<void> => {
   if (options.isDisposed()) return;
+  if (processCommonResourceRequest(value, options)) return;
   const request = parseRequest(value, options);
   if (request === undefined) {
     await options.post(
