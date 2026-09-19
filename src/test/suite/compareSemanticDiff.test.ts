@@ -6,7 +6,7 @@ import type {
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
-import { localizedChangeSummary } from "../../presentation/semantic-diff/semanticDiffMarkdownLocalization";
+import { localizedChangeSummary } from "../../presentation/semantic-diff/report/semanticDiffMarkdownLocalization";
 
 const relation = (
   sourceUnitId: string,

@@ -1,9 +1,9 @@
 import type {
   SemanticDiffOutputDocument,
   SemanticDiffOutputMode,
-  SemanticDiffOutputModeItem,
   presentSemanticDiffOutput,
-} from "../../../semantic-diff/semanticDiffOutput";
+} from "../../../semantic-diff/report/semanticDiffOutput";
+import type { SemanticDiffOutputModeItem } from "./semanticDiffOutputModePicker";
 
 export type SemanticDiffExplorerReportActionDeps = Readonly<{
   showQuickPick: (

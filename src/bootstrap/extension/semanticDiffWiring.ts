@@ -13,7 +13,7 @@ import {
   SEMANTIC_DIFF_REPORT_SCHEME,
   SemanticDiffReportDocumentProvider,
 } from "../../presentation/vscode/semantic-diff/report/semanticDiffReportDocument";
-import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
+import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/report/semanticDiffOutput";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";

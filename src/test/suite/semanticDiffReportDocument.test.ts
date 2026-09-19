@@ -5,7 +5,7 @@ import {
   SemanticDiffReportDocumentProvider,
   type SemanticDiffReportDocumentDeps,
 } from "../../presentation/vscode/semantic-diff/report/semanticDiffReportDocument";
-import type { SemanticDiffOutputDocument } from "../../presentation/semantic-diff/semanticDiffOutput";
+import type { SemanticDiffOutputDocument } from "../../presentation/semantic-diff/report/semanticDiffOutput";
 
 type ReportDocumentObservations = {
   openedDocuments: vscode.Uri[];

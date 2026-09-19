@@ -20,7 +20,7 @@ import type {
   SemanticDiffUnitReference,
   SemanticDiffUnsupportedItem,
   SemanticDiffWarning,
-} from "../../application/semantic-diff/semanticDiffDto";
+} from "../../../application/semantic-diff/semanticDiffDto";
 import {
   type SemanticDiffJsonCanonicalPair,
   type SemanticDiffJsonChange,

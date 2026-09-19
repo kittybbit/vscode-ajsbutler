@@ -1,4 +1,4 @@
-import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
+import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/semanticDiffDto";
 import {
   SEMANTIC_DIFF_JSON_MEDIA_TYPE,
   type SemanticDiffJsonOutput,

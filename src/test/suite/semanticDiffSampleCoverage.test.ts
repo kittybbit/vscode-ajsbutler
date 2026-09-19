@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
-import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
+import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/report/renderSemanticDiffMarkdown";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { createSemanticDiffSourceIndexIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 

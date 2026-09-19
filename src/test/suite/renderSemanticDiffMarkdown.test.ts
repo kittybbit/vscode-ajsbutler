@@ -10,8 +10,8 @@ import type {
   SemanticDiffIdentityDecision,
   SemanticDiffUnitReference,
 } from "../../application/semantic-diff/semanticDiffDto";
-import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
-import { localizedChangeSummary } from "../../presentation/semantic-diff/semanticDiffMarkdownLocalization";
+import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/report/renderSemanticDiffMarkdown";
+import { localizedChangeSummary } from "../../presentation/semantic-diff/report/semanticDiffMarkdownLocalization";
 
 const params = (values: Record<string, string>): AjsParameter[] =>
   Object.entries(values).map(([key, value]) => ({ key, value }));

@@ -26,6 +26,32 @@ const semanticDiffAdapterRoot = path.join(
   repoRoot,
   "src/presentation/vscode/semantic-diff",
 );
+const semanticDiffPresentationRoot = path.join(
+  repoRoot,
+  "src/presentation/semantic-diff",
+);
+const semanticDiffPresentationReportRoot = path.join(
+  semanticDiffPresentationRoot,
+  "report",
+);
+const semanticDiffPresentationReportFiles = [
+  "renderSemanticDiffAuditMarkdown.ts",
+  "renderSemanticDiffMarkdown.ts",
+  "renderSemanticDiffSummaryMarkdown.ts",
+  "semanticDiffJson.ts",
+  "semanticDiffJsonOrdering.ts",
+  "semanticDiffJsonProjection.ts",
+  "semanticDiffJsonValidation.ts",
+  "semanticDiffMarkdownLocalization.ts",
+  "semanticDiffMarkdownTypes.ts",
+  "semanticDiffOutput.ts",
+  "semanticDiffReportText.ts",
+  "serializeSemanticDiffJson.ts",
+] as const;
+const semanticDiffPresentationFacades = [
+  "pickSemanticDiffOutputMode.ts",
+  "presentSemanticDiffOutput.ts",
+] as const;
 const semanticDiffCategories = [
   "panel",
   "flow",
@@ -448,6 +474,64 @@ suite("Architecture dependency rules", () => {
     );
   });
 
+  test("keeps report ownership split between Presentation and VS Code", () => {
+    const rootFiles = fs
+      .readdirSync(semanticDiffPresentationRoot, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
+      .map((entry) => entry.name);
+    assert.deepStrictEqual(rootFiles, []);
+    assert.deepStrictEqual(
+      fs
+        .readdirSync(semanticDiffPresentationReportRoot)
+        .filter((file) => file.endsWith(".ts"))
+        .sort(),
+      [...semanticDiffPresentationReportFiles].sort(),
+    );
+    semanticDiffPresentationFacades.forEach((file) => {
+      assert.strictEqual(
+        fs.existsSync(path.join(semanticDiffPresentationRoot, file)),
+        false,
+        `${file} must not remain as a Presentation facade`,
+      );
+    });
+
+    const reportFiles = sourceFilesUnder(semanticDiffPresentationReportRoot);
+    const reportImports = reportFiles.flatMap((filePath) => {
+      const file = path.relative(repoRoot, filePath).split(path.sep).join("/");
+      return collectImportReferencesFromSource(
+        file,
+        fs.readFileSync(filePath, "utf8"),
+      ).filter(
+        ({ specifier }) =>
+          specifier === "vscode" ||
+          specifier.startsWith("node:") ||
+          specifier === "react" ||
+          specifier.startsWith("@mui/"),
+      );
+    });
+    assert.deepStrictEqual(reportImports, []);
+    assert.deepStrictEqual(
+      findHostNeutralBrowserGlobalReferences(reportFiles),
+      [],
+    );
+
+    const vscodeReportImports = sourceFilesUnder(
+      path.join(semanticDiffAdapterRoot, "report"),
+    ).flatMap((filePath) => {
+      const file = path.relative(repoRoot, filePath).split(path.sep).join("/");
+      return collectImportReferencesFromSource(
+        file,
+        fs.readFileSync(filePath, "utf8"),
+      ).filter(({ resolvedPath }) =>
+        resolvedPath?.startsWith("src/presentation/semantic-diff/report/"),
+      );
+    });
+    assert.ok(
+      vscodeReportImports.length > 0,
+      "VS Code report adapters must consume Presentation report modules",
+    );
+  });
+
   test("rejects direct imports of moved flat Semantic Diff implementations", () => {
     const imports = sourceFilesUnder(path.join(repoRoot, "src")).flatMap(
       (filePath) => {
@@ -575,12 +659,15 @@ suite("Architecture dependency rules", () => {
     semanticDiffBrowserEntries.forEach((file) => {
       const source = fs.readFileSync(path.join(repoRoot, file), "utf8");
       assert.match(source, /bootstrapViewer/);
+      if (file.endsWith("/semanticDiffExplorer.tsx")) {
+        assert.doesNotMatch(source, /export\s+(?:\{|default)/u);
+      }
     });
   });
 
   test("keeps host-neutral Semantic Diff output free of host dependencies", () => {
     const hostNeutralFiles = sourceFilesUnder(
-      path.join(repoRoot, "src/presentation/semantic-diff"),
+      semanticDiffPresentationReportRoot,
     );
     const hostNeutralImports = hostNeutralFiles.flatMap((filePath) => {
       const relative = path

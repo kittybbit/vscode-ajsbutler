@@ -3,7 +3,7 @@ import type {
   SemanticDiffChangeKind,
   SemanticDiffElementKind,
   SemanticDiffUnsupportedKind,
-} from "../../application/semantic-diff/semanticDiffDto";
+} from "../../../application/semantic-diff/semanticDiffDto";
 import { semanticDiffReportText } from "./semanticDiffReportText";
 import {
   bulletLine,

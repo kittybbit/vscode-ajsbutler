@@ -6,7 +6,7 @@ import {
   unitTypeLabel,
 } from "../../domain/services/i18n/nls";
 import { ParameterSyntaxResourceAdapter } from "../../infrastructure/i18n/ParameterSyntaxResourceAdapter";
-import { semanticDiffReportText } from "../../presentation/semantic-diff/semanticDiffReportText";
+import { semanticDiffReportText } from "../../presentation/semantic-diff/report/semanticDiffReportText";
 
 suite("NLS", () => {
   test("falls back to English message resources for unsupported languages", () => {

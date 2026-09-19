@@ -14,7 +14,7 @@ import type {
   SemanticDiffSide,
   SemanticDiffUnsupportedReason,
   SemanticDiffUnsupportedKind,
-} from "../../application/semantic-diff/semanticDiffDto";
+} from "../../../application/semantic-diff/semanticDiffDto";
 
 export const SEMANTIC_DIFF_JSON_MEDIA_TYPE =
   "application/json; charset=utf-8" as const;

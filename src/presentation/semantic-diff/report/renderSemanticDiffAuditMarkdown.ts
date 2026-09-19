@@ -9,7 +9,7 @@ import type {
   SemanticDiffUnsupportedItem,
   SemanticDiffLimitation,
   SemanticDiffWarning,
-} from "../../application/semantic-diff/semanticDiffDto";
+} from "../../../application/semantic-diff/semanticDiffDto";
 import { semanticDiffReportText } from "./semanticDiffReportText";
 import {
   describeTarget,

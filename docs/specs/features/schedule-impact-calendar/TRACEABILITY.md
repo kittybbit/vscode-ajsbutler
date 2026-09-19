@@ -635,8 +635,9 @@
   complete; implementation review is `Ready` with no Findings, automatic
   Completion Approval is recorded below, and focused completion commit
   `bb8d7305` is complete. Slice 10 plan review and Human Plan Approval are
-  recorded below; its focused plan commit remains pending, so Feature Exit
-  remains deferred.
+  recorded below; focused plan commit `0aef43d2` and implementation are
+  complete, with independent implementation review and Completion Approval
+  pending, so Feature Exit remains deferred.
 
 ## Slice 9 Plan Review And Human Approval
 
@@ -741,9 +742,9 @@ architecture/location guard boundary.
   - `src/test/suite/webSmoke.ts`
   <!-- markdownlint-enable MD013 -->
 - Commit status: Complete; focused completion commit `bb8d7305`.
-- Next stage: Slice 10 plan approval is complete; `approval-committer` owns the
-  focused plan commit. Implementation, Feature Exit, and final batch human
-  Closure Approval remain deferred.
+- Next stage: Slice 10 independent implementation review; focused plan commit
+  `0aef43d2` is complete. Completion Approval, the focused completion commit,
+  Feature Exit, and final batch human Closure Approval remain deferred.
 
 ## Slice 10 Replanning Evidence
 
@@ -786,8 +787,9 @@ architecture/location guard boundary.
   protocols, session behavior, webpack configuration, roadmap, or Feature Exit
   closure. Independent plan review returned `Ready for approval` with no
   Findings and `Replanning required: No`; Human Plan Approval was recorded on
-  2026-09-19. The focused plan commit is pending `approval-committer`; no
-  runtime implementation or Completion Approval is recorded here.
+  2026-09-19. Focused plan commit `0aef43d2` is complete and the runtime
+  implementation is complete; independent implementation review returned
+  `Ready` with no Findings and Completion Approval is recorded below.
 
 ## Slice 10 Plan Review And Human Approval
 
@@ -807,8 +809,70 @@ required: No`.
   The current replan diff contains only TASKS/TRACEABILITY changes, and
   `docs/specs/architecture.md`, `docs/specs/roadmap.md`, and runtime files are
   unchanged.
-- Next stage: `approval-committer` owns the focused Slice 10 plan commit;
-  implementation remains blocked until that commit.
+- Next stage: Completion Approval is recorded below; `approval-committer` owns
+  the focused Slice 10 completion commit.
+
+## Slice 10 Implementation Evidence
+
+- Approved boundary: focused plan commit `0aef43d2` authorizes the
+  Presentation-report and VS Code/report package split. Twelve pure
+  Markdown/JSON/localization/document-dispatch modules now live under
+  `src/presentation/semantic-diff/report/`; the VS Code picker lives under
+  `src/presentation/vscode/semantic-diff/report/`; the two obsolete root
+  facades are deleted; and the Explorer browser entry retains only its
+  `bootstrapViewer(SemanticDiffExplorerApp)` call.
+- Traceability paths: the bootstrap, five Semantic Diff command consumers,
+  Explorer panel/report adapters, report document adapter, the architecture
+  guard, ten affected report/command/projection/document/sample suites, and
+  focused `semanticDiffOutputModePicker.test.ts` were updated. The moved
+  report modules preserve report bytes, JSON version 1, locale fallback, mode
+  order, document lifecycle, and existing application DTO boundaries. The
+  mode picker preserves `full`, `summary`, `audit`, `json` ordering and
+  cancellation. `docs/specs/roadmap.md` remains outside this slice and its
+  pre-existing closure proposal is untouched.
+- Acceptance result: architecture checks prove exactly twelve files under the
+  Presentation report package, no old facades or stale imports, host-neutral
+  report dependencies, inward VS Code/report dependencies, and a
+  bootstrap-only Explorer entry. Webpack entry/output names and report/action
+  consumers remain unchanged.
+- Validation result: `rtk pnpm run test:compile` passed; the architecture suite
+  passed 28 tests; the focused picker suite passed 2 tests; production,
+  desktop-development, and web-development builds compiled successfully; the
+  desktop extension host exited 0; the web extension host exited 0 with
+  `WEB-7`–`WEB-10` passing; full qlty completed with `qlty check: No issues`;
+  Markdown lint passed for 37 files with 0 errors; and `rtk git diff --check`
+  passed. Plain Node/Mocha report loading remains extension-host-only because
+  the existing `@resource/i18n/message` webpack alias is unavailable in Node;
+  the same report consumers are covered by desktop/web host validation.
+- Compatibility and production readiness: this is a package/import relocation
+  with no report semantics, DTO, protocol, session, transport, CSP,
+  dependency, telemetry, or webpack configuration change. VS Code `^1.75.0`,
+  desktop/web entrypoints, and browser-safe Presentation dependencies remain
+  preserved. Existing macOS codesign, web-stream cleanup, webpack-size, and
+  advisory smell findings remain documented observations.
+
+## Slice 10 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-19 in the current conversation under the user's
+  standing automatic no-findings Completion Approval instruction.
+- Basis: independent `implementation-reviewer` final verdict `Ready`; Findings
+  none. The completed diff matches the approved Presentation-report/VS
+  Code-report package boundary, import inventory, facade removal, architecture
+  guard, picker, test, and browser-entry scope.
+- Approved paths: the exact complete path list is recorded in the Slice 10
+  Completion Approval record in `TASKS.md`, including old/new report files,
+  picker, facade deletions, import consumers, tests, architecture guard,
+  browser entry, TASKS, and TRACEABILITY. No path outside that record is
+  approved. `docs/specs/roadmap.md` is excluded.
+- Validation: compile, architecture 28-test, picker 2-test,
+  production/desktop/web builds, desktop/web hosts, qlty, Markdown lint, and
+  diff checks passed; the existing plain Node/Mocha resource-alias limitation
+  remains documented.
+- Commit status: focused Slice 10 completion commit is pending
+  `approval-committer`.
+- Next stage: `approval-committer` for the exact completed paths above; Feature
+  Exit and final batch human Closure Approval remain deferred.
 
 ## Dependency And Approval Trace
 
@@ -918,10 +982,12 @@ required: No`.
 
 ## Feature Exit Evidence
 
-- All nine completed slices are independently reviewed `Ready` with no
+- All ten completed slices are independently reviewed `Ready` with no
   Findings and automatically Completion-approved under the user's no-findings
   instruction. Slice 10's plan is independently `Ready` and Human-approved,
-  but has no implementation approval. Slices 1–9 are focused-commit complete:
+  its focused plan commit `0aef43d2` is complete, its implementation review is
+  `Ready` with no Findings, and Completion Approval is recorded above. Slices
+  1–9 are focused-commit complete:
   Slice 1 `51a8ae4a`, Slice 2
   `b9cee633`, Slice 3 `ffb92f1e`, format-only correction `09148de4`, Slice 4
   `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`,
@@ -934,8 +1000,9 @@ required: No`.
   desktop/web contracts. Slice 7's shared viewer-resource theme/context
   correction and Slice 8's Calendar correction preserve the common Table/Flow
   mechanism. Slice 9 placement/import implementation is complete and its
-  independent review and Completion Approval are complete. Slice 10 remains
-  unimplemented.
+  independent review and Completion Approval are complete. Slice 10's
+  report-package implementation, independent review, and Completion Approval
+  are complete; its focused completion commit remains pending.
 - Durable propagation is complete for the observable use case, use-case index,
   README, and CHANGELOG. Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
@@ -943,12 +1010,12 @@ required: No`.
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 10 must preserve the Presentation-report versus
-  VS Code/report boundary required by the durable architecture, remove obsolete
-  facades without omitting consumers, and keep the browser entry bootstrap-only.
+- Remaining risks: the focused completion commit must preserve the reviewed
+  Presentation-report versus VS Code/report boundary, obsolete facade removal,
+  consumer coverage, and the bootstrap-only browser entry.
   Existing macOS codesign, web-stream
   cleanup, webpack-size, and advisory smell findings remain documented
   observations.
-- Closure recommendation: defer Feature Exit until Slice 10 is reviewed,
-  completion-approved, and committed; then rerun independent Feature Exit and
-  request the final batch human Closure Approval.
+- Closure recommendation: defer Feature Exit until the Slice 10 completion
+  commit is recorded; then rerun independent Feature Exit and request the final
+  batch human Closure Approval.

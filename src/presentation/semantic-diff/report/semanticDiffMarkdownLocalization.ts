@@ -16,7 +16,7 @@ import type {
   SemanticDiffTarget,
   SemanticDiffUnitTarget,
   SemanticDiffUnitReference,
-} from "../../application/semantic-diff/semanticDiffDto";
+} from "../../../application/semantic-diff/semanticDiffDto";
 import { semanticDiffReportText } from "./semanticDiffReportText";
 
 const labelKeys: Record<string, string> = {

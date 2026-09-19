@@ -37,8 +37,8 @@ import {
   presentSemanticDiffOutput,
   type SemanticDiffOutputDocument,
   type SemanticDiffOutputMode,
-  type SemanticDiffOutputModeItem,
-} from "../../semantic-diff/semanticDiffOutput";
+} from "../../semantic-diff/report/semanticDiffOutput";
+import type { SemanticDiffOutputModeItem } from "../semantic-diff/report/semanticDiffOutputModePicker";
 import { getSemanticDiffCommandLocalization } from "./semanticDiffCommandLocalization";
 import { commandExecution } from "./semanticDiffCommandWorkflowExecution";
 import type { WorkflowExplorerResult } from "./semanticDiffCommandWorkflowArtifacts";

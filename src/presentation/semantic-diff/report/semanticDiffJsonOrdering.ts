@@ -4,7 +4,7 @@ import type {
   SemanticDiffElementKind,
   SemanticDiffIdentityDecisionStatus,
   SemanticDiffUnsupportedKind,
-} from "../../application/semantic-diff/semanticDiffDto";
+} from "../../../application/semantic-diff/semanticDiffDto";
 import type {
   SemanticDiffJsonCanonicalPair,
   SemanticDiffJsonChange,

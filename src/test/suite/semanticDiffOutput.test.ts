@@ -1,11 +1,13 @@
 import * as assert from "assert";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import {
-  pickSemanticDiffOutputMode,
   presentSemanticDiffOutput,
-  semanticDiffOutputModeItems,
   type SemanticDiffOutputMode,
-} from "../../presentation/semantic-diff/semanticDiffOutput";
+} from "../../presentation/semantic-diff/report/semanticDiffOutput";
+import {
+  pickSemanticDiffOutputMode,
+  semanticDiffOutputModeItems,
+} from "../../presentation/vscode/semantic-diff/report/semanticDiffOutputModePicker";
 
 const emptyContext = (): SemanticDiffOutputContext => ({
   result: {

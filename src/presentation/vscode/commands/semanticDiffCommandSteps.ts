@@ -6,7 +6,7 @@ import type {
   SemanticDiffSourceCapture,
 } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffOutputContext } from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
-import type { SemanticDiffOutputMode } from "../../semantic-diff/semanticDiffOutput";
+import type { SemanticDiffOutputMode } from "../../semantic-diff/report/semanticDiffOutput";
 import type { SemanticDiffCommandDeps } from "./semanticDiffCommand";
 
 type SemanticDiffCommandErrorCodes = {

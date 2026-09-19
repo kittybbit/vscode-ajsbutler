@@ -5,16 +5,14 @@ import type {
   SemanticDiffExplorerSessionIdAllocator,
 } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
-import type {
-  SemanticDiffOutputDocument,
-  SemanticDiffOutputModeItem,
-} from "../../../semantic-diff/semanticDiffOutput";
+import type { SemanticDiffOutputDocument } from "../../../semantic-diff/report/semanticDiffOutput";
+import type { SemanticDiffOutputModeItem } from "../report/semanticDiffOutputModePicker";
 import type { SemanticDiffFlowActionRequest } from "../flow/semanticDiffExplorerFlowTypes";
 import type {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
 } from "./semanticDiffExplorerRegistry";
-import type { presentSemanticDiffOutput } from "../../../semantic-diff/semanticDiffOutput";
+import type { presentSemanticDiffOutput } from "../../../semantic-diff/report/semanticDiffOutput";
 import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
 import type { ScheduleImpactCalendarSessionRegistry } from "../calendar/scheduleImpactCalendarSessionRegistry";
 import type { ScheduleImpactCalendarPanelHandle } from "../calendar/scheduleImpactCalendarPanel";

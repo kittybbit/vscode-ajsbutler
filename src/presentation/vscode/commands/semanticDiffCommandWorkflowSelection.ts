@@ -10,7 +10,7 @@ import type {
   SemanticDiffWorkflowQuickPickItem,
 } from "./semanticDiffCommand";
 import type { SemanticDiffCommandLocalization } from "./semanticDiffCommandLocalization";
-import type { SemanticDiffOutputModeItem } from "../../semantic-diff/semanticDiffOutput";
+import type { SemanticDiffOutputModeItem } from "../semantic-diff/report/semanticDiffOutputModePicker";
 
 const workflowQuickPick = (
   deps: SemanticDiffCommandDeps,

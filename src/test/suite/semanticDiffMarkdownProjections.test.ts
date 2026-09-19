@@ -16,12 +16,12 @@ import type {
   SemanticDiffSummary,
   SemanticDiffUnsupportedItem,
 } from "../../application/semantic-diff/semanticDiffDto";
-import { renderSemanticDiffAuditMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffAuditMarkdown";
+import { renderSemanticDiffAuditMarkdown } from "../../presentation/semantic-diff/report/renderSemanticDiffAuditMarkdown";
 import {
   renderSemanticDiffFullMarkdown,
   renderSemanticDiffMarkdown,
-} from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
-import { renderSemanticDiffSummaryMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffSummaryMarkdown";
+} from "../../presentation/semantic-diff/report/renderSemanticDiffMarkdown";
+import { renderSemanticDiffSummaryMarkdown } from "../../presentation/semantic-diff/report/renderSemanticDiffSummaryMarkdown";
 
 const reference = (name: string, path = `/root/${name}`) => ({
   id: path,
