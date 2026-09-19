@@ -7,7 +7,7 @@ import {
 import {
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarSessionMessage,
-} from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport";
+} from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 
 type MessageListener = (event: MessageEvent) => void;
 

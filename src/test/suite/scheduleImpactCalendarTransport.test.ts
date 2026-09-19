@@ -10,7 +10,7 @@ import {
   parseScheduleImpactCalendarRequest,
   serializeScheduleImpactCalendarMessage,
   validateScheduleImpactCalendarMessage,
-} from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport";
+} from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 
 suite("Schedule impact calendar transport", () => {
   test("accepts only the closed request and response envelopes", () => {

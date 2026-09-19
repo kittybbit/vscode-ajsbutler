@@ -7,7 +7,7 @@ import {
   buildSemanticDiffOutputContext,
   type SemanticDiffOutputContext,
 } from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
-import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/panel/semanticDiffExplorerPanel";
 import { readBeforeDefinitionStep } from "./semanticDiffCommandSelection";
 import { readSemanticDiffActiveEditor } from "./semanticDiffCommandEditor";
 import {

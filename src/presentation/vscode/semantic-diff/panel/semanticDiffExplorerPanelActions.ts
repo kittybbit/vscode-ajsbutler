@@ -50,7 +50,7 @@ type PanelActionOptions = Readonly<{
       sidecar: import("../../../../application/semantic-diff/semanticDiffScheduleImpact").SemanticDiffScheduleImpact;
       displayLanguage?: string;
     }>,
-  ) => import("../../webview/scheduleImpactCalendar/scheduleImpactCalendarPanel").ScheduleImpactCalendarPanelHandle;
+  ) => import("../calendar/scheduleImpactCalendarPanel").ScheduleImpactCalendarPanelHandle;
 }>;
 
 type ActionExecution = Readonly<{

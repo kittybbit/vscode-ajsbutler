@@ -12,7 +12,7 @@ import {
   type SemanticDiffOutputContext,
 } from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffExplorerSessionId } from "../../../application/semantic-diff/semanticDiffExplorerDto";
-import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/panel/semanticDiffExplorerPanel";
 import {
   selectBeforeForCommand,
   selectModeForEditor,

@@ -18,7 +18,7 @@ import type {
   SemanticDiffResult,
 } from "../../application/semantic-diff/semanticDiffDto";
 import type { SemanticDiffOutputDocument } from "../../presentation/semantic-diff/semanticDiffOutput";
-import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,

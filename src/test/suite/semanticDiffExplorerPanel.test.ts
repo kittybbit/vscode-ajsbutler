@@ -20,14 +20,14 @@ import {
   createSemanticDiffExplorerReadyRequest,
 } from "../../application/semantic-diff/semanticDiffExplorerMessages";
 import { createViewerResourceRequest } from "../../presentation/webview/viewerRequestMessages";
-import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
+import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
-import type { ScheduleImpactCalendarPanelHandle } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
+import type { ScheduleImpactCalendarPanelHandle } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanel";
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
-} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+} from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 
 const emptyContext = () =>
   buildSemanticDiffOutputContext({

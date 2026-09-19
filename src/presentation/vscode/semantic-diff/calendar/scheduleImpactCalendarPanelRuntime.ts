@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { v4 as uuid } from "uuid";
 import { parseViewerRequest } from "../../../webview/viewerRequestMessages";
-import { postResourceMessage } from "../messageHandlers";
+import { postResourceMessage } from "../../webview/messageHandlers";
 import type {
   ScheduleImpactCalendarErrorCode,
   ScheduleImpactCalendarMessage,

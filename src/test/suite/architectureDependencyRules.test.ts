@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as fs from "fs";
 import * as path from "path";
+import * as ts from "typescript";
 import {
   architectureRuleIds,
   collectFunctionFactoryDefinitionsFromSource,
@@ -25,12 +26,13 @@ const semanticDiffAdapterRoot = path.join(
   repoRoot,
   "src/presentation/vscode/semantic-diff",
 );
-const semanticDiffCategories = ["panel", "flow", "report", "source"] as const;
-const semanticDiffRootFacades = [
-  "semanticDiffExplorerFlow.ts",
-  "semanticDiffExplorerPanel.ts",
-  "semanticDiffExplorerRegistry.ts",
-];
+const semanticDiffCategories = [
+  "panel",
+  "flow",
+  "report",
+  "source",
+  "calendar",
+] as const;
 const movedSemanticDiffModules = [
   "semanticDiffExplorerPanelActions",
   "semanticDiffExplorerPanelHtml",
@@ -49,6 +51,10 @@ const movedSemanticDiffModules = [
   "semanticDiffReportDocument",
 ] as const;
 const scheduleImpactCalendarHostRoot = path.join(
+  repoRoot,
+  "src/presentation/vscode/semantic-diff/calendar",
+);
+const scheduleImpactCalendarLegacyRoot = path.join(
   repoRoot,
   "src/presentation/vscode/webview/scheduleImpactCalendar",
 );
@@ -74,6 +80,10 @@ const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerView.tsx",
   "semanticDiffExplorerViewState.ts",
 ] as const;
+const semanticDiffBrowserEntries = [
+  "src/presentation/webview/editor/scheduleImpactCalendar.tsx",
+  "src/presentation/webview/editor/semanticDiffExplorer.tsx",
+] as const;
 
 const sourceFilesUnder = (directory: string): string[] =>
   fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -83,6 +93,60 @@ const sourceFilesUnder = (directory: string): string[] =>
       ? [entryPath]
       : [];
   });
+
+const browserGlobalNames = new Set([
+  "window",
+  "document",
+  "navigator",
+  "HTMLElement",
+  "MutationObserver",
+]);
+
+const findHostNeutralBrowserGlobalReferences = (
+  filePaths: readonly string[],
+): string[] => {
+  const program = ts.createProgram({
+    rootNames: [...filePaths],
+    options: {
+      baseUrl: repoRoot,
+      jsx: ts.JsxEmit.React,
+      lib: ["lib.dom.d.ts", "lib.es2022.d.ts"],
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Node10,
+      paths: {
+        "@generate/*": ["src/generate/*"],
+        "@resource/*": ["src/resource/*"],
+      },
+      skipLibCheck: true,
+      target: ts.ScriptTarget.ES2022,
+    },
+  });
+  const checker = program.getTypeChecker();
+
+  return filePaths.flatMap((filePath) => {
+    const sourceFile = program.getSourceFile(filePath);
+    if (!sourceFile) return [];
+    const references: string[] = [];
+    const visit = (node: ts.Node): void => {
+      if (ts.isIdentifier(node) && browserGlobalNames.has(node.text)) {
+        const symbol = checker.getSymbolAtLocation(node);
+        const isDomSymbol = symbol?.declarations?.some((declaration) =>
+          /[\\/]lib\.dom(?:\.iterable)?\.d\.ts$/u.test(
+            declaration.getSourceFile().fileName,
+          ),
+        );
+        if (isDomSymbol) {
+          references.push(
+            `${path.relative(repoRoot, filePath)}:${sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1}`,
+          );
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sourceFile);
+    return references;
+  });
+};
 
 const resolveSemanticDiffModule = (
   modulePath: string,
@@ -351,20 +415,18 @@ suite("Architecture dependency rules", () => {
     );
   });
 
-  test("keeps Semantic Diff adapter roots as the three public facades", () => {
+  test("keeps Semantic Diff adapters under canonical category packages", () => {
     const rootFiles = fs
       .readdirSync(semanticDiffAdapterRoot, { withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
       .map((entry) => entry.name)
       .sort();
-    assert.deepStrictEqual(rootFiles, [...semanticDiffRootFacades].sort());
-    semanticDiffRootFacades.forEach((file) => {
-      const source = fs.readFileSync(
-        path.join(semanticDiffAdapterRoot, file),
-        "utf8",
+    assert.deepStrictEqual(rootFiles, []);
+    semanticDiffCategories.forEach((category) => {
+      assert.ok(
+        fs.statSync(path.join(semanticDiffAdapterRoot, category)).isDirectory(),
+        `${category} must be a canonical Semantic Diff adapter category`,
       );
-      assert.doesNotMatch(source, /^import\s/m);
-      assert.match(source, /^export\s/m);
     });
     assert.ok(
       fs.existsSync(
@@ -373,13 +435,6 @@ suite("Architecture dependency rules", () => {
           "panel/semanticDiffExplorerConstants.ts",
         ),
       ),
-    );
-    assert.match(
-      fs.readFileSync(
-        path.join(semanticDiffAdapterRoot, "semanticDiffExplorerPanel.ts"),
-        "utf8",
-      ),
-      /semanticDiffExplorerConstants/,
     );
     assert.match(
       fs.readFileSync(
@@ -416,14 +471,12 @@ suite("Architecture dependency rules", () => {
   test("keeps Calendar and Explorer browser modules in canonical packages", () => {
     scheduleImpactCalendarHostModules.forEach((file) => {
       assert.ok(fs.existsSync(path.join(scheduleImpactCalendarHostRoot, file)));
-      assert.strictEqual(
-        fs.existsSync(
-          path.join(repoRoot, "src/presentation/vscode/webview", file),
-        ),
-        false,
-        `${file} must not remain in the flat host webview package`,
-      );
     });
+    assert.strictEqual(
+      fs.existsSync(scheduleImpactCalendarLegacyRoot),
+      false,
+      "Calendar host modules must not remain under generic vscode/webview",
+    );
     semanticDiffExplorerBrowserModules.forEach((file) => {
       assert.ok(fs.existsSync(path.join(semanticDiffExplorerEditorRoot, file)));
       assert.strictEqual(
@@ -463,6 +516,9 @@ suite("Architecture dependency rules", () => {
           ({ specifier }) =>
             specifier.includes("webview/semantic-diff/semanticDiffExplorer") ||
             specifier.includes("webview/editor/scheduleImpactCalendarBridge") ||
+            specifier.includes("/semantic-diff/semanticDiffExplorerFlow") ||
+            specifier.includes("/semantic-diff/semanticDiffExplorerPanel") ||
+            specifier.includes("/semantic-diff/semanticDiffExplorerRegistry") ||
             /webview\/scheduleImpactCalendar(?:Json|Panel|PanelRuntime|SessionRegistry|Transport)/u.test(
               specifier,
             ),
@@ -494,23 +550,59 @@ suite("Architecture dependency rules", () => {
       /scheduleImpactCalendar:\s*"\.\/src\/presentation\/webview\/editor\/scheduleImpactCalendar\.tsx"/u,
     );
 
-    const browserImports = semanticDiffExplorerBrowserModules.flatMap(
-      (file) => {
-        const filePath = path.join(semanticDiffExplorerEditorRoot, file);
-        const relative = path
-          .relative(repoRoot, filePath)
-          .split(path.sep)
-          .join("/");
-        return collectImportReferencesFromSource(
-          relative,
-          fs.readFileSync(filePath, "utf8"),
-        ).filter(
-          ({ specifier }) =>
-            specifier === "vscode" || specifier.startsWith("node:"),
-        );
-      },
-    );
+    const browserImports = [
+      ...semanticDiffExplorerBrowserModules.map((file) =>
+        path.join(semanticDiffExplorerEditorRoot, file),
+      ),
+      ...semanticDiffBrowserEntries.map((file) => path.join(repoRoot, file)),
+    ].flatMap((filePath) => {
+      const relative = path
+        .relative(repoRoot, filePath)
+        .split(path.sep)
+        .join("/");
+      return collectImportReferencesFromSource(
+        relative,
+        fs.readFileSync(filePath, "utf8"),
+      ).filter(
+        ({ specifier }) =>
+          specifier === "vscode" ||
+          specifier.startsWith("node:") ||
+          specifier.includes("/presentation/vscode/"),
+      );
+    });
     assert.deepStrictEqual(browserImports, []);
+
+    semanticDiffBrowserEntries.forEach((file) => {
+      const source = fs.readFileSync(path.join(repoRoot, file), "utf8");
+      assert.match(source, /bootstrapViewer/);
+    });
+  });
+
+  test("keeps host-neutral Semantic Diff output free of host dependencies", () => {
+    const hostNeutralFiles = sourceFilesUnder(
+      path.join(repoRoot, "src/presentation/semantic-diff"),
+    );
+    const hostNeutralImports = hostNeutralFiles.flatMap((filePath) => {
+      const relative = path
+        .relative(repoRoot, filePath)
+        .split(path.sep)
+        .join("/");
+      return collectImportReferencesFromSource(
+        relative,
+        fs.readFileSync(filePath, "utf8"),
+      ).filter(
+        ({ specifier }) =>
+          specifier === "vscode" ||
+          specifier.startsWith("node:") ||
+          specifier === "react" ||
+          specifier.startsWith("@mui/"),
+      );
+    });
+    assert.deepStrictEqual(hostNeutralImports, []);
+    assert.deepStrictEqual(
+      findHostNeutralBrowserGlobalReferences(hostNeutralFiles),
+      [],
+    );
   });
 
   test("keeps Semantic Diff adapter category graph acyclic", () => {

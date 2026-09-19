@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import type { UnitListDocumentDto } from "../../application/unit-list/unitListDocument";
-import type { SemanticDiffFlowPanel } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
+import type { SemanticDiffFlowPanel } from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 import { AJS_FLOW_VIEWER_TYPE } from "../../presentation/vscode/webview/constant";
 import type { ViewerFactory } from "../../presentation/vscode/webview/ViewerFactory";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";

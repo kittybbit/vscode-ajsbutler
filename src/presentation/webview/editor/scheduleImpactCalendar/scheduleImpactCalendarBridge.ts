@@ -3,7 +3,7 @@ import {
   createScheduleImpactCalendarRefreshRequest,
   parseScheduleImpactCalendarHostMessage,
   type ScheduleImpactCalendarHostMessage,
-} from "../../../vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport";
+} from "../../../vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 
 export type ScheduleImpactCalendarPostMessagePort = Readonly<{
   postMessage(message: unknown): void;

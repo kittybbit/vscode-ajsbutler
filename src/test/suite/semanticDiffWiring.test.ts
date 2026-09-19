@@ -17,7 +17,7 @@ import {
   createSemanticDiffSubscriptions,
   createSourceCaptureRegistrar,
 } from "../../bootstrap/extension/semanticDiffWiring";
-import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 import {
   createSemanticDiffExplorerActionIdAllocator,
   createSemanticDiffExplorerSessionIdAllocator,

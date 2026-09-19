@@ -1,5 +1,5 @@
 import type { SemanticDiffOutputDocument } from "../../semantic-diff/semanticDiffOutput";
-import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/panel/semanticDiffExplorerPanel";
 import type {
   SemanticDiffCommandDeps,
   SemanticDiffCommandResult,

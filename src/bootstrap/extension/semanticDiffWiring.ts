@@ -15,24 +15,24 @@ import {
 } from "../../presentation/vscode/semantic-diff/report/semanticDiffReportDocument";
 import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
-import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
+import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import type {
   SemanticDiffExplorerActionIdAllocator,
   SemanticDiffExplorerSessionIdAllocator,
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
-import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes";
 import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 import {
   createSemanticDiffFlowAction,
   SemanticDiffFlowOverlayRegistry,
   type SemanticDiffFlowSourceSnapshot,
-} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
+} from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
-import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarSessionRegistry";
 import type { ReadGitHeadDefinition } from "../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import {
   GIT_HEAD_CONTENT_SCHEME,

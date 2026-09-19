@@ -16,8 +16,8 @@ import type {
 } from "./semanticDiffExplorerRegistry";
 import type { presentSemanticDiffOutput } from "../../../semantic-diff/semanticDiffOutput";
 import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
-import type { ScheduleImpactCalendarSessionRegistry } from "../../webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry";
-import type { ScheduleImpactCalendarPanelHandle } from "../../webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
+import type { ScheduleImpactCalendarSessionRegistry } from "../calendar/scheduleImpactCalendarSessionRegistry";
+import type { ScheduleImpactCalendarPanelHandle } from "../calendar/scheduleImpactCalendarPanel";
 
 export type SemanticDiffScheduleImpactLookup = Readonly<{
   resolve(

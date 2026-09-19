@@ -629,10 +629,11 @@
   `fe042fb0`. Independent `plan-reviewer` returned `Ready for approval` with
   no Findings and `Replanning required: No`; Human Plan Approval was recorded
   on 2026-09-19 under the user's automatic no-findings instruction for the
-  exact paths recorded in `TASKS.md`. The next stage is the
-  `approval-committer` plan gate, followed by implementation review and
-  Completion Approval. Feature Exit is deferred until Slice 9 is complete;
-  the prior closure and roadmap proposal remain preserved and unapproved.
+  exact paths recorded in `TASKS.md`. Focused plan commit `65f123ee` is
+  complete; implementation review is `Ready` with no Findings and Completion
+  Approval is recorded below. The focused completion commit is pending
+  `approval-committer`; Feature Exit is deferred until that commit, and the
+  prior closure and roadmap proposal remain preserved and unapproved.
 
 ## Slice 9 Plan Review And Human Approval
 
@@ -651,8 +652,94 @@
   test paths are listed in the Slice 9 Human Approval record in `TASKS.md`;
   no path outside that record is approved. `webpack.config.js` is validation
   evidence only and is not an implementation path.
-- Next stage: `approval-committer` for the focused Slice 9 plan commit. No
-  implementation or Completion Approval is asserted by this record.
+- Next stage: Completion Approval is recorded below; `approval-committer` owns
+  the focused Slice 9 completion commit.
+
+## Slice 9 Implementation Evidence
+
+- Status: Implementation complete on 2026-09-19 under focused plan commit
+  `65f123ee`; independent `implementation-reviewer` returned `Ready` with no
+  Findings. Completion Approval is recorded below and the focused completion
+  commit remains pending.
+- Changed paths: the five Calendar host modules now live only under
+  `src/presentation/vscode/semantic-diff/calendar/`; the three root Semantic
+  Diff forwarding facades were removed; listed production and test imports were
+  canonicalized; and the architecture guard now checks category placement,
+  stale paths/facades, host-neutral output imports, and thin browser entries.
+  Its TypeScript symbol check rejects actual DOM-library references while
+  permitting local identifiers such as `document`. `docs/specs/roadmap.md`
+  remains excluded from the implementation diff.
+- Acceptance evidence: the old generic Calendar host folder is absent, all
+  affected consumers resolve to canonical `panel/`, `flow/`, and `calendar/`
+  owners, `src/presentation/semantic-diff` remains free of host/UI imports,
+  browser entries retain their thin `bootstrapViewer` shape, and webpack entry
+  and output names remain unchanged. DTOs, protocols, sessions, transport, CSP,
+  lifecycle, and Flow/Table infrastructure are unchanged.
+- Validation evidence: `rtk pnpm run test:compile` passed; the desktop
+  extension-host suite exited 0; architecture passed 27 tests; Calendar
+  bridge/session/transport focused suites passed 14 tests; the web test bundle
+  compiled and extension-host smoke passed `WEB-7` through `WEB-10`; production
+  and desktop/web development builds compiled successfully; full qlty completed
+  with `qlty check: No issues`; Markdown lint passed for 37 files with 0
+  errors; and `git diff --check` passed.
+- Compatibility/readiness: the relocation keeps VS Code `^1.75.0`, browser-safe
+  entries, bundle names, host-neutral JSON/report/Markdown output, and existing
+  Flow/Table behavior. Existing macOS codesign and webpack-size warnings remain
+  documented observations.
+
+## Slice 9 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-19 in the current conversation under the user's
+  standing automatic no-findings Completion Approval instruction.
+- Basis: independent `implementation-reviewer` final verdict `Ready`; Findings
+none. The completed diff matches the reviewed placement/import/facade and
+architecture/location guard boundary.
+<!-- markdownlint-disable MD013 -->
+- Approved paths (exact completed diff):
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarJson.ts` (deleted)
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanel.ts` (deleted)
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanelRuntime.ts` (deleted)
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry.ts` (deleted)
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport.ts` (deleted)
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarJson.ts`
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanel.ts`
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarSessionRegistry.ts`
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport.ts`
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerFlow.ts` (deleted)
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerPanel.ts` (deleted)
+  - `src/presentation/vscode/semantic-diff/semanticDiffExplorerRegistry.ts` (deleted)
+  - `src/bootstrap/extension/semanticDiffFlowViewerBridge.ts`
+  - `src/bootstrap/extension/semanticDiffWiring.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommand.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommandExplorerWorkflow.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommandWorkflowArtifacts.ts`
+  - `src/presentation/vscode/commands/semanticDiffCommandWorkflowExecution.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelActions.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelTypes.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBridge.ts`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/scheduleImpactCalendarBridge.test.ts`
+  - `src/test/suite/scheduleImpactCalendarPanelRuntime.test.ts`
+  - `src/test/suite/scheduleImpactCalendarSession.test.ts`
+  - `src/test/suite/scheduleImpactCalendarTransport.test.ts`
+  - `src/test/suite/semanticDiffCommand.test.ts`
+  - `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`
+  - `src/test/suite/semanticDiffExplorerFlow.test.ts`
+  - `src/test/suite/semanticDiffExplorerPanel.test.ts`
+  - `src/test/suite/semanticDiffExplorerRegistry.test.ts`
+  - `src/test/suite/semanticDiffExplorerScheduleImpact.test.ts`
+  - `src/test/suite/semanticDiffExplorerSourceAction.test.ts`
+  - `src/test/suite/semanticDiffWiring.test.ts`
+  - `src/test/suite/webSmoke.ts`
+  <!-- markdownlint-enable MD013 -->
+- Commit status: the focused completion commit is pending
+  `approval-committer`; Feature Exit and final batch human Closure Approval
+  remain deferred.
 
 ## Dependency And Approval Trace
 
@@ -754,10 +841,10 @@
 
 ## Feature Exit Evidence
 
-- All eight completed slices are independently reviewed `Ready` with no
-  Findings and automatically Completion-approved under the user's no-findings
-  instruction. The planned Slice 9 placement-policy slice is the active
-  replan and has no implementation approval.
+- Slices 1–8 are independently reviewed `Ready` with no Findings and
+  automatically Completion-approved under the user's no-findings instruction.
+  Slice 9 implementation review is `Ready` with no Findings and Completion
+  Approval is recorded; its focused completion commit remains pending.
   Slices 1–8 are focused-commit complete: Slice 1 `51a8ae4a`, Slice 2
   `b9cee633`, Slice 3 `ffb92f1e`, format-only correction `09148de4`, Slice 4
   `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`, and
@@ -769,7 +856,8 @@
   of existing result/report/JSON, Explorer, Flow, source, telemetry, and
   desktop/web contracts. Slice 7's shared viewer-resource theme/context
   correction and Slice 8's Calendar correction preserve the common Table/Flow
-  mechanism. Slice 9 remains unimplemented.
+  mechanism. Slice 9 placement/import implementation is complete and its
+  independent review and Completion Approval are complete.
 - Durable propagation is complete for the observable use case, use-case index,
   README, and CHANGELOG. Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
@@ -777,10 +865,10 @@
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 9 must prove that removing internal forwarding
-  facades and moving the Calendar host does not omit a consumer or cross the
-  host/browser boundary. Existing macOS codesign, web-stream cleanup,
-  webpack-size, and advisory smell findings remain documented observations.
-- Closure recommendation: defer Feature Exit until Slice 9 is reviewed,
-  completion-approved, and committed; then rerun independent Feature Exit and
-  request the final batch human Closure Approval.
+- Remaining risks: the focused completion commit must preserve the reviewed
+  consumer inventory and VS Code/browser boundary. Existing macOS codesign,
+  web-stream cleanup, webpack-size, and advisory smell findings remain
+  documented observations.
+- Closure recommendation: defer Feature Exit until the Slice 9 completion
+  commit is recorded; then rerun independent Feature Exit and request the final
+  batch human Closure Approval.

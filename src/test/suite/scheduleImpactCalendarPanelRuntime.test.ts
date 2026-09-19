@@ -5,12 +5,12 @@ import type { SemanticDiffOutputContext } from "../../application/semantic-diff/
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
 import { createViewerResourceRequest } from "../../presentation/webview/viewerRequestMessages";
-import { createScheduleImpactCalendarReadyRequest } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarTransport";
+import { createScheduleImpactCalendarReadyRequest } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 import {
   openScheduleImpactCalendarPanel,
   type ScheduleImpactCalendarPanelHandle,
-} from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanel";
-import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarSessionRegistry";
+} from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanel";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarSessionRegistry";
 
 const context = (): SemanticDiffOutputContext =>
   buildSemanticDiffOutputContext({
