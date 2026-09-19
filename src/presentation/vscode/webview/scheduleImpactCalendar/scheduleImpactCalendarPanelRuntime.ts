@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { v4 as uuid } from "uuid";
+import { parseViewerRequest } from "../../../webview/viewerRequestMessages";
+import { postResourceMessage } from "../messageHandlers";
 import type {
   ScheduleImpactCalendarErrorCode,
   ScheduleImpactCalendarMessage,
@@ -230,6 +232,11 @@ const handleCalendarMessage = (
   value: unknown,
 ): void => {
   if (!isLiveSession(context)) return;
+  const viewerRequest = parseViewerRequest(value);
+  if (viewerRequest?.type === "resource") {
+    postResourceMessage(viewerRequest.data, context.panel);
+    return;
+  }
   const decision = classifyCalendarRequest(context, value);
   if (decision.ok === false) {
     postFailureMessage(context, null, decision.code);

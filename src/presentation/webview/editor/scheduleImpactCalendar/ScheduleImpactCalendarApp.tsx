@@ -6,6 +6,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import { ThemeProvider } from "@mui/material/styles";
 import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
 import { getScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
+import { MyAppContextProvider, useMyAppContext } from "../MyContexts";
 import { createScheduleImpactCalendarBridge } from "./scheduleImpactCalendarBridge";
 import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import {
@@ -21,12 +22,7 @@ type CalendarState = Readonly<{
 
 export type ScheduleImpactCalendarAppProps = Readonly<{
   sidecar?: SemanticDiffScheduleImpact;
-  language?: string;
-  themeMode?: "light" | "dark";
 }>;
-
-const readLanguage = (fallback?: string): string =>
-  fallback ?? document.documentElement.lang ?? "en";
 
 const useCalendarSession = (): Readonly<{
   state: CalendarState | undefined;
@@ -59,7 +55,7 @@ const useCalendarSession = (): Readonly<{
   return { state, failure };
 };
 
-const ScheduleImpactCalendarTheme = ({
+const CalendarThemeShell = ({
   children,
   themeMode,
 }: Readonly<{
@@ -88,22 +84,31 @@ export const ScheduleImpactCalendarView = ({
   language?: string;
   themeMode?: "light" | "dark";
 }>): React.ReactElement => (
-  <ScheduleImpactCalendarTheme themeMode={themeMode}>
+  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
+    <CssBaseline />
+    <GlobalStyles
+      styles={{
+        ...viewerThemeGlobalStyles,
+        ...semanticDiffExplorerGlobalStyles,
+      }}
+    />
     <ScheduleImpactCalendarContents sidecar={sidecar} language={language} />
-  </ScheduleImpactCalendarTheme>
+  </ThemeProvider>
 );
 
-export const ScheduleImpactCalendarApp = ({
-  sidecar: providedSidecar,
-  language,
-  themeMode = "light",
-}: ScheduleImpactCalendarAppProps): React.ReactElement => {
+const ScheduleImpactCalendarInnerApp = ({
+  providedSidecar,
+}: Readonly<{
+  providedSidecar?: SemanticDiffScheduleImpact;
+}>): React.ReactElement => {
+  const { isDarkMode, lang = "en" } = useMyAppContext();
   const session = useCalendarSession();
   const sidecar = providedSidecar ?? session.state?.sidecar;
-  const labels = getScheduleImpactCalendarLabels(readLanguage(language));
+  const themeMode = isDarkMode ? "dark" : "light";
+  const labels = getScheduleImpactCalendarLabels(lang);
   if (!sidecar)
     return (
-      <ScheduleImpactCalendarTheme themeMode={themeMode}>
+      <CalendarThemeShell themeMode={themeMode}>
         <Box
           component="main"
           aria-labelledby="schedule-impact-calendar-title"
@@ -126,16 +131,21 @@ export const ScheduleImpactCalendarApp = ({
             </Box>
           )}
         </Box>
-      </ScheduleImpactCalendarTheme>
+      </CalendarThemeShell>
     );
   return (
-    <ScheduleImpactCalendarTheme themeMode={themeMode}>
-      <ScheduleImpactCalendarContents
-        sidecar={sidecar}
-        language={readLanguage(language)}
-      />
-    </ScheduleImpactCalendarTheme>
+    <CalendarThemeShell themeMode={themeMode}>
+      <ScheduleImpactCalendarContents sidecar={sidecar} language={lang} />
+    </CalendarThemeShell>
   );
 };
+
+export const ScheduleImpactCalendarApp = ({
+  sidecar,
+}: ScheduleImpactCalendarAppProps = {}): React.ReactElement => (
+  <MyAppContextProvider scrollType="window">
+    <ScheduleImpactCalendarInnerApp providedSidecar={sidecar} />
+  </MyAppContextProvider>
+);
 
 export default ScheduleImpactCalendarApp;

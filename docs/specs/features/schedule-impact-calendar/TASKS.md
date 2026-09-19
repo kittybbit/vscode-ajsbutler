@@ -6,18 +6,19 @@
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
 - Mode: Replanning Mode after the explicit Calendar theme correction request;
-  Feature Exit is deferred until the eighth implementation slice completes.
-  Slices 1–7 are complete on the current `main`.
+  Feature Exit is deferred until the eighth implementation slice is
+  completion-committed. Slices 1–7 are complete on the current `main`; Slice 8
+  implementation is complete pending its focused completion commit.
   Slice 1 is completion-committed at `51a8ae4a`, Slice 2 at
   `b9cee633`, Slice 3 at `ffb92f1e`, the format-only correction at `09148de4`,
   Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, Slice 6 at `c36ee1cf`, and
   Slice 7 at `8c555139`.
-- Approved or active slice: Slice 8 is plan-reviewed `Ready for approval` with
-  no Findings, Human Plan Approved, and pending its focused plan commit before
-  implementation. Slices 1–7 have independent `Ready` reviews with no
-  Findings, automatic no-findings Completion Approval, and focused completion
-  commits. Feature Exit is reopened and deferred until Slice 8 is reviewed,
-  implemented, and completion-committed.
+- Approved or active slice: Slice 8 implementation review is `Ready` with no
+  Findings and Completion Approval is recorded under the user's automatic
+  no-findings instruction; its focused completion commit is pending. Slices
+  1–7 have independent `Ready` reviews with no Findings, automatic no-findings
+  Completion Approval, and focused completion commits. Feature Exit remains
+  deferred until Slice 8 is completion-committed.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -137,7 +138,8 @@
   `0b914f48` are complete. All seven implementation reviews are `Ready` with
   no Findings; automatic Completion Approval and focused completion commits
   are complete. Slice 8's plan review and Human Plan Approval are complete;
-  implementation approval is still pending its focused plan commit.
+  focused plan commit `16f09c72` and implementation are complete, pending
+  independent implementation re-review.
 
 ## Sync Rule
 
@@ -171,8 +173,9 @@
   explicit Explorer theme request reopened planning for Slice 7; its approved
   plan commit is `0b914f48`, implementation review is `Ready` with no Findings,
   automatic Completion Approval is recorded, and completion commit `8c555139`
-  is complete. The explicit Calendar theme request now reopens planning for
-  Slice 8 and defers Feature Exit again.
+  is complete. The explicit Calendar theme request added Slice 8; its
+  implementation review and Completion Approval are now complete, with the
+  focused completion commit pending.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
@@ -180,10 +183,11 @@
   period-bearing action gating, calendar MUI component organization, Explorer
   editor-package component organization, shared Explorer/Calendar resource
   theme and locale integration, validation, and durable user documentation.
-- Review status: all plan/replan packages through Slice 8 and all seven
+- Review status: all plan/replan packages through Slice 8 and all eight
   completed implementation slices are independently `Ready` with no Findings.
   Slice 8's plan review is `Ready for approval` with no Findings and no
-  Replanning required.
+  Replanning required; its implementation review is `Ready` with no Findings
+  and Completion Approval is recorded.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -197,13 +201,14 @@
   Approval, and completion commit `c36ee1cf` are also recorded. Slice 7 replan
   Human Approval and focused plan commit `0b914f48` are recorded, along with
   its `Ready` implementation review, automatic Completion Approval, and
-  completion commit `8c555139`. Slice 8 Human Plan Approval is recorded below
-  on 2026-09-19 under the user's automatic no-findings approval instruction;
-  the final batch human Closure Approval remains pending after Slice 8.
-- Active implementation slice: none; Slices 1–7 are complete, reviewed,
-  automatically Completion-approved, and committed. Slice 8 is
-  plan-reviewed and Human Plan Approved but awaits the focused plan commit
-  before implementation. Feature Exit is deferred until Slice 8 completes.
+  completion commit `8c555139`. Slice 8 Human Plan Approval and focused plan
+  commit `16f09c72` are recorded below on 2026-09-19 under the user's
+  automatic no-findings approval instruction; its implementation review is
+  `Ready` with no Findings and Completion Approval is recorded. The final
+  batch human Closure Approval remains pending after Slice 8.
+- Active implementation slice: none; Slices 1–8 are complete, reviewed, and
+  automatically Completion-approved. Slice 8 awaits its focused completion
+  commit. Feature Exit is deferred until Slice 8 is completion-committed.
 - Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, Slice 7,
   then Slice 8. Each slice requires its own implementation review, Completion
   Approval, and focused commit after the plan gate; Feature Exit follows Slice 8.
@@ -762,20 +767,78 @@ Findings and Completion Approval is recorded above; focused completion commit
 - Validation-only existing coverage: shared viewer host/request/event-bridge
   suites and architecture/desktop/web checks remain required; they are not
   additional implementation paths approved by this record.
-- Plan commit status: Pending approval-committer for the exact Slice 8 plan
-  gate; implementation may not start before that commit.
-- Next stage: approval-committer for the exact Slice 8 plan gate, then Slice 8
-  implementation.
+- Plan commit status: Complete; focused Slice 8 plan commit `16f09c72` is
+  complete.
+- Next stage: completion approval is recorded below; approval-committer now
+  owns the exact focused Slice 8 completion gate.
+
+### Slice 8 Implementation Evidence
+
+- Implementation date: 2026-09-19. Calendar production now uses the shared
+  `MyAppContextProvider` with `scrollType="window"`, waits for the validated
+  resource, and derives its single MUI theme shell and display language from
+  `isDarkMode` and `lang`.
+- The explicit `ScheduleImpactCalendarView` sidecar/language/theme seam is
+  preserved for direct callers and tests. The production Calendar-specific
+  theme wrapper and DOM-language fallback were removed. The Calendar panel
+  runtime accepts valid common `resource` requests through
+  `parseViewerRequest` and `postResourceMessage` before custom validation;
+  malformed requests remain fail-closed and Calendar ready/refresh IDs,
+  envelopes, sidecar, schedule facts, and disposal behavior are unchanged.
+- Added focused context and panel-runtime coverage for window resource
+  requests, resource-gated loading, light/dark palette updates, Japanese and
+  fallback labels, malformed requests, unchanged ready IDs, and disposal.
+- Validation completed: direct Calendar/shared-resource matrix (`25 passing`)
+  and architecture suite (`26 passing`), test compile, production and desktop/
+  web development builds, desktop host exit 0, web smoke exit 0 with WEB-7
+  through WEB-10 passed, qlty check (`No issues`), Markdown lint (`37 files,
+0 errors`), and diff check.
+- Implementation review: independent `implementation-reviewer` returned
+  `Ready` with no Findings. Main recorded automatic Completion Approval on
+  2026-09-19 under the user's standing no-findings instruction.
+
+### Slice 8 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-19; approved in the current conversation
+- Basis: independent `implementation-reviewer` final verdict `Ready`; Findings
+  none. Main applies the user's existing automatic no-findings Completion
+  Approval instruction. Final batch human Closure Approval remains pending.
+- Approved scope: exactly the completed Slice 8 Calendar shared
+  viewer-resource/theme correction: production provider/resource wiring,
+  Calendar panel generic-resource pre-dispatch, preserved explicit View seam,
+  focused context and panel-runtime tests, and the validation evidence above.
+  No schedule meaning, sidecar/session DTO, public resource schema, request or
+  envelope identity, CSP, bundle name, VS Code engine, or telemetry behavior
+  changed.
+- Approved paths (exact completed diff):
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/test/suite/scheduleImpactCalendarPanelRuntime.test.ts`
+  - `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx`
+- Validation: direct Calendar/shared-resource matrix (`25 passing`),
+  architecture suite (`26 passing`), test compile, production and desktop/web
+  development builds, desktop extension host exit 0, web smoke `WEB-7` through
+  `WEB-10`, qlty `No issues`, Markdown lint (`37 files, 0 errors`), and
+  `git diff --check` passed.
+- Commit status: Pending approval-committer for the exact focused Slice 8
+  completion commit; no closure or roadmap approval is included here.
+- Next stage: approval-committer for the exact Slice 8 completion gate, then
+  Feature Exit review and final batch human Closure Approval.
 
 ## Closure Approval
 
-- Status: Deferred pending Slice 8 completion, then explicit human Closure
+- Status: Deferred pending Slice 8 focused completion commit, then explicit
+  human Closure
   Approval after independent Feature Exit review
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Deferred; the prior Close proposal is preserved but
-  superseded as the current gate until Slice 8 is complete.
+- Feature Exit verdict: Deferred; Slice 8 implementation review and Completion
+  Approval are complete, but its focused completion commit is still pending.
+  The prior Close proposal remains preserved until that gate completes.
 - Commit status: Eligible only after explicit Closure Approval is recorded.
 - Proposed closure propagation: remove the completed Wave 4 calendar entry from
   `docs/specs/roadmap.md`, then delete only
@@ -2817,9 +2880,9 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
 
 ### Slice 8: Use The Shared Viewer Resource Context For Calendar Theme
 
-- Status: Plan-reviewed `Ready for approval` with no Findings and Human Plan
-  Approval recorded on 2026-09-19; awaiting the focused plan commit before
-  implementation. No implementation approval is asserted here.
+- Status: Implemented under focused plan commit `16f09c72`; pending
+  independent implementation re-review. Plan review was `Ready for approval`
+  with no Findings and Human Plan Approval was recorded on 2026-09-19.
 - Trigger: Slice 7 aligned Explorer with the common viewer resource/context
   mechanism, but the Calendar production App still owns an explicit
   `themeMode` and DOM-language fallback. Its closed panel runtime validates
@@ -2910,11 +2973,12 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
   documentation are outside this slice.
 - Dependencies: completion-committed Slice 7 `8c555139`, existing
   `MyAppContextProvider`, shared viewer request/parser and `postResourceMessage`,
-  and the current Calendar package. Slice 8 has received independent plan
-  review and Human Plan Approval; it still requires the approval-committer plan
-  gate, implementation review, and Completion Approval. The user's automatic
-  no-findings approval applies after a clean independent implementation review;
-  final human approval remains batched after all eight slices.
+  and the current Calendar package. Slice 8's focused plan commit
+  `16f09c72` is complete and implementation is complete; independent
+  implementation re-review is `Ready` with no Findings and Completion
+  Approval is recorded below under the user's automatic no-findings
+  instruction. The focused completion commit remains pending; final human
+  approval remains batched after all eight slices.
 - Risks: the Calendar runtime must accept the generic resource side channel
   without weakening session validation; a missing response can leave the
   provider waiting; explicit test View props must not leak into production;
@@ -2938,10 +3002,12 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
   public transport, schedule meaning, or documented behavior, stop and return
   to Main for Replanning and feature-author routing.
 - Planning review: independent `plan-reviewer` verdict `Ready for approval`;
-  Findings none; Replanning required: No. Human Plan Approval is recorded
-  below under the user's standing automatic no-findings instruction. No
-  implementation, Completion Approval, Feature Exit verdict, or closure
-  approval is asserted here.
+  Findings none; Replanning required: No. Human Plan Approval and focused plan
+  commit `16f09c72` are recorded below under the user's standing automatic
+  no-findings instruction. Implementation is complete under that approved
+  scope. Independent implementation review is `Ready` with no Findings and
+  Completion Approval is recorded below; Feature Exit and closure approval are
+  not asserted here.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -3034,13 +3100,13 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 
 ## Feature Exit
 
-- Definition of Done status: Deferred while planned Slice 8 is reviewed and
-  implemented. Slices 1–7 are complete, independently reviewed `Ready` with no Findings,
-  automatically Completion-approved under the user's instruction, and
-  focused-commit complete: Slice 1 `51a8ae4a`, Slice 2 `b9cee633`, Slice 3
-  `ffb92f1e`, format correction `09148de4`, Slice 4 `d4344a26`, Slice 5
-  `f47edeb0`, Slice 6 `c36ee1cf`, and Slice 7 `8c555139`; Slice 8 has no
-  completion commit yet.
+- Definition of Done status: Deferred pending the focused Slice 8 completion
+  commit and subsequent Feature Exit review. Slices 1–8 are independently
+  reviewed `Ready` with no Findings and automatically Completion-approved under
+  the user's instruction. Slices 1–7 are focused-commit complete: Slice 1
+  `51a8ae4a`, Slice 2 `b9cee633`, Slice 3 `ffb92f1e`, format correction
+  `09148de4`, Slice 4 `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, and
+  Slice 7 `8c555139`; Slice 8's focused completion commit remains pending.
 - Durable documentation: `uc-present-schedule-impact.md`, its index entry,
   README, and CHANGELOG updates are complete. Architecture and glossary
   propagation are not required. The closure package removes the completed
@@ -3050,11 +3116,11 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   contract preservation are evidenced above. Existing macOS codesign,
   web-stream cleanup, webpack-size, and advisory smell findings remain
   documented observations.
-- Remaining risks: Slice 8 must preserve fail-closed Calendar session
-  validation while accepting the generic resource request, avoid a missing
-  resource startup wait, and keep one production theme boundary across
-  desktop/web. Existing macOS codesign, web stream-cleanup, webpack-size, and
-  advisory smell findings remain documented compatibility observations.
+- Remaining risks: the focused Slice 8 completion commit must preserve the
+  reviewed fail-closed Calendar validation, shared-resource startup behavior,
+  and one production theme boundary across desktop/web. Existing macOS
+  codesign, web-stream cleanup, webpack-size, and advisory smell findings
+  remain documented compatibility observations.
 - Proposed closure scope: update `docs/specs/roadmap.md` as above, then remove
   only `docs/specs/features/schedule-impact-calendar/`; inherited feature
   folders remain preserved.
@@ -3204,8 +3270,10 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 - [x] Slice 8 shared Calendar-resource/theme replan received independent
       `plan-reviewer` `Ready for approval` review with no Findings and no
       Replanning required; Human Plan Approval was recorded on 2026-09-19 for
-      the exact paths above. Implementation remains blocked only on the
-      focused plan commit.
+      the exact paths above. Focused plan commit `16f09c72` and implementation
+      are complete; independent implementation review returned `Ready` with no
+      Findings and Completion Approval was recorded on 2026-09-19. The focused
+      completion commit remains pending approval-committer.
 
 ## Notes
 
