@@ -5,17 +5,19 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Replanning Mode after the explicit Explorer theme correction request;
-  Feature Exit is deferred until the seventh implementation slice completes.
-  Slices 1–6 were completed on the current `main` and remain unchanged.
+- Mode: Replanning Mode after the explicit Calendar theme correction request;
+  Feature Exit is deferred until the eighth implementation slice completes.
+  Slices 1–7 are complete on the current `main`.
   Slice 1 is completion-committed at `51a8ae4a`, Slice 2 at
   `b9cee633`, Slice 3 at `ffb92f1e`, the format-only correction at `09148de4`,
-  Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, and Slice 6 at `c36ee1cf`.
-- Approved or active slice: Slice 7 is implemented under focused plan commit
-  `0b914f48` and pending independent implementation review. Slices 1–6 have
-  independent `Ready` reviews with no Findings, automatic no-findings
-  Completion Approval, and focused completion commits. Feature Exit is
-  reopened and deferred until Slice 7 is reviewed and completion-committed.
+  Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, Slice 6 at `c36ee1cf`, and
+  Slice 7 at `8c555139`.
+- Approved or active slice: Slice 8 is plan-reviewed `Ready for approval` with
+  no Findings, Human Plan Approved, and pending its focused plan commit before
+  implementation. Slices 1–7 have independent `Ready` reviews with no
+  Findings, automatic no-findings Completion Approval, and focused completion
+  commits. Feature Exit is reopened and deferred until Slice 8 is reviewed,
+  implemented, and completion-committed.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -102,29 +104,40 @@
   Slice 7 replaces that bespoke listener with `MyAppContextProvider`, adds a
   narrow shared-resource dispatch before custom validation, and keeps the
   semantic Explorer request union and closed session transport unchanged.
-- The plan now has seven slices: pure comparison artifacts and sidecar
+- Replanning trigger: after Slice 7, the user reported that the Schedule
+  Impact Calendar still does not appear to receive the MUI theme and required
+  the same common mechanism as Flow, Unit List, and Explorer. The Calendar
+  production App still owns an explicit `themeMode`/DOM-language fallback and
+  its custom panel runtime validates only `ready`/`refresh`, so it never
+  accepts the shared `MyAppContextProvider` resource request. Slice 8 applies
+  the common provider/resource path to Calendar and preserves the closed
+  calendar session transport and supplied-sidecar View seam.
+- The plan now has eight slices: pure comparison artifacts and sidecar
   projection; internal command/bootstrap session and transport foundation;
   the public accessible timeline and documentation; the MUI webview
   component decomposition and layout refinement requested after Slice 3; the
   requested presentation-only Explorer composition alignment; the
-  feature-owned host/browser package relocation requested after Slice 5; and
-  the shared viewer-resource theme/context correction for Explorer.
+  feature-owned host/browser package relocation requested after Slice 5; the
+  shared viewer-resource theme/context correction for Explorer; and the shared
+  viewer-resource theme/context correction for Calendar.
 - Current boundaries remain: one identity pass and one schedule evaluation,
   immutable `{ result, summary }` context, host-private sidecar, no change to
   the closed Explorer semantic transport (Slice 7 only accepts the existing
   generic viewer-resource side channel), and no schedule recalculation or
-  candidate merging.
+  candidate merging. Slice 8 changes only Calendar's presentation resource
+  integration; it does not alter the closed calendar session message schema.
 - Public calendar exposure is gated by the workflow's successful evaluated-
   period artifact (`scheduleImpact.kind === "available"`) and the completed
-  Slice 3 implementation. Slices 1 through 6 are complete and committed on
+  Slice 3 implementation. Slices 1 through 7 are complete and committed on
   this branch: `51a8ae4a`, `b9cee633`, `ffb92f1e`, `09148de4`, `d4344a26`,
-  `f47edeb0`, and `c36ee1cf`.
-- The original plan, replans, and Slice 4/5/6 packages have independent
+  `f47edeb0`, `c36ee1cf`, and `8c555139`.
+- The original plan, replans, and Slice 4/5/6/7 packages have independent
   `Ready` verdicts with no Findings. The focused Slice 4/5 plan/replan commit
-  `271c6027` and Slice 6 plan/replan commit `e51d6def` are complete. All six
-  implementation reviews are `Ready` with no Findings; automatic Completion
-  Approval and focused completion commits are complete. Slice 7 has no review
-  or implementation approval yet.
+  `271c6027`, Slice 6 plan/replan commit `e51d6def`, and Slice 7 plan commit
+  `0b914f48` are complete. All seven implementation reviews are `Ready` with
+  no Findings; automatic Completion Approval and focused completion commits
+  are complete. Slice 8's plan review and Human Plan Approval are complete;
+  implementation approval is still pending its focused plan commit.
 
 ## Sync Rule
 
@@ -139,7 +152,8 @@
   internal Calendar Slices 1–2 → completed workflow → public Calendar Slice 3
   → presentation-only MUI Slice 4 → presentation-only Explorer Slice 5 →
   feature-owned host/browser package relocation Slice 6 → shared
-  viewer-resource theme/context correction Slice 7.
+  viewer-resource theme/context correction Slice 7 → shared
+  viewer-resource theme/context correction Slice 8 for Calendar.
 - Keep this file focused on implementation slices, approval, validation, risk,
   production readiness, and Feature Exit readiness.
 
@@ -155,18 +169,21 @@
   4 and Slice 5; both presentation-only slices are now complete. The later
   placement request reopened planning for Slice 6, which is now complete. The
   explicit Explorer theme request reopened planning for Slice 7; its approved
-  plan commit is `0b914f48` and implementation is complete pending
-  independent review.
+  plan commit is `0b914f48`, implementation review is `Ready` with no Findings,
+  automatic Completion Approval is recorded, and completion commit `8c555139`
+  is complete. The explicit Calendar theme request now reopens planning for
+  Slice 8 and defers Feature Exit again.
 - Planning scope: the internal application comparison-artifact contract and
   immutable sidecar projection, exact root and candidate correspondence,
   private calendar session transport, atomic Explorer handoff, accessible
   timeline, outcome/run filtering, localization, bounded rendering, workflow
   period-bearing action gating, calendar MUI component organization, Explorer
-  editor-package component organization, validation, and durable user
-  documentation.
-- Review status: all plan/replan packages through Slice 7 and all six prior
-  implementation slices are independently `Ready` with no Findings. Slice 7
-  implementation is pending independent implementation review.
+  editor-package component organization, shared Explorer/Calendar resource
+  theme and locale integration, validation, and durable user documentation.
+- Review status: all plan/replan packages through Slice 8 and all seven
+  completed implementation slices are independently `Ready` with no Findings.
+  Slice 8's plan review is `Ready for approval` with no Findings and no
+  Replanning required.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -178,16 +195,18 @@
   and focused completion commits `d4344a26` and `f47edeb0` are recorded below.
   Slice 6 replan `e51d6def`, implementation review, automatic Completion
   Approval, and completion commit `c36ee1cf` are also recorded. Slice 7 replan
-  Human Approval and focused plan commit `0b914f48` are recorded. The final
-  batch human Closure Approval remains pending after Slice 7.
-- Active implementation slice: Slice 7 implementation is complete and awaits
-  independent review; Slices 1–6 are complete, reviewed, automatically
-  Completion-approved, and committed. Feature Exit is deferred until Slice 7
-  completes.
-- Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, then
-  Slice 7. Each slice requires its own implementation review, Completion
-  Approval, and focused
-  commit after the plan gate; Feature Exit follows Slice 7.
+  Human Approval and focused plan commit `0b914f48` are recorded, along with
+  its `Ready` implementation review, automatic Completion Approval, and
+  completion commit `8c555139`. Slice 8 Human Plan Approval is recorded below
+  on 2026-09-19 under the user's automatic no-findings approval instruction;
+  the final batch human Closure Approval remains pending after Slice 8.
+- Active implementation slice: none; Slices 1–7 are complete, reviewed,
+  automatically Completion-approved, and committed. Slice 8 is
+  plan-reviewed and Human Plan Approved but awaits the focused plan commit
+  before implementation. Feature Exit is deferred until Slice 8 completes.
+- Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, Slice 7,
+  then Slice 8. Each slice requires its own implementation review, Completion
+  Approval, and focused commit after the plan gate; Feature Exit follows Slice 8.
 
 ## Human Approval
 
@@ -670,8 +689,8 @@ Findings and Completion Approval is recorded above; focused completion commit
   validation. Preserve the custom Explorer protocol, session/action behavior,
   calendar integration, schedule semantics, and the deferred closure proposal.
 - Review route: the approved result records independent `plan-reviewer`
-  review, Human Approval, and focused plan commit `0b914f48`; implementation
-  is complete and pending independent implementation review.
+  review, Human Approval, focused plan commit `0b914f48`, and the completed
+  implementation review below.
 
 ### Slice 7 Completion Approval
 
@@ -700,18 +719,63 @@ Findings and Completion Approval is recorded above; focused completion commit
   - `src/test/suite/semanticDiffExplorerPanel.test.ts`
   - `src/test/suite/semanticDiffExplorerThemeContext.test.tsx`
   - `src/test/suite/semanticDiffExplorerThemeMode.test.ts`
-- Commit status: Pending; focused Slice 7 completion commit.
+- Commit status: Complete; focused completed Slice 7 commit `8c555139`.
 - Next stage: independent Feature Exit and final batch human closure approval.
+
+### Slice 8 Replan Human Approval
+
+- Status: Superseded by the approved result below.
+- Basis: the user reported that the Schedule Impact Calendar still does not
+  appear to receive the MUI theme and requested the same common mechanism used
+  by Flow, Unit List, and Explorer.
+- Proposed scope: Calendar production `MyAppContextProvider` integration with
+  `scrollType="window"`, context-derived `isDarkMode`/`lang`, one production
+  MUI theme shell, explicit View test seam preservation, and common resource
+  request pre-dispatch through the existing parser and `postResourceMessage` in
+  the Calendar panel runtime. Preserve the closed calendar session transport,
+  sidecar, schedule facts, and deferred closure proposal.
+- Review route: superseded by the independent review and approval recorded
+  below.
+
+### Slice 8 Replan Human Approval Result
+
+- Status: Approved
+- Approved at: 2026-09-19; approved in the current conversation
+- Basis: independent `plan-reviewer` verdict `Ready for approval`; Findings
+  none; Replanning required: No. Main applies the user's standing automatic
+  no-findings slice-level approval instruction.
+- Approved scope: exactly the Slice 8 Calendar shared viewer-resource/theme
+  correction: production provider/resource wiring, Calendar panel generic
+  resource pre-dispatch, explicit View seam preservation, and the listed
+  focused tests. The closed Calendar session transport, sidecar, schedule
+  facts, public resource schema, desktop/web behavior, and deferred Feature
+  Exit remain unchanged.
+- Approved paths:
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarPanelRuntime.test.ts`
+- Validation-only existing coverage: shared viewer host/request/event-bridge
+  suites and architecture/desktop/web checks remain required; they are not
+  additional implementation paths approved by this record.
+- Plan commit status: Pending approval-committer for the exact Slice 8 plan
+  gate; implementation may not start before that commit.
+- Next stage: approval-committer for the exact Slice 8 plan gate, then Slice 8
+  implementation.
 
 ## Closure Approval
 
-- Status: Deferred pending Slice 7 completion, then explicit human Closure
+- Status: Deferred pending Slice 8 completion, then explicit human Closure
   Approval after independent Feature Exit review
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Deferred; the prior `Close` proposal is preserved but
-  superseded as the current gate until Slice 7 is complete.
+- Feature Exit verdict: Deferred; the prior Close proposal is preserved but
+  superseded as the current gate until Slice 8 is complete.
 - Commit status: Eligible only after explicit Closure Approval is recorded.
 - Proposed closure propagation: remove the completed Wave 4 calendar entry from
   `docs/specs/roadmap.md`, then delete only
@@ -2502,7 +2566,7 @@ lint:md`; and `git diff --check`.
   contract; and the completed workflow/public integration. Implementation may
   start only after independent plan review and the replan plan commit. The
   user's automatic no-findings approval applies after a clean independent
-  implementation review; final human approval remains batched after all six
+  implementation review; final human approval remains batched after all seven
   slices.
 - Risks: relative imports can accidentally cross host/browser ownership;
   deleting facades can miss a test or hidden bundle consumer; moving the
@@ -2572,8 +2636,9 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
 - Status: Approved and implemented on 2026-09-15 after the explicit user
   report that the Explorer MUI theme is not applied. Independent
   `plan-reviewer` review was `Ready` with no Findings, Human Approval and
-  focused plan commit `0b914f48` are complete, and Completion Approval remains
-  pending independent implementation review.
+  focused plan commit `0b914f48` are complete. Independent implementation
+  review is `Ready` with no Findings, automatic Completion Approval is recorded,
+  and focused completion commit `8c555139` is complete.
 - Trigger: production Explorer rendering still calls the bespoke
   `useSemanticDiffExplorerThemeMode`, which reads DOM theme state and owns a
   `MutationObserver`/`matchMedia` listener. The other webviews obtain theme and
@@ -2714,16 +2779,16 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
   compatibility purpose. If implementation would require changing the shared
   resource DTO, public Explorer protocol, or documented semantic behavior,
   stop and return to Main for Replanning and feature-author routing.
-- Review route: the bounded Slice 7 plan received independent `plan-reviewer`
-  `Ready` review with no Findings, Human Approval, and focused plan commit
-  `0b914f48`. Implementation is complete and pending independent
-  implementation review; no Completion Approval, Feature Exit verdict, or
-  closure approval is asserted here.
+- Planning review: the bounded Slice 7 plan received independent
+  `plan-reviewer` `Ready` review with no Findings, Human Approval, and focused
+  plan commit `0b914f48`. Its implementation review and Completion Approval
+  are recorded above; Feature Exit remains the next stage.
 
 ### Slice 7 Implementation Evidence
 
-- Status: Implementation complete on 2026-09-15; independent implementation
-  review and Completion Approval remain pending.
+- Status: Complete on 2026-09-15; independent implementation review is
+  `Ready` with no Findings, automatic Completion Approval is recorded, and
+  focused completion commit `8c555139` is complete.
 - Changed paths: the shared `MyAppContextProvider` now accepts an optional
   `scrollType` while retaining the `table` default; Explorer production now
   requests the `window` resource and derives its single MUI theme shell and
@@ -2750,6 +2815,134 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
   CSP, bundle names, Table/Flow provider default, desktop/web support, and
   telemetry remain unchanged. No README/CHANGELOG update is required.
 
+### Slice 8: Use The Shared Viewer Resource Context For Calendar Theme
+
+- Status: Plan-reviewed `Ready for approval` with no Findings and Human Plan
+  Approval recorded on 2026-09-19; awaiting the focused plan commit before
+  implementation. No implementation approval is asserted here.
+- Trigger: Slice 7 aligned Explorer with the common viewer resource/context
+  mechanism, but the Calendar production App still owns an explicit
+  `themeMode` and DOM-language fallback. Its closed panel runtime validates
+  only Calendar `ready`/`refresh` messages, so it rejects the valid common
+  `resource` request that `MyAppContextProvider` would send.
+- Scope: make Calendar production use `MyAppContextProvider` with
+  `scrollType="window"`, derive display language and MUI light/dark mode from
+  validated `isDarkMode`/`lang`, and keep one production
+  `ThemeProvider`/`CssBaseline`/shared global-style shell. Preserve
+  `ScheduleImpactCalendarView` as an explicit supplied-sidecar,
+  language/theme test seam. Add common resource pre-dispatch in the existing
+  Calendar panel runtime using `parseViewerRequest` and `postResourceMessage`
+  before the closed Calendar session validator. No calendar session envelope,
+  sidecar, schedule fact, or shared resource schema changes.
+- User / Domain Value: Calendar receives the same VS Code theme and locale
+  source as Flow, Unit List, and Explorer, so its MUI palette, global styles,
+  labels, status surfaces, and accessibility colors match the active host in
+  desktop and web extension hosts.
+- Cohesive Change Group: Calendar App/provider wiring, shared host resource
+  dispatch, explicit test-seam preservation, and focused context/DOM/host
+  regression coverage. No schedule semantics, timeline/filter meaning,
+  lifecycle, or transport behavior changes.
+- Planned paths and approval scope:
+  - Update `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+    to follow the Explorer/Flow/Table App pattern: a provider-wrapped inner
+    production App consumes `useMyAppContext().isDarkMode` and `lang`, uses
+    `scrollType="window"`, and owns the single production MUI theme shell.
+    Remove production dependence on `themeMode` and document language and
+    remove the Calendar-specific theme wrapper as a theme owner. Keep
+    `ScheduleImpactCalendarView`'s explicit `language`/`themeMode` inputs for
+    direct tests and supplied-sidecar callers without any environment
+    detection. Use the existing `createSemanticDiffTheme`,
+    `viewerThemeGlobalStyles`, and shared semantic-diff global styles exactly
+    once in production, following the common Flow/Table/Explorer pattern.
+  - Update
+    `src/presentation/vscode/webview/scheduleImpactCalendar/scheduleImpactCalendarPanelRuntime.ts`
+    to recognize a valid common `viewerRequestMessages` `resource` request
+    before `validateScheduleImpactCalendarMessage`, then call the existing
+    `src/presentation/vscode/webview/messageHandlers.ts::postResourceMessage`
+    for the live Calendar panel. Keep Calendar `ready`/`refresh` validation,
+    request IDs, stale/unknown/disposed outcomes, child cleanup, and closed
+    session envelopes unchanged. Malformed common requests remain fail-closed;
+    do not add a Calendar-specific resource schema or theme detection.
+  - Add/update focused tests: new
+    `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx` for provider
+    request/gated loading, window resource, light/dark palette and EN/JA/
+    fallback labels; update
+    `src/test/suite/scheduleImpactCalendarView.test.tsx` and
+    `scheduleImpactCalendarComponents.test.tsx` to preserve explicit View
+    theme/language injection and MUI behavior; add
+    `src/test/suite/scheduleImpactCalendarPanelRuntime.test.ts` for valid
+    resource pre-dispatch, malformed fail-closed behavior, unchanged
+    ready/refresh IDs/envelopes, stale/disposed handling, and cleanup. Reuse
+    existing `viewerHostMessages.test.ts`, `viewerRequestMessages.test.ts`,
+    and `viewerEventBridge.test.ts` coverage rather than creating a second
+    resource contract. Include architecture/dependency and desktop/web smoke
+    or extension-host checks.
+- Acceptance: Calendar production waits for the validated common resource like
+  the other viewers, then renders one MUI theme from VS Code `isDarkMode` and
+  localized labels from `lang`; no production themeMode/DOM-language fallback
+  or Calendar-specific theme implementation/listener remains; direct View
+  tests still work with explicit injected values; valid
+  resource requests are answered through the shared helper before Calendar
+  validation; malformed requests fail closed; Calendar session ready/refresh,
+  payload/error envelopes, disposal/reopen, CSP, bundle name, accessibility,
+  and desktop/web behavior remain unchanged.
+- Validation: run the new Calendar context/theme and panel-runtime suites,
+  existing Calendar component/view/accessibility/localization/projection/
+  bridge/session/transport regressions, shared resource/event-bridge tests,
+  `rtk pnpm run test:compile`, production build, desktop and web development
+  builds, desktop/web extension-host and web-smoke checks, architecture and
+  browser-safe import guards, `rtk pnpm run qlty`, `rtk pnpm run lint:md`, and
+  `git diff --check`. The DOM matrix must cover resource-gated loading,
+  light/dark palette, EN/JA/fallback labels, explicit View seam, large and
+  failure states, and accessibility/reflow behavior.
+- Production Readiness: reuse the validated shared viewer resource DTO/parser
+  and `postResourceMessage`; preserve `scrollType` and provider cleanup;
+  isolate the generic side channel from Calendar's custom session validator;
+  retain browser-safe imports, nonce/CSP, output filename, VS Code engine,
+  privacy, telemetry, JP1/AJS compatibility, and no README/CHANGELOG change
+  for this internal theme/context correction.
+- Approval Boundary: only Calendar production App/provider theme and locale
+  wiring, Calendar panel-runtime generic-resource pre-dispatch, the explicit
+  View test seam updates, and the listed focused/shared regression tests.
+  Schedule calculations, sidecar/session DTOs, Calendar closed transport,
+  workflow/action behavior, public resource schema, Flow/Table/Explorer
+  behavior, package/dependency changes, CSP/output semantics, and unrelated
+  documentation are outside this slice.
+- Dependencies: completion-committed Slice 7 `8c555139`, existing
+  `MyAppContextProvider`, shared viewer request/parser and `postResourceMessage`,
+  and the current Calendar package. Slice 8 has received independent plan
+  review and Human Plan Approval; it still requires the approval-committer plan
+  gate, implementation review, and Completion Approval. The user's automatic
+  no-findings approval applies after a clean independent implementation review;
+  final human approval remains batched after all eight slices.
+- Risks: the Calendar runtime must accept the generic resource side channel
+  without weakening session validation; a missing response can leave the
+  provider waiting; explicit test View props must not leak into production;
+  duplicate theme shells can mask the fix; and desktop/web startup or CSP can
+  regress. Focused resource, runtime, DOM, disposal, compile, and host tests
+  cover these risks.
+- Out of Scope: new resource schema, custom Calendar protocol changes,
+  schedule semantics, timeline/filter redesign, sidecar/session lifecycle
+  changes, parser/application/domain changes, shared viewer redesign,
+  dependency changes, persistence, telemetry, and unrelated docs.
+
+### Slice 8 Planning Evidence
+
+- Replanning trigger and impact are recorded above. Current Calendar still
+  uses explicit theme/language props in production and its custom host runtime
+  does not accept the common resource request. The plan reopens Feature Exit
+  without changing completed Slices 1–7 or their evidence.
+- No normative `SPECS.md` amendment is required: this is a presentation and
+  shared-host-adapter correction within the existing Calendar compatibility
+  purpose. If implementation requires changing the shared resource DTO,
+  public transport, schedule meaning, or documented behavior, stop and return
+  to Main for Replanning and feature-author routing.
+- Planning review: independent `plan-reviewer` verdict `Ready for approval`;
+  Findings none; Replanning required: No. Human Plan Approval is recorded
+  below under the user's standing automatic no-findings instruction. No
+  implementation, Completion Approval, Feature Exit verdict, or closure
+  approval is asserted here.
+
 ## Cross-Slice Approval And Production Readiness
 
 - Implement, independently review, Completion-approve, and commit exactly one
@@ -2761,9 +2954,10 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
   commit `8e6922f8` with its evaluated-period artifact handoff → Slice 3 public
   action and visible timeline → Slice 4 calendar MUI composition → Slice 5
   Explorer MUI composition → Slice 6 host/browser package relocation → Slice 7
-  shared viewer-resource theme/context correction. Slice 2 must not expose a
-  user-reachable action; Slice 3 remains the first public surface and Slices
-  4–7 preserve it.
+  shared viewer-resource theme/context correction → Slice 8 shared
+  viewer-resource theme/context correction for Calendar. Slice 2 must not
+  expose a user-reachable action; Slice 3 remains the first public surface and
+  Slices 4–8 preserve it.
 - Every slice preserves the existing Explorer public message union,
   immutable `SemanticDiffOutputContext` shape `{ result, summary }`, stable
   `scheduleComparison.runChanges` ID/order semantics, JSON version 1, report
@@ -2824,7 +3018,7 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 
 ## Traceability
 
-- `TRACEABILITY.md` is required and maps CAL requirements to the six slices,
+- `TRACEABILITY.md` is required and maps CAL requirements to the eight slices,
   concrete approval paths, tests, and durable documentation.
 - The sidecar identity, composite source-change resolution, root matrix,
   internal artifact contract, and pure application builder are Slice 1-owned;
@@ -2834,17 +3028,19 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   filters/legend, localization, and durable use-case documentation are Slice
   3-owned; calendar MUI component organization is Slice 4-owned; Explorer MUI
   component organization is Slice 5-owned; and feature-owned host/browser
-  package relocation is Slice 6-owned. No requirement is left to an
-  unassigned slice.
+  package relocation is Slice 6-owned; shared viewer-resource theme/context
+  correction is Slice 7-owned; Calendar shared viewer-resource theme/context
+  correction is Slice 8-owned. No requirement is left to an unassigned slice.
 
 ## Feature Exit
 
-- Definition of Done status: Deferred while planned Slice 7 is reviewed and
-  implemented. Slices 1–6 are complete, independently reviewed `Ready` with no Findings,
+- Definition of Done status: Deferred while planned Slice 8 is reviewed and
+  implemented. Slices 1–7 are complete, independently reviewed `Ready` with no Findings,
   automatically Completion-approved under the user's instruction, and
   focused-commit complete: Slice 1 `51a8ae4a`, Slice 2 `b9cee633`, Slice 3
   `ffb92f1e`, format correction `09148de4`, Slice 4 `d4344a26`, Slice 5
-  `f47edeb0`, and Slice 6 `c36ee1cf`; Slice 7 has no completion commit yet.
+  `f47edeb0`, Slice 6 `c36ee1cf`, and Slice 7 `8c555139`; Slice 8 has no
+  completion commit yet.
 - Durable documentation: `uc-present-schedule-impact.md`, its index entry,
   README, and CHANGELOG updates are complete. Architecture and glossary
   propagation are not required. The closure package removes the completed
@@ -2854,12 +3050,11 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   contract preservation are evidenced above. Existing macOS codesign,
   web-stream cleanup, webpack-size, and advisory smell findings remain
   documented observations.
-- Remaining risks: Slice 7 must preserve fail-closed custom validation while
-  accepting the generic resource request, avoid a missing-resource startup
-  wait, and keep one production theme boundary across desktop/web. Existing
-  macOS codesign, web stream-cleanup, webpack-size, and advisory smell findings
-  remain documented compatibility observations. Closure is not yet the active
-  gate.
+- Remaining risks: Slice 8 must preserve fail-closed Calendar session
+  validation while accepting the generic resource request, avoid a missing
+  resource startup wait, and keep one production theme boundary across
+  desktop/web. Existing macOS codesign, web stream-cleanup, webpack-size, and
+  advisory smell findings remain documented compatibility observations.
 - Proposed closure scope: update `docs/specs/roadmap.md` as above, then remove
   only `docs/specs/features/schedule-impact-calendar/`; inherited feature
   folders remain preserved.
@@ -3000,6 +3195,17 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 - [x] Slice 7 shared-resource/theme replan received independent
       `plan-reviewer` `Ready` review with no Findings, explicit Human Approval,
       and focused plan commit `0b914f48` before implementation.
+- [x] Slice 7 received independent `implementation-reviewer` `Ready` review
+      with no Findings. Main recorded automatic Completion Approval under the
+      user's no-findings instruction; focused implementation commit `8c555139`
+      is complete. Its focused 87-test matrix, independent 65-test subset,
+      architecture 26-test suite, compile, build, host, quality, Markdown lint,
+      and diff checks pass.
+- [x] Slice 8 shared Calendar-resource/theme replan received independent
+      `plan-reviewer` `Ready for approval` review with no Findings and no
+      Replanning required; Human Plan Approval was recorded on 2026-09-19 for
+      the exact paths above. Implementation remains blocked only on the
+      focused plan commit.
 
 ## Notes
 
@@ -3038,5 +3244,6 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   unavailable impact. The Wave 4 roadmap entry and the internal Calendar
   Slices 1–2 → completed workflow → public Slice 3 → MUI Slice 4 → Explorer
   package Slice 5 → host/browser package relocation Slice 6 → shared
-  viewer-resource theme/context Slice 7 dependency chain are synchronized.
-  Feature Exit remains deferred until Slice 7 completes.
+  viewer-resource theme/context Slice 7 → shared viewer-resource
+  theme/context Slice 8 for Calendar dependency chain are synchronized.
+  Feature Exit remains deferred until Slice 8 completes.
