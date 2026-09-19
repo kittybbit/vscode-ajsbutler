@@ -5,21 +5,20 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Replanning Mode after the explicit Semantic Diff report-package
-  organization request; Feature Exit is deferred until the tenth implementation
-  slice completes. Slices 1–9 are complete and completion-committed.
+- Mode: Replanning Mode after the explicit readability request for shared
+  Semantic Diff Explorer and Schedule Impact Calendar result presentation;
+  Slices 1–10 remain complete and completion-committed. Feature Exit is
+  deferred until the new presentation slice is complete and committed.
   Slice 1 is completion-committed at `51a8ae4a`, Slice 2 at
   `b9cee633`, Slice 3 at `ffb92f1e`, the format-only correction at `09148de4`,
   Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, Slice 6 at `c36ee1cf`, Slice 7
-  at `8c555139`, Slice 8 at `fe042fb0`, and Slice 9 at `bb8d7305`.
-- Approved or active slice: Slice 10 implementation is complete under focused
-  plan commit `0aef43d2`; independent implementation review returned `Ready`
-  with no Findings, and Completion Approval is recorded below. Slices 1–9
-  have independent `Ready` reviews with no
-  Findings, automatic no-findings Completion Approval, and focused completion
-  commits. The focused Slice 10 completion commit is pending
-  `approval-committer`; Feature Exit is reopened and deferred until Slice 10
-  is committed.
+  at `8c555139`, Slice 8 at `fe042fb0`, Slice 9 at `bb8d7305`, and Slice 10
+  at `0a5cdd31`.
+- Approved or active slice: Slice 11 plan is Human-approved and awaits the
+  focused `approval-committer` plan commit; implementation remains inactive.
+  All ten earlier slices have independent `Ready` reviews with no Findings,
+  automatic no-findings Completion Approval, and focused completion commits.
+  Feature Exit remains deferred.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -133,7 +132,18 @@
   separates the VS Code chooser/document adapters, removes the two unused
   facade files, and retains the browser re-export cleanup as an approved
   implementation path. The current replan diff has no runtime entrypoint edit.
-- The plan now has ten slices: pure comparison artifacts and sidecar
+- Replanning trigger: after Slice 10, the user reported that Semantic Diff
+  Explorer and Schedule Impact Calendar results are difficult to read as long
+  strings and requested one consistent presentation. Investigation found
+  existing MUI cards, alerts, lists, and theme/context wiring, but each view
+  still owns duplicated section/card/key-value/status/empty markup; Calendar
+  concatenates identifiers and details with `·`, while Explorer splits its
+  summary, status, and tree detail presentation across view-specific wrappers.
+  Slice 11 introduces generic browser-safe result primitives under the shared
+  webview editor package and adopts them in both views. View-owned adapters
+  keep all localized labels and domain-to-display mapping; no DTO, business
+  meaning, protocol, host lifecycle, or theme mechanism changes.
+- The plan now has eleven slices: pure comparison artifacts and sidecar
   projection; internal command/bootstrap session and transport foundation;
   the public accessible timeline and documentation; the MUI webview
   component decomposition and layout refinement requested after Slice 3; the
@@ -142,7 +152,8 @@
   shared viewer-resource theme/context correction for Explorer; the shared
   viewer-resource theme/context correction for Calendar; and the Semantic Diff
   placement-policy relocation for Calendar host and host facade modules; and
-  the Semantic Diff Presentation-report/VS Code-report package organization.
+  the Semantic Diff Presentation-report/VS Code-report package organization;
+  and shared, accessible result presentation for Explorer and Calendar.
 - Current boundaries remain: one identity pass and one schedule evaluation,
   immutable `{ result, summary }` context, host-private sidecar, no change to
   the closed Explorer semantic transport (Slice 7 only accepts the existing
@@ -150,11 +161,13 @@
   candidate merging. Slice 8 changes only Calendar's presentation resource
   integration; Slice 9 changes only source placement and imports; Slice 10
   changes only report-package ownership, imports, and the unused browser
-  entrypoint re-export. None changes the closed calendar session message
-  schema.
+  entrypoint re-export. Slice 11 changes only shared webview result
+  composition and view-owned presentation adapters; it does not change the
+  closed calendar session message schema, Explorer messages, DTOs, or the
+  common theme/resource mechanism.
 - Public calendar exposure is gated by the workflow's successful evaluated-
   period artifact (`scheduleImpact.kind === "available"`) and the completed
-  Slice 3 implementation. Slices 1 through 9 are complete and committed on
+  Slice 3 implementation. Slices 1 through 10 are complete and committed on
   this branch: `51a8ae4a`, `b9cee633`, `ffb92f1e`, `09148de4`, `d4344a26`,
   `f47edeb0`, `c36ee1cf`, `8c555139`, `fe042fb0`, and `bb8d7305`.
 - The original plan, replans, and Slice 4/5/6/7/8/9 packages have independent
@@ -183,7 +196,7 @@
   viewer-resource theme/context correction Slice 7 → shared
   viewer-resource theme/context correction Slice 8 for Calendar → Semantic
   Diff placement-policy relocation Slice 9 → Semantic Diff report-package
-  organization Slice 10.
+  organization Slice 10 → shared result-presentation Slice 11.
 - Keep this file focused on implementation slices, approval, validation, risk,
   production readiness, and Feature Exit readiness.
 
@@ -212,11 +225,15 @@
   editor-package component organization, shared Explorer/Calendar resource
   theme and locale integration, placement policy, validation, and durable user
   documentation, and Semantic Diff Presentation-report/VS Code-report package
-  organization.
+  organization, and shared result-presentation composition is now planned as
+  Slice 11.
 - Review status: all plan/replan packages through Slice 10 and all ten
   implementation slices are independently `Ready` with no Findings. Slice 10
   plan review returned `Ready for approval`; its implementation review returned
-  `Ready`, and Completion Approval is recorded below.
+  `Ready`, and Completion Approval is recorded below. Slice 11 plan review
+  returned `Ready for approval` with no Findings and no Replanning required;
+  Human Plan Approval is recorded below and its focused plan commit is pending
+  `approval-committer`.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -242,16 +259,18 @@
   Slice 10 plan review returned `Ready for approval` with no Findings and no
   Replanning required. Human Plan Approval is recorded below on 2026-09-19;
   focused plan commit `0aef43d2` is complete, implementation review returned
-  `Ready` with no Findings, and Completion Approval is recorded below.
-  Feature Exit is deferred again.
+  `Ready` with no Findings, automatic Completion Approval is recorded, and
+  focused completion commit `0a5cdd31` is complete. Slice 11 Human Plan
+  Approval is recorded below; its focused plan commit is pending
+  `approval-committer`, and implementation/Completion Approval remain pending.
 - Active implementation slice: none; Slices 1–10 are complete, reviewed,
-  automatically Completion-approved, and Slices 1–9 are focused-commit
-  complete. Slice 10 awaits its focused completion commit from
-  `approval-committer`. Feature Exit is deferred until that commit.
+  automatically Completion-approved, and focused-commit complete. Slice 11 is
+  plan-approved but not yet committed or implementation-authorized; the next
+  stage is `approval-committer`. Feature Exit follows Slice 11.
 - Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, Slice 7,
-  Slice 8, Slice 9, then Slice 10. Each slice requires its own implementation
-  review, Completion Approval, and focused commit after the plan gate; Feature
-  Exit follows Slice 10.
+  Slice 8, Slice 9, Slice 10, then Slice 11. Each slice requires its own
+  implementation review, Completion Approval, and focused commit after the
+  plan gate; Feature Exit follows Slice 11.
 
 ## Human Approval
 
@@ -1042,25 +1061,27 @@ Findings and Completion Approval is recorded above; focused completion commit
   <!-- markdownlint-enable MD013 -->
 - `webpack.config.js` is validation evidence only and is not an approved
   implementation path. The current replan diff contains no runtime change.
-- Next stage: Completion Approval is recorded below; `approval-committer` owns
-  the focused Slice 10 completion commit.
+- Next stage: independent Feature Exit review and final batch human Closure
+  Approval.
 
 ## Closure Approval
 
-- Status: Deferred pending the Slice 10 focused completion commit and a renewed
-  independent Feature Exit review, followed by explicit human Closure Approval
+- Status: Deferred until Slice 11 is independently reviewed, Completion-
+  approved, and committed, followed by renewed independent Feature Exit review
+  and explicit human Closure Approval
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Deferred; the prior `Close` proposal remains preserved,
-  but Slice 10 must be independently reviewed and completion-committed before
-  Feature Exit can close the feature. No Closure Approval has been granted.
+- Feature Exit verdict: Deferred; Slices 1–10 are complete and independently
+  reviewed `Ready` with no Findings. Slice 11's plan is approved but its
+  focused plan commit and implementation remain pending. No Closure Approval
+  has been granted.
 - Commit status: Eligible only after explicit Closure Approval is recorded.
-- Proposed closure propagation: remove the completed Wave 4 calendar entry from
-  `docs/specs/roadmap.md`, then delete only
-  `docs/specs/features/schedule-impact-calendar/` after Slice 10 completion,
-  renewed Feature Exit review, and Closure Approval;
-  inherited feature folders remain preserved.
+- Proposed closure propagation remains unchanged: remove the completed Wave 4
+  calendar entry from `docs/specs/roadmap.md`, then delete only
+  `docs/specs/features/schedule-impact-calendar/` after Slice 11 completion,
+  renewed Feature Exit review, and Closure Approval; inherited feature folders
+  remain preserved.
 
 ## Planning Inputs And Boundaries
 
@@ -3230,8 +3251,8 @@ development:web`; desktop host run (exit 0); permitted web host run (exit 0,
 
 - Status: Implementation complete under focused plan commit `65f123ee`.
   Independent `implementation-reviewer` returned `Ready` with no Findings.
-  Completion Approval is recorded below; the focused completion commit is
-  pending `approval-committer`.
+  automatic Completion Approval is recorded below; focused completion commit
+  `bb8d7305` is complete.
 - Trigger: browser entries already follow the common thin
   `webview/editor/<viewer>.tsx` pattern, but Calendar's feature-specific host
   package remains under generic document-viewer infrastructure at
@@ -3426,9 +3447,8 @@ import, facade-removal, and architecture/location guard scope.
   - `src/test/suite/webSmoke.ts`
   <!-- markdownlint-enable MD013 -->
 - Commit status: Complete; focused Slice 9 completion commit `bb8d7305`.
-- Next stage: Slice 10 implementation review; focused plan commit `0aef43d2`
-  is complete. Completion Approval, the focused completion commit, Feature
-  Exit, and final batch human Closure Approval remain deferred.
+- Next stage: independent Feature Exit review and final batch human Closure
+  Approval.
 
 ### Slice 10: Align Semantic Diff Presentation And VS Code Report Packages
 
@@ -3436,8 +3456,8 @@ import, facade-removal, and architecture/location guard scope.
   `0aef43d2`. Independent `plan-reviewer` returned `Ready for approval` with no
   Findings and no Replanning required; Human Plan Approval is recorded above.
   Independent `implementation-reviewer` returned `Ready` with no Findings;
-  Completion Approval is recorded below and the focused completion commit is
-  pending `approval-committer`.
+  automatic Completion Approval is recorded below and focused completion commit
+  `0a5cdd31` is complete.
 - Trigger and policy: the fourteen files under
   `src/presentation/semantic-diff/` currently combine pure Markdown/JSON
   transformation, localization, output-document aggregation, and a VS Code
@@ -3670,10 +3690,182 @@ guard, picker, test, and browser-entry scope.
   production/desktop/web build, desktop/web host, qlty, Markdown lint, and
   diff checks passed. The existing plain Node/Mocha resource-alias limitation
   remains documented; report consumers are covered by extension-host checks.
-- Commit status: focused Slice 10 completion commit is pending
-  `approval-committer`.
-- Next stage: `approval-committer` for the exact completed paths above; Feature
-  Exit and final batch human Closure Approval remain deferred.
+- Commit status: Complete; focused Slice 10 completion commit `0a5cdd31`.
+- Next stage: independent Feature Exit review and final batch human Closure
+  Approval.
+
+### Slice 11: Shared Readable Result Presentation
+
+- Status: Plan review returned `Ready for approval` with no Findings and no
+  Replanning required. Human Plan Approval was recorded on 2026-09-20 under
+  the user's automatic no-findings approval instruction. The focused plan
+  commit is pending `approval-committer`; no runtime or test implementation is
+  authorized before that commit.
+- Replanning trigger: the user reported that Semantic Diff Explorer and
+  Schedule Impact Calendar results are hard to read as strings and requested a
+  consistent presentation in both views. The existing components already use
+  MUI and the shared viewer theme/context, but section, card, label/value,
+  status, and empty-state markup is duplicated or represented as `·`-joined
+  prose in each view.
+- Scope: add browser-safe shared result primitives under
+  `src/presentation/webview/editor/shared/result/`: `ResultSection.tsx`,
+  `ResultCard.tsx`, `ResultKeyValueList.tsx`, `ResultStatusChip.tsx`, and
+  `ResultEmptyState.tsx`. Primitives accept generic labels and `ReactNode`
+  values, use the existing MUI theme and `viewerThemeStyles`, and do not
+  perform domain formatting. Keep localized labels, outcome mapping, detail
+  ordering, and malformed-data wording in the owning view adapters.
+- Explorer adoption: update
+  `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`,
+  `SummaryCards.tsx`, `ExplorerTreePanel.tsx`, and
+  `semanticDiffExplorerTree.tsx` to use the shared section/card/key-value/
+  status primitives for summary, status, row metadata, and detail values.
+  Preserve the Header/actions, tree navigation, selection callbacks, live
+  announcements, focus recovery, and existing `SemanticDiffOutputContext`.
+- Calendar adoption: update
+  `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`,
+  `ScheduleImpactCalendarHeader.tsx`,
+  `ScheduleImpactCalendarSections.tsx`, and
+  `ScheduleImpactCalendarTimeline.tsx` to use the same primitives for the
+  title/summary hierarchy, root/no-run/candidate/issue/legend sections,
+  timeline entries, run details, status outcomes, and empty states. Keep
+  `ScheduleImpactCalendarBoundedList.tsx`'s virtualization and keyboard
+  contract unchanged; shared cards must remain safe for its cloned focusable
+  children.
+- Information hierarchy: both views expose title/header, summary/status,
+  metadata/context, and detail sections through semantic `section` headings,
+  outlined MUI cards, `dl` label/value rows, and generic status chips. Long
+  paths, IDs, and detail values wrap within cards. Empty, unavailable, and
+  malformed-data states remain the existing localized view states and use the
+  generic empty primitive without inferring business outcomes.
+- Visual and accessibility contract: use MUI theme palette, existing
+  `Stack` spacing and typography scale, responsive column-to-row layouts,
+  existing focus/forced-colors styles, and the shared minimum target size.
+  Preserve heading levels, region/list/tree semantics, `aria-labelledby`,
+  `role=status` live/empty announcements, screen-reader labels, keyboard
+  navigation, reduced-motion behavior, and desktop/web rendering. Do not add
+  a view-specific theme listener or formatter.
+- User / Domain Value: the same schedule and semantic-diff facts become
+  scannable by status, metadata, and detail without changing what the facts
+  mean or which actions are available.
+- Cohesive Change Group: the five shared primitives plus both view adapters,
+  their focused component/accessibility tests, and one architecture guard
+  update form one independently reviewable presentation slice. The shared
+  primitives remain presentation-only and consume no domain, application,
+  infrastructure, bootstrap, VS Code, parser, or host-session modules.
+- Acceptance:
+  - Explorer and Calendar both render the shared section/card/key-value,
+    status, and empty primitives; no duplicate generic result primitives are
+    introduced under either view directory.
+  - Summary, status, metadata, and detail are visibly separated with stable
+    localized labels; long identifiers wrap and empty/unavailable/malformed
+    states remain readable and truthful.
+  - Responsive reflow, theme palette, high-contrast/focus styling,
+    heading/region/list/tree semantics, live announcements, keyboard focus,
+    and screen-reader labels remain valid in both views.
+  - Large Explorer trees and Calendar timelines retain existing Virtuoso/
+    bounded-list thresholds, overscan, focus recovery, DOM bounds, ordering,
+    and action callbacks.
+  - `SemanticDiffOutputContext`, Calendar DTOs, schedule meaning, filters,
+    report output, public action/message unions, bridges, sessions, host
+    lifecycle, CSP, and desktop/web bundle names are byte/behavior compatible.
+  - `CHANGELOG.md` contains one concise `Unreleased` user-facing entry:
+    "Improved Semantic Diff Explorer and Schedule Impact Calendar result
+    readability with shared MUI sections, metadata, status, and empty-state
+    presentation." The entry describes the visible result-display improvement
+    without exposing internal component names or changing product meaning.
+- Validation: add
+  `src/test/suite/sharedResultPresentation.test.tsx` for primitive semantics,
+  long-value wrapping, status tones, empty-state roles, and focusable card
+  labels. Extend `semanticDiffExplorerComponents.test.tsx`,
+  `semanticDiffExplorerDom.test.tsx`,
+  `scheduleImpactCalendarComponents.test.tsx`,
+  `scheduleImpactCalendarView.test.tsx`, and
+  `scheduleImpactCalendarAccessibility.test.tsx` for hierarchy, shared
+  primitive usage, localization, empty/malformed/unavailable states,
+  responsive values, keyboard/screen-reader behavior, and large fixtures.
+  Reuse `semanticDiffExplorerThemeContext.test.tsx` and
+  `scheduleImpactCalendarThemeContext.test.tsx` to prove the existing common
+  theme/context remains the source of palette and locale. Update
+  `architectureDependencyRules.test.ts` to guard the shared package's
+  presentation-only imports and both consumers' canonical imports. Run the
+  focused suites, `rtk pnpm run test:compile`, production/desktop/web builds,
+  desktop/web host checks, `rtk pnpm run qlty`, Markdown lint,
+  `CHANGELOG.md`/feature Markdown lint, and `git diff --check`; verify the exact
+  Unreleased entry and absence of unrelated changelog edits.
+- Production Readiness: malformed or missing display values must render the
+  existing localized fallback rather than throwing or inventing facts; long
+  values must not overflow or create unbounded layout width; large lists must
+  remain virtualized. Shared browser code must stay free of Node/VS Code
+  imports, and common theme/resource behavior must remain unchanged on desktop
+  and web. Because this is user-visible readability behavior, add the concise
+  `Unreleased` entry above to `CHANGELOG.md`; no README, SPECS, roadmap, or
+  durable architecture change is planned.
+- Approval Boundary: the exact approved paths are recorded in the Slice 11
+  Plan Review And Human Approval section below: shared result files, listed
+  Explorer and Calendar presentation consumers, focused tests, architecture
+  guard, `CHANGELOG.md`, and TASKS/TRACEABILITY. No other path is approved.
+  The CHANGELOG edit is implementation work within the approved slice and must
+  not be made before the focused plan commit.
+- Dependencies: Slice 11 depends on completion-committed Slice 10
+  `0a5cdd31` and consumes the existing `MyAppContextProvider`,
+  `createSemanticDiffTheme`, `viewerThemeGlobalStyles`, and
+  `viewerThemeStyles`. Feature Exit remains blocked until Slice 11 is
+  independently reviewed, Completion-approved, and committed.
+- Risks: generic primitives could absorb semantic formatting or alter row
+  focus/virtualization; keep props generic, retain mapping in view adapters,
+  and use existing DOM/keyboard fixtures. Card wrappers could increase DOM
+  size or reduce contrast; retain bounded lists and assert theme/forced-colors
+  styles. Any DTO, protocol, lifecycle, or theme-mechanism change requires a
+  new replan and approval boundary.
+- Out of Scope: schedule evaluation, semantic-diff projection/report/JSON
+  behavior, Calendar or Explorer DTOs, actions/messages, bridges, transport,
+  sessions, host adapters, parser/application changes, dependency upgrades,
+  webpack/CSP changes, Flow/Unit List behavior, durable architecture/SPECS
+  changes, roadmap closure, Feature Exit, and implementation/commit/approval.
+
+### Slice 11 Plan Review And Human Approval
+
+- Plan-reviewer result: `Ready for approval`; Findings none; `Replanning
+required: No`.
+- Human Plan Approval: Approved on 2026-09-20 in the current conversation
+  under the user's standing automatic no-findings slice approval instruction.
+- Approved boundary: add the shared browser-safe result primitives, adopt them
+in the listed Explorer and Calendar presentation components, add the focused
+shared/view accessibility/theme and architecture coverage, and add exactly
+one concise user-facing `Unreleased` entry to `CHANGELOG.md`. Preserve all
+facts, labels, DTOs, filters, actions, messages, sessions, common theme/
+resource handling, virtualization, and desktop/web behavior.
+<!-- markdownlint-disable MD013 -->
+- Approved paths (exact Slice 11 plan scope):
+  - `src/presentation/webview/editor/shared/result/ResultSection.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultCard.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultKeyValueList.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultStatusChip.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultEmptyState.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SummaryCards.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/test/suite/sharedResultPresentation.test.tsx`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerThemeContext.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarAccessibility.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `CHANGELOG.md` (one exact `Unreleased` readability entry only)
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+- Next stage: `approval-committer` for the focused Slice 11 plan commit. No
+  runtime, `CHANGELOG.md`, or roadmap edit has been made by this planning
+  update.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -3689,9 +3881,9 @@ guard, picker, test, and browser-entry scope.
   shared viewer-resource theme/context correction → Slice 8 shared
   viewer-resource theme/context correction for Calendar → Slice 9 Semantic
   Diff placement-policy relocation → Slice 10 Semantic Diff report-package
-  organization. Slice 2 must not
+  organization → shared result-presentation Slice 11. Slice 2 must not
   expose a user-reachable action; Slice 3 remains the first public surface and
-  Slices 4–10 preserve it.
+  Slices 4–11 preserve it.
 - Every slice preserves the existing Explorer public message union,
   immutable `SemanticDiffOutputContext` shape `{ result, summary }`, stable
   `scheduleComparison.runChanges` ID/order semantics, JSON version 1, report
@@ -3750,11 +3942,13 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   message, or model behavior also requires Replanning and may require a new
   feature-author decision. A change from Slice 10's report-package ownership
   boundary into report semantics, JSON schema, mode behavior, or public output
-  APIs also requires Replanning.
+  APIs also requires Replanning. A change from Slice 11's presentation-only
+  primitives into localized domain formatting, DTO/protocol behavior, host
+  lifecycle, or a separate theme mechanism also requires Replanning.
 
 ## Traceability
 
-- `TRACEABILITY.md` is required and maps CAL requirements to the nine slices,
+- `TRACEABILITY.md` is required and maps CAL requirements to the eleven slices,
   concrete approval paths, tests, and durable documentation.
 - The sidecar identity, composite source-change resolution, root matrix,
   internal artifact contract, and pure application builder are Slice 1-owned;
@@ -3768,20 +3962,18 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   correction is Slice 7-owned; Calendar shared viewer-resource theme/context
   correction is Slice 8-owned; host/browser package placement and canonical
   imports are Slice 9-owned; Semantic Diff report-package organization is Slice
-  10-owned. No requirement is left to an unassigned slice.
+  10-owned; shared readable result presentation is Slice 11-owned. No
+  requirement is left to an unassigned slice.
 
 ## Feature Exit
 
-- Definition of Done status: Deferred while Slice 10 report-package
-  organization awaits its focused completion commit. Slices 1–9 are independently
-  reviewed `Ready` with no Findings, automatically Completion-approved under
-  the user's instruction, and focused-commit
+- Definition of Done status: Deferred until Slice 11 is complete. Slices 1–10
+  are independently reviewed `Ready` with no Findings, automatically
+  Completion-approved under the user's instruction, and focused-commit
   complete: Slice 1 `51a8ae4a`, Slice 2 `b9cee633`, Slice 3 `ffb92f1e`, format
   correction `09148de4`, Slice 4 `d4344a26`, Slice 5 `f47edeb0`, Slice 6
-  `c36ee1cf`, Slice 7 `8c555139`, Slice 8 `fe042fb0`, and Slice 9
-  `bb8d7305`. Slice 10 implementation is complete under plan commit
-  `0aef43d2`; independent review is `Ready` with no Findings and Completion
-  Approval is recorded below.
+  `c36ee1cf`, Slice 7 `8c555139`, Slice 8 `fe042fb0`, Slice 9 `bb8d7305`, and
+  Slice 10 `0a5cdd31`.
 - Durable documentation: `uc-present-schedule-impact.md`, its index entry,
   README, and CHANGELOG updates are complete. Architecture and glossary
   propagation are not required. The closure package removes the completed
@@ -3792,14 +3984,19 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   and affected host/browser validation are complete. Slice 10 report-package
   location/import guards and affected command, report, document, architecture,
   compile, build, host, quality, Markdown, and diff validation are complete;
-  independent review and Completion Approval are complete.
+  independent review and Completion Approval are complete. Slice 11 plan
+  review is `Ready for approval` with no Findings and Human Plan Approval is
+  recorded; its focused plan commit is pending `approval-committer`, and it
+  has no implementation or completion evidence yet. Its pending user-visible
+  `CHANGELOG.md` Unreleased entry is part of that slice.
   Existing macOS codesign, web-stream cleanup, webpack-size, and advisory
   smell findings remain documented observations.
-- Remaining risks: the focused completion commit must preserve the reviewed
-  Presentation-report versus VS Code/report boundary, obsolete facade removal,
-  consumer coverage, and the bootstrap-only browser entry.
-  Existing macOS codesign, web-stream cleanup, webpack-size, and advisory smell
-  findings remain documented compatibility observations.
+- Remaining risks: Slice 11 still requires its focused plan commit,
+  implementation review, Completion Approval, and completion commit. Existing
+  macOS codesign, web-stream cleanup, webpack-size, and advisory smell
+  findings remain documented compatibility observations. The open gates are
+  Slice 11 implementation/completion approval and the final explicit human
+  Closure Approval.
 - Proposed closure scope: update `docs/specs/roadmap.md` as above, then remove
   only `docs/specs/features/schedule-impact-calendar/` after Closure Approval;
   inherited feature folders remain preserved.
@@ -3973,8 +4170,22 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       exact paths above. Focused plan commit `0aef43d2` is complete and the
       implementation is complete; independent `implementation-reviewer`
       returned `Ready` with no Findings, and automatic Completion Approval was
-      recorded on 2026-09-19. Focused completion commit is pending
-      `approval-committer`.
+      recorded on 2026-09-19. Focused completion commit `0a5cdd31` is complete;
+      architecture 28, picker 2, JSON 17, compile/build/host/smoke WEB-7–10,
+      quality/lint/diff checks pass.
+- [x] Slice 11 shared-result presentation plan received independent
+      `plan-reviewer` `Ready for approval` with no Findings and
+      `Replanning required: No`; Human Plan Approval was recorded on
+      2026-09-20 under the user's automatic no-findings instruction for the
+      exact paths above. The focused plan commit is pending
+      `approval-committer`; runtime and actual `CHANGELOG.md` edits remain
+      untouched.
+- [ ] Slice 11 implementation remains pending the focused plan commit. It must
+      add only the shared result primitives, listed Explorer/Calendar adapters,
+      focused UI/accessibility/theme coverage, the exact `CHANGELOG.md`
+      Unreleased entry, and the architecture import guard; then run compile,
+      builds, desktop/web host checks, quality, Markdown lint, changelog scope
+      review, and diff validation.
 
 ## Notes
 
@@ -4014,7 +4225,8 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   Slices 1–2 → completed workflow → public Slice 3 → MUI Slice 4 → Explorer
   package Slice 5 → host/browser package relocation Slice 6 → shared
   viewer-resource theme/context Slice 7 → shared viewer-resource
-  theme/context Slice 8 for Calendar dependency chain and Slice 9 placement
-  policy are synchronized. Slice 10 report-package organization is complete
-  under plan commit `0aef43d2`; independent review, Completion Approval, and
-  its focused completion commit remain pending, so Feature Exit is deferred.
+  theme/context Slice 8 for Calendar dependency chain, Slice 9 placement
+  policy, Slice 10 report-package organization, and the planned Slice 11
+  shared result-presentation boundary are synchronized. Feature Exit remains
+  deferred until Slice 11 is complete and committed, followed by final
+  explicit human Closure Approval.

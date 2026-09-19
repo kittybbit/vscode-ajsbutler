@@ -2,25 +2,27 @@
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Requirement                                                                                                            | `SPECS.md` basis                                                                                          | Slice          | Test / validation evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CAL-FACTS-001`: consume one immutable comparison snapshot; perform identity and schedule evaluation once              | Requirements: CAL-FACTS-001; Architecture; Acceptance Criteria                                            | Slices 1 and 2 | `compareSemanticDiffWithArtifacts.test.ts`, `semanticDiffPresentationArtifacts.test.ts`, `buildSemanticDiffPresentationArtifactsAdapter.test.ts`: parsed input, facts union, exact adapter call graph, one-pass spies, public `.result` and context compatibility                                                                                                                                                                                                           |
-| `CAL-PERIOD-001`: preserve the half-open period and gate the public action on workflow period-bearing context          | Requirements: CAL-PERIOD-001; Exposure Boundary; Acceptance Criteria                                      | Slices 1–3     | facts-union period cases; Slice 2 omitted-options/selected-period forwarding tests; completed workflow `semanticDiffCommand.test.ts` period picker/forwarding/cancellation coverage; Slice 3 evaluated-artifact enablement and no-period ordinary-Explorer/unavailable behavior; invalid workflow input failure before comparison/open; existing `compareSemanticDiffWithArtifacts.test.ts` direct adapter invalid-period fixture; no timezone or `Date` conversion         |
-| `CAL-RUNS-001`: retain supported before/after runs and distinguish unchanged, added, removed, and changed-time effects | Requirements: CAL-RUNS-001; Normative Calendar Data Contract; Acceptance Criteria                         | Slice 1        | `semanticDiffScheduleRules.test.ts`, `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, and `compareSemanticDiffWithArtifacts.test.ts`: real differ duplicate/count-mismatch changed-time pairing, rule/source-unit grouping, same-pass before/after runs and valid-no-runs metadata, closed root predicate, root/non-root correspondence, rename/move, excluded ambiguous candidates, and shuffled deterministic order                          |
-| `CAL-CHANGES-001`: preserve exact source-change references and deterministic effect identity                           | Requirements: CAL-CHANGES-001; Stable IDs, Foreign References, And Duplicate Pairing; Acceptance Criteria | Slice 1        | `semanticDiffScheduleRules.test.ts`, `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, and `compareSemanticDiffWithArtifacts.test.ts`: actual upstream `runChanges` `(id, occurrenceOrdinal)` resolution for duplicate/count-mismatch effects, source-unit isolation, root-scope one-sided refs, allowed same-effect sharing, cross-effect rejection, and stable detail/timeline/rule order                                                     |
-| `CAL-ZERO-001`: distinguish explicit valid no-runs from partial, unsupported, invalid, and uncalculated outcomes       | Requirements: CAL-ZERO-001; Root Outcomes, Timeline, Issues, And Filters; Acceptance Criteria             | Slices 1 and 3 | `semanticDiffScheduleRules.test.ts` and `semanticDiffScheduleImpact.test.ts`: both-side valid-no-runs metadata from one pass; supported/partial plus invalid, `missing-context`, unsupported, and legacy `missing-start-time`→`uncalculated` status matrix; null-side, zero-only, mixed, malformed, and candidate-root exclusion cases                                                                                                                                      |
-| `CAL-UNKNOWN-001`: keep unsupported and uncalculated schedule portions visible with stable evidence                    | Requirements: CAL-UNKNOWN-001; Root Outcomes, Timeline, Issues, And Filters; Acceptance Criteria          | Slices 1 and 3 | `semanticDiffScheduleRules.test.ts` and `semanticDiffScheduleImpact.test.ts`: carried status applies only to calendar-selection/closed-day-substitution; corrected missing-context fixture; issue-kind ordinal grouping, issue-code/detail preservation, side/root references, uncalculated section, no prose inference                                                                                                                                                     |
-| `CAL-PRESENT-001`: provide a deterministic date-grouped linear timeline with keyboard and screen-reader semantics      | Requirements: CAL-PRESENT-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria    | Slices 3 and 4 | projection/view tests, extracted MUI component behavior, keyboard and focus recovery, live-region announcements, desktop/web and reflow checks                                                                                                                                                                                                                                                                                                                              |
-| `CAL-FILTER-001`: keep root, root-outcome, and run-state filtering separate and conjunctive                            | Requirements: CAL-FILTER-001; Root Outcomes, Timeline, Issues, And Filters; Acceptance Criteria           | Slices 3 and 4 | independent selector and no-match cases; extracted MUI filter controls; global versus visible totals; unchanged source facts and order                                                                                                                                                                                                                                                                                                                                      |
-| `CAL-SESSION-001`: reuse one comparison, isolate child lifecycle, and keep the sidecar host-private                    | Requirements: CAL-SESSION-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria    | Slices 2 and 3 | registry identity, exact-once Explorer open, atomic rollback, parent-only release, child reopen, stale/late work, closed envelopes; completed workflow `semanticDiffCommand.test.ts`/`semanticDiffCommandScheduleImpact.test.ts` handoff guards; Slice 3 `semanticDiffExplorerRegistry.test.ts`/`semanticDiffExplorerPanel.test.ts` compatible action registration/validation, private callback dispatch, exact-context sidecar resolution, and child-panel lifecycle tests |
-| `CAL-A11Y-001`: expose textual state and preserve desktop/web accessibility                                            | Requirements: CAL-A11Y-001; Display Language And Compatibility; Acceptance Criteria                       | Slices 3 and 4 | accessibility and localization tests for names, focus, announcements, MUI roles, high contrast, zoom, reduced motion, and fallback language                                                                                                                                                                                                                                                                                                                                 |
-| `CAL-SCALE-001`: bound rendering and enforce the inclusive 8 MiB encoded-message limit without loss                    | Requirements: CAL-SCALE-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria      | Slices 1–4     | exact/over-limit message tests, no partial state, deterministic large-result projection, extracted virtualization and DOM-size checks                                                                                                                                                                                                                                                                                                                                       |
-| `CAL-PRIVACY-001`: keep content, paths, run lists, and host handles out of telemetry and transport                     | Requirements: CAL-PRIVACY-001; Impact Analysis; Non-Goals                                                 | Slices 1–3     | DTO/message inspection, telemetry guard, architecture and desktop/web checks                                                                                                                                                                                                                                                                                                                                                                                                |
-| Architecture and compatibility boundaries remain unchanged                                                             | Architecture; Compatibility; Breaking Change Analysis                                                     | Slices 1–10    | path-scoped review, architecture checks, manifest/output-bundle guard, existing report/JSON/Explorer/Flow/source regressions, MUI component/package checks, host/browser location guard, shared-resource/context checks, placement-policy/import inventory, Presentation-report/VS Code-report package guard, quality checks                                                                                                                                                |
-| Presentation package organization remains aligned with table/Flow webviews without changing behavior                   | Architecture; Compatibility; Acceptance Criteria                                                          | Slices 4–10    | calendar/Explorer component-boundary tests, host/browser package-location/import assertions, shared `MyAppContextProvider`/resource tests, Semantic Diff category/facade guards, Presentation-report/VS Code-report ownership checks, thin-browser-entry checks, existing calendar suites, Explorer DOM/theme/projection/messages/Flow/source/report/action suites, desktop/web builds, MUI role/label/focus/reflow checks                                                  |
-| Explorer theme and locale use the canonical viewer resource mechanism                                                  | Compatibility; Acceptance Criteria                                                                        | Slice 7        | `MyContexts` provider/resource integration, `viewerHostMessages`/`viewerEventBridge` parser coverage, Explorer DOM/component theme and locale fixtures, `semanticDiffExplorerPanel.test.ts` common-resource pre-dispatch and malformed-request coverage, desktop/web host checks                                                                                                                                                                                            |
-| Calendar theme and locale use the canonical viewer resource mechanism                                                  | Compatibility; Acceptance Criteria                                                                        | Slice 8        | Calendar provider/resource integration, shared viewer parser/event-bridge coverage, Calendar DOM/component palette and locale fixtures, `scheduleImpactCalendarPanelRuntime.test.ts` common-resource pre-dispatch and malformed-request coverage, desktop/web host checks                                                                                                                                                                                                   |
-| Durable user documentation is added only when the public view is observable                                            | Durable Documentation Impact; Acceptance Criteria                                                         | Slice 3        | `uc-present-schedule-impact.md` and index validation; `rtk pnpm run lint:md`; README/CHANGELOG impact review                                                                                                                                                                                                                                                                                                                                                                |
+| Requirement                                                                                                            | `SPECS.md` basis                                                                                          | Slice               | Test / validation evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CAL-FACTS-001`: consume one immutable comparison snapshot; perform identity and schedule evaluation once              | Requirements: CAL-FACTS-001; Architecture; Acceptance Criteria                                            | Slices 1 and 2      | `compareSemanticDiffWithArtifacts.test.ts`, `semanticDiffPresentationArtifacts.test.ts`, `buildSemanticDiffPresentationArtifactsAdapter.test.ts`: parsed input, facts union, exact adapter call graph, one-pass spies, public `.result` and context compatibility                                                                                                                                                                                                           |
+| `CAL-PERIOD-001`: preserve the half-open period and gate the public action on workflow period-bearing context          | Requirements: CAL-PERIOD-001; Exposure Boundary; Acceptance Criteria                                      | Slices 1–3          | facts-union period cases; Slice 2 omitted-options/selected-period forwarding tests; completed workflow `semanticDiffCommand.test.ts` period picker/forwarding/cancellation coverage; Slice 3 evaluated-artifact enablement and no-period ordinary-Explorer/unavailable behavior; invalid workflow input failure before comparison/open; existing `compareSemanticDiffWithArtifacts.test.ts` direct adapter invalid-period fixture; no timezone or `Date` conversion         |
+| `CAL-RUNS-001`: retain supported before/after runs and distinguish unchanged, added, removed, and changed-time effects | Requirements: CAL-RUNS-001; Normative Calendar Data Contract; Acceptance Criteria                         | Slice 1             | `semanticDiffScheduleRules.test.ts`, `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, and `compareSemanticDiffWithArtifacts.test.ts`: real differ duplicate/count-mismatch changed-time pairing, rule/source-unit grouping, same-pass before/after runs and valid-no-runs metadata, closed root predicate, root/non-root correspondence, rename/move, excluded ambiguous candidates, and shuffled deterministic order                          |
+| `CAL-CHANGES-001`: preserve exact source-change references and deterministic effect identity                           | Requirements: CAL-CHANGES-001; Stable IDs, Foreign References, And Duplicate Pairing; Acceptance Criteria | Slice 1             | `semanticDiffScheduleRules.test.ts`, `semanticDiffScheduleImpact.test.ts`, `semanticDiffScheduleCalendar.test.ts`, and `compareSemanticDiffWithArtifacts.test.ts`: actual upstream `runChanges` `(id, occurrenceOrdinal)` resolution for duplicate/count-mismatch effects, source-unit isolation, root-scope one-sided refs, allowed same-effect sharing, cross-effect rejection, and stable detail/timeline/rule order                                                     |
+| `CAL-ZERO-001`: distinguish explicit valid no-runs from partial, unsupported, invalid, and uncalculated outcomes       | Requirements: CAL-ZERO-001; Root Outcomes, Timeline, Issues, And Filters; Acceptance Criteria             | Slices 1 and 3      | `semanticDiffScheduleRules.test.ts` and `semanticDiffScheduleImpact.test.ts`: both-side valid-no-runs metadata from one pass; supported/partial plus invalid, `missing-context`, unsupported, and legacy `missing-start-time`→`uncalculated` status matrix; null-side, zero-only, mixed, malformed, and candidate-root exclusion cases                                                                                                                                      |
+| `CAL-UNKNOWN-001`: keep unsupported and uncalculated schedule portions visible with stable evidence                    | Requirements: CAL-UNKNOWN-001; Root Outcomes, Timeline, Issues, And Filters; Acceptance Criteria          | Slices 1 and 3      | `semanticDiffScheduleRules.test.ts` and `semanticDiffScheduleImpact.test.ts`: carried status applies only to calendar-selection/closed-day-substitution; corrected missing-context fixture; issue-kind ordinal grouping, issue-code/detail preservation, side/root references, uncalculated section, no prose inference                                                                                                                                                     |
+| `CAL-PRESENT-001`: provide a deterministic date-grouped linear timeline with keyboard and screen-reader semantics      | Requirements: CAL-PRESENT-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria    | Slices 3, 4, and 11 | projection/view tests, extracted MUI component behavior, shared result primitives, keyboard and focus recovery, live-region announcements, desktop/web and reflow checks                                                                                                                                                                                                                                                                                                    |
+| `CAL-FILTER-001`: keep root, root-outcome, and run-state filtering separate and conjunctive                            | Requirements: CAL-FILTER-001; Root Outcomes, Timeline, Issues, And Filters; Acceptance Criteria           | Slices 3 and 4      | independent selector and no-match cases; extracted MUI filter controls; global versus visible totals; unchanged source facts and order                                                                                                                                                                                                                                                                                                                                      |
+| `CAL-SESSION-001`: reuse one comparison, isolate child lifecycle, and keep the sidecar host-private                    | Requirements: CAL-SESSION-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria    | Slices 2 and 3      | registry identity, exact-once Explorer open, atomic rollback, parent-only release, child reopen, stale/late work, closed envelopes; completed workflow `semanticDiffCommand.test.ts`/`semanticDiffCommandScheduleImpact.test.ts` handoff guards; Slice 3 `semanticDiffExplorerRegistry.test.ts`/`semanticDiffExplorerPanel.test.ts` compatible action registration/validation, private callback dispatch, exact-context sidecar resolution, and child-panel lifecycle tests |
+| `CAL-A11Y-001`: expose textual state and preserve desktop/web accessibility                                            | Requirements: CAL-A11Y-001; Display Language And Compatibility; Acceptance Criteria                       | Slices 3, 4, and 11 | accessibility and localization tests for names, focus, announcements, shared semantic headings/label-value/status/empty roles, MUI roles, high contrast, zoom, reduced motion, and fallback language                                                                                                                                                                                                                                                                        |
+| `CAL-SCALE-001`: bound rendering and enforce the inclusive 8 MiB encoded-message limit without loss                    | Requirements: CAL-SCALE-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria      | Slices 1–4 and 11   | exact/over-limit message tests, no partial state, deterministic large-result projection, shared-card wrapping, extracted virtualization and DOM-size checks                                                                                                                                                                                                                                                                                                                 |
+| `CAL-PRIVACY-001`: keep content, paths, run lists, and host handles out of telemetry and transport                     | Requirements: CAL-PRIVACY-001; Impact Analysis; Non-Goals                                                 | Slices 1–3          | DTO/message inspection, telemetry guard, architecture and desktop/web checks                                                                                                                                                                                                                                                                                                                                                                                                |
+| Architecture and compatibility boundaries remain unchanged                                                             | Architecture; Compatibility; Breaking Change Analysis                                                     | Slices 1–11         | path-scoped review, architecture checks, manifest/output-bundle guard, existing report/JSON/Explorer/Flow/source regressions, MUI component/package checks, host/browser location guard, shared-resource/context checks, placement-policy/import inventory, Presentation-report/VS Code-report package guard, shared result import guard, quality checks                                                                                                                    |
+| Presentation package organization remains aligned with table/Flow webviews without changing behavior                   | Architecture; Compatibility; Acceptance Criteria                                                          | Slices 4–11         | calendar/Explorer component-boundary tests, host/browser package-location/import assertions, shared `MyAppContextProvider`/resource tests, Semantic Diff category/facade guards, Presentation-report/VS Code-report ownership checks, thin-browser-entry checks, shared result import guard, existing calendar suites, Explorer DOM/theme/projection/messages/Flow/source/report/action suites, desktop/web builds, MUI role/label/focus/reflow checks                      |
+| Explorer theme and locale use the canonical viewer resource mechanism                                                  | Compatibility; Acceptance Criteria                                                                        | Slice 7             | `MyContexts` provider/resource integration, `viewerHostMessages`/`viewerEventBridge` parser coverage, Explorer DOM/component theme and locale fixtures, `semanticDiffExplorerPanel.test.ts` common-resource pre-dispatch and malformed-request coverage, desktop/web host checks                                                                                                                                                                                            |
+| Calendar theme and locale use the canonical viewer resource mechanism                                                  | Compatibility; Acceptance Criteria                                                                        | Slice 8             | Calendar provider/resource integration, shared viewer parser/event-bridge coverage, Calendar DOM/component palette and locale fixtures, `scheduleImpactCalendarPanelRuntime.test.ts` common-resource pre-dispatch and malformed-request coverage, desktop/web host checks                                                                                                                                                                                                   |
+| Explorer and Calendar use one readable, accessible result-presentation vocabulary                                      | CAL-PRESENT-001; CAL-A11Y-001; Acceptance Criteria                                                        | Slice 11            | `sharedResultPresentation.test.tsx`, Explorer component/DOM/theme suites, Calendar component/view/accessibility/theme suites, architecture shared-import guard, compile/build/desktop/web host, large/malformed-value and reflow checks                                                                                                                                                                                                                                     |
+| User-visible result readability is recorded in the Unreleased changelog                                                | CHANGELOG Impact; CAL-PRESENT-001; Acceptance Criteria                                                    | Slice 11            | `CHANGELOG.md` exact Unreleased entry naming the shared Explorer/Calendar readability improvement; Markdown lint, diff check, and review proving no unrelated changelog edits                                                                                                                                                                                                                                                                                               |
+| Durable user documentation is added only when the public view is observable                                            | Durable Documentation Impact; Acceptance Criteria                                                         | Slice 3             | `uc-present-schedule-impact.md` and index validation; `rtk pnpm run lint:md`; README/CHANGELOG impact review                                                                                                                                                                                                                                                                                                                                                                |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -635,9 +637,9 @@
   complete; implementation review is `Ready` with no Findings, automatic
   Completion Approval is recorded below, and focused completion commit
   `bb8d7305` is complete. Slice 10 plan review and Human Plan Approval are
-  recorded below; focused plan commit `0aef43d2` and implementation are
-  complete, with independent implementation review and Completion Approval
-  pending, so Feature Exit remains deferred.
+  recorded below; focused plan commit `0aef43d2`, implementation review,
+  automatic Completion Approval, and focused completion commit `0a5cdd31` are
+  complete. Feature Exit is ready for final explicit human Closure Approval.
 
 ## Slice 9 Plan Review And Human Approval
 
@@ -742,9 +744,8 @@ architecture/location guard boundary.
   - `src/test/suite/webSmoke.ts`
   <!-- markdownlint-enable MD013 -->
 - Commit status: Complete; focused completion commit `bb8d7305`.
-- Next stage: Slice 10 independent implementation review; focused plan commit
-  `0aef43d2` is complete. Completion Approval, the focused completion commit,
-  Feature Exit, and final batch human Closure Approval remain deferred.
+- Next stage: independent Feature Exit review and final batch human Closure
+  Approval.
 
 ## Slice 10 Replanning Evidence
 
@@ -869,10 +870,106 @@ required: No`.
   production/desktop/web builds, desktop/web hosts, qlty, Markdown lint, and
   diff checks passed; the existing plain Node/Mocha resource-alias limitation
   remains documented.
-- Commit status: focused Slice 10 completion commit is pending
-  `approval-committer`.
-- Next stage: `approval-committer` for the exact completed paths above; Feature
-  Exit and final batch human Closure Approval remain deferred.
+- Commit status: Complete; focused Slice 10 completion commit `0a5cdd31`.
+- Next stage: independent Feature Exit review and final batch human Closure
+  Approval.
+
+## Slice 11 Replanning Evidence
+
+- Trigger: after Slice 10, the user requested a consistent readable result
+  presentation for Semantic Diff Explorer and Schedule Impact Calendar because
+  the current output is difficult to scan as long strings.
+- Investigation: Explorer already composes MUI `SummaryCards`, a status area,
+  and a virtualized `ExplorerTreePanel`; Calendar already uses MUI `Paper`,
+  `Alert`, `List`, and `Chip` in `ScheduleImpactCalendarSections` and
+  `ScheduleImpactCalendarTimeline`. Both still duplicate view-specific
+  section/card/label-value/status/empty markup, and Calendar joins important
+  identifiers and details with `·`. Both Apps already use the shared
+  `MyAppContextProvider`, `createSemanticDiffTheme`, and viewer global styles.
+- Canonical package: generic result primitives are planned only under
+  `src/presentation/webview/editor/shared/result/`. They accept generic
+  labels, status tones, and `ReactNode` values; they contain no schedule or
+  semantic-diff formatting and no application/domain/host imports. Existing
+  theme/context and focus styles remain the only source of palette and viewer
+  behavior.
+- Adoption paths: Explorer `SemanticDiffExplorerContents.tsx`, `SummaryCards.tsx`,
+  `ExplorerTreePanel.tsx`, and `semanticDiffExplorerTree.tsx`; Calendar
+  `ScheduleImpactCalendarContents.tsx`, `ScheduleImpactCalendarHeader.tsx`,
+  `ScheduleImpactCalendarSections.tsx`, and
+  `ScheduleImpactCalendarTimeline.tsx`. `ScheduleImpactCalendarBoundedList.tsx`
+  remains the existing virtualization and keyboard boundary.
+- Acceptance mapping: `ResultSection` provides semantic heading/region
+  structure; `ResultCard` provides responsive outlined grouping and wrapping;
+  `ResultKeyValueList` provides `dl` metadata/detail rows;
+  `ResultStatusChip` provides generic theme-aware status tones; and
+  `ResultEmptyState` provides localized empty/unavailable/malformed-state
+  presentation. Both views retain their labels, ordering, filters, actions,
+  announcements, tree/list semantics, and large-result bounds.
+- Validation mapping: add `src/test/suite/sharedResultPresentation.test.tsx`;
+  extend `semanticDiffExplorerComponents.test.tsx`,
+  `semanticDiffExplorerDom.test.tsx`,
+  `scheduleImpactCalendarComponents.test.tsx`,
+  `scheduleImpactCalendarView.test.tsx`,
+  `scheduleImpactCalendarAccessibility.test.tsx`, and the two existing theme
+  context suites. Update `architectureDependencyRules.test.ts` to enforce
+  presentation-only shared imports and both canonical consumers. Compile,
+  production/desktop/web builds, host checks, quality, Markdown lint, and
+  diff checks are required after implementation.
+- User-visible documentation mapping: the implementation must add exactly one
+  concise `Unreleased` bullet to `CHANGELOG.md`: "Improved Semantic Diff
+  Explorer and Schedule Impact Calendar result readability with shared MUI
+  sections, metadata, status, and empty-state presentation." Review checks
+  that the entry is user-facing, contains no internal file names, and introduces
+  no unrelated changelog edits.
+- Dependency and approval boundary: Slice 11 depends on completion-committed
+  Slice 10 `0a5cdd31`. It is a presentation-only readability slice and has no
+  implementation or completion evidence yet. Its plan-reviewer result is
+  `Ready for approval` with no Findings and `Replanning required: No`; Human
+  Plan Approval was recorded on 2026-09-20. The focused plan commit is pending
+  `approval-committer`, and Feature Exit remains deferred.
+
+## Slice 11 Plan Review And Human Approval
+
+- Plan-reviewer result: `Ready for approval`; Findings none; `Replanning
+required: No`.
+- Human Plan Approval: Approved on 2026-09-20 under the user's standing
+  automatic no-findings slice approval instruction.
+- Approved scope: shared browser-safe result primitives, the listed Explorer and
+Calendar presentation adapters, focused shared/view accessibility/theme and
+architecture coverage, and exactly one concise user-facing `Unreleased`
+entry in `CHANGELOG.md`. Facts, labels, DTOs, filters, actions, messages,
+sessions, common theme/resource handling, virtualization, and desktop/web
+behavior remain unchanged.
+<!-- markdownlint-disable MD013 -->
+- Approved paths (exact Slice 11 plan scope):
+  - `src/presentation/webview/editor/shared/result/ResultSection.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultCard.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultKeyValueList.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultStatusChip.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultEmptyState.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SummaryCards.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/test/suite/sharedResultPresentation.test.tsx`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerThemeContext.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarAccessibility.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `CHANGELOG.md` (one exact `Unreleased` readability entry only)
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+- Next stage: `approval-committer` for the focused Slice 11 plan commit. No
+  runtime, actual `CHANGELOG.md`, or roadmap edit is included in this update.
 
 ## Dependency And Approval Trace
 
@@ -979,6 +1076,15 @@ required: No`.
   document lifecycle, Explorer/Calendar protocols, browser bundle names, and
   existing viewer behavior. Its report/document/action, architecture, compile,
   desktop, web, quality, lint, and diff checks are the acceptance evidence.
+- Slice 11 depends on completion-committed Slice 10 `0a5cdd31` and owns only
+  shared browser-safe result primitives, Explorer/Calendar presentation
+  adapters, focused readability/accessibility coverage, and the shared-import
+  architecture guard. It preserves localized view mapping, facts, DTOs,
+  filters, actions, report/JSON behavior, public messages, host/session
+  lifecycle, common theme/resource handling, virtualization, and bundle names.
+  Its focused shared/Explorer/Calendar UI suites, accessibility and theme
+  suites, architecture guard, compile/build/host, quality, lint, and diff
+  checks are the acceptance evidence.
 
 ## Feature Exit Evidence
 
@@ -991,7 +1097,10 @@ required: No`.
   Slice 1 `51a8ae4a`, Slice 2
   `b9cee633`, Slice 3 `ffb92f1e`, format-only correction `09148de4`, Slice 4
   `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`,
-  Slice 8 `fe042fb0`, and Slice 9 `bb8d7305`.
+  Slice 8 `fe042fb0`, Slice 9 `bb8d7305`, and Slice 10 `0a5cdd31`.
+  Slice 11 plan review is `Ready for approval` with no Findings and Human Plan
+  Approval is recorded; its focused plan commit is pending
+  `approval-committer`, and it has no implementation or completion evidence.
 - Acceptance and validation evidence covers the complete requirement table,
   including the evaluated-period workflow gate, exact sidecar/context
   lifecycle, root and run outcomes, identity candidates, deterministic
@@ -1001,21 +1110,23 @@ required: No`.
   correction and Slice 8's Calendar correction preserve the common Table/Flow
   mechanism. Slice 9 placement/import implementation is complete and its
   independent review and Completion Approval are complete. Slice 10's
-  report-package implementation, independent review, and Completion Approval
-  are complete; its focused completion commit remains pending.
+  report-package implementation, independent review, Completion Approval, and
+  focused completion commit `0a5cdd31` are complete. Shared result
+  presentation is deferred to Slice 11.
 - Durable propagation is complete for the observable use case, use-case index,
-  README, and CHANGELOG. Architecture and glossary updates are not required.
+  README, and prior CHANGELOG entries. Slice 11's new user-visible
+  readability entry remains pending implementation approval. Architecture and
+  glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
   completed Wave 4 calendar entry while preserving the deferred schedule-
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: the focused completion commit must preserve the reviewed
-  Presentation-report versus VS Code/report boundary, obsolete facade removal,
-  consumer coverage, and the bootstrap-only browser entry.
-  Existing macOS codesign, web-stream
-  cleanup, webpack-size, and advisory smell findings remain documented
-  observations.
-- Closure recommendation: defer Feature Exit until the Slice 10 completion
-  commit is recorded; then rerun independent Feature Exit and request the final
-  batch human Closure Approval.
+- Remaining risks: Slice 11 still requires its focused plan commit,
+  implementation review, Completion Approval, and completion commit. Existing
+  macOS codesign, web-stream cleanup, webpack-size, and advisory smell
+  findings remain documented compatibility observations. Closure Approval
+  remains blocked until Slice 11 completes.
+- Closure recommendation: defer Feature Exit until Slice 11 completes, then
+  request final explicit human Closure Approval and the subsequent focused
+  closure commit.
