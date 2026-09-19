@@ -16,8 +16,8 @@
 | `CAL-A11Y-001`: expose textual state and preserve desktop/web accessibility                                            | Requirements: CAL-A11Y-001; Display Language And Compatibility; Acceptance Criteria                       | Slices 3 and 4 | accessibility and localization tests for names, focus, announcements, MUI roles, high contrast, zoom, reduced motion, and fallback language                                                                                                                                                                                                                                                                                                                                 |
 | `CAL-SCALE-001`: bound rendering and enforce the inclusive 8 MiB encoded-message limit without loss                    | Requirements: CAL-SCALE-001; Host-Private Calendar Session And Closed Transport; Acceptance Criteria      | Slices 1–4     | exact/over-limit message tests, no partial state, deterministic large-result projection, extracted virtualization and DOM-size checks                                                                                                                                                                                                                                                                                                                                       |
 | `CAL-PRIVACY-001`: keep content, paths, run lists, and host handles out of telemetry and transport                     | Requirements: CAL-PRIVACY-001; Impact Analysis; Non-Goals                                                 | Slices 1–3     | DTO/message inspection, telemetry guard, architecture and desktop/web checks                                                                                                                                                                                                                                                                                                                                                                                                |
-| Architecture and compatibility boundaries remain unchanged                                                             | Architecture; Compatibility; Breaking Change Analysis                                                     | Slices 1–9     | path-scoped review, architecture checks, manifest/output-bundle guard, existing report/JSON/Explorer/Flow/source regressions, MUI component/package checks, host/browser location guard, shared-resource/context checks, placement-policy/import inventory, quality checks                                                                                                                                                                                                  |
-| Presentation package organization remains aligned with table/Flow webviews without changing behavior                   | Architecture; Compatibility; Acceptance Criteria                                                          | Slices 4–9     | calendar/Explorer component-boundary tests, host/browser package-location/import assertions, shared `MyAppContextProvider`/resource tests, Semantic Diff category/facade guards, thin browser-entry checks, existing calendar suites, Explorer DOM/theme/projection/messages/Flow/source/report/action suites, desktop/web builds, MUI role/label/focus/reflow checks                                                                                                       |
+| Architecture and compatibility boundaries remain unchanged                                                             | Architecture; Compatibility; Breaking Change Analysis                                                     | Slices 1–10    | path-scoped review, architecture checks, manifest/output-bundle guard, existing report/JSON/Explorer/Flow/source regressions, MUI component/package checks, host/browser location guard, shared-resource/context checks, placement-policy/import inventory, Presentation-report/VS Code-report package guard, quality checks                                                                                                                                                |
+| Presentation package organization remains aligned with table/Flow webviews without changing behavior                   | Architecture; Compatibility; Acceptance Criteria                                                          | Slices 4–10    | calendar/Explorer component-boundary tests, host/browser package-location/import assertions, shared `MyAppContextProvider`/resource tests, Semantic Diff category/facade guards, Presentation-report/VS Code-report ownership checks, thin-browser-entry checks, existing calendar suites, Explorer DOM/theme/projection/messages/Flow/source/report/action suites, desktop/web builds, MUI role/label/focus/reflow checks                                                  |
 | Explorer theme and locale use the canonical viewer resource mechanism                                                  | Compatibility; Acceptance Criteria                                                                        | Slice 7        | `MyContexts` provider/resource integration, `viewerHostMessages`/`viewerEventBridge` parser coverage, Explorer DOM/component theme and locale fixtures, `semanticDiffExplorerPanel.test.ts` common-resource pre-dispatch and malformed-request coverage, desktop/web host checks                                                                                                                                                                                            |
 | Calendar theme and locale use the canonical viewer resource mechanism                                                  | Compatibility; Acceptance Criteria                                                                        | Slice 8        | Calendar provider/resource integration, shared viewer parser/event-bridge coverage, Calendar DOM/component palette and locale fixtures, `scheduleImpactCalendarPanelRuntime.test.ts` common-resource pre-dispatch and malformed-request coverage, desktop/web host checks                                                                                                                                                                                                   |
 | Durable user documentation is added only when the public view is observable                                            | Durable Documentation Impact; Acceptance Criteria                                                         | Slice 3        | `uc-present-schedule-impact.md` and index validation; `rtk pnpm run lint:md`; README/CHANGELOG impact review                                                                                                                                                                                                                                                                                                                                                                |
@@ -539,7 +539,9 @@
   plan commit `16f09c72` is complete; implementation review returned `Ready`
   with no Findings, automatic Completion Approval was recorded on 2026-09-19,
   and focused completion commit `fe042fb0` is complete. Slice 9
-  placement-policy relocation is now pending, so Feature Exit is deferred.
+  placement-policy relocation is independently reviewed and completion-committed
+  at `bb8d7305`; the later Slice 10 replan is recorded below, so Feature Exit
+  remains deferred.
 
 ## Slice 8 Implementation Evidence
 
@@ -630,10 +632,11 @@
   no Findings and `Replanning required: No`; Human Plan Approval was recorded
   on 2026-09-19 under the user's automatic no-findings instruction for the
   exact paths recorded in `TASKS.md`. Focused plan commit `65f123ee` is
-  complete; implementation review is `Ready` with no Findings and Completion
-  Approval is recorded below. The focused completion commit is pending
-  `approval-committer`; Feature Exit is deferred until that commit, and the
-  prior closure and roadmap proposal remain preserved and unapproved.
+  complete; implementation review is `Ready` with no Findings, automatic
+  Completion Approval is recorded below, and focused completion commit
+  `bb8d7305` is complete. Slice 10 plan review and Human Plan Approval are
+  recorded below; its focused plan commit remains pending, so Feature Exit
+  remains deferred.
 
 ## Slice 9 Plan Review And Human Approval
 
@@ -659,8 +662,8 @@
 
 - Status: Implementation complete on 2026-09-19 under focused plan commit
   `65f123ee`; independent `implementation-reviewer` returned `Ready` with no
-  Findings. Completion Approval is recorded below and the focused completion
-  commit remains pending.
+  Findings. Automatic Completion Approval is recorded below and focused
+  completion commit `bb8d7305` is complete.
 - Changed paths: the five Calendar host modules now live only under
   `src/presentation/vscode/semantic-diff/calendar/`; the three root Semantic
   Diff forwarding facades were removed; listed production and test imports were
@@ -737,9 +740,75 @@ architecture/location guard boundary.
   - `src/test/suite/semanticDiffWiring.test.ts`
   - `src/test/suite/webSmoke.ts`
   <!-- markdownlint-enable MD013 -->
-- Commit status: the focused completion commit is pending
-  `approval-committer`; Feature Exit and final batch human Closure Approval
-  remain deferred.
+- Commit status: Complete; focused completion commit `bb8d7305`.
+- Next stage: Slice 10 plan approval is complete; `approval-committer` owns the
+  focused plan commit. Implementation, Feature Exit, and final batch human
+  Closure Approval remain deferred.
+
+## Slice 10 Replanning Evidence
+
+- Trigger: after Slice 9 completion, the user requested that the contents of
+  `src/presentation/semantic-diff` follow the Flow/Unit List responsibility
+  structure. The fourteen-file package currently combines host-neutral
+  Markdown/JSON report transformations with a VS Code output-mode chooser and
+  output-document aggregation.
+- Finding addressed: the earlier application/report destination conflicted
+  with `docs/specs/architecture.md:106-113`, which assigns localization,
+  Summary/Full/Audit/JSON projections, and mode selection to Presentation. The
+  revised report destination stays within Presentation; the durable
+  architecture file is unchanged.
+- Canonical boundary: move the twelve host-neutral report files into
+  `src/presentation/semantic-diff/report/`; keep the VS Code picker and report
+  document/action adapters under
+  `src/presentation/vscode/semantic-diff/report/`; delete the two obsolete
+  `pickSemanticDiffOutputMode.ts` and `presentSemanticDiffOutput.ts` facades;
+  and remove only the unused `SemanticDiffExplorerApp` re-exports from
+  `src/presentation/webview/editor/semanticDiffExplorer.tsx` while retaining
+  its `bootstrapViewer` entry. That browser edit is a future approved
+  implementation path; the current replan diff has no runtime entrypoint edit.
+- Import and test impact: canonicalize the bootstrap, command, panel, and
+  report adapter imports; update the existing report, JSON, Markdown, command,
+  document, sample, and architecture suites; and add focused picker tests.
+  The architecture guard will enforce Presentation-report host neutrality,
+  inward VS Code/report dependencies, absence of the old package/facades, and
+  the browser entry's bootstrap-only shape.
+- Acceptance and validation: all fourteen legacy files are accounted for as
+  twelve Presentation-report moves (with the picker extracted from
+  `semanticDiffOutput.ts`) and two facade deletions. Report Markdown/JSON
+  bytes, JSON version 1, locale fallback, mode ordering, picker cancellation,
+  report document lifecycle, Explorer report actions, browser bootstrap, and
+  bundle entry/output names remain unchanged. Compile, affected report/command/
+  Explorer suites, architecture/location guards, desktop/web builds and host
+  checks, quality, Markdown lint, and `git diff --check` provide evidence.
+- Dependency and approval boundary: Slice 10 depends on completion-committed
+  Slice 9 `bb8d7305`. It is a Presentation package ownership replan only and
+  does not change report semantics, public output APIs, JSON schema, viewer
+  protocols, session behavior, webpack configuration, roadmap, or Feature Exit
+  closure. Independent plan review returned `Ready for approval` with no
+  Findings and `Replanning required: No`; Human Plan Approval was recorded on
+  2026-09-19. The focused plan commit is pending `approval-committer`; no
+  runtime implementation or Completion Approval is recorded here.
+
+## Slice 10 Plan Review And Human Approval
+
+- Plan-reviewer result: `Ready for approval`; Findings none; `Replanning
+required: No`.
+- Human Plan Approval: Approved on 2026-09-19 in the current conversation under
+  the user's standing automatic no-findings slice approval instruction.
+- Approved boundary: move the twelve host-neutral Semantic Diff report files
+  into `src/presentation/semantic-diff/report/`, extract the VS Code picker
+  into `src/presentation/vscode/semantic-diff/report/`, delete the two old
+  root facades, canonicalize the listed imports/tests/architecture guards, and
+  remove the unused browser App re-exports in the approved implementation
+  diff. Preserve report bytes, JSON version 1, mode ordering, document
+  lifecycle, protocols, bundle names, and the durable Presentation ownership.
+- Approved paths: the exact complete path list is recorded in the Slice 10
+  Human Approval record in `TASKS.md`; no path outside that record is approved.
+  The current replan diff contains only TASKS/TRACEABILITY changes, and
+  `docs/specs/architecture.md`, `docs/specs/roadmap.md`, and runtime files are
+  unchanged.
+- Next stage: `approval-committer` owns the focused Slice 10 plan commit;
+  implementation remains blocked until that commit.
 
 ## Dependency And Approval Trace
 
@@ -838,17 +907,25 @@ architecture/location guard boundary.
   webpack entry/output names, and all Calendar/Explorer contracts. Its
   architecture, compile, affected regression, desktop, web, and package
   checks are the acceptance evidence.
+- Slice 10 depends on completion-committed Slice 9 `bb8d7305` and owns only
+  the Presentation-report versus VS Code/report package split, obsolete facade
+  deletion, canonical report imports/tests, Presentation-report and VS Code/report
+  architecture guards, and the unused browser-entry re-export deletion. It
+  preserves report Markdown/JSON bytes, JSON version 1, mode ordering, report
+  document lifecycle, Explorer/Calendar protocols, browser bundle names, and
+  existing viewer behavior. Its report/document/action, architecture, compile,
+  desktop, web, quality, lint, and diff checks are the acceptance evidence.
 
 ## Feature Exit Evidence
 
-- Slices 1–8 are independently reviewed `Ready` with no Findings and
-  automatically Completion-approved under the user's no-findings instruction.
-  Slice 9 implementation review is `Ready` with no Findings and Completion
-  Approval is recorded; its focused completion commit remains pending.
-  Slices 1–8 are focused-commit complete: Slice 1 `51a8ae4a`, Slice 2
+- All nine completed slices are independently reviewed `Ready` with no
+  Findings and automatically Completion-approved under the user's no-findings
+  instruction. Slice 10's plan is independently `Ready` and Human-approved,
+  but has no implementation approval. Slices 1–9 are focused-commit complete:
+  Slice 1 `51a8ae4a`, Slice 2
   `b9cee633`, Slice 3 `ffb92f1e`, format-only correction `09148de4`, Slice 4
-  `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`, and
-  Slice 8 `fe042fb0`.
+  `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`,
+  Slice 8 `fe042fb0`, and Slice 9 `bb8d7305`.
 - Acceptance and validation evidence covers the complete requirement table,
   including the evaluated-period workflow gate, exact sidecar/context
   lifecycle, root and run outcomes, identity candidates, deterministic
@@ -857,7 +934,8 @@ architecture/location guard boundary.
   desktop/web contracts. Slice 7's shared viewer-resource theme/context
   correction and Slice 8's Calendar correction preserve the common Table/Flow
   mechanism. Slice 9 placement/import implementation is complete and its
-  independent review and Completion Approval are complete.
+  independent review and Completion Approval are complete. Slice 10 remains
+  unimplemented.
 - Durable propagation is complete for the observable use case, use-case index,
   README, and CHANGELOG. Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
@@ -865,10 +943,12 @@ architecture/location guard boundary.
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: the focused completion commit must preserve the reviewed
-  consumer inventory and VS Code/browser boundary. Existing macOS codesign,
-  web-stream cleanup, webpack-size, and advisory smell findings remain
-  documented observations.
-- Closure recommendation: defer Feature Exit until the Slice 9 completion
-  commit is recorded; then rerun independent Feature Exit and request the final
-  batch human Closure Approval.
+- Remaining risks: Slice 10 must preserve the Presentation-report versus
+  VS Code/report boundary required by the durable architecture, remove obsolete
+  facades without omitting consumers, and keep the browser entry bootstrap-only.
+  Existing macOS codesign, web-stream
+  cleanup, webpack-size, and advisory smell findings remain documented
+  observations.
+- Closure recommendation: defer Feature Exit until Slice 10 is reviewed,
+  completion-approved, and committed; then rerun independent Feature Exit and
+  request the final batch human Closure Approval.
