@@ -1,8 +1,8 @@
 import { createTheme, type SxProps, type Theme } from "@mui/material/styles";
 
-export const semanticDiffExplorerTargetSizePx = 44;
+export const viewerTargetSizePx = 44;
 
-export const semanticDiffExplorerFocusSx: SxProps<Theme> = {
+export const viewerFocusSx: SxProps<Theme> = {
   "&:focus-visible": {
     outline: (theme) => `2px solid ${theme.palette.primary.main}`,
     outlineOffset: "2px",
@@ -15,7 +15,7 @@ export const semanticDiffExplorerFocusSx: SxProps<Theme> = {
   },
 };
 
-export const semanticDiffExplorerSelectionSx = (
+export const viewerSelectionSx = (
   selected: boolean,
 ): {
   borderLeft: string;
@@ -29,7 +29,49 @@ export const semanticDiffExplorerSelectionSx = (
   },
 });
 
-export const semanticDiffExplorerGlobalStyles = (theme: Theme) => ({
+export const viewerFocusBorder = (theme: Theme): string =>
+  `var(--vscode-focusBorder, ${theme.palette.primary.main})`;
+
+export const viewerSelectionBorder = (theme: Theme): string =>
+  `var(--vscode-list-activeSelectionBackground, ${theme.palette.secondary.main})`;
+
+export const viewerSearchBorder = (theme: Theme): string =>
+  `var(--vscode-editor-findMatchBorder, ${theme.palette.success.main})`;
+
+export const viewerPanelBorder = (theme: Theme): string =>
+  `var(--vscode-widget-border, ${theme.palette.divider})`;
+
+export const viewerPathBorder = (theme: Theme): string =>
+  `var(--vscode-textLink-foreground, ${theme.palette.info.main})`;
+
+export const viewerFocusTargetSx = {
+  "&:focus": {
+    outline: (theme) => `2px solid ${viewerFocusBorder(theme)}`,
+    outlineOffset: "-2px",
+  },
+  "@media (forced-colors: active)": {
+    "&:focus": {
+      outline: "2px solid Highlight",
+      outlineOffset: "-2px",
+    },
+  },
+};
+
+export const viewerFocusIndicatorSx = {
+  "&:focus-visible": {
+    outline: (theme) => `2px solid ${viewerFocusBorder(theme)}`,
+    outlineOffset: "-2px",
+  },
+  "@media (forced-colors: active)": {
+    "&:focus-visible": {
+      outline: "2px solid Highlight",
+      outlineOffset: "-2px",
+    },
+  },
+};
+
+/** Shared global viewer rules with the palette-derived base taking precedence over browser defaults. */
+export const viewerGlobalStyles = (theme: Theme) => ({
   html: {
     backgroundColor: theme.palette.background.default,
   },
@@ -45,21 +87,27 @@ export const semanticDiffExplorerGlobalStyles = (theme: Theme) => ({
   },
   "body.vscode-high-contrast, body.vscode-high-contrast-light, body.vscode-high-contrast-dark":
     {
-      backgroundColor: "Canvas",
-      color: "CanvasText",
+      color: "var(--vscode-foreground, CanvasText)",
+      backgroundColor: "var(--vscode-editor-background, Canvas)",
       "& #root": {
-        backgroundColor: "Canvas",
-        color: "CanvasText",
+        color: "var(--vscode-foreground, CanvasText)",
+        backgroundColor: "var(--vscode-editor-background, Canvas)",
+      },
+      "& .MuiPaper-root": {
+        backgroundImage: "none",
       },
     },
   "@media (forced-colors: active)": {
     body: {
-      backgroundColor: "Canvas",
       color: "CanvasText",
+      backgroundColor: "Canvas",
     },
     "#root": {
       backgroundColor: "Canvas",
       color: "CanvasText",
+    },
+    ".MuiPaper-root": {
+      backgroundImage: "none",
     },
     ".sde-state": {
       borderColor: "ButtonText",
@@ -77,7 +125,7 @@ export const semanticDiffExplorerGlobalStyles = (theme: Theme) => ({
   },
 });
 
-export const semanticDiffViewerSurfaceSx: SxProps<Theme> = {
+export const viewerSurfaceSx: SxProps<Theme> = {
   width: "100%",
   flex: 1,
   minWidth: 0,
@@ -96,7 +144,7 @@ export const semanticDiffViewerSurfaceSx: SxProps<Theme> = {
 };
 
 /** A theme-aware opaque surface for content that stays above a scrolling view. */
-export const semanticDiffViewerOpaqueSurfaceSx = {
+export const viewerOpaqueSurfaceSx = {
   backgroundColor: (theme) => theme.palette.background.paper,
   borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
   boxShadow: (theme) => theme.shadows[1],
@@ -114,13 +162,11 @@ export const semanticDiffViewerOpaqueSurfaceSx = {
   },
 };
 
-export type SemanticDiffThemeOptions = Readonly<{
+export type ViewerThemeOptions = Readonly<{
   mode?: "light" | "dark";
 }>;
 
-export const createSemanticDiffTheme = (
-  options: SemanticDiffThemeOptions = {},
-): Theme =>
+export const createViewerTheme = (options: ViewerThemeOptions = {}): Theme =>
   createTheme({
     palette: {
       mode: options.mode ?? "light",
@@ -136,47 +182,35 @@ export const createSemanticDiffTheme = (
       MuiButton: {
         styleOverrides: {
           root: {
-            minWidth: semanticDiffExplorerTargetSizePx,
-            minHeight: semanticDiffExplorerTargetSizePx,
+            minWidth: viewerTargetSizePx,
+            minHeight: viewerTargetSizePx,
             textTransform: "none",
             whiteSpace: "normal",
-            ...semanticDiffExplorerFocusSx,
+            ...viewerFocusSx,
           },
         },
       },
       MuiIconButton: {
         styleOverrides: {
           root: {
-            minWidth: semanticDiffExplorerTargetSizePx,
-            minHeight: semanticDiffExplorerTargetSizePx,
-            ...semanticDiffExplorerFocusSx,
-          },
-        },
-      },
-      MuiNativeSelect: {
-        styleOverrides: {
-          select: {
-            minHeight: semanticDiffExplorerTargetSizePx,
-            paddingTop: 10,
-            paddingBottom: 10,
-            ...semanticDiffExplorerFocusSx,
+            minWidth: viewerTargetSizePx,
+            minHeight: viewerTargetSizePx,
+            ...viewerFocusSx,
           },
         },
       },
       MuiSelect: {
         styleOverrides: {
           select: {
-            minHeight: semanticDiffExplorerTargetSizePx,
+            minHeight: viewerTargetSizePx,
             paddingTop: 10,
             paddingBottom: 10,
             boxSizing: "border-box",
             whiteSpace: "normal",
             overflowWrap: "anywhere",
-            ...semanticDiffExplorerFocusSx,
+            ...viewerFocusSx,
           },
         },
       },
     },
   });
-
-export const semanticDiffExplorerTheme = createSemanticDiffTheme();

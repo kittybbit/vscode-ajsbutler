@@ -16,12 +16,13 @@
   `0a5cdd31`, Slice 11 at `644161ca`, Slice 12 at `2fb18daa`, and Slice 13 at
   `b8d9a667`, Slice 14 at `52ede211`, and Slice 15 at `e83e67b9`.
 - Approved or active slice: Slice 16 plan review is `Ready` with no Findings;
-  Human Plan Approval is recorded and the exact plan is awaiting
-  `approval-committer`. All fifteen predecessor slices have independent `Ready`
-  reviews with no Findings, automatic no-findings Completion Approval, and
-  focused completion commits. Slice 15's focused plan commit is `cd4d932e` and
-  its focused completion commit is `e83e67b9`; Feature Exit is reopened and
-  deferred until Slice 16 completes its gates.
+  Human Plan Approval and Completion Approval are recorded, and the exact
+  completed slice is awaiting `approval-committer`. All fifteen predecessor
+  slices have independent `Ready` reviews with no Findings, automatic
+  no-findings Completion Approval, and focused completion commits. Slice 15's
+  focused plan commit is `cd4d932e` and its focused completion commit is
+  `e83e67b9`; Feature Exit is reopened and deferred until Slice 16 completes
+  its gates.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -242,8 +243,9 @@
   this branch: `51a8ae4a`, `b9cee633`, `ffb92f1e`, `09148de4`, `d4344a26`,
   `f47edeb0`, `c36ee1cf`, `8c555139`, `fe042fb0`, `bb8d7305`,
   `644161ca`, `2fb18daa`, `b8d9a667`, `52ede211`, and `e83e67b9`. Slice 16 is
-  a presentation-only replan with `Ready` review and Human Approval; its
-  focused plan commit is pending `approval-committer`.
+  a presentation-only replan with `Ready` review, Human Plan Approval, and
+  Completion Approval; its focused completion commit is pending
+  `approval-committer`.
 - The original plan, replans, and Slice 4/5/6/7/8/9 packages have independent
   `Ready` verdicts with no Findings. The focused Slice 4/5 plan/replan commit
   `271c6027`, Slice 6 plan/replan commit `e51d6def`, and Slice 7 plan commit
@@ -257,8 +259,8 @@
   Slice 14 plan commit `9a0bd721`, implementation review, Completion Approval,
   and focused completion commit `52ede211` are complete. Slice 15 plan and
   completion gates are complete at `cd4d932e`/`e83e67b9`; Slice 16 plan review
-  is `Ready` with no Findings and Human Plan Approval is recorded, with its
-  focused plan commit pending `approval-committer`.
+  is `Ready` with no Findings, Human Plan Approval and Completion Approval are
+  recorded, with its focused completion commit pending `approval-committer`.
 
 ## Sync Rule
 
@@ -313,9 +315,9 @@
   range/comparison layout, one-row shared result alignment plus targeted
   Slice 11/12 smell cleanup, Calendar internal-ID display cleanup, and the
   Slice 15 shared MUI presentation audit are complete; the Slice 16 canonical
-  shared MUI viewer-theme cleanup is plan-approved and pending its focused plan
-  commit.
-- Review status: all plan/replan packages through Slice 15 and all fifteen
+  shared MUI viewer-theme cleanup is implementation-complete and pending its
+  focused completion commit.
+- Review status: all plan/replan packages through Slice 16 and all fifteen
   implementation slices are independently `Ready` with no
   Findings. Slice 10
   plan review returned `Ready for approval`; its implementation review returned
@@ -343,9 +345,10 @@
   and focused completion commit `52ede211` are complete. Slice 15 plan review
   is `Ready` with no Findings, Human Plan Approval is recorded, implementation
   review is `Ready` with no Findings, Completion Approval is recorded, and
-  focused completion commit `e83e67b9` is complete. Slice 16 is reviewed and
-  Human-approved; its focused plan commit is pending `approval-committer`, so
-  Feature Exit remains reopened and deferred.
+  focused completion commit `e83e67b9` is complete. Slice 16 plan and
+  implementation reviews are `Ready` with no Findings, Human Plan Approval and
+  Completion Approval are recorded, and its focused completion commit is
+  pending `approval-committer`; Feature Exit remains reopened and deferred.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -392,13 +395,14 @@
   Completion Approval are recorded; focused plan commit `cd4d932e`,
   implementation, and focused completion commit `e83e67b9` are complete. Slice
   16 plan review is `Ready` with no Findings and Human Plan Approval is
-  recorded; its focused plan commit is pending `approval-committer`. Final
+  recorded; implementation review is `Ready`, Completion Approval is recorded,
+  and its focused completion commit is pending `approval-committer`. Final
   batch human Closure Approval remains deferred while Slice 16 completes.
-- Active implementation slice: none; Slice 16 is plan-approved and pending its
-  focused plan commit by `approval-committer`. All fifteen predecessor slices are
-  implementation-complete, independently reviewed `Ready` with no Findings,
-  Completion-approved, and focused-commit complete. Feature Exit is reopened
-  and deferred until Slice 16 completes.
+- Active implementation slice: none; Slice 16 is implementation-complete and
+  pending its focused completion commit by `approval-committer`. All fifteen
+  predecessor slices are implementation-complete, independently reviewed
+  `Ready` with no Findings, Completion-approved, and focused-commit complete.
+  Feature Exit is reopened and deferred until Slice 16 completes.
 - Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, Slice 7,
   Slice 8, Slice 9, Slice 10, Slice 11, Slice 12, Slice 13, Slice 14, then
   Slice 15, then Slice 16. Each slice requires its own implementation review,
@@ -1206,10 +1210,10 @@ Findings and Completion Approval is recorded above; focused completion commit
 - Approved scope: none
 - Approved paths: none
 - Feature Exit verdict: Deferred; all fifteen predecessor slices are complete
-  and independently reviewed `Ready` with no Findings. Slice 16 plan review
-  is `Ready` with no Findings and Human Plan Approval is recorded; its focused
-  plan commit is pending `approval-committer`. No Closure Approval has been
-  granted.
+  and independently reviewed `Ready` with no Findings. Slice 16 plan and
+  implementation reviews are `Ready` with no Findings, Human Plan Approval and
+  Completion Approval are recorded, and its focused completion commit is
+  pending `approval-committer`. No Closure Approval has been granted.
 - Commit status: Eligible only after explicit Closure Approval is recorded.
 - Proposed closure propagation after approval: remove the completed Wave 4
   calendar entry from `docs/specs/roadmap.md`, then delete only
@@ -4885,8 +4889,11 @@ Definition runtime remain unchanged.
   `Replanning required: No`. Human Plan Approval is recorded on 2026-09-20
   under the user's standing automatic no-findings slice approval instruction.
   Slice 15 remains completion-committed at `e83e67b9`; Slice 16 is approved
-  for the exact paths below and awaits `approval-committer` before
-  implementation. Feature Exit remains reopened and deferred.
+  for the exact paths below. Focused plan commit `04f4cbc4` and implementation
+  are complete under the approved paths; independent implementation review is
+  `Ready` with no Findings, Completion Approval is recorded, and the focused
+  completion commit awaits `approval-committer`. Feature Exit remains reopened
+  and deferred.
 - Replanning trigger and audit evidence: the user questioned whether
   `muiTheme.ts` is needed and requested standard MUI alignment. The current
   `createSemanticDiffTheme` wrapper is consumed by Flow, Table, Explorer,
@@ -5002,10 +5009,11 @@ Definition runtime remain unchanged.
   host, or transport dependency crosses the existing architecture boundary.
 - Dependencies and gate: Slice 16 depends on completion-committed Slice 15
   `e83e67b9`. Independent plan review is `Ready` with no Findings and Human
-  Plan Approval is recorded for the exact paths above. Next stage is
-  `approval-committer` for the focused plan commit; implementation review,
-  Completion Approval, and a focused completion commit must then precede
-  renewed Feature Exit review and final batch Closure Approval.
+  Plan Approval is recorded for the exact paths above. Focused plan commit
+  `04f4cbc4` and implementation are complete; independent implementation
+  review is `Ready` with no Findings and Completion Approval is recorded.
+  Next stage is `approval-committer` for the focused completion commit, which
+  must precede renewed Feature Exit review and final batch Closure Approval.
 - Risks: merging global style objects can change CSS precedence, deleting the
   dead NativeSelect override could hide an unlocated consumer, and moving
   helpers from `editor/shared` can miss a relative import or architecture
@@ -5055,10 +5063,81 @@ Definition runtime remain unchanged.
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
-- Plan gate status: reviewed and Human-approved; no implementation or
-  Completion Approval exists. Next stage is `approval-committer` for the exact
-  approved planning package, followed by one approved Slice 16 implementation
-  and independent implementation review.
+- Plan gate status: reviewed and Human-approved; focused plan commit
+  `04f4cbc4` is complete and Slice 16 implementation is complete under the
+  exact approved paths. Independent implementation review is `Ready` with no
+  Findings and Completion Approval is recorded; next stage is
+  `approval-committer` for the exact completed paths.
+
+### Slice 16 Implementation Evidence
+
+- Implementation status: Complete under focused plan commit `04f4cbc4`;
+  independent implementation review returned `Ready` with no Findings and
+  Completion Approval is recorded on 2026-09-20. The focused completion commit
+  is pending `approval-committer`.
+- The browser-safe `viewerTheme.ts` now owns the generic MUI theme factory,
+  viewer tokens, focus/selection/surface styles, VS Code border helpers, and
+  merged global typography/high-contrast/forced-colors rules. Flow, Table,
+  Explorer, Calendar, and `ViewerFilterSelect` import only this canonical
+  module. The unused NativeSelect override and theme singleton were removed.
+- Focused theme, Explorer, Calendar, and shared-filter coverage preserves
+  palette modes, VS Code font/tokens, 44px controls, focus/selection/surface
+  rules, forced colors, direct theme seams, filter behavior, and Flow/Table
+  imports. No DTO, protocol, host, lifecycle, virtualization, or bundle
+  contract changed.
+- Validation evidence is recorded after the final implementation checks. The
+  canonical `antlr4ts` regeneration produced no generated-parser diff, and
+  `test:compile` plus the canonical desktop preparation/runner completed
+  successfully. The direct Flow/Table integration command required a temporary
+  Node `@generate/parser` alias to load the generated output; it then reached
+  the suites but reported eight pre-existing JSDOM integration failures (one
+  Flow fixture lookup and seven Table fixture/keyboard expectations). These
+  failures are outside the Slice 16 theme migration and are retained as an
+  environment limitation rather than changed here. The roadmap closure
+  proposal is excluded and remains untouched.
+- Completed paths (exact Slice 16 diff):
+  <!-- markdownlint-disable MD013 -->
+  - `src/presentation/webview/shared/viewerTheme.ts` (new)
+  - `src/presentation/webview/shared/muiTheme.ts` (deleted)
+  - `src/presentation/webview/editor/shared/viewerThemeStyles.ts` (deleted)
+  - `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`
+  - `src/presentation/webview/editor/ajsFlow/nodes/nodeSxProps.ts`
+  - `src/presentation/webview/editor/ajsTable/TableContents.tsx`
+  - `src/presentation/webview/editor/ajsTable/TableHeader.tsx`
+  - `src/presentation/webview/editor/ajsTable/tableSemanticRenderer.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/Header.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerView.tsx`
+  - `src/presentation/webview/editor/shared/SharedUnitDetailPane.tsx`
+  - `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`
+  - `src/presentation/webview/editor/shared/ViewerFilterSelect.tsx`
+  - `src/test/suite/viewerTheme.test.ts` (new)
+  - `src/test/suite/muiTheme.test.ts` (deleted)
+  - `src/test/suite/viewerThemeStyles.test.ts` (deleted)
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/viewerFilterSelect.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+
+### Slice 16 Completion Approval
+
+- Implementation-reviewer final verdict: `Ready`; Findings none.
+- Completion Approval: Approved on 2026-09-20 under the user's standing
+  automatic no-findings Completion Approval instruction.
+- Completed boundary: the canonical shared viewer theme migration and all
+  listed Flow/Table/Explorer/Calendar/shared-filter consumers and tests. The
+  Flow/Table direct baseline failures reproduced at `e83e67b9` remain
+  environment/baseline observations; production webpack, desktop, and web
+  validation passed. No roadmap, CHANGELOG, DTO, protocol, host lifecycle,
+  virtualization, or bundle behavior changed.
+- Completed paths are exactly the Slice 16 diff listed above. Next stage is
+  `approval-committer` for the focused completion commit; Feature Exit remains
+  deferred until that commit and renewed independent exit review.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -5175,8 +5254,8 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 
 ## Feature Exit
 
-- Definition of Done status: Deferred while Slice 16 is planned and awaits its
-  approval, implementation, review, and completion commit. All fifteen
+- Definition of Done status: Deferred while Slice 16 awaits its focused
+  completion commit and renewed exit review. All fifteen
   predecessor slices are independently reviewed `Ready` with no Findings,
   automatically Completion-approved under the user's instruction, and
   focused-commit complete: Slice 1 `51a8ae4a`, Slice 2 `b9cee633`, Slice 3
@@ -5186,8 +5265,10 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   `2fb18daa`, Slice 13 `b8d9a667`, Slice 14 `52ede211`, and Slice 15
   `e83e67b9`. Slice 15 plan review, Human Approval, focused plan commit
   `cd4d932e`, implementation, independent implementation review, Completion
-  Approval, and focused completion commit are complete. Slice 16 has no plan
-  review or approval yet.
+  Approval, and focused completion commit are complete. Slice 16 plan review,
+  Human Plan Approval, focused plan commit `04f4cbc4`, implementation,
+  independent implementation review, and Completion Approval are complete;
+  its focused completion commit remains pending.
 - Durable documentation: `uc-present-schedule-impact.md`, its index entry,
   README, and CHANGELOG updates are complete. Architecture and glossary
   propagation are not required. The closure package removes the completed
@@ -5222,12 +5303,11 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   `e83e67b9` is complete. Focused validation passes 31 tests and architecture
   29 tests, plus compile, production/desktop/web builds, desktop/web host
   WEB7–10, qlty with no issues and smell delta new0, lint, and diff checks.
-- Remaining risks: Slice 16's generic global-style merge, export migration,
-  and removal of the dead NativeSelect override require the focused import,
-  palette, forced-colors, direct-shell, and desktop/web validation recorded in
-  its plan. Existing macOS codesign, web-stream cleanup, webpack-size, and
-  Slice 10-baseline advisory smell findings remain documented compatibility
-  observations.
+- Remaining risks: Slice 16's focused completion commit remains pending
+  `approval-committer`; its direct Flow/Table baseline failures are documented
+  environment observations. Existing macOS codesign, web-stream
+  cleanup, webpack-size, and Slice 10-baseline advisory smell findings remain
+  documented compatibility observations.
 - Proposed closure scope after Slice 16: retain the prepared
   `docs/specs/roadmap.md` cleanup, then remove only
   `docs/specs/features/schedule-impact-calendar/` after renewed Feature Exit
@@ -5461,11 +5541,11 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       plan commit `cd4d932e` and implementation are complete, and independent
       implementation review is `Ready` with no Findings. Completion Approval
       is recorded, and focused completion commit `e83e67b9` is complete.
-- [ ] Slice 16 canonical shared MUI viewer-theme cleanup is planned under the
-      exact paths recorded above; independent plan review is `Ready` with no
-      Findings and Human Plan Approval is recorded. Its focused plan commit is
-      pending `approval-committer`; no implementation or Completion Approval
-      is recorded.
+- [x] Slice 16 canonical shared MUI viewer-theme cleanup is implemented under
+      the exact paths recorded above; independent plan and implementation
+      reviews are `Ready` with no Findings, Human Plan Approval and Completion
+      Approval are recorded, and focused plan commit `04f4cbc4` is complete.
+      Focused completion commit is pending `approval-committer`.
 
 ## Notes
 
@@ -5513,6 +5593,7 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   16 canonical shared MUI viewer-theme cleanup are
   synchronized. Slice 15 plan review and implementation review are `Ready`
   with no Findings, Completion Approval and focused completion commit
-  `e83e67b9` are recorded. Slice 16 plan review is `Ready` with no Findings and
-  Human Plan Approval is recorded; its focused plan commit is pending
-  `approval-committer`. Feature Exit is reopened and deferred.
+  `e83e67b9` are recorded. Slice 16 plan and implementation reviews are
+  `Ready` with no Findings, Human Plan Approval and Completion Approval are
+  recorded, and its focused completion commit is pending `approval-committer`.
+  Feature Exit is reopened and deferred.

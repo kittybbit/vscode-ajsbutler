@@ -25,11 +25,8 @@ import {
   type FlowViewportInstanceRef,
 } from "./useFlowViewportAdapter";
 import type { UnitTreeFocusRequest } from "../shared/UnitTreeSelector";
-import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
-import {
-  createSemanticDiffTheme,
-  semanticDiffViewerSurfaceSx,
-} from "../../shared/muiTheme";
+import { viewerGlobalStyles } from "../../shared/viewerTheme";
+import { createViewerTheme, viewerSurfaceSx } from "../../shared/viewerTheme";
 import { navigateToTable } from "./nodes/Utils";
 import { type FlowMiniMapColors } from "./flowMiniMap";
 import type { CurrentUnitIdStateType } from "./flowViewerStateTypes";
@@ -200,7 +197,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
   currentUnitIdState,
 }) => {
   return (
-    <Box sx={semanticDiffViewerSurfaceSx}>
+    <Box sx={viewerSurfaceSx}>
       <Stack
         direction="row"
         spacing={1.25}
@@ -287,7 +284,7 @@ const FlowViewerBody: FC<FlowViewerBodyProps> = ({
 const useFlowTheme = (): Theme => {
   const { isDarkMode } = useMyAppContext();
   return useMemo(
-    () => createSemanticDiffTheme({ mode: isDarkMode ? "dark" : "light" }),
+    () => createViewerTheme({ mode: isDarkMode ? "dark" : "light" }),
     [isDarkMode],
   );
 };
@@ -620,7 +617,7 @@ const FlowContents: FC = () => {
       <ViewerAnnouncementHost ref={announcementHostRef} />
       <GlobalStyles
         styles={{
-          ...viewerThemeGlobalStyles,
+          ...viewerGlobalStyles(theme),
           ".ajs-flow-minimap .react-flow__minimap-node": {
             vectorEffect: "non-scaling-stroke",
             strokeLinejoin: "round",

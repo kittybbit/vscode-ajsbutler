@@ -7,7 +7,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TableRowView } from "./tableViewerData";
 import type { TableGridFocus } from "./tableNavigationModel";
-import { viewerFocusIndicatorSx } from "../shared/viewerThemeStyles";
+import { viewerFocusIndicatorSx } from "../../shared/viewerTheme";
 
 const styleTableCell: SxProps<Theme> = {
   whiteSpace: "nowrap",

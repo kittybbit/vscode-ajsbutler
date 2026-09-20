@@ -25,7 +25,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
-import { viewerFocusTargetSx, viewerPanelBorder } from "./viewerThemeStyles";
+import {
+  viewerFocusTargetSx,
+  viewerPanelBorder,
+} from "../../shared/viewerTheme";
 
 export type SharedUnitDetailPaneRow = {
   label: string;

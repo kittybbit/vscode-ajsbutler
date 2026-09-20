@@ -48,7 +48,7 @@ import {
   viewerFocusBorder,
   viewerPathBorder,
   viewerSelectionBorder,
-} from "./viewerThemeStyles";
+} from "../../shared/viewerTheme";
 
 export type { UnitTreeFocusRequest } from "./unitTreeSelectorModel";
 

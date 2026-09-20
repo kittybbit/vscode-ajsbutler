@@ -6,9 +6,9 @@ import Typography from "@mui/material/Typography";
 import { ThemeProvider } from "@mui/material/styles";
 import { filterSemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import {
-  createSemanticDiffTheme,
-  semanticDiffExplorerGlobalStyles,
-} from "../../shared/muiTheme";
+  createViewerTheme,
+  viewerGlobalStyles,
+} from "../../shared/viewerTheme";
 import {
   getSemanticDiffExplorerLabels,
   type SemanticDiffExplorerLabels,
@@ -28,13 +28,16 @@ const ExplorerThemeShell = ({
 }: Readonly<{
   children: React.ReactNode;
   themeMode: SemanticDiffExplorerThemeMode;
-}>): React.ReactElement => (
-  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
-    <CssBaseline />
-    <GlobalStyles styles={semanticDiffExplorerGlobalStyles} />
-    {children}
-  </ThemeProvider>
-);
+}>): React.ReactElement => {
+  const theme = createViewerTheme({ mode: themeMode });
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GlobalStyles styles={viewerGlobalStyles(theme)} />
+      {children}
+    </ThemeProvider>
+  );
+};
 
 const ExplorerLoadingView = ({
   labels,

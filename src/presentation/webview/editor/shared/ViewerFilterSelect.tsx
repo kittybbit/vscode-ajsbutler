@@ -6,10 +6,7 @@ import ListSubheader, {
 } from "@mui/material/ListSubheader";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import {
-  semanticDiffExplorerFocusSx,
-  semanticDiffExplorerTargetSizePx,
-} from "../../shared/muiTheme";
+import { viewerFocusSx, viewerTargetSizePx } from "../../shared/viewerTheme";
 
 export type ViewerFilterOption = Readonly<{
   value: string;
@@ -151,9 +148,9 @@ const ViewerFilterSelectControl = ({
         sx={{
           minWidth: 0,
           maxWidth: "100%",
-          ...semanticDiffExplorerFocusSx,
+          ...viewerFocusSx,
           "& .MuiSelect-select": {
-            minHeight: semanticDiffExplorerTargetSizePx,
+            minHeight: viewerTargetSizePx,
             boxSizing: "border-box",
             display: "flex",
             alignItems: "center",
@@ -169,7 +166,7 @@ const ViewerFilterSelectControl = ({
               "& .MuiMenuItem-root": {
                 whiteSpace: "normal",
                 overflowWrap: "anywhere",
-                minHeight: semanticDiffExplorerTargetSizePx,
+                minHeight: viewerTargetSizePx,
               },
               "& .MuiListSubheader-root": {
                 whiteSpace: "normal",

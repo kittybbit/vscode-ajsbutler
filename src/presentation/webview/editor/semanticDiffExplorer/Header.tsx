@@ -8,10 +8,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import type { SemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import ViewerFilterSelect from "../shared/ViewerFilterSelect";
-import {
-  semanticDiffExplorerFocusSx,
-  semanticDiffViewerOpaqueSurfaceSx,
-} from "../../shared/muiTheme";
+import { viewerFocusSx, viewerOpaqueSurfaceSx } from "../../shared/viewerTheme";
 
 const calendarActionLabel = (language: string): string =>
   language.toLowerCase().startsWith("ja")
@@ -53,7 +50,7 @@ export const SemanticDiffExplorerHeader = ({
       elevation={1}
       data-semantic-diff-explorer-header="true"
       sx={{
-        ...semanticDiffViewerOpaqueSurfaceSx,
+        ...viewerOpaqueSurfaceSx,
         mb: 2,
         top: 0,
         zIndex: (theme) => theme.zIndex.appBar,
@@ -87,7 +84,7 @@ export const SemanticDiffExplorerHeader = ({
             variant="contained"
             startIcon={<OpenInNewIcon aria-hidden="true" />}
             onClick={(event) => outputAction?.(event.currentTarget)}
-            sx={semanticDiffExplorerFocusSx}
+            sx={viewerFocusSx}
           >
             {labels.output}
           </Button>
@@ -96,7 +93,7 @@ export const SemanticDiffExplorerHeader = ({
               type="button"
               variant="outlined"
               onClick={(event) => calendarAction(event.currentTarget)}
-              sx={semanticDiffExplorerFocusSx}
+              sx={viewerFocusSx}
             >
               {calendarActionLabel(language)}
             </Button>

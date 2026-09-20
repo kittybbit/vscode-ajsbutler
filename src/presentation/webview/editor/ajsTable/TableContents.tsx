@@ -72,11 +72,8 @@ import {
   ViewerAnnouncementHost,
   type ViewerAnnouncementHostHandle,
 } from "../shared/viewerAnnouncements";
-import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
-import {
-  createSemanticDiffTheme,
-  semanticDiffViewerSurfaceSx,
-} from "../../shared/muiTheme";
+import { viewerGlobalStyles } from "../../shared/viewerTheme";
+import { createViewerTheme, viewerSurfaceSx } from "../../shared/viewerTheme";
 import {
   formatUnitInformationMessage,
   unitInformationMessage,
@@ -178,7 +175,7 @@ const useChangeDocument = (): TableDocumentState => {
 
 const useTableViewerTheme = (isDarkMode: boolean): Theme =>
   useMemo(
-    () => createSemanticDiffTheme({ mode: isDarkMode ? "dark" : "light" }),
+    () => createViewerTheme({ mode: isDarkMode ? "dark" : "light" }),
     [isDarkMode],
   );
 
@@ -245,7 +242,7 @@ const TableViewerShell = ({
         ref={announcementHostRef}
       />
       <CssBaseline />
-      <GlobalStyles styles={viewerThemeGlobalStyles} />
+      <GlobalStyles styles={viewerGlobalStyles(theme)} />
       <Stack
         direction="column"
         spacing={0}
@@ -268,7 +265,7 @@ const TableViewerShell = ({
           visibleRowCount={rows.length}
           totalRowCount={totalRowCount}
         />
-        <Box sx={semanticDiffViewerSurfaceSx}>
+        <Box sx={viewerSurfaceSx}>
           <Stack
             direction="row"
             spacing={1.25}

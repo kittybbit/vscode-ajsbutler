@@ -1,7 +1,7 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { FlowNodePresentationModel } from "../flowNodePresentationModel";
 import { flowNodeGeometryEm } from "./flowNodeGeometry";
-import { viewerFocusBorder } from "../../shared/viewerThemeStyles";
+import { viewerFocusBorder } from "../../../shared/viewerTheme";
 
 type NodeVisualState = Pick<
   FlowNodePresentationModel,

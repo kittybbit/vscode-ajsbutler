@@ -4,9 +4,9 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import { ThemeProvider } from "@mui/material/styles";
 import { filterSemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import {
-  createSemanticDiffTheme,
-  semanticDiffExplorerGlobalStyles,
-} from "../../shared/muiTheme";
+  createViewerTheme,
+  viewerGlobalStyles,
+} from "../../shared/viewerTheme";
 import SemanticDiffExplorerContents, {
   type SemanticDiffExplorerContentsProps,
 } from "./SemanticDiffExplorerContents";
@@ -39,22 +39,25 @@ export const SemanticDiffExplorerView = ({
   action,
   hostAnnouncement,
   virtualizedScrollToIndex,
-}: SemanticDiffExplorerViewProps): React.ReactElement => (
-  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
-    <CssBaseline />
-    <GlobalStyles styles={semanticDiffExplorerGlobalStyles} />
-    <SemanticDiffExplorerContents
-      viewModel={viewModel}
-      language={language}
-      themeMode={themeMode}
-      outputAction={outputAction}
-      calendarAction={calendarAction}
-      action={action}
-      hostAnnouncement={hostAnnouncement}
-      virtualizedScrollToIndex={virtualizedScrollToIndex}
-    />
-  </ThemeProvider>
-);
+}: SemanticDiffExplorerViewProps): React.ReactElement => {
+  const theme = createViewerTheme({ mode: themeMode });
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GlobalStyles styles={viewerGlobalStyles(theme)} />
+      <SemanticDiffExplorerContents
+        viewModel={viewModel}
+        language={language}
+        themeMode={themeMode}
+        outputAction={outputAction}
+        calendarAction={calendarAction}
+        action={action}
+        hostAnnouncement={hostAnnouncement}
+        virtualizedScrollToIndex={virtualizedScrollToIndex}
+      />
+    </ThemeProvider>
+  );
+};
 
 export {
   flattenSemanticDiffExplorerTree,

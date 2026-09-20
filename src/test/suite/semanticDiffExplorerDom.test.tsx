@@ -33,12 +33,12 @@ import { getSemanticDiffExplorerLabels } from "../../presentation/webview/editor
 import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
 import { createViewerResourceStateMessage } from "../../presentation/webview/viewerHostMessages";
 import {
-  createSemanticDiffTheme,
-  semanticDiffExplorerFocusSx,
-  semanticDiffExplorerGlobalStyles,
-  semanticDiffExplorerSelectionSx,
-  semanticDiffExplorerTargetSizePx,
-} from "../../presentation/webview/shared/muiTheme";
+  createViewerTheme,
+  viewerFocusSx,
+  viewerGlobalStyles,
+  viewerSelectionSx,
+  viewerTargetSizePx,
+} from "../../presentation/webview/shared/viewerTheme";
 import {
   createSemanticDiffExplorerSessionMessage,
   createSemanticDiffExplorerError,
@@ -398,9 +398,9 @@ suite("Semantic diff Explorer DOM", () => {
   };
 
   test("uses MUI standard colors and the stricter focus/target baseline", () => {
-    const lightTheme = createSemanticDiffTheme({ mode: "light" });
-    const darkTheme = createSemanticDiffTheme({ mode: "dark" });
-    const lightGlobalStyles = semanticDiffExplorerGlobalStyles(lightTheme);
+    const lightTheme = createViewerTheme({ mode: "light" });
+    const darkTheme = createViewerTheme({ mode: "dark" });
+    const lightGlobalStyles = viewerGlobalStyles(lightTheme);
     assert.strictEqual(lightTheme.palette.background.default, "#fff");
     assert.strictEqual(darkTheme.palette.background.default, "#121212");
     assert.ok(contrastRatio(lightTheme.palette.primary.main, "#ffffff") >= 3);
@@ -419,8 +419,8 @@ suite("Semantic diff Explorer DOM", () => {
     );
     assert.strictEqual(lightGlobalStyles.body.backgroundColor, "#fff");
     assert.strictEqual(lightGlobalStyles.body.color, "rgba(0, 0, 0, 0.87)");
-    assert.strictEqual(semanticDiffExplorerTargetSizePx, 44);
-    assert.ok(semanticDiffExplorerFocusSx["&:focus-visible"]);
+    assert.strictEqual(viewerTargetSizePx, 44);
+    assert.ok(viewerFocusSx["&:focus-visible"]);
     assert.ok(lightGlobalStyles["@media (forced-colors: active)"]);
   });
 
@@ -442,16 +442,16 @@ suite("Semantic diff Explorer DOM", () => {
   });
 
   test("uses system forced-colors and a visible two-pixel focus", () => {
-    const focus = semanticDiffExplorerFocusSx["&:focus-visible"];
+    const focus = viewerFocusSx["&:focus-visible"];
     assert.strictEqual(typeof focus?.outline, "function");
     if (typeof focus?.outline === "function") {
       assert.match(
-        String(focus.outline(createSemanticDiffTheme({ mode: "light" }))),
+        String(focus.outline(createViewerTheme({ mode: "light" }))),
         /2px solid/,
       );
     }
-    const forcedColors = semanticDiffExplorerGlobalStyles(
-      createSemanticDiffTheme({ mode: "light" }),
+    const forcedColors = viewerGlobalStyles(
+      createViewerTheme({ mode: "light" }),
     )["@media (forced-colors: active)"] as Record<
       string,
       Record<string, string>
@@ -469,7 +469,7 @@ suite("Semantic diff Explorer DOM", () => {
       "forcedColorAdjust" in forcedColors["button, select"]!,
       false,
     );
-    const forcedSelection = semanticDiffExplorerSelectionSx(true)[
+    const forcedSelection = viewerSelectionSx(true)[
       "@media (forced-colors: active)"
     ] as Record<string, string>;
     assert.strictEqual(forcedSelection.borderLeftColor, "Highlight");
@@ -533,11 +533,11 @@ suite("Semantic diff Explorer DOM", () => {
     assert.strictEqual(output.getAttribute("type"), "button");
     assert.strictEqual(
       getComputedStyle(output).minHeight,
-      `${semanticDiffExplorerTargetSizePx}px`,
+      `${viewerTargetSizePx}px`,
     );
     assert.strictEqual(
       getComputedStyle(filter).minHeight,
-      `${semanticDiffExplorerTargetSizePx}px`,
+      `${viewerTargetSizePx}px`,
     );
     assert.ok(
       view.container.querySelector('[data-result-status="true"]')?.textContent,
@@ -569,7 +569,7 @@ suite("Semantic diff Explorer DOM", () => {
     assert.strictEqual(document.activeElement, tree);
     assert.ok(tree.getAttribute("aria-activedescendant"));
     assert.match(
-      String(semanticDiffExplorerFocusSx["&:focus-visible"]?.outline),
+      String(viewerFocusSx["&:focus-visible"]?.outline),
       /2px solid/,
     );
     selectFilterOption(dom, filter, "confirmation-required");

@@ -8,10 +8,7 @@ import {
 } from "./semanticDiffExplorerTree";
 import { handleExplorerTreeKey } from "./semanticDiffExplorerKeyboard";
 import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
-import {
-  semanticDiffExplorerFocusSx,
-  semanticDiffViewerOpaqueSurfaceSx,
-} from "../../shared/muiTheme";
+import { viewerFocusSx, viewerOpaqueSurfaceSx } from "../../shared/viewerTheme";
 import ResultSection from "../shared/result/ResultSection";
 
 export type SemanticDiffExplorerTreePanelProps = Readonly<{
@@ -139,8 +136,8 @@ export const SemanticDiffExplorerTreePanel = ({
           minWidth: 0,
           overflow: "auto",
           p: 0.5,
-          ...semanticDiffViewerOpaqueSurfaceSx,
-          ...semanticDiffExplorerFocusSx,
+          ...viewerOpaqueSurfaceSx,
+          ...viewerFocusSx,
         }}
       >
         {rows.length > 200 ? (

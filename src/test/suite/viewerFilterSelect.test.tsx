@@ -4,7 +4,7 @@ import React, { createRef } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import ViewerFilterSelect from "../../presentation/webview/editor/shared/ViewerFilterSelect";
-import { createSemanticDiffTheme } from "../../presentation/webview/shared/muiTheme";
+import { createViewerTheme } from "../../presentation/webview/shared/viewerTheme";
 
 type GlobalValue = {
   key: string;
@@ -93,7 +93,7 @@ suite("Viewer filter select", () => {
     const triggerRef = createRef<HTMLDivElement>();
     const selected: string[] = [];
     const view = render(
-      <ThemeProvider theme={createSemanticDiffTheme()}>
+      <ThemeProvider theme={createViewerTheme()}>
         <ViewerFilterSelect
           id="viewer-filter"
           label="Filter changes"

@@ -1932,9 +1932,10 @@ cd4d932e` with no Slice 15 findings; Markdown lint with zero errors; and
   change returns to Main for Replanning.
 - Plan gate status: independent plan review returned `Ready` with Findings
   none and `Replanning required: No`; Human Plan Approval was recorded on
-  2026-09-20 under the user's standing automatic no-findings instruction. The
-  exact approved planning package is pending `approval-committer`; no
-  implementation review or Completion Approval exists. Feature Exit remains
+  2026-09-20 under the user's standing automatic no-findings instruction.
+  Focused plan commit `04f4cbc4` and implementation are complete under the
+  exact approved paths; independent implementation review returned `Ready`
+  with no Findings and Completion Approval is recorded. Feature Exit remains
   deferred until Slice 16's completion commit and renewed exit review.
 
 ## Slice 16 Plan Review And Human Approval
@@ -1977,10 +1978,86 @@ cd4d932e` with no Slice 15 findings; Markdown lint with zero errors; and
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
-- Plan gate status: reviewed and Human-approved; no implementation or
-  Completion Approval exists. Next stage is `approval-committer` for the exact
-  approved planning package, followed by one approved Slice 16 implementation
-  and independent implementation review.
+- Plan gate status: reviewed and Human-approved; focused plan commit
+  `04f4cbc4` and Slice 16 implementation are complete under the exact approved
+  paths. Independent implementation review is `Ready` with no Findings and
+  Completion Approval is recorded; next stage is `approval-committer` for the
+  exact completed paths.
+
+## Slice 16 Implementation Evidence
+
+- Implementation status: Complete under focused plan commit `04f4cbc4`;
+  independent implementation review returned `Ready` with no Findings and
+  Completion Approval is recorded on 2026-09-20. The focused completion commit
+  is pending `approval-committer`.
+- The browser-safe `viewerTheme.ts` is the canonical owner of the generic MUI
+  theme factory, viewer tokens, focus/selection/surface styles, VS Code border
+  helpers, and merged global typography/high-contrast/forced-colors rules.
+  Flow, Table, Explorer, Calendar, and `ViewerFilterSelect` import only this
+  module. The unused NativeSelect override and theme singleton were removed.
+- The consolidated `viewerTheme.test.ts` and direct Explorer/Calendar/filter
+  coverage preserve light/dark palettes, VS Code font/tokens, 44px targets,
+  focus/selection/surface rules, forced colors, direct theme seams, filter
+  behavior, and Flow/Table imports. No DTO, protocol, host, lifecycle,
+  virtualization, or bundle contract changed.
+- Final validation evidence: `antlr4ts` regeneration produced no generated-
+  parser diff; `test:compile` passed; the canonical theme and
+  Explorer/Calendar/filter focused matrix passed 32 tests; architecture passed
+  29 tests; qlty check reported no issues; the smell delta against
+  `e83e67b9` reported no findings in the new canonical theme; Markdown lint
+  and `git diff --check` passed; production webpack and desktop preparation/
+  smoke passed; and the web bundle plus WEB-7 through WEB-10 passed. The web
+  runner emitted stream cleanup errors after those host cases. The direct
+  Flow/Table integration command required a temporary Node `@generate/parser`
+  alias to load the generated output, then reached the suites and reported
+  eight pre-existing JSDOM integration failures (one Flow fixture lookup and
+  seven Table fixture/keyboard expectations). These failures are outside the
+  Slice 16 theme migration and remain an environment limitation; the
+  canonical desktop runner completed successfully.
+- The pre-existing roadmap closure proposal remains excluded and untouched.
+- Completed paths (exact Slice 16 diff):
+  <!-- markdownlint-disable MD013 -->
+  - `src/presentation/webview/shared/viewerTheme.ts` (new)
+  - `src/presentation/webview/shared/muiTheme.ts` (deleted)
+  - `src/presentation/webview/editor/shared/viewerThemeStyles.ts` (deleted)
+  - `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`
+  - `src/presentation/webview/editor/ajsFlow/nodes/nodeSxProps.ts`
+  - `src/presentation/webview/editor/ajsTable/TableContents.tsx`
+  - `src/presentation/webview/editor/ajsTable/TableHeader.tsx`
+  - `src/presentation/webview/editor/ajsTable/tableSemanticRenderer.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/Header.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerView.tsx`
+  - `src/presentation/webview/editor/shared/SharedUnitDetailPane.tsx`
+  - `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`
+  - `src/presentation/webview/editor/shared/ViewerFilterSelect.tsx`
+  - `src/test/suite/viewerTheme.test.ts` (new)
+  - `src/test/suite/muiTheme.test.ts` (deleted)
+  - `src/test/suite/viewerThemeStyles.test.ts` (deleted)
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/viewerFilterSelect.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+
+## Slice 16 Completion Approval
+
+- Implementation-reviewer final verdict: `Ready`; Findings none.
+- Completion Approval: Approved on 2026-09-20 under the user's standing
+  automatic no-findings Completion Approval instruction.
+- Completed boundary: the canonical shared viewer theme migration and all
+  listed Flow/Table/Explorer/Calendar/shared-filter consumers and tests. The
+  Flow/Table direct baseline failures reproduced at `e83e67b9` remain
+  environment/baseline observations; production webpack, desktop, and web
+  validation passed. No roadmap, CHANGELOG, DTO, protocol, host lifecycle,
+  virtualization, or bundle behavior changed.
+- Completed paths are exactly the Slice 16 diff listed above. Next stage is
+  `approval-committer` for the focused completion commit; Feature Exit remains
+  deferred until that commit and renewed independent exit review.
 
 ## Feature Exit Evidence
 
@@ -2023,9 +2100,10 @@ cd4d932e` with no Slice 15 findings; Markdown lint with zero errors; and
   completion commit `52ede211` is complete. Slice 15's shared MUI presentation
   audit is independently reviewed `Ready` with no Findings, Completion-
   approved, and focused completion commit `e83e67b9` is complete. Slice 16
-  plan review is `Ready` with no Findings and Human Plan Approval is recorded;
-  its focused plan commit is pending `approval-committer`, so final batch
-  human Closure Approval is deferred.
+  plan and implementation reviews are `Ready` with no Findings, Human Plan
+  Approval and Completion Approval are recorded, and its focused completion
+  commit is pending `approval-committer`, so final batch human Closure Approval
+  is deferred.
 - Acceptance and validation evidence covers the complete requirement table,
   including the evaluated-period workflow gate, exact sidecar/context
   lifecycle, root and run outcomes, identity candidates, deterministic
@@ -2058,11 +2136,12 @@ cd4d932e` with no Slice 15 findings; Markdown lint with zero errors; and
   follow-ups are preserved. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 16's global-style merge, export migration, and dead
-  NativeSelect override removal require the focused import, palette,
+- Remaining risks: Slice 16's focused completion commit remains pending
+  `approval-committer`; its direct Flow/Table baseline failures are documented
+  environment observations. The global-style merge, export migration, and
+  dead NativeSelect override removal passed the focused import, palette,
   forced-colors, direct-shell, and desktop/web validation recorded above.
   Existing macOS codesign, web-stream cleanup, webpack-size, and Slice
   10-baseline advisory smell findings remain compatibility observations.
-- Closure recommendation: Defer until Slice 16 is independently reviewed,
-  approved, implemented, Completion-approved, and committed, then repeat
-  Feature Exit and obtain final explicit human Closure Approval.
+- Closure recommendation: Defer until Slice 16's approved completion commit,
+  then repeat Feature Exit and obtain final explicit human Closure Approval.

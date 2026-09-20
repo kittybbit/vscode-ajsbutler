@@ -8,11 +8,10 @@ import type { SemanticDiffScheduleImpact } from "../../../../application/semanti
 import { getScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
 import { MyAppContextProvider, useMyAppContext } from "../MyContexts";
 import { createScheduleImpactCalendarBridge } from "./scheduleImpactCalendarBridge";
-import { viewerThemeGlobalStyles } from "../shared/viewerThemeStyles";
 import {
-  createSemanticDiffTheme,
-  semanticDiffExplorerGlobalStyles,
-} from "../../shared/muiTheme";
+  createViewerTheme,
+  viewerGlobalStyles,
+} from "../../shared/viewerTheme";
 import ScheduleImpactCalendarContents from "./ScheduleImpactCalendarContents";
 
 type CalendarState = Readonly<{
@@ -61,18 +60,16 @@ const CalendarThemeShell = ({
 }: Readonly<{
   children: React.ReactNode;
   themeMode: "light" | "dark";
-}>): React.ReactElement => (
-  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
-    <CssBaseline />
-    <GlobalStyles
-      styles={{
-        ...viewerThemeGlobalStyles,
-        ...semanticDiffExplorerGlobalStyles,
-      }}
-    />
-    {children}
-  </ThemeProvider>
-);
+}>): React.ReactElement => {
+  const theme = createViewerTheme({ mode: themeMode });
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GlobalStyles styles={viewerGlobalStyles(theme)} />
+      {children}
+    </ThemeProvider>
+  );
+};
 
 /** Compatibility seam for supplied-sidecar component tests and callers. */
 export const ScheduleImpactCalendarView = ({
@@ -84,16 +81,9 @@ export const ScheduleImpactCalendarView = ({
   language?: string;
   themeMode?: "light" | "dark";
 }>): React.ReactElement => (
-  <ThemeProvider theme={createSemanticDiffTheme({ mode: themeMode })}>
-    <CssBaseline />
-    <GlobalStyles
-      styles={{
-        ...viewerThemeGlobalStyles,
-        ...semanticDiffExplorerGlobalStyles,
-      }}
-    />
+  <CalendarThemeShell themeMode={themeMode}>
     <ScheduleImpactCalendarContents sidecar={sidecar} language={language} />
-  </ThemeProvider>
+  </CalendarThemeShell>
 );
 
 const ScheduleImpactCalendarInnerApp = ({

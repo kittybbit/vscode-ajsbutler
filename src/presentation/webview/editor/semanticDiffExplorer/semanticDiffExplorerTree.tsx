@@ -17,10 +17,7 @@ import {
   flattenSemanticDiffExplorerTree,
   type ExplorerRow,
 } from "./semanticDiffExplorerTreeData";
-import {
-  semanticDiffExplorerFocusSx,
-  semanticDiffExplorerSelectionSx,
-} from "../../shared/muiTheme";
+import { viewerFocusSx, viewerSelectionSx } from "../../shared/viewerTheme";
 import ResultComparison from "../shared/result/ResultComparison";
 import ResultKeyValueList from "../shared/result/ResultKeyValueList";
 import ResultStatusChip from "../shared/result/ResultStatusChip";
@@ -233,7 +230,7 @@ const ActionButton = ({
         justifyContent: "flex-start",
         textAlign: "left",
         overflowWrap: "anywhere",
-        ...semanticDiffExplorerFocusSx,
+        ...viewerFocusSx,
       }}
       onClick={(event) => handleActionClick({ event, actionId, onAction })}
     >
@@ -291,8 +288,8 @@ const rowSx = (selected: boolean) => ({
   borderRadius: 1,
   backgroundColor: selected ? "action.selected" : "transparent",
   color: "text.primary",
-  ...semanticDiffExplorerFocusSx,
-  ...semanticDiffExplorerSelectionSx(selected),
+  ...viewerFocusSx,
+  ...viewerSelectionSx(selected),
 });
 const expandGlyph = (expanded: boolean): string => (expanded ? "▾" : "▸");
 
@@ -383,8 +380,8 @@ const ExplorerLeafRow = ({
         borderRadius: 1,
         backgroundColor: selected ? "action.selected" : "transparent",
         color: "text.primary",
-        ...semanticDiffExplorerFocusSx,
-        ...semanticDiffExplorerSelectionSx(selected),
+        ...viewerFocusSx,
+        ...viewerSelectionSx(selected),
       }}
       onClick={onSelect}
     >
