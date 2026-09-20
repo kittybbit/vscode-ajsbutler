@@ -1,11 +1,11 @@
 import React from "react";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { SemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
+import ResultCard from "../shared/result/ResultCard";
+import ResultKeyValueList from "../shared/result/ResultKeyValueList";
+import ResultStatusChip from "../shared/result/ResultStatusChip";
 import {
   semanticDiffExplorerCardLabel,
   type SemanticDiffExplorerLabels,
@@ -34,50 +34,42 @@ export const SemanticDiffExplorerSummaryCards = ({
     }}
   >
     {viewModel.cards.map((card) => (
-      <Card
-        component="article"
-        variant="outlined"
+      <ResultCard
         key={card.id}
-        aria-label={`${semanticDiffExplorerCardLabel(card.id, language)}: ${card.count}`}
-        sx={{ minWidth: 0, borderColor: "divider" }}
+        ariaLabel={`${semanticDiffExplorerCardLabel(card.id, language)}: ${card.count}`}
+        sx={{ borderColor: "divider" }}
       >
-        <CardContent>
-          <Stack
-            direction="row"
-            spacing={1}
-            useFlexGap
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
-          >
-            <Typography
-              component="h2"
-              variant="h6"
-              sx={{ overflowWrap: "anywhere" }}
-            >
-              {semanticDiffExplorerCardLabel(card.id, language)}
-            </Typography>
-            <Chip size="small" label={card.count} aria-hidden="true" />
-          </Stack>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
           <Typography
-            component="output"
-            variant="h4"
-            aria-label={`${card.count}`}
+            component="h2"
+            variant="h6"
+            sx={{ overflowWrap: "anywhere" }}
           >
-            {card.count}
+            {semanticDiffExplorerCardLabel(card.id, language)}
           </Typography>
-          <Box component="dl" sx={{ m: 0 }}>
-            {Object.entries(card.counts).map(([key, count]) => (
-              <Box key={key} sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <Typography component="dt" variant="body2">
-                  {labels.value(key)}
-                </Typography>
-                <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-                  {count}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </CardContent>
-      </Card>
+          <ResultStatusChip label={card.count} ariaLabel={`${card.count}`} />
+        </Stack>
+        <Typography
+          component="output"
+          variant="h4"
+          aria-label={`${card.count}`}
+          sx={{ display: "block", my: 1 }}
+        >
+          {card.count}
+        </Typography>
+        <ResultKeyValueList
+          items={Object.entries(card.counts).map(([key, count]) => ({
+            id: key,
+            label: labels.value(key),
+            value: count,
+          }))}
+        />
+      </ResultCard>
     ))}
   </Box>
 );

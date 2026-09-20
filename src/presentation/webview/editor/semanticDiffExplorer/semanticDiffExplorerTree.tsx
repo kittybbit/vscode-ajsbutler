@@ -22,6 +22,8 @@ import {
   semanticDiffExplorerFocusSx,
   semanticDiffExplorerSelectionSx,
 } from "../../shared/muiTheme";
+import ResultKeyValueList from "../shared/result/ResultKeyValueList";
+import ResultStatusChip from "../shared/result/ResultStatusChip";
 import { focusExplorerRowAfterVirtualizedScroll } from "./semanticDiffExplorerFocus";
 
 export type { ExplorerRow } from "./semanticDiffExplorerTreeData";
@@ -176,25 +178,33 @@ const rowLabel = ({
     ? labels.group(row.node?.label ?? "")
     : leafLabel({ leaf: row.leaf!, labels });
 
+type ExplorerDetailItem = Readonly<{
+  label: string;
+  value: string;
+}>;
+
 const optionalDetail = (
   label: string,
   value: string | undefined,
   labels: SemanticDiffExplorerLabels,
-): string => (value ? `${labels.detailField(label)}: ${value}` : "");
+): ExplorerDetailItem | null =>
+  value ? { label: labels.detailField(label), value } : null;
 const listDetail = (
   label: string,
   values: readonly string[],
   labels: SemanticDiffExplorerLabels,
-): string =>
-  values.length > 0 ? `${labels.detailField(label)}: ${values.join(", ")}` : "";
+): ExplorerDetailItem | null =>
+  values.length > 0
+    ? { label: labels.detailField(label), value: values.join(", ") }
+    : null;
 
-const detailLabel = ({
+const detailItems = ({
   detail,
   labels,
 }: Readonly<{
   detail: SemanticDiffDetail;
   labels: SemanticDiffExplorerLabels;
-}>): string =>
+}>): ExplorerDetailItem[] =>
   [
     optionalDetail("unit", detail.unitPath, labels),
     optionalDetail("parameter", detail.parameterKey, labels),
@@ -203,40 +213,50 @@ const detailLabel = ({
     listDetail("raw", detail.rawValues, labels),
     listDetail("removed", detail.removedSources, labels),
     detail.period
-      ? `${labels.detailField("period")}: ${detail.period.from}–${detail.period.to}`
-      : "",
-  ]
-    .filter(Boolean)
-    .join(" · ");
+      ? {
+          label: labels.detailField("period"),
+          value: `${detail.period.from}–${detail.period.to}`,
+        }
+      : null,
+  ].filter((item): item is ExplorerDetailItem => item !== null);
 
 const scheduleDetails = (
   leaf: LeafOf<"schedule">,
   labels: SemanticDiffExplorerLabels,
-): string => {
+): ExplorerDetailItem[] => {
   const run = leaf.change.after ?? leaf.change.before;
   return run
-    ? `${labels.detailField("unit")}: ${leaf.change.unitPath} · ${run.date} ${run.time}`
-    : leaf.change.unitPath;
+    ? [
+        { label: labels.detailField("unit"), value: leaf.change.unitPath },
+        {
+          label: labels.detailField("period"),
+          value: `${run.date} ${run.time}`,
+        },
+      ]
+    : [{ label: labels.detailField("unit"), value: leaf.change.unitPath }];
 };
 const constraintDetails = (
   leaf: Exclude<SemanticDiffExplorerLeaf, LeafOf<"schedule">>,
   labels: SemanticDiffExplorerLabels,
-): string[] =>
+): ExplorerDetailItem[] =>
   "constraints" in leaf
-    ? leaf.constraints.map((constraint) => labels.detailField(constraint.code))
+    ? leaf.constraints.map((constraint) => ({
+        label: labels.details,
+        value: labels.detailField(constraint.code),
+      }))
     : [];
 const warningDetails = (
   leaf: Exclude<SemanticDiffExplorerLeaf, LeafOf<"schedule">>,
   labels: SemanticDiffExplorerLabels,
-): string[] =>
+): ExplorerDetailItem[] =>
   "warning" in leaf && leaf.warning
-    ? [`${labels.warning}: ${labels.reason(leaf.warning.code)}`]
+    ? [{ label: labels.warning, value: labels.reason(leaf.warning.code) }]
     : [];
 const standardDetails = (
   leaf: Exclude<SemanticDiffExplorerLeaf, LeafOf<"schedule">>,
   labels: SemanticDiffExplorerLabels,
-): string[] => [
-  leaf.detail ? detailLabel({ detail: leaf.detail, labels }) : "",
+): ExplorerDetailItem[] => [
+  ...(leaf.detail ? detailItems({ detail: leaf.detail, labels }) : []),
   ...constraintDetails(leaf, labels),
   ...warningDetails(leaf, labels),
 ];
@@ -246,13 +266,10 @@ const leafDetails = ({
 }: Readonly<{
   leaf: SemanticDiffExplorerLeaf;
   labels: SemanticDiffExplorerLabels;
-}>): string =>
-  (leaf.kind === "schedule"
-    ? [scheduleDetails(leaf, labels)]
-    : standardDetails(leaf, labels)
-  )
-    .filter(Boolean)
-    .join(" · ");
+}>): ExplorerDetailItem[] =>
+  leaf.kind === "schedule"
+    ? scheduleDetails(leaf, labels)
+    : standardDetails(leaf, labels);
 
 const unavailableActionLabel = (
   action: SemanticDiffExplorerLeaf["actions"]["source"],
@@ -478,27 +495,18 @@ const ExplorerLeafFacts = ({
   return (
     <>
       <FactChip value={facts.changeKind} fact="change-kind" />
-      <Chip
-        component="span"
-        size="small"
-        variant="outlined"
-        className="sde-state"
-        data-fact="state"
-        aria-label={`${labels.stateLabel}: ${facts.state}`}
+      <ResultStatusChip
         label={facts.state}
+        ariaLabel={`${labels.stateLabel}: ${facts.state}`}
+        dataFact="state"
       />
       <FactChip value={facts.unsupportedKind} fact="unsupported-kind" />
       <FactText value={facts.reason} fact="reason" />
       <FactText value={target} fact="target" />
-      {details ? (
-        <Typography
-          component="span"
-          variant="body2"
-          aria-label={`${labels.details}: ${details}`}
-          sx={{ flex: "1 1 100%", overflowWrap: "anywhere" }}
-        >
-          {details}
-        </Typography>
+      {details.length > 0 ? (
+        <Box sx={{ flex: "1 1 100%", minWidth: 0 }}>
+          <ResultKeyValueList items={details} />
+        </Box>
       ) : null}
     </>
   );

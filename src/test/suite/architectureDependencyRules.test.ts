@@ -95,6 +95,17 @@ const semanticDiffExplorerEditorRoot = path.join(
   repoRoot,
   "src/presentation/webview/editor/semanticDiffExplorer",
 );
+const sharedResultRoot = path.join(
+  repoRoot,
+  "src/presentation/webview/editor/shared/result",
+);
+const sharedResultFiles = [
+  "ResultCard.tsx",
+  "ResultEmptyState.tsx",
+  "ResultKeyValueList.tsx",
+  "ResultSection.tsx",
+  "ResultStatusChip.tsx",
+] as const;
 const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerFocus.ts",
   "semanticDiffExplorerHostMessageState.ts",
@@ -663,6 +674,78 @@ suite("Architecture dependency rules", () => {
         assert.doesNotMatch(source, /export\s+(?:\{|default)/u);
       }
     });
+  });
+
+  test("keeps shared result primitives browser-safe and view-owned", () => {
+    assert.deepStrictEqual(
+      fs
+        .readdirSync(sharedResultRoot)
+        .filter((file) => file.endsWith(".tsx"))
+        .sort(),
+      [...sharedResultFiles].sort(),
+    );
+
+    const primitiveFiles = sourceFilesUnder(sharedResultRoot);
+    const forbiddenImports = primitiveFiles.flatMap((filePath) => {
+      const file = path.relative(repoRoot, filePath).split(path.sep).join("/");
+      return collectImportReferencesFromSource(
+        file,
+        fs.readFileSync(filePath, "utf8"),
+      ).filter(
+        ({ resolvedPath, specifier }) =>
+          specifier === "vscode" ||
+          specifier.startsWith("node:") ||
+          specifier.startsWith("@resource/") ||
+          resolvedPath?.startsWith("src/domain/") ||
+          resolvedPath?.startsWith("src/application/") ||
+          resolvedPath?.startsWith("src/infrastructure/") ||
+          resolvedPath?.startsWith("src/presentation/vscode/"),
+      );
+    });
+    assert.deepStrictEqual(forbiddenImports, []);
+
+    const sharedImportPrefix = "src/presentation/webview/editor/shared/result/";
+    const explorerImports = sourceFilesUnder(semanticDiffExplorerEditorRoot)
+      .flatMap((filePath) => {
+        const file = path
+          .relative(repoRoot, filePath)
+          .split(path.sep)
+          .join("/");
+        return collectImportReferencesFromSource(
+          file,
+          fs.readFileSync(filePath, "utf8"),
+        );
+      })
+      .filter(({ resolvedPath }) =>
+        resolvedPath?.startsWith(sharedImportPrefix),
+      );
+    const calendarImports = sourceFilesUnder(
+      path.join(
+        repoRoot,
+        "src/presentation/webview/editor/scheduleImpactCalendar",
+      ),
+    )
+      .flatMap((filePath) => {
+        const file = path
+          .relative(repoRoot, filePath)
+          .split(path.sep)
+          .join("/");
+        return collectImportReferencesFromSource(
+          file,
+          fs.readFileSync(filePath, "utf8"),
+        );
+      })
+      .filter(({ resolvedPath }) =>
+        resolvedPath?.startsWith(sharedImportPrefix),
+      );
+    assert.ok(
+      explorerImports.length > 0,
+      "Explorer must consume shared result primitives",
+    );
+    assert.ok(
+      calendarImports.length > 0,
+      "Calendar must consume shared result primitives",
+    );
   });
 
   test("keeps host-neutral Semantic Diff output free of host dependencies", () => {

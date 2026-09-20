@@ -1,11 +1,11 @@
 import React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import type { ScheduleImpactCalendarModel } from "./scheduleImpactCalendarModel";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
+import ResultStatusChip from "../shared/result/ResultStatusChip";
 
 export const ScheduleImpactCalendarHeader = ({
   model,
@@ -35,11 +35,11 @@ export const ScheduleImpactCalendarHeader = ({
           {labels.period}: [{model.period.from}, {model.period.to})
         </Typography>
       </Box>
-      <Chip
+      <ResultStatusChip
         label={labels.results(model.visibleCount, model.globalCount)}
         role="status"
-        aria-live="polite"
-        data-testid="schedule-impact-calendar-result-count"
+        ariaLive="polite"
+        dataTestId="schedule-impact-calendar-result-count"
       />
     </Toolbar>
   </AppBar>

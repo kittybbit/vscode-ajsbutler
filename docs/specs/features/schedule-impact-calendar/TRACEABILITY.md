@@ -922,11 +922,49 @@ required: No`.
   that the entry is user-facing, contains no internal file names, and introduces
   no unrelated changelog edits.
 - Dependency and approval boundary: Slice 11 depends on completion-committed
-  Slice 10 `0a5cdd31`. It is a presentation-only readability slice and has no
-  implementation or completion evidence yet. Its plan-reviewer result is
-  `Ready for approval` with no Findings and `Replanning required: No`; Human
-  Plan Approval was recorded on 2026-09-20. The focused plan commit is pending
+  Slice 10 `0a5cdd31`. It is a presentation-only readability slice with plan
+  commit `56cab973` complete and implementation complete under the approved
+  paths. Its plan-reviewer result is `Ready for approval` with no Findings and
+  `Replanning required: No`; Human Plan Approval was recorded on 2026-09-20.
+  Implementation review returned `Ready` with no Findings and Completion
+  Approval is recorded below; the focused completion commit is pending
   `approval-committer`, and Feature Exit remains deferred.
+
+## Slice 11 Implementation Evidence
+
+- Status: Implementation complete on 2026-09-20 under focused plan commit
+  `56cab973`; implementation review returned `Ready` with no Findings and
+  Completion Approval is recorded below. The focused completion commit is
+  pending `approval-committer`.
+- Changed paths: the five browser-safe shared result primitives, the four
+  Explorer and four Calendar presentation adapters, the actual focused tests
+  and architecture suite, `CHANGELOG.md`, and the Slice 11 task and
+  traceability records. The pre-existing dirty roadmap closure proposal is
+  outside the approved slice and remains unchanged.
+- Acceptance: Explorer and Calendar now share semantic sections, outlined
+  result cards, individual localized label/value metadata rows, status chips,
+  and localized empty states. Root sides, issues, timeline rule/occurrence
+  facts, and Explorer detail fields no longer concatenate semantic fields into
+  delimiter-separated prose. Existing labels, facts, DTOs, filters, actions,
+  announcements, tree/list semantics, theme/resource context, virtualization,
+  keyboard focus, and desktop/web contracts remain owned by their existing
+  adapters.
+- Focused validation: shared primitives 1 passing; Explorer component/DOM
+  suites 17 passing; Calendar component/accessibility/theme suites 4 passing;
+  Calendar normal and paired/root-scope view tests 2 passing; Explorer shared
+  theme context 2 passing; architecture dependency suite 29 passing. Test
+  compilation passed after the final implementation edits.
+- Known validation boundary: the large issue-list End-focus assertion reaches
+  the same `issue-99` boundary against the pre-Slice 11 HEAD implementation;
+  `ScheduleImpactCalendarBoundedList.tsx` is explicitly outside this slice.
+  This baseline limitation is reported for independent review rather than
+  changed by the result-presentation extraction.
+- Final validation: `pnpm run build` passed with the repository's existing
+  webpack size warnings; `pnpm run test:compile` and the desktop preparation
+  passed, and `pnpm run test:desktop:run` exited 0. The web smoke bundle and
+  `pnpm run test:web:run` exited 0 with WEB-7, WEB-8, WEB-9, and WEB-10 passed.
+  `pnpm run qlty:check` reported no issues after formatting, Markdown lint
+  reported 0 errors across 37 files, and `git diff --check` passed.
 
 ## Slice 11 Plan Review And Human Approval
 
@@ -968,8 +1006,45 @@ behavior remain unchanged.
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
-- Next stage: `approval-committer` for the focused Slice 11 plan commit. No
-  runtime, actual `CHANGELOG.md`, or roadmap edit is included in this update.
+- Next stage: `approval-committer` for the focused Slice 11 completion commit.
+  No roadmap edit is included in this approval record.
+
+## Slice 11 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-20 under the user's standing automatic no-findings
+  Completion Approval instruction.
+- Basis: independent `implementation-reviewer` final verdict `Ready`; Findings
+none. The actual completed diff matches the approved shared result,
+Explorer/Calendar presentation, test, architecture, changelog, and feature
+documentation boundary.
+<!-- markdownlint-disable MD013 -->
+- Completed paths (exact actual Slice 11 diff):
+  - `CHANGELOG.md`
+  - `src/presentation/webview/editor/shared/result/ResultCard.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultEmptyState.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultKeyValueList.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultSection.tsx`
+  - `src/presentation/webview/editor/shared/result/ResultStatusChip.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SummaryCards.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/sharedResultPresentation.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+- Commit status: the focused Slice 11 completion commit is pending
+  `approval-committer`. `docs/specs/roadmap.md` is outside the completed diff;
+  no roadmap edit is made by this approval record.
 
 ## Dependency And Approval Trace
 
@@ -1099,8 +1174,10 @@ behavior remain unchanged.
   `d4344a26`, Slice 5 `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`,
   Slice 8 `fe042fb0`, Slice 9 `bb8d7305`, and Slice 10 `0a5cdd31`.
   Slice 11 plan review is `Ready for approval` with no Findings and Human Plan
-  Approval is recorded; its focused plan commit is pending
-  `approval-committer`, and it has no implementation or completion evidence.
+  Approval is recorded; focused plan commit `56cab973` and implementation are
+  complete under the approved paths. Implementation review returned `Ready`
+  with no Findings and Completion Approval is recorded; its focused completion
+  commit is pending `approval-committer`.
 - Acceptance and validation evidence covers the complete requirement table,
   including the evaluated-period workflow gate, exact sidecar/context
   lifecycle, root and run outcomes, identity candidates, deterministic
@@ -1111,22 +1188,20 @@ behavior remain unchanged.
   mechanism. Slice 9 placement/import implementation is complete and its
   independent review and Completion Approval are complete. Slice 10's
   report-package implementation, independent review, Completion Approval, and
-  focused completion commit `0a5cdd31` are complete. Shared result
-  presentation is deferred to Slice 11.
+  focused completion commit `0a5cdd31` are complete. Slice 11's shared result
+  presentation implementation is complete under its approved paths.
 - Durable propagation is complete for the observable use case, use-case index,
-  README, and prior CHANGELOG entries. Slice 11's new user-visible
-  readability entry remains pending implementation approval. Architecture and
-  glossary updates are not required.
+  README, prior CHANGELOG entries, and the Slice 11 readability entry.
+  Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
   completed Wave 4 calendar entry while preserving the deferred schedule-
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 11 still requires its focused plan commit,
-  implementation review, Completion Approval, and completion commit. Existing
-  macOS codesign, web-stream cleanup, webpack-size, and advisory smell
+- Remaining risks: Slice 11 still requires its focused completion commit.
+  Existing macOS codesign, web-stream cleanup, webpack-size, and advisory smell
   findings remain documented compatibility observations. Closure Approval
-  remains blocked until Slice 11 completes.
+  remains blocked until the Slice 11 completion commit.
 - Closure recommendation: defer Feature Exit until Slice 11 completes, then
   request final explicit human Closure Approval and the subsequent focused
   closure commit.

@@ -274,17 +274,30 @@ suite("Schedule impact calendar view", () => {
     const issueRegion = view.getByRole("region", {
       name: "未計算のスケジュール範囲",
     });
-    assert.ok(issueRegion.textContent?.includes("ID: issue-1"));
-    assert.ok(issueRegion.textContent?.includes("対象種別: attribute"));
+    assert.ok(issueRegion.textContent?.includes("issue-1"));
+    assert.ok(issueRegion.textContent?.includes("attribute"));
     assert.ok(issueRegion.textContent?.includes("構造化詳細"));
+    const issueLabels = [...issueRegion.querySelectorAll("dt")].map(
+      (element) => element.textContent,
+    );
+    assert.ok(issueLabels.includes("ID"));
+    assert.ok(issueLabels.includes("出現順"));
+    assert.ok(issueLabels.includes("種別"));
+    assert.ok(issueLabels.includes("対象種別"));
+    assert.ok(issueLabels.includes("対象ID"));
+    assert.ok(issueLabels.includes("パラメーターキー"));
     const candidateRegion = view.getByRole("region", {
       name: "同一性候補",
     });
-    assert.ok(candidateRegion.textContent?.includes("ID: candidate-before-1"));
-    assert.ok(
-      candidateRegion.textContent?.includes("ソースユニット名: before-job"),
+    assert.ok(candidateRegion.textContent?.includes("candidate-before-1"));
+    assert.ok(candidateRegion.textContent?.includes("before-job"));
+    assert.ok(changedItem?.textContent?.includes("change-1"));
+    const timelineLabels = [...(changedItem?.querySelectorAll("dt") ?? [])].map(
+      (element) => element.textContent,
     );
-    assert.ok(changedItem?.textContent?.includes("ソース変更参照: change-1:0"));
+    assert.ok(timelineLabels.includes("ルール"));
+    assert.ok(timelineLabels.includes("出現順"));
+    assert.ok(timelineLabels.includes("ソース変更参照"));
     const legend = view.getByTestId("schedule-impact-calendar-legend");
     assert.strictEqual(
       legend.querySelectorAll("[data-legend-pattern]").length,
@@ -405,7 +418,7 @@ suite("Schedule impact calendar view", () => {
       view
         .getByRole("region", { name: "Uncalculated schedule portions" })
         .getAttribute("data-global-count"),
-      "10000",
+      String(itemCount),
     );
     assert.ok(view.getByTestId("schedule-impact-calendar-legend"));
     assert.ok(view.container.textContent?.includes("candidate-group-0"));
@@ -445,7 +458,7 @@ suite("Schedule impact calendar view", () => {
         dom.window.document.activeElement?.getAttribute(
           "data-schedule-impact-calendar-candidate-group-id",
         ),
-        "candidate-group-9999",
+        `candidate-group-${itemCount - 1}`,
       ),
     );
 
@@ -461,7 +474,7 @@ suite("Schedule impact calendar view", () => {
         dom.window.document.activeElement?.getAttribute(
           "data-schedule-impact-calendar-issue-id",
         ),
-        "issue-9999",
+        `issue-${itemCount - 1}`,
       ),
     );
   });
@@ -511,21 +524,15 @@ suite("Schedule impact calendar view", () => {
         language="en"
       />,
     );
-    assert.ok(
-      view.getAllByText(/ID: root-1.*Before: Side: before.*After: Side: after/)
-        .length >= 1,
-    );
-    assert.ok(
-      view.getAllByText(/ID: one-sided-root.*Before: Side: before/).length >= 1,
-    );
-    assert.ok(view.getAllByText(/After: Side absent/).length >= 1);
-    assert.ok(
-      view.getAllByText(
-        /Scope transition: added-root-scope.*Identity decision ID: decision-1/,
-      ).length >= 1,
-    );
-    assert.ok(
-      view.getAllByText(/Counterpart: \/jobs\/old-scoped\.ajs/).length >= 1,
-    );
+    const rootRegion = view.getByRole("region", { name: "Root outcomes" });
+    const rootText = rootRegion.textContent ?? "";
+    assert.match(rootText, /root-1/);
+    assert.match(rootText, /before/);
+    assert.match(rootText, /after/);
+    assert.match(rootText, /one-sided-root/);
+    assert.match(rootText, /Side absent/);
+    assert.match(rootText, /Added root scope/);
+    assert.match(rootText, /decision-1/);
+    assert.match(rootText, /\/jobs\/old-scoped\.ajs/);
   });
 });

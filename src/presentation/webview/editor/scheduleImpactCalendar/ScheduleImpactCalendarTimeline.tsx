@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { SemanticDiffScheduleImpactRun } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
@@ -16,6 +14,10 @@ import {
   scheduleImpactCalendarItemId,
 } from "./scheduleImpactCalendarFocus";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
+import ResultCard from "../shared/result/ResultCard";
+import ResultEmptyState from "../shared/result/ResultEmptyState";
+import ResultKeyValueList from "../shared/result/ResultKeyValueList";
+import ResultStatusChip from "../shared/result/ResultStatusChip";
 
 const runStateLabel = (
   value: string,
@@ -30,13 +32,24 @@ const runStateLabel = (
     }) as Record<string, string>
   )[value] ?? value;
 
-const sourceChangeRefLabel = (
-  run: SemanticDiffScheduleImpactRun | null,
+const sourceChangeRefValue = (
+  run: Pick<SemanticDiffScheduleImpactRun, "sourceChangeRef"> | null,
   labels: ScheduleImpactCalendarLabels,
-): string =>
-  run?.sourceChangeRef
-    ? `${run.sourceChangeRef.id}:${run.sourceChangeRef.occurrenceOrdinal}`
-    : labels.none;
+): React.ReactElement =>
+  run?.sourceChangeRef ? (
+    <ResultKeyValueList
+      dense
+      items={[
+        { label: labels.id, value: run.sourceChangeRef.id },
+        {
+          label: labels.occurrence,
+          value: run.sourceChangeRef.occurrenceOrdinal,
+        },
+      ]}
+    />
+  ) : (
+    <>{labels.none}</>
+  );
 
 const RunDetails = ({
   run,
@@ -52,37 +65,27 @@ const RunDetails = ({
       {label}
     </Typography>
     {run ? (
-      <Box component="dl" sx={{ m: 0 }}>
-        <Typography component="dt" variant="body2">
-          {labels.id}: {run.id}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.side}: {run.side}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.unitId}: {run.unitId}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.unitName}: {run.unitName}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.unitPath}: {run.unitPath}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.period}: {run.date} {run.time}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.rule}: {run.rule} · {labels.occurrence}:{" "}
-          {run.occurrenceOrdinal}
-        </Typography>
-        <Typography component="dd" variant="body2" sx={{ m: 0 }}>
-          {labels.sourceChangeRef}: {sourceChangeRefLabel(run, labels)}
-        </Typography>
-      </Box>
+      <ResultKeyValueList
+        items={[
+          { label: labels.id, value: run.id },
+          { label: labels.side, value: run.side },
+          { label: labels.unitId, value: run.unitId },
+          { label: labels.unitName, value: run.unitName },
+          { label: labels.unitPath, value: run.unitPath },
+          { label: labels.period, value: `${run.date} ${run.time}` },
+          {
+            label: labels.rule,
+            value: run.rule,
+          },
+          { label: labels.occurrence, value: run.occurrenceOrdinal },
+          {
+            label: labels.sourceChangeRef,
+            value: sourceChangeRefValue(run, labels),
+          },
+        ]}
+      />
     ) : (
-      <Typography component="p" variant="body2">
-        {labels.none}
-      </Typography>
+      <ResultEmptyState role="status">{labels.none}</ResultEmptyState>
     )}
   </Box>
 );
@@ -185,40 +188,40 @@ export const ScheduleImpactCalendarTimeline = ({
       onKeyDown={(event) => handleItemKeyDown(event, index, entry.item.id)}
       sx={{ py: 0.5 }}
     >
-      <Paper
-        component="article"
-        variant="outlined"
-        sx={{ p: 1 }}
-        aria-label={scheduleImpactCalendarItemAccessibleName(
+      <ResultCard
+        ariaLabel={scheduleImpactCalendarItemAccessibleName(
           entry.accessibleLabel,
           runStateLabel(entry.item.state, labels),
         )}
+        sx={{ p: 0 }}
       >
-        <Typography component="strong" variant="body1">
-          {entry.item.time} · {runStateLabel(entry.item.state, labels)}
-        </Typography>
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <Typography component="strong" variant="body1">
+            {entry.item.time}
+          </Typography>
+          <ResultStatusChip label={runStateLabel(entry.item.state, labels)} />
+        </Stack>
         <Typography component="div" variant="body2">
           {entry.root?.after?.unitPath ??
             entry.root?.before?.unitPath ??
             entry.item.after?.unitPath ??
             entry.item.before?.unitPath}
         </Typography>
-        <Typography component="div" variant="body2">
-          {labels.rule}: {entry.item.rule} · {labels.before}:{" "}
-          {entry.item.before?.time ?? "—"} · {labels.after}:{" "}
-          {entry.item.after?.time ?? "—"}
-        </Typography>
-        <Typography component="div" variant="body2">
-          {labels.id}: {entry.item.id} · {labels.side}: {entry.item.side} ·{" "}
-          {labels.root}: {entry.item.rootId} · {labels.occurrence}:{" "}
-          {entry.item.occurrenceOrdinal}
-        </Typography>
-        <Typography component="div" variant="body2">
-          {labels.sourceChangeRef}:{" "}
-          {entry.item.sourceChangeRef
-            ? `${entry.item.sourceChangeRef.id}:${entry.item.sourceChangeRef.occurrenceOrdinal}`
-            : labels.none}
-        </Typography>
+        <ResultKeyValueList
+          items={[
+            { label: labels.rule, value: entry.item.rule },
+            { label: labels.before, value: entry.item.before?.time ?? "—" },
+            { label: labels.after, value: entry.item.after?.time ?? "—" },
+            { label: labels.id, value: entry.item.id },
+            { label: labels.side, value: entry.item.side },
+            { label: labels.root, value: entry.item.rootId },
+            { label: labels.occurrence, value: entry.item.occurrenceOrdinal },
+            {
+              label: labels.sourceChangeRef,
+              value: sourceChangeRefValue(entry.item, labels),
+            },
+          ]}
+        />
         <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
           <RunDetails
             run={entry.item.before}
@@ -231,7 +234,7 @@ export const ScheduleImpactCalendarTimeline = ({
             labels={labels}
           />
         </Stack>
-      </Paper>
+      </ResultCard>
     </Box>
   );
   const virtualizedItems = model.visibleItems;
@@ -311,9 +314,7 @@ export const ScheduleImpactCalendarTimeline = ({
         ))
       )}
       {model.visibleItems.length === 0 && (
-        <Alert severity="info" variant="outlined" role="status">
-          {labels.noResults}
-        </Alert>
+        <ResultEmptyState>{labels.noResults}</ResultEmptyState>
       )}
     </Box>
   );

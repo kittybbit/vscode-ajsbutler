@@ -9,6 +9,7 @@ import {
 import { handleExplorerTreeKey } from "./semanticDiffExplorerKeyboard";
 import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
 import { semanticDiffExplorerFocusSx } from "../../shared/muiTheme";
+import ResultSection from "../shared/result/ResultSection";
 
 export type SemanticDiffExplorerTreePanelProps = Readonly<{
   rows: readonly ExplorerRow[];
@@ -116,39 +117,43 @@ export const SemanticDiffExplorerTreePanel = ({
     });
 
   return (
-    <Paper
-      ref={treeRef}
-      role="tree"
-      tabIndex={0}
-      aria-activedescendant={activeId}
-      aria-label={labels.tree}
-      variant="outlined"
-      data-semantic-diff-explorer-tree="true"
-      onKeyDown={handleKeyDown}
-      sx={{
-        minHeight: "12rem",
-        height: "calc(100vh - 18rem)",
-        minWidth: 0,
-        overflow: "auto",
-        p: 0.5,
-        backgroundColor: "transparent",
-        ...semanticDiffExplorerFocusSx,
-      }}
-    >
-      {rows.length > 200 ? (
-        <Virtuoso
-          ref={virtuosoRef}
-          data={rows}
-          totalCount={rows.length}
-          overscan={20 * 48}
-          itemContent={renderRow}
-        />
-      ) : (
-        rows.map((row, index) => (
-          <React.Fragment key={row.id}>{renderRow(index, row)}</React.Fragment>
-        ))
-      )}
-    </Paper>
+    <ResultSection title={labels.tree} ariaLabel={labels.tree} sx={{ mb: 0 }}>
+      <Paper
+        ref={treeRef}
+        role="tree"
+        tabIndex={0}
+        aria-activedescendant={activeId}
+        aria-label={labels.tree}
+        variant="outlined"
+        data-semantic-diff-explorer-tree="true"
+        onKeyDown={handleKeyDown}
+        sx={{
+          minHeight: "12rem",
+          height: "calc(100vh - 18rem)",
+          minWidth: 0,
+          overflow: "auto",
+          p: 0.5,
+          backgroundColor: "transparent",
+          ...semanticDiffExplorerFocusSx,
+        }}
+      >
+        {rows.length > 200 ? (
+          <Virtuoso
+            ref={virtuosoRef}
+            data={rows}
+            totalCount={rows.length}
+            overscan={20 * 48}
+            itemContent={renderRow}
+          />
+        ) : (
+          rows.map((row, index) => (
+            <React.Fragment key={row.id}>
+              {renderRow(index, row)}
+            </React.Fragment>
+          ))
+        )}
+      </Paper>
+    </ResultSection>
   );
 };
 

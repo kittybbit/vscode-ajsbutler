@@ -12,6 +12,7 @@ import { ScheduleImpactCalendarFilters as CalendarFilters } from "./ScheduleImpa
 import { ScheduleImpactCalendarHeader } from "./ScheduleImpactCalendarHeader";
 import { ScheduleImpactCalendarSections } from "./ScheduleImpactCalendarSections";
 import { ScheduleImpactCalendarTimeline } from "./ScheduleImpactCalendarTimeline";
+import ResultSection from "../shared/result/ResultSection";
 
 export type ScheduleImpactCalendarContentsProps = Readonly<{
   sidecar: SemanticDiffScheduleImpact;
@@ -67,14 +68,16 @@ export const ScheduleImpactCalendarContents = ({
       >
         {announcement}
       </Typography>
-      <CalendarFilters
-        model={model}
-        labels={labels}
-        onChange={(next) => {
-          setFilters(next);
-          setAnnouncement(labels.filterChanged);
-        }}
-      />
+      <ResultSection title={labels.filters} ariaLabel={labels.filters}>
+        <CalendarFilters
+          model={model}
+          labels={labels}
+          onChange={(next) => {
+            setFilters(next);
+            setAnnouncement(labels.filterChanged);
+          }}
+        />
+      </ResultSection>
       <ScheduleImpactCalendarSections model={model} labels={labels} />
       <ScheduleImpactCalendarTimeline
         model={model}

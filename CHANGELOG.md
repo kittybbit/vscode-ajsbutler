@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Improved Semantic Diff Explorer and Schedule Impact Calendar result readability with shared MUI sections, metadata, status, and empty-state presentation.
 - Added a read-only, localized Schedule Impact timeline to Semantic Diff
   Explorer for valid comparison periods, including supported runs, explicit
   no-run or uncalculated outcomes, identity candidates, independent filters,

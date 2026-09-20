@@ -235,9 +235,9 @@ suite("Semantic Diff Explorer components", () => {
     assert.ok(view.getByRole("region", { name: "Summary cards" }));
     assert.ok(view.getByRole("tree", { name: "Semantic diff changes" }));
     assert.ok(
-      view.container
-        .querySelector('p[role="status"]')
-        ?.textContent?.includes("findings"),
+      [...view.container.querySelectorAll('[data-result-status="true"]')].some(
+        (element) => element.textContent?.includes("findings"),
+      ),
     );
     assert.ok(view.container.querySelector('[aria-live="polite"]'));
     fireEvent.click(view.getByRole("button", { name: "Output" }));

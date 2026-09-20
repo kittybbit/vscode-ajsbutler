@@ -1,10 +1,6 @@
 import React from "react";
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { SemanticDiffScheduleImpactRootSide } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
@@ -14,28 +10,16 @@ import {
 } from "./scheduleImpactCalendarModel";
 import { ScheduleImpactCalendarBoundedList } from "./ScheduleImpactCalendarBoundedList";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
+import ResultCard from "../shared/result/ResultCard";
+import ResultEmptyState from "../shared/result/ResultEmptyState";
+import ResultKeyValueList from "../shared/result/ResultKeyValueList";
+import ResultSection from "../shared/result/ResultSection";
+import ResultStatusChip from "../shared/result/ResultStatusChip";
 
-const SectionHeading = ({
-  children,
-  visible,
-  total,
-}: Readonly<{
-  children: React.ReactNode;
-  visible?: number;
-  total?: number;
-}>): React.ReactElement => (
-  <Stack direction="row" spacing={1} alignItems="center">
-    <Typography component="h2" variant="h6">
-      {children}
-    </Typography>
-    {visible !== undefined && total !== undefined && (
-      <Chip
-        size="small"
-        label={`${visible}/${total}`}
-        aria-label={`${visible}/${total}`}
-      />
-    )}
-  </Stack>
+const ScheduleImpactCalendarIssueDetail = ({
+  detail,
+}: Readonly<{ detail: unknown }>): React.ReactElement => (
+  <>{JSON.stringify(detail)}</>
 );
 
 const RootStatus = ({
@@ -55,10 +39,22 @@ const RootStatus = ({
           : labels.uncalculated;
   const sideDetails = (
     side: SemanticDiffScheduleImpactRootSide | null,
-  ): string =>
-    side
-      ? `${labels.side}: ${side.side} · ${labels.unitId}: ${side.unitId} · ${labels.unitName}: ${side.unitName} · ${labels.unitPath}: ${side.unitPath} · ${labels.outcome}: ${outcomeLabel(side.outcome)}`
-      : labels.absentSide;
+  ): React.ReactElement => (
+    <ResultKeyValueList
+      dense
+      items={
+        side
+          ? [
+              { label: labels.side, value: side.side },
+              { label: labels.unitId, value: side.unitId },
+              { label: labels.unitName, value: side.unitName },
+              { label: labels.unitPath, value: side.unitPath },
+              { label: labels.outcome, value: outcomeLabel(side.outcome) },
+            ]
+          : [{ label: labels.side, value: labels.absentSide }]
+      }
+    />
+  );
   const rows = model.visibleRootOptions.map((root) => {
     const sourceRoot = model.visibleRoots.find(
       (candidate) => candidate.id === root.id,
@@ -71,50 +67,86 @@ const RootStatus = ({
         component="li"
         key={root.id}
         data-schedule-impact-calendar-root-id={root.id}
+        sx={{ display: "block", py: 0.5 }}
       >
-        <Typography component="span">
-          {labels.id}: {root.id} · {labels.unitPath}: {root.label} ·{" "}
-          {outcomes.map(outcomeLabel).join(" / ")}
-          {sourceRoot &&
-            ` · ${labels.before}: ${sideDetails(sourceRoot.before)}`}
-          {sourceRoot && ` · ${labels.after}: ${sideDetails(sourceRoot.after)}`}
-          {root.scopeTransition === "added-root-scope"
-            ? ` · ${labels.scopeTransition}: ${labels.addedRootScope} · ${labels.identityDecisionId}: ${sourceRoot?.scopeTransition?.identityDecisionId ?? labels.none}`
-            : root.scopeTransition === "removed-root-scope"
-              ? ` · ${labels.scopeTransition}: ${labels.removedRootScope} · ${labels.identityDecisionId}: ${sourceRoot?.scopeTransition?.identityDecisionId ?? labels.none}`
-              : ""}
-          {root.counterpartPath
-            ? ` · ${labels.counterpart}: ${root.counterpartPath}`
-            : ""}
-        </Typography>
+        <ResultCard ariaLabel={`${labels.id}: ${root.id}`} sx={{ p: 0 }}>
+          <ResultKeyValueList
+            items={[
+              { label: labels.id, value: root.id },
+              { label: labels.unitPath, value: root.label },
+              {
+                label: labels.outcome,
+                value: (
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    useFlexGap
+                    flexWrap="wrap"
+                  >
+                    {outcomes.map((outcome) => (
+                      <ResultStatusChip
+                        key={outcome}
+                        label={outcomeLabel(outcome)}
+                      />
+                    ))}
+                  </Stack>
+                ),
+              },
+              ...(sourceRoot
+                ? [
+                    {
+                      label: labels.before,
+                      value: sideDetails(sourceRoot.before),
+                    },
+                    {
+                      label: labels.after,
+                      value: sideDetails(sourceRoot.after),
+                    },
+                  ]
+                : []),
+              ...(root.scopeTransition
+                ? [
+                    {
+                      label: labels.scopeTransition,
+                      value:
+                        root.scopeTransition === "added-root-scope"
+                          ? labels.addedRootScope
+                          : labels.removedRootScope,
+                    },
+                    {
+                      label: labels.identityDecisionId,
+                      value:
+                        sourceRoot?.scopeTransition?.identityDecisionId ??
+                        labels.none,
+                    },
+                  ]
+                : []),
+              ...(root.counterpartPath
+                ? [{ label: labels.counterpart, value: root.counterpartPath }]
+                : []),
+            ]}
+          />
+        </ResultCard>
       </ListItem>
     );
   });
   return (
-    <Box
-      component="section"
-      aria-label={labels.rootStatus}
-      data-global-count={model.rootOptions.length}
-      data-visible-count={model.visibleRootOptions.length}
-      sx={{ mb: 2 }}
+    <ResultSection
+      title={labels.rootStatus}
+      ariaLabel={labels.rootStatus}
+      count={`${model.visibleRootOptions.length}/${model.rootOptions.length}`}
+      dataGlobalCount={model.rootOptions.length}
+      dataVisibleCount={model.visibleRootOptions.length}
     >
-      <SectionHeading
-        visible={model.visibleRootOptions.length}
-        total={model.rootOptions.length}
-      >
-        {labels.rootStatus}
-      </SectionHeading>
       {rows.length === 0 ? (
-        <Alert severity="info" variant="outlined">
-          {labels.noResults}
-        </Alert>
+        <ResultEmptyState role="alert">{labels.noResults}</ResultEmptyState>
       ) : (
         <ScheduleImpactCalendarBoundedList
           items={rows}
           ariaLabel={labels.rootStatus}
         />
       )}
-    </Box>
+    </ResultSection>
   );
 };
 
@@ -136,51 +168,78 @@ const ValidNoRuns = ({
   const roots = model.visibleRoots.filter((root) =>
     getScheduleImpactCalendarRootOutcomes(root).includes("valid-no-runs"),
   );
+  const sideDetails = (
+    side: SemanticDiffScheduleImpactRootSide | null,
+  ): React.ReactElement => (
+    <ResultKeyValueList
+      dense
+      items={
+        side
+          ? [
+              { label: labels.side, value: side.side },
+              { label: labels.unitPath, value: side.unitPath },
+              { label: labels.outcome, value: outcomeLabel(side.outcome) },
+            ]
+          : [{ label: labels.side, value: labels.absentSide }]
+      }
+    />
+  );
   const rows = roots.map((root) => (
     <ListItem
       component="li"
       key={root.id}
       data-schedule-impact-calendar-no-runs-root-id={root.id}
+      sx={{ display: "block", py: 0.5 }}
     >
-      <Typography component="span">
-        {labels.id}: {root.id} · {labels.before}:{" "}
-        {root.before
-          ? `${labels.side}: ${root.before.side} · ${labels.unitPath}: ${root.before.unitPath} · ${labels.outcome}: ${outcomeLabel(root.before.outcome)}`
-          : labels.absentSide}{" "}
-        · {labels.after}:{" "}
-        {root.after
-          ? `${labels.side}: ${root.after.side} · ${labels.unitPath}: ${root.after.unitPath} · ${labels.outcome}: ${outcomeLabel(root.after.outcome)}`
-          : labels.absentSide}
-        {root.scopeTransition &&
-          ` · ${labels.scopeTransition}: ${root.scopeTransition.kind} · ${labels.identityDecisionId}: ${root.scopeTransition.identityDecisionId}`}
-      </Typography>
+      <ResultCard ariaLabel={`${labels.id}: ${root.id}`} sx={{ p: 0 }}>
+        <ResultKeyValueList
+          items={[
+            { label: labels.id, value: root.id },
+            {
+              label: labels.before,
+              value: sideDetails(root.before),
+            },
+            {
+              label: labels.after,
+              value: sideDetails(root.after),
+            },
+            ...(root.scopeTransition
+              ? [
+                  {
+                    label: labels.scopeTransition,
+                    value: root.scopeTransition.kind,
+                  },
+                  {
+                    label: labels.identityDecisionId,
+                    value: root.scopeTransition.identityDecisionId,
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </ResultCard>
     </ListItem>
   ));
   const total = model.roots.filter((root) =>
     getScheduleImpactCalendarRootOutcomes(root).includes("valid-no-runs"),
   ).length;
   return (
-    <Box
-      component="section"
-      aria-label={labels.noRuns}
-      data-global-count={total}
-      data-visible-count={rows.length}
-      sx={{ mb: 2 }}
+    <ResultSection
+      title={labels.noRuns}
+      ariaLabel={labels.noRuns}
+      count={`${rows.length}/${total}`}
+      dataGlobalCount={total}
+      dataVisibleCount={rows.length}
     >
-      <SectionHeading visible={rows.length} total={total}>
-        {labels.noRuns}
-      </SectionHeading>
       {rows.length === 0 ? (
-        <Alert severity="info" variant="outlined">
-          {labels.emptyNoRuns}
-        </Alert>
+        <ResultEmptyState role="alert">{labels.emptyNoRuns}</ResultEmptyState>
       ) : (
         <ScheduleImpactCalendarBoundedList
           items={rows}
           ariaLabel={labels.noRuns}
         />
       )}
-    </Box>
+    </ResultSection>
   );
 };
 
@@ -222,13 +281,12 @@ const Legend = ({
       </ListItem>
     ));
   return (
-    <Box
-      component="section"
-      aria-label={labels.legend}
-      data-testid="schedule-impact-calendar-legend"
-      sx={{ mb: 2 }}
+    <ResultSection
+      title={labels.legend}
+      ariaLabel={labels.legend}
+      dataTestId="schedule-impact-calendar-legend"
+      sx={{ mb: 0 }}
     >
-      <SectionHeading>{labels.legend}</SectionHeading>
       <Typography component="h3" variant="body1">
         {labels.runState}
       </Typography>
@@ -241,7 +299,7 @@ const Legend = ({
       <List component="ul" aria-label={labels.outcome} sx={{ pl: 3, m: 0 }}>
         {items(outcomes)}
       </List>
-    </Box>
+    </ResultSection>
   );
 };
 
@@ -266,25 +324,26 @@ const Candidates = ({
       data-schedule-impact-calendar-candidate-id={candidate.id}
       sx={{ display: "block" }}
     >
-      <Typography component="span">
-        {labels.id}: {candidate.id} · {labels.unitId}: {candidate.unitId} ·{" "}
-        {labels.unitName}: {candidate.unitName} · {labels.unitPath}:{" "}
-        {candidate.unitPath}
-      </Typography>
+      <ResultKeyValueList
+        items={[
+          { label: labels.id, value: candidate.id },
+          { label: labels.unitId, value: candidate.unitId },
+          { label: labels.unitName, value: candidate.unitName },
+          { label: labels.unitPath, value: candidate.unitPath },
+        ]}
+      />
     </ListItem>
   );
   const rows = model.candidateGroups.map((group) => (
-    <Paper
-      component="article"
-      variant="outlined"
+    <ResultCard
       key={group.id}
-      data-schedule-impact-calendar-candidate-group-id={group.id}
+      title={`${labels.id}: ${group.id}`}
+      ariaLabel={group.id}
+      dataAttributes={{
+        "data-schedule-impact-calendar-candidate-group-id": group.id,
+      }}
       sx={{ p: 1, mb: 1 }}
-      aria-label={group.id}
     >
-      <Typography component="h3" variant="subtitle1">
-        {labels.id}: {group.id}
-      </Typography>
       <Typography component="h4" variant="body2">
         {labels.candidateBefore}
       </Typography>
@@ -307,33 +366,27 @@ const Candidates = ({
           ariaLabel={`${group.id} ${labels.candidateAfter}`}
         />
       )}
-    </Paper>
+    </ResultCard>
   ));
   return (
-    <Box
-      component="section"
-      aria-label={labels.candidates}
-      data-global-count={model.candidateGroups.length}
-      data-visible-count={model.candidateGroups.length}
-      sx={{ mb: 2 }}
+    <ResultSection
+      title={labels.candidates}
+      ariaLabel={labels.candidates}
+      count={`${model.candidateGroups.length}/${model.candidateGroups.length}`}
+      dataGlobalCount={model.candidateGroups.length}
+      dataVisibleCount={model.candidateGroups.length}
     >
-      <SectionHeading
-        visible={model.candidateGroups.length}
-        total={model.candidateGroups.length}
-      >
-        {labels.candidates}
-      </SectionHeading>
       {rows.length === 0 ? (
-        <Alert severity="info" variant="outlined">
+        <ResultEmptyState role="alert">
           {labels.emptyCandidates}
-        </Alert>
+        </ResultEmptyState>
       ) : (
         <ScheduleImpactCalendarBoundedList
           items={rows}
           ariaLabel={labels.candidates}
         />
       )}
-    </Box>
+    </ResultSection>
   );
 };
 
@@ -345,60 +398,59 @@ const Issues = ({
   labels: ScheduleImpactCalendarLabels;
 }>): React.ReactElement => {
   const rows = model.visibleIssues.map((issue) => (
-    <ListItem
-      component="li"
+    <ResultCard
       key={issue.id}
-      data-schedule-impact-calendar-issue-id={issue.id}
-      sx={{ display: "block" }}
+      ariaLabel={`${labels.id}: ${issue.id}`}
+      dataAttributes={{ "data-schedule-impact-calendar-issue-id": issue.id }}
+      sx={{
+        p: 0,
+        "& .MuiCardContent-root": {
+          p: 0.5,
+          "&:last-child": { pb: 0.5 },
+        },
+      }}
     >
-      <Typography component="div" variant="body2">
-        {labels.id}: {issue.id} · {labels.occurrence}: {issue.occurrenceOrdinal}{" "}
-        · {labels.kind}: {issue.kind} · {labels.side}:{" "}
-        {issue.side ?? labels.none}
-      </Typography>
-      <Typography component="div" variant="body2">
-        {labels.root}: {issue.rootId ?? labels.none} · {labels.reason}:{" "}
-        {issue.reasonCode}
-      </Typography>
-      <Typography component="div" variant="body2">
-        {labels.targetKind}: {issue.targetKind} · {labels.targetId}:{" "}
-        {issue.targetId ?? labels.none} · {labels.unitPath}:{" "}
-        {issue.targetPath ?? labels.none} · {labels.parameterKey}:{" "}
-        {issue.parameterKey ?? labels.none}
-      </Typography>
-      <Box
-        component="pre"
-        sx={{ m: 0, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
-      >
-        {labels.detail}: {JSON.stringify(issue.detail)}
-      </Box>
-    </ListItem>
+      <ResultKeyValueList
+        dense
+        items={[
+          { label: labels.id, value: issue.id },
+          { label: labels.occurrence, value: issue.occurrenceOrdinal },
+          { label: labels.kind, value: issue.kind },
+          { label: labels.side, value: issue.side ?? labels.none },
+          { label: labels.root, value: issue.rootId ?? labels.none },
+          { label: labels.reason, value: issue.reasonCode },
+          { label: labels.targetKind, value: issue.targetKind },
+          { label: labels.targetId, value: issue.targetId ?? labels.none },
+          { label: labels.unitPath, value: issue.targetPath ?? labels.none },
+          {
+            label: labels.parameterKey,
+            value: issue.parameterKey ?? labels.none,
+          },
+          {
+            label: labels.detail,
+            value: <ScheduleImpactCalendarIssueDetail detail={issue.detail} />,
+          },
+        ]}
+      />
+    </ResultCard>
   ));
   return (
-    <Box
-      component="section"
-      aria-label={labels.issues}
-      data-global-count={model.issues.length}
-      data-visible-count={model.visibleIssues.length}
-      sx={{ mb: 2 }}
+    <ResultSection
+      title={labels.issues}
+      ariaLabel={labels.issues}
+      count={`${model.visibleIssues.length}/${model.issues.length}`}
+      dataGlobalCount={model.issues.length}
+      dataVisibleCount={model.visibleIssues.length}
     >
-      <SectionHeading
-        visible={model.visibleIssues.length}
-        total={model.issues.length}
-      >
-        {labels.issues}
-      </SectionHeading>
       {rows.length === 0 ? (
-        <Alert severity="info" variant="outlined">
-          {labels.emptyIssues}
-        </Alert>
+        <ResultEmptyState role="alert">{labels.emptyIssues}</ResultEmptyState>
       ) : (
         <ScheduleImpactCalendarBoundedList
           items={rows}
           ariaLabel={labels.issues}
         />
       )}
-    </Box>
+    </ResultSection>
   );
 };
 

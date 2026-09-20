@@ -520,7 +520,9 @@ suite("Semantic diff Explorer DOM", () => {
       getComputedStyle(filter).minHeight,
       `${semanticDiffExplorerTargetSizePx}px`,
     );
-    assert.ok(view.container.querySelector('p[role="status"]')?.textContent);
+    assert.ok(
+      view.container.querySelector('[data-result-status="true"]')?.textContent,
+    );
     assert.ok(view.container.querySelector('[aria-live="polite"]'));
     assert.ok(tree.getAttribute("aria-activedescendant"));
     const injectedStyles = [...dom.window.document.querySelectorAll("style")]
@@ -556,7 +558,9 @@ suite("Semantic diff Explorer DOM", () => {
       view.container.querySelector('[aria-live="polite"]')?.textContent ?? "",
       /Confirmation required/,
     );
-    assert.ok(view.container.querySelector('p[role="status"]')?.textContent);
+    assert.ok(
+      view.container.querySelector('[data-result-status="true"]')?.textContent,
+    );
   });
 
   test("renders localized cards, reasons, details, actions, and accessible tree", async () => {
@@ -577,7 +581,16 @@ suite("Semantic diff Explorer DOM", () => {
     assert.ok(items.length >= 3);
     assert.ok(within(tree).getByText("確認が必要"));
     assert.strictEqual(view.queryByText("条件付きリレーションの削除"), null);
-    assert.ok(view.getAllByText(/変更前: 10/).length > 0);
+    const detailLabels = [...tree.querySelectorAll("dt")].map(
+      (element) => element.textContent,
+    );
+    assert.ok(detailLabels.includes("変更前"));
+    assert.ok(detailLabels.includes("変更後"));
+    const detailValues = [...tree.querySelectorAll("dd")].map(
+      (element) => element.textContent,
+    );
+    assert.ok(detailValues.includes("10"));
+    assert.ok(detailValues.includes("20"));
     assert.ok(view.getByRole("button", { name: "ソースを開く" }));
     assert.ok(
       view.getAllByRole("button", { name: /フローを開く: 対象がありません/ })
@@ -746,7 +759,8 @@ suite("Semantic diff Explorer DOM", () => {
     });
 
     assert.strictEqual(
-      view.container.querySelector('p[role="status"]')?.textContent,
+      view.getByText("No confirmation-required items match this filter.")
+        .textContent,
       "No confirmation-required items match this filter.",
     );
     assert.strictEqual(

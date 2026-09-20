@@ -14,6 +14,8 @@ import {
 import SemanticDiffExplorerHeader from "./Header";
 import SemanticDiffExplorerSummaryCards from "./SummaryCards";
 import SemanticDiffExplorerTreePanel from "./ExplorerTreePanel";
+import ResultEmptyState from "../shared/result/ResultEmptyState";
+import ResultStatusChip from "../shared/result/ResultStatusChip";
 
 export type SemanticDiffExplorerThemeMode = "light" | "dark";
 
@@ -88,9 +90,17 @@ export const SemanticDiffExplorerContents = ({
         labels={labels}
         language={language}
       />
-      <Typography component="p" role="status" sx={{ mb: 1 }}>
-        {explorerStatus(filteredViewModel, labels)}
-      </Typography>
+      {filteredViewModel.status === "findings" ? (
+        <ResultStatusChip
+          label={explorerStatus(filteredViewModel, labels)}
+          ariaLabel={explorerStatus(filteredViewModel, labels)}
+          role="status"
+        />
+      ) : (
+        <ResultEmptyState>
+          {explorerStatus(filteredViewModel, labels)}
+        </ResultEmptyState>
+      )}
       <Typography
         component="div"
         aria-live="polite"
