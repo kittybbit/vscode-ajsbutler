@@ -88,6 +88,49 @@ suite("Shared result presentation", () => {
     );
   });
 
+  test("keeps dense and normal key/value items in independent readable rows", () => {
+    const view = render(
+      <>
+        <ResultKeyValueList
+          ariaLabel="Normal details"
+          items={[
+            { label: "First label", value: "First value" },
+            { label: "Second label", value: "Second value" },
+          ]}
+        />
+        <ResultKeyValueList
+          ariaLabel="Dense details"
+          dense
+          items={[
+            { label: "Dense first", value: "Dense value" },
+            { label: "Dense second", value: "Dense value" },
+          ]}
+        />
+      </>,
+    );
+    const lists = [...view.container.querySelectorAll("dl")];
+    assert.strictEqual(lists.length, 2);
+    lists.forEach((list) => {
+      const rows = [...list.querySelectorAll("[data-result-key-value-row]")];
+      assert.strictEqual(rows.length, 2);
+      rows.forEach((row) => {
+        assert.strictEqual(row.querySelectorAll("dt").length, 1);
+        assert.strictEqual(row.querySelectorAll("dd").length, 1);
+      });
+    });
+    assert.deepStrictEqual(
+      [...lists[0].querySelectorAll("dt, dd")].map(
+        (element) => element.textContent,
+      ),
+      ["First label", "First value", "Second label", "Second value"],
+    );
+    assert.ok(
+      [...document.querySelectorAll("style")].some((style) =>
+        /@media \(max-width:\s*32rem\)/u.test(style.textContent ?? ""),
+      ),
+    );
+  });
+
   test("formats localized ranges without changing endpoint order", () => {
     assert.strictEqual(
       formatLocalizedDateRange("2026-01-01", "2026-01-04", "en-US"),

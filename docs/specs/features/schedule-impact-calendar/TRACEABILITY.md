@@ -1279,15 +1279,15 @@ value` output become one independent label/value row per item in both the
 ## Slice 13 Plan Review And Human Approval
 
 - Plan-reviewer result: `Ready for approval`; Findings none; `Replanning
-  required: No`.
+required: No`.
 - Human Plan Approval: Approved on 2026-09-20 under the user's standing
   automatic no-findings slice approval instruction.
 - Approved boundary: the shared one-row key/value layout, named Explorer
-  composition/detail helper extraction, focused Calendar/Explorer tests,
-  browser-safe architecture guard, one additional `CHANGELOG.md` entry, and
-  the two feature evidence documents. DTOs, protocols, host lifecycle,
-  theme/resource handling, virtualization, qlty configuration, roadmap, and
-  Feature Exit remain outside the approved implementation scope.
+composition/detail helper extraction, focused Calendar/Explorer tests,
+browser-safe architecture guard, one additional `CHANGELOG.md` entry, and
+the two feature evidence documents. DTOs, protocols, host lifecycle,
+theme/resource handling, virtualization, qlty configuration, roadmap, and
+Feature Exit remain outside the approved implementation scope.
 <!-- markdownlint-disable MD013 -->
 - Approved paths (exact Slice 13 plan scope):
   - `src/presentation/webview/editor/shared/result/ResultKeyValueList.tsx`
@@ -1305,11 +1305,48 @@ value` output become one independent label/value row per item in both the
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
-- Plan gate status: reviewed and Human-approved; the focused Slice 13 plan
-  commit is pending `approval-committer`.
-- Next stage: `approval-committer` for the exact approved plan paths above.
-  No implementation, Completion Approval, Feature Exit review, or commit is
-  authorized until that plan gate completes.
+- Plan gate status: reviewed and Human-approved; focused Slice 13 plan commit
+  `a314dc54` is complete.
+- Next stage: recorded implementation review and Completion Approval are
+  complete; `approval-committer` owns the focused Slice 13 completion commit.
+  Feature Exit remains deferred.
+
+## Slice 13 Implementation Evidence
+
+- Status: Implementation complete on 2026-09-20 under focused plan commit
+  `a314dc54`; independent implementation review returned `Ready` with no
+  Findings, and Completion Approval is recorded below. The implementation is
+  limited to the approved shared row primitive, Explorer status/detail
+  extraction, focused tests, architecture guard, `CHANGELOG.md`, and feature
+  evidence documents.
+- Acceptance evidence: `ResultKeyValueList` keeps normal and dense items in
+  independent full-width grid rows while preserving `<dl>/<dt>/<dd>` order,
+  long-value wrapping, narrow reflow, and dense spacing as the only density
+  difference. Calendar nested source-change details and Explorer summary/tree
+  details use the same one-label/one-value row invariant. Explorer status
+  presentation is separated from the main composition, and pure detail,
+  comparison, localized period, schedule timestamp, constraint, and warning
+  builders now live in the browser-safe `semanticDiffExplorerDetails.ts`.
+- Quality evidence: the Slice 11/12 target findings are absent from the post-
+  change `qlty smells --no-snippets` inventory: ResultKeyValueList complexity,
+  SemanticDiffExplorerContents complexity, semanticDiffExplorerTree total
+  complexity, `detailItems`, and `scheduleDetails`. Existing Calendar host,
+  Calendar model/view, locale duplication, and other Slice 10-baseline findings
+  remain unchanged; no qlty suppression or configuration change was made.
+- Validation evidence: shared result tests pass 4; Calendar
+  component/view/accessibility tests pass 6; Explorer component/DOM tests pass
+  17; the architecture suite passes 29; and `test:compile` passes. Production
+  and desktop development builds compile successfully, the desktop extension
+  host exits 0, and web smoke passes WEB-7 through WEB-10. Final qlty,
+  Markdown lint, and diff checks are recorded after the last formatting edit.
+- Compatibility/readiness: DTOs, facts, filters, result/report/JSON contracts,
+  actions, messages, sessions, transport, theme/resource handling,
+  virtualization, focus recovery, bundle names, and desktop/web behavior are
+  unchanged. Existing macOS codesign, web stream-cleanup, webpack-size, and
+  advisory baseline smell findings remain compatibility observations.
+- Implementation feedback: nested key/value lists are validated through the
+  direct row children so nested source-change metadata retains its own semantic
+  rows without being mistaken for one outer row.
 
 ## Dependency And Approval Trace
 
@@ -1445,17 +1482,53 @@ value` output become one independent label/value row per item in both the
   user-facing `CHANGELOG.md` entry, and the qlty smell delta validation. It
   preserves Calendar/Explorer facts, DTOs, result/report/JSON contracts,
   filters, actions, messages, sessions, transport, theme/resource handling,
-  virtualization, bundle names, and desktop/web behavior. Slice 13 has no plan
-  implementation approval yet; its plan review is `Ready for approval` with no
-  Findings, Human Plan Approval is recorded on 2026-09-20, and the focused plan
-  commit is pending `approval-committer`. Feature Exit is reopened and deferred
-  until its own implementation gates complete.
+  virtualization, bundle names, and desktop/web behavior. Slice 13 plan review
+  is `Ready for approval` with no Findings, Human Plan Approval is recorded on
+  2026-09-20, focused plan commit `a314dc54` is complete, and implementation
+  is complete under the approved paths. Independent implementation review
+  returned `Ready` with no Findings and Completion Approval is recorded below;
+  the focused completion commit is pending `approval-committer`, so Feature
+  Exit is reopened and deferred.
+
+## Slice 13 Completion Approval
+
+- Implementation-reviewer final verdict: `Ready`; Findings none.
+- Completion Approval: Approved on 2026-09-20 under the user's standing
+  automatic no-findings Completion Approval instruction.
+- Completed boundary: the shared one-row key/value presentation, Explorer
+  status/detail extraction, focused Calendar/Explorer tests, browser-safe
+  architecture guard, the one additional `CHANGELOG.md` entry, and the two
+  feature evidence documents. DTOs, protocols, host lifecycle,
+  theme/resource handling, virtualization, qlty configuration, and roadmap
+  remain unchanged.
+<!-- markdownlint-disable MD013 -->
+- Completed paths (exact Slice 13 diff):
+  - `src/presentation/webview/editor/shared/result/ResultKeyValueList.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerDetails.ts`
+  - `src/test/suite/sharedResultPresentation.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `CHANGELOG.md`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+<!-- markdownlint-enable MD013 -->
+- Completion gate status: implementation review and Completion Approval are
+  complete; the exact completed diff is ready for the focused completion
+  commit.
+- Next stage: `approval-committer` for the exact completed paths above. Feature
+  Exit review and final batch human Closure Approval remain deferred until the
+  completion commit.
 
 ## Feature Exit Evidence
 
-- All twelve completed slices are independently reviewed `Ready` with no
-  Findings and automatically Completion-approved under the user's no-findings
-  instruction. Slice 10's plan is independently `Ready` and Human-approved,
+- All thirteen slices are independently reviewed `Ready` with no Findings and
+  automatically Completion-approved under the user's no-findings instruction.
+  Slice 10's plan is independently `Ready` and Human-approved,
   its focused plan commit `0aef43d2` is complete, its implementation review is
   `Ready` with no Findings, and Completion Approval is recorded above. Slices
   1–12 are focused-commit complete:
@@ -1474,9 +1547,11 @@ value` output become one independent label/value row per item in both the
   Independent implementation review returned `Ready` with no Findings,
   automatic Completion Approval is recorded, and focused completion commit
   `2fb18daa` is complete. Slice 13's plan review is `Ready for approval` with
-  no Findings and Human Plan Approval is recorded on 2026-09-20; its focused
-  plan commit is pending `approval-committer`, so Feature Exit remains reopened
-  and deferred.
+  no Findings and Human Plan Approval is recorded on 2026-09-20; focused plan
+  commit `a314dc54` and implementation are complete under the approved paths.
+  Independent implementation review returned `Ready` with no Findings and
+  Completion Approval is recorded; the focused completion commit is pending
+  `approval-committer`, so Feature Exit remains reopened and deferred.
 - Acceptance and validation evidence covers the complete requirement table,
   including the evaluated-period workflow gate, exact sidecar/context
   lifecycle, root and run outcomes, identity candidates, deterministic
@@ -1491,11 +1566,15 @@ value` output become one independent label/value row per item in both the
   presentation implementation is complete under its approved paths. Slice 12's
   localized range/comparison implementation is complete, reviewed, and
   Completion-approved under focused commit `2fb18daa`. Slice 13's one-row
-  result alignment and targeted smell cleanup remain planned only.
+  result alignment and targeted smell cleanup are implemented under focused
+  plan commit `a314dc54`; independent implementation review returned `Ready`
+  with no Findings and Completion Approval is recorded. Its focused completion
+  commit is pending `approval-committer`.
 - Durable propagation is complete for the observable use case, use-case index,
   README, prior CHANGELOG entries, and the Slice 11 readability entry. Slice
-  12's additional user-visible entry is applied; implementation review and
-  Completion Approval are recorded, with focused completion commit `2fb18daa`
+  12's additional user-visible entry is applied; Slice 13's one-row readability
+  entry is applied and its independent implementation review and Completion
+  Approval are recorded. Slice 12's focused completion commit `2fb18daa` is
   complete.
   Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
@@ -1503,8 +1582,8 @@ value` output become one independent label/value row per item in both the
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 13 still requires independent plan review, Human
-  Approval, implementation review, Completion Approval, and focused commit.
+- Remaining risks: Slice 13 still requires its focused completion commit and
+  renewed Feature Exit review.
   Existing macOS codesign, web-stream cleanup, webpack-size, and Slice
   10-baseline advisory smell findings remain documented compatibility
   observations.

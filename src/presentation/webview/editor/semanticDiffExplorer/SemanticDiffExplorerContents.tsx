@@ -16,6 +16,7 @@ import SemanticDiffExplorerSummaryCards from "./SummaryCards";
 import SemanticDiffExplorerTreePanel from "./ExplorerTreePanel";
 import ResultEmptyState from "../shared/result/ResultEmptyState";
 import ResultStatusChip from "../shared/result/ResultStatusChip";
+import { explorerStatusLabel } from "./semanticDiffExplorerDetails";
 
 export type SemanticDiffExplorerThemeMode = "light" | "dark";
 
@@ -30,15 +31,20 @@ export type SemanticDiffExplorerContentsProps = Readonly<{
   virtualizedScrollToIndex?: (index: number) => void;
 }>;
 
-const explorerStatus = (
-  viewModel: SemanticDiffExplorerViewModel,
-  labels: SemanticDiffExplorerLabels,
-): string =>
-  ({
-    findings: labels.findings,
-    empty: labels.empty,
-    "filter-empty": labels.filterEmpty,
-  })[viewModel.status];
+const ExplorerStatus = ({
+  status,
+  labels,
+}: Readonly<{
+  status: SemanticDiffExplorerViewModel["status"];
+  labels: SemanticDiffExplorerLabels;
+}>): React.ReactElement => {
+  const label = explorerStatusLabel(status, labels);
+  return status === "findings" ? (
+    <ResultStatusChip label={label} ariaLabel={label} role="status" />
+  ) : (
+    <ResultEmptyState>{label}</ResultEmptyState>
+  );
+};
 
 export const SemanticDiffExplorerContents = ({
   viewModel,
@@ -90,17 +96,7 @@ export const SemanticDiffExplorerContents = ({
         labels={labels}
         language={language}
       />
-      {filteredViewModel.status === "findings" ? (
-        <ResultStatusChip
-          label={explorerStatus(filteredViewModel, labels)}
-          ariaLabel={explorerStatus(filteredViewModel, labels)}
-          role="status"
-        />
-      ) : (
-        <ResultEmptyState>
-          {explorerStatus(filteredViewModel, labels)}
-        </ResultEmptyState>
-      )}
+      <ExplorerStatus status={filteredViewModel.status} labels={labels} />
       <Typography
         component="div"
         aria-live="polite"

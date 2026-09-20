@@ -291,6 +291,21 @@ suite("Schedule impact calendar view", () => {
     );
     assert.ok(view.getByRole("heading", { name: "有効な実行なし" }));
     assert.ok(view.getByTestId("schedule-impact-calendar-legend"));
+    const keyValueRows = [
+      ...view.container.querySelectorAll("[data-result-key-value-row]"),
+    ];
+    assert.ok(keyValueRows.length > 0);
+    keyValueRows.forEach((row) => {
+      const directChildren = [...row.children];
+      assert.strictEqual(
+        directChildren.filter((child) => child.tagName === "DT").length,
+        1,
+      );
+      assert.strictEqual(
+        directChildren.filter((child) => child.tagName === "DD").length,
+        1,
+      );
+    });
     const issueRegion = view.getByRole("region", {
       name: "未計算のスケジュール範囲",
     });

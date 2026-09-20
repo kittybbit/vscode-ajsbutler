@@ -114,6 +114,7 @@ const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerHostState.ts",
   "semanticDiffExplorerKeyboard.ts",
   "semanticDiffExplorerLocalization.ts",
+  "semanticDiffExplorerDetails.ts",
   "semanticDiffExplorerTree.tsx",
   "semanticDiffExplorerTreeData.ts",
   "semanticDiffExplorerView.tsx",

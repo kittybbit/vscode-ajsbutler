@@ -223,6 +223,14 @@ suite("Schedule impact calendar components", () => {
     assert.ok(
       view.getByRole("region", { name: "Uncalculated schedule portions" }),
     );
+    const keyValueRows = [
+      ...view.container.querySelectorAll("[data-result-key-value-row]"),
+    ];
+    assert.ok(keyValueRows.length > 0);
+    keyValueRows.forEach((row) => {
+      assert.strictEqual(row.querySelectorAll("dt").length, 1);
+      assert.strictEqual(row.querySelectorAll("dd").length, 1);
+    });
     assert.ok(view.getByTestId("schedule-impact-calendar-legend"));
     assert.ok(view.getByRole("region", { name: "Schedule impact timeline" }));
     assert.ok(

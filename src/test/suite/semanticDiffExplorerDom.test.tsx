@@ -584,6 +584,14 @@ suite("Semantic diff Explorer DOM", () => {
     const detailLabels = [...tree.querySelectorAll("dt, h3")].map(
       (element) => element.textContent,
     );
+    const keyValueRows = [
+      ...view.container.querySelectorAll("[data-result-key-value-row]"),
+    ];
+    assert.ok(keyValueRows.length > 0);
+    keyValueRows.forEach((row) => {
+      assert.strictEqual(row.querySelectorAll("dt").length, 1);
+      assert.strictEqual(row.querySelectorAll("dd").length, 1);
+    });
     assert.ok(detailLabels.includes("変更前"));
     assert.ok(detailLabels.includes("変更後"));
     const comparisonValues = [
