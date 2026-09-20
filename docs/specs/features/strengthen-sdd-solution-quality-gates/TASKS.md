@@ -8,8 +8,8 @@
   workflow branch. `AGENTS.md` and `.agents/skills/**/*.md` are outside the
   Verify docs-only allowlist, so this slice must use the full Verify evidence
   path even though it changes no product code.
-- Approved or active slice: Slice 1, approved for implementation after the
-  focused planning-package commit succeeds.
+- Approved or active slice: Slice 1 complete; Completion Approval granted and
+  awaiting the focused completion commit.
 - Do not edit runtime, tests, generated artifacts, configuration, `.qlty`, or
   `package.json`.
 - Keep this feature's `SPECS.md` read-only for Slice 1; an edit requires
@@ -24,7 +24,7 @@
   qlty, diff check, the existing architecture dependency test, and the
   recorded dry run. Do not label this slice docs-only.
 - Approval and document-role policy: see `docs/specs/README.md`.
-- Next decision: commit the approved planning package, then implement Slice 1.
+- Next decision: commit the approved Slice 1 diff, then begin Feature Exit.
 
 ## Sync Rule
 
@@ -39,7 +39,7 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: Complete
 - Planning scope: one repository-policy documentation responsibility slice
   propagating a consistent `Solution Shape` gate across the seven durable
   surfaces named below. The branch is intentionally on the non-doc workflow:
@@ -48,7 +48,7 @@
 - Review status: Ready for approval; independent review completed with no
   findings
 - Human approval: Approved
-- Active implementation slice: Slice 1
+- Active implementation slice: None
 
 ## Human Approval
 
@@ -77,12 +77,20 @@ planning package must be committed by `approval-committer` before Slice 1.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: completed Slice 1, `Propagate The Solution Shape Quality
+  Gate`, exactly as independently reviewed.
+- Approved paths: `AGENTS.md`, `docs/specs/architecture.md`,
+  `docs/specs/features/_templates/TASKS.template.md`,
+  `.agents/skills/sdd-plan-task/SKILL.md`,
+  `.agents/skills/sdd-review-plan/SKILL.md`,
+  `.agents/skills/sdd-implement-task/SKILL.md`,
+  `.agents/skills/sdd-review-implementation/SKILL.md`,
+  `docs/specs/features/strengthen-sdd-solution-quality-gates/TASKS.md`, and
+  `docs/specs/features/strengthen-sdd-solution-quality-gates/TRACEABILITY.md`.
+- Implementation review verdict: Ready
+- Commit status: Eligible
 
 ## Closure Approval
 
@@ -97,7 +105,7 @@ planning package must be committed by `approval-committer` before Slice 1.
 
 ### Slice 1: Propagate The Solution Shape Quality Gate
 
-- Status: Approved
+- Status: Complete
 - Scope:
   - Add concise agent-facing obligations to `AGENTS.md` while retaining
     `docs/specs/README.md` as the lifecycle, approval, validation, document-role,
@@ -212,7 +220,7 @@ planning package must be committed by `approval-committer` before Slice 1.
     accepting it because its defensive connection/scope DTO copies preserve
     the application boundary before invoking the port, as proven by
     `src/test/suite/importAjsDefinitionViaWebApi.test.ts` (`copies request DTOs
-    before invoking the port`). Do not leave this case as a pass/fail fork: if
+before invoking the port`). Do not leave this case as a pass/fail fork: if
     a later implementation contradicts that evidence, implementation review
     records the contradiction as a finding.
   - In the same WebAPI dry run, consider the relevant existing capabilities:
@@ -303,13 +311,49 @@ planning package must be committed by `approval-committer` before Slice 1.
 
 - [x] Independent plan review returned `Ready` with no actionable finding.
 - [x] Explicit Human Approval records the exact Slice 1 boundary.
-- [ ] Run the Slice 1 full non-doc Verify validation set after implementation,
+- [x] Run the Slice 1 full non-doc Verify validation set after implementation,
       including build, test compilation, desktop tests, web tests, qlty, and
       targeted Markdown validation.
-- [ ] Record changed paths, exact commands/configuration, qlty finding identity,
+- [x] Record changed paths, exact commands/configuration, qlty finding identity,
       separated new/worsened versus unchanged baseline findings, and all
       separate dry-run outcomes in `TASKS.md` and `TRACEABILITY.md` before
       implementation review.
+
+## Slice 1 Implementation Evidence
+
+- Durable changes are limited to the seven approved target paths; evidence-only
+  changes are limited to this file and `TRACEABILITY.md`. `SPECS.md`, runtime,
+  tests, generated artifacts, configuration, `.qlty/qlty.toml`, and
+  `package.json` are unchanged.
+- Validation passed: `rtk pnpm run lint:md` (39 files), targeted
+  `rtk pnpm exec markdownlint-cli2 AGENTS.md docs/specs/architecture.md` (2
+  files), `rtk git diff --check`, `rtk pnpm run build`, `rtk pnpm run
+test:compile`, `rtk pnpm run test:desktop:run` (VS Code 1.138.0), `rtk pnpm
+run test:web:run`, and the focused architecture suite (25 passing).
+- qlty baseline and final use the identical `rtk pnpm run qlty` command and
+  unchanged `.qlty/qlty.toml` (SHA-1 `ac860e9547b795c36ff466164d1a088554609009`):
+  `qlty check` reports no issues and `qlty smells --no-snippets` reports no
+  findings. New/worsened findings: none. Unchanged unrelated baseline
+  findings: none. Metric-only movement: none observed. Qlty-required formatting
+  in these two evidence records is retained; it is not unrelated quality
+  cleanup.
+- WebAPI dry run: accept `ImportAjsDefinitionViaWebApiPort` for its
+  application-owned host-neutral dependency-inversion contract; accept
+  `Jp1Ajs3WebApiImportAdapter` for infrastructure credential/HTTP isolation,
+  generated-OpenAPI-to-neutral translation, error normalization, and
+  `AbortController` timeout lifecycle; reject an application wrapper that only
+  forwards the same request and response; and accept the retained
+  `createImportAjsDefinitionViaWebApi` factory separately for defensive
+  connection/scope DTO copies, as proven by
+  `src/test/suite/importAjsDefinitionViaWebApi.test.ts` (`copies request DTOs
+before invoking the port`). Relevant capabilities are `globalThis.fetch`,
+  `AbortController`, `jp1Ajs3GetUnitListOperation`, and the existing credential
+  provider. No custom mechanism is proposed; the HTTP wrapper remains in
+  infrastructure. No baseline scope creep is approved.
+- Compatibility and readiness: no JP1/AJS, parser, runtime data path,
+  desktop/web bundle, VS Code engine, or user workflow changes; independent
+  implementation review returned `Ready`, and Completion Approval remains
+  pending.
 
 ## Notes
 
@@ -317,5 +361,6 @@ planning package must be committed by `approval-committer` before Slice 1.
   and branch-created feature folder.
 - One slice is the smallest useful unit because the value is consistency across
   the existing gates; the seven files are not seven independent outcomes.
-- Human Approval covers only the reviewed Slice 1 boundary; the planning
-  package must be committed before any durable target changes begin.
+- Human Approval covered only the reviewed Slice 1 boundary; the planning
+  package is committed, and the independently reviewed implementation now
+  awaits separate Completion Approval.

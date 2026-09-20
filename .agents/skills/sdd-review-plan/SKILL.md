@@ -39,6 +39,28 @@ Evaluate every slice and the plan as a whole for:
   interfaces, dependencies, and architecture boundaries
 - actionable qlty evidence for code slices
 
+## Solution Shape Review
+
+Challenge every material new or retained abstraction against the recorded
+`Solution Shape`: semantic owner and package/layer for material decisions,
+invariants, translations, lifecycles, public names, contracts, dependencies,
+and applicable tests; concrete responsibility and boundary value; public names,
+contracts, dependency direction, and tests where applicable; and the relevant
+framework, library, platform, or established repository capability. Keep the
+port, adapter, and retained application-factory assessments separate. Accept a
+port for dependency inversion and/or a host-neutral contract without requiring
+adapter duties; require an adapter to own applicable isolation, translation,
+error normalization, lifecycle, compatibility, or test-boundary responsibility;
+reject a same-request/same-response forwarding wrapper without port-contract
+value. Require a custom-gap justification only for a proposed custom
+mechanism, and keep framework use at the outer boundary. Separate automatic
+architecture-test evidence from reviewer judgments. For code slices, challenge
+the planned qlty baseline/final comparison, identical command/configuration,
+finding identity, and separation of new/worsened versus unchanged unrelated
+baseline findings. Route any changed owner/package, contract/dependency
+direction, framework-versus-custom decision, abstraction/responsibility,
+affected surface, risk, validation, or approval boundary to Replanning.
+
 ## Review Workflow
 
 1. Resolve the selected feature and read the complete implementation plan.

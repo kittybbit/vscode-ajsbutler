@@ -105,6 +105,42 @@ Before editing runtime code, tests, generated artifacts, or configuration, the
 selected feature must have an approved implementation slice recorded in
 `TASKS.md`. If scope or design changes, stop and use Replanning Mode.
 
+### Solution Shape Gate
+
+For every non-trivial slice, record the `Solution Shape` at planning,
+implementation, and review:
+
+- assign each material decision, invariant, translation, lifecycle, public
+  name, contract, dependency, and test where applicable to a semantic owner
+  and package/layer
+- identify every material new or retained abstraction, its concrete
+  responsibility, and why it earns a boundary; this includes exported or
+  layer-crossing abstractions, ports, adapters, contract-bearing wrappers,
+  lifecycle owners, and abstractions that change dependency direction or
+  semantic ownership, but excludes ordinary local helpers and type aliases
+  unless they play one of those roles
+- record public names, contracts, dependency direction, and applicable tests;
+  assess ports for dependency inversion and/or host-neutral contract value,
+  adapters for applicable isolation, translation, error normalization,
+  lifecycle, compatibility, or test-boundary responsibility, and retained
+  factories separately for composition or use-case-boundary responsibility
+- consider only the relevant framework, library, platform, or established
+  repository capability; justify a custom mechanism only when one is proposed,
+  and keep framework use at the outer boundary
+- treat the existing architecture dependency test as automatic evidence for
+  its cataloged import, construction, parser, telemetry, and layer rules;
+  semantic ownership, abstraction value, framework sufficiency, custom-gap
+  credibility, and qlty disposition remain reviewer judgments
+- for code slices, capture pre-edit and final `rtk pnpm run qlty` results with
+  the same configuration and comparable rule/path/symbol-location identity;
+  separate new or worsened findings from unchanged unrelated baseline
+  findings, and do not turn unrelated baseline findings into cleanup
+
+Stop for Replanning when the approved `Solution Shape` changes its semantic
+owner or package/layer, contract or dependency direction, framework-versus-
+custom decision, abstraction or responsibility, affected surface, risk,
+validation, or approval boundary.
+
 ## Coding and Testing Rules
 
 - Use TypeScript with explicit exported API types.

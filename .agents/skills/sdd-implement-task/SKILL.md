@@ -43,6 +43,31 @@ existing problems:
 
 Do not expand scope to fix unrelated baseline issues.
 
+## Solution Shape Gate
+
+Before editing, preserve the approved `Solution Shape` for every material new
+or retained abstraction: semantic owner and package/layer; concrete
+responsibility and boundary value; public names, contracts, dependency
+direction, and tests where applicable; and the relevant framework, library,
+platform, or established repository capability. Use the material-abstraction
+definition in `AGENTS.md`. Assess ports for dependency inversion and/or a
+host-neutral contract, adapters for applicable isolation, translation, error
+normalization, lifecycle, compatibility, or test-boundary responsibility, and
+retained application factories separately for composition or use-case-boundary
+responsibility. Reject a same-request/same-response forwarding wrapper without
+port-contract value. Justify a custom gap only when a custom mechanism is
+proposed, and keep framework use at the outer boundary. Record automatic
+architecture-test evidence separately from reviewer judgments.
+
+For code slices, capture pre-edit and final `rtk pnpm run qlty` results with the
+same configuration and comparable finding identity (rule, path, and
+symbol/location where available). List new or worsened findings separately
+from unchanged unrelated baseline findings; metric-only movement is a review
+signal and unrelated baseline cleanup is out of scope. If the owner/package,
+contract/dependency direction, framework-versus-custom decision,
+abstraction/responsibility, affected surface, risk, validation, or approval
+boundary changes, stop and return for Replanning.
+
 ## Implementation Workflow
 
 1. Select one approved slice and confirm its scope, acceptance, validation,

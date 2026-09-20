@@ -90,6 +90,30 @@ Before updating `TASKS.md`, establish:
   large input risk, desktop/web impact, README/docs, and CHANGELOG impact
 - unresolved assumptions and risks
 
+## Solution Shape Gate
+
+For every material new or retained abstraction, record the approved `Solution
+Shape`: semantic owner and package/layer for each material decision, invariant,
+translation, lifecycle, public name, contract, dependency, and applicable test;
+the abstraction's concrete responsibility and why it earns a boundary; public
+names, contracts, dependency direction, and tests where applicable; and the
+relevant framework, library, platform, or established repository capability.
+Use the compact material-abstraction definition from `AGENTS.md`; ordinary
+local helpers and type aliases are excluded unless they play one of those
+roles. Assess a dependency-inverting or host-neutral port, an adapter's
+applicable isolation/translation/error/lifecycle/compatibility/test-boundary
+responsibility, and any retained application factory's composition or
+use-case-boundary responsibility as separate cases. A custom-gap justification
+is required only for a proposed custom mechanism. Record the automatic
+architecture-test evidence separately from reviewer judgments about semantic
+ownership, abstraction value, framework sufficiency, custom-gap credibility,
+and qlty disposition. For code slices, plan comparable pre-edit and final
+`rtk pnpm run qlty` evidence with unchanged configuration and finding identity;
+unrelated baseline findings are not cleanup scope. Stop for Replanning when the
+owner/package, contract/dependency direction, framework-versus-custom decision,
+abstraction/responsibility, affected surface, risk, validation, or approval
+boundary changes.
+
 ## Approval-Commit Handoff
 
 Plan or Replanning Mode ends before implementation. Return the complete plan,

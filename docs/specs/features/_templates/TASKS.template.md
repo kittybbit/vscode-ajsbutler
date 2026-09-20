@@ -37,6 +37,30 @@
 - Human approval:
 - Active implementation slice:
 
+## Solution Shape Evidence
+
+Record this compact evidence for every material new or retained abstraction
+(exported or layer-crossing abstraction, port or adapter, contract-bearing
+wrapper, lifecycle owner, or abstraction changing dependency direction or
+semantic ownership; ordinary local helpers and type aliases are excluded
+unless they play one of those roles):
+
+- Semantic owner and package/layer for each material decision, invariant,
+  translation, lifecycle, public name, contract, dependency, and applicable
+  test:
+- Material abstraction, concrete responsibility, and why it earns a boundary;
+  assess ports, adapters, and retained application factories as separate cases:
+- Public names, contracts, dependency direction, and tests where applicable:
+- Relevant framework, library, platform, or established repository capability;
+  custom-gap justification only when a custom mechanism is proposed:
+- Automatic architecture evidence versus reviewer-only judgments:
+- Code-slice qlty baseline and final using the identical command and
+  configuration, with findings separated into new/worsened and unchanged
+  unrelated baseline identities:
+- Replanning trigger check: owner/package, contract/dependency direction,
+  framework-versus-custom decision, abstraction/responsibility, affected
+  surface, risk, validation, or approval boundary:
+
 ## Human Approval
 
 - Status: Pending
