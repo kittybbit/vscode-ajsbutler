@@ -23,6 +23,10 @@ suite("Schedule impact calendar localization", () => {
       english.results(2, 5),
       "2 of 5 timeline entries visible",
     );
+    assert.strictEqual(
+      english.selected("3"),
+      "Schedule impact calendar contains 3 entries.",
+    );
     assert.strictEqual(japanese.results(2, 5), "5 件中 2 件を表示");
     assert.strictEqual(
       english.selectedItem("2026-01-01 /jobs/example.ajs, occurrence 2"),

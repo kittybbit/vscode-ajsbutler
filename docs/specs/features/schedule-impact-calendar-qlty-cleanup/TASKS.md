@@ -4,8 +4,8 @@
 
 - Purpose: remove PR #318's 36 qlty blocking issues while preserving the
   completed Schedule Impact Calendar and related viewer behavior.
-- Approved or active slice: none. The complete one-slice plan is ready for
-  independent review; implementation remains unapproved.
+- Approved or active slice: Slice 1 Completion Approval granted; pending the
+  exact completion commit.
 - Do not: suppress findings or modify qlty, markdownlint, compiler, test, or
   build configuration.
 - Do not: change product behavior, schedule semantics, DTO/transport
@@ -14,7 +14,7 @@
   affected source files listed under Slice 1.
 - Read `TRACEABILITY.md` when checking requirement or validation coverage.
 - Approval policy: see `docs/specs/README.md`.
-- Next decision: independent plan review by `plan-reviewer`.
+- Next decision: completion commit by `approval-committer`.
 
 ## Sync Rule
 
@@ -29,7 +29,8 @@
 
 ## Plan Status
 
-- Status: Approved; pending plan-gate commit
+- Status: Approved; plan-gate commit `35e56d56`; implementation review Ready,
+  Completion Approval granted, pending completion commit
 - Planning scope: all 36 blocking findings reported on PR #318: 23
   high-complexity findings, five duplication findings, three excessive-return
   findings, two Markdown line-length findings, and one finding each for
@@ -38,7 +39,8 @@
 - Review status: Ready on 2026-09-20; Findings: none
 - Human approval: Approved on 2026-09-20 under the user's established
   automatic per-slice approval instruction after a review with no Findings.
-- Active implementation slice: Slice 1, pending plan-gate commit
+- Active implementation slice: Slice 1, Completion Approval granted; pending
+  completion commit
 
 ## Planning Evidence
 
@@ -124,12 +126,46 @@ plan-gate commit for the approved planning package.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: 2026-09-21 under the user's established automatic per-slice
+  approval instruction after the independent implementation reviewer returned
+  `Ready` with no Findings.
+- Approved scope: The final behavior-neutral Slice 1 implementation diff,
+  including the qlty cleanup, review corrections, focused localization
+  assertion, updated implementation evidence, and no other feature or
+  cleanup.
+- Approved paths:
+  - `CHANGELOG.md`
+  - `docs/specs/features/schedule-impact-calendar-qlty-cleanup/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar-qlty-cleanup/TRACEABILITY.md`
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanel.ts`
+  - `src/presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanelRuntime.ts`
+  - `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanelRequests.ts`
+  - `src/presentation/webview/editor/ajsTable/TableHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarBoundedList.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarCandidates.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarIssues.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarLegend.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarResultSection.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarRootSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSectionBody.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimelineHelpers.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBoundedListHelpers.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarModel.ts`
+  - `src/presentation/webview/editor/shared/SharedUnitDetailPane.tsx`
+  - `src/presentation/webview/editor/shared/UnitTreeSelector.tsx`
+  - `src/resource/i18n/scheduleImpactCalendar.ts`
+  - `src/resource/i18n/scheduleImpactCalendar_en.ts`
+  - `src/resource/i18n/scheduleImpactCalendar_ja.ts`
+  - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
+- Implementation review verdict: `Ready` on 2026-09-21; Findings: none.
+- Review evidence: the reviewer accepted the final diff, qlty-zero result,
+  focused host/build validation, accessibility and localization contract
+  checks, and the TASKS/TRACEABILITY evidence.
+- Commit status: Eligible for the exact completion commit by
+  `approval-committer`; do not include unrelated paths.
 
 ## Closure Approval
 
@@ -144,7 +180,8 @@ plan-gate commit for the approved planning package.
 
 ### Slice 1: Clear the PR #318 qlty gate without behavior changes
 
-- Status: Approved; pending plan-gate commit before implementation.
+- Status: Implementation complete; implementation review Ready and Completion
+  Approval granted; pending the exact completion commit.
 - Scope:
   - Reconcile the implementation result with the same 36-item live PR report;
     every listed location must either disappear from qlty output through a
@@ -331,10 +368,10 @@ check` to pass; this is the authoritative PR-diff confirmation.
     change, exported API break, schedule-semantic change, qlty/configuration
     change, architecture exception, unrelated finding, or path outside this
     boundary stops implementation and returns to Main for Replanning Mode.
-- Dependencies: the feature-intake artifacts and closed Schedule Impact
-  Calendar implementation at `744fed91` are present; plan-reviewer `Ready` and
-  Human Approval are satisfied. The remaining dependency is an
-  approval-committer plan-gate commit before implementation.
+- Dependencies: the feature-intake artifacts, closed Schedule Impact Calendar
+  implementation at `744fed91`, and plan-gate commit `35e56d56` are present;
+  plan-reviewer `Ready` and Human Approval are satisfied. Hosted qlty remains
+  a post-completion-commit check owned by Main.
 - Risks:
   - Helper extraction can change early-return ordering, hook dependencies,
     stale closure behavior, disposal registration, or exception cleanup.
@@ -356,27 +393,50 @@ check` to pass; this is the authoritative PR-diff confirmation.
 - `TRACEABILITY.md` is required and maps every requirement and live finding
   group to Slice 1 and its regression or validation evidence.
 
+## Implementation Evidence
+
+- Scope: refactored only the approved Calendar host, Explorer request, Table
+  header, Calendar UI/model, shared UI, localization, helper, and changelog
+  paths. No DTO, transport, public export, configuration, or architecture
+  rule changed.
+- Quality: `pnpm run qlty` passed; `qlty smells --no-snippets` reports zero
+  findings against `origin/main`.
+- Tests and builds: test compilation, production build,
+  `development:desktop`, `development:web`, desktop host tests, and web host
+  tests passed. The desktop runner emitted the existing macOS codesign
+  diagnostic and exited successfully.
+- Markdown and diff: direct CHANGELOG lint, repository Markdown lint, and
+  `git diff --check` passed.
+- Compatibility: existing behavior contracts remain covered by the selected
+  Calendar, Explorer, Table, shared UI, accessibility, localization, and
+  architecture suites exercised by the desktop/web host runs.
+- Review corrections: restored the calendar reveal callback reference, the
+  host-message type, false sort handling, typed bounded-list cloning, shared
+  root facts, the exact English selection announcement, legend list labels,
+  and stable standard-timeline keys.
+- Remaining evidence: PR #318 hosted qlty must be rechecked after the
+  completion commit is pushed.
+
 ## Feature Exit
 
-- Definition of Done status: not started. Slice 1 must be independently
-  reviewed, explicitly completion-approved, and committed; the remote PR qlty
-  check and all planned validation must pass before Feature Exit.
+- Definition of Done status: implementation evidence complete and Slice 1
+  Completion Approval granted; the exact completion commit, remote PR qlty
+  check, and Feature Exit remain.
 - Durable documentation updates: none expected; behavior and repository policy
   do not change.
-- Open risks: the implementation reviewer must compare the final DOM,
-  lifecycle, localization values, public exports, and qlty issue inventory,
-  with special attention to helper extractions and host cleanup behavior.
+- Open risks: hosted PR qlty must be rechecked after the completion commit;
+  Feature Exit remains pending.
 
 ## Validation Checklist
 
 - [x] Reconciled all 36 hosted PR blockers and all 43 locally listed smell
       locations into Slice 1.
-- [ ] Focused Calendar host/runtime, component, model, accessibility,
+- [x] Focused Calendar host/runtime, component, model, accessibility,
       localization, shared UI, and Table regression suites pass.
-- [ ] TypeScript test compilation passes.
-- [ ] `rtk pnpm run qlty` reports no blocking issue for the PR diff.
-- [ ] Direct `CHANGELOG.md` Markdown lint and repository `lint:md` pass.
-- [ ] Production, desktop, and web builds pass.
-- [ ] Desktop and web host tests, including WEB-7 through WEB-10, pass.
-- [ ] Architecture dependency test and diff checks pass.
+- [x] TypeScript test compilation passes.
+- [x] `rtk pnpm run qlty` reports no blocking issue for the PR diff.
+- [x] Direct `CHANGELOG.md` Markdown lint and repository `lint:md` pass.
+- [x] Production, desktop, and web builds pass.
+- [x] Desktop and web host tests, including WEB-7 through WEB-10, pass.
+- [x] Architecture dependency test and diff checks pass.
 - [ ] PR #318's hosted qlty check passes after the completion commit is pushed.

@@ -16,6 +16,24 @@
 
 <!-- markdownlint-enable MD013 -->
 
+## Implementation Result
+
+<!-- markdownlint-disable MD013 -->
+
+| Evidence           | Result                                                                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Approved scope     | Calendar host/runtime, Explorer requests, Table header, Calendar UI/model, shared UI, localization helpers, and two CHANGELOG wraps only |
+| Quality            | `pnpm run qlty` passed; `qlty smells --no-snippets` returned zero findings against `origin/main`                                         |
+| Compile and builds | `pnpm run test:compile`, `pnpm run build`, `development:desktop`, and `development:web` passed                                           |
+| Host validation    | Desktop and web host suites passed; existing macOS codesign diagnostic was non-fatal                                                     |
+| Markdown and diff  | Direct CHANGELOG lint, repository Markdown lint, and `git diff --check` passed                                                           |
+| Review corrections | Restored lifecycle, typing, accessibility, localization, and stable-key contracts identified during implementation review                |
+| Review verdict     | `implementation-reviewer` returned `Ready` on 2026-09-21 with no Findings                                                                |
+| Completion gate    | Approved on 2026-09-21 under the established automatic per-slice approval policy; exact paths are recorded in `TASKS.md`                 |
+| Remaining gate     | PR #318 hosted qlty check after the completion commit is pushed                                                                          |
+
+<!-- markdownlint-enable MD013 -->
+
 ## Live Finding Coverage
 
 <!-- markdownlint-disable MD013 -->

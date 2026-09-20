@@ -47,9 +47,28 @@ export const getTableHeaderAriaSort = (
   header: Pick<Header<TableRowView, unknown>, "column">,
 ): "ascending" | "descending" | "none" | undefined => {
   if (!header.column.getCanSort()) return undefined;
-  const sort = header.column.getIsSorted();
-  return sort === "asc" ? "ascending" : sort === "desc" ? "descending" : "none";
+  return tableHeaderAriaSortValue(header.column.getIsSorted());
 };
+
+const tableHeaderAriaSortValue = (
+  sort: false | "asc" | "desc",
+): "ascending" | "descending" | "none" => {
+  if (sort === "asc") return "ascending";
+  if (sort === "desc") return "descending";
+  return "none";
+};
+
+const headerFocus = (
+  header: Header<TableRowView, unknown>,
+): TableGridFocus => ({
+  kind: "header",
+  columnId: header.column.id,
+});
+
+const isCurrentHeaderFocus = (
+  focus: TableGridFocus | undefined,
+  header: Header<TableRowView, unknown>,
+): boolean => focus?.kind === "header" && focus.columnId === header.column.id;
 
 const renderSortableHeaderContent = (
   header: Header<TableRowView, unknown>,
@@ -57,13 +76,8 @@ const renderSortableHeaderContent = (
   props: TableHeaderProps,
 ): React.ReactNode => {
   const isSorted = header.column.getIsSorted();
-  const focus: TableGridFocus = {
-    kind: "header",
-    columnId: header.column.id,
-  };
-  const isCurrent =
-    props.currentFocus?.kind === "header" &&
-    props.currentFocus.columnId === header.column.id;
+  const focus = headerFocus(header);
+  const isCurrent = isCurrentHeaderFocus(props.currentFocus, header);
   return (
     <TableSortLabel
       ref={(element) => props.registerFocusElement(focus, element)}
@@ -96,42 +110,112 @@ const renderHeaderContent = (
 const renderHeaderCell = (
   header: Header<TableRowView, unknown>,
   props: TableHeaderProps,
-): React.ReactNode => {
-  const firstLeafColumnId = header.getLeafHeaders()[0]?.column.id;
-  const columnIndex = props.visibleColumnIds.indexOf(firstLeafColumnId);
-  const focus: TableGridFocus = {
-    kind: "header",
-    columnId: header.column.id,
-  };
+): React.ReactNode => <TableHeaderCell header={header} props={props} />;
+
+const TableHeaderCell = ({
+  header,
+  props,
+}: Readonly<{
+  header: Header<TableRowView, unknown>;
+  props: TableHeaderProps;
+}>): React.ReactElement => {
+  const columnIndex = visibleHeaderColumnIndex(header, props.visibleColumnIds);
+  const focus = headerFocus(header);
   const focusTableCell =
     canFocusTableHeader(header) && !canRenderSortableHeader(header);
-  const isCurrent =
-    props.currentFocus?.kind === "header" &&
-    props.currentFocus.columnId === header.column.id;
+  const isCurrent = isCurrentHeaderFocus(props.currentFocus, header);
+  const cellProps = createHeaderCellProps({
+    header,
+    props,
+    focus,
+    focusTableCell,
+    isCurrent,
+    columnIndex,
+  });
   return (
-    <TableCell
-      ref={
-        focusTableCell
-          ? (element) =>
-              props.registerFocusElement(focus, element as HTMLElement | null)
-          : undefined
-      }
-      key={header.id}
-      role="columnheader"
-      aria-colindex={columnIndex >= 0 ? columnIndex + 1 : undefined}
-      aria-sort={getTableHeaderAriaSort(header)}
-      colSpan={header.colSpan}
-      tabIndex={focusTableCell ? (isCurrent ? 0 : -1) : undefined}
-      onFocus={focusTableCell ? () => props.onFocus(focus) : undefined}
-      onKeyDown={
-        focusTableCell ? (event) => props.onKeyDown(event, focus) : undefined
-      }
-      sx={[styleTableCell, focusTableCell ? headerCellFocusSx : undefined]}
-    >
+    <TableCell {...cellProps}>
       {header.isPlaceholder ? undefined : renderHeaderContent(header, props)}
     </TableCell>
   );
 };
+
+const visibleHeaderColumnIndex = (
+  header: Header<TableRowView, unknown>,
+  visibleColumnIds: readonly string[],
+): number => {
+  const firstLeafColumnId = header.getLeafHeaders()[0]?.column.id;
+  return firstLeafColumnId === undefined
+    ? -1
+    : visibleColumnIds.indexOf(firstLeafColumnId);
+};
+
+const createHeaderCellProps = ({
+  header,
+  props,
+  focus,
+  focusTableCell,
+  isCurrent,
+  columnIndex,
+}: Readonly<{
+  header: Header<TableRowView, unknown>;
+  props: TableHeaderProps;
+  focus: TableGridFocus;
+  focusTableCell: boolean;
+  isCurrent: boolean;
+  columnIndex: number;
+}>) => ({
+  ref: headerCellRef(focusTableCell, props, focus),
+  key: header.id,
+  role: "columnheader" as const,
+  "aria-colindex": headerColumnIndex(columnIndex),
+  "aria-sort": getTableHeaderAriaSort(header),
+  colSpan: header.colSpan,
+  tabIndex: headerCellTabIndex(focusTableCell, isCurrent),
+  onFocus: headerCellFocusHandler(focusTableCell, props, focus),
+  onKeyDown: headerCellKeyDownHandler(focusTableCell, props, focus),
+  sx: headerCellSx(focusTableCell),
+});
+
+const headerCellRef = (
+  focusTableCell: boolean,
+  props: TableHeaderProps,
+  focus: TableGridFocus,
+) =>
+  focusTableCell
+    ? (element: HTMLElement | null) =>
+        props.registerFocusElement(focus, element)
+    : undefined;
+
+const headerColumnIndex = (columnIndex: number): number | undefined =>
+  columnIndex >= 0 ? columnIndex + 1 : undefined;
+
+const headerCellTabIndex = (
+  focusTableCell: boolean,
+  isCurrent: boolean,
+): number | undefined => {
+  if (!focusTableCell) return undefined;
+  return isCurrent ? 0 : -1;
+};
+
+const headerCellFocusHandler = (
+  focusTableCell: boolean,
+  props: TableHeaderProps,
+  focus: TableGridFocus,
+) => (focusTableCell ? () => props.onFocus(focus) : undefined);
+
+const headerCellKeyDownHandler = (
+  focusTableCell: boolean,
+  props: TableHeaderProps,
+  focus: TableGridFocus,
+) =>
+  focusTableCell
+    ? (event: KeyboardEvent<HTMLElement>) => props.onKeyDown(event, focus)
+    : undefined;
+
+const headerCellSx = (focusTableCell: boolean) => [
+  styleTableCell,
+  focusTableCell ? headerCellFocusSx : undefined,
+];
 
 const TableHeader: FC<TableHeaderProps> = (props) => {
   console.log("render TableHeader.");

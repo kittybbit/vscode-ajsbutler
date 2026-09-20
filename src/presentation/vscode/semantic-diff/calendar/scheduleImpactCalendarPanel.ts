@@ -49,6 +49,57 @@ const findCachedPanel = (
   return undefined;
 };
 
+const getPanelCache = (
+  registry: ScheduleImpactCalendarSessionRegistry,
+): Map<string, ScheduleImpactCalendarPanelHandle> => {
+  const cache = panelCaches.get(registry);
+  if (cache) return cache;
+  const created = new Map<string, ScheduleImpactCalendarPanelHandle>();
+  panelCaches.set(registry, created);
+  return created;
+};
+
+const createCalendarPanelHandle = ({
+  deps,
+  input,
+  registry,
+  cache,
+  session,
+}: Readonly<{
+  deps: ScheduleImpactCalendarPanelDeps;
+  input: OpenScheduleImpactCalendarPanelInput;
+  registry: ScheduleImpactCalendarSessionRegistry;
+  cache: Map<string, ScheduleImpactCalendarPanelHandle>;
+  session: ScheduleImpactCalendarSessionHandle;
+}>): ScheduleImpactCalendarPanelHandle => {
+  const runtime = createScheduleImpactCalendarPanelRuntime(
+    {
+      extensionContext: deps.extensionContext,
+      createWebviewPanel: deps.createWebviewPanel,
+      sessionRegistry: registry,
+    },
+    session,
+  );
+  const removeCachedPanel = (): void => {
+    if (cache.get(input.parentSessionId) === handle) {
+      cache.delete(input.parentSessionId);
+    }
+  };
+  const handle: ScheduleImpactCalendarPanelHandle = {
+    calendarSessionId: session.calendarSessionId,
+    session,
+    panel: runtime.panel,
+    reveal: () => runtime.panel.reveal(vscode.ViewColumn.Active),
+    dispose: (): void => {
+      removeCachedPanel();
+      runtime.dispose();
+    },
+  };
+  cache.set(input.parentSessionId, handle);
+  runtime.panel.onDidDispose(removeCachedPanel);
+  return handle;
+};
+
 /** Internal panel foundation. Slice 2 intentionally mounts no visible UI. */
 export const openScheduleImpactCalendarPanel = (
   deps: ScheduleImpactCalendarPanelDeps,
@@ -56,8 +107,7 @@ export const openScheduleImpactCalendarPanel = (
 ): ScheduleImpactCalendarPanelHandle => {
   const registry =
     deps.sessionRegistry ?? new ScheduleImpactCalendarSessionRegistry();
-  const cache = panelCaches.get(registry) ?? new Map();
-  panelCaches.set(registry, cache);
+  const cache = getPanelCache(registry);
   const existing = findCachedPanel(cache, registry, input.parentSessionId);
   if (existing) return existing;
   let panel: vscode.WebviewPanel | undefined;
@@ -69,32 +119,14 @@ export const openScheduleImpactCalendarPanel = (
     reveal: () => panel?.reveal(vscode.ViewColumn.Active),
   });
   try {
-    const runtime = createScheduleImpactCalendarPanelRuntime(
-      {
-        extensionContext: deps.extensionContext,
-        createWebviewPanel: deps.createWebviewPanel,
-        sessionRegistry: registry,
-      },
+    const handle = createCalendarPanelHandle({
+      deps,
+      input,
+      registry,
+      cache,
       session,
-    );
-    panel = runtime.panel;
-    const removeCachedPanel = (): void => {
-      if (cache.get(input.parentSessionId) === handle) {
-        cache.delete(input.parentSessionId);
-      }
-    };
-    const handle: ScheduleImpactCalendarPanelHandle = {
-      calendarSessionId: session.calendarSessionId,
-      session,
-      panel: runtime.panel,
-      reveal: () => runtime.panel.reveal(vscode.ViewColumn.Active),
-      dispose: (): void => {
-        removeCachedPanel();
-        runtime.dispose();
-      },
-    };
-    cache.set(input.parentSessionId, handle);
-    runtime.panel.onDidDispose(removeCachedPanel);
+    });
+    panel = handle.panel;
     return handle;
   } catch (error) {
     registry.close(session.calendarSessionId, session.epoch);
@@ -111,31 +143,40 @@ export const createScheduleImpactCalendarPanel = (
       deps.sessionRegistry ?? new ScheduleImpactCalendarSessionRegistry(),
   };
   const openPanels = new Map<string, ScheduleImpactCalendarPanelHandle>();
-  return (
-    input: OpenScheduleImpactCalendarPanelInput,
-  ): ScheduleImpactCalendarPanelHandle => {
-    const existing = findCachedPanel(
-      openPanels,
-      factoryDeps.sessionRegistry,
-      input.parentSessionId,
-    );
-    if (existing) return existing;
-    const handle = openScheduleImpactCalendarPanel(factoryDeps, input);
-    const removeOpenPanel = (): void => {
-      if (openPanels.get(input.parentSessionId) === activeHandle) {
-        openPanels.delete(input.parentSessionId);
-      }
-    };
-    const originalDispose = handle.dispose;
-    const activeHandle: ScheduleImpactCalendarPanelHandle = {
-      ...handle,
-      dispose: () => {
-        removeOpenPanel();
-        originalDispose();
-      },
-    };
-    openPanels.set(input.parentSessionId, activeHandle);
-    handle.panel.onDidDispose(removeOpenPanel);
-    return activeHandle;
+  return (input) => createFactoryPanel(factoryDeps, openPanels, input);
+};
+
+const createFactoryPanel = (
+  deps: ScheduleImpactCalendarPanelDeps,
+  openPanels: Map<string, ScheduleImpactCalendarPanelHandle>,
+  input: OpenScheduleImpactCalendarPanelInput,
+): ScheduleImpactCalendarPanelHandle => {
+  const registry = deps.sessionRegistry!;
+  const existing = findCachedPanel(openPanels, registry, input.parentSessionId);
+  if (existing) return existing;
+  const handle = openScheduleImpactCalendarPanel(deps, input);
+  return cacheFactoryPanel(openPanels, input.parentSessionId, handle);
+};
+
+const cacheFactoryPanel = (
+  openPanels: Map<string, ScheduleImpactCalendarPanelHandle>,
+  parentSessionId: string,
+  handle: ScheduleImpactCalendarPanelHandle,
+): ScheduleImpactCalendarPanelHandle => {
+  const removeOpenPanel = (): void => {
+    if (openPanels.get(parentSessionId) === activeHandle) {
+      openPanels.delete(parentSessionId);
+    }
   };
+  const originalDispose = handle.dispose;
+  const activeHandle: ScheduleImpactCalendarPanelHandle = {
+    ...handle,
+    dispose: () => {
+      removeOpenPanel();
+      originalDispose();
+    },
+  };
+  openPanels.set(parentSessionId, activeHandle);
+  handle.panel.onDidDispose(removeOpenPanel);
+  return activeHandle;
 };

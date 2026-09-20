@@ -19,6 +19,30 @@ type CalendarState = Readonly<{
   sidecar: SemanticDiffScheduleImpact;
 }>;
 
+type CalendarSessionMessage = Parameters<
+  Parameters<
+    ReturnType<typeof createScheduleImpactCalendarBridge>["onMessage"]
+  >[0]
+>[0];
+
+const applyCalendarSessionMessage = (
+  message: CalendarSessionMessage,
+  setState: React.Dispatch<React.SetStateAction<CalendarState | undefined>>,
+  setFailure: React.Dispatch<React.SetStateAction<boolean>>,
+): void => {
+  switch (message.type) {
+    case "session":
+      setState({ sessionId: message.sessionId, sidecar: message.payload });
+      return;
+    case "failure":
+      setFailure(true);
+      return;
+    case "close":
+      setState(undefined);
+      return;
+  }
+};
+
 export type ScheduleImpactCalendarAppProps = Readonly<{
   sidecar?: SemanticDiffScheduleImpact;
 }>;
@@ -37,13 +61,7 @@ const useCalendarSession = (): Readonly<{
     }
     const bridge = createScheduleImpactCalendarBridge(sessionId);
     const unsubscribe = bridge.onMessage((message) => {
-      if (message.type === "session") {
-        setState({ sessionId: message.sessionId, sidecar: message.payload });
-      } else if (message.type === "failure") {
-        setFailure(true);
-      } else if (message.type === "close") {
-        setState(undefined);
-      }
+      applyCalendarSessionMessage(message, setState, setFailure);
     });
     bridge.sendReady();
     return () => {
@@ -96,39 +114,47 @@ const ScheduleImpactCalendarInnerApp = ({
   const sidecar = providedSidecar ?? session.state?.sidecar;
   const themeMode = isDarkMode ? "dark" : "light";
   const labels = getScheduleImpactCalendarLabels(lang);
-  if (!sidecar)
-    return (
-      <CalendarThemeShell themeMode={themeMode}>
-        <Box
-          component="main"
-          aria-labelledby="schedule-impact-calendar-title"
-          sx={{ p: 2 }}
-        >
-          <Box
-            component="h1"
-            id="schedule-impact-calendar-title"
-            sx={{ typography: "h4" }}
-          >
-            {session.failure ? labels.failed : labels.title}
-          </Box>
-          {session.failure ? (
-            <Alert severity="error" variant="outlined" role="status">
-              {labels.error}
-            </Alert>
-          ) : (
-            <Box role="status" aria-live="polite">
-              {labels.loading}
-            </Box>
-          )}
-        </Box>
-      </CalendarThemeShell>
-    );
-  return (
+  return sidecar ? (
     <CalendarThemeShell themeMode={themeMode}>
       <ScheduleImpactCalendarContents sidecar={sidecar} language={lang} />
     </CalendarThemeShell>
+  ) : (
+    <CalendarThemeShell themeMode={themeMode}>
+      <CalendarLoadingState labels={labels} failed={session.failure} />
+    </CalendarThemeShell>
   );
 };
+
+const CalendarLoadingState = ({
+  labels,
+  failed,
+}: Readonly<{
+  labels: ReturnType<typeof getScheduleImpactCalendarLabels>;
+  failed: boolean;
+}>): React.ReactElement => (
+  <Box
+    component="main"
+    aria-labelledby="schedule-impact-calendar-title"
+    sx={{ p: 2 }}
+  >
+    <Box
+      component="h1"
+      id="schedule-impact-calendar-title"
+      sx={{ typography: "h4" }}
+    >
+      {failed ? labels.failed : labels.title}
+    </Box>
+    {failed ? (
+      <Alert severity="error" variant="outlined" role="status">
+        {labels.error}
+      </Alert>
+    ) : (
+      <Box role="status" aria-live="polite">
+        {labels.loading}
+      </Box>
+    )}
+  </Box>
+);
 
 export const ScheduleImpactCalendarApp = ({
   sidecar,

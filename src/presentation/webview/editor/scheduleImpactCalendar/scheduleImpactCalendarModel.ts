@@ -69,11 +69,13 @@ const compareItem = (
   left: SemanticDiffScheduleImpactTimelineItem,
   right: SemanticDiffScheduleImpactTimelineItem,
 ): number =>
-  compareText(left.date, right.date) ||
-  compareText(left.time, right.time) ||
-  compareNumber(left.rule, right.rule) ||
-  compareNumber(left.occurrenceOrdinal, right.occurrenceOrdinal) ||
-  compareText(left.id, right.id);
+  [
+    compareText(left.date, right.date),
+    compareText(left.time, right.time),
+    compareNumber(left.rule, right.rule),
+    compareNumber(left.occurrenceOrdinal, right.occurrenceOrdinal),
+    compareText(left.id, right.id),
+  ].find((result) => result !== 0) ?? 0;
 
 const compareRoot = (
   left: SemanticDiffScheduleImpactRoot,
@@ -85,15 +87,13 @@ const compareRoot = (
 const rootOutcome = (
   root: SemanticDiffScheduleImpactRoot,
 ): SemanticDiffScheduleImpactRootOutcome | null => {
-  const outcomes = [root.before?.outcome, root.after?.outcome].filter(
-    (value): value is SemanticDiffScheduleImpactRootOutcome =>
-      value !== undefined,
+  const outcomes = rootOutcomes(root);
+  return (
+    (["supported-runs", "partial", "uncalculated", "valid-no-runs"].find(
+      (outcome) =>
+        outcomes.includes(outcome as ScheduleImpactCalendarRootOutcome),
+    ) as ScheduleImpactCalendarRootOutcome | undefined) ?? null
   );
-  if (outcomes.length === 0) return null;
-  if (outcomes.includes("supported-runs")) return "supported-runs";
-  if (outcomes.includes("partial")) return "partial";
-  if (outcomes.includes("uncalculated")) return "uncalculated";
-  return "valid-no-runs";
 };
 
 const rootLabel = (root: SemanticDiffScheduleImpactRoot): string =>
@@ -102,11 +102,15 @@ const rootLabel = (root: SemanticDiffScheduleImpactRoot): string =>
 const rootTransition = (
   root: SemanticDiffScheduleImpactRoot,
 ): ScheduleImpactCalendarRootOption["scopeTransition"] =>
-  root.scopeTransition?.kind ??
-  (root.matchKind === "added-root-scope" ||
-  root.matchKind === "removed-root-scope"
-    ? root.matchKind
-    : null);
+  root.scopeTransition?.kind ?? rootScopeMatchKind(root.matchKind);
+
+const rootScopeMatchKind = (
+  matchKind: SemanticDiffScheduleImpactRoot["matchKind"],
+): ScheduleImpactCalendarRootOption["scopeTransition"] => {
+  if (matchKind === "added-root-scope") return matchKind;
+  if (matchKind === "removed-root-scope") return matchKind;
+  return null;
+};
 
 const rootOutcomes = (
   root: SemanticDiffScheduleImpactRoot,
@@ -149,20 +153,35 @@ export const normalizeScheduleImpactCalendarFilters = (
   roots: readonly SemanticDiffScheduleImpactRoot[],
 ): ScheduleImpactCalendarFilters => {
   const defaults = defaultFilters(roots);
-  const rootIds =
-    filters?.rootIds?.filter((id) => roots.some((root) => root.id === id)) ??
-    defaults.rootIds;
-  const outcomes =
-    filters?.outcomes?.filter((outcome) => allOutcomes.includes(outcome)) ??
-    defaults.outcomes;
-  const runStates =
-    filters?.runStates?.filter((state) => allRunStates.includes(state)) ??
-    defaults.runStates;
+  const rootIds = normalizeFilterValues(
+    filters?.rootIds,
+    roots.map((root) => root.id),
+    defaults.rootIds,
+  );
+  const outcomes = normalizeFilterValues(
+    filters?.outcomes,
+    allOutcomes,
+    defaults.outcomes,
+  );
+  const runStates = normalizeFilterValues(
+    filters?.runStates,
+    allRunStates,
+    defaults.runStates,
+  );
   return {
-    rootIds: rootIds.length > 0 ? [...rootIds] : defaults.rootIds,
-    outcomes: outcomes.length > 0 ? [...outcomes] : defaults.outcomes,
-    runStates: runStates.length > 0 ? [...runStates] : defaults.runStates,
+    rootIds,
+    outcomes,
+    runStates,
   };
+};
+
+const normalizeFilterValues = <T extends string>(
+  selected: readonly T[] | undefined,
+  available: readonly T[],
+  fallback: readonly T[],
+): readonly T[] => {
+  const filtered = selected?.filter((value) => available.includes(value));
+  return filtered && filtered.length > 0 ? [...filtered] : [...fallback];
 };
 
 const issueOrder = (

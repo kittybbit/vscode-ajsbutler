@@ -39,12 +39,17 @@ const escapeHtml = (value: string): string =>
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 
-const buildCalendarShell = (
-  panel: vscode.WebviewPanel,
-  extensionContext: vscode.ExtensionContext,
-  sessionId: string,
-  language: "en" | "ja",
-): string => {
+const buildCalendarShell = ({
+  panel,
+  extensionContext,
+  sessionId,
+  language,
+}: Readonly<{
+  panel: vscode.WebviewPanel;
+  extensionContext: vscode.ExtensionContext;
+  sessionId: string;
+  language: "en" | "ja";
+}>): string => {
   const nonce = uuid();
   const bundleUri =
     typeof panel.webview.asWebviewUri === "function"
@@ -89,12 +94,12 @@ const prepareCalendarPanel = (
     enableScripts: true,
     localResourceRoots: [deps.extensionContext.extensionUri],
   };
-  panel.webview.html = buildCalendarShell(
+  panel.webview.html = buildCalendarShell({
     panel,
-    deps.extensionContext,
-    session.calendarSessionId,
-    session.displayLanguage,
-  );
+    extensionContext: deps.extensionContext,
+    sessionId: session.calendarSessionId,
+    language: session.displayLanguage,
+  });
 };
 
 type CalendarRuntimeState = {
@@ -232,17 +237,30 @@ const handleCalendarMessage = (
   value: unknown,
 ): void => {
   if (!isLiveSession(context)) return;
-  const viewerRequest = parseViewerRequest(value);
-  if (viewerRequest?.type === "resource") {
-    postResourceMessage(viewerRequest.data, context.panel);
-    return;
-  }
+  if (handleCalendarResourceRequest(context, value)) return;
+  handleValidatedCalendarMessage(context, value);
+};
+
+const handleValidatedCalendarMessage = (
+  context: CalendarRuntimeContext,
+  value: unknown,
+): void => {
   const decision = classifyCalendarRequest(context, value);
   if (decision.ok === false) {
     postFailureMessage(context, null, decision.code);
     return;
   }
   respondToCalendarRequest(context, decision.request);
+};
+
+const handleCalendarResourceRequest = (
+  context: CalendarRuntimeContext,
+  value: unknown,
+): boolean => {
+  const request = parseViewerRequest(value);
+  if (request?.type !== "resource") return false;
+  postResourceMessage(request.data, context.panel);
+  return true;
 };
 
 const createCalendarMessageListener =
