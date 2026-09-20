@@ -4,19 +4,21 @@
 
 - Purpose: correct exactly three PR #319 findings in the existing Solution
   Shape contract without reopening its broader design.
-- Approved or active slice: Slice 1, approved for implementation after the
-  focused planning-package commit succeeds.
+- Approved or active slice: Slice 1, including the reviewed disposable-
+  snapshot observation procedure, approved for implementation after the
+  focused replan commit succeeds.
 - Do not edit runtime, tests, packages, generated artifacts, configuration,
   `.qlty`, `package.json`, or `engines.vscode`.
 - Do not add a skill, role, coordinator, wrapper, or evidence store.
 - Read first: `SPECS.md`, this file, and the durable surface being corrected.
 - Read `TRACEABILITY.md` only to verify cross-surface coverage.
-- Validate with non-mutating qlty observations, final qlty, focused Markdown
-  lint, architecture and full Verify evidence, and repeated path/status plus
-  deterministic content-hash checks. Status equality alone is not evidence of
+- Validate with disposable-snapshot qlty check/smells observations and the
+  aggregate final qlty run, focused Markdown lint, architecture and full Verify
+  evidence, and repeated primary-worktree path/status plus complete deterministic
+  path-and-hash manifests. Status equality alone is not evidence of
   non-mutation.
 - Approval and document-role policy: see `docs/specs/README.md`.
-- Next decision: commit the approved planning package, then implement Slice 1.
+- Next decision: commit the approved replan package, then resume Slice 1.
 
 ## Sync Rule
 
@@ -34,17 +36,24 @@
 - Status: Approved
 - Planning scope: one policy-correction slice covering the three findings and
   their required consistency propagation.
-- Review status: Ready for approval; independent review completed with no
-  findings
-- Human approval: Approved
-- Active implementation slice: Slice 1
+- Review status: Targeted replan review Ready with no actionable findings
+- Human approval: Approved, including the targeted disposable-snapshot replan
+- Active implementation slice: Slice 1 after the focused replan commit
+- Replanning trigger: the approved baseline procedure proved invalid because
+  `rtk pnpm exec qlty check` created `.qlty/plugin_cachedir` and
+  `.qlty/results` in the primary worktree outside the allowlist. This replan
+  moves both comparable and aggregate qlty observations into disposable
+  snapshots; the three findings, one slice, eight durable/two evidence paths,
+  and lifecycle remain unchanged.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation
+- Approved at: original scope and targeted replan approved in current
+  conversation
 - Approved scope: Slice 1, `Correct The Per-Slice Quality Evidence Contract`,
-  within the reviewed approval boundary below.
+  within the reviewed approval boundary below, including the disposable-
+  snapshot comparable and aggregate qlty procedure.
 - Approved paths:
   - Plan package:
     `docs/specs/features/tighten-sdd-solution-quality-contract/SPECS.md`,
@@ -61,9 +70,8 @@
     `docs/specs/features/tighten-sdd-solution-quality-contract/TASKS.md` and
     `docs/specs/features/tighten-sdd-solution-quality-contract/TRACEABILITY.md`.
 
-Implementation must not start while Status is Pending. A plan-reviewer
-`Ready` verdict is not Human Approval. After explicit approval, the focused
-planning package must be committed by `approval-committer` before Slice 1.
+The focused replan package must be committed by `approval-committer` before
+Slice 1 resumes.
 
 ## Completion Approval
 
@@ -98,17 +106,28 @@ planning package must be committed by `approval-committer` before Slice 1.
     direction that cannot be mapped reliably to a specific finding stays
     advisory; unchanged unrelated findings stay out of scope.
   - Define the pre-edit baseline and comparable final as the same non-mutating
-    observations: `rtk pnpm exec qlty check` and
-    `rtk pnpm exec qlty smells --no-snippets`, or a verified equivalent pair
-    using the same configuration, scope, identity, severity, and measured
-    value. Before and after each observation, capture both
-    `git status --short --untracked-files=all` and a deterministic content-hash
-    manifest that expands the complete untracked file set. Apply the same pair
-    around the formatting-capable `rtk pnpm run qlty` final validation. If that
-    aggregate run mutates any reviewed path, rerun both non-mutating commands
-    with their before/after pair and use only the repeated result for final
-    comparison. A new or mutated path outside the approved allowlist blocks the
-    slice and requires Replanning.
+    observations, executed inside exact disposable filesystem/worktree
+    snapshots rather than the primary worktree: `rtk pnpm exec qlty check` and
+    `rtk pnpm exec qlty smells --no-snippets`, using the same configuration,
+    scope, identity, severity, and measured value. The baseline snapshot must
+    represent the approved plan-commit state. The final snapshot must represent
+    the exact reviewed final state, including approved tracked and untracked
+    edits and deletions. Run the entire aggregate `rtk pnpm run qlty` inside
+    the disposable final snapshot, never on the primary worktree. Qlty caches,
+    results, logs, and other runtime artifacts may be created only inside the
+    disposable snapshot and are discarded with it; none are synchronized back.
+    No persistent script, wrapper, config change, cleanup exception, or new
+    tool is added. During snapshot preparation and every qlty run, capture
+    `git status --short --untracked-files=all` plus the complete deterministic
+    path-and-hash manifest; the primary worktree must remain identical and any
+    primary mutation is a blocker. If snapshot qlty formatting
+    changes analyzed source or evidence content, inspect the snapshot diff and
+    synchronize only approved/evidence paths as an intentional implementation
+    edit after separate allowlist analysis. Any outside-allowlist change blocks
+    and requires Replanning. After an approved sync, rebuild the exact final
+    snapshot from the updated primary and rerun the check/smells pair plus the
+    aggregate until the aggregate causes no analyzed source/evidence change;
+    only that stable final snapshot is final evidence.
   - Move the complete `Solution Shape Evidence` block in
     `TASKS.template.md` from plan scope into every `### Slice N` section. Make
     planning create, plan review assess, implementation read/update, and
@@ -143,30 +162,49 @@ planning package must be committed by `approval-committer` before Slice 1.
   selected-slice evidence consumption.
 - Relevant capability and custom-gap decision: use the existing qlty CLI
   subcommands directly for non-mutating observations and the existing package
-  aggregate for final validation; no custom comparison script or wrapper is
-  justified or proposed.
+  aggregate inside the disposable final snapshot; no custom comparison script
+  or wrapper is justified or proposed.
 - Automatic evidence versus reviewer judgment: qlty supplies observations and
   the architecture suite enforces only its existing catalog. Stable-identity
   comparability, reliable metric mapping, semantic ownership, abstraction
   value, and correct selected-slice use remain reviewer judgments.
 - qlty baseline/final: this policy-only slice does not change code. Its
-  implementation must nevertheless verify the proposed commands are
-  non-mutating by comparing exact `git status --short --untracked-files=all`
-  snapshots and a deterministic content-hash manifest before and after each
-  observation. The manifest command must expand all tracked and complete
-  non-ignored untracked paths. Use this exact command: `git ls-files --cached
-  --others --exclude-standard -z` piped to `xargs -0 -n1 shasum -a 256`, then
-  to `LC_ALL=C sort`.
-  Compare content for every approved/evidence path and every initially
-  dirty/untracked path, not status equality alone. A path first appearing or
-  changing outside the approved allowlist is a blocker/Replanning trigger.
-  Future code slices record each finding's identity, explicit severity ordering,
-  measured baseline/final values, and explicit higher-is-worse or
-  lower-is-worse direction in their own evidence block.
+  implementation must nevertheless run the comparable pair and the entire
+  aggregate `rtk pnpm run qlty` only inside exact disposable snapshots. The
+  baseline snapshot represents the approved plan-commit state; the final
+  snapshot represents the exact reviewed final state, including approved
+  tracked/untracked edits and deletions. Ensure each snapshot has local
+  disposable qlty cache/result/log destinations rather than inherited links to
+  the primary worktree or user cache, then discard it; snapshot-local artifacts
+  are never synchronized. Verify snapshot fidelity with a manifest of every
+  analyzed source/config path, excluding only declared qlty runtime artifacts
+  inside the snapshot. During snapshot preparation and each qlty run, capture
+  `git status --short --untracked-files=all` plus the complete deterministic
+  path-and-hash manifest of all tracked and
+  non-ignored untracked files, including clean tracked paths, additions,
+  deletions, and every file expanded from untracked directories. Record an
+  explicit absence/deletion entry for a path missing at that state. Use the
+  exact path enumeration command `git ls-files --cached --others
+  --exclude-standard -z` piped to `xargs -0 -n1 shasum -a 256`, then to
+  `LC_ALL=C sort`, with deterministic absence entries for missing paths. Compare
+  this complete manifest before and after snapshot preparation and each qlty
+  run; analyze the approved/evidence allowlist separately and never substitute
+  that subset comparison for the complete manifest. A new or mutated primary
+  path outside the allowlist is a blocker/Replanning trigger. If aggregate
+  formatting changes analyzed source/evidence content, inspect the snapshot
+  diff, synchronize only approved/evidence paths as an intentional
+  implementation edit, rebuild the exact final snapshot, and repeat the pair
+  plus aggregate until no analyzed source/evidence change remains. Future code
+  slices record each finding's identity, explicit severity ordering, measured
+  baseline/final values, and explicit higher-is-worse or lower-is-worse
+  direction in their own evidence block.
 - Replanning trigger check: stop if correction requires a fourth finding,
   changed lifecycle/document role, new automation, changed qlty configuration,
   changed runtime/test/package surface, or any broader semantic ownership,
-  port/adapter, framework, approval, or compatibility decision.
+  port/adapter, framework, approval, or compatibility decision. Also stop for
+  any unexpected primary-worktree mutation, qlty runtime output outside the
+  disposable snapshot, snapshot source/config fidelity mismatch, or new or
+  mutated path outside the approved allowlist.
 
 - Acceptance:
   - All durable surfaces distinguish reliably finding-mapped worsening
@@ -175,12 +213,25 @@ planning package must be committed by `approval-committer` before Slice 1.
     finding records its explicit severity ordering, baseline/final severity,
     measured values, and whether higher or lower measured values are worse;
     worsening follows that comparator, including lower-is-worse metrics.
-  - Baseline and comparable final use the same non-mutating check/smells pair;
-    final `rtk pnpm run qlty` is separate and triggers a repeated final
-    observation whenever its before/after status or content-hash evidence shows
-    mutation of any reviewed path. Status equality alone is insufficient.
-    Every observation covers all approved/evidence paths and every initially
-    dirty/untracked path, and a new or mutated path outside the allowlist is a
+  - Baseline and comparable final use the same non-mutating check/smells pair
+    inside exact disposable snapshots; the baseline snapshot is the approved
+    plan-commit state and the final snapshot is the exact reviewed final state,
+    including approved tracked/untracked edits and deletions. Run the entire
+    aggregate `rtk pnpm run qlty` in the disposable final snapshot, never on
+    primary. Qlty runtime artifacts are created only inside and discarded with
+    the snapshot. Verify snapshot fidelity with a source/config manifest
+    excluding only declared qlty runtime artifacts. During snapshot preparation
+    and each qlty run, capture before/after primary status plus complete
+    deterministic path-and-hash manifests over all tracked and non-ignored
+    untracked files, including clean
+    tracked paths, additions, deletions, and full untracked expansion; perform
+    allowlist analysis separately. If snapshot formatting changes analyzed
+    source/evidence content, inspect the diff and synchronize only approved or
+    evidence paths as an intentional implementation edit. Rebuild the exact
+    final snapshot after sync and repeat the pair plus aggregate until aggregate
+    causes no analyzed source/evidence change; only the stable snapshot is final
+    evidence. Primary state must remain identical during preparation and qlty
+    execution. Any outside-allowlist or unexpected primary mutation is a
     blocker/Replanning trigger.
   - The template contains no plan-global Solution Shape evidence block. Every
     `### Slice N` carries the complete compact block, including semantic owner,
@@ -199,37 +250,56 @@ planning package must be committed by `approval-committer` before Slice 1.
     architecture-test boundary, and Replanning triggers retain their meaning.
 - Validation:
 
-  - Before edits, save the exact `git status --short --untracked-files=all`
-    output and a deterministic content-hash manifest for the complete tracked
-    and non-ignored untracked set. Generate the manifest without adding a repo
-    script or wrapper, using the same command every time: `git ls-files
-    --cached --others --exclude-standard -z` piped to `xargs -0 -n1 shasum
-    -a 256`, then to `LC_ALL=C sort`.
-    The before/after evidence must cover every approved/evidence path and every
-    initially dirty/untracked path, including untracked files expanded from
-    directories. Run `rtk pnpm exec qlty check` and
-    `rtk pnpm exec qlty smells --no-snippets` separately; capture status and
-    manifest immediately before and after each command. Content or path
-    mutation, not status equality alone, determines non-mutation. A newly
-    created or mutated path outside the eight durable/two evidence-path
-    allowlist is a blocker and Replanning trigger.
-  - After edits and other potentially mutating validation, repeat the same two
-    non-mutating commands with identical configuration and scope, with the same
-    before/after status and content-hash pair around each command. Compare rule,
-    path, symbol/location when available, and record for each comparable
-    finding the explicit severity ordering, baseline/final severity, measured
-    values, and higher-is-worse or lower-is-worse metric direction. Any new or
-    adverse movement under that comparator is Finding/NG. Record only identity
-    or direction that cannot be mapped reliably as advisory, and do not absorb
-    unchanged unrelated findings.
-  - Run `rtk pnpm run qlty` as separate formatting-capable final validation,
-    with the same status and content-hash capture immediately before and after
-    the aggregate run. If it mutates any reviewed path, inspect the exact
-    mutation; if it mutates a path outside the allowlist, block and request
-    Replanning. Otherwise rerun both non-mutating check/smells commands with
-    their own before/after status and manifest pair, and use only that repeated
-    observation for final comparison. Record the comparator with the final
-    baseline/final evidence.
+  - Prepare two exact disposable filesystem/worktree snapshots without adding
+    a repo script, wrapper, config, cleanup exception, or new tool. The baseline
+    snapshot represents the approved plan-commit state. The final snapshot
+    represents the exact reviewed final state, including approved tracked and
+    untracked edits and deletions. Before and after each snapshot preparation,
+    capture `git status --short --untracked-files=all` plus the complete
+    deterministic path-and-hash manifest of all tracked and non-ignored
+    untracked files, including clean tracked paths, additions,
+    deletions, and every file expanded from untracked directories. Record
+    explicit absence/deletion entries. Keep primary state identical during
+    preparation; any mutation is a blocker/Replanning trigger. Perform
+    allowlist analysis separately rather than substituting a subset comparison.
+  - In each disposable snapshot, materialize local qlty runtime destinations
+    rather than inherited links to the primary worktree or user cache. Run
+    `rtk pnpm exec qlty check` and `rtk pnpm exec qlty smells --no-snippets`
+    separately in the snapshot with the same configuration and scope, then run
+    the entire aggregate `rtk pnpm run qlty` in the disposable final snapshot,
+    never on primary. Capture the primary status command
+    (`git status --short --untracked-files=all`) and the complete path-and-hash
+    manifest immediately before and after each qlty run and once after snapshot
+    discard; primary state must remain identical during preparation and
+    execution.
+    Qlty caches, results, logs, and other runtime artifacts may exist only
+    inside the disposable snapshot. Verify snapshot fidelity with a manifest of
+    every analyzed source/config path, including `.qlty/qlty.toml`, package
+    manifests, and lockfiles; exclude only the declared snapshot-local qlty
+    runtime paths `.qlty/plugin_cachedir/**`, `.qlty/results/**`,
+    `.qlty/logs/**`, and `.qlty/out/**`. If snapshot formatting changes
+    analyzed source/evidence content, inspect the snapshot diff and synchronize
+    only approved/evidence paths as an intentional implementation edit; any
+    outside-allowlist change blocks/Replans. Rebuild the exact final snapshot
+    from the updated primary and repeat the pair plus aggregate until aggregate
+    causes no analyzed source/evidence change; discard all snapshot-local
+    artifacts without synchronization.
+  - Compare rule, path, symbol/location when available, and record for each
+    comparable finding the explicit severity ordering, baseline/final severity,
+    measured values, and higher-is-worse or lower-is-worse metric direction.
+    Any new or adverse movement under that comparator is Finding/NG. Record
+    only identity or direction that cannot be mapped reliably as advisory, and
+    do not absorb unchanged unrelated findings.
+  - Run the aggregate `rtk pnpm run qlty` only in the disposable final
+    snapshot, never on the primary worktree. If snapshot formatting changes
+    analyzed source/evidence content, inspect the snapshot diff; only approved
+    or evidence paths may be deliberately synchronized as an implementation
+    edit after separate allowlist analysis. Any outside-allowlist change blocks
+    and requests Replanning. Rebuild the exact final snapshot from the updated
+    primary and rerun check, smells, and aggregate until the aggregate causes no
+    analyzed source/evidence change; use only that stable final snapshot for
+    final evidence. Snapshot-local qlty artifacts are discarded and never
+    synchronized.
   - Run focused Markdown lint over the exact Markdown scope with this command:
 
     ```bash
@@ -254,13 +324,17 @@ planning package must be committed by `approval-committer` before Slice 1.
     `rtk pnpm run test:web:run`.
   - After test compilation, run the focused existing architecture suite:
     `rtk node ./node_modules/mocha/bin/mocha --ui tdd out/test/suite/architectureDependencyRules.test.js`.
-  - Run `rtk git diff --check`; compare final
-    `git status --short --untracked-files=all`, deterministic content-hash
-    manifest, and changed-path output with the approved durable/evidence-only
-    allowlists and the initial dirty/untracked path set. Confirm
-    `.qlty/qlty.toml`, `package.json`, and `engines.vscode` are unchanged and
-    no generated validation output is included. A new or mutated path outside
-    the allowlist blocks the slice and requires Replanning.
+  - Run `rtk git diff --check`; compare final primary complete path-and-hash
+    manifest and changed-path output with the approved durable/evidence-only
+    allowlists and the initial complete manifest. This comparison includes all
+    clean tracked paths, additions, deletions, and fully expanded non-ignored
+    untracked files; allowlist analysis is separate and cannot replace it.
+    Verify each snapshot's analyzed source/config manifest against its expected
+    baseline or final state, with only the declared snapshot-local qlty runtime
+    paths excluded. Confirm `.qlty/qlty.toml`, `package.json`, and
+    `engines.vscode` are unchanged and no generated validation output is
+    included in the primary worktree. A new or mutated path outside the
+    allowlist blocks the slice and requires Replanning.
   - Dry-run the revised template as a two-slice feature. Slice A owns an
     application WebAPI port and infrastructure adapter with fetch/credential
     isolation, translation, error normalization, timeout lifecycle, and its
@@ -308,15 +382,16 @@ planning package must be committed by `approval-committer` before Slice 1.
     `.github/workflows/verify.yml`, and
     `src/test/suite/architectureDependencyRules.test.ts`.
 - Risks: broad edits to `docs/specs/README.md` could disturb lifecycle
-  ownership; repeated qlty wording could drift; “equivalent” could admit a
-  mutating command; status equality could overlook content mutation or
-  untracked artifacts; a missing severity ordering or wrong metric direction
-  could misclassify a regression (including a lower-is-worse metric); and
-  multi-slice tools could still read the nearest global evidence. Mitigate with
-  a sentence-level SSOT correction, exact default commands, repeated
-  before/after status plus deterministic content-hash manifests, explicit
-  per-finding comparators, allowlisted paths, and selected-slice dry-run
-  evidence.
+  ownership; repeated qlty wording could drift; a mutating aggregate could
+  alter reviewed content or contaminate primary state; status equality could
+  overlook content mutation, deletions, or untracked artifacts; snapshot
+  fidelity could omit a reviewed source path; a missing severity ordering or
+  wrong metric direction could misclassify a regression (including a
+  lower-is-worse metric); and multi-slice tools could still read the nearest
+  global evidence. Mitigate with exact disposable snapshots, snapshot-local
+  qlty runtime paths, complete path-and-hash manifests, separate allowlist
+  analysis, explicit approved-sync convergence, per-finding comparators,
+  allowlisted paths, and selected-slice dry-run evidence.
 - Out of Scope: a fourth PR finding; changes to lifecycle, roles, approvals,
   commits, Replanning, Feature Exit, document roles, runtime, tests, packages,
   generated artifacts, configuration, `.qlty`, thresholds, `engines.vscode`,
