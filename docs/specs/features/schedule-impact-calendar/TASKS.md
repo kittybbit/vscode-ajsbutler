@@ -5,26 +5,24 @@
 - Purpose: present one completed Semantic Diff comparison's supported schedule
   runs and explicit schedule outcomes as an accessible, read-only,
   date-grouped timeline.
-- Mode: Replanning Mode for Slice 14 after the explicit request to review
-  whether Calendar's internal ID fields belong in the user-facing result view;
-  all thirteen implementation slices are complete and
+- Mode: Replanning Mode for Slice 15 after the user requested a full MUI
+  presentation audit of the Semantic Diff Explorer and Schedule Impact
+  Calendar; all fourteen predecessor implementation slices are complete and
   completion-committed.
   Slice 1 is completion-committed at `51a8ae4a`, Slice 2 at
   `b9cee633`, Slice 3 at `ffb92f1e`, the format-only correction at `09148de4`,
   Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, Slice 6 at `c36ee1cf`, Slice 7
   at `8c555139`, Slice 8 at `fe042fb0`, Slice 9 at `bb8d7305`, Slice 10 at
   `0a5cdd31`, Slice 11 at `644161ca`, Slice 12 at `2fb18daa`, and Slice 13 at
-  `b8d9a667`.
-- Approved or active slice: Slice 14 plan review is `Ready` with no Findings,
-  Human Plan Approval is recorded, focused plan commit `9a0bd721` is complete,
-  implementation review is `Ready` with no Findings, and Completion Approval
-  is recorded; its focused completion commit is pending `approval-committer`.
-  All thirteen
-  predecessor slices have independent `Ready` reviews
+  `b8d9a667`, and Slice 14 at `52ede211`.
+- Approved or active slice: Slice 15 plan review is `Ready` with no Findings,
+  Replanning is not required, and Human Plan Approval is recorded; its focused
+  plan commit is pending `approval-committer`, so no Slice 15 implementation is
+  authorized yet. All fourteen predecessor slices have independent `Ready` reviews
   with no Findings, automatic no-findings Completion Approval, and focused
-  completion commits. Slice 13's focused plan commit is `a314dc54` and its
-  focused completion commit is `b8d9a667`; Feature Exit is reopened and
-  deferred until Slice 14's focused completion commit and renewed exit review.
+  completion commits. Slice 14's focused plan commit is `9a0bd721` and its
+  focused completion commit is `52ede211`; Feature Exit is reopened and
+  deferred until Slice 15 completes its gates.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -34,8 +32,8 @@
   `schedule-semantics-expansion`, `semantic-diff-structured-outputs`, and
   `semantic-diff-explorer` plans.
 - Final evidence is recorded below for the exact approved paths. Durable
-  roadmap propagation is prepared for the closure commit; the selected feature
-  folder remains until explicit Closure Approval.
+  roadmap propagation remains a deferred closure proposal; the selected
+  feature folder remains until Slice 15 and explicit Closure Approval.
 
 ## Current Plan Basis
 
@@ -180,7 +178,18 @@
   removes only the newly introduced findings through small presentation
   helper extractions; it does not add qlty suppressions or change the qlty
   configuration.
-- The plan now has fourteen slices: pure comparison artifacts and sidecar
+- Replanning trigger: after Slice 14, the user requested a full UI audit of
+  both the Semantic Diff Explorer and Schedule Impact Calendar. The Explorer
+  header currently uses a transparent sticky AppBar and a native select, while
+  Calendar filters use three independently styled native selects. The views
+  also differ in sticky-surface treatment, panel opacity, menu sizing,
+  in-menu headings, wrapping, spacing, elevation, borders, z-index, and
+  responsive control behavior. Slice 15 groups actionable fixes around shared
+  MUI surface and filter-control patterns, comparing the existing Flow/Table
+  viewer surface and Unit Definition control conventions. It preserves the
+  common resource/theme mechanism, result facts, filter semantics,
+  keyboard/focus behavior, virtualization, and host contracts.
+- The plan now has fifteen slices: pure comparison artifacts and sidecar
   projection; internal command/bootstrap session and transport foundation;
   the public accessible timeline and documentation; the MUI webview
   component decomposition and layout refinement requested after Slice 3; the
@@ -192,8 +201,10 @@
   the Semantic Diff Presentation-report/VS Code-report package organization;
   and shared, accessible result presentation for Explorer and Calendar; and
   the shared localized range/comparison layout correction; and one-row shared
-  result alignment plus targeted cleanup of Slice 11/12 smell findings; and
-  internal Calendar-ID presentation cleanup.
+  result alignment plus targeted cleanup of Slice 11/12 smell findings;
+  internal Calendar-ID presentation cleanup; and the shared MUI presentation
+  audit and filter/surface consistency fixes for Explorer and Calendar Slice
+  15.
 - Current boundaries remain: one identity pass and one schedule evaluation,
   immutable `{ result, summary }` context, host-private sidecar, no change to
   the closed Explorer semantic transport (Slice 7 only accepts the existing
@@ -208,13 +219,16 @@
   messages, DTOs, or the common theme/resource mechanism. Slice 13 changes
   only shared browser-safe key/value row presentation and the named Explorer
   presentation helper organization. Slice 14 changes only Calendar
-  presentation of internal identifiers and its user-visible labels.
+  presentation of internal identifiers and its user-visible labels. Slice 15
+  changes only shared MUI presentation surfaces, filter controls, responsive
+  wrapping, and related accessibility coverage.
 - Public calendar exposure is gated by the workflow's successful evaluated-
   period artifact (`scheduleImpact.kind === "available"`) and the completed
-  Slice 3 implementation. Slices 1 through 13 are complete and committed on
+  Slice 3 implementation. Slices 1 through 14 are complete and committed on
   this branch: `51a8ae4a`, `b9cee633`, `ffb92f1e`, `09148de4`, `d4344a26`,
   `f47edeb0`, `c36ee1cf`, `8c555139`, `fe042fb0`, `bb8d7305`,
-  `644161ca`, `2fb18daa`, and `b8d9a667`.
+  `644161ca`, `2fb18daa`, `b8d9a667`, and `52ede211`. Slice 15 is a
+  plan-approved presentation-only replan awaiting its focused plan commit.
 - The original plan, replans, and Slice 4/5/6/7/8/9 packages have independent
   `Ready` verdicts with no Findings. The focused Slice 4/5 plan/replan commit
   `271c6027`, Slice 6 plan/replan commit `e51d6def`, and Slice 7 plan commit
@@ -225,6 +239,9 @@
   review, Completion Approval, and focused completion commit `fe042fb0` are
   complete. Slice 9 plan commit `65f123ee`, implementation review, automatic
   Completion Approval, and focused completion commit `bb8d7305` are complete.
+  Slice 14 plan commit `9a0bd721`, implementation review, Completion Approval,
+  and focused completion commit `52ede211` are complete. Slice 15 remains
+  pending independent plan review.
 
 ## Sync Rule
 
@@ -245,7 +262,8 @@
   organization Slice 10 → shared result-presentation Slice 11 → localized
   range and before/after comparison layout Slice 12 → one-row shared result
   alignment and targeted Slice 11/12 smell cleanup Slice 13 → internal
-  Calendar-ID presentation cleanup Slice 14.
+  Calendar-ID presentation cleanup Slice 14 → shared MUI presentation audit
+  Slice 15.
 - Keep this file focused on implementation slices, approval, validation, risk,
   production readiness, and Feature Exit readiness.
 
@@ -275,11 +293,12 @@
   theme and locale integration, placement policy, validation, and durable user
   documentation, and Semantic Diff Presentation-report/VS Code-report package
   organization, shared result-presentation composition, localized
-  range/comparison layout, and one-row shared result alignment plus targeted
-  Slice 11/12 smell cleanup are complete; Calendar internal-ID display cleanup
-  is now being replanned as Slice 14.
-- Review status: all plan/replan packages through Slice 13 and all thirteen
-  implementation slices are independently `Ready` with no Findings. Slice 10
+  range/comparison layout, one-row shared result alignment plus targeted
+  Slice 11/12 smell cleanup, and Calendar internal-ID display cleanup are
+  complete; the Slice 15 shared MUI presentation audit is now being replanned.
+- Review status: all plan/replan packages through Slice 15 and all fourteen
+  predecessor implementation slices are independently `Ready` with no
+  Findings. Slice 10
   plan review returned `Ready for approval`; its implementation review returned
   `Ready`, and Completion Approval is recorded below. Slice 11 plan review
   returned `Ready for approval` with no Findings and no Replanning required;
@@ -300,8 +319,12 @@
   commit `a314dc54` is complete, implementation is complete under the approved
   paths, independent implementation review returned `Ready` with no Findings,
   automatic Completion Approval is recorded below, and focused completion
-  commit `b8d9a667` is complete. Slice 14's reviewed plan is pending its
-  focused plan commit, and Feature Exit is reopened and deferred.
+  commit `b8d9a667` is complete. Slice 14 plan commit `9a0bd721`,
+  implementation, independent `Ready` review, automatic Completion Approval,
+  and focused completion commit `52ede211` are complete. Slice 15 plan review
+  is `Ready` with no Findings, Human Plan Approval is recorded, and its focused
+  plan commit is pending `approval-committer`; implementation and completion
+  gates remain pending, so Feature Exit is deferred.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -342,20 +365,21 @@
   focused plan commit `a314dc54` is complete, implementation is complete under
   the approved paths, independent implementation review returned `Ready` with
   no Findings, automatic Completion Approval is recorded below, and focused
-  completion commit `b8d9a667` is complete. Final batch human Closure Approval
-  remains pending. Slice 14's implementation and Completion Approval are now
-  recorded, with its focused completion commit pending `approval-committer`.
-- Active implementation slice: none; Slice 14's plan is Human-approved,
-  implementation review is `Ready` with no Findings, and Completion Approval is
-  recorded; its focused completion commit is pending `approval-committer`.
-  Slices 1–13 are implementation-complete,
-  independently reviewed `Ready` with no Findings, Completion-approved, and
-  focused-commit complete. Feature Exit is reopened and deferred until Slice
-  14's focused completion commit and renewed exit review.
+  completion commit `b8d9a667` is complete. Slice 14 plan approval, focused
+  plan commit `9a0bd721`, implementation review, Completion Approval, and
+  focused completion commit `52ede211` are complete. Slice 15 plan approval is
+  recorded and its focused plan commit is pending `approval-committer`; final
+  batch human Closure Approval remains deferred.
+- Active implementation slice: none; Slice 15 is in Replanning Mode and no
+  implementation is authorized. All fourteen predecessor slices are
+  implementation-complete, independently reviewed `Ready` with no Findings,
+  Completion-approved, and focused-commit complete. Feature Exit is deferred
+  until Slice 15 completes.
 - Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, Slice 7,
-  Slice 8, Slice 9, Slice 10, Slice 11, Slice 12, Slice 13, then Slice 14.
+  Slice 8, Slice 9, Slice 10, Slice 11, Slice 12, Slice 13, Slice 14, then
+  Slice 15.
   Each slice requires its own implementation review, Completion Approval, and
-  focused commit after the plan gate; Feature Exit follows Slice 14.
+  focused commit after the plan gate; Feature Exit follows Slice 15.
 
 ## Human Approval
 
@@ -1151,19 +1175,19 @@ Findings and Completion Approval is recorded above; focused completion commit
 
 ## Closure Approval
 
-- Status: Deferred while Slice 14's focused completion commit awaits
-  `approval-committer`; explicit human Closure Approval follows Slice 14's
-  completed gates and a renewed independent Feature Exit review
+- Status: Deferred while Slice 15 is replanned and completes its independent
+  review, approval, implementation, and completion gates; explicit human
+  Closure Approval follows the renewed Feature Exit review
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
-- Feature Exit verdict: Deferred; all thirteen predecessor slices are complete
-  and independently reviewed `Ready` with no Findings. Slice 14 is a new
-  presentation-only replan triggered by the user's internal-ID display
-  question; its plan review is `Ready` with no Findings, Human Plan Approval
-  is recorded on 2026-09-20, implementation review is `Ready` with no
-  Findings, and Completion Approval is recorded. The focused completion commit
-  is pending `approval-committer`. No Closure Approval has been granted.
+- Feature Exit verdict: Deferred; all fourteen predecessor slices are complete
+  and independently reviewed `Ready` with no Findings. Slice 15 is a new
+  presentation-only UI audit plan triggered by the user's request for
+  consistent MUI surfaces and controls across Explorer and Calendar. Its plan
+  review is `Ready` with no Findings and Human Plan Approval is recorded; the
+  focused plan commit is pending `approval-committer`, with implementation and
+  Completion Approval still pending. No Closure Approval has been granted.
 - Commit status: Eligible only after explicit Closure Approval is recorded.
 - Proposed closure propagation after approval: remove the completed Wave 4
   calendar entry from `docs/specs/roadmap.md`, then delete only
@@ -4368,10 +4392,8 @@ virtualization, or qlty configuration change is included.
   <!-- markdownlint-enable MD013 -->
 - Plan gate status: complete as a reviewed and Human-approved plan; focused
   Slice 13 plan commit `a314dc54` is complete.
-- Next stage: Slice 14's reviewed plan is pending its focused
-  `approval-committer` plan commit; implementation and later completion gates
-  must follow before renewed Feature Exit review and final batch human Closure
-  Approval.
+- Next stage: independent Feature Exit review is complete; final batch human
+  Closure Approval is the sole remaining gate.
 
 ### Slice 13 Completion Approval
 
@@ -4403,10 +4425,8 @@ remain unchanged.
 - Completion gate status: implementation review and Completion Approval are
   complete; focused completion commit `b8d9a667` contains the exact completed
   paths above.
-- Next stage: Slice 14's reviewed plan is pending its focused
-  `approval-committer` plan commit; implementation and later completion gates
-  must follow before renewed Feature Exit review and final batch human Closure
-  Approval.
+- Next stage: independent Feature Exit review is complete; final batch human
+  Closure Approval is the sole remaining gate.
 
 ### Slice 14: Remove Internal Identifiers From Calendar Presentation
 
@@ -4414,7 +4434,7 @@ remain unchanged.
   Human Plan Approval is recorded below. Focused Slice 14 plan commit
   `9a0bd721` is complete, implementation is complete under its approved
   paths, and independent implementation review and Completion Approval are
-  complete; the focused completion commit remains pending. The user asked
+  complete; focused completion commit `52ede211` is complete. The user asked
   whether Calendar `ID` fields are necessary because they appear to be internal
   identifiers and the Flow, Unit List, and Explorer views present names and
   paths instead. This slice records the evidence-based presentation boundary
@@ -4531,11 +4551,12 @@ virtualization, schedule meaning, and other views remain unchanged.
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
 - Plan gate status: reviewed and Human-approved; focused Slice 14 plan commit
-  `9a0bd721` is complete. Implementation and independent implementation
-  review are complete under the approved paths; Completion Approval is
-  recorded below and the focused completion commit remains pending.
-- Next stage: `approval-committer` for the exact completed Slice 14 paths
-  recorded below.
+  `9a0bd721` is complete. Implementation, independent implementation review,
+  and Completion Approval are complete under the approved paths; focused
+  completion commit `52ede211` is complete.
+- Next stage: independent plan review and Human Approval for Slice 15; its
+  implementation and completion gates must precede renewed Feature Exit review
+  and final batch human Closure Approval.
 
 ### Slice 14 Completion Approval
 
@@ -4565,11 +4586,209 @@ virtualization, schedule meaning, and other views remain unchanged.
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
 - Completion gate status: implementation review and Completion Approval are
-  complete; the focused completion commit remains pending
-  `approval-committer`.
-- Next stage: `approval-committer` for the exact completed Slice 14 paths
-  above. Feature Exit review and final batch human Closure Approval remain
-  deferred until that commit.
+  complete; focused completion commit `52ede211` contains the exact completed
+  paths above.
+- Next stage: independent plan review and Human Approval for Slice 15; its
+  implementation and completion gates must precede renewed Feature Exit review
+  and final batch human Closure Approval.
+
+### Slice 15: Shared MUI Presentation Audit For Explorer And Calendar
+
+- Status: Plan review is `Ready` with no Findings and `Replanning required: No`.
+  Human Plan Approval is recorded on 2026-09-20 under the user's standing
+  automatic no-findings slice approval instruction. The focused plan commit is
+  pending `approval-committer`; Slices 1–14 remain complete and
+  completion-committed, and Slice 15 implementation is not authorized until
+  that commit.
+- Audit findings and decisions:
+  - Explorer `Header.tsx` has a transparent sticky `AppBar`, so scrolling
+    content can show through its title and controls. Explorer
+    `ExplorerTreePanel.tsx` also uses a transparent `Paper`, which makes the
+    tree surface inherit page content. Both are actionable and will use one
+    shared theme-aware opaque sticky/panel treatment with the existing MUI
+    theme and forced-colors conventions.
+  - Explorer `Header.tsx` and Calendar `ScheduleImpactCalendarFilters.tsx`
+    use native selects with independent sizing. Explorer has one filter and
+    Calendar has root, outcome, and run-state filters. They will use one
+    browser-safe MUI `Select` wrapper with `autoWidth={false}` so the menu
+    anchor matches the trigger, viewport-bounded Paper, wrapped long labels,
+    and a non-selectable `ListSubheader` heading. Existing localized field
+    labels are reused as headings, including the existing Japanese
+    `変更を絞り込む`; no new filter meaning or locale key is introduced.
+  - Calendar's sticky header is already opaque and the shared result cards,
+    sections, comparison shell, one-row key/value list, and virtualization
+    already provide the correct baseline. The implementation will normalize
+    the Calendar header through the shared surface helper and preserve the
+    result primitives unless focused audit assertions identify a concrete
+    spacing, border, elevation, or overflow defect. Flow/Table's
+    `semanticDiffViewerSurfaceSx` and Unit Definition's MUI form-control
+    conventions are reference patterns only and are not changed by this
+    slice.
+  - Both contents shells, headers, filters, tree/panel surfaces, result cards,
+    comparison sides, status chips, empty states, and bounded lists will be
+    checked for spacing, surface contrast, border/elevation/z-index, narrow
+    width overflow, long labels, light/dark/forced-colors rendering, focus,
+    keyboard operation, and screen-reader names. This inventory keeps fixes
+    limited to the listed presentation classes and does not redesign the
+    result hierarchy or change schedule facts.
+- User / Domain Value: Explorer and Calendar present the same predictable MUI
+  control and surface behavior. Sticky content remains readable over scroll,
+  filter menus explain their purpose, trigger and menu widths align, long
+  English/Japanese labels wrap within the viewport, and keyboard, focus,
+  screen-reader, light/dark, high-contrast, and narrow-layout behavior remain
+  usable.
+- Implementation boundary:
+  - Add `ViewerFilterSelect.tsx` under the shared webview editor package. It
+    owns only MUI `FormControl`, `InputLabel`, `Select`, `ListSubheader`, and
+    `MenuItem` composition and shared menu sizing/wrapping/focus styles. It
+    accepts plain string options and callbacks, exposes an explicit trigger
+    ref, uses MUI `MenuProps`/slot props and default anchoring, and never
+    performs data or schedule interpretation.
+  - Add one exported theme-aware sticky surface style to `muiTheme.ts` and
+    apply it to both headers; use an opaque `background.paper` surface,
+    divider border, existing AppBar z-index, consistent elevation, and the
+    existing Canvas/forced-colors behavior. Apply the same opaque panel rule
+    to the Explorer tree Paper while leaving selected/transparent row states
+    inside that panel unchanged.
+  - Replace Explorer's filter and Calendar's three filters with the shared
+    wrapper. Preserve existing IDs, values, option ordering, filter update
+    functions, announcements, originating element focus, and localized labels.
+    Widen the Calendar focus helper only as needed for the MUI trigger element;
+    do not change filter state or model keys.
+  - Keep the existing common `MyAppContextProvider`, `ThemeProvider`, global
+    styles, resource path, host/session/transport, DTOs, result primitives,
+    virtualization, and browser bundle unchanged. No custom theme listener,
+    DOM menu positioning, or parallel view-specific filter implementation is
+    allowed.
+- Acceptance:
+  - Explorer and Calendar sticky headers have opaque theme-aware surfaces with
+    readable content above scrolling results; Explorer's tree panel is opaque;
+    light, dark, high-contrast, and forced-colors assertions prove contrast,
+    border, elevation, and z-index behavior without bespoke theme detection.
+  - Each filter trigger has a stable accessible name and existing ID/value;
+    every opened menu has the localized non-selectable field heading first,
+    followed by the same option values and order as before. Heading text is
+    excluded from selection and arrow navigation, and Escape, Enter, Home,
+    End, and focus restoration retain MUI keyboard/a11y behavior.
+  - Menu Paper width is anchored to its trigger (`autoWidth={false}`), remains
+    within a narrow viewport, and wraps long root paths and localized labels.
+    Responsive filter stacks do not create horizontal overflow. Existing
+    filter announcements, result counts, no-match behavior, and Calendar
+    Explorer action focus remain unchanged.
+  - Shared result cards, sections, comparison before/after order, one-row
+    label/value semantics, empty states, bounded lists, large collections,
+    reduced motion, and malformed/long values retain their existing behavior;
+    no schedule fact, DTO, protocol, ID, focus key, or virtualization contract
+    changes.
+  - The Unreleased changelog records one concise user-visible entry for the
+    shared Explorer/Calendar MUI surface and filter consistency improvement.
+- Planned paths (exact Slice 15 implementation scope):
+  <!-- markdownlint-disable MD013 -->
+  - `src/presentation/webview/shared/muiTheme.ts`
+  - `src/presentation/webview/editor/shared/ViewerFilterSelect.tsx` (new)
+  - `src/presentation/webview/editor/semanticDiffExplorer/Header.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarFilters.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarFocus.ts`
+  - `src/test/suite/viewerFilterSelect.test.tsx` (new)
+  - `src/test/suite/muiTheme.test.ts`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerThemeContext.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarAccessibility.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx`
+  - `CHANGELOG.md` (one concise `Unreleased` entry)
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+- Validation-only references: `semanticDiffExplorerContents.tsx`,
+  `ScheduleImpactCalendarContents.tsx`, shared `ResultCard.tsx`,
+  `ResultSection.tsx`, `ResultComparison.tsx`, `ResultKeyValueList.tsx`,
+  `ScheduleImpactCalendarBoundedList.tsx`, `sharedResultPresentation.test.tsx`,
+  `architectureDependencyRules.test.ts`, Flow/Table contents, and
+  `UnitDefinitionDialog.tsx` are included in the audit and regression checks;
+  they are edited only if an actionable defect in this slice's listed classes
+  is reproduced and independently scoped in review.
+- Validation: run the new shared-select tests and focused Explorer component,
+  DOM, theme-context, Calendar component, view, accessibility, and
+  theme-context suites; run shared-result regression and architecture checks;
+  run `rtk pnpm run test:compile`, production build, desktop/web builds and
+  host/smoke checks. Compare `rtk pnpm run qlty` and
+  `qlty smells --no-snippets` with the Slice 14/origin-main inventory; no
+  suppression or quality configuration change is allowed. Run Markdown lint,
+  `git diff --check`, and explicit light/dark/forced-colors, EN/JA,
+  narrow-viewport, long-label, keyboard, focus, screen-reader, reduced-motion,
+  and large/malformed-result checks.
+- Quality delta: no Slice 15 runtime or test code exists in this replan. The
+  current baseline is Slice 14's passing `qlty check` with only documented
+  pre-existing advisory smells and no new finding; implementation must compare
+  `qlty smells --no-snippets` against that baseline and add no suppression or
+  quality configuration.
+- Dependencies and gate: Slice 15 depends on completion-committed Slice 14
+  `52ede211`. Its plan review is `Ready` with no Findings and Human Plan
+  Approval is recorded; next stage is `approval-committer` for the exact plan
+  paths below. Only after that focused plan commit may implementation,
+  implementation review, the user's automatic no-findings Completion Approval
+  when applicable, and a focused completion commit proceed before Feature Exit
+  can be reconsidered.
+- Risks: replacing native selects with MUI Select changes the DOM role and
+  browser-native menu implementation; mitigate with explicit accessible-name,
+  heading exclusion, keyboard, focus, and screen-reader tests. Long root
+  paths and translated labels may still challenge very narrow viewports;
+  mitigate with trigger anchoring, viewport-bounded Paper, wrapping, and
+  responsive stack tests. Sticky surface changes can hide top content or fail
+  forced-colors contrast; verify z-index, border, and Canvas behavior. A new
+  domain fact, protocol/message change, theme/resource mechanism, host
+  lifecycle change, virtualization change, unrelated smell cleanup, or result
+  primitive redesign returns to Main for Replanning.
+- Out of scope: schedule semantics, result/DTO/JSON/report contracts, filter
+  meaning or ordering, IDs and data attributes, host/session/transport,
+  common resource/theme detection, Flow/Table/Unit Definition runtime changes,
+  bundle/webpack changes, dependency upgrades, new locale meaning, roadmap
+  closure, Feature Exit, and implementation/commit/approval in this replan.
+
+### Slice 15 Plan Review And Human Approval
+
+- Plan-reviewer result: `Ready`; Findings none; `Replanning required: No`.
+- Human Plan Approval: Approved on 2026-09-20 under the user's standing
+  automatic no-findings slice approval instruction.
+- Approved boundary: shared browser-safe MUI sticky/panel surface treatment;
+  one `ViewerFilterSelect` with localized non-selectable menu headings,
+  trigger-anchored width, wrapping, and focus styles; Explorer header/tree
+  consumers; Calendar header and three filter consumers; focused shared,
+  Explorer, Calendar, theme, keyboard, responsive, and accessibility tests;
+  one concise Unreleased changelog entry; and these feature documents. Result
+  facts, filter meaning/order, DTOs, IDs, protocol, host lifecycle,
+  virtualization, common resource/theme detection, and Flow/Table/Unit
+  Definition runtime remain unchanged.
+<!-- markdownlint-disable MD013 -->
+- Approved paths (exact Slice 15 plan scope):
+  - `src/presentation/webview/shared/muiTheme.ts`
+  - `src/presentation/webview/editor/shared/ViewerFilterSelect.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/Header.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarFilters.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarFocus.ts`
+  - `src/test/suite/viewerFilterSelect.test.tsx`
+  - `src/test/suite/muiTheme.test.ts`
+  - `src/test/suite/semanticDiffExplorerComponents.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/semanticDiffExplorerThemeContext.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarAccessibility.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarThemeContext.test.tsx`
+  - `CHANGELOG.md`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+<!-- markdownlint-enable MD013 -->
+- Plan gate status: reviewed and Human-approved; no implementation or
+  completion approval is recorded. Next stage: `approval-committer` for the
+  exact approved Slice 15 plan paths above.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -4587,10 +4806,11 @@ virtualization, schedule meaning, and other views remain unchanged.
   Diff placement-policy relocation → Slice 10 Semantic Diff report-package
   organization → shared result-presentation Slice 11 → localized range and
   before/after comparison layout Slice 12 → one-row result alignment and
-  targeted smell cleanup Slice 13 → internal-ID presentation cleanup Slice 14.
+  targeted smell cleanup Slice 13 → internal-ID presentation cleanup Slice 14
+  → shared MUI presentation audit Slice 15.
   Slice 2 must not
   expose a user-reachable action; Slice 3 remains the first public surface and
-  Slices 4–13 preserve it.
+  Slices 4–15 preserve it.
 - Every slice preserves the existing Explorer public message union,
   immutable `SemanticDiffOutputContext` shape `{ result, summary }`, stable
   `scheduleComparison.runChanges` ID/order semantics, JSON version 1, report
@@ -4655,7 +4875,7 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 
 ## Traceability
 
-- `TRACEABILITY.md` is required and maps CAL requirements to the fourteen slices,
+- `TRACEABILITY.md` is required and maps CAL requirements to the fifteen slices,
   concrete approval paths, tests, and durable documentation.
 - The sidecar identity, composite source-change resolution, root matrix,
   internal artifact contract, and pure application builder are Slice 1-owned;
@@ -4672,26 +4892,23 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   10-owned; shared readable result presentation is Slice 11-owned; localized
   range formatting and before/after comparison layout are Slice 12-owned;
   one-row shared result alignment and targeted Slice 11/12 smell cleanup are
-  Slice 13-owned; internal Calendar-ID presentation cleanup is Slice 14-owned.
+  Slice 13-owned; internal Calendar-ID presentation cleanup is Slice 14-owned;
+  shared MUI surface/filter consistency and responsive accessibility are Slice
+  15-owned.
   Feature Exit is reopened and no requirement is treated as closed until
-  Slice 14 completes its gates.
+  Slice 15 completes its gates.
 
 ## Feature Exit
 
-- Definition of Done status: Slice 14's plan is reviewed `Ready` with no
-  Findings and Human Plan Approval is recorded after the user's internal-ID
-  display question; focused plan commit `9a0bd721` and implementation are
-  complete under the approved paths, independent implementation review is
-  `Ready` with no Findings, and Completion Approval is recorded. Its focused
-  completion commit is pending `approval-committer`, so Feature Exit is
-  reopened and deferred. All
-  thirteen predecessor slices are independently reviewed `Ready` with no
+- Definition of Done status: Deferred while Slice 15 is replanned. All
+  fourteen predecessor slices are independently reviewed `Ready` with no
   Findings, automatically Completion-approved under the user's instruction,
   and focused-commit complete: Slice 1 `51a8ae4a`, Slice 2 `b9cee633`, Slice 3
   `ffb92f1e`, format correction `09148de4`, Slice 4 `d4344a26`, Slice 5
   `f47edeb0`, Slice 6 `c36ee1cf`, Slice 7 `8c555139`, Slice 8 `fe042fb0`,
   Slice 9 `bb8d7305`, Slice 10 `0a5cdd31`, Slice 11 `644161ca`, Slice 12
-  `2fb18daa`, and Slice 13 `b8d9a667`.
+  `2fb18daa`, Slice 13 `b8d9a667`, and Slice 14 `52ede211`. Slice 15 has no
+  plan review, Human Approval, implementation, or Completion Approval.
 - Durable documentation: `uc-present-schedule-impact.md`, its index entry,
   README, and CHANGELOG updates are complete. Architecture and glossary
   propagation are not required. The closure package removes the completed
@@ -4717,16 +4934,24 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   independent implementation review returned `Ready` with no Findings,
   automatic Completion Approval is recorded, and focused completion commit
   `b8d9a667` is complete.
-- Remaining risks: Slice 14's focused completion commit is pending
-  `approval-committer`; renewed Feature Exit review and final human Closure
-  Approval follow.
+- Slice 14's internal-ID cleanup is independently reviewed `Ready` with no
+  Findings, automatic Completion-approved, and focused completion commit
+  `52ede211` is complete. Calendar14 focused tests, compile/build, desktop/web
+  host WEB7–10, qlty with baseline-only smells/new0, lint, and diff checks pass.
+- Remaining risks: Slice 15's reviewed plan is pending its focused
+  `approval-committer` plan commit; implementation review, Completion Approval,
+  and a focused completion commit remain pending. Its
+  native-select-to-MUI-select migration and
+  sticky-surface changes require the focused keyboard, focus, responsive,
+  theme, and forced-colors validation recorded above.
   Existing macOS codesign, web-stream cleanup, webpack-size, and Slice
   10-baseline advisory smell findings remain documented compatibility
-  observations. Final human Closure Approval remains deferred until Slice 14
-  completes.
-- Proposed closure scope: update `docs/specs/roadmap.md` as above, then remove
-  only `docs/specs/features/schedule-impact-calendar/` after Closure Approval;
-  inherited feature folders remain preserved.
+  observations; Feature Exit and final human Closure Approval remain deferred.
+- Proposed closure scope after Slice 15: retain the deferred
+  `docs/specs/roadmap.md` proposal, then remove only
+  `docs/specs/features/schedule-impact-calendar/` after renewed Feature Exit
+  review and explicit Closure Approval; inherited feature folders remain
+  preserved.
 
 ## Validation
 
@@ -4945,10 +5170,17 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       recorded on 2026-09-20. Focused plan commit `9a0bd721` and implementation
       are complete under the approved paths; independent implementation review
       returned `Ready` with no Findings, Completion Approval was recorded on
-      2026-09-20, and the focused completion commit is pending
-      `approval-committer`. The evidence distinguishes AJS unit name/path and
+      2026-09-20, and focused completion commit `52ede211` is complete. The
+      evidence distinguishes AJS unit name/path and
       issue target values from stable sidecar, run, candidate, issue, decision,
       and source-reference IDs.
+- [ ] Slice 15 full Explorer/Calendar MUI presentation audit is planned under
+      the exact paths recorded above. Independent plan review is `Ready` with
+      no Findings, Human Plan Approval is recorded on 2026-09-20, and the
+      focused plan commit is pending `approval-committer`; implementation,
+      implementation review, Completion Approval, focused completion commit,
+      and full responsive/theme/accessibility/quality validation remain
+      pending. No implementation is authorized before that plan commit.
 
 ## Notes
 
@@ -4991,7 +5223,9 @@ scheduleProjectionFacts })` calls `buildSemanticDiffOutputContext(result)`
   theme/context Slice 8 for Calendar dependency chain, Slice 9 placement
   policy, Slice 10 report-package organization, shared result-presentation
   Slice 11, localized range/comparison Slice 12, and planned one-row result
-  alignment/targeted smell cleanup Slice 13, and planned internal-ID
-  presentation cleanup Slice 14 are synchronized. Feature Exit remains
-  deferred until Slice 14 is complete and committed, followed by final
-  explicit human Closure Approval.
+  alignment/targeted smell cleanup Slice 13, and internal-ID presentation
+  cleanup Slice 14 and the Slice 15 shared MUI presentation audit plan are
+  synchronized. Slice 15 plan review is `Ready` with no Findings, Human Plan
+  Approval is recorded, and `approval-committer` is next. Feature Exit remains
+  deferred until Slice 15 completes and the final explicit human Closure
+  Approval is granted.
