@@ -47,23 +47,11 @@ entry conditions that make planning each item useful.
 
 ## Semantic Diff Roadmap
 
-### Wave 4: Schedule Impact Presentation
-
-#### Add A Schedule Impact Calendar
-
-- Origin: proposal N-3.
-- Present added, removed, changed-time, zero-run, and uncalculated schedule
-  effects for a selected comparison period.
-- Entry condition: schedule interpretation and run-projection contracts are
-  stable. Internal artifact and session support precedes the comparison
-  workflow; the public calendar action follows the completed period-bearing
-  workflow and Explorer handoff.
-
 ### Deferred Schedule Semantics
 
-- Sequencing: complete Wave 3, then Wave 4, before selectively pursuing these
-  follow-ups. The completed schedule interpretation and projection contracts
-  are prerequisites; no new numbered wave is created by this section.
+- Sequencing: Waves 3 and 4 are complete. Before selectively pursuing these
+  follow-ups, retain the completed schedule interpretation and projection
+  contracts as prerequisites; no new numbered wave is created by this section.
 - Parent schedule inheritance and `ln`: retain explicit uncalculated evidence.
   Entry condition: a reviewed neutral contract distinguishes an inherited
   execution-generation date from a guaranteed nested-jobnet start time, with
