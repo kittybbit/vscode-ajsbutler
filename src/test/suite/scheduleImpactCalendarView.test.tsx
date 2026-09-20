@@ -1,7 +1,13 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
 import React from "react";
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  waitFor,
+} from "@testing-library/react";
 import { VirtuosoMockContext } from "react-virtuoso";
 import { ScheduleImpactCalendarView } from "../../presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp";
 import type {
@@ -32,6 +38,7 @@ const installDom = (): { dom: JSDOM; globals: GlobalValue[] } => {
     document: dom.window.document,
     navigator: dom.window.navigator,
     HTMLElement: dom.window.HTMLElement,
+    DocumentFragment: dom.window.DocumentFragment,
     Node: dom.window.Node,
     Element: dom.window.Element,
     Event: dom.window.Event,
@@ -106,6 +113,23 @@ const restoreDom = (dom: JSDOM, globals: GlobalValue[]): void => {
     else delete (globalThis as Record<string, unknown>)[key];
   });
   dom.window.close();
+};
+
+const selectFilterOption = (
+  dom: JSDOM,
+  control: HTMLElement,
+  value: string,
+): void => {
+  act(() => {
+    fireEvent.keyDown(control, { key: "ArrowDown" });
+  });
+  const option = dom.window.document.body.querySelector(
+    `[data-value="${value}"]`,
+  );
+  assert.ok(option);
+  act(() => {
+    fireEvent.click(option as HTMLElement);
+  });
 };
 
 const root = (): SemanticDiffScheduleImpactRoot => ({
@@ -242,8 +266,9 @@ suite("Schedule impact calendar view", () => {
   setup(() => {
     ({ dom, globals } = installDom());
   });
-  teardown(() => {
+  teardown(async () => {
     cleanup();
+    await new Promise<void>((resolve) => setImmediate(resolve));
     restoreDom(dom, globals);
   });
 
@@ -385,7 +410,7 @@ suite("Schedule impact calendar view", () => {
     assert.ok(!view.container.textContent?.includes("run-1"));
 
     const outcome = view.getByRole("combobox", { name: "ルート結果" });
-    fireEvent.change(outcome, { target: { value: "uncalculated" } });
+    selectFilterOption(dom, outcome, "uncalculated");
     assert.match(
       view.getAllByRole("status")[0]?.textContent ?? "",
       /2 件中 0 件/,

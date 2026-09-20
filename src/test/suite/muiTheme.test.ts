@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import {
   createSemanticDiffTheme,
+  semanticDiffViewerOpaqueSurfaceSx,
   semanticDiffExplorerTheme,
 } from "../../presentation/webview/shared/muiTheme";
 
@@ -31,6 +32,30 @@ suite("Semantic Diff MUI theme", () => {
     assert.strictEqual(
       darkTheme.components?.MuiButton?.styleOverrides?.contained,
       undefined,
+    );
+  });
+
+  test("provides one opaque, forced-colors-safe sticky surface", () => {
+    assert.strictEqual(
+      typeof semanticDiffViewerOpaqueSurfaceSx.backgroundColor,
+      "function",
+    );
+    assert.strictEqual(
+      typeof semanticDiffViewerOpaqueSurfaceSx.borderBottom,
+      "function",
+    );
+    assert.strictEqual(
+      typeof semanticDiffViewerOpaqueSurfaceSx.boxShadow,
+      "function",
+    );
+    assert.deepStrictEqual(
+      semanticDiffViewerOpaqueSurfaceSx["@media (forced-colors: active)"],
+      {
+        backgroundColor: "Canvas",
+        color: "CanvasText",
+        borderColor: "CanvasText",
+        boxShadow: "none",
+      },
     );
   });
 });

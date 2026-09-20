@@ -7,6 +7,7 @@ import type { ScheduleImpactCalendarModel } from "./scheduleImpactCalendarModel"
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
 import ResultStatusChip from "../shared/result/ResultStatusChip";
 import { formatLocalizedDateRange } from "../shared/result/formatLocalizedDateRange";
+import { semanticDiffViewerOpaqueSurfaceSx } from "../../shared/muiTheme";
 
 export const ScheduleImpactCalendarHeader = ({
   model,
@@ -22,7 +23,11 @@ export const ScheduleImpactCalendarHeader = ({
     position="sticky"
     color="default"
     elevation={1}
-    sx={{ top: 0, zIndex: (theme) => theme.zIndex.appBar }}
+    sx={{
+      ...semanticDiffViewerOpaqueSurfaceSx,
+      top: 0,
+      zIndex: (theme) => theme.zIndex.appBar,
+    }}
   >
     <Toolbar sx={{ gap: 1.25, minHeight: "3.5rem", flexWrap: "wrap", py: 1 }}>
       <Box sx={{ minWidth: 0, flex: "1 1 20rem" }}>

@@ -95,6 +95,25 @@ export const semanticDiffViewerSurfaceSx: SxProps<Theme> = {
   boxSizing: "border-box",
 };
 
+/** A theme-aware opaque surface for content that stays above a scrolling view. */
+export const semanticDiffViewerOpaqueSurfaceSx = {
+  backgroundColor: (theme) => theme.palette.background.paper,
+  borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+  boxShadow: (theme) => theme.shadows[1],
+  "body.vscode-high-contrast &": {
+    backgroundColor: "Canvas",
+    color: "CanvasText",
+    borderColor: "CanvasText",
+    boxShadow: "none",
+  },
+  "@media (forced-colors: active)": {
+    backgroundColor: "Canvas",
+    color: "CanvasText",
+    borderColor: "CanvasText",
+    boxShadow: "none",
+  },
+};
+
 export type SemanticDiffThemeOptions = Readonly<{
   mode?: "light" | "dark";
 }>;
@@ -140,6 +159,19 @@ export const createSemanticDiffTheme = (
             minHeight: semanticDiffExplorerTargetSizePx,
             paddingTop: 10,
             paddingBottom: 10,
+            ...semanticDiffExplorerFocusSx,
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          select: {
+            minHeight: semanticDiffExplorerTargetSizePx,
+            paddingTop: 10,
+            paddingBottom: 10,
+            boxSizing: "border-box",
+            whiteSpace: "normal",
+            overflowWrap: "anywhere",
             ...semanticDiffExplorerFocusSx,
           },
         },

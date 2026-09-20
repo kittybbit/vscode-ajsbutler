@@ -1,16 +1,17 @@
 import React, { useRef } from "react";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import NativeSelect from "@mui/material/NativeSelect";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import type { SemanticDiffExplorerViewModel } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalization";
-import { semanticDiffExplorerFocusSx } from "../../shared/muiTheme";
+import ViewerFilterSelect from "../shared/ViewerFilterSelect";
+import {
+  semanticDiffExplorerFocusSx,
+  semanticDiffViewerOpaqueSurfaceSx,
+} from "../../shared/muiTheme";
 
 const calendarActionLabel = (language: string): string =>
   language.toLowerCase().startsWith("ja")
@@ -36,11 +37,9 @@ export const SemanticDiffExplorerHeader = ({
   calendarAction,
   language,
 }: SemanticDiffExplorerHeaderProps): React.ReactElement => {
-  const filterRef = useRef<HTMLSelectElement>(null);
-  const handleFilterChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ): void => {
-    const next = event.target.value as SemanticDiffExplorerViewModel["filter"];
+  const filterRef = useRef<HTMLDivElement>(null);
+  const handleFilterChange = (value: string): void => {
+    const next = value as SemanticDiffExplorerViewModel["filter"];
     setFilter(next);
     filterRef.current?.focus();
     setAnnouncement(next === "all" ? labels.all : labels.confirmationRequired);
@@ -50,10 +49,15 @@ export const SemanticDiffExplorerHeader = ({
     <AppBar
       component="header"
       position="sticky"
-      color="transparent"
-      elevation={0}
+      color="default"
+      elevation={1}
       data-semantic-diff-explorer-header="true"
-      sx={{ mb: 2, top: 0, zIndex: (theme) => theme.zIndex.appBar }}
+      sx={{
+        ...semanticDiffViewerOpaqueSurfaceSx,
+        mb: 2,
+        top: 0,
+        zIndex: (theme) => theme.zIndex.appBar,
+      }}
     >
       <Toolbar
         disableGutters
@@ -97,28 +101,21 @@ export const SemanticDiffExplorerHeader = ({
               {calendarActionLabel(language)}
             </Button>
           )}
-          <FormControl sx={{ minWidth: 14 * 16, maxWidth: "100%" }}>
-            <InputLabel htmlFor="semantic-diff-explorer-filter">
-              {labels.filter}
-            </InputLabel>
-            <NativeSelect
-              id="semantic-diff-explorer-filter"
-              value={filter}
-              inputProps={{ "aria-label": labels.filter }}
-              ref={filterRef}
-              onChange={handleFilterChange}
-              sx={{
-                minWidth: 0,
-                maxWidth: "100%",
-                ...semanticDiffExplorerFocusSx,
-              }}
-            >
-              <option value="all">{labels.all}</option>
-              <option value="confirmation-required">
-                {labels.confirmationRequired}
-              </option>
-            </NativeSelect>
-          </FormControl>
+          <ViewerFilterSelect
+            id="semantic-diff-explorer-filter"
+            label={labels.filter}
+            value={filter}
+            options={[
+              { value: "all", label: labels.all },
+              {
+                value: "confirmation-required",
+                label: labels.confirmationRequired,
+              },
+            ]}
+            menuHeading={labels.filter}
+            triggerRef={filterRef}
+            onChange={handleFilterChange}
+          />
         </Stack>
       </Toolbar>
     </AppBar>

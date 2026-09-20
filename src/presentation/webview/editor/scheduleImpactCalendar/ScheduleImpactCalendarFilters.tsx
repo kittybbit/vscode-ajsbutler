@@ -1,7 +1,4 @@
 import React, { useRef } from "react";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import NativeSelect from "@mui/material/NativeSelect";
 import Stack from "@mui/material/Stack";
 import type {
   ScheduleImpactCalendarFilters as ScheduleImpactCalendarFilterState,
@@ -9,7 +6,26 @@ import type {
 } from "./scheduleImpactCalendarModel";
 import { focusScheduleImpactCalendarControl } from "./scheduleImpactCalendarFocus";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
-import { semanticDiffExplorerFocusSx } from "../../shared/muiTheme";
+import ViewerFilterSelect, {
+  type ViewerFilterSelectProps,
+} from "../shared/ViewerFilterSelect";
+
+type CalendarFilterKey = keyof ScheduleImpactCalendarFilterState;
+type CalendarFilterValues = Record<CalendarFilterKey, readonly string[]>;
+
+const allOutcomes: ScheduleImpactCalendarFilterState["outcomes"] = [
+  "supported-runs",
+  "valid-no-runs",
+  "partial",
+  "uncalculated",
+];
+
+const allStates: ScheduleImpactCalendarFilterState["runStates"] = [
+  "unchanged",
+  "added",
+  "removed",
+  "changed-time",
+];
 
 const filterValue = <T extends string>(
   values: readonly T[],
@@ -22,6 +38,120 @@ const updateFilter = <T extends string>(
   all: readonly T[],
 ): readonly T[] => (value === "all" ? all : [value as T]);
 
+const filterValues = (rootIds: readonly string[]): CalendarFilterValues => ({
+  rootIds,
+  outcomes: allOutcomes,
+  runStates: allStates,
+});
+
+const updateCalendarFilters = ({
+  filters,
+  key,
+  value,
+  values,
+}: Readonly<{
+  filters: ScheduleImpactCalendarFilterState;
+  key: CalendarFilterKey;
+  value: string;
+  values: CalendarFilterValues;
+}>): ScheduleImpactCalendarFilterState =>
+  ({
+    ...filters,
+    [key]: updateFilter(filters[key], value, values[key]),
+  }) as ScheduleImpactCalendarFilterState;
+
+const focusFilter = (
+  key: CalendarFilterKey,
+  refs: Readonly<{
+    root: React.RefObject<HTMLDivElement | null>;
+    outcome: React.RefObject<HTMLDivElement | null>;
+    state: React.RefObject<HTMLDivElement | null>;
+  }>,
+): void =>
+  focusScheduleImpactCalendarControl(
+    {
+      rootIds: refs.root,
+      outcomes: refs.outcome,
+      runStates: refs.state,
+    }[key].current,
+  );
+
+const rootScopeSuffix = (
+  scopeTransition: ScheduleImpactCalendarModel["rootOptions"][number]["scopeTransition"],
+  labels: ScheduleImpactCalendarLabels,
+): string =>
+  scopeTransition === null
+    ? ""
+    : ` (${
+        {
+          "added-root-scope": labels.addedRootScope,
+          "removed-root-scope": labels.removedRootScope,
+        }[scopeTransition]
+      })`;
+
+const rootCounterpartSuffix = (
+  counterpartPath: string | null,
+  label: string,
+): string =>
+  counterpartPath === null ? "" : ` · ${label}: ${counterpartPath}`;
+
+const rootOptionLabel = (
+  root: ScheduleImpactCalendarModel["rootOptions"][number],
+  labels: ScheduleImpactCalendarLabels,
+): React.ReactElement => (
+  <>
+    {root.label}
+    {rootScopeSuffix(root.scopeTransition, labels)}
+    {rootCounterpartSuffix(root.counterpartPath, labels.counterpart)}
+  </>
+);
+
+const rootOptions = (
+  roots: ScheduleImpactCalendarModel["rootOptions"],
+  labels: ScheduleImpactCalendarLabels,
+) => [
+  { value: "all", label: labels.all },
+  ...roots.map((root) => ({
+    value: root.id,
+    label: rootOptionLabel(root, labels),
+  })),
+];
+
+type CalendarFilterConfig = Readonly<{
+  key: CalendarFilterKey;
+  id: string;
+  label: string;
+  value: string;
+  options: ViewerFilterSelectProps["options"];
+  triggerRef: React.RefObject<HTMLDivElement | null>;
+}>;
+
+const CalendarFilter = ({
+  id,
+  label,
+  value,
+  options,
+  triggerRef,
+  onChange,
+}: Readonly<{
+  id: string;
+  label: string;
+  value: string;
+  options: ViewerFilterSelectProps["options"];
+  triggerRef: React.RefObject<HTMLDivElement | null>;
+  onChange: (value: string) => void;
+}>): React.ReactElement => (
+  <ViewerFilterSelect
+    id={id}
+    label={label}
+    value={value}
+    menuHeading={label}
+    options={options}
+    triggerRef={triggerRef}
+    onChange={onChange}
+  />
+);
+
 export const ScheduleImpactCalendarFilters = ({
   model,
   labels,
@@ -31,51 +161,59 @@ export const ScheduleImpactCalendarFilters = ({
   labels: ScheduleImpactCalendarLabels;
   onChange: (filters: ScheduleImpactCalendarFilterState) => void;
 }>): React.ReactElement => {
-  const rootRef = useRef<HTMLSelectElement>(null);
-  const outcomeRef = useRef<HTMLSelectElement>(null);
-  const stateRef = useRef<HTMLSelectElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const outcomeRef = useRef<HTMLDivElement>(null);
+  const stateRef = useRef<HTMLDivElement>(null);
   const roots = model.rootOptions;
-  const update = (
-    key: keyof ScheduleImpactCalendarFilterState,
-    value: string,
-  ): void => {
-    const allRoots = roots.map((root) => root.id);
-    const allOutcomes: ScheduleImpactCalendarFilterState["outcomes"] = [
-      "supported-runs",
-      "valid-no-runs",
-      "partial",
-      "uncalculated",
-    ];
-    const allStates: ScheduleImpactCalendarFilterState["runStates"] = [
-      "unchanged",
-      "added",
-      "removed",
-      "changed-time",
-    ];
-    const next = {
-      ...model.filters,
-      rootIds:
-        key === "rootIds"
-          ? updateFilter(model.filters.rootIds, value, allRoots)
-          : model.filters.rootIds,
-      outcomes:
-        key === "outcomes"
-          ? updateFilter(model.filters.outcomes, value, allOutcomes)
-          : model.filters.outcomes,
-      runStates:
-        key === "runStates"
-          ? updateFilter(model.filters.runStates, value, allStates)
-          : model.filters.runStates,
-    };
+  const refs = { root: rootRef, outcome: outcomeRef, state: stateRef };
+  const update = (key: CalendarFilterKey, value: string): void => {
+    const next = updateCalendarFilters({
+      filters: model.filters,
+      key,
+      value,
+      values: filterValues(roots.map((root) => root.id)),
+    });
     onChange(next);
-    focusScheduleImpactCalendarControl(
-      key === "rootIds"
-        ? rootRef.current
-        : key === "outcomes"
-          ? outcomeRef.current
-          : stateRef.current,
-    );
+    focusFilter(key, refs);
   };
+  const filterConfigs = [
+    {
+      key: "rootIds" as const,
+      id: "schedule-impact-calendar-root-filter",
+      label: labels.root,
+      value: filterValue(model.filters.rootIds, "all"),
+      options: rootOptions(roots, labels),
+      triggerRef: rootRef,
+    },
+    {
+      key: "outcomes" as const,
+      id: "schedule-impact-calendar-outcome-filter",
+      label: labels.outcome,
+      value: filterValue(model.filters.outcomes, "all"),
+      options: [
+        { value: "all", label: labels.all },
+        { value: "supported-runs", label: labels.supportedRuns },
+        { value: "valid-no-runs", label: labels.noRuns },
+        { value: "partial", label: labels.partial },
+        { value: "uncalculated", label: labels.uncalculated },
+      ],
+      triggerRef: outcomeRef,
+    },
+    {
+      key: "runStates" as const,
+      id: "schedule-impact-calendar-state-filter",
+      label: labels.runState,
+      value: filterValue(model.filters.runStates, "all"),
+      options: [
+        { value: "all", label: labels.all },
+        { value: "unchanged", label: labels.unchanged },
+        { value: "added", label: labels.added },
+        { value: "removed", label: labels.removed },
+        { value: "changed-time", label: labels.changedTime },
+      ],
+      triggerRef: stateRef,
+    },
+  ] satisfies readonly CalendarFilterConfig[];
   return (
     <Stack
       component="section"
@@ -85,70 +223,13 @@ export const ScheduleImpactCalendarFilters = ({
       useFlexGap
       sx={{ flexWrap: "wrap", mb: 2 }}
     >
-      <FormControl sx={{ minWidth: 14 * 16 }}>
-        <InputLabel htmlFor="schedule-impact-calendar-root-filter">
-          {labels.root}
-        </InputLabel>
-        <NativeSelect
-          id="schedule-impact-calendar-root-filter"
-          inputProps={{ "aria-label": labels.root }}
-          value={filterValue(model.filters.rootIds, "all")}
-          ref={rootRef}
-          onChange={(event) => update("rootIds", event.target.value)}
-          sx={semanticDiffExplorerFocusSx}
-        >
-          <option value="all">{labels.all}</option>
-          {roots.map((root) => (
-            <option key={root.id} value={root.id}>
-              {root.label}
-              {root.scopeTransition
-                ? ` (${root.scopeTransition === "added-root-scope" ? labels.addedRootScope : labels.removedRootScope})`
-                : ""}
-              {root.counterpartPath
-                ? ` · ${labels.counterpart}: ${root.counterpartPath}`
-                : ""}
-            </option>
-          ))}
-        </NativeSelect>
-      </FormControl>
-      <FormControl sx={{ minWidth: 14 * 16 }}>
-        <InputLabel htmlFor="schedule-impact-calendar-outcome-filter">
-          {labels.outcome}
-        </InputLabel>
-        <NativeSelect
-          id="schedule-impact-calendar-outcome-filter"
-          inputProps={{ "aria-label": labels.outcome }}
-          value={filterValue(model.filters.outcomes, "all")}
-          ref={outcomeRef}
-          onChange={(event) => update("outcomes", event.target.value)}
-          sx={semanticDiffExplorerFocusSx}
-        >
-          <option value="all">{labels.all}</option>
-          <option value="supported-runs">{labels.supportedRuns}</option>
-          <option value="valid-no-runs">{labels.noRuns}</option>
-          <option value="partial">{labels.partial}</option>
-          <option value="uncalculated">{labels.uncalculated}</option>
-        </NativeSelect>
-      </FormControl>
-      <FormControl sx={{ minWidth: 14 * 16 }}>
-        <InputLabel htmlFor="schedule-impact-calendar-state-filter">
-          {labels.runState}
-        </InputLabel>
-        <NativeSelect
-          id="schedule-impact-calendar-state-filter"
-          inputProps={{ "aria-label": labels.runState }}
-          value={filterValue(model.filters.runStates, "all")}
-          ref={stateRef}
-          onChange={(event) => update("runStates", event.target.value)}
-          sx={semanticDiffExplorerFocusSx}
-        >
-          <option value="all">{labels.all}</option>
-          <option value="unchanged">{labels.unchanged}</option>
-          <option value="added">{labels.added}</option>
-          <option value="removed">{labels.removed}</option>
-          <option value="changed-time">{labels.changedTime}</option>
-        </NativeSelect>
-      </FormControl>
+      {filterConfigs.map((config) => (
+        <CalendarFilter
+          key={config.id}
+          {...config}
+          onChange={(value) => update(config.key, value)}
+        />
+      ))}
     </Stack>
   );
 };

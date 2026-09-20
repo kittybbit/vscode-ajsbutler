@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Unified Semantic Diff Explorer and Schedule Impact Calendar MUI filter menus and opaque scrolling surfaces across themes and narrow layouts.
 - Removed internal Calendar identifiers from visible details and accessible
   announcements while retaining unit names, paths, targets, and occurrences.
 - Added consistent localized date ranges and before/after comparison layouts

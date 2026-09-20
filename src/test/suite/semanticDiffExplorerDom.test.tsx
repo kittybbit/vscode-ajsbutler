@@ -71,6 +71,7 @@ const installDom = (): { dom: JSDOM; globals: GlobalValue[] } => {
     document: dom.window.document,
     navigator: dom.window.navigator,
     HTMLElement: dom.window.HTMLElement,
+    DocumentFragment: dom.window.DocumentFragment,
     Node: dom.window.Node,
     Element: dom.window.Element,
     Event: dom.window.Event,
@@ -120,6 +121,23 @@ const restoreDom = (dom: JSDOM, globals: GlobalValue[]): void => {
     else delete (globalThis as Record<string, unknown>)[key];
   });
   dom.window.close();
+};
+
+const selectFilterOption = (
+  dom: JSDOM,
+  control: HTMLElement,
+  value: string,
+): void => {
+  act(() => {
+    fireEvent.keyDown(control, { key: "ArrowDown" });
+  });
+  const option = dom.window.document.body.querySelector(
+    `[data-value="${value}"]`,
+  );
+  assert.ok(option);
+  act(() => {
+    fireEvent.click(option as HTMLElement);
+  });
 };
 
 const availableActions = (): SemanticDiffExplorerActionSet => ({
@@ -361,8 +379,9 @@ suite("Semantic diff Explorer DOM", () => {
       value: eventBridge,
     });
   });
-  teardown(() => {
+  teardown(async () => {
     cleanup();
+    await new Promise<void>((resolve) => setImmediate(resolve));
     restoreDom(dom, globals);
   });
 
@@ -553,7 +572,7 @@ suite("Semantic diff Explorer DOM", () => {
       String(semanticDiffExplorerFocusSx["&:focus-visible"]?.outline),
       /2px solid/,
     );
-    fireEvent.change(filter, { target: { value: "confirmation-required" } });
+    selectFilterOption(dom, filter, "confirmation-required");
     assert.match(
       view.container.querySelector('[aria-live="polite"]')?.textContent ?? "",
       /Confirmation required/,
@@ -701,9 +720,11 @@ suite("Semantic diff Explorer DOM", () => {
     );
     assert.strictEqual(ordinaryRow.getAttribute("aria-selected"), "true");
 
-    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox", { name: "Filter changes" }),
+      "confirmation-required",
+    );
     assert.deepStrictEqual(recordTuples(view.container), [
       "change:required-change:change:required-change:0",
       "confirmation:confirmation-record:confirmation:confirmation-record:0",
@@ -723,9 +744,11 @@ suite("Semantic diff Explorer DOM", () => {
       null,
     );
 
-    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
-      target: { value: "all" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox", { name: "Filter changes" }),
+      "all",
+    );
     assert.deepStrictEqual(recordTuples(view.container), [
       "change:ordinary-change:change:ordinary-change:0",
       "change:required-change:change:required-change:0",
@@ -769,9 +792,11 @@ suite("Semantic diff Explorer DOM", () => {
       );
       await Promise.resolve();
     });
-    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox", { name: "Filter changes" }),
+      "confirmation-required",
+    );
 
     assert.strictEqual(
       view.getByText("No confirmation-required items match this filter.")
@@ -951,9 +976,11 @@ suite("Semantic diff Explorer DOM", () => {
       firstLeaf.id,
     );
 
-    fireEvent.change(view.getByRole("combobox"), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox"),
+      "confirmation-required",
+    );
     const visibleRows = view.getAllByRole("treeitem");
     assert.ok(visibleRows.length > 0);
     const visibleFirst = visibleRows[0]!;
@@ -968,9 +995,7 @@ suite("Semantic diff Explorer DOM", () => {
       0,
     );
 
-    fireEvent.change(view.getByRole("combobox"), {
-      target: { value: "all" },
-    });
+    selectFilterOption(dom, view.getByRole("combobox"), "all");
     assert.strictEqual(
       tree.getAttribute("aria-activedescendant"),
       firstLeaf.id,
@@ -983,9 +1008,11 @@ suite("Semantic diff Explorer DOM", () => {
       1,
     );
 
-    fireEvent.change(view.getByRole("combobox"), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox"),
+      "confirmation-required",
+    );
     const filteredAgainFirst = view.getAllByRole("treeitem")[0]!;
     assert.strictEqual(
       tree.getAttribute("aria-activedescendant"),

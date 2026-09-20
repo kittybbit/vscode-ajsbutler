@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
 import React from "react";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { ScheduleImpactCalendarView } from "../../presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp";
 import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
 
@@ -20,6 +20,7 @@ const installDom = (): { dom: JSDOM; globals: GlobalValue[] } => {
     document: dom.window.document,
     navigator: dom.window.navigator,
     HTMLElement: dom.window.HTMLElement,
+    DocumentFragment: dom.window.DocumentFragment,
     Node: dom.window.Node,
     Element: dom.window.Element,
     Event: dom.window.Event,
@@ -69,6 +70,23 @@ const restoreDom = (dom: JSDOM, globals: GlobalValue[]): void => {
     else delete (globalThis as Record<string, unknown>)[key];
   });
   dom.window.close();
+};
+
+const selectFilterOption = (
+  dom: JSDOM,
+  control: HTMLElement,
+  value: string,
+): void => {
+  act(() => {
+    fireEvent.keyDown(control, { key: "ArrowDown" });
+  });
+  const option = dom.window.document.body.querySelector(
+    `[data-value="${value}"]`,
+  );
+  assert.ok(option);
+  act(() => {
+    fireEvent.click(option as HTMLElement);
+  });
 };
 
 const componentSidecar = (): SemanticDiffScheduleImpact => ({
@@ -201,8 +219,9 @@ suite("Schedule impact calendar components", () => {
   setup(() => {
     ({ dom, globals } = installDom());
   });
-  teardown(() => {
+  teardown(async () => {
     cleanup();
+    await new Promise<void>((resolve) => setImmediate(resolve));
     restoreDom(dom, globals);
   });
 
@@ -268,7 +287,7 @@ suite("Schedule impact calendar components", () => {
     );
 
     const outcome = view.getByRole("combobox", { name: "Root outcome" });
-    fireEvent.change(outcome, { target: { value: "valid-no-runs" } });
+    selectFilterOption(dom, outcome, "valid-no-runs");
     assert.strictEqual(
       view
         .getByRole("region", { name: "Root outcomes" })

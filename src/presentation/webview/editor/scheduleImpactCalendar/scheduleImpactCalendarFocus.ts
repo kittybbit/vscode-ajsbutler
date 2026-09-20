@@ -1,5 +1,5 @@
 export const focusScheduleImpactCalendarControl = (
-  element: HTMLSelectElement | null,
+  element: HTMLElement | null,
 ): void => {
   element?.focus({ preventScroll: true });
 };
