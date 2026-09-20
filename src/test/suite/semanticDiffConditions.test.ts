@@ -8,9 +8,9 @@ import type {
 } from "../../domain/models/ajs/AjsDocument";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import { compareSemanticDiff } from "../../application/semantic-diff/compareSemanticDiff";
-import { renderSemanticDiffAuditMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffAuditMarkdown";
-import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/renderSemanticDiffMarkdown";
-import { renderSemanticDiffJson } from "../../presentation/semantic-diff/serializeSemanticDiffJson";
+import { renderSemanticDiffAuditMarkdown } from "../../presentation/semantic-diff/report/renderSemanticDiffAuditMarkdown";
+import { renderSemanticDiffMarkdown } from "../../presentation/semantic-diff/report/renderSemanticDiffMarkdown";
+import { renderSemanticDiffJson } from "../../presentation/semantic-diff/report/serializeSemanticDiffJson";
 
 const relation = (
   sourceUnitId: string,

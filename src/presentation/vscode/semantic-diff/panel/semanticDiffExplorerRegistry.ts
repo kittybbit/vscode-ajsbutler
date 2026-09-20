@@ -21,7 +21,7 @@ import {
 } from "../../../../application/semantic-diff/semanticDiffSourceCapture";
 
 export type SemanticDiffExplorerActionMetadata = Readonly<{
-  kind: "source" | "flow" | "output";
+  kind: "source" | "flow" | "output" | "calendar";
   side: "before" | "after" | null;
   targetId: string | null;
   recordId: string | null;
@@ -240,6 +240,7 @@ export class SemanticDiffExplorerActionRegistry {
   public register(
     session: SemanticDiffExplorerSession,
     outputActionId: SemanticDiffExplorerActionId,
+    calendarActionId?: SemanticDiffExplorerActionId,
   ): void {
     this.walkLeaves(session.viewModel.tree, session.sessionId);
     this.walkLeaves(session.allViewModel.tree, session.sessionId);
@@ -247,6 +248,42 @@ export class SemanticDiffExplorerActionRegistry {
       sessionId: session.sessionId,
       metadata: {
         kind: "output",
+        side: null,
+        targetId: null,
+        recordId: null,
+        recordKind: null,
+        recordOccurrence: null,
+        recordTarget: null,
+        targetKind: null,
+        parameterKey: null,
+      },
+    });
+    if (calendarActionId !== undefined) {
+      this.actions.set(calendarActionId, {
+        sessionId: session.sessionId,
+        metadata: {
+          kind: "calendar",
+          side: null,
+          targetId: null,
+          recordId: null,
+          recordKind: null,
+          recordOccurrence: null,
+          recordTarget: null,
+          targetKind: null,
+          parameterKey: null,
+        },
+      });
+    }
+  }
+
+  public registerCalendar(
+    sessionId: SemanticDiffExplorerSessionId,
+    calendarActionId: SemanticDiffExplorerActionId,
+  ): void {
+    this.actions.set(calendarActionId, {
+      sessionId,
+      metadata: {
+        kind: "calendar",
         side: null,
         targetId: null,
         recordId: null,

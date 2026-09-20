@@ -34,7 +34,7 @@ import {
   unregisterAndReleaseWorkflowCapture,
   type SourceBinding,
 } from "./semanticDiffCommandSourceBinding";
-import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/panel/semanticDiffExplorerPanel";
 
 export type WorkflowExplorerResult = Readonly<{
   handle: SemanticDiffExplorerSessionHandle;

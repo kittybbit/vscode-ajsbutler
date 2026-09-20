@@ -19,7 +19,7 @@ import {
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
-} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+} from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 
 const emptyContext = () =>
   buildSemanticDiffOutputContext({

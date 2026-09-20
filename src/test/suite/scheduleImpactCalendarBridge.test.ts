@@ -3,11 +3,11 @@ import {
   createScheduleImpactCalendarBridge,
   type ScheduleImpactCalendarMessageTarget,
   type ScheduleImpactCalendarPostMessagePort,
-} from "../../presentation/webview/editor/scheduleImpactCalendarBridge";
+} from "../../presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBridge";
 import {
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarSessionMessage,
-} from "../../presentation/vscode/webview/scheduleImpactCalendarTransport";
+} from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 
 type MessageListener = (event: MessageEvent) => void;
 

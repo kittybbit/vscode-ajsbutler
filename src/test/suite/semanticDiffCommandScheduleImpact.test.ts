@@ -9,7 +9,7 @@ import { createBeginSemanticDiffSourceCapture } from "../../application/semantic
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
-import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 import {
   executeCompareSemanticDiffCommand,
   type SemanticDiffCommandDeps,

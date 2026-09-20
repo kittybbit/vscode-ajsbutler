@@ -6,14 +6,14 @@ import {
 import type { SemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
-import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
+import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import { createScheduleAwareExplorerSession } from "../../bootstrap/extension/createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
-import { createScheduleImpactCalendarBridge } from "../../presentation/webview/editor/scheduleImpactCalendarBridge";
+import { createScheduleImpactCalendarBridge } from "../../presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBridge";
 import {
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarSessionMessage,
-} from "../../presentation/vscode/webview/scheduleImpactCalendarTransport";
+} from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 
 const LANGUAGE_ID = "jp1ajs";
 

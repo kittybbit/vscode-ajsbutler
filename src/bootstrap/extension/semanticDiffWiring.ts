@@ -13,26 +13,26 @@ import {
   SEMANTIC_DIFF_REPORT_SCHEME,
   SemanticDiffReportDocumentProvider,
 } from "../../presentation/vscode/semantic-diff/report/semanticDiffReportDocument";
-import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/semanticDiffOutput";
+import { presentSemanticDiffOutput } from "../../presentation/semantic-diff/report/semanticDiffOutput";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
-import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerPanel";
+import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import type { SemanticDiffSourceCaptureFactory } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffSourceHandleIdAllocator } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import type {
   SemanticDiffExplorerActionIdAllocator,
   SemanticDiffExplorerSessionIdAllocator,
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
-import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes";
 import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
 import {
   createSemanticDiffFlowAction,
   SemanticDiffFlowOverlayRegistry,
   type SemanticDiffFlowSourceSnapshot,
-} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
+} from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
-import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/webview/scheduleImpactCalendarSessionRegistry";
+import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarSessionRegistry";
 import type { ReadGitHeadDefinition } from "../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import {
   GIT_HEAD_CONTENT_SCHEME,
@@ -199,12 +199,16 @@ const createOpenExplorer = ({
   contextRegistry,
   flowOverlayRegistry,
   getSourceSnapshot,
+  sidecarRegistry,
+  calendarSessionRegistry,
 }: Readonly<{
   deps: SemanticDiffWiringDeps;
   reportDocuments: SemanticDiffReportDocumentProvider;
   contextRegistry: SemanticDiffExplorerContextRegistry;
   flowOverlayRegistry: SemanticDiffFlowOverlayRegistry;
   getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
+  sidecarRegistry: ScheduleImpactSidecarRegistry;
+  calendarSessionRegistry: ScheduleImpactCalendarSessionRegistry;
 }>) =>
   createOpenSemanticDiffExplorer({
     extensionContext: deps.extensionContext,
@@ -217,6 +221,8 @@ const createOpenExplorer = ({
     showTextDocument: (document, options) =>
       vscode.window.showTextDocument(document, options),
     contextRegistry,
+    scheduleImpactSidecarRegistry: sidecarRegistry,
+    calendarSessionRegistry,
     sessionIdAllocator: deps.sessionIdAllocator,
     actionIdAllocator: deps.actionIdAllocator,
     flowAction: deps.flowBridge
@@ -293,15 +299,17 @@ export const createSemanticDiffSubscriptions = (
   const flowOverlayRegistry = new SemanticDiffFlowOverlayRegistry();
   const getSourceSnapshot = createSourceSnapshotGetter(contextRegistry);
   const reportDocuments = createReportDocuments();
+  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
+  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
   const openExplorer = createOpenExplorer({
     deps,
     reportDocuments,
     contextRegistry,
     flowOverlayRegistry,
     getSourceSnapshot,
+    sidecarRegistry,
+    calendarSessionRegistry,
   });
-  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
-  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
   const gitHeadContentProvider = new VscodeGitHeadContentProvider();
   const openScheduleAwareExplorerSession = createScheduleAwareExplorerSession({
     openExplorer,

@@ -5,16 +5,23 @@ import type {
   SemanticDiffExplorerSessionIdAllocator,
 } from "../../../../application/semantic-diff/semanticDiffExplorer";
 import type { SemanticDiffOutputContext } from "../../../../application/semantic-diff/semanticDiffDto";
-import type {
-  SemanticDiffOutputDocument,
-  SemanticDiffOutputModeItem,
-} from "../../../semantic-diff/semanticDiffOutput";
+import type { SemanticDiffOutputDocument } from "../../../semantic-diff/report/semanticDiffOutput";
+import type { SemanticDiffOutputModeItem } from "../report/semanticDiffOutputModePicker";
 import type { SemanticDiffFlowActionRequest } from "../flow/semanticDiffExplorerFlowTypes";
 import type {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
 } from "./semanticDiffExplorerRegistry";
-import type { presentSemanticDiffOutput } from "../../../semantic-diff/semanticDiffOutput";
+import type { presentSemanticDiffOutput } from "../../../semantic-diff/report/semanticDiffOutput";
+import type { SemanticDiffScheduleImpact } from "../../../../application/semantic-diff/semanticDiffScheduleImpact";
+import type { ScheduleImpactCalendarSessionRegistry } from "../calendar/scheduleImpactCalendarSessionRegistry";
+import type { ScheduleImpactCalendarPanelHandle } from "../calendar/scheduleImpactCalendarPanel";
+
+export type SemanticDiffScheduleImpactLookup = Readonly<{
+  resolve(
+    context: SemanticDiffOutputContext,
+  ): SemanticDiffScheduleImpact | undefined;
+}>;
 
 /** The host-only handle intentionally does not expose the application session. */
 export type SemanticDiffExplorerSessionHandle = Readonly<{
@@ -57,4 +64,15 @@ export type SemanticDiffExplorerPanelDeps = Readonly<{
       }>
   >;
   disposeFlowSession?: (sessionId: SemanticDiffExplorerSessionId) => void;
+  /** Host-private calendar sidecar lookup. The context object is the key. */
+  scheduleImpactSidecarRegistry?: SemanticDiffScheduleImpactLookup;
+  calendarSessionRegistry?: ScheduleImpactCalendarSessionRegistry;
+  openScheduleImpactCalendarPanel?: (
+    input: Readonly<{
+      parentSessionId: string;
+      context: SemanticDiffOutputContext;
+      sidecar: SemanticDiffScheduleImpact;
+      displayLanguage?: string;
+    }>,
+  ) => ScheduleImpactCalendarPanelHandle;
 }>;

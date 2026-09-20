@@ -3,7 +3,7 @@ import {
   createSemanticDiffFlowAction,
   SemanticDiffFlowOverlayRegistry,
   type SemanticDiffFlowPanel,
-} from "../../presentation/vscode/semantic-diff/semanticDiffExplorerFlow";
+} from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 import {
   createSemanticDiffExplorerSessionId,
   type SemanticDiffExplorerLeaf,
@@ -24,7 +24,7 @@ import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/
 import type { UnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 import { unitInformationMessage } from "../../presentation/webview/editor/unitInformationLocalization";
-import { SemanticDiffExplorerActionRegistry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import { SemanticDiffExplorerActionRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 
 const unit = (id: string, name: string, parentId?: string) => ({
   id,

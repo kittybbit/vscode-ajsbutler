@@ -20,7 +20,7 @@ import {
   buildSemanticDiffJsonV1,
   renderSemanticDiffJson,
   serializeSemanticDiffJson,
-} from "../../presentation/semantic-diff/serializeSemanticDiffJson";
+} from "../../presentation/semantic-diff/report/serializeSemanticDiffJson";
 
 const baselineEmptyV1BytesBase64 =
   "ewogICJzY2hlbWEiOiAiYWpzYnV0bGVyLnNlbWFudGljLWRpZmYiLAogICJzY2hlbWFWZXJzaW9uIjogMSwKICAic3VtbWFyeSI6IHsKICAgICJjaGFuZ2VDb3VudHNCeUtpbmQiOiB7CiAgICAgICJhZGRlZCI6IDAsCiAgICAgICJyZW1vdmVkIjogMCwKICAgICAg" +

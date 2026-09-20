@@ -25,7 +25,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useMyAppContext } from "../MyContexts";
 import { unitInformationMessage } from "../unitInformationLocalization";
 import { useResponsivePanelCollapse } from "./useResponsivePanelCollapse";
-import { viewerFocusTargetSx, viewerPanelBorder } from "./viewerThemeStyles";
+import {
+  viewerFocusTargetSx,
+  viewerPanelBorder,
+} from "../../shared/viewerTheme";
 
 export type SharedUnitDetailPaneRow = {
   label: string;
@@ -95,9 +98,27 @@ export const resolveDetailPaneShortcut = ({
   metaKey = false,
   shiftKey = false,
 }: DetailPaneShortcutContext): DetailPaneShortcut | undefined => {
-  if (altKey || ctrlKey || metaKey || shiftKey) return undefined;
+  return hasShortcutModifier({ altKey, ctrlKey, metaKey, shiftKey })
+    ? undefined
+    : shortcutForKey(key);
+};
+
+const hasShortcutModifier = ({
+  altKey,
+  ctrlKey,
+  metaKey,
+  shiftKey,
+}: Readonly<{
+  altKey: boolean;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  shiftKey: boolean;
+}>): boolean => altKey || ctrlKey || metaKey || shiftKey;
+
+const shortcutForKey = (key: string): DetailPaneShortcut | undefined => {
   if (key.toLowerCase() === "r") return "return";
-  return key === "Escape" ? "close" : undefined;
+  if (key === "Escape") return "close";
+  return undefined;
 };
 
 export const resolveDetailPaneShortcutForTarget = (
@@ -168,27 +189,27 @@ const getStateChipVariant = (active: boolean): "filled" | "outlined" =>
 
 const StateChip: FC<SharedUnitDetailPaneChip> = ({ active, label }) => {
   const { lang = "en" } = useMyAppContext();
+  const state = active ? "a11y.state.yes" : "a11y.state.no";
   return (
     <Chip
       size="small"
       color={getStateChipColor(active)}
       variant={getStateChipVariant(active)}
-      sx={{
-        borderWidth: active ? 2 : 1,
-        borderStyle: active ? "double" : "dashed",
-        "@media (forced-colors: active)": {
-          color: "CanvasText",
-          borderColor: "CanvasText",
-          backgroundColor: "Canvas",
-        },
-      }}
-      label={`${label}: ${unitInformationMessage(
-        active ? "a11y.state.yes" : "a11y.state.no",
-        lang,
-      )}`}
+      sx={stateChipSx(active)}
+      label={`${label}: ${unitInformationMessage(state, lang)}`}
     />
   );
 };
+
+const stateChipSx = (active: boolean): SxProps<Theme> => ({
+  borderWidth: active ? 2 : 1,
+  borderStyle: active ? "double" : "dashed",
+  "@media (forced-colors: active)": {
+    color: "CanvasText",
+    borderColor: "CanvasText",
+    backgroundColor: "Canvas",
+  },
+});
 
 const CollapsedDetailPane: FC<
   Pick<
@@ -418,36 +439,94 @@ const ExpandedDetailPane: FC<
   </Paper>
 );
 
+const handleDetailPaneKeyDown = (
+  event: KeyboardEvent<HTMLElement>,
+  onReturnFocus: VoidFunction | undefined,
+  onClose: VoidFunction,
+): void => {
+  if (!onReturnFocus) return;
+  const shortcut = resolveDetailPaneShortcutForTarget(event, event.target);
+  if (!shortcut) return;
+  event.preventDefault();
+  event.stopPropagation();
+  executeDetailPaneShortcut(shortcut, onReturnFocus, onClose);
+};
+
+const executeDetailPaneShortcut = (
+  shortcut: DetailPaneShortcut,
+  onReturnFocus: VoidFunction,
+  onClose: VoidFunction,
+): void => ({ return: onReturnFocus, close: onClose })[shortcut]();
+
+const applyDetailPaneFocusRequest = (
+  context: Readonly<{
+    collapsed: boolean;
+    expand: VoidFunction;
+    focusTargetRef: RefObject<HTMLElement | null>;
+    focusRequestRevision: number;
+    onFocusRequestHandled: SharedUnitDetailPaneProps["onFocusRequestHandled"];
+  }>,
+): void => {
+  if (context.focusRequestRevision <= 0) return;
+  if (context.collapsed) {
+    context.expand();
+    return;
+  }
+  focusRequestedDetailPane(context);
+};
+
+const focusRequestedDetailPane = (
+  context: Readonly<{
+    focusTargetRef: RefObject<HTMLElement | null>;
+    focusRequestRevision: number;
+    onFocusRequestHandled: SharedUnitDetailPaneProps["onFocusRequestHandled"];
+  }>,
+): void => {
+  if (!context.focusTargetRef.current) return;
+  context.focusTargetRef.current.focus();
+  context.onFocusRequestHandled?.(context.focusRequestRevision);
+};
+
+const useDetailPaneFocusRequest = (
+  context: Readonly<{
+    collapsed: boolean;
+    expand: VoidFunction;
+    focusTargetRef: RefObject<HTMLElement | null>;
+    focusRequestRevision: number;
+    onFocusRequestHandled: SharedUnitDetailPaneProps["onFocusRequestHandled"];
+  }>,
+): void => {
+  const {
+    collapsed,
+    expand,
+    focusTargetRef,
+    focusRequestRevision,
+    onFocusRequestHandled,
+  } = context;
+  useEffect(() => {
+    applyDetailPaneFocusRequest({
+      collapsed,
+      expand,
+      focusTargetRef,
+      focusRequestRevision,
+      onFocusRequestHandled,
+    });
+  }, [collapsed, expand, focusRequestRevision, onFocusRequestHandled]);
+};
+
 const SharedUnitDetailPane: FC<SharedUnitDetailPaneProps> = (props) => {
   const theme = useTheme();
   const isNarrow = useMediaQuery(theme.breakpoints.down("md"));
   const { collapse, collapsed, expand } = useResponsivePanelCollapse(isNarrow);
   const focusTargetRef = useRef<HTMLElement>(null);
   const focusRequestRevision = props.focusRequestRevision ?? 0;
-
-  useEffect(() => {
-    if (focusRequestRevision <= 0) return;
-    if (collapsed) {
-      expand();
-      return;
-    }
-    if (!focusTargetRef.current) return;
-    focusTargetRef.current.focus();
-    props.onFocusRequestHandled?.(focusRequestRevision);
-  }, [collapsed, expand, focusRequestRevision, props.onFocusRequestHandled]);
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (!props.onReturnFocus) return;
-    const shortcut = resolveDetailPaneShortcutForTarget(event, event.target);
-    if (!shortcut) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (shortcut === "return") {
-      props.onReturnFocus?.();
-      return;
-    }
-    props.onClose();
-  };
+  useDetailPaneFocusRequest({
+    collapsed,
+    expand,
+    focusTargetRef,
+    focusRequestRevision,
+    onFocusRequestHandled: props.onFocusRequestHandled,
+  });
 
   return collapsed ? (
     <CollapsedDetailPane
@@ -464,7 +543,9 @@ const SharedUnitDetailPane: FC<SharedUnitDetailPaneProps> = (props) => {
       closeAriaLabel={props.closeAriaLabel ?? "Close details"}
       collapseTooltip={props.collapseTooltip ?? "Collapse details"}
       focusTargetRef={focusTargetRef}
-      onKeyDown={handleKeyDown}
+      onKeyDown={(event) =>
+        handleDetailPaneKeyDown(event, props.onReturnFocus, props.onClose)
+      }
       onCollapse={collapse}
     />
   );

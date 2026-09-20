@@ -16,7 +16,7 @@ import {
   executeSemanticDiffExplorerSourceAction,
   type SemanticDiffSourceActionDeps,
 } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceAction";
-import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/semanticDiffExplorerRegistry";
+import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
 
 type SourceActionTestDeps = SemanticDiffSourceActionDeps & {
   readonly parserCalls: number;

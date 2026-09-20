@@ -19,7 +19,7 @@ import {
   viewerFocusIndicatorSx,
   viewerSearchBorder,
   viewerSelectionBorder,
-} from "../shared/viewerThemeStyles";
+} from "../../shared/viewerTheme";
 
 export type VirtualizedTableContext = {
   columnCount: number;

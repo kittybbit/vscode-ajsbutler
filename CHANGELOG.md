@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Unified Semantic Diff Explorer and Schedule Impact Calendar MUI filter menus
+  and opaque scrolling surfaces across themes and narrow layouts.
+- Removed internal Calendar identifiers from visible details and accessible
+  announcements while retaining unit names, paths, targets, and occurrences.
+- Added consistent localized date ranges and before/after comparison layouts
+  to Semantic Diff Explorer and Schedule Impact Calendar.
+- Kept each result label/value fact on its own readable row and simplified
+  Explorer detail presentation.
+- Improved Semantic Diff Explorer and Schedule Impact Calendar result
+  readability with shared MUI sections, metadata, status, and empty-state
+  presentation.
+- Added a read-only, localized Schedule Impact timeline to Semantic Diff
+  Explorer for valid comparison periods, including supported runs, explicit
+  no-run or uncalculated outcomes, identity candidates, independent filters,
+  keyboard accessibility, and bounded large-result rendering.
 - Fixed Semantic Diff false-positive candidate changes when repeated nested
   `g`/`mg` job groups have distinct canonical paths, while preserving
   conservative ambiguity for duplicate paths.

@@ -48,7 +48,7 @@ import {
   viewerFocusBorder,
   viewerPathBorder,
   viewerSelectionBorder,
-} from "./viewerThemeStyles";
+} from "../../shared/viewerTheme";
 
 export type { UnitTreeFocusRequest } from "./unitTreeSelectorModel";
 
@@ -155,10 +155,61 @@ type ExpandedUnitTreePanelProps = Omit<UnitTreeSelectorTreeProps, "units"> & {
   title: string;
 };
 
+type UnitTreeSelectorUnitState = Readonly<{
+  rowState: UnitTreeRowState;
+  handleToggle: () => void;
+  handleMouseEnter: () => void;
+  handleMouseLeave: () => void;
+  rowInteraction: ReturnType<typeof createUnitTreeRowInteraction>;
+}>;
+
 const defaultCanOpenScopeUnit = (): boolean => false;
 const defaultIsUnitEnabled = (): boolean => true;
 
 export const UNIT_TREE_ACTION_SIZE_PX = 28;
+
+const useUnitTreeSelectorUnitState = (
+  props: UnitTreeSelectorUnitProps,
+): UnitTreeSelectorUnitState => {
+  const {
+    unit,
+    canOpenScopeUnit,
+    currentPathUnitIds,
+    currentUnitId,
+    expandedUnitIds,
+    hoveredUnitId,
+    isUnitEnabled,
+    onHoverUnit,
+    onLeaveUnit,
+    onOpenScope,
+    onSelectUnit,
+    selectedUnitId,
+    setExpanded,
+  } = props;
+  const rowState = resolveUnitTreeRowState(unit, {
+    canOpenScopeUnit,
+    currentPathUnitIds,
+    currentUnitId,
+    expandedUnitIds,
+    hoveredUnitId,
+    isUnitEnabled,
+    hasOpenScopeHandler: Boolean(onOpenScope),
+    selectedUnitId,
+  });
+  return {
+    rowState,
+    handleToggle: () => setExpanded(unit.id, !rowState.isExpanded),
+    handleMouseEnter: () =>
+      notifyEnabledUnit(rowState.isEnabled, unit.id, onHoverUnit),
+    handleMouseLeave: () =>
+      notifyEnabledUnit(rowState.isEnabled, unit.id, onLeaveUnit),
+    rowInteraction: createUnitTreeRowInteraction({
+      isEnabled: rowState.isEnabled,
+      onSelectUnit,
+      unitId: unit.id,
+    }),
+  };
+};
 
 const unitTreeActionSx = {
   width: UNIT_TREE_ACTION_SIZE_PX,
@@ -312,40 +363,92 @@ const UnitTreeRowFrame: FC<UnitTreeRowFrameProps> = ({
     alignItems="center"
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
-    sx={{
-      minHeight: "2.25rem",
-      marginX: 0.75,
-      marginY: 0.15,
-      paddingLeft: `${Math.max(0, unit.depth) * 0.65}rem`,
-      borderRadius: 1.5,
-      border: (theme) =>
-        `1px solid ${resolveUnitTreeRowBorderColor(
-          rowState,
-          viewerSelectionBorder(theme),
-        )}`,
-      borderStyle: resolveUnitTreeRowBorderStyle(rowState),
-      borderWidth: rowState.isSelected ? 2 : 1,
-      borderInlineStart: (theme) =>
-        rowState.isInCurrentPath
-          ? `3px dashed ${viewerPathBorder(theme)}`
-          : undefined,
-      outline: (theme) =>
-        resolveUnitTreeRowOutline(rowState, theme.palette.primary.main),
-      outlineOffset: "-2px",
-      backgroundColor: resolveUnitTreeRowBackgroundColor(rowState),
-      "@media (forced-colors: active)": {
-        backgroundColor: "Canvas",
-        borderColor: rowState.isSelected ? "CanvasText" : "Canvas",
-        borderInlineStartColor: rowState.isInCurrentPath
-          ? "Highlight"
-          : undefined,
-        outlineColor: rowState.isHovered ? "Highlight" : undefined,
-      },
-    }}
+    sx={unitTreeRowSx(rowState, unit)}
   >
     {children}
   </Stack>
 );
+
+const unitTreeRowSx = (
+  rowState: UnitTreeRowState,
+  unit: FlowGraphUnitDto,
+): Record<string, unknown> => ({
+  minHeight: "2.25rem",
+  marginX: 0.75,
+  marginY: 0.15,
+  paddingLeft: `${Math.max(0, unit.depth) * 0.65}rem`,
+  borderRadius: 1.5,
+  border: (theme: Parameters<typeof viewerSelectionBorder>[0]) =>
+    `1px solid ${resolveUnitTreeRowBorderColor(
+      rowState,
+      viewerSelectionBorder(theme),
+    )}`,
+  borderStyle: resolveUnitTreeRowBorderStyle(rowState),
+  borderWidth: selectedBorderWidth(rowState),
+  borderInlineStart: currentPathBorder(rowState),
+  outline: (theme: Parameters<typeof viewerFocusBorder>[0]) =>
+    resolveUnitTreeRowOutline(rowState, theme.palette.primary.main),
+  outlineOffset: "-2px",
+  backgroundColor: resolveUnitTreeRowBackgroundColor(rowState),
+  "@media (forced-colors: active)": forcedColorRowSx(rowState),
+});
+
+const selectedBorderWidth = (rowState: UnitTreeRowState): number =>
+  rowState.isSelected ? 2 : 1;
+
+const currentPathBorder =
+  (
+    rowState: UnitTreeRowState,
+  ): ((theme: Parameters<typeof viewerPathBorder>[0]) => string | undefined) =>
+  (theme) =>
+    rowState.isInCurrentPath
+      ? `3px dashed ${viewerPathBorder(theme)}`
+      : undefined;
+
+const forcedColorRowSx = (rowState: UnitTreeRowState) => ({
+  backgroundColor: "Canvas",
+  borderColor: selectedForcedBorderColor(rowState),
+  borderInlineStartColor: pathForcedBorderColor(rowState),
+  outlineColor: hoveredForcedOutlineColor(rowState),
+});
+
+const selectedForcedBorderColor = (rowState: UnitTreeRowState): string =>
+  rowState.isSelected ? "CanvasText" : "Canvas";
+
+const pathForcedBorderColor = (
+  rowState: UnitTreeRowState,
+): string | undefined => (rowState.isInCurrentPath ? "Highlight" : undefined);
+
+const hoveredForcedOutlineColor = (
+  rowState: UnitTreeRowState,
+): string | undefined => (rowState.isHovered ? "Highlight" : undefined);
+
+const unitTreeRowAttributes = (rowState: UnitTreeRowState) => ({
+  "aria-current": currentTreeRowValue(rowState),
+  "aria-disabled": disabledTreeRowValue(rowState),
+  "aria-expanded": expandedTreeRowValue(rowState),
+  "aria-selected": rowState.isSelected,
+});
+
+const currentTreeRowValue = (rowState: UnitTreeRowState): "true" | undefined =>
+  rowState.isCurrent ? "true" : undefined;
+
+const disabledTreeRowValue = (
+  rowState: UnitTreeRowState,
+): "true" | undefined => (rowState.isEnabled ? undefined : "true");
+
+const expandedTreeRowValue = (
+  rowState: UnitTreeRowState,
+): boolean | undefined =>
+  rowState.hasChildren ? rowState.isExpanded : undefined;
+
+const handleUnitTreeRowFocus = (
+  event: React.FocusEvent<HTMLElement>,
+  unitId: string,
+  onRowFocus: (unitId: string) => void,
+): void => {
+  if (event.target === event.currentTarget) onRowFocus(unitId);
+};
 
 const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
   unit,
@@ -367,25 +470,31 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
   setExpanded,
   setRowRef,
 }) => {
-  const rowState = resolveUnitTreeRowState(unit, {
+  const {
+    rowState,
+    handleToggle,
+    handleMouseEnter,
+    handleMouseLeave,
+    rowInteraction,
+  } = useUnitTreeSelectorUnitState({
+    unit,
     canOpenScopeUnit,
     currentPathUnitIds,
     currentUnitId,
     expandedUnitIds,
     hoveredUnitId,
     isUnitEnabled,
-    hasOpenScopeHandler: Boolean(onOpenScope),
-    selectedUnitId,
-  });
-  const handleToggle = () => setExpanded(unit.id, !rowState.isExpanded);
-  const handleMouseEnter = () =>
-    notifyEnabledUnit(rowState.isEnabled, unit.id, onHoverUnit);
-  const handleMouseLeave = () =>
-    notifyEnabledUnit(rowState.isEnabled, unit.id, onLeaveUnit);
-  const rowInteraction = createUnitTreeRowInteraction({
-    isEnabled: rowState.isEnabled,
+    onHoverUnit,
+    onLeaveUnit,
+    onOpenScope,
+    onEscape,
+    onEnterUnit,
+    onRowFocus,
+    onRowKeyDown,
     onSelectUnit,
-    unitId: unit.id,
+    selectedUnitId,
+    setExpanded,
+    setRowRef,
   });
 
   return (
@@ -393,19 +502,12 @@ const UnitTreeSelectorUnit: FC<UnitTreeSelectorUnitProps> = ({
       ref={(element: HTMLElement | null) => setRowRef(unit.id, element)}
       role="treeitem"
       tabIndex={-1}
-      aria-current={rowState.isCurrent ? "true" : undefined}
-      aria-disabled={!rowState.isEnabled ? "true" : undefined}
-      aria-expanded={rowState.hasChildren ? rowState.isExpanded : undefined}
+      {...unitTreeRowAttributes(rowState)}
       aria-level={unit.depth + 1}
-      aria-selected={rowState.isSelected}
       data-unit-tree-unit-id={unit.id}
       onMouseDown={rowInteraction.onMouseDown}
       onClick={rowInteraction.onClick}
-      onFocus={(event) => {
-        if (event.target === event.currentTarget) {
-          onRowFocus(unit.id);
-        }
-      }}
+      onFocus={(event) => handleUnitTreeRowFocus(event, unit.id, onRowFocus)}
       onKeyDown={(event) => onRowKeyDown(event, unit.id)}
       sx={{
         "&:focus-visible > [data-unit-tree-row]": {

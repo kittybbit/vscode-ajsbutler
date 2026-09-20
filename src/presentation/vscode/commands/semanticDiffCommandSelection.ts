@@ -1,10 +1,8 @@
 import type * as vscode from "vscode";
 import type { SemanticDiffCommandDeps } from "./semanticDiffCommand";
 import { readSemanticDiffBeforeFile } from "./semanticDiffCommandReading";
-import {
-  pickSemanticDiffOutputMode,
-  type SemanticDiffOutputMode,
-} from "../../semantic-diff/semanticDiffOutput";
+import { pickSemanticDiffOutputMode } from "../semantic-diff/report/semanticDiffOutputModePicker";
+import { type SemanticDiffOutputMode } from "../../semantic-diff/report/semanticDiffOutput";
 import {
   failedStep,
   mapCommandStep,

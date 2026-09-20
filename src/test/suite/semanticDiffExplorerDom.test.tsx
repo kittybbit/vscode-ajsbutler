@@ -10,7 +10,7 @@ import {
   render,
   within,
 } from "@testing-library/react";
-import SemanticDiffExplorerApp from "../../presentation/webview/semantic-diff/semanticDiffExplorer";
+import SemanticDiffExplorerApp from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
 import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import {
   createSemanticDiffExplorerActionIdAllocator,
@@ -28,15 +28,17 @@ import {
   SemanticDiffExplorerView,
   focusExplorerRowAfterVirtualizedScroll,
   flattenSemanticDiffExplorerTree,
-} from "../../presentation/webview/semantic-diff/semanticDiffExplorerView";
-import { getSemanticDiffExplorerLabels } from "../../presentation/webview/semantic-diff/semanticDiffExplorerLocalization";
+} from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerView";
+import { getSemanticDiffExplorerLabels } from "../../presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerLocalization";
+import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
+import { createViewerResourceStateMessage } from "../../presentation/webview/viewerHostMessages";
 import {
-  createSemanticDiffTheme,
-  semanticDiffExplorerFocusSx,
-  semanticDiffExplorerGlobalStyles,
-  semanticDiffExplorerSelectionSx,
-  semanticDiffExplorerTargetSizePx,
-} from "../../presentation/webview/shared/muiTheme";
+  createViewerTheme,
+  viewerFocusSx,
+  viewerGlobalStyles,
+  viewerSelectionSx,
+  viewerTargetSizePx,
+} from "../../presentation/webview/shared/viewerTheme";
 import {
   createSemanticDiffExplorerSessionMessage,
   createSemanticDiffExplorerError,
@@ -69,6 +71,7 @@ const installDom = (): { dom: JSDOM; globals: GlobalValue[] } => {
     document: dom.window.document,
     navigator: dom.window.navigator,
     HTMLElement: dom.window.HTMLElement,
+    DocumentFragment: dom.window.DocumentFragment,
     Node: dom.window.Node,
     Element: dom.window.Element,
     Event: dom.window.Event,
@@ -118,6 +121,23 @@ const restoreDom = (dom: JSDOM, globals: GlobalValue[]): void => {
     else delete (globalThis as Record<string, unknown>)[key];
   });
   dom.window.close();
+};
+
+const selectFilterOption = (
+  dom: JSDOM,
+  control: HTMLElement,
+  value: string,
+): void => {
+  act(() => {
+    fireEvent.keyDown(control, { key: "ArrowDown" });
+  });
+  const option = dom.window.document.body.querySelector(
+    `[data-value="${value}"]`,
+  );
+  assert.ok(option);
+  act(() => {
+    fireEvent.click(option as HTMLElement);
+  });
 };
 
 const availableActions = (): SemanticDiffExplorerActionSet => ({
@@ -349,19 +369,38 @@ const contrastRatio = (first: string, second: string): number => {
 suite("Semantic diff Explorer DOM", () => {
   let dom: JSDOM;
   let globals: GlobalValue[];
+  let eventBridge: ReturnType<typeof createViewerEventBridge>;
 
   setup(() => {
     ({ dom, globals } = installDom());
+    eventBridge = createViewerEventBridge();
+    Object.defineProperty(dom.window, "EventBridge", {
+      configurable: true,
+      value: eventBridge,
+    });
   });
-  teardown(() => {
+  teardown(async () => {
     cleanup();
+    await new Promise<void>((resolve) => setImmediate(resolve));
     restoreDom(dom, globals);
   });
 
+  const dispatchResource = (isDarkMode: boolean, lang: string): void => {
+    act(() => {
+      eventBridge.dispatch({
+        data: createViewerResourceStateMessage({
+          isDarkMode,
+          lang,
+          scrollType: "window",
+        }),
+      } as MessageEvent);
+    });
+  };
+
   test("uses MUI standard colors and the stricter focus/target baseline", () => {
-    const lightTheme = createSemanticDiffTheme({ mode: "light" });
-    const darkTheme = createSemanticDiffTheme({ mode: "dark" });
-    const lightGlobalStyles = semanticDiffExplorerGlobalStyles(lightTheme);
+    const lightTheme = createViewerTheme({ mode: "light" });
+    const darkTheme = createViewerTheme({ mode: "dark" });
+    const lightGlobalStyles = viewerGlobalStyles(lightTheme);
     assert.strictEqual(lightTheme.palette.background.default, "#fff");
     assert.strictEqual(darkTheme.palette.background.default, "#121212");
     assert.ok(contrastRatio(lightTheme.palette.primary.main, "#ffffff") >= 3);
@@ -380,8 +419,8 @@ suite("Semantic diff Explorer DOM", () => {
     );
     assert.strictEqual(lightGlobalStyles.body.backgroundColor, "#fff");
     assert.strictEqual(lightGlobalStyles.body.color, "rgba(0, 0, 0, 0.87)");
-    assert.strictEqual(semanticDiffExplorerTargetSizePx, 44);
-    assert.ok(semanticDiffExplorerFocusSx["&:focus-visible"]);
+    assert.strictEqual(viewerTargetSizePx, 44);
+    assert.ok(viewerFocusSx["&:focus-visible"]);
     assert.ok(lightGlobalStyles["@media (forced-colors: active)"]);
   });
 
@@ -403,16 +442,16 @@ suite("Semantic diff Explorer DOM", () => {
   });
 
   test("uses system forced-colors and a visible two-pixel focus", () => {
-    const focus = semanticDiffExplorerFocusSx["&:focus-visible"];
+    const focus = viewerFocusSx["&:focus-visible"];
     assert.strictEqual(typeof focus?.outline, "function");
     if (typeof focus?.outline === "function") {
       assert.match(
-        String(focus.outline(createSemanticDiffTheme({ mode: "light" }))),
+        String(focus.outline(createViewerTheme({ mode: "light" }))),
         /2px solid/,
       );
     }
-    const forcedColors = semanticDiffExplorerGlobalStyles(
-      createSemanticDiffTheme({ mode: "light" }),
+    const forcedColors = viewerGlobalStyles(
+      createViewerTheme({ mode: "light" }),
     )["@media (forced-colors: active)"] as Record<
       string,
       Record<string, string>
@@ -430,7 +469,7 @@ suite("Semantic diff Explorer DOM", () => {
       "forcedColorAdjust" in forcedColors["button, select"]!,
       false,
     );
-    const forcedSelection = semanticDiffExplorerSelectionSx(true)[
+    const forcedSelection = viewerSelectionSx(true)[
       "@media (forced-colors: active)"
     ] as Record<string, string>;
     assert.strictEqual(forcedSelection.borderLeftColor, "Highlight");
@@ -494,13 +533,15 @@ suite("Semantic diff Explorer DOM", () => {
     assert.strictEqual(output.getAttribute("type"), "button");
     assert.strictEqual(
       getComputedStyle(output).minHeight,
-      `${semanticDiffExplorerTargetSizePx}px`,
+      `${viewerTargetSizePx}px`,
     );
     assert.strictEqual(
       getComputedStyle(filter).minHeight,
-      `${semanticDiffExplorerTargetSizePx}px`,
+      `${viewerTargetSizePx}px`,
     );
-    assert.ok(view.container.querySelector('p[role="status"]')?.textContent);
+    assert.ok(
+      view.container.querySelector('[data-result-status="true"]')?.textContent,
+    );
     assert.ok(view.container.querySelector('[aria-live="polite"]'));
     assert.ok(tree.getAttribute("aria-activedescendant"));
     const injectedStyles = [...dom.window.document.querySelectorAll("style")]
@@ -528,15 +569,17 @@ suite("Semantic diff Explorer DOM", () => {
     assert.strictEqual(document.activeElement, tree);
     assert.ok(tree.getAttribute("aria-activedescendant"));
     assert.match(
-      String(semanticDiffExplorerFocusSx["&:focus-visible"]?.outline),
+      String(viewerFocusSx["&:focus-visible"]?.outline),
       /2px solid/,
     );
-    fireEvent.change(filter, { target: { value: "confirmation-required" } });
+    selectFilterOption(dom, filter, "confirmation-required");
     assert.match(
       view.container.querySelector('[aria-live="polite"]')?.textContent ?? "",
       /Confirmation required/,
     );
-    assert.ok(view.container.querySelector('p[role="status"]')?.textContent);
+    assert.ok(
+      view.container.querySelector('[data-result-status="true"]')?.textContent,
+    );
   });
 
   test("renders localized cards, reasons, details, actions, and accessible tree", async () => {
@@ -557,7 +600,31 @@ suite("Semantic diff Explorer DOM", () => {
     assert.ok(items.length >= 3);
     assert.ok(within(tree).getByText("確認が必要"));
     assert.strictEqual(view.queryByText("条件付きリレーションの削除"), null);
-    assert.ok(view.getAllByText(/変更前: 10/).length > 0);
+    const detailLabels = [...tree.querySelectorAll("dt, h3")].map(
+      (element) => element.textContent,
+    );
+    const keyValueRows = [
+      ...view.container.querySelectorAll("[data-result-key-value-row]"),
+    ];
+    assert.ok(keyValueRows.length > 0);
+    keyValueRows.forEach((row) => {
+      assert.strictEqual(row.querySelectorAll("dt").length, 1);
+      assert.strictEqual(row.querySelectorAll("dd").length, 1);
+    });
+    assert.ok(detailLabels.includes("変更前"));
+    assert.ok(detailLabels.includes("変更後"));
+    const comparisonValues = [
+      ...tree.querySelectorAll("[data-result-comparison-side]"),
+    ].map((element) => element.textContent);
+    const comparisonLabels = [
+      ...tree.querySelectorAll("[data-result-comparison]"),
+    ].map((element) => element.getAttribute("aria-label"));
+    assert.ok(
+      comparisonLabels.every((label) => /変更前 \/ 変更後$/.test(label ?? "")),
+    );
+    assert.strictEqual(new Set(comparisonLabels).size, comparisonLabels.length);
+    assert.ok(comparisonValues.some((value) => value?.includes("10")));
+    assert.ok(comparisonValues.some((value) => value?.includes("20")));
     assert.ok(view.getByRole("button", { name: "ソースを開く" }));
     assert.ok(
       view.getAllByRole("button", { name: /フローを開く: 対象がありません/ })
@@ -615,8 +682,10 @@ suite("Semantic diff Explorer DOM", () => {
     ).vscode = { postMessage: (value) => messages.push(value) };
 
     const view = render(<SemanticDiffExplorerApp />);
-    assert.strictEqual(messages.length, 1);
-    assert.strictEqual((messages[0] as { type: string }).type, "ready");
+    assert.strictEqual((messages[0] as { type: string }).type, "resource");
+    dispatchResource(false, "en");
+    assert.strictEqual(messages.length, 2);
+    assert.strictEqual((messages[1] as { type: string }).type, "ready");
 
     await act(async () => {
       dom.window.dispatchEvent(
@@ -651,9 +720,11 @@ suite("Semantic diff Explorer DOM", () => {
     );
     assert.strictEqual(ordinaryRow.getAttribute("aria-selected"), "true");
 
-    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox", { name: "Filter changes" }),
+      "confirmation-required",
+    );
     assert.deepStrictEqual(recordTuples(view.container), [
       "change:required-change:change:required-change:0",
       "confirmation:confirmation-record:confirmation:confirmation-record:0",
@@ -673,9 +744,11 @@ suite("Semantic diff Explorer DOM", () => {
       null,
     );
 
-    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
-      target: { value: "all" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox", { name: "Filter changes" }),
+      "all",
+    );
     assert.deepStrictEqual(recordTuples(view.container), [
       "change:ordinary-change:change:ordinary-change:0",
       "change:required-change:change:required-change:0",
@@ -706,6 +779,7 @@ suite("Semantic diff Explorer DOM", () => {
       }
     ).vscode = { postMessage: () => undefined };
     const view = render(<SemanticDiffExplorerApp />);
+    dispatchResource(false, "en");
 
     await act(async () => {
       dom.window.dispatchEvent(
@@ -718,12 +792,15 @@ suite("Semantic diff Explorer DOM", () => {
       );
       await Promise.resolve();
     });
-    fireEvent.change(view.getByRole("combobox", { name: "Filter changes" }), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox", { name: "Filter changes" }),
+      "confirmation-required",
+    );
 
     assert.strictEqual(
-      view.container.querySelector('p[role="status"]')?.textContent,
+      view.getByText("No confirmation-required items match this filter.")
+        .textContent,
       "No confirmation-required items match this filter.",
     );
     assert.strictEqual(
@@ -745,8 +822,9 @@ suite("Semantic diff Explorer DOM", () => {
       postMessage: (value) => messages.push(value),
     };
     const view = render(<SemanticDiffExplorerApp />);
-    assert.strictEqual(messages.length, 1);
-    assert.strictEqual((messages[0] as { type: string }).type, "ready");
+    dispatchResource(false, "en");
+    assert.strictEqual(messages.length, 2);
+    assert.strictEqual((messages[1] as { type: string }).type, "ready");
 
     await act(async () => {
       dom.window.dispatchEvent(
@@ -776,10 +854,9 @@ suite("Semantic diff Explorer DOM", () => {
     );
   });
 
-  test("follows host theme changes in loading and loaded states", async () => {
+  test("follows shared resource theme and locale in loading and loaded states", async () => {
     const { session } = createSessionFixture();
     const messages: unknown[] = [];
-    dom.window.document.body.className = "vscode-light";
     dom.window.document.body.dataset.semanticDiffSessionId = session.sessionId;
     (
       dom.window as unknown as {
@@ -788,18 +865,31 @@ suite("Semantic diff Explorer DOM", () => {
     ).vscode = { postMessage: (value) => messages.push(value) };
 
     const view = render(<SemanticDiffExplorerApp />);
+    dispatchResource(false, "en");
     assert.strictEqual(
       view.getByRole("main").dataset.semanticDiffThemeMode,
       "light",
     );
+    assert.match(
+      [...dom.window.document.querySelectorAll("style")]
+        .map((style) => style.textContent ?? "")
+        .join("\n"),
+      /background-color:#fff/,
+    );
 
-    await act(async () => {
-      dom.window.document.body.className = "vscode-dark";
-      await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 0));
-    });
+    dispatchResource(true, "ja-JP");
     assert.strictEqual(
       view.getByRole("main").dataset.semanticDiffThemeMode,
       "dark",
+    );
+    assert.ok(
+      view.getByRole("heading", { name: "セマンティック差分エクスプローラー" }),
+    );
+    assert.match(
+      [...dom.window.document.querySelectorAll("style")]
+        .map((style) => style.textContent ?? "")
+        .join("\n"),
+      /background-color:#121212/,
     );
 
     await act(async () => {
@@ -818,15 +908,7 @@ suite("Semantic diff Explorer DOM", () => {
       "dark",
     );
 
-    await act(async () => {
-      dom.window.document.body.className = "vscode-light";
-      await new Promise<void>((resolve) => dom.window.setTimeout(resolve, 0));
-    });
-    assert.strictEqual(
-      view.getByRole("main").dataset.semanticDiffThemeMode,
-      "light",
-    );
-    assert.strictEqual(messages.length, 1);
+    assert.strictEqual(messages.length, 2);
   });
 
   test("supports tree parent/child keyboard semantics and sibling aria positions", () => {
@@ -894,9 +976,11 @@ suite("Semantic diff Explorer DOM", () => {
       firstLeaf.id,
     );
 
-    fireEvent.change(view.getByRole("combobox"), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox"),
+      "confirmation-required",
+    );
     const visibleRows = view.getAllByRole("treeitem");
     assert.ok(visibleRows.length > 0);
     const visibleFirst = visibleRows[0]!;
@@ -911,9 +995,7 @@ suite("Semantic diff Explorer DOM", () => {
       0,
     );
 
-    fireEvent.change(view.getByRole("combobox"), {
-      target: { value: "all" },
-    });
+    selectFilterOption(dom, view.getByRole("combobox"), "all");
     assert.strictEqual(
       tree.getAttribute("aria-activedescendant"),
       firstLeaf.id,
@@ -926,9 +1008,11 @@ suite("Semantic diff Explorer DOM", () => {
       1,
     );
 
-    fireEvent.change(view.getByRole("combobox"), {
-      target: { value: "confirmation-required" },
-    });
+    selectFilterOption(
+      dom,
+      view.getByRole("combobox"),
+      "confirmation-required",
+    );
     const filteredAgainFirst = view.getAllByRole("treeitem")[0]!;
     assert.strictEqual(
       tree.getAttribute("aria-activedescendant"),
