@@ -22,6 +22,8 @@ import {
   semanticDiffExplorerFocusSx,
   semanticDiffExplorerSelectionSx,
 } from "../../shared/muiTheme";
+import ResultComparison from "../shared/result/ResultComparison";
+import { formatLocalizedDateRange } from "../shared/result/formatLocalizedDateRange";
 import ResultKeyValueList from "../shared/result/ResultKeyValueList";
 import ResultStatusChip from "../shared/result/ResultStatusChip";
 import { focusExplorerRowAfterVirtualizedScroll } from "./semanticDiffExplorerFocus";
@@ -183,6 +185,11 @@ type ExplorerDetailItem = Readonly<{
   value: string;
 }>;
 
+type ExplorerDetailPresentation = Readonly<{
+  rows: readonly ExplorerDetailItem[];
+  comparison: Readonly<{ before: string; after: string }> | null;
+}>;
+
 const optionalDetail = (
   label: string,
   value: string | undefined,
@@ -201,40 +208,54 @@ const listDetail = (
 const detailItems = ({
   detail,
   labels,
+  language,
 }: Readonly<{
   detail: SemanticDiffDetail;
   labels: SemanticDiffExplorerLabels;
-}>): ExplorerDetailItem[] =>
-  [
+  language: string;
+}>): ExplorerDetailPresentation => ({
+  rows: [
     optionalDetail("unit", detail.unitPath, labels),
     optionalDetail("parameter", detail.parameterKey, labels),
-    listDetail("before", detail.beforeValues, labels),
-    listDetail("after", detail.afterValues, labels),
     listDetail("raw", detail.rawValues, labels),
     listDetail("removed", detail.removedSources, labels),
     detail.period
       ? {
           label: labels.detailField("period"),
-          value: `${detail.period.from}–${detail.period.to}`,
+          value: formatLocalizedDateRange(
+            detail.period.from,
+            detail.period.to,
+            language,
+          ),
         }
       : null,
-  ].filter((item): item is ExplorerDetailItem => item !== null);
+  ].filter((item): item is ExplorerDetailItem => item !== null),
+  comparison:
+    detail.beforeValues.length > 0 || detail.afterValues.length > 0
+      ? {
+          before: detail.beforeValues.join(", ") || "—",
+          after: detail.afterValues.join(", ") || "—",
+        }
+      : null,
+});
 
 const scheduleDetails = (
   leaf: LeafOf<"schedule">,
   labels: SemanticDiffExplorerLabels,
-): ExplorerDetailItem[] => {
-  const run = leaf.change.after ?? leaf.change.before;
-  return run
-    ? [
-        { label: labels.detailField("unit"), value: leaf.change.unitPath },
-        {
-          label: labels.detailField("period"),
-          value: `${run.date} ${run.time}`,
-        },
-      ]
-    : [{ label: labels.detailField("unit"), value: leaf.change.unitPath }];
-};
+): ExplorerDetailPresentation => ({
+  rows: [{ label: labels.detailField("unit"), value: leaf.change.unitPath }],
+  comparison:
+    leaf.change.before || leaf.change.after
+      ? {
+          before: leaf.change.before
+            ? `${leaf.change.before.date} ${leaf.change.before.time}`
+            : "—",
+          after: leaf.change.after
+            ? `${leaf.change.after.date} ${leaf.change.after.time}`
+            : "—",
+        }
+      : null,
+});
 const constraintDetails = (
   leaf: Exclude<SemanticDiffExplorerLeaf, LeafOf<"schedule">>,
   labels: SemanticDiffExplorerLabels,
@@ -255,21 +276,32 @@ const warningDetails = (
 const standardDetails = (
   leaf: Exclude<SemanticDiffExplorerLeaf, LeafOf<"schedule">>,
   labels: SemanticDiffExplorerLabels,
-): ExplorerDetailItem[] => [
-  ...(leaf.detail ? detailItems({ detail: leaf.detail, labels }) : []),
-  ...constraintDetails(leaf, labels),
-  ...warningDetails(leaf, labels),
-];
+  language: string,
+): ExplorerDetailPresentation => {
+  const details = leaf.detail
+    ? detailItems({ detail: leaf.detail, labels, language })
+    : { rows: [], comparison: null };
+  return {
+    rows: [
+      ...details.rows,
+      ...constraintDetails(leaf, labels),
+      ...warningDetails(leaf, labels),
+    ],
+    comparison: details.comparison,
+  };
+};
 const leafDetails = ({
   leaf,
   labels,
+  language,
 }: Readonly<{
   leaf: SemanticDiffExplorerLeaf;
   labels: SemanticDiffExplorerLabels;
-}>): ExplorerDetailItem[] =>
+  language: string;
+}>): ExplorerDetailPresentation =>
   leaf.kind === "schedule"
     ? scheduleDetails(leaf, labels)
-    : standardDetails(leaf, labels);
+    : standardDetails(leaf, labels, language);
 
 const unavailableActionLabel = (
   action: SemanticDiffExplorerLeaf["actions"]["source"],
@@ -392,6 +424,7 @@ const ExplorerRowView = ({
   row,
   selected,
   labels,
+  language,
   onSelect,
   onToggle,
   onAction,
@@ -400,6 +433,7 @@ const ExplorerRowView = ({
   row: ExplorerRow;
   selected: boolean;
   labels: SemanticDiffExplorerLabels;
+  language: string;
   onSelect: () => void;
   onToggle: () => void;
   onAction?: (id: string, element?: HTMLElement) => void;
@@ -421,6 +455,7 @@ const ExplorerRowView = ({
       row={row}
       selected={selected}
       labels={labels}
+      language={language}
       onSelect={onSelect}
       onAction={onAction}
       rowRef={rowRef}
@@ -432,6 +467,7 @@ const ExplorerLeafRow = ({
   row,
   selected,
   labels,
+  language,
   onSelect,
   onAction,
   rowRef,
@@ -439,6 +475,7 @@ const ExplorerLeafRow = ({
   row: ExplorerRow;
   selected: boolean;
   labels: SemanticDiffExplorerLabels;
+  language: string;
   onSelect: () => void;
   onAction?: (id: string, element?: HTMLElement) => void;
   rowRef: (element: HTMLElement | null) => void;
@@ -475,7 +512,13 @@ const ExplorerLeafRow = ({
       }}
       onClick={onSelect}
     >
-      <ExplorerLeafFacts facts={facts} labels={labels} leaf={leaf} />
+      <ExplorerLeafFacts
+        facts={facts}
+        labels={labels}
+        leaf={leaf}
+        language={language}
+        rowId={row.id}
+      />
       <ExplorerLeafActions leaf={leaf} labels={labels} onAction={onAction} />
     </Box>
   );
@@ -485,12 +528,16 @@ const ExplorerLeafFacts = ({
   facts,
   labels,
   leaf,
+  language,
+  rowId,
 }: Readonly<{
   facts: LeafFacts;
   labels: SemanticDiffExplorerLabels;
   leaf: SemanticDiffExplorerLeaf;
+  language: string;
+  rowId: string;
 }>): React.ReactElement => {
-  const details = leafDetails({ leaf, labels });
+  const details = leafDetails({ leaf, labels, language });
   const target = targetLabel({ target: leafTarget(leaf), labels });
   return (
     <>
@@ -503,9 +550,20 @@ const ExplorerLeafFacts = ({
       <FactChip value={facts.unsupportedKind} fact="unsupported-kind" />
       <FactText value={facts.reason} fact="reason" />
       <FactText value={target} fact="target" />
-      {details.length > 0 ? (
+      {details.rows.length > 0 ? (
         <Box sx={{ flex: "1 1 100%", minWidth: 0 }}>
-          <ResultKeyValueList items={details} />
+          <ResultKeyValueList items={details.rows} />
+        </Box>
+      ) : null}
+      {details.comparison ? (
+        <Box sx={{ flex: "1 1 100%", minWidth: 0 }}>
+          <ResultComparison
+            beforeLabel={labels.detailField("before")}
+            afterLabel={labels.detailField("after")}
+            before={details.comparison.before}
+            after={details.comparison.after}
+            ariaLabel={`${rowId}: ${labels.detailField("before")} / ${labels.detailField("after")}`}
+          />
         </Box>
       ) : null}
     </>

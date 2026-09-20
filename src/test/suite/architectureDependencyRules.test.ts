@@ -105,6 +105,8 @@ const sharedResultFiles = [
   "ResultKeyValueList.tsx",
   "ResultSection.tsx",
   "ResultStatusChip.tsx",
+  "ResultComparison.tsx",
+  "formatLocalizedDateRange.ts",
 ] as const;
 const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerFocus.ts",
@@ -680,7 +682,7 @@ suite("Architecture dependency rules", () => {
     assert.deepStrictEqual(
       fs
         .readdirSync(sharedResultRoot)
-        .filter((file) => file.endsWith(".tsx"))
+        .filter((file) => file.endsWith(".ts") || file.endsWith(".tsx"))
         .sort(),
       [...sharedResultFiles].sort(),
     );

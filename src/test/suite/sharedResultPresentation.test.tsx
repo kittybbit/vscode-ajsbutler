@@ -3,10 +3,12 @@ import { JSDOM } from "jsdom";
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import ResultCard from "../../presentation/webview/editor/shared/result/ResultCard";
+import ResultComparison from "../../presentation/webview/editor/shared/result/ResultComparison";
 import ResultEmptyState from "../../presentation/webview/editor/shared/result/ResultEmptyState";
 import ResultKeyValueList from "../../presentation/webview/editor/shared/result/ResultKeyValueList";
 import ResultSection from "../../presentation/webview/editor/shared/result/ResultSection";
 import ResultStatusChip from "../../presentation/webview/editor/shared/result/ResultStatusChip";
+import { formatLocalizedDateRange } from "../../presentation/webview/editor/shared/result/formatLocalizedDateRange";
 
 suite("Shared result presentation", () => {
   let dom: JSDOM;
@@ -84,5 +86,54 @@ suite("Shared result presentation", () => {
         ?.getAttribute("data-global-count"),
       "2",
     );
+  });
+
+  test("formats localized ranges without changing endpoint order", () => {
+    assert.strictEqual(
+      formatLocalizedDateRange("2026-01-01", "2026-01-04", "en-US"),
+      "2026-01-01 – 2026-01-04",
+    );
+    assert.strictEqual(
+      formatLocalizedDateRange("2026-01-01", "2026-01-04", "ja-JP"),
+      "2026-01-01〜2026-01-04",
+    );
+  });
+
+  test("keeps comparison sides semantic, ordered, and responsive", () => {
+    const view = render(
+      <ResultComparison
+        beforeLabel="Before"
+        afterLabel="After"
+        before="a-before-value-that-wraps"
+        after={null}
+        ariaLabel="Before / After"
+        dataTestId="comparison"
+      />,
+    );
+    const comparison = view.container.querySelector(
+      '[data-result-comparison-label="Before / After"]',
+    ) as HTMLElement;
+    assert.ok(comparison);
+    assert.strictEqual(comparison.getAttribute("aria-label"), "Before / After");
+    assert.ok(
+      [...document.querySelectorAll("style")].some((style) =>
+        style.textContent?.includes("@media (min-width:900px)"),
+      ),
+    );
+    const sides = [
+      ...comparison.querySelectorAll("[data-result-comparison-side]"),
+    ];
+    assert.deepStrictEqual(
+      sides.map((side) => side.getAttribute("data-result-comparison-side")),
+      ["before", "after"],
+    );
+    assert.deepStrictEqual(
+      [...comparison.querySelectorAll("h3")].map(
+        (heading) => heading.textContent,
+      ),
+      ["Before", "After"],
+    );
+    assert.ok(sides[0]?.textContent?.includes("a-before-value-that-wraps"));
+    assert.ok(sides[1]?.textContent?.includes("—"));
   });
 });

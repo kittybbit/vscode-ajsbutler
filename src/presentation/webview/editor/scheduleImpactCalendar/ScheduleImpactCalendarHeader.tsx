@@ -6,13 +6,16 @@ import Typography from "@mui/material/Typography";
 import type { ScheduleImpactCalendarModel } from "./scheduleImpactCalendarModel";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
 import ResultStatusChip from "../shared/result/ResultStatusChip";
+import { formatLocalizedDateRange } from "../shared/result/formatLocalizedDateRange";
 
 export const ScheduleImpactCalendarHeader = ({
   model,
   labels,
+  language,
 }: Readonly<{
   model: ScheduleImpactCalendarModel;
   labels: ScheduleImpactCalendarLabels;
+  language: string;
 }>): React.ReactElement => (
   <AppBar
     component="header"
@@ -32,7 +35,13 @@ export const ScheduleImpactCalendarHeader = ({
           {labels.title}
         </Typography>
         <Typography component="p" sx={{ m: 0 }}>
-          {labels.period}: [{model.period.from}, {model.period.to})
+          {labels.period}: [
+          {formatLocalizedDateRange(
+            model.period.from,
+            model.period.to,
+            language,
+          )}
+          )
         </Typography>
       </Box>
       <ResultStatusChip

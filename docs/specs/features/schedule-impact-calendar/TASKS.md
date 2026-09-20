@@ -15,12 +15,15 @@
   Slice 4 at `d4344a26`, Slice 5 at `f47edeb0`, Slice 6 at `c36ee1cf`, Slice 7
   at `8c555139`, Slice 8 at `fe042fb0`, Slice 9 at `bb8d7305`, Slice 10 at
   `0a5cdd31`, and Slice 11 at `644161ca`.
-- Approved or active slice: none. Slices 1–11 have independent `Ready`
-  reviews with no Findings, automatic no-findings Completion Approval, and
-  focused completion commits. Slice 12 plan review is `Ready for approval`
+- Approved or active slice: Slice 12 implementation is complete under focused
+  plan commit `b25e38d5`; independent implementation review returned `Ready`
+  with no Findings, automatic Completion Approval is recorded, and its focused
+  completion commit is pending `approval-committer`. Slices 1–11 have
+  independent `Ready` reviews with no Findings, automatic no-findings
+  Completion Approval, and
+  focused completion commits. Slice 12 plan review was `Ready for approval`
   with no Findings, Human Plan Approval is recorded, and its exact plan paths
-  are approved; the focused plan commit is pending `approval-committer` before
-  implementation authorization. Feature Exit remains deferred.
+  are approved. Feature Exit remains deferred.
 - Do not recalculate schedules, infer outcomes from empty arrays, merge
   ambiguous identity candidates, change the Explorer contract, or change
   `SemanticDiffResult`, the immutable `{ result, summary }`
@@ -256,7 +259,10 @@
   completion commit `644161ca` is complete.
 - Slice 12 plan review returned `Ready for approval` with no Findings and
   `Replanning required: No`; Human Plan Approval is recorded below for the
-  exact paths, and its focused plan commit is pending `approval-committer`.
+  exact paths, focused plan commit `b25e38d5` is complete, implementation is
+  complete under the approved paths, independent implementation review returned
+  `Ready` with no Findings, and automatic Completion Approval is recorded below.
+  Its focused completion commit is pending `approval-committer`.
 - Human approval: The reviewed three-slice package, original internal Slice 1
   boundary, first four-path status-carrier delta, second five-path Replanning
   delta, and third seven-path Replanning delta are approved. The focused
@@ -289,13 +295,15 @@
   returned `Ready` with no Findings, automatic Completion Approval is recorded,
   and focused completion commit `644161ca` is complete. Slice 12 plan review
   returned `Ready for approval` with no Findings and Human Plan Approval is
-  recorded below; its focused plan commit is pending `approval-committer`.
-  Final batch human Closure Approval remains deferred until Slice 12 is
-  complete.
-- Active implementation slice: none; Slices 1–11 are implementation-complete,
-  reviewed, Completion-approved, and focused-commit complete. Slice 12 is
-  planned but not implementation-authorized. Feature Exit is reopened and
-  deferred.
+  recorded below; focused plan commit `b25e38d5` is complete, implementation is
+  complete under the approved paths; independent implementation review
+  returned `Ready` with no Findings, automatic Completion Approval is recorded
+  below, and its focused completion commit is pending `approval-committer`.
+  Final batch human Closure Approval remains deferred until that commit and
+  renewed Feature Exit review.
+- Active implementation slice: none; Slices 1–12 are implementation-complete,
+  reviewed, and Completion-approved. Slice 12's focused completion commit is
+  pending `approval-committer`; Feature Exit remains deferred.
 - Slice order: Slice 1, Slice 2, Slice 3, Slice 4, Slice 5, Slice 6, Slice 7,
   Slice 8, Slice 9, Slice 10, Slice 11, then Slice 12. Each slice requires its
   own implementation review, Completion Approval, and focused commit after
@@ -1095,9 +1103,9 @@ Findings and Completion Approval is recorded above; focused completion commit
 
 ## Closure Approval
 
-- Status: Deferred while Slice 12 is replanned; explicit human Closure
-  Approval follows Slice 12 completion and renewed independent Feature Exit
-  review
+- Status: Deferred while Slice 12 awaits independent implementation review and
+  Completion Approval; explicit human Closure Approval follows Slice 12
+  completion and renewed independent Feature Exit review
 - Approved at: none
 - Approved scope: none
 - Approved paths: none
@@ -3957,8 +3965,10 @@ documentation boundary.
   `Replanning required: No`. Human Plan Approval was recorded on 2026-09-20
   under the user's automatic no-findings instruction for the exact paths below.
   Slice 11 is completion-committed at `644161ca`; Slice 12's focused plan
-  commit is pending `approval-committer`, and implementation is not authorized
-  until that gate completes.
+  commit `b25e38d5` is complete. Implementation is complete under the approved
+  paths; final implementation review returned `Ready` with no Findings and
+  automatic Completion Approval is recorded below. The focused completion
+  commit is pending `approval-committer`.
 - Replanning trigger: the user reported that date ranges such as
   `2026-01-01-2026-01-04` are hard to scan because date-internal hyphens and
   the range separator run together, and that Calendar before-values are pushed
@@ -4115,9 +4125,62 @@ virtualization, and desktop/web behavior.
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
-- Next stage: `approval-committer` for the focused Slice 12 plan commit.
-  Runtime, tests, CHANGELOG, roadmap, and implementation remain unchanged
-  until that commit and the subsequent implementation handoff.
+- Plan gate status: complete; focused Slice 12 plan commit `b25e38d5`.
+  Implementation review returned `Ready` with no Findings and Completion
+  Approval is recorded below. Next stage: `approval-committer` for the focused
+  Slice 12 completion commit.
+
+### Slice 12 Implementation Evidence
+
+- Status: Implementation complete under focused plan commit `b25e38d5`.
+  Final `implementation-reviewer` verdict: `Ready`; Findings none. Automatic
+  Completion Approval is recorded below under the user's standing no-findings
+  instruction. The focused completion commit is pending
+  `approval-committer`.
+- Acceptance result: the shared localized range formatter and comparison shell
+  are adopted by the Calendar and Explorer consumers in the approved scope;
+  before remains first/left and after second/right, narrow layouts preserve
+  before→after order, and the existing facts, DTOs, half-open period semantics,
+  keyboard/focus behavior, virtualization, and theme/resource mechanism remain
+  unchanged.
+- Changed paths are listed exactly in the Slice 12 Completion Approval below;
+  no unapproved component, runtime protocol, roadmap, or unrelated changelog
+  path is included.
+
+### Slice 12 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-20 under the user's standing automatic no-findings
+  Completion Approval instruction.
+- Basis: independent `implementation-reviewer` final verdict `Ready`; Findings
+none. The completed diff matches the approved formatter, comparison,
+Calendar/Explorer presentation, focused test, architecture, changelog, and
+feature-documentation boundary.
+<!-- markdownlint-disable MD013 -->
+- Completed paths (exact actual Slice 12 diff):
+  - `CHANGELOG.md`
+  - `src/presentation/webview/editor/shared/result/ResultComparison.tsx`
+  - `src/presentation/webview/editor/shared/result/formatLocalizedDateRange.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/sharedResultPresentation.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+- Commit status: implementation is completion-approved; focused completion
+  commit is pending `approval-committer`.
+- Next stage: `approval-committer` for the exact completed paths above. Feature
+  Exit and final batch human Closure Approval remain deferred until that commit
+  and renewed independent Feature Exit review.
 
 ## Cross-Slice Approval And Production Readiness
 
@@ -4221,8 +4284,10 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
 
 ## Feature Exit
 
-- Definition of Done status: Slice 12 is planned and awaiting independent
-  plan review; Feature Exit is deferred. Slices 1–11
+- Definition of Done status: Slice 12 implementation is complete under the
+  approved paths, independent implementation review returned `Ready` with no
+  Findings, and Completion Approval is recorded; its focused completion commit
+  is pending `approval-committer`, so Feature Exit is deferred. Slices 1–11
   are independently reviewed `Ready` with no Findings, automatically
   Completion-approved under the user's instruction, and focused-commit
   complete: Slice 1 `51a8ae4a`, Slice 2 `b9cee633`, Slice 3 `ffb92f1e`, format
@@ -4245,15 +4310,16 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
   under the approved paths. Implementation review returned `Ready` with no
   Findings, automatic Completion Approval is recorded, and focused completion
   commit `644161ca` is complete. Its user-visible `CHANGELOG.md` Unreleased
-  entry is applied. Slice 12's additional range/comparison entry remains
-  planned only.
+  entry is applied. Slice 12's additional range/comparison implementation is
+  reviewed `Ready` with no Findings and Completion-approved; its focused
+  completion commit remains pending.
   Existing macOS codesign, web-stream cleanup, webpack-size, and advisory
   smell findings remain documented observations.
-- Remaining risks: Slice 12's independent plan review and approval are open;
-  its layout, localization, and accessibility implementation evidence does not
-  exist yet. Existing macOS codesign, web-stream cleanup, webpack-size, and
-  advisory smell findings remain documented compatibility observations. Feature
-  Exit and final batch human Closure Approval remain deferred.
+- Remaining risks: Slice 12's focused completion commit and renewed Feature Exit
+  review are open. Existing macOS codesign, web-stream cleanup,
+  webpack-size, and advisory smell findings remain documented compatibility
+  observations. Feature Exit and final batch human Closure Approval remain
+  deferred.
 - Proposed closure scope: update `docs/specs/roadmap.md` as above, then remove
   only `docs/specs/features/schedule-impact-calendar/` after Closure Approval;
   inherited feature folders remain preserved.
@@ -4450,9 +4516,12 @@ after: { rootProjections, statuses, issues }, correspondence }`. Existing
       `plan-reviewer` `Ready for approval` with no Findings and
       `Replanning required: No`; Human Plan Approval was recorded on
       2026-09-20 under the user's automatic no-findings instruction for the
-      exact paths above. The focused plan commit is pending
-      `approval-committer`; no Slice 12 runtime, test, or changelog
-      implementation is authorized yet, and Feature Exit remains deferred.
+      exact paths above. Focused plan commit `b25e38d5` is complete and the
+      implementation is complete under the approved paths. Independent
+      implementation review returned `Ready` with no Findings, automatic
+      Completion Approval was recorded on 2026-09-20, and the focused
+      completion commit is pending `approval-committer`; Feature Exit remains
+      deferred. Focused validation evidence is recorded in TRACEABILITY.
 
 ## Notes
 

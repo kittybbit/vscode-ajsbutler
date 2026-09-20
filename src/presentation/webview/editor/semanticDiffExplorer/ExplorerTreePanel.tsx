@@ -14,6 +14,7 @@ import ResultSection from "../shared/result/ResultSection";
 export type SemanticDiffExplorerTreePanelProps = Readonly<{
   rows: readonly ExplorerRow[];
   labels: SemanticDiffExplorerLabels;
+  language: string;
   selectedId: string | undefined;
   activeId: string | undefined;
   activeIndex: number;
@@ -60,6 +61,7 @@ const createRowHandlers = ({
 export const SemanticDiffExplorerTreePanel = ({
   rows,
   labels,
+  language,
   selectedId,
   activeId,
   activeIndex,
@@ -86,6 +88,7 @@ export const SemanticDiffExplorerTreePanel = ({
           row={row}
           selected={row.id === selectedId}
           labels={labels}
+          language={language}
           {...handlers}
           onAction={action}
           rowRef={(element) => registerRow(row.id, element)}

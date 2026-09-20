@@ -11,6 +11,7 @@ import {
 import { ScheduleImpactCalendarBoundedList } from "./ScheduleImpactCalendarBoundedList";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
 import ResultCard from "../shared/result/ResultCard";
+import ResultComparison from "../shared/result/ResultComparison";
 import ResultEmptyState from "../shared/result/ResultEmptyState";
 import ResultKeyValueList from "../shared/result/ResultKeyValueList";
 import ResultSection from "../shared/result/ResultSection";
@@ -92,18 +93,6 @@ const RootStatus = ({
                   </Stack>
                 ),
               },
-              ...(sourceRoot
-                ? [
-                    {
-                      label: labels.before,
-                      value: sideDetails(sourceRoot.before),
-                    },
-                    {
-                      label: labels.after,
-                      value: sideDetails(sourceRoot.after),
-                    },
-                  ]
-                : []),
               ...(root.scopeTransition
                 ? [
                     {
@@ -125,6 +114,13 @@ const RootStatus = ({
                 ? [{ label: labels.counterpart, value: root.counterpartPath }]
                 : []),
             ]}
+          />
+          <ResultComparison
+            beforeLabel={labels.before}
+            afterLabel={labels.after}
+            before={sideDetails(sourceRoot?.before ?? null)}
+            after={sideDetails(sourceRoot?.after ?? null)}
+            ariaLabel={`${root.id}: ${labels.before} / ${labels.after}`}
           />
         </ResultCard>
       </ListItem>
@@ -195,14 +191,6 @@ const ValidNoRuns = ({
         <ResultKeyValueList
           items={[
             { label: labels.id, value: root.id },
-            {
-              label: labels.before,
-              value: sideDetails(root.before),
-            },
-            {
-              label: labels.after,
-              value: sideDetails(root.after),
-            },
             ...(root.scopeTransition
               ? [
                   {
@@ -216,6 +204,13 @@ const ValidNoRuns = ({
                 ]
               : []),
           ]}
+        />
+        <ResultComparison
+          beforeLabel={labels.before}
+          afterLabel={labels.after}
+          before={sideDetails(root.before)}
+          after={sideDetails(root.after)}
+          ariaLabel={`${root.id}: ${labels.before} / ${labels.after}`}
         />
       </ResultCard>
     </ListItem>
@@ -344,28 +339,31 @@ const Candidates = ({
       }}
       sx={{ p: 1, mb: 1 }}
     >
-      <Typography component="h4" variant="body2">
-        {labels.candidateBefore}
-      </Typography>
-      {group.before.length === 0 ? (
-        <Typography>{labels.emptyCandidates}</Typography>
-      ) : (
-        <ScheduleImpactCalendarBoundedList
-          items={group.before.map(candidateDetails)}
-          ariaLabel={`${group.id} ${labels.candidateBefore}`}
-        />
-      )}
-      <Typography component="h4" variant="body2">
-        {labels.candidateAfter}
-      </Typography>
-      {group.after.length === 0 ? (
-        <Typography>{labels.emptyCandidates}</Typography>
-      ) : (
-        <ScheduleImpactCalendarBoundedList
-          items={group.after.map(candidateDetails)}
-          ariaLabel={`${group.id} ${labels.candidateAfter}`}
-        />
-      )}
+      <ResultComparison
+        beforeLabel={labels.candidateBefore}
+        afterLabel={labels.candidateAfter}
+        before={
+          group.before.length === 0 ? (
+            <Typography>{labels.emptyCandidates}</Typography>
+          ) : (
+            <ScheduleImpactCalendarBoundedList
+              items={group.before.map(candidateDetails)}
+              ariaLabel={`${group.id} ${labels.candidateBefore}`}
+            />
+          )
+        }
+        after={
+          group.after.length === 0 ? (
+            <Typography>{labels.emptyCandidates}</Typography>
+          ) : (
+            <ScheduleImpactCalendarBoundedList
+              items={group.after.map(candidateDetails)}
+              ariaLabel={`${group.id} ${labels.candidateAfter}`}
+            />
+          )
+        }
+        ariaLabel={`${group.id} ${labels.candidateBefore} / ${labels.candidateAfter}`}
+      />
     </ResultCard>
   ));
   return (

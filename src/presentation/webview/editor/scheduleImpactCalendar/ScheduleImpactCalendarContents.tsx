@@ -13,6 +13,7 @@ import { ScheduleImpactCalendarHeader } from "./ScheduleImpactCalendarHeader";
 import { ScheduleImpactCalendarSections } from "./ScheduleImpactCalendarSections";
 import { ScheduleImpactCalendarTimeline } from "./ScheduleImpactCalendarTimeline";
 import ResultSection from "../shared/result/ResultSection";
+import { formatLocalizedDateRange } from "../shared/result/formatLocalizedDateRange";
 
 export type ScheduleImpactCalendarContentsProps = Readonly<{
   sidecar: SemanticDiffScheduleImpact;
@@ -40,6 +41,11 @@ export const ScheduleImpactCalendarContents = ({
       component="main"
       aria-labelledby="schedule-impact-calendar-title"
       data-testid="schedule-impact-calendar"
+      data-schedule-impact-calendar-period={formatLocalizedDateRange(
+        model.period.from,
+        model.period.to,
+        language,
+      )}
       direction="column"
       spacing={1}
       sx={{
@@ -59,7 +65,11 @@ export const ScheduleImpactCalendarContents = ({
         },
       }}
     >
-      <ScheduleImpactCalendarHeader model={model} labels={labels} />
+      <ScheduleImpactCalendarHeader
+        model={model}
+        labels={labels}
+        language={language}
+      />
       <Typography
         component="div"
         aria-live="polite"

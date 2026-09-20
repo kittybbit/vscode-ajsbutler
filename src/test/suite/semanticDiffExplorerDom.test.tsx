@@ -581,16 +581,23 @@ suite("Semantic diff Explorer DOM", () => {
     assert.ok(items.length >= 3);
     assert.ok(within(tree).getByText("確認が必要"));
     assert.strictEqual(view.queryByText("条件付きリレーションの削除"), null);
-    const detailLabels = [...tree.querySelectorAll("dt")].map(
+    const detailLabels = [...tree.querySelectorAll("dt, h3")].map(
       (element) => element.textContent,
     );
     assert.ok(detailLabels.includes("変更前"));
     assert.ok(detailLabels.includes("変更後"));
-    const detailValues = [...tree.querySelectorAll("dd")].map(
-      (element) => element.textContent,
+    const comparisonValues = [
+      ...tree.querySelectorAll("[data-result-comparison-side]"),
+    ].map((element) => element.textContent);
+    const comparisonLabels = [
+      ...tree.querySelectorAll("[data-result-comparison]"),
+    ].map((element) => element.getAttribute("aria-label"));
+    assert.ok(
+      comparisonLabels.every((label) => /変更前 \/ 変更後$/.test(label ?? "")),
     );
-    assert.ok(detailValues.includes("10"));
-    assert.ok(detailValues.includes("20"));
+    assert.strictEqual(new Set(comparisonLabels).size, comparisonLabels.length);
+    assert.ok(comparisonValues.some((value) => value?.includes("10")));
+    assert.ok(comparisonValues.some((value) => value?.includes("20")));
     assert.ok(view.getByRole("button", { name: "ソースを開く" }));
     assert.ok(
       view.getAllByRole("button", { name: /フローを開く: 対象がありません/ })

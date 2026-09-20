@@ -113,6 +113,7 @@ export const SemanticDiffExplorerContents = ({
         {...selection}
         rows={rows}
         labels={labels}
+        language={language}
         action={action}
         toggleExpanded={toggleExpanded}
         setAnnouncement={setAnnouncement}

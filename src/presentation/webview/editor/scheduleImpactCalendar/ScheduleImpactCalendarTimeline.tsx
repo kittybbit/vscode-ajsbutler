@@ -15,6 +15,7 @@ import {
 } from "./scheduleImpactCalendarFocus";
 import type { ScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
 import ResultCard from "../shared/result/ResultCard";
+import ResultComparison from "../shared/result/ResultComparison";
 import ResultEmptyState from "../shared/result/ResultEmptyState";
 import ResultKeyValueList from "../shared/result/ResultKeyValueList";
 import ResultStatusChip from "../shared/result/ResultStatusChip";
@@ -53,17 +54,12 @@ const sourceChangeRefValue = (
 
 const RunDetails = ({
   run,
-  label,
   labels,
 }: Readonly<{
   run: SemanticDiffScheduleImpactRun | null;
-  label: string;
   labels: ScheduleImpactCalendarLabels;
 }>): React.ReactElement => (
-  <Box component="section" aria-label={label}>
-    <Typography component="h4" variant="body2">
-      {label}
-    </Typography>
+  <Box component="div">
     {run ? (
       <ResultKeyValueList
         items={[
@@ -210,8 +206,6 @@ export const ScheduleImpactCalendarTimeline = ({
         <ResultKeyValueList
           items={[
             { label: labels.rule, value: entry.item.rule },
-            { label: labels.before, value: entry.item.before?.time ?? "—" },
-            { label: labels.after, value: entry.item.after?.time ?? "—" },
             { label: labels.id, value: entry.item.id },
             { label: labels.side, value: entry.item.side },
             { label: labels.root, value: entry.item.rootId },
@@ -222,18 +216,13 @@ export const ScheduleImpactCalendarTimeline = ({
             },
           ]}
         />
-        <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-          <RunDetails
-            run={entry.item.before}
-            label={labels.before}
-            labels={labels}
-          />
-          <RunDetails
-            run={entry.item.after}
-            label={labels.after}
-            labels={labels}
-          />
-        </Stack>
+        <ResultComparison
+          beforeLabel={labels.before}
+          afterLabel={labels.after}
+          before={<RunDetails run={entry.item.before} labels={labels} />}
+          after={<RunDetails run={entry.item.after} labels={labels} />}
+          ariaLabel={`${entry.item.id}: ${labels.before} / ${labels.after}`}
+        />
       </ResultCard>
     </Box>
   );

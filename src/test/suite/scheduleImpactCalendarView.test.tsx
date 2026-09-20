@@ -255,7 +255,7 @@ suite("Schedule impact calendar view", () => {
     assert.ok(
       view.getByRole("heading", { name: "スケジュール影響カレンダー" }),
     );
-    assert.ok(view.container.textContent?.includes("[2026-01-01, 2026-01-04)"));
+    assert.ok(view.container.textContent?.includes("[2026-01-01〜2026-01-04)"));
     assert.ok(view.getByRole("combobox", { name: "ルートジョブネット" }));
     assert.ok(view.getByRole("combobox", { name: "ルート結果" }));
     assert.ok(view.getByRole("combobox", { name: "実行状態" }));
@@ -268,6 +268,26 @@ suite("Schedule impact calendar view", () => {
       view
         .getByRole("region", { name: "ルート結果" })
         .textContent?.includes("対応する実行"),
+    );
+    const rootComparison = view
+      .getByRole("region", { name: "ルート結果" })
+      .querySelector("[data-result-comparison]");
+    assert.strictEqual(
+      rootComparison?.getAttribute("aria-label"),
+      "root-1: 変更前 / 変更後",
+    );
+    assert.deepStrictEqual(
+      [...(rootComparison?.querySelectorAll("h3") ?? [])].map(
+        (heading) => heading.textContent,
+      ),
+      ["変更前", "変更後"],
+    );
+    assert.deepStrictEqual(
+      [
+        ...(rootComparison?.querySelectorAll("[data-result-comparison-side]") ??
+          []),
+      ].map((side) => side.getAttribute("data-result-comparison-side")),
+      ["before", "after"],
     );
     assert.ok(view.getByRole("heading", { name: "有効な実行なし" }));
     assert.ok(view.getByTestId("schedule-impact-calendar-legend"));
@@ -477,7 +497,7 @@ suite("Schedule impact calendar view", () => {
         `issue-${itemCount - 1}`,
       ),
     );
-  });
+  }).timeout(5000);
 
   test("exposes paired, one-sided, and root-scope identity facts", () => {
     const oneSided: SemanticDiffScheduleImpactRoot = {

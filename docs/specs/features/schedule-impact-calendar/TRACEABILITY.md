@@ -1082,10 +1082,13 @@ documentation boundary.
   architecture guard, compile/build/desktop/web host checks, responsive order,
   long values, one-sided data, and exact additional `CHANGELOG.md` entry.
 - Dependency and approval boundary: Slice 12 depends on completion-committed
-  Slice 11 `644161ca`. This is a presentation-only replan whose plan review is
+  Slice 11 `644161ca`. This is a presentation-only replan whose plan review was
   `Ready for approval` with no Findings and whose Human Plan Approval is
-  recorded for the exact paths below. Its focused plan commit is pending
-  `approval-committer`; implementation and Completion Approval remain pending.
+  recorded for the exact paths below. Focused plan commit `b25e38d5` is
+  complete; implementation is complete under the approved paths, independent
+  implementation review returned `Ready` with no Findings, automatic
+  Completion Approval is recorded, and the focused completion commit is
+  pending `approval-committer`.
   Feature Exit is reopened and deferred; `docs/specs/roadmap.md` remains
   outside the scope.
 
@@ -1125,9 +1128,93 @@ virtualization, and desktop/web behavior remain unchanged.
   - `docs/specs/features/schedule-impact-calendar/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
   <!-- markdownlint-enable MD013 -->
-- Next stage: `approval-committer` for the focused Slice 12 plan commit.
-  No implementation, test, CHANGELOG, roadmap, or Completion Approval change
-  is authorized by this record.
+- Plan gate status: complete; focused Slice 12 plan commit `b25e38d5`.
+  Implementation review returned `Ready` with no Findings and Completion
+  Approval is recorded below. Next stage: `approval-committer` for the focused
+  Slice 12 completion commit.
+
+## Slice 12 Implementation Evidence
+
+- Status: Implementation complete on 2026-09-20 under focused plan commit
+  `b25e38d5`; independent implementation review returned `Ready` with no
+  Findings, and automatic Completion Approval is recorded below. The
+  implementation is limited to the approved shared formatter,
+  comparison primitive, Calendar/Explorer consumers, focused tests,
+  architecture guard, and one `CHANGELOG.md` entry.
+- Acceptance evidence: `formatLocalizedDateRange` preserves the raw half-open
+  endpoints while using `from – to` for English and `from〜to` for Japanese.
+  `ResultComparison` presents localized before/after headings in left-to-right
+  order, stacks them in the same order at narrow widths, wraps long values,
+  and renders an explicit empty value. Calendar Header, root/no-run/candidate/
+  timeline sections, and Explorer detail use the shared formatter/comparison
+  presentation without changing facts, DTOs, filters, actions, messages,
+  sessions, virtualization, keyboard focus, or resource/theme handling.
+- Changed paths: the two new shared result modules; four Calendar consumers;
+  three Explorer consumers; shared, Calendar, Explorer, localization, view,
+  accessibility, and architecture tests; `CHANGELOG.md`; and the two feature
+  evidence documents. `docs/specs/roadmap.md` remains an existing dirty path
+  outside this Slice 12 implementation diff.
+- Validation evidence: shared result/localization checks pass with 6 tests;
+  Explorer component/DOM checks pass with 17 tests; Calendar component,
+  accessibility, and view checks pass with 6 tests, including the bounded
+  repeated-section case; the architecture suite passes 29 tests; and
+  `test:compile` passes. Production `build` and desktop preparation compile
+  the Calendar and Explorer bundles; the desktop extension host exits 0 and
+  web smoke passes WEB-7 through WEB-10. `qlty:check` reports `No issues`,
+  Markdown lint passes 37 files with 0 errors, and `git diff --check` passes.
+  Existing macOS codesign, web stream-cleanup, and webpack-size warnings are
+  documented observations.
+- Compatibility/readiness: no public DTO, protocol, session, transport,
+  action, bundle name, VS Code engine, schedule meaning, or theme/resource
+  mechanism changed. Existing macOS codesign, web-stream cleanup,
+  webpack-size, and advisory smell findings remain compatibility observations.
+- Implementation feedback: keeping the comparison shell's visible localized
+  headings independent of repeated accessible landmarks avoids duplicate
+  landmark names while preserving semantic before/after order for assistive
+  technology.
+- Review correction evidence: `ResultComparison` now exposes the supplied
+  comparison label through the actual `aria-label` while retaining the test
+  data attribute. Calendar root/no-run/timeline comparisons and Explorer leaf
+  comparisons include stable root, item, or row identities so repeated groups
+  remain uniquely named. The responsive grid uses the shared MUI `xs` stacked /
+  `md` two-column breakpoint; shared DOM coverage asserts the generated
+  `min-width:900px` rule and Calendar/Explorer coverage asserts the unique
+  localized labels.
+
+## Slice 12 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-09-20 under the user's standing automatic no-findings
+  Completion Approval instruction.
+- Basis: independent `implementation-reviewer` final verdict `Ready`; Findings
+none. The completed diff matches the approved formatter, comparison,
+Calendar/Explorer presentation, focused test, architecture, changelog, and
+feature-documentation boundary.
+<!-- markdownlint-disable MD013 -->
+- Completed paths (exact actual Slice 12 diff):
+  - `CHANGELOG.md`
+  - `src/presentation/webview/editor/shared/result/ResultComparison.tsx`
+  - `src/presentation/webview/editor/shared/result/formatLocalizedDateRange.ts`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarHeader.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarTimeline.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/ExplorerTreePanel.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerContents.tsx`
+  - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
+  - `src/test/suite/architectureDependencyRules.test.ts`
+  - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `src/test/suite/semanticDiffExplorerDom.test.tsx`
+  - `src/test/suite/sharedResultPresentation.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar/TRACEABILITY.md`
+  <!-- markdownlint-enable MD013 -->
+- Commit status: implementation is completion-approved; focused completion
+  commit is pending `approval-committer`.
+- Next stage: `approval-committer` for the exact completed paths above. Feature
+  Exit and final batch human Closure Approval remain deferred until that commit
+  and renewed independent Feature Exit review.
 
 ## Dependency And Approval Trace
 
@@ -1250,10 +1337,12 @@ virtualization, and desktop/web behavior remain unchanged.
   and one additional user-facing `CHANGELOG.md` entry. It preserves raw date
   values, half-open period semantics, facts, DTOs, filters, actions, messages,
   sessions, common theme/resource handling, virtualization, and bundle names.
-  Its plan review is `Ready for approval` with no Findings, Human Plan Approval
-  is recorded for the exact paths below, and its focused plan commit is pending
-  `approval-committer`; no implementation or Completion Approval evidence
-  exists yet.
+  Its plan review was `Ready for approval` with no Findings, Human Plan
+  Approval is recorded for the exact paths below, and focused plan commit
+  `b25e38d5` is complete. Implementation is complete under the approved paths;
+  independent implementation review returned `Ready` with no Findings,
+  automatic Completion Approval is recorded, and the focused completion commit
+  is pending `approval-committer`.
 
 ## Feature Exit Evidence
 
@@ -1272,10 +1361,12 @@ virtualization, and desktop/web behavior remain unchanged.
   Approval is recorded; focused plan commit `56cab973` and implementation are
   complete under the approved paths. Implementation review returned `Ready`
   with no Findings, automatic Completion Approval is recorded, and focused
-  completion commit `644161ca` is complete. Slice 12 is planned in a reopened
-  Replanning Mode; its plan review is `Ready for approval` with no Findings and
-  Human Plan Approval is recorded, while implementation and Completion Approval
-  are still pending, so Feature Exit remains deferred.
+  completion commit `644161ca` is complete. Slice 12 is implemented in a
+  reopened Replanning Mode under focused plan commit `b25e38d5`; its plan review
+  is `Ready for approval` with no Findings and Human Plan Approval is recorded.
+  Independent implementation review returned `Ready` with no Findings,
+  automatic Completion Approval is recorded, and the focused completion commit
+  is pending `approval-committer`, so Feature Exit remains deferred.
 - Acceptance and validation evidence covers the complete requirement table,
   including the evaluated-period workflow gate, exact sidecar/context
   lifecycle, root and run outcomes, identity candidates, deterministic
@@ -1290,17 +1381,18 @@ virtualization, and desktop/web behavior remain unchanged.
   presentation implementation is complete under its approved paths.
 - Durable propagation is complete for the observable use case, use-case index,
   README, prior CHANGELOG entries, and the Slice 11 readability entry. Slice
-  12's additional user-visible entry is planned only.
+  12's additional user-visible entry is applied; implementation review and
+  Completion Approval are recorded, with the focused completion commit pending.
   Architecture and glossary updates are not required.
 - Roadmap propagation is prepared in `docs/specs/roadmap.md`: remove the
   completed Wave 4 calendar entry while preserving the deferred schedule-
   semantics follow-ups. After explicit Closure Approval, remove only
   `docs/specs/features/schedule-impact-calendar/`; inherited feature folders
   remain preserved.
-- Remaining risks: Slice 12's independent plan review and approval are open;
-  its range/comparison implementation evidence does not exist yet. Existing
-  macOS codesign, web-stream cleanup, webpack-size, and advisory smell
-  findings remain documented compatibility observations.
+- Remaining risks: Slice 12's focused completion commit and renewed Feature
+  Exit review are open. Existing macOS codesign, web-stream cleanup,
+  webpack-size, and advisory smell findings remain documented compatibility
+  observations.
 - Closure recommendation: defer Feature Exit until Slice 12 is independently
   reviewed, approved, implemented, reviewed, Completion-approved, and
   focused-commit complete; then request final batch human Closure Approval.
