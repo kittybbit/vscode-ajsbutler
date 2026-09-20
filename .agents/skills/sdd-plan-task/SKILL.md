@@ -92,12 +92,15 @@ Before updating `TASKS.md`, establish:
 
 ## Solution Shape Gate
 
-For every material new or retained abstraction, record the approved `Solution
-Shape`: semantic owner and package/layer for each material decision, invariant,
-translation, lifecycle, public name, contract, dependency, and applicable test;
-the abstraction's concrete responsibility and why it earns a boundary; public
-names, contracts, dependency direction, and tests where applicable; and the
-relevant framework, library, platform, or established repository capability.
+Resolve the selected slice before recording evidence and use only that slice's
+`#### Solution Shape Evidence` block in `TASKS.md`; another slice's block
+cannot authorize or satisfy this slice. For every material new or retained
+abstraction, record the approved `Solution Shape`: semantic owner and
+package/layer for each material decision, invariant, translation, lifecycle,
+public name, contract, dependency, and applicable test; the abstraction's
+concrete responsibility and why it earns a boundary; public names, contracts,
+dependency direction, and tests where applicable; and the relevant framework,
+library, platform, or established repository capability.
 Use the compact material-abstraction definition from `AGENTS.md`; ordinary
 local helpers and type aliases are excluded unless they play one of those
 roles. Assess a dependency-inverting or host-neutral port, an adapter's
@@ -107,9 +110,18 @@ use-case-boundary responsibility as separate cases. A custom-gap justification
 is required only for a proposed custom mechanism. Record the automatic
 architecture-test evidence separately from reviewer judgments about semantic
 ownership, abstraction value, framework sufficiency, custom-gap credibility,
-and qlty disposition. For code slices, plan comparable pre-edit and final
-`rtk pnpm run qlty` evidence with unchanged configuration and finding identity;
-unrelated baseline findings are not cleanup scope. Stop for Replanning when the
+and qlty disposition. For code slices, plan the same non-mutating `rtk pnpm
+exec qlty check` and `rtk pnpm exec qlty smells --no-snippets` observations in
+exact disposable snapshots using identical verified qlty configuration and
+analyzed scope, with the formatting-capable aggregate as separate final
+validation only in the disposable final snapshot. Keep qlty runtime
+artifacts snapshot-local; if aggregate formatting changes analyzed source
+or evidence, plan an allowlisted sync, final-snapshot rebuild, and repeated
+check/smells pair plus aggregate until stable. Plan each comparable finding's
+identity, explicit severity ordering, baseline/final severity, measured values,
+and higher-is-worse or lower-is-worse direction; new or reliably mapped adverse
+movement is Finding/NG, unmappable identity or direction is advisory, and
+unchanged unrelated findings are out of scope. Stop for Replanning when the
 owner/package, contract/dependency direction, framework-versus-custom decision,
 abstraction/responsibility, affected surface, risk, validation, or approval
 boundary changes.
@@ -180,6 +192,8 @@ commentary. Update the smallest necessary durable surface.
 - do not edit runtime code, tests, generated artifacts, configuration, or
   implementation branches in Planning or Replanning Mode
 - use `docs/specs/README.md` as the SSOT for approval and lifecycle policy
-- use `rtk pnpm run qlty` and `rtk pnpm run lint:md` as appropriate
+- use the shared disposable-snapshot qlty procedure in `AGENTS.md`; its
+  formatting-capable aggregate runs only in the disposable final snapshot
+- use `rtk pnpm run lint:md` as appropriate
 - return the issue to Main for planning when a new design decision, scope,
   impact, or approval boundary appears

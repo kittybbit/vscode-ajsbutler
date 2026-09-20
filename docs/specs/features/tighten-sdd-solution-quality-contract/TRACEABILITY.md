@@ -15,13 +15,15 @@
 
 ## Slice 1 Result
 
-- Status: Implementation complete; targeted evidence-replan review,
-  independent implementation review, and completion approval pending.
-- Targeted replan trigger: a final complete-manifest or fidelity digest recorded
-  here would include this evidence file and become stale when the file changes.
-  Feature docs therefore retain procedure/results and provisional evidence only;
-  the read-only implementation-reviewer returns authoritative final digests in
-  review output.
+- Status: Implementation complete; evidence-replan review and commit
+  `add59ae31f448429f1477d8c767a0a00fa21ddda` are complete; read-only
+  independent implementation review is pending/active, followed by Completion
+  Approval.
+- Evidence-replan rationale: a final complete-manifest or fidelity digest
+  recorded here would include this evidence file and become stale when the file
+  changes. Feature docs therefore retain procedure/results and provisional
+  evidence only; the read-only implementation-reviewer returns authoritative
+  final digests in review output.
 - Record the replan reason: the prior baseline procedure created
   `.qlty/plugin_cachedir` and `.qlty/results` in the primary worktree, outside
   the allowlist; implementation made no edits and clean state was restored.

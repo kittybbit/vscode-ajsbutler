@@ -86,11 +86,19 @@ The architecture dependency test is automatic evidence only for the existing
 catalog of import, construction, parser, telemetry, and layer rules. Semantic
 ownership, whether an abstraction earns its boundary, framework sufficiency,
 custom-gap credibility, and qlty-delta disposition remain explicit reviewer
-judgments. For code slices, record pre-edit and final qlty results using the
-identical command and configuration and comparable finding identity (rule,
-path, and symbol/location where available). Separate new or worsened findings
-from unchanged unrelated baseline findings; metric-only movement is a review
-signal, not permission for unrelated cleanup.
+judgments. For code slices, compare the same non-mutating `rtk pnpm exec qlty
+check` and `rtk pnpm exec qlty smells` with `--no-snippets` in exact disposable
+snapshots. For each comparable finding, record identity, explicit severity ordering,
+baseline/final severity, measured values, and whether higher or lower values
+are worse. A new finding or reliably mapped adverse movement is Finding/NG;
+only unmappable identity or direction is advisory, and unchanged unrelated
+findings remain out of scope. The formatting-capable aggregate qlty run is
+separate final validation in the disposable final snapshot, never the baseline
+observation. Apply the shared snapshot contract in `AGENTS.md`: baseline and
+final use identical verified configuration and analyzed scope, qlty runtime
+artifacts stay snapshot-local, and any aggregate formatting change requires an
+allowlisted sync, final-snapshot rebuild, and repeated check/smells pair plus
+aggregate until stable.
 
 An approved slice stops for Replanning when its semantic owner or package/layer,
 contract or dependency direction, framework-versus-custom decision,

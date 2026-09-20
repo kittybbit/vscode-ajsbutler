@@ -4,8 +4,8 @@
 
 - Purpose: correct exactly three PR #319 findings in the existing Solution
   Shape contract without reopening its broader design.
-- Approved or active slice: Slice 1 implementation is complete under the
-  approved disposable-snapshot and reviewer-owned final-digest procedure.
+- Approved or active slice: Slice 1 complete; Completion Approval granted and
+  awaiting the focused completion commit.
 - Do not edit runtime, tests, packages, generated artifacts, configuration,
   `.qlty`, `package.json`, or `engines.vscode`.
 - Do not add a skill, role, coordinator, wrapper, or evidence store.
@@ -17,8 +17,7 @@
   path-and-hash manifests. Status equality alone is not evidence of
   non-mutation.
 - Approval and document-role policy: see `docs/specs/README.md`.
-- Next decision: commit the approved evidence replan, then run the read-only
-  implementation review.
+- Next decision: commit the approved Slice 1 diff, then begin Feature Exit.
 
 ## Sync Rule
 
@@ -33,23 +32,21 @@
 
 ## Plan Status
 
-- Status: In Progress
+- Status: Complete
 - Planning scope: one policy-correction slice covering the three findings and
   their required consistency propagation.
-- Review status: Final-digest evidence replan Ready with no actionable findings
+- Review status: Implementation review Ready with no actionable findings
 - Human approval: Approved, including the reviewer-owned final-digest evidence
   procedure
-- Active implementation slice: Slice 1 implementation complete; targeted
-  implementation review paused
+- Active implementation slice: None
 - Replanning trigger: the approved baseline procedure proved invalid because
   `rtk pnpm exec qlty check` created `.qlty/plugin_cachedir` and
   `.qlty/results` in the primary worktree outside the allowlist. This replan
   moves both comparable and aggregate qlty observations into disposable
   snapshots; the three findings, one slice, eight durable/two evidence paths,
-  and lifecycle remain unchanged. A second targeted replan is required because
-  recording the final complete-manifest or fidelity digest in `TRACEABILITY.md`
-  changes the hashed reviewed state; authoritative final digests must therefore
-  come from the read-only implementation-reviewer output.
+  and lifecycle remain unchanged. Evidence-replan review and commit
+  `add59ae31f448429f1477d8c767a0a00fa21ddda` are complete; authoritative final
+  digests must therefore come from the read-only implementation-reviewer output.
 
 ## Human Approval
 
@@ -76,17 +73,27 @@
     `docs/specs/features/tighten-sdd-solution-quality-contract/TASKS.md` and
     `docs/specs/features/tighten-sdd-solution-quality-contract/TRACEABILITY.md`.
 
-The focused evidence-replan package must be committed by
-`approval-committer` before the read-only implementation review resumes.
+The focused evidence-replan package was committed by `approval-committer` in
+`add59ae31f448429f1477d8c767a0a00fa21ddda`; the read-only implementation
+review may now resume.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: completed Slice 1, `Correct The Per-Slice Quality Evidence
+  Contract`, exactly as independently reviewed.
+- Approved paths: `AGENTS.md`, `docs/specs/README.md`,
+  `docs/specs/architecture.md`,
+  `docs/specs/features/_templates/TASKS.template.md`,
+  `.agents/skills/sdd-plan-task/SKILL.md`,
+  `.agents/skills/sdd-review-plan/SKILL.md`,
+  `.agents/skills/sdd-implement-task/SKILL.md`,
+  `.agents/skills/sdd-review-implementation/SKILL.md`,
+  `docs/specs/features/tighten-sdd-solution-quality-contract/TASKS.md`, and
+  `docs/specs/features/tighten-sdd-solution-quality-contract/TRACEABILITY.md`.
+- Implementation review verdict: Ready
+- Commit status: Eligible
 
 ## Closure Approval
 
@@ -101,7 +108,7 @@ The focused evidence-replan package must be committed by
 
 ### Slice 1: Correct The Per-Slice Quality Evidence Contract
 
-- Status: Implementation complete; independent review and completion approval pending
+- Status: Complete
 - Scope:
   - Correct the durable qlty disposition everywhere it appears: a new finding
     or a reliably comparable worsening of an existing finding under its
@@ -441,16 +448,14 @@ The focused evidence-replan package must be committed by
 
 ## Feature Exit
 
-- Definition of Done status: Slice 1 implementation and provisional evidence
-  are complete; authoritative read-only implementation review and Completion
-  Approval remain for this slice. Feature Exit follows the completion commit
-  as its later lifecycle gate.
+- Definition of Done status: Slice 1 implementation, authoritative read-only
+  implementation review, and Completion Approval are complete. Feature Exit
+  follows the focused completion commit as its later lifecycle gate.
 - Durable documentation updates: Slice 1 is the approved correction to the
   smallest existing policy surfaces; Feature Exit must verify no reusable
   correction remains only in this temporary feature folder.
-- Open risks: no implementation compatibility risk is recorded; authoritative
-  final manifest/fidelity evidence, independent review, and Completion
-  Approval remain pending.
+- Open risks: no implementation or compatibility risk is recorded; the focused
+  completion commit and later Feature Exit gates remain.
 
 ## Validation
 
@@ -460,7 +465,7 @@ The focused evidence-replan package must be committed by
 - [x] Complete the Slice 1 validation sequence and two-slice dry run.
 - [x] Record provisional final comparison and validation results in
       `TRACEABILITY.md` before implementation review.
-- [ ] Read-only implementation review returns authoritative final
+- [x] Read-only implementation review returned authoritative final
       manifest/fidelity digests in review output without editing evidence files.
 
 ## Notes
@@ -469,4 +474,5 @@ The focused evidence-replan package must be committed by
   feature folder; the closed predecessor feature is not reopened.
 - One slice is the smallest useful unit because observation, disposition, and
   evidence locality are one contract, not independent file outcomes.
-- This Planning Mode update grants no approval and makes no durable change.
+- Human and Completion Approvals cover only the reviewed Slice 1 boundary;
+  Feature Exit remains a separate independent gate.

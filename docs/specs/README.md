@@ -112,7 +112,9 @@ inside the approved slice scope.
 For docs-only changes:
 
 - `pnpm run build` is not required
-- `rtk pnpm run qlty` is required
+- the non-mutating qlty check/smells observations and formatting-capable
+  aggregate are required in disposable snapshots; the aggregate runs only in
+  the disposable final snapshot
 - run `rtk pnpm run lint:md` when the changed markdown scope benefits from
   markdown-specific validation
 - repository `Verify` workflow should not be relied on as a required gate
@@ -126,17 +128,26 @@ Select validation from the changed surface, starting with the nearest useful
 check. Do not repeat an unchanged check merely because a later workflow stage
 has begun.
 
-- Docs-only: run `rtk pnpm run qlty`; add `rtk pnpm run lint:md` when Markdown
-  structure or links need focused validation.
-- Isolated code: run the nearest relevant test and `rtk pnpm run qlty`; add a
+- Docs-only: run the approved disposable-snapshot qlty observations and the
+  separate final aggregate in that snapshot; add `rtk pnpm run lint:md` when
+  Markdown structure or links need focused validation. Comparable qlty evidence
+  uses the same non-mutating `rtk pnpm exec qlty check` and
+  `rtk pnpm exec qlty smells --no-snippets` observations in that procedure;
+  the formatting-capable aggregate is separate final validation.
+- Isolated code: run the nearest relevant test and the approved disposable-
+  snapshot qlty check/smells observations plus separate final aggregate; add a
   build when the change affects compilation, bundling, packaging, or final
   confidence requires it.
 - Parser, shared contracts, extension hosts, entry points, generated artifacts,
   or configuration: add the relevant desktop or web tests and build evidence.
 
-For code slices, a passing qlty result is required. Resolve new smell findings
-or record an approved, actionable follow-up. Treat metrics-only movement as a
-review signal, not an automatic refactor or merge failure.
+For code slices, a passing qlty result is required. For every comparable
+finding, record its identity, explicit severity ordering, baseline and final
+severity, measured values, and whether higher or lower values are worse. A new
+finding or reliably mapped adverse movement under that comparator is a Finding
+and NG. Only identity or direction that cannot be mapped reliably is advisory;
+unchanged unrelated findings stay out of scope. Metric-only movement is a
+review signal only when no mapped adverse finding exists.
 
 Plan review is the pre-approval scope gate. After implementation and final
 validation, perform one integrated review of scope, acceptance, quality, and

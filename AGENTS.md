@@ -131,10 +131,20 @@ implementation, and review:
   its cataloged import, construction, parser, telemetry, and layer rules;
   semantic ownership, abstraction value, framework sufficiency, custom-gap
   credibility, and qlty disposition remain reviewer judgments
-- for code slices, capture pre-edit and final `rtk pnpm run qlty` results with
-  the same configuration and comparable rule/path/symbol-location identity;
-  separate new or worsened findings from unchanged unrelated baseline
-  findings, and do not turn unrelated baseline findings into cleanup
+- for code slices, compare the same non-mutating `rtk pnpm exec qlty check`
+  and `rtk pnpm exec qlty smells --no-snippets` observations in exact
+  disposable snapshots using identical verified qlty configuration and
+  analyzed scope; record each comparable finding's identity, explicit severity
+  ordering, baseline/final severity, measured values, and whether higher or
+  lower values are worse. A new finding or reliably mapped adverse movement is
+  Finding/NG; only unmappable identity or direction is advisory, and unchanged
+  unrelated findings stay out of scope. Keep qlty caches, results, logs, and
+  other runtime artifacts snapshot-local. The formatting-capable
+  `rtk pnpm run qlty` aggregate is separate final validation in the disposable
+  final snapshot, never the baseline observation. If aggregate formatting
+  changes analyzed source or evidence, synchronize only approved paths, rebuild
+  the final snapshot, and repeat the comparable check/smells pair plus
+  aggregate until no analyzed content changes.
 
 Stop for Replanning when the approved `Solution Shape` changes its semantic
 owner or package/layer, contract or dependency direction, framework-versus-
