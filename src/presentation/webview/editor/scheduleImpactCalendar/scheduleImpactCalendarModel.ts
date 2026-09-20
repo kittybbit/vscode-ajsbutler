@@ -184,12 +184,9 @@ const itemLabel = (
     "";
   const runLabel = (run: SemanticDiffScheduleImpactRun | null): string =>
     run
-      ? `${run.side} id=${run.id} unitId=${run.unitId} unitName=${run.unitName} unitPath=${run.unitPath} date=${run.date} time=${run.time} rule=${run.rule} occurrence=${run.occurrenceOrdinal} sourceChangeRef=${run.sourceChangeRef ? `${run.sourceChangeRef.id}:${run.sourceChangeRef.occurrenceOrdinal}` : "none"}`
+      ? `${run.side} unitName=${run.unitName} unitPath=${run.unitPath} date=${run.date} time=${run.time} rule=${run.rule} occurrence=${run.occurrenceOrdinal}`
       : "unavailable";
-  const sourceChangeRef = item.sourceChangeRef
-    ? `${item.sourceChangeRef.id}:${item.sourceChangeRef.occurrenceOrdinal}`
-    : "none";
-  return `date=${item.date} path=${path} id=${item.id} side=${item.side} rootId=${item.rootId} rule=${item.rule} occurrence=${item.occurrenceOrdinal} state=${item.state} before=${runLabel(item.before)} after=${runLabel(item.after)} sourceChangeRef=${sourceChangeRef}`;
+  return `date=${item.date} time=${item.time} path=${path} side=${item.side} rule=${item.rule} occurrence=${item.occurrenceOrdinal} state=${item.state} before=${runLabel(item.before)} after=${runLabel(item.after)}`;
 };
 
 const matches = (

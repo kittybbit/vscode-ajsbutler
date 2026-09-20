@@ -120,7 +120,11 @@ suite("Schedule impact calendar projection", () => {
     assert.strictEqual(impact.timelineItems[0]?.id, "second");
     assert.match(
       model.allItems[0]?.accessibleLabel ?? "",
-      /id=first.*side=pair.*rootId=a.*occurrence=0.*sourceChangeRef=none/,
+      /date=2026-01-01.*path=\/root\/a.*side=pair.*occurrence=0.*state=unchanged/,
+    );
+    assert.doesNotMatch(
+      model.allItems[0]?.accessibleLabel ?? "",
+      /\b(?:id|rootId|unitId|sourceChangeRef)=/,
     );
   });
 
@@ -162,5 +166,49 @@ suite("Schedule impact calendar projection", () => {
       "supported-runs",
       "valid-no-runs",
     ]);
+  });
+
+  test("keeps duplicate user names distinguishable without internal IDs", () => {
+    const impact = sidecar();
+    const duplicate = {
+      ...impact.timelineItems[0]!,
+      id: "duplicate-internal-key",
+      date: "2026-01-03",
+      time: "11:00",
+      before: {
+        id: "duplicate-run-key",
+        unitId: "duplicate-unit-key",
+        unitPath: "/root/a/job",
+        unitName: "same-name",
+        rule: 1,
+        date: "2026-01-03",
+        time: "11:00",
+        side: "before" as const,
+        occurrenceOrdinal: 3,
+        sourceChangeRef: { id: "duplicate-change-key", occurrenceOrdinal: 3 },
+      },
+    };
+    const model = buildScheduleImpactCalendarModel({
+      ...impact,
+      timelineItems: [
+        {
+          ...impact.timelineItems[0]!,
+          before: duplicate.before,
+          date: "2026-01-02",
+          time: "10:00",
+          occurrenceOrdinal: 2,
+        },
+        duplicate,
+      ],
+    });
+    const labels = model.visibleItems.map((entry) => entry.accessibleLabel);
+    assert.strictEqual(labels.length, 2);
+    assert.notStrictEqual(labels[0], labels[1]);
+    labels.forEach((label) =>
+      assert.doesNotMatch(
+        label,
+        /duplicate-internal-key|duplicate-run-key|duplicate-change-key/,
+      ),
+    );
   });
 });

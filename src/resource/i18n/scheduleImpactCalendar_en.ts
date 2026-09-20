@@ -8,14 +8,10 @@ export const scheduleImpactCalendarEnglish = {
   root: "Root jobnet",
   rootStatus: "Root outcomes",
   counterpart: "Counterpart",
-  id: "ID",
   side: "Side",
-  unitId: "Source unit ID",
   unitName: "Source unit name",
   unitPath: "Source unit path",
   occurrence: "Occurrence",
-  sourceChangeRef: "Source change reference",
-  identityDecisionId: "Identity decision ID",
   scopeTransition: "Scope transition",
   absentSide: "Side absent",
   targetKind: "Target kind",
@@ -48,6 +44,7 @@ export const scheduleImpactCalendarEnglish = {
   rule: "Rule",
   candidateBefore: "Before candidates",
   candidateAfter: "After candidates",
+  candidateGroup: (index: number): string => `Candidate group ${index}`,
   emptyCandidates: "No identity candidates.",
   emptyIssues: "No uncalculated schedule portions.",
   issue: "Issue",
@@ -57,6 +54,8 @@ export const scheduleImpactCalendarEnglish = {
   refresh: "Refresh",
   selected: (value: string): string =>
     `Schedule impact calendar contains ${value} entries.`,
+  selectedItem: (value: string): string =>
+    `Selected schedule impact: ${value}.`,
   filtered: (visible: number, total: number): string =>
     `${visible} of ${total} entries are visible.`,
   filterChanged: "Schedule impact filters updated.",

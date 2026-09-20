@@ -33,25 +33,6 @@ const runStateLabel = (
     }) as Record<string, string>
   )[value] ?? value;
 
-const sourceChangeRefValue = (
-  run: Pick<SemanticDiffScheduleImpactRun, "sourceChangeRef"> | null,
-  labels: ScheduleImpactCalendarLabels,
-): React.ReactElement =>
-  run?.sourceChangeRef ? (
-    <ResultKeyValueList
-      dense
-      items={[
-        { label: labels.id, value: run.sourceChangeRef.id },
-        {
-          label: labels.occurrence,
-          value: run.sourceChangeRef.occurrenceOrdinal,
-        },
-      ]}
-    />
-  ) : (
-    <>{labels.none}</>
-  );
-
 const RunDetails = ({
   run,
   labels,
@@ -63,9 +44,7 @@ const RunDetails = ({
     {run ? (
       <ResultKeyValueList
         items={[
-          { label: labels.id, value: run.id },
           { label: labels.side, value: run.side },
-          { label: labels.unitId, value: run.unitId },
           { label: labels.unitName, value: run.unitName },
           { label: labels.unitPath, value: run.unitPath },
           { label: labels.period, value: `${run.date} ${run.time}` },
@@ -74,10 +53,6 @@ const RunDetails = ({
             value: run.rule,
           },
           { label: labels.occurrence, value: run.occurrenceOrdinal },
-          {
-            label: labels.sourceChangeRef,
-            value: sourceChangeRefValue(run, labels),
-          },
         ]}
       />
     ) : (
@@ -138,7 +113,7 @@ export const ScheduleImpactCalendarTimeline = ({
   const handleItemKeyDown = (
     event: React.KeyboardEvent<HTMLElement>,
     index: number,
-    itemId: string,
+    entry: ScheduleImpactCalendarModel["visibleItems"][number],
   ): void => {
     let nextIndex: number | undefined;
     if (event.key === "ArrowDown")
@@ -147,7 +122,7 @@ export const ScheduleImpactCalendarTimeline = ({
     else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = model.visibleItems.length - 1;
     else if (event.key === "Enter" || event.key === " ") {
-      onAnnouncement(labels.selected(itemId));
+      onAnnouncement(labels.selectedItem(entry.accessibleLabel));
       return;
     }
     if (nextIndex === undefined || nextIndex === index) return;
@@ -181,7 +156,7 @@ export const ScheduleImpactCalendarTimeline = ({
       }}
       onClick={() => setActiveItemId(entry.item.id)}
       onFocus={() => setActiveItemId(entry.item.id)}
-      onKeyDown={(event) => handleItemKeyDown(event, index, entry.item.id)}
+      onKeyDown={(event) => handleItemKeyDown(event, index, entry)}
       sx={{ py: 0.5 }}
     >
       <ResultCard
@@ -206,14 +181,8 @@ export const ScheduleImpactCalendarTimeline = ({
         <ResultKeyValueList
           items={[
             { label: labels.rule, value: entry.item.rule },
-            { label: labels.id, value: entry.item.id },
             { label: labels.side, value: entry.item.side },
-            { label: labels.root, value: entry.item.rootId },
             { label: labels.occurrence, value: entry.item.occurrenceOrdinal },
-            {
-              label: labels.sourceChangeRef,
-              value: sourceChangeRefValue(entry.item, labels),
-            },
           ]}
         />
         <ResultComparison
@@ -221,7 +190,7 @@ export const ScheduleImpactCalendarTimeline = ({
           afterLabel={labels.after}
           before={<RunDetails run={entry.item.before} labels={labels} />}
           after={<RunDetails run={entry.item.after} labels={labels} />}
-          ariaLabel={`${entry.item.id}: ${labels.before} / ${labels.after}`}
+          ariaLabel={`${entry.accessibleLabel}: ${labels.before} / ${labels.after}`}
         />
       </ResultCard>
     </Box>

@@ -8,14 +8,10 @@ export const scheduleImpactCalendarJapanese = {
   root: "ルートジョブネット",
   rootStatus: "ルート結果",
   counterpart: "対応するルート",
-  id: "ID",
   side: "サイド",
-  unitId: "ソースユニットID",
   unitName: "ソースユニット名",
   unitPath: "ソースユニットパス",
   occurrence: "出現順",
-  sourceChangeRef: "ソース変更参照",
-  identityDecisionId: "同一性判定ID",
   scopeTransition: "範囲遷移",
   absentSide: "サイドなし",
   targetKind: "対象種別",
@@ -48,6 +44,7 @@ export const scheduleImpactCalendarJapanese = {
   rule: "ルール",
   candidateBefore: "変更前候補",
   candidateAfter: "変更後候補",
+  candidateGroup: (index: number): string => `候補グループ${index}`,
   emptyCandidates: "同一性候補はありません。",
   emptyIssues: "未計算のスケジュール範囲はありません。",
   issue: "問題",
@@ -57,6 +54,8 @@ export const scheduleImpactCalendarJapanese = {
   refresh: "更新",
   selected: (value: string): string =>
     `スケジュール影響カレンダーに ${value} 件あります。`,
+  selectedItem: (value: string): string =>
+    `選択したスケジュール影響: ${value}。`,
   filtered: (visible: number, total: number): string =>
     `${total} 件中 ${visible} 件を表示しています。`,
   filterChanged: "スケジュール影響フィルターを更新しました。",

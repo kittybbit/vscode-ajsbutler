@@ -17,6 +17,19 @@ suite("Schedule impact calendar accessibility", () => {
     );
   });
 
+  test("uses semantic timeline context without internal keys", () => {
+    const accessibleName = scheduleImpactCalendarItemAccessibleName(
+      "date=2026-01-01 path=/jobs/example.ajs/job side=after occurrence=2",
+      "Added",
+    );
+    assert.match(accessibleName, /\/jobs\/example\.ajs\/job/);
+    assert.match(accessibleName, /occurrence=2/);
+    assert.doesNotMatch(
+      accessibleName,
+      /(?:item|run|root|candidate|issue|decision|sourceChangeRef)-?id|unitId=/i,
+    );
+  });
+
   test("retries focus until a virtualized item is mounted", () => {
     const frames: FrameRequestCallback[] = [];
     const elements = new Map<string, HTMLElement>();

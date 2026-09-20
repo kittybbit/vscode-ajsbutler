@@ -179,7 +179,7 @@ const sidecar = (): SemanticDiffScheduleImpact => ({
         beforeValues: [],
         afterValues: ["09:30"],
         rawValues: ["09:30"],
-        removedSources: [],
+        removedSources: ["encoded-source-change-id"],
       },
     },
   ],
@@ -274,7 +274,7 @@ suite("Schedule impact calendar view", () => {
       .querySelector("[data-result-comparison]");
     assert.strictEqual(
       rootComparison?.getAttribute("aria-label"),
-      "root-1: 変更前 / 変更後",
+      "ルートジョブネット: /jobs/root.ajs, 変更前 / 変更後",
     );
     assert.deepStrictEqual(
       [...(rootComparison?.querySelectorAll("h3") ?? [])].map(
@@ -309,13 +309,22 @@ suite("Schedule impact calendar view", () => {
     const issueRegion = view.getByRole("region", {
       name: "未計算のスケジュール範囲",
     });
-    assert.ok(issueRegion.textContent?.includes("issue-1"));
+    assert.ok(
+      issueRegion.querySelector(
+        "[data-schedule-impact-calendar-issue-id='issue-1']",
+      ),
+    );
+    assert.doesNotMatch(issueRegion.textContent ?? "", /issue-1/);
+    assert.doesNotMatch(
+      issueRegion.textContent ?? "",
+      /encoded-source-change-id/,
+    );
     assert.ok(issueRegion.textContent?.includes("attribute"));
     assert.ok(issueRegion.textContent?.includes("構造化詳細"));
     const issueLabels = [...issueRegion.querySelectorAll("dt")].map(
       (element) => element.textContent,
     );
-    assert.ok(issueLabels.includes("ID"));
+    assert.ok(!issueLabels.includes("ID"));
     assert.ok(issueLabels.includes("出現順"));
     assert.ok(issueLabels.includes("種別"));
     assert.ok(issueLabels.includes("対象種別"));
@@ -324,15 +333,16 @@ suite("Schedule impact calendar view", () => {
     const candidateRegion = view.getByRole("region", {
       name: "同一性候補",
     });
-    assert.ok(candidateRegion.textContent?.includes("candidate-before-1"));
+    assert.ok(!candidateRegion.textContent?.includes("candidate-before-1"));
     assert.ok(candidateRegion.textContent?.includes("before-job"));
-    assert.ok(changedItem?.textContent?.includes("change-1"));
+    assert.ok(changedItem?.textContent?.includes("before-job"));
+    assert.ok(!changedItem?.textContent?.includes("change-1"));
     const timelineLabels = [...(changedItem?.querySelectorAll("dt") ?? [])].map(
       (element) => element.textContent,
     );
     assert.ok(timelineLabels.includes("ルール"));
     assert.ok(timelineLabels.includes("出現順"));
-    assert.ok(timelineLabels.includes("ソース変更参照"));
+    assert.ok(!timelineLabels.includes("ソース変更参照"));
     const legend = view.getByTestId("schedule-impact-calendar-legend");
     assert.strictEqual(
       legend.querySelectorAll("[data-legend-pattern]").length,
@@ -371,7 +381,8 @@ suite("Schedule impact calendar view", () => {
     fireEvent.keyDown(lastItem, { key: "Home" });
     assert.strictEqual(dom.window.document.activeElement?.id, firstItem.id);
     fireEvent.keyDown(firstItem, { key: "Enter" });
-    assert.ok(view.container.textContent?.includes("run-1"));
+    assert.ok(view.container.textContent?.includes("選択したスケジュール影響"));
+    assert.ok(!view.container.textContent?.includes("run-1"));
 
     const outcome = view.getByRole("combobox", { name: "ルート結果" });
     fireEvent.change(outcome, { target: { value: "uncalculated" } });
@@ -456,7 +467,8 @@ suite("Schedule impact calendar view", () => {
       String(itemCount),
     );
     assert.ok(view.getByTestId("schedule-impact-calendar-legend"));
-    assert.ok(view.container.textContent?.includes("candidate-group-0"));
+    assert.ok(view.container.textContent?.includes("Candidate group 1"));
+    assert.ok(!view.container.textContent?.includes("candidate-group-0"));
 
     const expectedLastTimelineId =
       buildScheduleImpactCalendarModel(large).visibleItems.at(-1)?.item.id;
@@ -561,13 +573,16 @@ suite("Schedule impact calendar view", () => {
     );
     const rootRegion = view.getByRole("region", { name: "Root outcomes" });
     const rootText = rootRegion.textContent ?? "";
-    assert.match(rootText, /root-1/);
+    assert.match(rootText, /\/jobs\/root\.ajs/);
     assert.match(rootText, /before/);
     assert.match(rootText, /after/);
-    assert.match(rootText, /one-sided-root/);
+    assert.match(rootText, /\/jobs\/removed\.ajs/);
     assert.match(rootText, /Side absent/);
     assert.match(rootText, /Added root scope/);
-    assert.match(rootText, /decision-1/);
     assert.match(rootText, /\/jobs\/old-scoped\.ajs/);
+    assert.doesNotMatch(
+      rootText,
+      /root-1|one-sided-root|scope-root|decision-1/,
+    );
   });
 });

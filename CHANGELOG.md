@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Removed internal Calendar identifiers from visible details and accessible
+  announcements while retaining unit names, paths, targets, and occurrences.
 - Added consistent localized date ranges and before/after comparison layouts
   to Semantic Diff Explorer and Schedule Impact Calendar.
 - Kept each result label/value fact on its own readable row and simplified

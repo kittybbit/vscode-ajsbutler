@@ -233,22 +233,38 @@ suite("Schedule impact calendar components", () => {
     });
     assert.ok(view.getByTestId("schedule-impact-calendar-legend"));
     assert.ok(view.getByRole("region", { name: "Schedule impact timeline" }));
-    assert.ok(
-      view.container
-        .querySelector("[data-schedule-impact-calendar-item-id='run-a']")
-        ?.textContent?.includes("run-a"),
+    const timelineItem = view.container.querySelector(
+      "[data-schedule-impact-calendar-item-id='run-a']",
     );
-    assert.ok(
-      view.container
-        .querySelector(
-          "[data-schedule-impact-calendar-candidate-group-id='candidate-group-a']",
-        )
-        ?.textContent?.includes("candidate-group-a"),
+    assert.ok(timelineItem);
+    assert.doesNotMatch(
+      timelineItem?.getAttribute("aria-label") ?? "",
+      /run-a/,
     );
-    assert.ok(
-      view.container
-        .querySelector("[data-schedule-impact-calendar-issue-id='issue-a']")
-        ?.textContent?.includes("issue-a"),
+    const candidateGroup = view.container.querySelector(
+      "[data-schedule-impact-calendar-candidate-group-id='candidate-group-a']",
+    );
+    assert.ok(candidateGroup);
+    assert.doesNotMatch(
+      candidateGroup?.getAttribute("aria-label") ?? "",
+      /candidate-group-a/,
+    );
+    const issue = view.container.querySelector(
+      "[data-schedule-impact-calendar-issue-id='issue-a']",
+    );
+    assert.ok(issue);
+    assert.doesNotMatch(issue?.getAttribute("aria-label") ?? "", /issue-a/);
+    assert.doesNotMatch(
+      view.container.querySelector(
+        "[data-schedule-impact-calendar-candidate-group-id='candidate-group-a']",
+      )?.textContent ?? "",
+      /candidate-group-a/,
+    );
+    assert.doesNotMatch(
+      view.container.querySelector(
+        "[data-schedule-impact-calendar-issue-id='issue-a']",
+      )?.textContent ?? "",
+      /issue-a/,
     );
 
     const outcome = view.getByRole("combobox", { name: "Root outcome" });
