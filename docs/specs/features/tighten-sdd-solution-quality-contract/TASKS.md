@@ -4,9 +4,8 @@
 
 - Purpose: correct exactly three PR #319 findings in the existing Solution
   Shape contract without reopening its broader design.
-- Approved or active slice: Slice 1, including the reviewed disposable-
-  snapshot observation procedure, approved for implementation after the
-  focused replan commit succeeds.
+- Approved or active slice: Slice 1 implementation is complete under the
+  approved disposable-snapshot and reviewer-owned final-digest procedure.
 - Do not edit runtime, tests, packages, generated artifacts, configuration,
   `.qlty`, `package.json`, or `engines.vscode`.
 - Do not add a skill, role, coordinator, wrapper, or evidence store.
@@ -18,7 +17,8 @@
   path-and-hash manifests. Status equality alone is not evidence of
   non-mutation.
 - Approval and document-role policy: see `docs/specs/README.md`.
-- Next decision: commit the approved replan package, then resume Slice 1.
+- Next decision: commit the approved evidence replan, then run the read-only
+  implementation review.
 
 ## Sync Rule
 
@@ -33,27 +33,33 @@
 
 ## Plan Status
 
-- Status: Approved
+- Status: In Progress
 - Planning scope: one policy-correction slice covering the three findings and
   their required consistency propagation.
-- Review status: Targeted replan review Ready with no actionable findings
-- Human approval: Approved, including the targeted disposable-snapshot replan
-- Active implementation slice: Slice 1 after the focused replan commit
+- Review status: Final-digest evidence replan Ready with no actionable findings
+- Human approval: Approved, including the reviewer-owned final-digest evidence
+  procedure
+- Active implementation slice: Slice 1 implementation complete; targeted
+  implementation review paused
 - Replanning trigger: the approved baseline procedure proved invalid because
   `rtk pnpm exec qlty check` created `.qlty/plugin_cachedir` and
   `.qlty/results` in the primary worktree outside the allowlist. This replan
   moves both comparable and aggregate qlty observations into disposable
   snapshots; the three findings, one slice, eight durable/two evidence paths,
-  and lifecycle remain unchanged.
+  and lifecycle remain unchanged. A second targeted replan is required because
+  recording the final complete-manifest or fidelity digest in `TRACEABILITY.md`
+  changes the hashed reviewed state; authoritative final digests must therefore
+  come from the read-only implementation-reviewer output.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: original scope and targeted replan approved in current
-  conversation
+- Approved at: original scope, disposable-snapshot procedure, and final-digest
+  evidence replan approved in current conversation
 - Approved scope: Slice 1, `Correct The Per-Slice Quality Evidence Contract`,
   within the reviewed approval boundary below, including the disposable-
-  snapshot comparable and aggregate qlty procedure.
+  snapshot comparable and aggregate qlty procedure and reviewer-owned
+  authoritative final-digest output.
 - Approved paths:
   - Plan package:
     `docs/specs/features/tighten-sdd-solution-quality-contract/SPECS.md`,
@@ -70,8 +76,8 @@
     `docs/specs/features/tighten-sdd-solution-quality-contract/TASKS.md` and
     `docs/specs/features/tighten-sdd-solution-quality-contract/TRACEABILITY.md`.
 
-The focused replan package must be committed by `approval-committer` before
-Slice 1 resumes.
+The focused evidence-replan package must be committed by
+`approval-committer` before the read-only implementation review resumes.
 
 ## Completion Approval
 
@@ -95,7 +101,7 @@ Slice 1 resumes.
 
 ### Slice 1: Correct The Per-Slice Quality Evidence Contract
 
-- Status: Approved
+- Status: Implementation complete; independent review and completion approval pending
 - Scope:
   - Correct the durable qlty disposition everywhere it appears: a new finding
     or a reliably comparable worsening of an existing finding under its
@@ -184,8 +190,9 @@ Slice 1 resumes.
   non-ignored untracked files, including clean tracked paths, additions,
   deletions, and every file expanded from untracked directories. Record an
   explicit absence/deletion entry for a path missing at that state. Use the
-  exact path enumeration command `git ls-files --cached --others
-  --exclude-standard -z` piped to `xargs -0 -n1 shasum -a 256`, then to
+  exact path enumeration command
+  `git ls-files --cached --others --exclude-standard -z`, piped to
+  `xargs -0 -n1 shasum -a 256`, then to
   `LC_ALL=C sort`, with deterministic absence entries for missing paths. Compare
   this complete manifest before and after snapshot preparation and each qlty
   run; analyze the approved/evidence allowlist separately and never substitute
@@ -198,6 +205,19 @@ Slice 1 resumes.
   slices record each finding's identity, explicit severity ordering, measured
   baseline/final values, and explicit higher-is-worse or lower-is-worse
   direction in their own evidence block.
+- Final evidence ownership: `TASKS.md` and `TRACEABILITY.md` record the
+  commands, snapshot provenance, comparator, qlty results, absence of findings,
+  and provisional post-edit evidence, but must not embed a final complete-
+  manifest or fidelity digest that includes either evidence file. After all
+  implementation and evidence edits are frozen, the read-only
+  implementation-reviewer independently materializes the exact current
+  reviewed state, runs disposable check/smells/aggregate observations as
+  needed, verifies formatter convergence and primary non-mutation, and returns
+  the authoritative final complete-manifest and fidelity digests in the review
+  output rather than editing these hashed files. The `Ready` verdict is based
+  on that live exact-state evidence. Completion Approval fields remain
+  lifecycle metadata handled by the existing approval-committer and diff-check
+  gates; this replan does not redesign that lifecycle.
 - Replanning trigger check: stop if correction requires a fourth finding,
   changed lifecycle/document role, new automation, changed qlty configuration,
   changed runtime/test/package surface, or any broader semantic ownership,
@@ -248,6 +268,12 @@ Slice 1 resumes.
   - The predecessor's semantic ownership, meaningful port/adapter and factory
     treatment, framework-first decision, outer-layer framework limit,
     architecture-test boundary, and Replanning triggers retain their meaning.
+  - The evidence files record commands, snapshot provenance, comparator,
+    qlty results, absence of findings, and provisional evidence only; they do
+    not record a final complete-manifest or fidelity digest that includes
+    either evidence file. The read-only implementation-reviewer returns the
+    authoritative final digests in review output after all edits are frozen,
+    and the `Ready` verdict relies on that live exact-state evidence.
 - Validation:
 
   - Prepare two exact disposable filesystem/worktree snapshots without adding
@@ -300,6 +326,15 @@ Slice 1 resumes.
     analyzed source/evidence change; use only that stable final snapshot for
     final evidence. Snapshot-local qlty artifacts are discarded and never
     synchronized.
+  - After all implementation and evidence edits are frozen, the read-only
+    implementation-reviewer must materialize the exact current reviewed state,
+    rerun disposable check/smells/aggregate observations as needed, verify
+    formatter convergence and primary non-mutation, and return the
+    authoritative final complete-manifest and fidelity digests in review
+    output. The reviewer must not edit `TASKS.md` or `TRACEABILITY.md`; those
+    files may record commands, provenance, comparator, results, absence of
+    findings, and provisional evidence only. The `Ready` verdict is based on
+    this live exact-state evidence.
   - Run focused Markdown lint over the exact Markdown scope with this command:
 
     ```bash
@@ -406,23 +441,27 @@ Slice 1 resumes.
 
 ## Feature Exit
 
-- Definition of Done status: Not started; plan review, Human Approval, plan
-  commit, Slice 1 implementation/review, Completion Approval/commit,
-  independent Feature Exit, Closure Approval, and closure commit remain.
+- Definition of Done status: Slice 1 implementation and provisional evidence
+  are complete; authoritative read-only implementation review and Completion
+  Approval remain for this slice. Feature Exit follows the completion commit
+  as its later lifecycle gate.
 - Durable documentation updates: Slice 1 is the approved correction to the
   smallest existing policy surfaces; Feature Exit must verify no reusable
   correction remains only in this temporary feature folder.
-- Open risks: exact command non-mutation and selected-slice isolation remain to
-  be demonstrated during implementation and independently reviewed.
+- Open risks: no implementation compatibility risk is recorded; authoritative
+  final manifest/fidelity evidence, independent review, and Completion
+  Approval remain pending.
 
 ## Validation
 
 - [x] Independent plan review returned `Ready` with no actionable finding.
 - [x] Explicit Human Approval records the exact Slice 1 boundary.
-- [ ] Record non-mutating baseline status evidence before implementation.
-- [ ] Complete the Slice 1 validation sequence and two-slice dry run.
-- [ ] Record final comparison and validation results in `TRACEABILITY.md`
-      before implementation review.
+- [x] Record non-mutating baseline status evidence before implementation.
+- [x] Complete the Slice 1 validation sequence and two-slice dry run.
+- [x] Record provisional final comparison and validation results in
+      `TRACEABILITY.md` before implementation review.
+- [ ] Read-only implementation review returns authoritative final
+      manifest/fidelity digests in review output without editing evidence files.
 
 ## Notes
 
