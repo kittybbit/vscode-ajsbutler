@@ -85,6 +85,40 @@ create the focused closure commit before the feature is closed.
 ### Slice 1: {{slice name}}
 
 - Status: Proposed | Approved | In Progress | Complete | Blocked | Replan Required
+
+#### Solution Shape Evidence
+
+Record this compact evidence only for this slice and for every material new or
+retained abstraction (exported or layer-crossing abstraction, port or adapter,
+contract-bearing wrapper, lifecycle owner, or abstraction changing dependency
+direction or semantic ownership; ordinary local helpers and type aliases are
+excluded unless they play one of those roles):
+
+- Semantic owner and package/layer for each material decision, invariant,
+  translation, lifecycle, public name, contract, dependency, and applicable
+  test:
+- Material abstraction, concrete responsibility, and why it earns a boundary;
+  assess ports, adapters, and retained application factories as separate cases:
+- Public names, contracts, dependency direction, and tests where applicable:
+- Relevant framework, library, platform, or established repository capability;
+  custom-gap justification only when a custom mechanism is proposed:
+- Automatic architecture evidence versus reviewer-only judgments:
+- Code-slice qlty evidence: baseline and comparable final use the same
+  non-mutating `rtk pnpm exec qlty check` and `rtk pnpm exec qlty smells` with
+  the `--no-snippets` option in exact disposable snapshots. Record each
+  finding's identity, explicit severity ordering, baseline/final severity,
+  measured values, and whether higher or lower values are worse. A new finding
+  or reliably mapped adverse movement is Finding/NG; only unmappable identity
+  or direction is advisory; unchanged unrelated findings stay out of scope.
+  Keep formatting-capable `rtk pnpm run qlty` as separate final validation in
+  the disposable final snapshot. Apply the shared snapshot contract in
+  `AGENTS.md`: use identical verified configuration and analyzed scope, keep
+  qlty runtime artifacts snapshot-local, and after formatter changes rebuild
+  and repeat the check/smells pair plus aggregate until stable.
+- Replanning trigger check: owner/package, contract/dependency direction,
+  framework-versus-custom decision, abstraction/responsibility, affected
+  surface, risk, validation, or approval boundary:
+
 - Scope:
 - User / Domain Value:
 - Cohesive Change Group:

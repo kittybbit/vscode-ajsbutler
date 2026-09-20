@@ -43,6 +43,41 @@ existing problems:
 
 Do not expand scope to fix unrelated baseline issues.
 
+## Solution Shape Gate
+
+Before editing, resolve the selected slice and read only its `#### Solution
+Shape Evidence` block in `TASKS.md`; another slice's evidence cannot authorize
+or satisfy the selected slice. Preserve the approved `Solution Shape` for
+every material new or retained abstraction: semantic owner and package/layer;
+concrete
+responsibility and boundary value; public names, contracts, dependency
+direction, and tests where applicable; and the relevant framework, library,
+platform, or established repository capability. Use the material-abstraction
+definition in `AGENTS.md`. Assess ports for dependency inversion and/or a
+host-neutral contract, adapters for applicable isolation, translation, error
+normalization, lifecycle, compatibility, or test-boundary responsibility, and
+retained application factories separately for composition or use-case-boundary
+responsibility. Reject a same-request/same-response forwarding wrapper without
+port-contract value. Justify a custom gap only when a custom mechanism is
+proposed, and keep framework use at the outer boundary. Record automatic
+architecture-test evidence separately from reviewer judgments.
+
+For code slices, capture the same non-mutating `rtk pnpm exec qlty check` and
+`rtk pnpm exec qlty smells --no-snippets` observations in exact disposable
+snapshots using identical verified qlty configuration and analyzed scope. Keep
+qlty runtime artifacts snapshot-local and run formatting-capable `rtk pnpm run
+qlty` only as separate final validation in the disposable final snapshot. If
+aggregate formatting changes analyzed source or evidence, synchronize only
+approved paths, rebuild the final snapshot, and repeat the check/smells pair
+plus aggregate until stable. Record each comparable finding's
+identity, explicit severity ordering, baseline/final severity, measured values,
+and higher-is-worse or lower-is-worse direction. A new finding or reliably
+mapped adverse movement is Finding/NG; only unmappable identity or direction is
+advisory, and unchanged unrelated findings stay out of scope. If the
+owner/package, contract/dependency direction, framework-versus-custom
+decision, abstraction/responsibility, affected surface, risk, validation, or
+approval boundary changes, stop and return for Replanning.
+
 ## Implementation Workflow
 
 1. Select one approved slice and confirm its scope, acceptance, validation,
@@ -85,7 +120,12 @@ Use the nearest relevant check first and add only checks required by the
 changed surface and recorded risks. Typical checks include:
 
 ```bash
+# In each disposable snapshot:
+rtk pnpm exec qlty check
+rtk pnpm exec qlty smells --no-snippets
+# In the disposable final snapshot only:
 rtk pnpm run qlty
+# In the reviewed primary state:
 rtk pnpm run lint:md
 rtk git diff --check
 ```

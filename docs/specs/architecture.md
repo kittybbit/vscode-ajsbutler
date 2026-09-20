@@ -53,6 +53,58 @@ The following rules are mandatory:
 These rules apply to static imports, type imports, exports, dynamic imports,
 `require`, and import-equals references across all production source roots.
 
+## Solution Shape
+
+Every material decision, invariant, translation, lifecycle, public name,
+contract, dependency, and applicable test has one semantic owner and an
+explicit package/layer. The owner belongs where that meaning is stable; outer
+layers translate host, transport, framework, and presentation concerns.
+
+For this gate, a material new or retained abstraction is an exported or
+layer-crossing abstraction, port or adapter, contract-bearing wrapper,
+lifecycle owner, or abstraction that changes dependency direction or semantic
+ownership. Ordinary local helpers and type aliases are excluded unless they
+play one of those roles. Each material abstraction records its concrete
+responsibility and why it earns a boundary. A port may earn its boundary by
+owning dependency inversion and/or a host-neutral contract; it need not also
+own adapter concerns. An adapter earns its boundary through one or more
+applicable isolation, translation, error normalization, lifecycle,
+compatibility, or test-boundary responsibilities. A wrapper that only forwards
+the same request and response, with none of those responsibilities and no
+port-contract value, does not earn a boundary. Retained application factories
+are assessed separately for composition or use-case-boundary responsibility;
+they are not treated as ports or adapters by default.
+
+Framework-first means considering only the relevant framework, library,
+platform, or established repository capability for the proposed responsibility.
+It does not require adoption or speculative surveys. A custom-gap
+justification is required only when a custom mechanism is proposed for a job a
+relevant existing capability could perform. Framework use remains at the outer
+boundary; inner layers stay host-neutral.
+
+The architecture dependency test is automatic evidence only for the existing
+catalog of import, construction, parser, telemetry, and layer rules. Semantic
+ownership, whether an abstraction earns its boundary, framework sufficiency,
+custom-gap credibility, and qlty-delta disposition remain explicit reviewer
+judgments. For code slices, compare the same non-mutating `rtk pnpm exec qlty
+check` and `rtk pnpm exec qlty smells` with `--no-snippets` in exact disposable
+snapshots. For each comparable finding, record identity, explicit severity ordering,
+baseline/final severity, measured values, and whether higher or lower values
+are worse. A new finding or reliably mapped adverse movement is Finding/NG;
+only unmappable identity or direction is advisory, and unchanged unrelated
+findings remain out of scope. The formatting-capable aggregate qlty run is
+separate final validation in the disposable final snapshot, never the baseline
+observation. Apply the shared snapshot contract in `AGENTS.md`: baseline and
+final use identical verified configuration and analyzed scope, qlty runtime
+artifacts stay snapshot-local, and any aggregate formatting change requires an
+allowlisted sync, final-snapshot rebuild, and repeated check/smells pair plus
+aggregate until stable.
+
+An approved slice stops for Replanning when its semantic owner or package/layer,
+contract or dependency direction, framework-versus-custom decision,
+abstraction or responsibility, affected surface, risk, validation, or approval
+boundary changes.
+
 ## Composition
 
 `src/bootstrap/extension/activateExtension.ts` and its bootstrap collaborators

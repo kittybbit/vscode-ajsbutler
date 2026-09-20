@@ -105,6 +105,52 @@ Before editing runtime code, tests, generated artifacts, or configuration, the
 selected feature must have an approved implementation slice recorded in
 `TASKS.md`. If scope or design changes, stop and use Replanning Mode.
 
+### Solution Shape Gate
+
+For every non-trivial slice, record the `Solution Shape` at planning,
+implementation, and review:
+
+- assign each material decision, invariant, translation, lifecycle, public
+  name, contract, dependency, and test where applicable to a semantic owner
+  and package/layer
+- identify every material new or retained abstraction, its concrete
+  responsibility, and why it earns a boundary; this includes exported or
+  layer-crossing abstractions, ports, adapters, contract-bearing wrappers,
+  lifecycle owners, and abstractions that change dependency direction or
+  semantic ownership, but excludes ordinary local helpers and type aliases
+  unless they play one of those roles
+- record public names, contracts, dependency direction, and applicable tests;
+  assess ports for dependency inversion and/or host-neutral contract value,
+  adapters for applicable isolation, translation, error normalization,
+  lifecycle, compatibility, or test-boundary responsibility, and retained
+  factories separately for composition or use-case-boundary responsibility
+- consider only the relevant framework, library, platform, or established
+  repository capability; justify a custom mechanism only when one is proposed,
+  and keep framework use at the outer boundary
+- treat the existing architecture dependency test as automatic evidence for
+  its cataloged import, construction, parser, telemetry, and layer rules;
+  semantic ownership, abstraction value, framework sufficiency, custom-gap
+  credibility, and qlty disposition remain reviewer judgments
+- for code slices, compare the same non-mutating `rtk pnpm exec qlty check`
+  and `rtk pnpm exec qlty smells --no-snippets` observations in exact
+  disposable snapshots using identical verified qlty configuration and
+  analyzed scope; record each comparable finding's identity, explicit severity
+  ordering, baseline/final severity, measured values, and whether higher or
+  lower values are worse. A new finding or reliably mapped adverse movement is
+  Finding/NG; only unmappable identity or direction is advisory, and unchanged
+  unrelated findings stay out of scope. Keep qlty caches, results, logs, and
+  other runtime artifacts snapshot-local. The formatting-capable
+  `rtk pnpm run qlty` aggregate is separate final validation in the disposable
+  final snapshot, never the baseline observation. If aggregate formatting
+  changes analyzed source or evidence, synchronize only approved paths, rebuild
+  the final snapshot, and repeat the comparable check/smells pair plus
+  aggregate until no analyzed content changes.
+
+Stop for Replanning when the approved `Solution Shape` changes its semantic
+owner or package/layer, contract or dependency direction, framework-versus-
+custom decision, abstraction or responsibility, affected surface, risk,
+validation, or approval boundary.
+
 ## Coding and Testing Rules
 
 - Use TypeScript with explicit exported API types.

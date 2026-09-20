@@ -39,6 +39,39 @@ Evaluate every slice and the plan as a whole for:
   interfaces, dependencies, and architecture boundaries
 - actionable qlty evidence for code slices
 
+## Solution Shape Review
+
+Resolve the selected slice first and challenge only its `#### Solution Shape
+Evidence` block in `TASKS.md`; evidence from another slice cannot authorize or
+satisfy the selected slice. Challenge every material new or retained
+abstraction against the recorded `Solution Shape`: semantic owner and
+package/layer for material decisions,
+invariants, translations, lifecycles, public names, contracts, dependencies,
+and applicable tests; concrete responsibility and boundary value; public names,
+contracts, dependency direction, and tests where applicable; and the relevant
+framework, library, platform, or established repository capability. Keep the
+port, adapter, and retained application-factory assessments separate. Accept a
+port for dependency inversion and/or a host-neutral contract without requiring
+adapter duties; require an adapter to own applicable isolation, translation,
+error normalization, lifecycle, compatibility, or test-boundary responsibility;
+reject a same-request/same-response forwarding wrapper without port-contract
+value. Require a custom-gap justification only for a proposed custom
+mechanism, and keep framework use at the outer boundary. Separate automatic
+architecture-test evidence from reviewer judgments. For code slices, challenge
+the planned same non-mutating check/smells pair in disposable snapshots using
+identical verified qlty configuration and analyzed scope, and keep aggregate
+final validation only in the disposable final snapshot. Keep qlty runtime
+artifacts snapshot-local; if aggregate formatting changes analyzed source or
+evidence, require an allowlisted sync, final-snapshot rebuild, and repeated
+check/smells pair plus aggregate until stable. Require each comparable finding's
+identity, explicit severity ordering, baseline/final severity, measured values,
+and higher-is-worse or lower-is-worse direction; a new or reliably mapped
+adverse movement is Finding/NG, only unmappable identity or direction is
+advisory, and unchanged unrelated findings stay out of scope. Route any changed
+owner/package, contract/dependency direction, framework-versus-custom
+decision, abstraction/responsibility, affected surface, risk, validation, or
+approval boundary to Replanning.
+
 ## Review Workflow
 
 1. Resolve the selected feature and read the complete implementation plan.
