@@ -1,5 +1,5 @@
 import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import { interpretScheduleDateValue } from "../../models/parameters/scheduleDateInterpreter";
+import { interpretScheduleDateValue } from "../../schedule/ScheduleDate";
 import {
   relativeScheduleDateRequiresContext,
   type SemanticDiffScheduleCalendarContext,
@@ -16,7 +16,7 @@ import {
   createScheduleDate,
   daysInGregorianMonthOrUndefined,
   formatScheduleDate,
-} from "./semanticDiffScheduleDateMath";
+} from "../../schedule/ScheduleDate";
 import { operationalDateCandidates } from "./semanticDiffScheduleOperationalCandidates";
 
 type ParsedScheduleDate = NonNullable<

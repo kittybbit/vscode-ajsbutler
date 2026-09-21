@@ -1,4 +1,4 @@
-import type { ScheduleDateDay } from "../../models/parameters/scheduleDateInterpreter";
+import type { ScheduleDateDay } from "../../schedule/ScheduleDate";
 import {
   classifyScheduleCalendarDay,
   operationalMonthDate,
@@ -15,7 +15,7 @@ import {
   type ScheduleDateCandidateResult,
   type ScheduleDayClassification,
 } from "./semanticDiffScheduleCandidateTypes";
-import { formatScheduleDate } from "./semanticDiffScheduleDateMath";
+import { formatScheduleDate } from "../../schedule/ScheduleDate";
 
 type ClassifiedDay = Extract<
   ScheduleDateDay,

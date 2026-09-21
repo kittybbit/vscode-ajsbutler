@@ -1,4 +1,4 @@
-import type { ScheduleDateInterpretation } from "../../models/parameters/scheduleDateInterpreter";
+import type { ScheduleDateInterpretation } from "../../schedule/ScheduleDate";
 
 const relativeDayKinds = new Set(["relative", "open", "closed"]);
 

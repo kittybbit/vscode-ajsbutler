@@ -5,7 +5,7 @@ import {
   type SemanticDiffScheduleCalendarContext,
 } from "./semanticDiffScheduleCalendarContext";
 import type { ValidSchedulePeriod } from "./semanticDiffScheduleCandidateTypes";
-import { toUtcDate } from "./semanticDiffScheduleDateMath";
+import { toUtcDate } from "../../schedule/ScheduleDate";
 import {
   datePreflight,
   scheduleRuleEvidenceId,

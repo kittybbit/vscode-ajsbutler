@@ -1,11 +1,11 @@
 import type { AjsParameter } from "../../models/ajs/AjsDocument";
 import { classifyScheduleCalendarDay } from "./semanticDiffScheduleCalendarContext";
 import type { SemanticDiffScheduleCalendarDayResult } from "./semanticDiffScheduleCalendarTypes";
-import { formatScheduleDate, toUtcDate } from "./semanticDiffScheduleDateMath";
+import { formatScheduleDate, toUtcDate } from "../../schedule/ScheduleDate";
 import {
   parseClosedDaySubstitutionValue,
   parseShiftDaysValue,
-} from "../../models/parameters/scheduleRuleHelpers";
+} from "../../schedule/ScheduleRule";
 import type {
   SemanticDiffScheduleInterpretation,
   SemanticDiffScheduleRuleInterpretation,

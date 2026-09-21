@@ -1,6 +1,6 @@
 import type { AjsParameter, AjsUnit } from "../../models/ajs/AjsDocument";
-import type { ScheduleDateInterpretation } from "../../models/parameters/scheduleDateInterpreter";
-import type { ParsedRuleValue } from "../../models/parameters/scheduleRuleHelpers";
+import type { ScheduleDateInterpretation } from "../../schedule/ScheduleDate";
+import type { ParsedRuleValue } from "../../schedule/ScheduleRule";
 import type {
   SemanticDiffComparisonPeriod,
   SemanticDiffScheduleRun,

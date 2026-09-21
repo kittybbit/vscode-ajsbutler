@@ -9,8 +9,7 @@
   projection meaning without changing any behavior contract.
 - Selected feature evidence: `docs/specs/roadmap.md` names
   `schedule-domain-ownership` as the first selected internal-architecture
-  feature; the only current working-tree changes are its intake package and
-  roadmap entry.
+  feature; the plan-gate commit contains its reviewed intake and slice plan.
 - Complete plan: four ordered implementation slices. Each slice deletes the
   superseded owner in the same change; no compatibility forwarding module is
   authorized.
@@ -342,7 +341,7 @@
   implementation review
 - Active implementation slice: Slice 1, after the approved plan-gate commit
 - Implementation branch: `codex/schedule-domain-ownership`; approved plan-gate
-  commit `ad72765` is present. Runtime/test edits remain limited to the active
+  commit `0a28b73` is present. Runtime/test edits remain limited to the active
   slice and its recorded approval boundary.
 
 ## Human Approval
@@ -392,19 +391,50 @@ remains; Feature Closure Approval is still a separate gate.
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in the current conversation after independent
+  implementation review Round 2 returned `Ready` with no Findings
+- Approved scope: exact completed Slice 1, `Establish schedule date and rule
+  ownership`, with no behavior change and no Slice 2/F2 work
+- Approved paths: the exact reviewed Slice 1 completion diff:
+  - `docs/specs/features/schedule-domain-ownership/TASKS.md`
+  - `docs/specs/features/schedule-domain-ownership/TRACEABILITY.md`
+  - `src/domain/schedule/ScheduleDate.ts`
+  - `src/domain/schedule/ScheduleRule.ts`
+  - `src/domain/models/parameters/scheduleDateInterpreter.ts`
+  - `src/domain/models/parameters/scheduleRuleHelpers.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleDateMath.ts`
+  - `src/application/unit-list/unitListScheduleValueHelpers.ts`
+  - `src/domain/services/diagnostics/ScheduleDateRules.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleCalendarSelectors.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleCalendarTypes.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleClassifiedDayCandidates.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleDateCandidates.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleOperationalCandidates.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleOperationalMonth.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRelativeDate.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRuleEvidence.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRuleInterpreter.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRuleProjection.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionAnalysis.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionProjection.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`
+  - `src/test/suite/scheduleRuleHelpers.test.ts`
+- Implementation review verdict: `Ready` (independent Round 2; no Findings)
+- Review evidence: Round 1 remediation was revalidated with the exact
+  `SDD_PHASE=slice1` retirement/file-set, local-only, and exact
+  export/forwarding audits; the identical-config qlty check/smells comparison
+  and final aggregate completed without a new Finding or analyzed-source
+  change.
+- Commit status: Eligible for one exact completion commit by
+  `approval-committer`; not yet committed
 
-The current all-slice Human Approval is not a Completion Approval yet.
-Completion Approval is recorded for the exact completed slice only after its
-independent implementation review returns `Ready`; the approval-committer
-must commit that exact slice before the next slice begins. If the review has
-Findings, implementation and review continue until the slice is `Ready` or a
-new scope/design decision triggers Replanning.
+This Completion Approval is the external human approval for the exact
+reviewed Slice 1 diff above. It does not authorize implementation of Slice 2,
+Feature Exit, closure propagation, or any path outside this list. The active
+implementation slice remains Slice 1 until the completion commit; only after
+that commit may Main advance the plan to Slice 2.
 
 ## Closure Approval
 
@@ -960,6 +990,7 @@ const filesFor = (args) => {
 const sourceFiles = filesFor(["rg", "--files", "src", "--glob", "*.ts", "--glob", "*.tsx"]);
 const allSourceFiles = filesFor(["rg", "--files", "src"]);
 const packageFiles = filesFor(["rg", "--files", "src/domain/schedule"]);
+const productionSourceFiles = sourceFiles.filter((file) => !file.startsWith("src/test/"));
 const sourceText = sourceFiles.map((file) => readFileSync(file, "utf8")).join("\n");
 const failures = [];
 const retiredStems = new Set(retiredModules.map((file) => file.split("/").pop().replace(/\.[^.]+$/, "")));
@@ -968,12 +999,18 @@ for (const file of retiredModules) {
   const base = file.split("/").pop().replace(/\.[^.]+$/, "");
   if (new RegExp("\\b" + base + "\\b").test(sourceText)) failures.push(base + ": retired module name still occurs in src");
 }
-for (const file of allSourceFiles) {
+// Retired owner stems are production-module assertions. Test names such as
+// scheduleRuleHelpers.test.ts remain valid evidence paths in the closed test
+// manifest and must not be rejected as production owners.
+for (const file of productionSourceFiles) {
   const base = file.split("/").pop();
   const stem = base.replace(/\.[^.]+$/, "");
   if (retiredStems.has(stem) || [...retiredStems].some((retired) => base.startsWith(retired + "."))) {
     failures.push(file + ": retired owner stem variant still exists");
   }
+}
+for (const file of allSourceFiles) {
+  const base = file.split("/").pop();
   if (/^ScheduleSubstitution(?:\..+)?$/.test(base)) failures.push(file + ": ScheduleSubstitution.* is forbidden");
 }
 for (const name of retiredSymbols) {
@@ -2134,8 +2171,9 @@ Phase pass criteria are closed and cumulative:
 
 ### Slice 1: Establish schedule date and rule ownership
 
-- Status: Human-approved; pending implementation and independent implementation
-  review
+- Status: Implemented; independent implementation review Round 2 `Ready` with
+  no Findings; Slice 1 Completion Approval `Approved`; pending exact
+  completion commit
 - Scope: create `src/domain/schedule/ScheduleDate.ts` and
   `src/domain/schedule/ScheduleRule.ts`; move the existing normalized schedule
   date token interpretation, Gregorian date helpers, and rule-prefixed value
@@ -2242,6 +2280,90 @@ Phase pass criteria are closed and cumulative:
   `semanticDiffScheduleCalendar.test.ts`.
 - Framework/custom decision: plain TypeScript and built-in `Date` remain
   sufficient. No port, adapter, factory, custom framework, or lifecycle owner.
+
+#### Slice 1 Implementation Evidence
+
+- Implementation status: complete within the approved Slice 1 manifest; no
+  commit was created. The exact changed paths are the two additions, three
+  deletions, the listed production import consumers, and
+  `src/test/suite/scheduleRuleHelpers.test.ts`.
+- Ownership result: `ScheduleDate.ts` owns the existing date-token
+  interpretation and Gregorian/UTC helpers; `ScheduleRule.ts` owns the
+  existing rule-prefixed parsers and monitoring-pair helper. The only new
+  local boundary is the non-exported `resolveScheduleRuleNumber`; no
+  forwarding module, barrel, period primitive, or F2 date/index work was
+  added.
+- Acceptance evidence: old-module/import scan returned no
+  `scheduleDateInterpreter`, `scheduleRuleHelpers`, or
+  `semanticDiffScheduleDateMath` occurrence under `src`; the phase-1
+  retirement/file-set audit found exactly `ScheduleDate.ts` and
+  `ScheduleRule.ts`; exact compiler export audit passed; the local-only
+  `resolveScheduleRuleNumber` path/export audit passed; the schedule package
+  host/Node import audit passed; the retired owner-stem check is scoped to
+  production source so the allowed `scheduleRuleHelpers.test.ts` validation
+  path is not treated as a production owner; `git diff --check` passed.
+- Desktop validation: `rtk pnpm run test:prepare:desktop` passed (desktop
+  webpack plus test compilation), followed by `rtk pnpm run
+test:desktop:run`, exit 0. The full runner emits no per-suite summary; its
+  successful exit covers the Slice 1 `M_1(test)` suites:
+  `scheduleRuleHelpers.test.ts`, `unitListViewHelpers.test.ts`,
+  `evaluateScheduleDiagnosticViolations.test.ts`,
+  `semanticDiffScheduleRules.test.ts`,
+  `semanticDiffScheduleCalendar.test.ts`,
+  `semanticDiffSchedule.test.ts`, and
+  `architectureDependencyRules.test.ts`.
+- Build/web validation: `rtk pnpm run build` passed with only the existing
+  webpack asset-size recommendations. After that final build, the only web
+  command was `rtk pnpm run test:web`; its nested `pretest:web ->
+test:prepare:web` preparation (web webpack, test compilation, web-test
+  bundle) passed and the escalated web runner exited 0 with WEB-7 through
+  WEB-10 passed. The runner emitted non-fatal EPIPE/premature-stream-close
+  cleanup messages after the assertions; the sandboxed attempts before the
+  escalated run were not used as pass evidence.
+- qlty evidence: identical verified `.qlty/qlty.toml`, toolchain, and
+  all-source scope were used in disposable snapshots
+  `sdd-slice1-qlty-baseline-r1.k30I69` (plan-gate `0a28b73`) and
+  `sdd-slice1-qlty-final-r1c` (post-formatting Slice 1). Severity
+  ordering is `fmt` gate > `high` > `medium` > `low` > `note`; higher
+  severity is worse. For metric findings, higher measured values are worse.
+  The non-mutating `rtk pnpm exec qlty check -a --no-fix
+--no-upgrade-check` comparator was:
+  `MD041@.github/ISSUE_TEMPLATE/pull_request_template.md:1:0`, medium to
+  medium, measured finding count 1 to 1, unchanged existing/out-of-scope;
+  `@typescript-eslint/no-unused-vars@src/application/unit-list/buildUnitListRemainingGroups.ts:6:6`,
+  medium to medium, count 1 to 1, unchanged existing/out-of-scope; and
+  `eslint@src/test/suite/index.ts:1:1`, low to low, count 1 to 1,
+  unchanged existing/out-of-scope. The final check had no new fmt finding.
+  The non-mutating `rtk pnpm exec qlty smells -a --no-snippets
+--no-upgrade-check` comparator has no severity field, so its unchanged
+  severity is recorded as `smell`; each metric direction is higher-worse:
+  `formatScheduleDateDayValue` returns 4/4 and complexity 8/8,
+  `scheduleDateType` returns 7/7, `scheduleDateYearMonth` complexity 5/5,
+  and `parseSd` complexity 6/6; the moved
+  `interpretScheduleDateDay` returns 9/9 and complexity 24/24, and
+  `interpretScheduleDateValue` complexity 10/10. The latter two identities
+  map from retired `scheduleDateInterpreter.ts` to `ScheduleDate.ts`; this is
+  a path relocation, not an adverse movement. Unchanged unrelated findings
+  remain out of scope. The final-snapshot-only `rtk pnpm run qlty` passed
+  with no analyzed-content change after the approved documentation formatting
+  was synchronized; qlty caches/results/logs remained snapshot-local.
+- Compatibility and documentation: no `engines.vscode`, DTO/schema,
+  command, parser, presentation, bootstrap, README, user documentation, or
+  CHANGELOG change. The moved domain modules contain no Node, VS Code, host,
+  locale, I/O, or telemetry dependency; desktop/web behavior remains
+  covered by the validation above.
+- Implementation feedback: the closed manifest was sufficient for an atomic
+  ownership move. Keeping date interpretation and date math together in
+  `ScheduleDate.ts` avoided a temporary compatibility owner while preserving
+  the existing Semantic Diff period copy for F2. No new dependency or scope
+  decision was discovered.
+- Unresolved risks: no Slice 1-specific validation risk remains. Independent
+  implementation review Round 2 returned `Ready` with no Findings after the
+  production-only retirement-stem audit and final disposable-snapshot qlty
+  evidence were remediated. Slice 2 and Feature Closure remain separately
+  gated.
+- Recommended route: `Main -> approval-committer` for the exact Slice 1
+  completion commit. Keep Slice 2 inactive until that commit is created.
 
 ### Slice 2: Move normalized schedule interpretation
 
@@ -2923,6 +3045,7 @@ Stop and return to Main for:
 ## Notes
 
 - `SPECS.md` remains the requirement and boundary owner.
-- This plan grants no approval and has not been reviewed or committed.
+- This plan was reviewed, human-approved, and committed through the plan gate;
+  implementation evidence above records the uncommitted Slice 1 result.
 
 <!-- markdownlint-enable MD013 MD060 -->

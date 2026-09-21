@@ -13,7 +13,7 @@ import {
   hasScheduleSubstitution,
 } from "./semanticDiffScheduleSubstitutionAnalysis";
 import { projectScheduleRules } from "./semanticDiffScheduleRuleProjection";
-import { toUtcDate } from "./semanticDiffScheduleDateMath";
+import { toUtcDate } from "../../schedule/ScheduleDate";
 import type { ValidSchedulePeriod } from "./semanticDiffScheduleCandidateTypes";
 
 const parsePeriod = (

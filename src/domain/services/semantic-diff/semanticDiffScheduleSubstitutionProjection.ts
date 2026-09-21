@@ -10,7 +10,7 @@ import type {
   ScheduleDateCandidateResult,
   ValidSchedulePeriod,
 } from "./semanticDiffScheduleCandidateTypes";
-import { toUtcDate } from "./semanticDiffScheduleDateMath";
+import { toUtcDate } from "../../schedule/ScheduleDate";
 import type { SemanticDiffScheduleRun } from "../../models/semantic-diff/SemanticDiff";
 import type { SemanticDiffScheduleRuleInterpretation } from "./semanticDiffScheduleTypes";
 import {

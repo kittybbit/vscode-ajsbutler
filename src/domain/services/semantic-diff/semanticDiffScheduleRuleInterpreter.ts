@@ -1,5 +1,5 @@
 import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import { interpretScheduleDateValue } from "../../models/parameters/scheduleDateInterpreter";
+import { interpretScheduleDateValue } from "../../schedule/ScheduleDate";
 import {
   parseCycleValue,
   parseClosedDaySubstitutionValue,
@@ -8,7 +8,7 @@ import {
   parseShiftDaysValue,
   parseStartTimeValue,
   type ParsedRuleValue,
-} from "../../models/parameters/scheduleRuleHelpers";
+} from "../../schedule/ScheduleRule";
 import {
   calendarIndependentDateEvidence,
   createScheduleRuleResult,

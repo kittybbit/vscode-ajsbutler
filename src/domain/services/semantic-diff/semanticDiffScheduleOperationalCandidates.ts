@@ -1,7 +1,7 @@
 import type {
   ScheduleDateDay,
   ScheduleDateInterpretation,
-} from "../../models/parameters/scheduleDateInterpreter";
+} from "../../schedule/ScheduleDate";
 import {
   operationalMonthDate,
   resolveOperationalMonth,
@@ -19,7 +19,7 @@ import {
   singleScheduleDateCandidate,
   type ScheduleDateCandidateResult,
 } from "./semanticDiffScheduleCandidateTypes";
-import { formatScheduleDate } from "./semanticDiffScheduleDateMath";
+import { formatScheduleDate } from "../../schedule/ScheduleDate";
 
 type OperationalCandidateInput = {
   parsed: ScheduleDateInterpretation;

@@ -1,10 +1,10 @@
 import type { AjsParameter, AjsUnit } from "../../models/ajs/AjsDocument";
-import type { ScheduleDateWeekday } from "../../models/parameters/scheduleDateInterpreter";
+import type { ScheduleDateWeekday } from "../../schedule/ScheduleDate";
 import {
   isImpossibleYearDay,
   isInvalidCalendarDay,
   isInvalidCalendarMonth,
-} from "./semanticDiffScheduleDateMath";
+} from "../../schedule/ScheduleDate";
 import { type AncestorResult } from "./semanticDiffScheduleCalendarIndex";
 import type {
   SemanticDiffScheduleCalendarContextIndex,
