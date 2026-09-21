@@ -19,12 +19,12 @@ import {
   type SubstitutionRuleState,
 } from "./semanticDiffScheduleSubstitutionAnalysis";
 import type {
-  SemanticDiffScheduleInterpretation,
-  SemanticDiffScheduleRuleInterpretation,
-} from "./semanticDiffScheduleTypes";
+  ScheduleInterpretation,
+  ScheduleRuleInterpretation,
+} from "../../schedule/ScheduleInterpretation";
 
 type RuleProjectionInput = {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   parsedPeriod: ValidSchedulePeriod;
   candidatePeriod: ValidSchedulePeriod;
   calendarContext?: SemanticDiffScheduleCalendarContext;
@@ -33,19 +33,19 @@ type RuleProjectionInput = {
 };
 
 type ProjectedRule = {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   runs: SemanticDiffScheduleRun[];
 };
 
 type ProjectedRules = {
-  rules: SemanticDiffScheduleRuleInterpretation[];
+  rules: ScheduleRuleInterpretation[];
   runs: SemanticDiffScheduleRun[];
 };
 
 const cloneRule = (
-  rule: SemanticDiffScheduleRuleInterpretation,
-  patch: Partial<SemanticDiffScheduleRuleInterpretation>,
-): SemanticDiffScheduleRuleInterpretation => ({ ...rule, ...patch });
+  rule: ScheduleRuleInterpretation,
+  patch: Partial<ScheduleRuleInterpretation>,
+): ScheduleRuleInterpretation => ({ ...rule, ...patch });
 
 const isWithin = (date: Date, period: ValidSchedulePeriod): boolean =>
   date >= period.from && date < period.to;
@@ -54,7 +54,7 @@ const updateSubstitutionContextState = (input: {
   association: SubstitutionAssociation;
   status: "invalid" | "missing-context";
   calendarRawParameters: AjsParameter[];
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.sh.forEach((substitutionRule) => {
     const current = input.states.get(substitutionRule.interpretationRule);
@@ -83,7 +83,7 @@ type CandidateProjectionInput = {
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
   fullyQualified: boolean;
   unresolvedWholeRule: boolean;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 };
 
 const invalidAssociation = (association: SubstitutionAssociation): boolean => {
@@ -169,8 +169,8 @@ const projectedCandidates = (input: CandidateProjectionInput): string[] => {
 const projectedRuns = (input: {
   candidates: string[];
   period: ValidSchedulePeriod;
-  interpretation: SemanticDiffScheduleInterpretation;
-  rule: SemanticDiffScheduleRuleInterpretation;
+  interpretation: ScheduleInterpretation;
+  rule: ScheduleRuleInterpretation;
   startTime: Extract<DatePreflight, { kind: "project" }>["startTime"];
 }): SemanticDiffScheduleRun[] =>
   input.candidates
@@ -202,7 +202,7 @@ const substitutionParameters = (
 ];
 
 const projectedEvidenceParameters = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   startTime: Extract<DatePreflight, { kind: "project" }>["startTime"];
   association: SubstitutionAssociation | undefined;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
@@ -221,7 +221,7 @@ const projectedEvidenceParameters = (input: {
 ];
 
 const projectReadyDateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   preflight: Extract<DatePreflight, { kind: "project" }>;
   context: RuleProjectionInput;
 }): ProjectedRule => {
@@ -263,8 +263,8 @@ const projectReadyDateRule = (input: {
 };
 
 const projectDateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   context: RuleProjectionInput;
 }): ProjectedRule => {
   const { rule, startTime, context } = input;
@@ -280,7 +280,7 @@ const projectDateRule = (input: {
 };
 
 const calendarSelection = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
 }): SemanticDiffScheduleCalendarContext["selection"] | undefined =>
   input.rule.parameter.key === "jc"
@@ -288,7 +288,7 @@ const calendarSelection = (input: {
     : undefined;
 
 const calendarSelectionRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
 }): ProjectedRule | undefined => {
   const selection = calendarSelection(input);
@@ -302,9 +302,9 @@ const calendarSelectionRule = (input: {
 };
 
 const calendarSelectionResult = (
-  rule: SemanticDiffScheduleRuleInterpretation,
+  rule: ScheduleRuleInterpretation,
   selection: NonNullable<SemanticDiffScheduleCalendarContext["selection"]>,
-): SemanticDiffScheduleRuleInterpretation =>
+): ScheduleRuleInterpretation =>
   cloneRule(rule, {
     status: selection.status,
     reason: selection.status === "supported" ? undefined : "calendar-selection",
@@ -316,8 +316,8 @@ const calendarSelectionResult = (
   });
 
 const substitutionStateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  rule: ScheduleRuleInterpretation;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): ProjectedRule | undefined => {
   const substitution = input.states.get(input.rule);
   return substitution
@@ -337,8 +337,8 @@ const substitutionStateRule = (input: {
 };
 
 const projectRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTimes: Map<number, SemanticDiffScheduleRuleInterpretation>;
+  rule: ScheduleRuleInterpretation;
+  startTimes: Map<number, ScheduleRuleInterpretation>;
   context: RuleProjectionInput;
 }): ProjectedRule => {
   const { rule, startTimes, context } = input;
@@ -362,9 +362,9 @@ const projectRule = (input: {
 };
 
 const firstStartTimes = (
-  rules: SemanticDiffScheduleRuleInterpretation[],
-): Map<number, SemanticDiffScheduleRuleInterpretation> => {
-  const startTimes = new Map<number, SemanticDiffScheduleRuleInterpretation>();
+  rules: ScheduleRuleInterpretation[],
+): Map<number, ScheduleRuleInterpretation> => {
+  const startTimes = new Map<number, ScheduleRuleInterpretation>();
   rules.forEach((rule) => {
     if (rule.rule !== undefined && !startTimes.has(rule.rule)) {
       startTimes.set(rule.rule, rule);

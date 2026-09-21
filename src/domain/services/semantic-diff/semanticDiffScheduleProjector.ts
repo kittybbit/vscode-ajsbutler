@@ -3,11 +3,13 @@ import type {
   SemanticDiffScheduleRun,
 } from "../../models/semantic-diff/SemanticDiff";
 import type {
-  SemanticDiffScheduleInterpretation,
   SemanticDiffScheduleProjection,
   SemanticDiffScheduleProjectionInput,
-  SemanticDiffScheduleRuleInterpretation,
 } from "./semanticDiffScheduleTypes";
+import type {
+  ScheduleInterpretation,
+  ScheduleRuleInterpretation,
+} from "../../schedule/ScheduleInterpretation";
 import {
   createSubstitutionAnalysis,
   hasScheduleSubstitution,
@@ -30,10 +32,10 @@ const addUtcDays = (date: Date, days: number): Date =>
 const projectionInput = (
   inputOrInterpretation:
     | SemanticDiffScheduleProjectionInput
-    | SemanticDiffScheduleInterpretation,
+    | ScheduleInterpretation,
   periodInput?: SemanticDiffComparisonPeriod,
 ): {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   period: SemanticDiffComparisonPeriod | undefined;
   calendarContext: SemanticDiffScheduleProjectionInput["calendarContext"];
 } =>
@@ -50,7 +52,7 @@ const projectionInput = (
       };
 
 const emptyProjection = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
   status: SemanticDiffScheduleProjection["status"],
   completeness: SemanticDiffScheduleProjection["completeness"],
 ): SemanticDiffScheduleProjection => ({
@@ -63,7 +65,7 @@ const emptyProjection = (
 });
 
 const unresolvedWholeRules = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): Set<number> =>
   new Set(
     interpretation.rules
@@ -88,17 +90,16 @@ const candidatePeriod = (input: {
       }
     : input.period;
 
-const isCompleteRule = (
-  rule: SemanticDiffScheduleRuleInterpretation,
-): boolean => rule.status === "supported" || rule.status === "no-runs";
+const isCompleteRule = (rule: ScheduleRuleInterpretation): boolean =>
+  rule.status === "supported" || rule.status === "no-runs";
 
 const scheduleDateRules = (
-  rules: SemanticDiffScheduleRuleInterpretation[],
-): SemanticDiffScheduleRuleInterpretation[] =>
+  rules: ScheduleRuleInterpretation[],
+): ScheduleRuleInterpretation[] =>
   rules.filter((rule) => rule.parameter.key === "sd");
 
 const completenessForRules = (
-  rules: SemanticDiffScheduleRuleInterpretation[],
+  rules: ScheduleRuleInterpretation[],
 ): "complete" | "partial" | "none" => {
   const dates = scheduleDateRules(rules);
   const complete = rules.every(isCompleteRule);
@@ -117,7 +118,7 @@ const completenessForRules = (
 };
 
 const incompleteStatus = (
-  rules: SemanticDiffScheduleRuleInterpretation[],
+  rules: ScheduleRuleInterpretation[],
 ): SemanticDiffScheduleProjection["status"] => {
   const invalid = rules.some((rule) => rule.status === "invalid");
   const missing = rules.some((rule) => rule.status === "missing-context");
@@ -139,7 +140,7 @@ const incompleteStatus = (
 const projectionStatus = (input: {
   completeness: "complete" | "partial" | "none";
   runs: SemanticDiffScheduleRun[];
-  rules: SemanticDiffScheduleRuleInterpretation[];
+  rules: ScheduleRuleInterpretation[];
 }): SemanticDiffScheduleProjection["status"] => {
   const complete = input.runs.length === 0 ? "no-runs" : "supported";
   return {
@@ -150,7 +151,7 @@ const projectionStatus = (input: {
 };
 
 const summarizeScheduleProjection = (input: {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   projected: ReturnType<typeof projectScheduleRules>;
 }): SemanticDiffScheduleProjection => {
   const completeness = input.interpretation.hasRuleZeroUndefined
@@ -171,7 +172,7 @@ const summarizeScheduleProjection = (input: {
 };
 
 const projectValidatedSchedule = (input: {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   period: ValidSchedulePeriod;
   calendarContext: SemanticDiffScheduleProjectionInput["calendarContext"];
 }): SemanticDiffScheduleProjection => {
@@ -194,7 +195,7 @@ const projectValidatedSchedule = (input: {
 };
 
 const invalidPeriodProjection = (input: {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   period: SemanticDiffComparisonPeriod | undefined;
   parsedPeriod: ValidSchedulePeriod | undefined;
 }): SemanticDiffScheduleProjection | undefined =>
@@ -203,14 +204,14 @@ const invalidPeriodProjection = (input: {
     : undefined;
 
 const zeroRunProjection = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): SemanticDiffScheduleProjection | undefined =>
   interpretation.hasRuleZeroUndefined
     ? emptyProjection(interpretation, "no-runs", "complete")
     : undefined;
 
 const earlyProjection = (input: {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   period: SemanticDiffComparisonPeriod | undefined;
   parsedPeriod: ValidSchedulePeriod | undefined;
 }): SemanticDiffScheduleProjection | undefined =>
@@ -221,13 +222,13 @@ export function projectScheduleRuns(
   input: SemanticDiffScheduleProjectionInput,
 ): SemanticDiffScheduleProjection;
 export function projectScheduleRuns(
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
   period: SemanticDiffComparisonPeriod,
 ): SemanticDiffScheduleProjection;
 export function projectScheduleRuns(
   inputOrInterpretation:
     | SemanticDiffScheduleProjectionInput
-    | SemanticDiffScheduleInterpretation,
+    | ScheduleInterpretation,
   periodInput?: SemanticDiffComparisonPeriod,
 ): SemanticDiffScheduleProjection {
   const input = projectionInput(inputOrInterpretation, periodInput);

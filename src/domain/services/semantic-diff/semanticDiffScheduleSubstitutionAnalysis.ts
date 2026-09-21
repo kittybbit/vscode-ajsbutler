@@ -7,9 +7,9 @@ import {
   parseShiftDaysValue,
 } from "../../schedule/ScheduleRule";
 import type {
-  SemanticDiffScheduleInterpretation,
-  SemanticDiffScheduleRuleInterpretation,
-} from "./semanticDiffScheduleTypes";
+  ScheduleInterpretation,
+  ScheduleRuleInterpretation,
+} from "../../schedule/ScheduleInterpretation";
 
 export type SubstitutionMode = "be" | "af" | "ca" | "no";
 
@@ -20,13 +20,13 @@ export type SubstitutionResolution = {
 };
 
 export type ParsedSubstitutionRule = {
-  interpretationRule: SemanticDiffScheduleRuleInterpretation;
+  interpretationRule: ScheduleRuleInterpretation;
   value: SubstitutionMode;
   rule: number;
 };
 
 export type ParsedShiftDaysRule = {
-  interpretationRule: SemanticDiffScheduleRuleInterpretation;
+  interpretationRule: ScheduleRuleInterpretation;
   value: number;
   rule: number;
   rawValue?: string;
@@ -34,7 +34,7 @@ export type ParsedShiftDaysRule = {
 
 export type SubstitutionAssociation = {
   sh: ParsedSubstitutionRule[];
-  invalidSh: SemanticDiffScheduleRuleInterpretation[];
+  invalidSh: ScheduleRuleInterpretation[];
   shd: ParsedShiftDaysRule[];
   invalidShiftDays: ParsedShiftDaysRule[];
   mode?: SubstitutionMode;
@@ -44,8 +44,8 @@ export type SubstitutionAssociation = {
 };
 
 export type SubstitutionRuleState = {
-  status: SemanticDiffScheduleRuleInterpretation["status"];
-  reason?: SemanticDiffScheduleRuleInterpretation["reason"];
+  status: ScheduleRuleInterpretation["status"];
+  reason?: ScheduleRuleInterpretation["reason"];
   evidenceId: string;
   rawParameters: AjsParameter[];
   rule?: number;
@@ -53,7 +53,7 @@ export type SubstitutionRuleState = {
 
 export type SubstitutionAnalysis = {
   associations: Map<number, SubstitutionAssociation>;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
   fullyQualifiedDateRules: Set<number>;
 };
 
@@ -74,9 +74,9 @@ type CandidateResolution = {
 type ShiftSearch = CandidateResolution;
 
 type ParsedRuleInput = {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   associations: Map<number, SubstitutionAssociation>;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 };
 
 export const substitutionState = (input: {
@@ -132,9 +132,9 @@ const malformedShiftDays = (
 };
 
 const recordInvalidSubstitution = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   association: SubstitutionAssociation;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.invalidSh.push(input.rule);
   input.states.set(
@@ -169,11 +169,11 @@ const analyzeShRule = (input: ParsedRuleInput): void => {
 };
 
 const recordInvalidShiftDays = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   association: SubstitutionAssociation;
   ruleNumber: number;
   rawValue?: string;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.invalidShiftDays.push({
     interpretationRule: input.rule,
@@ -243,7 +243,7 @@ const analyzeSubstitutionRule = (input: ParsedRuleInput): void => {
 };
 
 const ruleNumbers = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): { dateRules: Set<number>; fullyQualifiedDateRules: Set<number> } => ({
   dateRules: new Set(
     interpretation.scheduleDateRules
@@ -266,7 +266,7 @@ const completeAssociation = (input: {
   ruleNumber: number;
   dateRules: Set<number>;
   fullyQualifiedDateRules: Set<number>;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   const modeValues = new Set(input.association.sh.map((rule) => rule.value));
   input.association.modeConflict = modeValues.size > 1;
@@ -401,7 +401,7 @@ const recordSubstitutionStates = (input: {
   dateRules: Set<number>;
   fullyQualifiedDateRules: Set<number>;
   rawParameters: AjsParameter[];
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.sh.forEach((rule) => {
     const status = substitutionStatus(input);
@@ -590,13 +590,10 @@ export const resolveSubstitutionCandidate = (input: {
 };
 
 export const createSubstitutionAnalysis = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): SubstitutionAnalysis => {
   const associations = new Map<number, SubstitutionAssociation>();
-  const states = new Map<
-    SemanticDiffScheduleRuleInterpretation,
-    SubstitutionRuleState
-  >();
+  const states = new Map<ScheduleRuleInterpretation, SubstitutionRuleState>();
   interpretation.rules.forEach((rule) =>
     analyzeSubstitutionRule({ rule, associations, states }),
   );

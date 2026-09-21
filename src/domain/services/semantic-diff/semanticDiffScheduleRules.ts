@@ -9,7 +9,7 @@ import type {
 } from "../../models/semantic-diff/SemanticDiff";
 import { compareScheduleRuns } from "./semanticDiffScheduleDiffer";
 import type { SemanticDiffScheduleRunDecision } from "./semanticDiffScheduleDiffer";
-import { interpretSchedule } from "./semanticDiffScheduleInterpreter";
+import { interpretSchedule } from "../../schedule/ScheduleInterpretation";
 import { projectScheduleRuns } from "./semanticDiffScheduleProjector";
 import {
   createScheduleCalendarContextIndex,
@@ -18,14 +18,15 @@ import {
   type SemanticDiffScheduleCalendarContextIndex,
 } from "./semanticDiffScheduleCalendarContext";
 import type {
-  SemanticDiffScheduleEvidence,
-  SemanticDiffScheduleInterpretation,
   SemanticDiffScheduleProjection,
-  SemanticDiffScheduleRuleInterpretation,
   SemanticDiffScheduleSide,
-  SemanticDiffScheduleStatus,
-  SemanticDiffScheduleUnsupportedReason,
 } from "./semanticDiffScheduleTypes";
+import type {
+  ScheduleInterpretation,
+  ScheduleRuleInterpretation,
+  ScheduleStatus,
+  ScheduleUnsupportedReason,
+} from "../../schedule/ScheduleInterpretation";
 import type { SemanticDiffUnitMatch } from "./semanticDiffStructuralRules";
 
 export type SemanticDiffScheduleMatchedUnit = Pick<
@@ -33,14 +34,6 @@ export type SemanticDiffScheduleMatchedUnit = Pick<
   "before" | "after"
 >;
 
-export type {
-  SemanticDiffScheduleEvidence,
-  SemanticDiffScheduleInterpretation,
-  SemanticDiffScheduleProjection,
-  SemanticDiffScheduleRuleInterpretation,
-  SemanticDiffScheduleStatus,
-  SemanticDiffScheduleUnsupportedReason,
-};
 export type { SemanticDiffScheduleSide } from "./semanticDiffScheduleTypes";
 export { interpretSchedule, projectScheduleRuns, compareScheduleRuns };
 
@@ -48,9 +41,9 @@ export type SemanticDiffScheduleUnsupportedDecision = {
   side: SemanticDiffScheduleSide;
   unit: AjsUnit;
   parameter: AjsParameter;
-  reason: SemanticDiffScheduleUnsupportedReason;
+  reason: ScheduleUnsupportedReason;
   status?: Extract<
-    SemanticDiffScheduleStatus,
+    ScheduleStatus,
     "invalid" | "missing-context" | "unsupported"
   >;
   scheduleRule?: number;
@@ -156,15 +149,15 @@ const parsePeriod = (
   return from && to && from < to ? period : undefined;
 };
 
-const projectionStatusReasons = new Set<SemanticDiffScheduleUnsupportedReason>([
+const projectionStatusReasons = new Set<ScheduleUnsupportedReason>([
   "calendar-selection",
   "closed-day-substitution",
 ]);
 
 const isProjectionStatus = (
-  status: SemanticDiffScheduleStatus,
+  status: ScheduleStatus,
 ): status is Extract<
-  SemanticDiffScheduleStatus,
+  ScheduleStatus,
   "invalid" | "missing-context" | "unsupported"
 > =>
   status === "invalid" ||
@@ -172,7 +165,7 @@ const isProjectionStatus = (
   status === "unsupported";
 
 const unsupportedDecisionStatus = (
-  rule: SemanticDiffScheduleRuleInterpretation,
+  rule: ScheduleRuleInterpretation,
 ): SemanticDiffScheduleUnsupportedDecision["status"] =>
   rule.reason &&
   projectionStatusReasons.has(rule.reason) &&
@@ -194,8 +187,8 @@ const optionalScheduleRule = (
 
 const unsupportedDecision = (
   side: SemanticDiffScheduleSide,
-  interpretation: SemanticDiffScheduleInterpretation,
-  rule: SemanticDiffScheduleRuleInterpretation,
+  interpretation: ScheduleInterpretation,
+  rule: ScheduleRuleInterpretation,
 ): SemanticDiffScheduleUnsupportedDecision | undefined => {
   if (!rule.reason) {
     return undefined;
@@ -213,7 +206,7 @@ const unsupportedDecision = (
 
 const collectUnsupportedDecisions = (
   side: SemanticDiffScheduleSide,
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
   projection: SemanticDiffScheduleProjection,
 ): SemanticDiffScheduleUnsupportedDecision[] =>
   projection.rules
@@ -257,7 +250,7 @@ type ScheduleUnitCollectionInput = {
 };
 
 const hasContextRelativeDate = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): boolean =>
   interpretation.scheduleDateRules.some(
     (rule) =>
@@ -266,11 +259,11 @@ const hasContextRelativeDate = (
   );
 
 const hasClosedDaySubstitution = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): boolean => interpretation.rules.some((rule) => rule.parameter.key === "sh");
 
 const resolveUnitCalendarContext = (input: {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   unit: AjsUnit;
   document?: AjsDocument;
   contextIndex?: SemanticDiffScheduleCalendarContextIndex;
@@ -288,7 +281,7 @@ const resolveUnitCalendarContext = (input: {
 };
 
 const supportedSchedulePairCount = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
   projection: SemanticDiffScheduleProjection,
 ): number =>
   interpretation.hasRuleZeroUndefined

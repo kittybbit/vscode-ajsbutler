@@ -12,7 +12,7 @@ import type {
 } from "./semanticDiffScheduleCandidateTypes";
 import { toUtcDate } from "../../schedule/ScheduleDate";
 import type { SemanticDiffScheduleRun } from "../../models/semantic-diff/SemanticDiff";
-import type { SemanticDiffScheduleRuleInterpretation } from "./semanticDiffScheduleTypes";
+import type { ScheduleRuleInterpretation } from "../../schedule/ScheduleInterpretation";
 import {
   resolveSubstitutionCandidate,
   type SubstitutionAssociation,
@@ -36,24 +36,24 @@ type ResolutionSetup =
 type CandidateResolution = ReturnType<typeof resolveSubstitutionCandidate>;
 
 export type DatePreflight =
-  | { kind: "return"; rule: SemanticDiffScheduleRuleInterpretation }
+  | { kind: "return"; rule: ScheduleRuleInterpretation }
   | {
       kind: "project";
       candidates: string[];
       startTime: SupportedStartTimeRule;
     };
 
-type SupportedStartTimeRule = SemanticDiffScheduleRuleInterpretation & {
-  startTime: NonNullable<SemanticDiffScheduleRuleInterpretation["startTime"]>;
+type SupportedStartTimeRule = ScheduleRuleInterpretation & {
+  startTime: NonNullable<ScheduleRuleInterpretation["startTime"]>;
 };
 
 const cloneRule = (
-  rule: SemanticDiffScheduleRuleInterpretation,
-  patch: Partial<SemanticDiffScheduleRuleInterpretation>,
-): SemanticDiffScheduleRuleInterpretation => ({ ...rule, ...patch });
+  rule: ScheduleRuleInterpretation,
+  patch: Partial<ScheduleRuleInterpretation>,
+): ScheduleRuleInterpretation => ({ ...rule, ...patch });
 
 export const scheduleRuleEvidenceId = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   kind: "projected" | "invalid" | "missing-start-time";
   runs?: SemanticDiffScheduleRun[];
 }): string => {
@@ -68,17 +68,17 @@ export const scheduleRuleEvidenceId = (input: {
 };
 
 const startTimeParameter = (
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined,
+  startTime: ScheduleRuleInterpretation | undefined,
 ): AjsParameter[] => (startTime?.parameter ? [startTime.parameter] : []);
 
 const calendarRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
-  status: SemanticDiffScheduleRuleInterpretation["status"];
-  reason: SemanticDiffScheduleRuleInterpretation["reason"];
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
+  status: ScheduleRuleInterpretation["status"];
+  reason: ScheduleRuleInterpretation["reason"];
   evidenceId: string;
   calendarContext?: SemanticDiffScheduleCalendarContext;
-}): SemanticDiffScheduleRuleInterpretation =>
+}): ScheduleRuleInterpretation =>
   cloneRule(input.rule, {
     status: input.status,
     reason: input.reason,
@@ -94,7 +94,7 @@ const calendarRule = (input: {
 type RelativeDateMode = "none" | "invalid" | "unqualified" | "qualified";
 
 const relativeDateMode = (
-  date: SemanticDiffScheduleRuleInterpretation["date"],
+  date: ScheduleRuleInterpretation["date"],
 ): RelativeDateMode => {
   const facts =
     date === undefined
@@ -117,13 +117,13 @@ const relativeDateMode = (
 };
 
 const relativeDateContextOutcome = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
-}): SemanticDiffScheduleRuleInterpretation | undefined => {
+}): ScheduleRuleInterpretation | undefined => {
   const context = input.calendarContext;
   const handlers: Record<
     SemanticDiffScheduleCalendarContext["status"],
-    () => SemanticDiffScheduleRuleInterpretation | undefined
+    () => ScheduleRuleInterpretation | undefined
   > = {
     supported: () => undefined,
     invalid: () =>
@@ -149,13 +149,13 @@ const relativeDateContextOutcome = (input: {
 };
 
 const relativeDateOutcome = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
-}): SemanticDiffScheduleRuleInterpretation | undefined => {
+}): ScheduleRuleInterpretation | undefined => {
   const handlers: Record<
     RelativeDateMode,
-    () => SemanticDiffScheduleRuleInterpretation | undefined
+    () => ScheduleRuleInterpretation | undefined
   > = {
     none: () => undefined,
     invalid: () =>
@@ -175,8 +175,8 @@ const relativeDateOutcome = (input: {
 };
 
 const unsupportedDateOutcome = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-}): SemanticDiffScheduleRuleInterpretation | undefined =>
+  rule: ScheduleRuleInterpretation;
+}): ScheduleRuleInterpretation | undefined =>
   input.rule.date &&
   input.rule.status !== "supported" &&
   relativeDateMode(input.rule.date) === "none"
@@ -208,10 +208,10 @@ const contextFailureDetails = (
 };
 
 const contextFailureRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   contextParameters: AjsParameter[];
   candidateResult: ScheduleDateCandidateResult;
-}): SemanticDiffScheduleRuleInterpretation | undefined => {
+}): ScheduleRuleInterpretation | undefined => {
   const details = contextFailureDetails(input.candidateResult);
   const status = details.status;
   const evidenceId =
@@ -230,10 +230,10 @@ const contextFailureRule = (input: {
 };
 
 const invalidCandidateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   candidateResult: ScheduleDateCandidateResult;
-}): SemanticDiffScheduleRuleInterpretation | undefined =>
+}): ScheduleRuleInterpretation | undefined =>
   input.candidateResult.invalid ||
   (input.candidateResult.candidates.length > 0 &&
     input.candidateResult.candidates.every(
@@ -254,13 +254,13 @@ const invalidCandidateRule = (input: {
     : undefined;
 
 type StartTimeDecision = {
-  failure?: SemanticDiffScheduleRuleInterpretation;
+  failure?: ScheduleRuleInterpretation;
   supported?: SupportedStartTimeRule;
 };
 
 const startTimeDecision = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
 }): StartTimeDecision => {
   const key = startTimeKind(input.startTime);
   const decisions: Record<string, StartTimeDecision> = {
@@ -290,7 +290,7 @@ const startTimeDecision = (input: {
 };
 
 const startTimeKind = (
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined,
+  startTime: ScheduleRuleInterpretation | undefined,
 ): "missing" | "unsupported" | "supported" => {
   if (startTime === undefined) {
     return "missing";
@@ -301,14 +301,12 @@ const startTimeKind = (
   return "unsupported";
 };
 
-const supportedStartTime = (
-  startTime: SemanticDiffScheduleRuleInterpretation,
-): boolean =>
+const supportedStartTime = (startTime: ScheduleRuleInterpretation): boolean =>
   startTime.status === "supported" && startTime.startTime !== undefined;
 
 const candidatePreflight = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
   candidatePeriod: ValidSchedulePeriod;
 }): DatePreflight => {
@@ -342,11 +340,11 @@ const candidatePreflight = (input: {
 };
 
 const candidateFailureRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
   candidateResult: ScheduleDateCandidateResult;
-}): SemanticDiffScheduleRuleInterpretation | undefined => {
+}): ScheduleRuleInterpretation | undefined => {
   const contextParameters = [
     input.rule.parameter,
     ...(input.calendarContext?.rawParameters ?? []),
@@ -359,9 +357,9 @@ const candidateFailureRule = (input: {
 
 const preflightStartFailure = (input: {
   candidateResult: ScheduleDateCandidateResult;
-  candidateFailure: SemanticDiffScheduleRuleInterpretation | undefined;
-  startFailure: SemanticDiffScheduleRuleInterpretation | undefined;
-}): SemanticDiffScheduleRuleInterpretation | undefined => {
+  candidateFailure: ScheduleRuleInterpretation | undefined;
+  startFailure: ScheduleRuleInterpretation | undefined;
+}): ScheduleRuleInterpretation | undefined => {
   if (input.candidateResult.deferred || input.candidateFailure !== undefined) {
     return undefined;
   }
@@ -369,18 +367,18 @@ const preflightStartFailure = (input: {
 };
 
 const preflightReturnedRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   candidateResult: ScheduleDateCandidateResult;
-  candidateFailure: SemanticDiffScheduleRuleInterpretation | undefined;
-  startFailure: SemanticDiffScheduleRuleInterpretation | undefined;
-}): SemanticDiffScheduleRuleInterpretation | undefined =>
+  candidateFailure: ScheduleRuleInterpretation | undefined;
+  startFailure: ScheduleRuleInterpretation | undefined;
+}): ScheduleRuleInterpretation | undefined =>
   input.candidateResult.deferred
     ? input.rule
     : (input.candidateFailure ?? input.startFailure);
 
 export const datePreflight = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   calendarContext: SemanticDiffScheduleCalendarContext | undefined;
   candidatePeriod: ValidSchedulePeriod;
 }): DatePreflight => {
