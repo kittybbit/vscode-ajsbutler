@@ -14,9 +14,10 @@
 - Complete plan: four ordered implementation slices. Each slice deletes the
   superseded owner in the same change; no compatibility forwarding module is
   authorized.
-- Approved or active slice: Slice 1 (`Establish schedule date and rule
-  ownership`) is the next approved implementation scope after the plan-gate
-  commit. Slices 2-4 remain separately gated.
+- Approved implementation scope: all four slices in the reviewed sequential
+  order. Active slice: Slice 1 (`Establish schedule date and rule ownership`)
+  is the only slice currently eligible for implementation; Slices 2-4 wait
+  for their predecessor's completion review and commit.
 - Do not: change JP1/AJS schedule behavior, application DTOs, serialized
   schemas, commands, presentation, bootstrap, parser infrastructure, or any
   roadmap feature F2-F8.
@@ -323,70 +324,71 @@
   Findings and no replanning required. Post-revision `rtk pnpm run lint:md`,
   qlty check/smells, final `rtk pnpm run qlty`, and `git diff --check` all
   passed; the aggregate qlty run exited 0 without changing the planning
-  package. Human Approval is recorded below for the complete reviewed plan
-  and Slice 1 only; later slices remain separately gated.
+  package. Human Approval is recorded below for the complete reviewed plan and
+  sequential implementation of all four slices. Completion Approval remains
+  a separate per-slice gate after each independent implementation review
+  returns `Ready`; Closure Approval remains pending.
 
 ## Plan Status
 
-- Status: Reviewed and approved for Slice 1; later slices remain separately
-  gated
+- Status: Reviewed and approved for sequential implementation of Slices 1-4;
+  Slice 1 is active and later slices await predecessor completion gates
 - Planning scope: all requirements and acceptance criteria in `SPECS.md`,
   decomposed into four implementation slices
 - Review status: `Ready for approval` (independent plan review round 13; no
   Findings; no replanning required)
-- Human approval: approved for Slice 1 only
+- Human approval: approved for implementation of Slices 1-4 in order; per-
+  slice Completion Approval remains conditional on an independent `Ready`
+  implementation review
 - Active implementation slice: Slice 1, after the approved plan-gate commit
-- Implementation branch: required before the approved plan commit and any
-  runtime/test edit; the planning package is currently uncommitted on `main`
+- Implementation branch: `codex/schedule-domain-ownership`; approved plan-gate
+  commit `ad72765` is present. Runtime/test edits remain limited to the active
+  slice and its recorded approval boundary.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation
+- Approved at: approved in the current conversation for all four slices
 - Approved scope: the complete reviewed four-slice `schedule-domain-ownership`
-  implementation plan, with the next implementation scope limited to Slice 1
-  (`Establish schedule date and rule ownership`). Slices 2-4 require their own
-  later approval gates after the preceding slice is complete and committed.
+  implementation plan and implementation of Slices 1-4 in their recorded
+  sequential order. Slice 1 is the current implementation scope. Each later
+  slice becomes eligible only after its predecessor is independently reviewed,
+  receives the conditional Completion Approval recorded below, and is
+  committed. The user's approval does not authorize concurrent or out-of-order
+  implementation and does not grant Feature Closure Approval.
 - Approved paths:
-  - Plan gate commit (exact paths allowed now):
+  - Plan gate commit (already committed as `ad72765`; exact paths were):
     `docs/specs/roadmap.md`,
     `docs/specs/features/schedule-domain-ownership/SPECS.md`,
     `docs/specs/features/schedule-domain-ownership/TASKS.md`, and
     `docs/specs/features/schedule-domain-ownership/TRACEABILITY.md`.
-  - Next implementation scope (exact Slice 1 edit boundary; not part of the
-    plan-gate commit): additions
-    `src/domain/schedule/ScheduleDate.ts` and
-    `src/domain/schedule/ScheduleRule.ts`; deletions
-    `src/domain/models/parameters/scheduleDateInterpreter.ts`,
-    `src/domain/models/parameters/scheduleRuleHelpers.ts`, and
-    `src/domain/services/semantic-diff/semanticDiffScheduleDateMath.ts`;
-    edits
-    `src/application/unit-list/unitListScheduleValueHelpers.ts`,
-    `src/domain/services/diagnostics/ScheduleDateRules.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleCalendarSelectors.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleCalendarTypes.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleClassifiedDayCandidates.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleDateCandidates.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleOperationalCandidates.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleOperationalMonth.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleRelativeDate.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleRuleEvidence.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleRuleInterpreter.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleRuleProjection.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionAnalysis.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionProjection.ts`,
-    `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`, and
-    `src/test/suite/scheduleRuleHelpers.test.ts`.
-    Slice 1 validation-only paths remain read-only and are not approved edit
-    paths; the closed set is recorded in the Slice 1 manifest below.
+  - Slice 1 implementation: the exact additions, deletions, edits, and
+    validation-only paths in Slice 1's `Approval Boundary (closed edit
+manifest)` and `Validation-only closed set` below.
+  - Slice 2 implementation: the exact additions, deletions, edits, and
+    validation-only paths in Slice 2's corresponding closed manifest below;
+    usable only after Slice 1's completion commit.
+  - Slice 3 implementation: the exact additions, deletions, edits, and
+    validation-only paths in Slice 3's corresponding closed manifest below;
+    usable only after Slice 2's completion commit.
+  - Slice 4 implementation: the exact additions, rename, deletions, edits,
+    and validation-only paths in Slice 4's corresponding closed manifest
+    below; usable only after Slice 3's completion commit.
+  - Validation-only paths in every slice remain read-only. Paths outside these
+    closed manifests, including Feature Exit and closure artifacts, are not
+    approved.
 
-Implementation must not start while Status is Pending. Only clear human
-approval after an independent `Ready` plan review may change Status to
-Approved. Approval applies to exactly one next slice and its recorded paths.
+Implementation may start only with Slice 1 and its recorded paths. This
+approval covers the later slice scopes above in sequence, but does not remove
+the predecessor, independent implementation-review, Completion Approval, or
+completion-commit gates.
 
-Reset this section to Pending after the approved slice is completed and no
-active implementation approval remains.
+Keep this Human Approval as `Approved` while any of Slices 1-4 remains
+pre-approved and not yet completed. After each exact slice completion commit,
+advance `Active implementation slice` to the next slice and reset only the
+per-slice Completion Approval fields for that next slice. Reset this Human
+Approval only after Slice 4 is complete and no approved implementation scope
+remains; Feature Closure Approval is still a separate gate.
 
 ## Completion Approval
 
@@ -397,9 +399,12 @@ active implementation approval remains.
 - Implementation review verdict: Pending
 - Commit status: Not eligible
 
-Completion Approval is a separate human gate after independent implementation
-review returns `Ready`. The approval-committer must commit that exact slice
-before the next slice begins.
+The current all-slice Human Approval is not a Completion Approval yet.
+Completion Approval is recorded for the exact completed slice only after its
+independent implementation review returns `Ready`; the approval-committer
+must commit that exact slice before the next slice begins. If the review has
+Findings, implementation and review continue until the slice is `Ready` or a
+new scope/design decision triggers Replanning.
 
 ## Closure Approval
 
@@ -2129,7 +2134,8 @@ Phase pass criteria are closed and cumulative:
 
 ### Slice 1: Establish schedule date and rule ownership
 
-- Status: Planned; pending review and approval
+- Status: Human-approved; pending implementation and independent implementation
+  review
 - Scope: create `src/domain/schedule/ScheduleDate.ts` and
   `src/domain/schedule/ScheduleRule.ts`; move the existing normalized schedule
   date token interpretation, Gregorian date helpers, and rule-prefixed value
@@ -2239,7 +2245,7 @@ Phase pass criteria are closed and cumulative:
 
 ### Slice 2: Move normalized schedule interpretation
 
-- Status: Planned; pending Slice 1 completion, review, and approval
+- Status: Human-approved; pending Slice 1 completion, review, and commit
 - Scope: create `src/domain/schedule/ScheduleInterpretation.ts`; consolidate
   interpretation contracts, evidence construction, date/start-time rule
   classification, unsupported rule association, and unit interpretation from
@@ -2340,7 +2346,7 @@ Phase pass criteria are closed and cumulative:
 
 ### Slice 3: Move calendar context and candidate resolution
 
-- Status: Planned; pending Slice 2 completion, review, and approval
+- Status: Human-approved; pending Slice 2 completion, review, and commit
 - Scope: create `src/domain/schedule/ScheduleCalendar.ts` and
   `src/domain/schedule/ScheduleCandidateResolver.ts`; consolidate current
   calendar context/types/index/selectors/operational-month/relative-date files
@@ -2514,7 +2520,7 @@ Phase pass criteria are closed and cumulative:
 
 ### Slice 4: Move projection and seal the comparison boundary
 
-- Status: Planned; pending Slice 3 completion, review, and approval
+- Status: Human-approved; pending Slice 3 completion, review, and commit
 - Scope: create `src/domain/schedule/ScheduleProjection.ts`; consolidate
   projection, rule projection, substitution analysis/application, projection
   contracts, completeness, and run facts into that module's public contracts
