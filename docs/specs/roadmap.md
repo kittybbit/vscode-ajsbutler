@@ -47,6 +47,46 @@ entry conditions that make planning each item useful.
 
 ## Semantic Diff Roadmap
 
+### Internal Architecture Refactoring Sequence
+
+- Purpose: maintain the verified Clean Architecture and DDD boundaries while
+  reducing internal over-fragmentation, duplication, and responsibility
+  concentration. Prefer existing semantic owners and cohesive modules over new
+  abstractions.
+- Sequencing: treat the items below as separate SDD features with independent
+  plans, reviews, approvals, and completion evidence. Do not create one umbrella
+  implementation feature; this roadmap section is the coordination record.
+
+1. `schedule-domain-ownership`: move reusable schedule interpretation,
+   calendar, candidate, and projection meaning from the Semantic Diff namespace
+   to a cohesive domain schedule package without behavior change. This is the
+   selected first feature.
+2. `schedule-primitives-and-document-index`: establish one canonical
+   date/period implementation and one reusable AJS document index after schedule
+   ownership is stable.
+3. `semantic-diff-schedule-facade`: return the compatibility facade to thin
+   orchestration after schedule ownership and shared primitives are settled.
+4. `semantic-diff-application-projection`: separate the schedule-impact DTO,
+   build orchestration, identity, and timeline responsibilities without
+   recreating domain-level over-fragmentation.
+5. `semantic-diff-vscode-dependencies`: narrow command dependency groups and
+   move source-freshness behavior out of bootstrap while retaining bootstrap as
+   the composition root.
+6. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
+   wrappers and single-consumer helpers that do not earn an independent React,
+   interaction, accessibility, state, reuse, test, or complexity boundary.
+7. `domain-model-readonly`: migrate normalized domain model parts to readonly
+   contracts incrementally after mutation impact is characterized.
+8. `architecture-test-cohesion`: split the architecture-test implementation
+   only when its size or change pressure justifies the boundary; do not build a
+   speculative static-analysis framework.
+
+- Entry condition for each later item: the preceding dependency that affects
+  its semantic owner or public contract is complete, and intake confirms that
+  the item still represents one independently valuable outcome. Unrelated
+  later items may be reconsidered or reordered through their own intake when
+  evidence shows no dependency.
+
 ### Deferred Schedule Semantics
 
 - Sequencing: Waves 3 and 4 are complete. Before selectively pursuing these
