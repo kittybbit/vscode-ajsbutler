@@ -1,6 +1,6 @@
 import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import { classifyScheduleCalendarDay } from "./semanticDiffScheduleCalendarContext";
-import type { SemanticDiffScheduleCalendarDayResult } from "./semanticDiffScheduleCalendarTypes";
+import { classifyScheduleCalendarDay } from "../../schedule/ScheduleCalendar";
+import type { ScheduleCalendarDayResult } from "../../schedule/ScheduleCalendar";
 import { formatScheduleDate, toUtcDate } from "../../schedule/ScheduleDate";
 import {
   parseClosedDaySubstitutionValue,
@@ -451,8 +451,10 @@ const classifyDate = (
   context: SubstitutionContext,
   date: Date,
 ): Classification => {
-  const result: SemanticDiffScheduleCalendarDayResult =
-    classifyScheduleCalendarDay(context, date);
+  const result: ScheduleCalendarDayResult = classifyScheduleCalendarDay(
+    context,
+    date,
+  );
   return "evidenceId" in result
     ? { status: result.status, evidenceId: result.evidenceId }
     : result.status;

@@ -3,13 +3,11 @@ import {
   isFullyQualifiedRelativeScheduleDate,
   isSyntacticallyInvalidRelativeScheduleDate,
   relativeScheduleDateRequiresContext,
-  type SemanticDiffScheduleCalendarContext,
-} from "./semanticDiffScheduleCalendarContext";
-import { scheduleDateCandidates } from "./semanticDiffScheduleDateCandidates";
-import type {
-  ScheduleDateCandidateResult,
-  ValidSchedulePeriod,
-} from "./semanticDiffScheduleCandidateTypes";
+  type ScheduleCalendarContext,
+} from "../../schedule/ScheduleCalendar";
+import { resolveScheduleDateCandidates } from "../../schedule/ScheduleCandidateResolver";
+import type { ScheduleDateCandidateResult } from "../../schedule/ScheduleCandidateResolver";
+type ValidSchedulePeriod = { from: Date; to: Date };
 import { toUtcDate } from "../../schedule/ScheduleDate";
 import type { SemanticDiffScheduleRun } from "../../models/semantic-diff/SemanticDiff";
 import type { ScheduleRuleInterpretation } from "../../schedule/ScheduleInterpretation";
@@ -77,7 +75,7 @@ const calendarRule = (input: {
   status: ScheduleRuleInterpretation["status"];
   reason: ScheduleRuleInterpretation["reason"];
   evidenceId: string;
-  calendarContext?: SemanticDiffScheduleCalendarContext;
+  calendarContext?: ScheduleCalendarContext;
 }): ScheduleRuleInterpretation =>
   cloneRule(input.rule, {
     status: input.status,
@@ -118,11 +116,11 @@ const relativeDateMode = (
 
 const relativeDateContextOutcome = (input: {
   rule: ScheduleRuleInterpretation;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
 }): ScheduleRuleInterpretation | undefined => {
   const context = input.calendarContext;
   const handlers: Record<
-    SemanticDiffScheduleCalendarContext["status"],
+    ScheduleCalendarContext["status"],
     () => ScheduleRuleInterpretation | undefined
   > = {
     supported: () => undefined,
@@ -151,7 +149,7 @@ const relativeDateContextOutcome = (input: {
 const relativeDateOutcome = (input: {
   rule: ScheduleRuleInterpretation;
   startTime: ScheduleRuleInterpretation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
 }): ScheduleRuleInterpretation | undefined => {
   const handlers: Record<
     RelativeDateMode,
@@ -307,10 +305,10 @@ const supportedStartTime = (startTime: ScheduleRuleInterpretation): boolean =>
 const candidatePreflight = (input: {
   rule: ScheduleRuleInterpretation;
   startTime: ScheduleRuleInterpretation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
   candidatePeriod: ValidSchedulePeriod;
 }): DatePreflight => {
-  const candidateResult = scheduleDateCandidates({
+  const candidateResult = resolveScheduleDateCandidates({
     parameter: input.rule.parameter,
     period: input.candidatePeriod,
     calendarContext: input.calendarContext,
@@ -342,7 +340,7 @@ const candidatePreflight = (input: {
 const candidateFailureRule = (input: {
   rule: ScheduleRuleInterpretation;
   startTime: ScheduleRuleInterpretation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
   candidateResult: ScheduleDateCandidateResult;
 }): ScheduleRuleInterpretation | undefined => {
   const contextParameters = [
@@ -379,7 +377,7 @@ const preflightReturnedRule = (input: {
 export const datePreflight = (input: {
   rule: ScheduleRuleInterpretation;
   startTime: ScheduleRuleInterpretation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
   candidatePeriod: ValidSchedulePeriod;
 }): DatePreflight => {
   const preparedRule =

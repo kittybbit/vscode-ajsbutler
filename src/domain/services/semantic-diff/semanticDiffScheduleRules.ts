@@ -15,8 +15,8 @@ import {
   createScheduleCalendarContextIndex,
   isFullyQualifiedRelativeScheduleDate,
   resolveScheduleCalendarContext,
-  type SemanticDiffScheduleCalendarContextIndex,
-} from "./semanticDiffScheduleCalendarContext";
+  type ScheduleCalendarContextIndex,
+} from "../../schedule/ScheduleCalendar";
 import type {
   SemanticDiffScheduleProjection,
   SemanticDiffScheduleSide,
@@ -246,7 +246,7 @@ type ScheduleUnitCollectionInput = {
   unit: AjsUnit;
   period: SemanticDiffComparisonPeriod;
   document?: AjsDocument;
-  contextIndex?: SemanticDiffScheduleCalendarContextIndex;
+  contextIndex?: ScheduleCalendarContextIndex;
 };
 
 const hasContextRelativeDate = (
@@ -266,7 +266,7 @@ const resolveUnitCalendarContext = (input: {
   interpretation: ScheduleInterpretation;
   unit: AjsUnit;
   document?: AjsDocument;
-  contextIndex?: SemanticDiffScheduleCalendarContextIndex;
+  contextIndex?: ScheduleCalendarContextIndex;
 }): ReturnType<typeof resolveScheduleCalendarContext> | undefined => {
   const needsContext =
     hasContextRelativeDate(input.interpretation) ||

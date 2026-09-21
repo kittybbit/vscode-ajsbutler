@@ -71,3 +71,43 @@
 - Compatibility: no DTO, schema, command, parser, presentation, bootstrap,
   VS Code engine, web-host, Node, telemetry, README, user-documentation, or
   CHANGELOG change.
+
+## Slice 3 Validation Result
+
+- Status: Implementation complete within the approved manifest; independent
+  implementation review and Completion Approval remain pending.
+- Ownership: `ScheduleCalendar.ts` owns calendar context, source selection,
+  hierarchy traversal, classification, operational-month, and relative-date
+  meaning. `ScheduleCandidateResolver.ts` owns bounded candidate resolution.
+  All ten superseded calendar/candidate modules were removed, and no generic
+  document index or public local-helper boundary was introduced.
+- Evidence: phase-3 retirement/file-set, exact export, local-only,
+  import-direction, denylist, and interim-facade audits passed. The named
+  repeated-resolution test uses one explicitly supplied context index and
+  proves unchanged normalized `byId`, `byPath`, and `duplicatePath` snapshots
+  after two supported resolutions.
+- Validation: `rtk pnpm run test:prepare:desktop`,
+  `rtk pnpm run test:desktop:run`, `rtk pnpm run test:compile`,
+  `rtk pnpm run build`, and `rtk pnpm run test:web` passed. The web command's
+  nested preparation passed and WEB-7 through WEB-10 passed; only known
+  non-fatal stream-cleanup messages followed the assertions. `git diff --check`
+  passed.
+- Quality: baseline `sdd-slice3-baseline-git.NOmg6Q` and final
+  `sdd-slice3-qlty-final6.okYIoU` disposable qlty observations use identical
+  configuration/toolchain and all-source scope; the final snapshot exactly
+  matches the current working tree, including `TASKS.md` and
+  `TRACEABILITY.md`. The non-mutating check comparison changed from five
+  baseline findings to three final findings: existing `MD041` medium,
+  unused-import medium, and unused-disable low findings remain count 1 to 1;
+  the two baseline-only TASKS formatting findings (`markdownlint:fmt` and
+  `prettier:fmt`) were removed. Existing smell metrics remain unchanged. The
+  two consolidated owner files produce unmappable file-complexity identities
+  136 and 86; this is an advisory review signal under the approved
+  consolidation's identity-mapping rule, accepted by the independent reviewer
+  and not a reliably mapped adverse movement. Final-snapshot `rtk pnpm run
+qlty` passed with exit 0, reported no modified files for formatting/checks,
+  retained the two intentional owner complexity smells, and made no
+  analyzed-content change.
+- Compatibility: no DTO, schema, command, parser, presentation, bootstrap,
+  VS Code engine, web-host, Node, telemetry, README, user-documentation, or
+  CHANGELOG change.

@@ -16,7 +16,7 @@ import {
 } from "./semanticDiffScheduleSubstitutionAnalysis";
 import { projectScheduleRules } from "./semanticDiffScheduleRuleProjection";
 import { toUtcDate } from "../../schedule/ScheduleDate";
-import type { ValidSchedulePeriod } from "./semanticDiffScheduleCandidateTypes";
+type ValidSchedulePeriod = { from: Date; to: Date };
 
 const parsePeriod = (
   period: SemanticDiffComparisonPeriod,

@@ -11,7 +11,7 @@ import {
   createScheduleCalendarContextIndex,
   resolveOperationalMonth,
   resolveScheduleCalendarContext,
-} from "../../domain/services/semantic-diff/semanticDiffScheduleCalendarContext";
+} from "../../domain/schedule/ScheduleCalendar";
 import {
   evaluateSemanticDiffSchedule,
   interpretSchedule,
@@ -865,6 +865,33 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       ),
     );
     assert.deepStrictEqual(result.unsupportedDecisions, []);
+  });
+
+  test("reuses one explicitly supplied context index across repeated resolution", () => {
+    const target = jobnet("/root/target", { sd: "2026/04/+01" });
+    const root = group("/root", [target], { sdd: "1" });
+    const fullDocument = document([root]);
+    const index = createScheduleCalendarContextIndex(fullDocument);
+    const snapshotEntries = (values: Map<string, AjsUnit[]>): string[][] =>
+      [...values.entries()]
+        .flatMap(([key, matches]) =>
+          matches.map((match) => [key, match.absolutePath]),
+        )
+        .sort(([leftKey, leftPath], [rightKey, rightPath]) =>
+          `${leftKey}:${leftPath}`.localeCompare(`${rightKey}:${rightPath}`),
+        );
+    const snapshot = () => ({
+      byId: snapshotEntries(index.byId),
+      byPath: snapshotEntries(index.byPath),
+      duplicatePath: index.duplicatePath,
+    });
+    const before = snapshot();
+    const first = resolveScheduleCalendarContext(fullDocument, target, index);
+    const second = resolveScheduleCalendarContext(fullDocument, target, index);
+
+    assert.strictEqual(first.status, "supported");
+    assert.strictEqual(second.status, "supported");
+    assert.deepStrictEqual(snapshot(), before);
   });
 
   test("rejects hierarchy cycles and duplicate normalized paths recoverably", () => {

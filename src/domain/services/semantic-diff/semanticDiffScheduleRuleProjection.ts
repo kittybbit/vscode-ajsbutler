@@ -2,9 +2,9 @@ import type { AjsParameter } from "../../models/ajs/AjsDocument";
 import type { SemanticDiffScheduleRun } from "../../models/semantic-diff/SemanticDiff";
 import {
   relativeScheduleDateRequiresContext,
-  type SemanticDiffScheduleCalendarContext,
-} from "./semanticDiffScheduleCalendarContext";
-import type { ValidSchedulePeriod } from "./semanticDiffScheduleCandidateTypes";
+  type ScheduleCalendarContext,
+} from "../../schedule/ScheduleCalendar";
+type ValidSchedulePeriod = { from: Date; to: Date };
 import { toUtcDate } from "../../schedule/ScheduleDate";
 import {
   datePreflight,
@@ -27,7 +27,7 @@ type RuleProjectionInput = {
   interpretation: ScheduleInterpretation;
   parsedPeriod: ValidSchedulePeriod;
   candidatePeriod: ValidSchedulePeriod;
-  calendarContext?: SemanticDiffScheduleCalendarContext;
+  calendarContext?: ScheduleCalendarContext;
   substitutions: SubstitutionAnalysis;
   unresolvedWholeRules: Set<number>;
 };
@@ -80,7 +80,7 @@ const updateSubstitutionContextState = (input: {
 type CandidateProjectionInput = {
   candidates: string[];
   association: SubstitutionAssociation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
   fullyQualified: boolean;
   unresolvedWholeRule: boolean;
   states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
@@ -205,7 +205,7 @@ const projectedEvidenceParameters = (input: {
   rule: ScheduleRuleInterpretation;
   startTime: Extract<DatePreflight, { kind: "project" }>["startTime"];
   association: SubstitutionAssociation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
 }): AjsParameter[] => [
   input.rule.parameter,
   input.startTime.parameter,
@@ -281,15 +281,15 @@ const projectDateRule = (input: {
 
 const calendarSelection = (input: {
   rule: ScheduleRuleInterpretation;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
-}): SemanticDiffScheduleCalendarContext["selection"] | undefined =>
+  calendarContext: ScheduleCalendarContext | undefined;
+}): ScheduleCalendarContext["selection"] | undefined =>
   input.rule.parameter.key === "jc"
     ? input.calendarContext?.selection
     : undefined;
 
 const calendarSelectionRule = (input: {
   rule: ScheduleRuleInterpretation;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
 }): ProjectedRule | undefined => {
   const selection = calendarSelection(input);
   if (!selection) {
@@ -303,7 +303,7 @@ const calendarSelectionRule = (input: {
 
 const calendarSelectionResult = (
   rule: ScheduleRuleInterpretation,
-  selection: NonNullable<SemanticDiffScheduleCalendarContext["selection"]>,
+  selection: NonNullable<ScheduleCalendarContext["selection"]>,
 ): ScheduleRuleInterpretation =>
   cloneRule(rule, {
     status: selection.status,

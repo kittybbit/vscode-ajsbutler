@@ -9,7 +9,7 @@ import type {
   SemanticDiffComparisonPeriod,
   SemanticDiffScheduleRun,
 } from "../../models/semantic-diff/SemanticDiff";
-import type { SemanticDiffScheduleCalendarContext } from "./semanticDiffScheduleCalendarContext";
+import type { ScheduleCalendarContext } from "../../schedule/ScheduleCalendar";
 
 export type SemanticDiffScheduleSide = "before" | "after";
 
@@ -25,5 +25,5 @@ export type SemanticDiffScheduleProjection = {
 export type SemanticDiffScheduleProjectionInput = {
   interpretation: ScheduleInterpretation;
   period: SemanticDiffComparisonPeriod;
-  calendarContext?: SemanticDiffScheduleCalendarContext;
+  calendarContext?: ScheduleCalendarContext;
 };
