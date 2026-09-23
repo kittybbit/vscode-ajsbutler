@@ -53,8 +53,9 @@
 
 ## Slice 2 Validation Result
 
-- Status: Implementation complete within the approved manifest; independent
-  implementation review and Completion Approval remain pending.
+- Status: Implementation, independent implementation review, and Completion
+  Approval are complete; the exact approved slice is committed as rebased
+  commit `b88620a`.
 - Ownership: `src/domain/schedule/ScheduleInterpretation.ts` directly owns the
   six approved interpretation exports. The three Semantic Diff interpretation
   modules were removed, and the facade retains only the exact five interim
@@ -74,8 +75,9 @@
 
 ## Slice 3 Validation Result
 
-- Status: Implementation complete within the approved manifest; independent
-  implementation review and Completion Approval remain pending.
+- Status: Implementation, independent implementation review, and Completion
+  Approval are complete; the exact approved slice is committed as rebased
+  commit `d17377b88362120c756f55ca8226516f75e0b025`.
 - Ownership: `ScheduleCalendar.ts` owns calendar context, source selection,
   hierarchy traversal, classification, operational-month, and relative-date
   meaning. `ScheduleCandidateResolver.ts` owns bounded candidate resolution.
@@ -111,3 +113,39 @@ qlty` passed with exit 0, reported no modified files for formatting/checks,
 - Compatibility: no DTO, schema, command, parser, presentation, bootstrap,
   VS Code engine, web-host, Node, telemetry, README, user-documentation, or
   CHANGELOG change.
+
+## Slice 4 Validation Result
+
+- Status: implementation and evidence are complete on rebased predecessor
+  `d17377b`; the independent implementation review and Slice 4 Completion
+  Approval remain pending, and no commit was created.
+- Ownership: `ScheduleProjection.ts` owns reusable projection and run facts;
+  substitution helpers are private. `semanticDiffScheduleComparison.ts`
+  owns run-comparison policy, while the facade retains only comparison
+  evaluation. The application DTO remains unchanged and receives explicit
+  five-field run translations.
+- Evidence: all six phase-4 export, retirement, local-only, owner,
+  DTO-retirement, and dependency audits passed, as did the Node-built-in
+  audit. Both sides of the period boundary and the run-to-DTO mapping are
+  asserted by the approved tests. All eleven `M_4(test)` suites passed through
+  the full desktop runner after the `parsePeriod` remediation; separate test
+  compilation, build, nested web preparation/web runner, post-evidence markdown
+  lint, and diff checks passed.
+- Quality: the exact mapped predecessor is
+  `semanticDiffScheduleProjector.ts:21::parsePeriod` to
+  `ScheduleProjection.ts:66::parsePeriod`. The configured threshold-5 paired
+  scans emit no function-complexity finding at either endpoint; separate
+  diagnostic-only threshold-0 copies measure baseline/final 3/3 (higher is
+  worse). The former interim value 6 was adverse; the private co-located
+  bound-shape helper restores 3 without changing malformed direct-projection
+  behavior or the facade's distinct `invalid-period` result. The consolidated `ScheduleProjection.ts`
+  file-total metric 156 remains an unmappable-identity advisory only. The
+  exact qlty 0.500.0 baseline/final check and smells use the same repository
+  config and all-source scope; only three unchanged non-format check findings
+  remain and there is no new or mapped adverse smell. Final aggregate qlty
+  passes without changing analyzed content. Comparator identities, metric
+  direction, severities, and config hash are recorded in `TASKS.md`.
+- Compatibility: no DTO/schema, command, parser, presentation, bootstrap,
+  engine, README, user-doc, or CHANGELOG change. Desktop and web bundles pass;
+  no functional or architecture risk is known. Only the unmappable file-total
+  complexity advisory remains open for independent review.

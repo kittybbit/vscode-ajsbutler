@@ -23,9 +23,10 @@ import {
   evaluateSemanticDiffSchedule,
   type SemanticDiffScheduleEvaluation,
   type SemanticDiffSchedulePairEvaluation,
-  type SemanticDiffScheduleRunDecision,
   type SemanticDiffScheduleUnsupportedDecision,
 } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
+import type { ScheduleRun } from "../../domain/schedule/ScheduleProjection";
+import type { SemanticDiffScheduleRunDecision } from "../../domain/services/semantic-diff/semanticDiffScheduleComparison";
 import {
   isSemanticDiffJobnetUnit,
   type SemanticDiffUnitMatch,
@@ -176,6 +177,16 @@ type SingleRunDecision = Exclude<
   ChangedTimeDecision
 >;
 
+const toSemanticDiffScheduleRunDto = (
+  run: ScheduleRun,
+): SemanticDiffScheduleRun => ({
+  unitPath: run.unitPath,
+  unitName: run.unitName,
+  rule: run.rule,
+  date: run.date,
+  time: run.time,
+});
+
 const toChangedTimeRunChange = (
   decision: ChangedTimeDecision,
 ): SemanticDiffScheduleRunChange => ({
@@ -183,20 +194,18 @@ const toChangedTimeRunChange = (
   kind: decision.kind,
   unitPath: decision.unitPath,
   date: decision.date,
-  before: decision.before,
-  after: decision.after,
+  before: toSemanticDiffScheduleRunDto(decision.before),
+  after: toSemanticDiffScheduleRunDto(decision.after),
 });
 
 const singleRunChangeSides = (
   decision: SingleRunDecision,
 ): Pick<SemanticDiffScheduleRunChange, "before" | "after"> =>
   decision.kind === "removed"
-    ? { before: decision.before, after: null }
-    : { before: null, after: decision.after };
+    ? { before: toSemanticDiffScheduleRunDto(decision.before), after: null }
+    : { before: null, after: toSemanticDiffScheduleRunDto(decision.after) };
 
-const singleRunChangeRun = (
-  decision: SingleRunDecision,
-): SemanticDiffScheduleRun =>
+const singleRunChangeRun = (decision: SingleRunDecision): ScheduleRun =>
   decision.kind === "removed" ? decision.before : decision.after;
 
 const toSingleRunChange = (

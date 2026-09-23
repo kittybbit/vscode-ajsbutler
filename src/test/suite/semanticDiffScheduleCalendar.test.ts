@@ -12,11 +12,9 @@ import {
   resolveOperationalMonth,
   resolveScheduleCalendarContext,
 } from "../../domain/schedule/ScheduleCalendar";
-import {
-  evaluateSemanticDiffSchedule,
-  interpretSchedule,
-  projectScheduleRuns,
-} from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
+import { interpretSchedule } from "../../domain/schedule/ScheduleInterpretation";
+import { projectScheduleRuns } from "../../domain/schedule/ScheduleProjection";
+import { evaluateSemanticDiffSchedule } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
 
 const params = (values: Record<string, string | string[]>): AjsParameter[] =>
   Object.entries(values).flatMap(([key, value]) =>

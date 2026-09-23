@@ -331,8 +331,7 @@
 ## Plan Status
 
 - Status: Reviewed and approved for sequential implementation of Slices 1-4;
-  Slice 3 is active after the Slice 2 completion commit and Slice 4 awaits its
-  predecessor completion gate
+  Slices 1-3 are complete and committed, and Slice 4 is active
 - Planning scope: all requirements and acceptance criteria in `SPECS.md`,
   decomposed into four implementation slices
 - Review status: `Ready for approval` (independent plan review round 13; no
@@ -340,11 +339,12 @@
 - Human approval: approved for implementation of Slices 1-4 in order; per-
   slice Completion Approval remains conditional on an independent `Ready`
   implementation review
-- Active implementation slice: Slice 3, after the Slice 2 completion commit
-  `eafe3589692ea38e6f9937ff8fbe8b1d7378b6b5`. Implementation branch:
-  `codex/schedule-domain-ownership`; the
-  runtime/test edits remain limited to the active slice and its recorded
-  approval boundary.
+- Active implementation slice: Slice 4, after completion commits for Slices
+  1-3. The verified rebased lineage is plan gate `1d200ea`, all-slice
+  approval `ad1f460`, Slice 1 `214f6fc`, Slice 2 `b88620a`, and Slice 3
+  `d17377b88362120c756f55ca8226516f75e0b025`. Implementation branch:
+  `codex/schedule-domain-ownership`; edits remain limited to Slice 4's
+  recorded approval boundary.
 
 ## Human Approval
 
@@ -352,13 +352,11 @@
 - Approved at: approved in the current conversation for all four slices
 - Approved scope: the complete reviewed four-slice `schedule-domain-ownership`
   implementation plan and implementation of Slices 1-4 in their recorded
-  sequential order. Slice 3 is the current implementation scope. Slice 4
-  becomes eligible only after Slice 3 is independently reviewed,
-  receives the conditional Completion Approval recorded below, and is
-  committed. The user's approval does not authorize concurrent or out-of-order
-  implementation and does not grant Feature Closure Approval.
+  sequential order. Slices 1-3 have been independently reviewed, approved, and
+  committed; Slice 4 is the current implementation scope. This approval does
+  not authorize Feature Exit, closure propagation, or F2/F3 work.
 - Approved paths:
-  - Plan gate commit (already committed as `ad72765`; exact paths were):
+  - Plan gate commit (rebased and committed as `1d200ea`; exact paths were):
     `docs/specs/roadmap.md`,
     `docs/specs/features/schedule-domain-ownership/SPECS.md`,
     `docs/specs/features/schedule-domain-ownership/TASKS.md`, and
@@ -379,10 +377,10 @@ manifest)` and `Validation-only closed set` below.
     closed manifests, including Feature Exit and closure artifacts, are not
     approved.
 
-Implementation may start only with Slice 3 and its recorded paths. This
-approval covers the later slice scopes above in sequence, but does not remove
-the predecessor, independent implementation-review, Completion Approval, or
-completion-commit gates.
+Implementation may start only with Slice 4 and its recorded paths. All
+predecessor completion commits are present on the verified branch. Independent
+implementation review and the per-slice Completion Approval/commit gates
+remain required for Slice 4.
 
 Keep this Human Approval as `Approved` while any of Slices 2-4 remains
 pre-approved and not yet completed. After each exact slice completion commit,
@@ -393,66 +391,60 @@ remains; Feature Closure Approval is still a separate gate.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: approved in the current conversation under the user's standing
-  instruction for the exact reviewed Slice 3 implementation
-- Approved scope: the exact completed Slice 3 scope, `Move calendar context
-  and candidate resolution`, after independent implementation review Round 2
-  returned `Ready` with no Findings. This approval authorizes no Slice 4,
-  Feature Exit, closure propagation, or F2/F3 work.
-- Approved paths: the exact reviewed Slice 3 diff and its closed completion
-  manifest:
+- Status: Approved under the user's standing approval instruction after
+  independent implementation review Round 2 returned `Ready` with no Findings
+- Approved at: approved in current conversation
+- Approved scope: the exact reviewed Slice 4 diff based on rebased predecessor
+  `d17377b88362120c756f55ca8226516f75e0b025`, within the closed Slice 4
+  edit manifest below
+- Approved paths:
   - `docs/specs/features/schedule-domain-ownership/TASKS.md`
   - `docs/specs/features/schedule-domain-ownership/TRACEABILITY.md`
-  - `src/domain/schedule/ScheduleCalendar.ts`
-  - `src/domain/schedule/ScheduleCandidateResolver.ts`
-  - `src/domain/services/semantic-diff/semanticDiffScheduleCalendarTypes.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleCalendarContext.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleCalendarIndex.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleCalendarSelectors.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleOperationalMonth.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleRelativeDate.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleCandidateTypes.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleClassifiedDayCandidates.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleDateCandidates.ts`
-    (deletion)
-  - `src/domain/services/semantic-diff/semanticDiffScheduleOperationalCandidates.ts`
-    (deletion)
+  - `src/application/semantic-diff/compareScheduleDiff.ts`
+  - `src/domain/models/semantic-diff/SemanticDiff.ts`
+  - `src/domain/schedule/ScheduleProjection.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleComparison.ts`
+    (rename target)
+  - `src/domain/services/semantic-diff/semanticDiffScheduleDiffer.ts`
+    (rename source)
   - `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts`
+    (deleted)
   - `src/domain/services/semantic-diff/semanticDiffScheduleRuleProjection.ts`
+    (deleted)
   - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
   - `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionAnalysis.ts`
+    (deleted)
   - `src/domain/services/semantic-diff/semanticDiffScheduleSubstitutionProjection.ts`
+    (deleted)
   - `src/domain/services/semantic-diff/semanticDiffScheduleTypes.ts`
-  - `src/test/suite/semanticDiffScheduleCalendar.test.ts` (only the approved
-    import migration and named repeated-resolution/non-mutation test hunk)
+    (deleted)
+  - `src/test/suite/semanticDiffSchedule.test.ts`
+  - `src/test/suite/semanticDiffScheduleCalendar.test.ts`
+  - `src/test/suite/semanticDiffScheduleRules.test.ts`
 - Implementation review verdict: `Ready` (independent implementation review
   Round 2; no Findings)
-- Commit status: Eligible for one exact Slice 3 completion commit by
+- Commit status: Eligible for one exact Slice 4 completion commit by
   `approval-committer`; not yet committed
 
-The independent review found no Findings across the exact Slice 3 diff and
-closed manifest, including the ownership/export/retirement/local-only audits,
-same-index non-mutation test, desktop/web/build validation, and synchronized
-qlty evidence. The two unmappable consolidated-owner complexity identities
-(136 and 86) remain the accepted advisory classification recorded in Slice 3
-Implementation Evidence. This Completion Approval authorizes only the exact
-reviewed Slice 3 completion diff above. Slice 4 remains inactive until this
-exact completion diff is committed. Closure Approval remains pending below.
+### Historical Slice 3 Completion Approval
 
-Slice 2's exact completion diff received independent `Ready` review and
-Completion Approval and was committed as
-`eafe3589692ea38e6f9937ff8fbe8b1d7378b6b5`. This reset activates only Slice 3
-within its closed manifest; it does not authorize Slice 4, Feature Exit,
-closure propagation, or any F2 work. Closure Approval remains pending below.
+- Status: Approved under the user's standing approval instruction after
+  independent implementation review Round 2 returned `Ready` with no Findings
+- Approved scope: the exact Slice 3 diff under the closed Slice 3 manifest
+  below
+- Approved paths: the Slice 3 implementation paths and the named calendar
+  integration-test hunk in that closed manifest, plus the two role-owned
+  evidence documents
+- Commit: rebased Slice 3 completion commit
+  `d17377b88362120c756f55ca8226516f75e0b025`
+- Review evidence: ownership/export/retirement/local-only audits, same-index
+  non-mutation test, desktop/web/build validation, and synchronized qlty
+  evidence are retained in Slice 3 Implementation Evidence below.
+
+The earlier completion gates also remain recorded: Slice 1 was approved and
+committed as rebased commit `214f6fc`; Slice 2 was independently reviewed,
+approved, and committed as `b88620a`. Slice 4 is now the active scope;
+Closure Approval remains pending below.
 
 ## Closure Approval
 
@@ -1117,7 +1109,8 @@ const localOwners = {
     "ParsedShiftDaysRule", "SubstitutionAssociation", "SubstitutionRuleState",
     "SubstitutionAnalysis", "substitutionState", "resolveSubstitutionCandidate",
     "createSubstitutionAnalysis", "hasScheduleSubstitution", "DatePreflight",
-    "scheduleRuleEvidenceId", "datePreflight", "resolveSubstitutedCandidates",
+    "scheduleRuleEvidenceId", "datePreflight", "projectionPeriodOrEmptyBounds",
+    "resolveSubstitutedCandidates",
     "projectScheduleRules",
   ],
 };
@@ -1638,7 +1631,7 @@ const resolveExportSpecifierTarget = (specifier) => {
   };
 };
 const expected = new Map([
-  ["interpretSchedule", { source: "./semanticDiffScheduleInterpreter", kind: "value", form: "local-import" }],
+  ["interpretSchedule", { source: "../../schedule/ScheduleInterpretation", kind: "value", form: "local-import" }],
   ["projectScheduleRuns", { source: "./semanticDiffScheduleProjector", kind: "value", form: "local-import" }],
   ["compareScheduleRuns", { source: "./semanticDiffScheduleDiffer", kind: "value", form: "local-import" }],
   ["SemanticDiffScheduleSide", { source: "./semanticDiffScheduleTypes", kind: "type", form: "direct" }],
@@ -2189,9 +2182,9 @@ Phase pass criteria are closed and cumulative:
 
 ### Slice 1: Establish schedule date and rule ownership
 
-- Status: Implemented and committed in `787c052`; independent implementation
-  review Round 2 `Ready` with no Findings; Slice 1 Completion Approval
-  `Approved`
+- Status: Implemented and committed in rebased commit `214f6fc`; independent
+  implementation review Round 2 `Ready` with no Findings; Slice 1 Completion
+  Approval `Approved`
 - Scope: create `src/domain/schedule/ScheduleDate.ts` and
   `src/domain/schedule/ScheduleRule.ts`; move the existing normalized schedule
   date token interpretation, Gregorian date helpers, and rule-prefixed value
@@ -2302,7 +2295,8 @@ Phase pass criteria are closed and cumulative:
 #### Slice 1 Implementation Evidence
 
 - Implementation status: complete within the approved Slice 1 manifest and
-  committed in `787c052`. The exact changed paths are the two additions, three
+  committed in rebased commit `214f6fc` (original pre-rebase commit `787c052`).
+  The exact changed paths are the two additions, three
   deletions, the listed production import consumers, and
   `src/test/suite/scheduleRuleHelpers.test.ts`.
 - Ownership result: `ScheduleDate.ts` owns the existing date-token
@@ -2340,7 +2334,8 @@ test:prepare:web` preparation (web webpack, test compilation, web-test
   escalated run were not used as pass evidence.
 - qlty evidence: identical verified `.qlty/qlty.toml`, toolchain, and
   all-source scope were used in disposable snapshots
-  `sdd-slice1-qlty-baseline-r1.k30I69` (plan-gate `0a28b73`) and
+  `sdd-slice1-qlty-baseline-r1.k30I69` (original plan-gate `0a28b73`,
+  rebased equivalent `1d200ea`) and
   `sdd-slice1-qlty-final-r1c` (post-formatting Slice 1). Severity
   ordering is `fmt` gate > `high` > `medium` > `low` > `note`; higher
   severity is worse. For metric findings, higher measured values are worse.
@@ -2380,15 +2375,14 @@ test:prepare:web` preparation (web webpack, test compilation, web-test
   production-only retirement-stem audit and final disposable-snapshot qlty
   evidence were remediated. Slice 2 and Feature Closure remain separately
   gated.
-- Recommended route: Slice 2 is now active after the exact Slice 1 completion
-  commit; implementation review and Completion Approval remain required for
-  Slice 2.
+- Completion history: Slice 1 was committed as rebased commit `214f6fc`;
+  Slice 2's subsequent implementation/review/approval is recorded below.
 
 ### Slice 2: Move normalized schedule interpretation
 
 - Status: Implemented within the approved Slice 2 manifest; independent
   implementation review Round 1 returned `Ready` with no Findings; Slice 2
-  Completion Approval is `Approved`; exact completion commit remains pending
+  Completion Approval is `Approved`; committed as rebased commit `b88620a`
 - Scope: create `src/domain/schedule/ScheduleInterpretation.ts`; consolidate
   interpretation contracts, evidence construction, date/start-time rule
   classification, unsupported rule association, and unit interpretation from
@@ -2529,7 +2523,8 @@ test:prepare:web` preparation (web webpack, test compilation, web-test
   non-fatal stream-cleanup messages after assertions completed.
 - qlty evidence: the identical `.qlty/qlty.toml`, Node/pnpm toolchain, and
   all-source scope were compared in disposable snapshots
-  `sdd-slice2-qlty-baseline.2roKQd` (pre-edit `787c052` tree) and
+  `sdd-slice2-qlty-baseline.2roKQd` (pre-edit original `787c052` tree,
+  rebased equivalent `214f6fc`) and
   `sdd-slice2-qlty-final.aSlQjd` (final Slice 2 tree). Severity ordering is
   `fmt` gate > `high` > `medium` > `low` > `note`; higher severity and higher
   smell metrics are worse. The non-mutating `qlty check -a --no-fix
@@ -2558,17 +2553,16 @@ test:prepare:web` preparation (web webpack, test compilation, web-test
 - Unresolved risks: no Slice 2-specific validation or production-readiness
   risk remains. The intentional `interpretSchedule` facade bridge remains
   until Slice 4 as approved. Independent implementation review Round 1 found
-  no Findings. Slice 3 remains inactive until the exact Slice 2 completion
-  diff is committed; Closure Approval remains pending.
-- Recommended route: `Main -> approval-committer` for the one exact Slice 2
-  completion commit authorized above. Do not activate Slice 3 until that
-  commit succeeds.
+  no Findings, Completion Approval was granted, and the exact diff was
+  committed as rebased commit `b88620a`.
+- Completion history: the committed Slice 2 diff activated Slice 3; Slice 3's
+  review and completion are recorded below.
 
 ### Slice 3: Move calendar context and candidate resolution
 
 - Status: Implementation complete; independent implementation review Round 2
-  returned `Ready` with no Findings; Completion Approval is approved for the
-  exact reviewed scope and the completion commit remains pending
+  returned `Ready` with no Findings; Completion Approval was granted and the
+  exact scope was committed as rebased commit `d17377b`
 - Scope: create `src/domain/schedule/ScheduleCalendar.ts` and
   `src/domain/schedule/ScheduleCandidateResolver.ts`; consolidate current
   calendar context/types/index/selectors/operational-month/relative-date files
@@ -2742,8 +2736,8 @@ test:prepare:web` preparation (web webpack, test compilation, web-test
 
 #### Slice 3 Implementation Evidence
 
-- Implementation status: complete within the approved Slice 3 manifest; no
-  commit was created. The exact changed paths are the two new schedule owners,
+- Implementation status: complete within the approved Slice 3 manifest and
+  committed as rebased commit `d17377b`. The exact changed paths are the two new schedule owners,
   the ten retired calendar/candidate modules, the six listed Semantic Diff
   production edits, and the one named calendar integration-test import and
   same-index/non-mutation hunk. No validation-only path was edited.
@@ -2777,7 +2771,8 @@ test:web` passed; its nested `pretest:web -> test:prepare:web` preparation
   non-fatal stream-cleanup messages after assertions completed.
 - qlty evidence: identical `.qlty/qlty.toml`, Node/pnpm toolchain, and
   all-source scope were compared in disposable snapshots
-  `sdd-slice3-baseline-git.NOmg6Q` (pre-edit `eafe358`) and
+  `sdd-slice3-baseline-git.NOmg6Q` (pre-edit original `eafe358` tree,
+  rebased equivalent `b88620a`) and
   `sdd-slice3-qlty-final6.okYIoU` (final Slice 3 tree, including the exact
   current `TASKS.md` and `TRACEABILITY.md` content). Severity ordering is
   `fmt` gate > `high` > `medium` > `low` > `note`; higher severity and higher
@@ -2808,18 +2803,19 @@ test:web` passed; its nested `pretest:web -> test:prepare:web` preparation
   calendar/candidate ownership move. The same-index assertion demonstrates
   non-mutation without claiming construction-count observability. No new
   dependency, scope, design, or approval-boundary decision was discovered.
-- Unresolved risks: independent review should decide whether the two new
-  file-complexity smell identities are acceptable as an intentional consequence
-  of the approved cohesive consolidation or require Main to route replanning;
-  all functional, compatibility, and architecture checks pass. Slice 4 and
-  Feature Closure remain separately gated.
-- Recommended route: `Main -> implementation-reviewer` for independent review
-  of the exact Slice 3 diff, with the qlty file-complexity disposition called
-  out explicitly. Completion Approval remains Pending.
+- Unresolved risks: the independent reviewer accepted the two unmappable
+  consolidated-owner complexity identities as advisory under the approved
+  identity-mapping rule. No functional, compatibility, or architecture risk
+  remains for Slice 3. Slice 4 is active; Feature Closure remains separately
+  gated.
+- Completion history: Slice 3 was independently reviewed Round 2 with `Ready`,
+  received Completion Approval, and was committed as rebased commit
+  `d17377b88362120c756f55ca8226516f75e0b025`.
 
 ### Slice 4: Move projection and seal the comparison boundary
 
-- Status: Human-approved; pending Slice 3 completion, review, and commit
+- Status: Human-approved and active; predecessor Slices 1-3 are reviewed,
+  approved, and committed
 - Scope: create `src/domain/schedule/ScheduleProjection.ts`; consolidate
   projection, rule projection, substitution analysis/application, projection
   contracts, completeness, and run facts into that module's public contracts
@@ -3090,6 +3086,104 @@ test:web` passed; its nested `pretest:web -> test:prepare:web` preparation
 - Framework/custom decision: pure functions, collections, and UTC date
   operations remain sufficient. No projection interface, strategy, adapter,
   port, factory, or custom framework.
+
+#### Slice 4 Implementation Evidence
+
+- Implementation status: complete within the approved Slice 4 edit manifest;
+  based on rebased predecessor commit
+  `d17377b88362120c756f55ca8226516f75e0b025`. No runtime, test, configuration,
+  README, user-documentation, or CHANGELOG path outside that manifest changed.
+- Ownership and acceptance: `ScheduleProjection.ts` directly owns exactly
+  `ScheduleProjection`, `ScheduleProjectionInput`,
+  `ScheduleProjectionPeriod`, `ScheduleRun`, and `projectScheduleRuns`; all
+  substitution analysis/application and projection helpers remain private.
+  Review remediation keeps malformed direct period behavior in the same
+  owner: private `projectionPeriodOrEmptyBounds` isolates raw-bound shape
+  rejection from `parsePeriod` without changing the projection result or the
+  facade's separate `invalid-period` decision.
+  `semanticDiffScheduleComparison.ts` owns the comparison side, run-decision,
+  and comparison function exports; the final `semanticDiffScheduleRules.ts`
+  facade has no reusable schedule or comparison forwards. The explicit
+  `toScheduleProjectionPeriod` translation follows the retained comparison
+  guard, while direct malformed projection input returns only the projection
+  invalid/empty result. `compareScheduleDiff.ts` maps every before/after run
+  explicitly through `toSemanticDiffScheduleRunDto`, copying exactly the five
+  application DTO fields; `semanticDiffDto.ts` is unchanged and the duplicate
+  domain `SemanticDiffScheduleRun` declaration is removed.
+- Audit evidence: the phase-4 retirement/file-set, local-only owner,
+  exact-export/forwarding, all-`src` declaration/reference owner,
+  `SemanticDiffScheduleRun` retirement, path-resolved schedule dependency, and
+  Node-built-in audits passed. The schedule package contains exactly the six
+  approved modules and no `ScheduleSubstitution.*`, old projection modules,
+  Semantic Diff dependency, or `AjsDocumentIndex` match in audited scope. The
+  pre-migration current-facade bridge probe also passed on the exact
+  `d17377b` baseline after its stale interpreter-source expectation was
+  corrected to the already-approved `ScheduleInterpretation` owner.
+- Regression evidence: the period-boundary test asserts both the unchanged
+  facade `invalid-period` decision and the separate malformed-projection
+  result. The schedule result test asserts every before/after DTO field, and
+  the calendar integration test imports interpretation and projection from
+  their final direct owners. No other test body or consumer was changed.
+- Post-remediation validation: after the `parsePeriod` complexity fix,
+  `rtk pnpm run test:prepare:desktop` passed, including desktop webpack and
+  test compilation; the full `rtk pnpm run test:desktop:run` exited 0 and
+  covered all eleven `M_4(test)` paths in the closed validation manifest,
+  including schedule impact, contract, calendar projection, diagnostics, Unit
+  List, and architecture suites. The separate `rtk pnpm run test:compile`
+  passed. `rtk pnpm run build` passed with only webpack's asset-size
+  recommendations. After that build, only `rtk pnpm run test:web` ran; its
+  nested `pretest:web -> test:prepare:web` webpack, test compilation, and
+  test-bundle preparation passed, and the web runner exited 0. Non-fatal
+  stream-reset/premature-close cleanup messages followed its assertions.
+  After the evidence edits, `rtk pnpm run lint:md` and `rtk git diff --check`
+  also passed; the final snapshot's audit scripts and Node-built-in audit
+  passed.
+- Quality: the exact baseline is rebased commit
+  `d17377b88362120c756f55ca8226516f75e0b025`; baseline and final disposable
+  snapshots use the same qlty 0.500.0 binary, verified `.qlty/qlty.toml`
+  SHA-256 `6dd9ed207a1a865a36d57c371243320a8b6ff3d87f6d2b9f9ffe5dd792cc9170`,
+  and all-source scope. Severity order for emitted qlty findings is `fmt` gate,
+  then `high`, `medium`, `low`, and `note`; smell metrics are higher-is-worse.
+  The exact mapped function identity is old
+  `src/domain/services/semantic-diff/semanticDiffScheduleProjector.ts:21::parsePeriod`
+  to `src/domain/schedule/ScheduleProjection.ts:66::parsePeriod`. Paired scans
+  under the configured threshold 5 emit no function-complexity finding at
+  either endpoint (`none`/`none`). Separate diagnostic-only baseline/final
+  copies, changing only that threshold to 0, measure 3/3; these diagnostic
+  values are not substituted for the configured comparator. Direction is
+  higher-is-worse, so the mapped baseline-to-final movement is neutral with no
+  adverse disposition. The previously reviewed interim final value 6 exceeded
+  the threshold; extracting only the private, co-located
+  `projectionPeriodOrEmptyBounds` helper returns `parsePeriod` to 3 while
+  preserving the direct-input guard and facade decision. The helper is also
+  measured at 3 in the diagnostic copy, below the configured function
+  threshold, and emits no smell in the paired scans. The separate
+  `ScheduleProjection.ts` high-total-complexity metric is 156; it has no
+  one-to-one predecessor after consolidation, so only this file-level metric
+  remains an unmappable-identity advisory (higher-is-worse), not an excuse to
+  classify the mapped function as advisory. In the same all-source qlty check,
+  baseline findings were `MD041` medium, `TASKS.md` `prettier:fmt`, unused
+  import medium, and unused-disable low. Final has only the three unchanged
+  non-format findings, each count 1 to 1; no new check finding is present.
+  The exact final disposable snapshot was rebuilt after these evidence edits;
+  its non-mutating check/smells pair used the same configuration and scope,
+  followed by final `rtk pnpm run qlty`, which exited 0 without changing
+  analyzed content. Qlty caches, results, and logs stayed inside the
+  disposable snapshots.
+- Compatibility and readiness: no application DTO/schema, command, parser,
+  presentation, bootstrap, engine constraint, README, user-documentation, or
+  CHANGELOG change. The changed production modules are host-neutral and
+  Node-free; desktop and web bundles pass. No behavior drift or unresolved
+  functional/architecture issue is known. Only the consolidated owner's
+  unmappable high-total-complexity advisory remains for independent review.
+  Slice 4 is not committed; independent review Round 2 returned `Ready` with
+  no Findings, and exact-scope Completion Approval is recorded above.
+- Implementation feedback: the approved closed manifest was sufficient to
+  consolidate projection and substitution without a new public module,
+  validator, DTO alias, or compatibility overload. The only evidence-plan
+  correction was the stale pre-migration bridge-probe source path; no code
+  scope, design, or validation boundary changed. F2/F3 exclusions remain
+  untouched.
 
 <!-- markdownlint-enable MD024 -->
 
