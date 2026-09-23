@@ -1,6 +1,6 @@
 name = "plan-reviser"
 description = "Revise an SDD plan in response to findings without broadening scope."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 developer_instructions = """
