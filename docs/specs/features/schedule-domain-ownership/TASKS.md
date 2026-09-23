@@ -15,7 +15,7 @@
   superseded owner in the same change; no compatibility forwarding module is
   authorized.
 - Approved or active slice: Slice 1 (`Establish schedule date and rule
-  ownership`) is the next approved implementation scope after the plan-gate
+ownership`) is the next approved implementation scope after the plan-gate
   commit. Slices 2-4 remain separately gated.
 - Do not: change JP1/AJS schedule behavior, application DTOs, serialized
   schemas, commands, presentation, bootstrap, parser infrastructure, or any

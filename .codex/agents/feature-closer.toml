@@ -1,6 +1,6 @@
 name = "feature-closer"
 description = "Run the independent SDD Feature Exit review and prepare closure evidence."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 developer_instructions = """
