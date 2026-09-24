@@ -8,8 +8,8 @@ comparing mechanical facts.
 
 ## Minimal Context
 
-- Current decision: define one evidence contract and the deterministic
-  collectors needed by the existing lifecycle, without changing its gates.
+- Current decision: define one evidence contract and a shared SKILL that uses
+  existing deterministic CLI output, without changing lifecycle gates.
 - Read first: this file, `TASKS.md`, and `docs/specs/README.md`.
 - This is a transient branch feature for the user's SDD harness improvement
   request; the source is the attached Japanese improvement brief.
@@ -24,17 +24,18 @@ comparing mechanical facts.
 
 ## Requirements
 
-1. A versioned, machine-readable evidence package identifies its comparison
-   base, final state, analyzed paths, tool versions/configuration, commands,
-   exit status, and any unavailable or ambiguous evidence. A failed check must
-   never be represented as a pass.
+1. A shared evidence skill defines a versioned record that links raw,
+   reproducible CLI output and identifies its comparison base, final state,
+   analyzed paths, tool versions/configuration, commands, exit status, and any
+   unavailable or ambiguous evidence. A failed check must never be represented
+   as a pass.
 2. Run a verified qlty version that emits official SARIF for both `check` and
    `smells`. Retain the complete baseline and final SARIF files, command exit
    states, qlty version, analyzed scope, and configuration fingerprint. Use
    these standard records for finding-level review; do not implement a
    repository-specific qlty output parser or comparator.
-3. Repository impact evidence covers changed paths and approved-scope
-   correspondence. Architecture evidence reports the existing dependency
+3. Repository impact evidence uses Git's changed-path output and an explicit
+   approved-scope check. Architecture evidence reports the existing dependency
    test's result separately from semantic design judgments.
 4. Validation and compatibility evidence record executed checks, outcomes,
    `engines.vscode` changes, production Node imports, and desktop/web-relevant
@@ -45,16 +46,16 @@ comparing mechanical facts.
    human or agent review.
 6. Traceability and approval evidence report structural presence and recorded
    state only. Approval must come from a human; the harness cannot infer it.
-7. Existing SDD roles can consume the package through one shared procedure,
+7. Existing SDD roles can consume the record through one shared skill,
    with redundant collection instructions reduced without weakening review,
    approval, snapshot, or validation requirements.
 
 ## Architecture
 
-- Product layers: unchanged. Harness scripts remain outside `src/`.
-- Evidence producer: qlty's SARIF output plus focused repository tooling under
-  `scripts/`. The repository tooling has no authority to edit feature
-  documents or grant approval.
+- Product layers: unchanged. The shared skill adds no runtime source.
+- Evidence producer: qlty's SARIF output, Git, existing tests, and focused
+  read-only CLI commands. `.agents/skills/sdd-evidence/SKILL.md` defines how
+  to gather and record them; it grants no approval authority.
 - Evidence consumer: existing role procedures; semantic judgments and review
   verdicts remain with their current owners.
 - Existing architecture test remains the rule catalog and source of automatic
@@ -64,7 +65,7 @@ comparing mechanical facts.
 
 ### Dependency Impact
 
-- Likely surfaces: `scripts/`, focused harness tests, `.agents/skills/`,
+- Likely surfaces: `.agents/skills/`,
   `AGENTS.md`, and `docs/specs/README.md`. Exact paths are fixed per slice in
   `TASKS.md` before approval.
 - No product source, parser, generated parser, extension entry point, or
@@ -73,7 +74,7 @@ comparing mechanical facts.
 ### Breaking Change Analysis
 
 - User-visible extension behavior: none.
-- Extension API/DTO/schema: none. A new harness evidence schema is internal.
+- Extension API/DTO/schema: none. The evidence record is internal.
 - VS Code/web extension compatibility: preserve `engines.vscode` and both
   extension hosts; harness commands run only in development tooling.
 - Existing approval process: unchanged until a separately approved feature.
@@ -101,8 +102,9 @@ comparing mechanical facts.
 
 ## Acceptance Criteria
 
-- Equivalent inputs produce the same normalized evidence after removing
-  explicitly volatile metadata.
+- Equivalent inputs and commands produce the same raw evidence after excluding
+  explicitly volatile logs. The skill records unavailable or ambiguous facts
+  without upgrading them to a pass.
 - A missing, failed, or ambiguous source is visible in the package and cannot
   become an automatic Ready or Approved result.
 - Both qlty commands emit valid SARIF 2.1.0 from the same verified version in
@@ -118,6 +120,7 @@ comparing mechanical facts.
 
 - Consolidating planner roles or changing role models.
 - A custom qlty output parser or finding comparator.
+- A custom repository evidence collector when existing CLI output suffices.
 - Automating commits or human approval.
 - Adding execution profiles or deep agent variants.
 - Splitting implementation by source layer.
@@ -130,9 +133,8 @@ comparing mechanical facts.
   HTTP 403, so the verified official release binary was installed locally.
   The repository needs a durable minimum-version check before treating SARIF
   evidence as available on other hosts.
-- qlty `0.645.0` warns about three unsupported keys in the existing
-  configuration. The previous `0.500.0` effective configuration already used
-  the same defaults for those keys. Remove only these ignored entries and
-  verify that the effective settings and baseline/final configuration match.
+- qlty `0.645.0` warned about three unsupported keys. The previous `0.500.0`
+  effective configuration already used the same defaults, so Slice 1 removed
+  those ignored entries and verified identical baseline/final configuration.
 - A standard SARIF comparison capability may be evaluated later. This feature
   does not replace a human's review disposition with a new custom comparator.

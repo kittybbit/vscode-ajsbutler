@@ -4,26 +4,28 @@
 
 - Purpose: supply standard, reproducible evidence for SDD decisions.
 - Active slice: Slice 2, repository impact and validation evidence.
-- Do not create a custom qlty parser or comparator.
+- Do not create a custom qlty parser, comparator, or repository collector.
 - Do not infer Human Approval or replace independent semantic review.
 - Read first: `SPECS.md`, this file, `docs/specs/README.md`.
-- Validate: official SARIF in exact snapshots, focused harness checks,
+- Validate: official SARIF in exact snapshots, focused skill checks,
   Markdown lint, and the final qlty aggregate.
 - Approval and document roles: `docs/specs/README.md`.
-- Next decision: implement Slice 2 within its approved scope.
+- Next decision: commit the reviewed Slice 2 replan and approved SKILL, then
+  start Slice 3.
 
 ## Plan Status
 
 - Status: In Progress
 - Planning scope: Phase 1 deterministic evidence, replanned after the user's
-  direction to upgrade qlty instead of building a custom comparator. The
-  qlty configuration cleanup removes only entries ignored by both versions.
-- Review status: human review of the plan and Slice 1 in the current
-  conversation; no existing agents used.
+  direction to upgrade qlty instead of building a custom comparator and to
+  express repository evidence collection as a shared SKILL. The qlty
+  configuration cleanup removes only entries ignored by both versions.
+- Review status: human review of the plan, Slice 1, and Slice 2 replan in the
+  current conversation; no existing agents used.
 - Human approval: the user approved all slices, directed the qlty replacement,
   and asked to resume. Completion and closure approvals remain separate.
-- Active implementation slice: Slice 2; Slice 1 completion approved in the
-  current conversation.
+- Active implementation slice: Slice 2; Slice 1 was approved and committed as
+  `7727546`.
 
 ## Human Approval
 
@@ -31,7 +33,7 @@
 - Approved at: approved in current conversation
 - Approved scope: all three slices with official qlty SARIF and no custom qlty
   comparator; no product-runtime, parser, model, role, or approval-gate change.
-- Approved paths: `.qlty/qlty.toml`, `scripts/sdd-evidence/`,
+- Approved paths: `.qlty/qlty.toml`, `.agents/skills/sdd-evidence/`,
   `docs/specs/features/sdd-deterministic-evidence/`, `AGENTS.md`,
   `docs/specs/README.md`, and relevant `.agents/skills/sdd-*/SKILL.md` and
   `.codex/agents/*.toml` evidence-input references.
@@ -45,7 +47,7 @@
 - Approved paths: `.qlty/qlty.toml`, `docs/specs/README.md`, and this
   `TASKS.md`.
 - Implementation review verdict: Ready, human review in current conversation
-- Commit status: focused Slice 1 completion commit authorized
+- Commit status: committed as `7727546`
 
 ## Closure Approval
 
@@ -60,7 +62,7 @@
 
 ### Slice 1: Official qlty SARIF evidence
 
-- Status: Complete; reviewed and approved for completion commit
+- Status: Complete; reviewed and committed as `7727546`
 - Scope: require qlty `0.645.0` or a verified newer compatible version for
   evidence runs. Use official `check --sarif` and `smells --sarif
 --no-snippets` in exact disposable baseline/final snapshots. Record version,
@@ -91,28 +93,31 @@
 ### Slice 2: Repository impact and validation evidence
 
 - Status: In Progress
-- Scope: collect changed paths and scope correspondence; existing
-  architecture-test result; executed validation results; `engines.vscode`
-  difference; production Node imports; changed layers, exports, dependencies,
-  and candidate abstractions; traceability and approval-field presence.
-  Link qlty SARIF artifacts without parsing or comparing findings.
-- Affected paths: new focused files and tests under `scripts/sdd-evidence/`,
-  and this feature's `TASKS.md`/`TRACEABILITY.md`.
-- Solution Shape: one host-side evidence collector owns mechanical repository
-  facts. The existing architecture test owns dependency-rule truth. Semantic
+- Scope: create one shared SKILL for collecting and recording raw Git change
+  output, approved-scope correspondence, architecture-test results, executed
+  validation, `engines.vscode` comparison, Node-import search, changed layers,
+  exports, dependencies, candidate abstractions, traceability presence, and
+  recorded approval fields. Link qlty SARIF without parsing findings. Mark
+  missing, ambiguous, or failed evidence explicitly.
+- Affected paths: `.agents/skills/sdd-evidence/SKILL.md`, its invocation
+  adapter if needed, and this feature's `SPECS.md`, `TASKS.md`, and
+  `TRACEABILITY.md`.
+- Solution Shape: Git, qlty, and the existing architecture test own their raw
+  facts; the shared SKILL owns collection order and record format. Semantic
   owner, abstraction value, compatibility, and approval validity remain human
-  or agent judgments. Do not create category-specific port/adapter layers.
-- Acceptance: reproducible JSON metadata for the same inputs; fixtures for
-  added/deleted/renamed paths, missing checks, scope mismatch, engine change,
-  Node imports, and ambiguous static scans. No unrun check is reported pass.
-- Validation: focused harness tests, architecture dependency test, and
-  relevant build only if configuration or bundling changes.
-- Approval boundary: harness files under the listed directory and feature
-  documents. Architecture rule changes and product-source edits need
-  replanning.
+  or agent judgments. No new runtime abstraction or collector script exists.
+- Acceptance: another lifecycle role can follow the SKILL and reproduce raw
+  outputs for the same base and scope; added/deleted/renamed paths, missing
+  checks, scope mismatch, engine change, Node imports, and ambiguous scans
+  have explicit places in the record. No unrun check is reported pass.
+- Validation: skill validation, a real read-only dry run on this feature,
+  Markdown lint, and consistency with the existing architecture test.
+- Approval boundary: the listed shared SKILL and feature documents.
+  Architecture rule changes and product-source edits need replanning.
 - Dependencies: Slice 1 completion gate.
 - Production readiness: no extension behavior change; bound scans to changed
-  files where possible. No README or CHANGELOG change expected.
+  files where possible and retain raw command output. No README or CHANGELOG
+  change expected.
 
 ### Slice 3: Shared evidence use in lifecycle procedures
 
@@ -165,7 +170,12 @@
 - [x] Comparable baseline/final qlty `check` and `smells` SARIF observations
       over `docs/specs` with identical qlty `0.645.0`, configuration hash, and
       analyzed paths: zero findings in each of the four files.
-- [ ] Focused harness tests and architecture dependency test for Slice 2.
+- [x] Shared evidence SKILL frontmatter and structure validated.
+- [x] Read-only dry run on this branch listed three changed feature documents,
+      two new SKILL files, unchanged `engines.vscode` (`^1.75.0`), and recorded
+      approval fields without treating those fields as proof of approval.
+- [x] Markdown lint passed for the shared SKILL and changed feature documents;
+  the user reviewed and approved the Slice 2 replan and implementation.
 - [x] Final aggregate passed in the disposable final snapshot. Its default
       changed-file selection reported zero files; the explicit-path SARIF runs are
       the substantive qlty evidence for this docs-only slice.
