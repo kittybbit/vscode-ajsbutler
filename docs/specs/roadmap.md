@@ -21,38 +21,35 @@ entry conditions that make planning each item useful.
 
 - Source: the user's SDD harness improvement brief. Treat each item as a
   separate SDD feature with its own plan, independent review, human approval,
-  and completion evidence. The current selected feature is deterministic
-  evidence; later items are not approved implementation scope.
+  and completion evidence. The shared deterministic evidence skill is available;
+  the remaining items are not approved implementation scope.
 - Measure token use, elapsed time, agent invocations, review findings,
   retries, routing consistency, and approval violations before claiming an
   efficiency or quality improvement.
 
-1. `sdd-deterministic-evidence`: provide reproducible qlty, architecture,
-   impact, validation, compatibility, Solution Shape, traceability, and
-   recorded-approval evidence to existing semantic roles.
-2. `sdd-planner-consolidation`: merge planning and replanning into one role
+1. `sdd-planner-consolidation`: merge planning and replanning into one role
    with explicit modes after shared evidence is available.
-3. `sdd-deterministic-commit-gate`: evaluate and, only if authorization can be
+2. `sdd-deterministic-commit-gate`: evaluate and, only if authorization can be
    verified without inference, migrate the approval-committer's mechanical
    checks and focused commit operation to a fail-closed tool. Keep every human
    approval and independent review gate. A `TASKS.md` status field alone is
    insufficient proof of human approval; first establish an authoritative,
    machine-verifiable approval source or retain the existing gate role.
-4. `sdd-execution-profiles`: define model-independent `standard` and `deep`
+3. `sdd-execution-profiles`: define model-independent `standard` and `deep`
    classification and record the profile in slice artifacts. The classifier
    may consume reviewed declarations about semantic owner, contracts, and
    material abstractions, but must not pretend those judgments can be
    inferred from a path scan. Resolve unknown risk to `deep`; do not select a
    model at runtime.
-5. `sdd-profile-agent-routing`: evaluate fixed-runtime variants for only the
+4. `sdd-profile-agent-routing`: evaluate fixed-runtime variants for only the
    implementer and implementation reviewer, and route by the recorded profile.
    Add variants only when the measured quality and cost justify maintenance;
    verify the new agent definitions are actually discoverable before routing.
-6. `sdd-feature-exit-responsibilities`: after prior changes are measured,
+5. `sdd-feature-exit-responsibilities`: after prior changes are measured,
    evaluate read-only exit review and approved durable-document propagation as
    separate responsibilities.
 
-- Entry condition for each later item: its preceding evidence or routing
+- Entry condition for each remaining item: its preceding evidence or routing
   dependency is complete and the existing lifecycle's quality and approval
   boundaries can be maintained. Do not create placeholder feature folders.
 
