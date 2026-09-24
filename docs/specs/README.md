@@ -149,6 +149,26 @@ and NG. Only identity or direction that cannot be mapped reliably is advisory;
 unchanged unrelated findings stay out of scope. Metric-only movement is a
 review signal only when no mapped adverse finding exists.
 
+### qlty Evidence Format
+
+Use a verified qlty version at least `0.645.0` that supports official SARIF
+output for both `check` and `smells`. In exact disposable baseline and final
+snapshots, run the same non-mutating `rtk pnpm exec qlty check --sarif --no-fix`
+and `rtk pnpm exec qlty smells --sarif --no-snippets` commands over identical
+analyzed paths. Save each complete SARIF 2.1.0 file alongside command output
+and exit status. Record the qlty version, analyzed paths, configuration hash,
+snapshot revisions, and exact commands. qlty caches and outputs stay local to
+their respective snapshots. A missing file, malformed SARIF, failed command,
+version mismatch, configuration mismatch, or scope mismatch cannot be recorded
+as a passing observation.
+
+Use the official SARIF records to compare findings and measured values. Keep
+the finding disposition above as a reviewer decision; do not add a repository
+specific parser or comparator for qlty's textual output. Run the formatting
+capable `rtk pnpm run qlty` aggregate only in the disposable final snapshot.
+If it changes analyzed content, synchronize approved paths, rebuild the final
+snapshot, and repeat both SARIF observations and the aggregate until stable.
+
 Plan review is the pre-approval scope gate. After implementation and final
 validation, perform one integrated review of scope, acceptance, quality, and
 production readiness. Add an independent second review only for the higher-risk

@@ -3,15 +3,14 @@
 ## Agent Brief
 
 - Purpose: supply standard, reproducible evidence for SDD decisions.
-- Active slice: Slice 1, reviewed and awaiting its completion commit.
+- Active slice: Slice 2, repository impact and validation evidence.
 - Do not create a custom qlty parser or comparator.
 - Do not infer Human Approval or replace independent semantic review.
 - Read first: `SPECS.md`, this file, `docs/specs/README.md`.
 - Validate: official SARIF in exact snapshots, focused harness checks,
   Markdown lint, and the final qlty aggregate.
 - Approval and document roles: `docs/specs/README.md`.
-- Next decision: commit the reviewed plan and approved Slice 1, then start
-  Slice 2.
+- Next decision: implement Slice 2 within its approved scope.
 
 ## Plan Status
 
@@ -23,8 +22,8 @@
   conversation; no existing agents used.
 - Human approval: the user approved all slices, directed the qlty replacement,
   and asked to resume. Completion and closure approvals remain separate.
-- Active implementation slice: Slice 1, implementation complete and reviewed;
-  completion commit pending.
+- Active implementation slice: Slice 2; Slice 1 completion approved in the
+  current conversation.
 
 ## Human Approval
 
@@ -39,12 +38,14 @@
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved for Slice 1
+- Approved at: approved in current conversation
+- Approved scope: Slice 1 official qlty SARIF evidence and removal of ignored
+  qlty configuration entries.
+- Approved paths: `.qlty/qlty.toml`, `docs/specs/README.md`, and this
+  `TASKS.md`.
+- Implementation review verdict: Ready, human review in current conversation
+- Commit status: focused Slice 1 completion commit authorized
 
 ## Closure Approval
 
@@ -59,7 +60,7 @@
 
 ### Slice 1: Official qlty SARIF evidence
 
-- Status: Implemented; independent review and Completion Approval pending
+- Status: Complete; reviewed and approved for completion commit
 - Scope: require qlty `0.645.0` or a verified newer compatible version for
   evidence runs. Use official `check --sarif` and `smells --sarif
 --no-snippets` in exact disposable baseline/final snapshots. Record version,
@@ -89,7 +90,7 @@
 
 ### Slice 2: Repository impact and validation evidence
 
-- Status: Approved
+- Status: In Progress
 - Scope: collect changed paths and scope correspondence; existing
   architecture-test result; executed validation results; `engines.vscode`
   difference; production Node imports; changed layers, exports, dependencies,
