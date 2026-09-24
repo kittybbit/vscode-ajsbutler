@@ -8,12 +8,12 @@ import {
   parseWaitCountValue,
   resolveEffectiveStartConditionMonitoringPair,
   type ParsedScheduleByDaysFromStartValue,
-} from "../../domain/models/parameters/scheduleRuleHelpers";
+} from "../../domain/schedule/ScheduleRule";
 import {
   interpretScheduleDateValue,
   type ScheduleDateDay,
   type ScheduleDateInterpretation,
-} from "../../domain/models/parameters/scheduleDateInterpreter";
+} from "../../domain/schedule/ScheduleDate";
 
 export const parseLnParentRule = (value: string): string =>
   parseParentScheduleRuleValue(value)?.value ?? "";

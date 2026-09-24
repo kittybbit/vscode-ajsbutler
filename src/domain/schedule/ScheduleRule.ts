@@ -1,4 +1,4 @@
-export const resolveScheduleRuleNumber = (
+const resolveScheduleRuleNumber = (
   rawRuleNumber: string | undefined,
 ): number => (rawRuleNumber === undefined ? 1 : Number(rawRuleNumber));
 

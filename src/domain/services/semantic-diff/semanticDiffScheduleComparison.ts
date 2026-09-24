@@ -1,24 +1,26 @@
-import type { SemanticDiffScheduleRun } from "../../models/semantic-diff/SemanticDiff";
+import type { ScheduleRun } from "../../schedule/ScheduleProjection";
+
+export type SemanticDiffScheduleSide = "before" | "after";
 
 export type SemanticDiffScheduleRunDecision =
   | {
       kind: "changed-time";
       unitPath: string;
       date: string;
-      before: SemanticDiffScheduleRun;
-      after: SemanticDiffScheduleRun;
+      before: ScheduleRun;
+      after: ScheduleRun;
     }
   | {
       kind: "removed";
       unitPath: string;
       date: string;
-      before: SemanticDiffScheduleRun;
+      before: ScheduleRun;
     }
   | {
       kind: "added";
       unitPath: string;
       date: string;
-      after: SemanticDiffScheduleRun;
+      after: ScheduleRun;
     };
 
 const compareStrings = (left: string, right: string): number =>
@@ -28,8 +30,8 @@ type RunGroup = {
   sourceUnitPath: string;
   date: string;
   rule: number;
-  before: SemanticDiffScheduleRun[];
-  after: SemanticDiffScheduleRun[];
+  before: ScheduleRun[];
+  after: ScheduleRun[];
 };
 
 type IndexedDecision = {
@@ -42,11 +44,11 @@ type IndexedDecision = {
   occurrenceOrdinal: number;
 };
 
-const groupKey = (run: SemanticDiffScheduleRun): string =>
+const groupKey = (run: ScheduleRun): string =>
   JSON.stringify([run.unitPath, run.date, run.rule]);
 
 const createRunGroup = (
-  run: SemanticDiffScheduleRun,
+  run: ScheduleRun,
   side: "before" | "after",
 ): RunGroup => ({
   sourceUnitPath: run.unitPath,
@@ -58,7 +60,7 @@ const createRunGroup = (
 
 const appendRunToGroup = (
   group: RunGroup,
-  run: SemanticDiffScheduleRun,
+  run: ScheduleRun,
   side: "before" | "after",
 ): void => {
   group[side].push(run);
@@ -66,7 +68,7 @@ const appendRunToGroup = (
 
 const addRun = (
   groups: Map<string, RunGroup>,
-  run: SemanticDiffScheduleRun,
+  run: ScheduleRun,
   side: "before" | "after",
 ): void => {
   const key = groupKey(run);
@@ -80,14 +82,11 @@ const addRun = (
 
 const addRuns = (
   groups: Map<string, RunGroup>,
-  runs: SemanticDiffScheduleRun[],
+  runs: ScheduleRun[],
   side: "before" | "after",
 ): void => runs.forEach((run) => addRun(groups, run, side));
 
-const compareRuns = (
-  left: SemanticDiffScheduleRun,
-  right: SemanticDiffScheduleRun,
-): number =>
+const compareRuns = (left: ScheduleRun, right: ScheduleRun): number =>
   compareStrings(left.time, right.time) ||
   compareStrings(left.unitPath, right.unitPath) ||
   compareStrings(left.unitName, right.unitName);
@@ -139,8 +138,8 @@ const compareDecisions = (
 };
 
 const sortedGroups = (
-  beforeRuns: SemanticDiffScheduleRun[],
-  afterRuns: SemanticDiffScheduleRun[],
+  beforeRuns: ScheduleRun[],
+  afterRuns: ScheduleRun[],
 ): RunGroup[] => {
   const groups = new Map<string, RunGroup>();
   addRuns(groups, beforeRuns, "before");
@@ -155,9 +154,9 @@ const sortedGroups = (
 };
 
 const canonicalizeRuns = (
-  runs: SemanticDiffScheduleRun[],
+  runs: ScheduleRun[],
   canonicalPathByPath: ReadonlyMap<string, string>,
-): SemanticDiffScheduleRun[] =>
+): ScheduleRun[] =>
   runs.map((run) => {
     const unitPath = canonicalPathByPath.get(run.unitPath) ?? run.unitPath;
     return unitPath === run.unitPath ? run : { ...run, unitPath };
@@ -181,8 +180,8 @@ const createIndexedDecision = (input: {
 
 const changedTimeDecision = (input: {
   group: RunGroup;
-  before: SemanticDiffScheduleRun;
-  after: SemanticDiffScheduleRun;
+  before: ScheduleRun;
+  after: ScheduleRun;
   occurrenceOrdinal: number;
 }): IndexedDecision | undefined => {
   if (input.before.time === input.after.time) {
@@ -274,8 +273,8 @@ const decisionsForGroups = (groups: RunGroup[]): IndexedDecision[] =>
   groups.flatMap(decisionsForGroup);
 
 export const compareScheduleRuns = (
-  beforeRuns: SemanticDiffScheduleRun[],
-  afterRuns: SemanticDiffScheduleRun[],
+  beforeRuns: ScheduleRun[],
+  afterRuns: ScheduleRun[],
   canonicalPathByPath: ReadonlyMap<string, string> = new Map(),
 ): SemanticDiffScheduleRunDecision[] =>
   decisionsForGroups(

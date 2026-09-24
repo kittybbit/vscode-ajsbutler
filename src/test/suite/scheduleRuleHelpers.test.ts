@@ -10,8 +10,8 @@ import {
   parseWaitCountValue,
   parseWaitTimeValue,
   resolveEffectiveStartConditionMonitoringPair,
-} from "../../domain/models/parameters/scheduleRuleHelpers";
-import { interpretScheduleDateValue } from "../../domain/models/parameters/scheduleDateInterpreter";
+} from "../../domain/schedule/ScheduleRule";
+import { interpretScheduleDateValue } from "../../domain/schedule/ScheduleDate";
 
 suite("Schedule rule helpers", () => {
   test("interprets schedule-date rule association and token categories", () => {

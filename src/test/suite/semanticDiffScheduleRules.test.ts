@@ -4,13 +4,11 @@ import type {
   AjsParameter,
   AjsUnit,
 } from "../../domain/models/ajs/AjsDocument";
-import type { SemanticDiffScheduleRun } from "../../domain/models/semantic-diff/SemanticDiff";
-import {
-  compareScheduleRuns,
-  evaluateSemanticDiffSchedule,
-  interpretSchedule,
-  projectScheduleRuns,
-} from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
+import type { ScheduleRun } from "../../domain/schedule/ScheduleProjection";
+import { interpretSchedule } from "../../domain/schedule/ScheduleInterpretation";
+import { projectScheduleRuns } from "../../domain/schedule/ScheduleProjection";
+import { compareScheduleRuns } from "../../domain/services/semantic-diff/semanticDiffScheduleComparison";
+import { evaluateSemanticDiffSchedule } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
 
 const parameters = (
   values: Record<string, string | string[]>,
@@ -69,7 +67,7 @@ suite("Semantic Diff Schedule Rules", () => {
     date: string,
     time: string,
     unitName = unitPath.split("/").at(-1) ?? unitPath,
-  ): SemanticDiffScheduleRun => ({
+  ): ScheduleRun => ({
     unitPath,
     unitName,
     rule,
@@ -887,7 +885,7 @@ suite("Semantic Diff Schedule Rules", () => {
     );
   });
 
-  test("distinguishes missing and invalid comparison periods", () => {
+  test("keeps comparison invalid periods separate from projection preconditions", () => {
     assert.deepStrictEqual(
       evaluateSemanticDiffSchedule({
         beforeUnits: [],
@@ -908,5 +906,16 @@ suite("Semantic Diff Schedule Rules", () => {
         period: { from: "2026-05-01", to: "2026-04-01" },
       },
     );
+
+    const interpretation = interpretSchedule(
+      jobnet("/root/main", { sd: "2026/04/01", st: "09:00" }),
+    );
+    const projection = projectScheduleRuns({
+      interpretation,
+      period: { from: "not-a-date", to: "2026-04-01" },
+    });
+    assert.strictEqual(projection.status, "invalid");
+    assert.strictEqual(projection.completeness, "none");
+    assert.deepStrictEqual(projection.runs, []);
   });
 });
