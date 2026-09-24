@@ -15,7 +15,8 @@ slice. Report actionable findings or a Ready verdict.
 Read `AGENTS.md`, `docs/specs/README.md`, the selected feature's `SPECS.md`,
 `TASKS.md`, and `TRACEABILITY.md` when present. Inspect the approved slice,
 final diff, changed symbols, tests, validation output, and relevant desktop
-and web entry points.
+and web entry points. Use `$sdd-evidence` for mechanical scope, validation,
+compatibility signals, and qlty SARIF records.
 
 Keep the selected feature and slice fixed. Stop when the feature, approved
 scope, comparison base, or completion evidence is ambiguous.
@@ -36,11 +37,8 @@ Check the final change for:
 - `Solution Shape` preservation: semantic owner/package, responsibility,
   public names, contracts, dependency direction, tests where applicable,
   relevant capability, and the separate port/adapter/factory assessments
-- qlty baseline/final comparison from the same non-mutating check/smells pair
-  in disposable snapshots, with explicit finding severity ordering, measured
-  values, and higher-is-worse or lower-is-worse direction; a new or reliably
-  mapped adverse movement is Finding/NG, only unmappable identity or direction
-  is advisory, and unchanged unrelated findings stay out of scope
+- qlty baseline/final SARIF comparison and finding disposition under
+  `docs/specs/README.md`
 - failure modes, diagnostics/fallback behavior, large or malformed input
 - JP1/AJS definition-file compatibility
 - README/docs and CHANGELOG impact using the repository SSOT
@@ -66,17 +64,9 @@ responsibility; and reject a same-request/same-response forwarding wrapper
 without port-contract value. A custom-gap justification is needed only for a
 proposed custom mechanism, and framework use must remain at the outer boundary.
 Confirm automatic architecture-test evidence is not presented as proof of
-reviewer-only judgments. Compare the same non-mutating check/smells pair in
-disposable snapshots using identical verified qlty configuration and analyzed
-scope, and treat the formatting-capable aggregate as separate final validation
-only in the disposable final snapshot. Keep qlty runtime artifacts
-snapshot-local; if aggregate formatting changes analyzed source or evidence,
-require an allowlisted sync, final-snapshot rebuild, and repeated check/smells
-pair plus aggregate until stable. Compare finding identity, explicit severity ordering,
-baseline/final severity, measured values, and higher-is-worse or lower-is-worse
-direction; list new or reliably mapped adverse findings as Finding/NG,
-unmappable identity or direction as advisory, and unchanged unrelated findings
-out of scope. If the final diff changes the owner/package, contract/dependency
+reviewer-only judgments. Verify `$sdd-evidence` provenance and review qlty
+finding disposition under `docs/specs/README.md`. If the final diff changes
+the owner/package, contract/dependency
 direction, framework-versus-custom decision, abstraction/responsibility,
 affected surface, risk, validation, or approval boundary, return it for
 Replanning rather than treating it as an implementation fix.

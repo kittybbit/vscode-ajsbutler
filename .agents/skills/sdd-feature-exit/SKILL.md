@@ -23,6 +23,10 @@ Resolve the selected feature with the repository SSOT and keep it fixed. Stop
 when selection, slice state, approval evidence, or comparison base is
 ambiguous.
 
+Use `$sdd-evidence` to check mechanical completion facts when the recorded
+package is missing or stale. Approval validity and the closure recommendation
+remain Feature Exit judgments.
+
 ## Feature Exit Review
 
 1. Confirm every implementation slice is `Complete`, has its focused

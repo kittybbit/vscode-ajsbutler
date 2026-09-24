@@ -19,8 +19,9 @@ Read first:
 2. the selected feature's `SPECS.md` and `TASKS.md`
 
 Read related use cases, `TRACEABILITY.md`, and concrete symbols only when
-needed to validate a plan claim. Keep the selected feature fixed and stop if
-selection evidence is ambiguous.
+needed to validate a plan claim. Use `$sdd-evidence` to inspect mechanical
+scope, validation, and qlty facts; keep semantic review independent. Keep the
+selected feature fixed and stop if selection evidence is ambiguous.
 
 ## Review Criteria
 
@@ -58,16 +59,8 @@ reject a same-request/same-response forwarding wrapper without port-contract
 value. Require a custom-gap justification only for a proposed custom
 mechanism, and keep framework use at the outer boundary. Separate automatic
 architecture-test evidence from reviewer judgments. For code slices, challenge
-the planned same non-mutating check/smells pair in disposable snapshots using
-identical verified qlty configuration and analyzed scope, and keep aggregate
-final validation only in the disposable final snapshot. Keep qlty runtime
-artifacts snapshot-local; if aggregate formatting changes analyzed source or
-evidence, require an allowlisted sync, final-snapshot rebuild, and repeated
-check/smells pair plus aggregate until stable. Require each comparable finding's
-identity, explicit severity ordering, baseline/final severity, measured values,
-and higher-is-worse or lower-is-worse direction; a new or reliably mapped
-adverse movement is Finding/NG, only unmappable identity or direction is
-advisory, and unchanged unrelated findings stay out of scope. Route any changed
+the planned `$sdd-evidence` inputs, snapshot scope, and qlty disposition under
+`docs/specs/README.md`. Route any changed
 owner/package, contract/dependency direction, framework-versus-custom
 decision, abstraction/responsibility, affected surface, risk, validation, or
 approval boundary to Replanning.

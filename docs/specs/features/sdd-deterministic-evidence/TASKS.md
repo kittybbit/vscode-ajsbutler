@@ -3,14 +3,14 @@
 ## Agent Brief
 
 - Purpose: supply standard, reproducible evidence for SDD decisions.
-- Active slice: Slice 3, shared evidence use in lifecycle procedures.
+- Active slice: none; all three slices are complete after the Slice 3 commit.
 - Do not create a custom qlty parser, comparator, or repository collector.
 - Do not infer Human Approval or replace independent semantic review.
 - Read first: `SPECS.md`, this file, `docs/specs/README.md`.
 - Validate: official SARIF in exact snapshots, focused skill checks,
   Markdown lint, and the final qlty aggregate.
 - Approval and document roles: `docs/specs/README.md`.
-- Next decision: commit the approved Slice 2 SKILL, then implement Slice 3.
+- Next decision: complete the approved Slice 3 commit, then run Feature Exit.
 
 ## Plan Status
 
@@ -23,8 +23,8 @@
   current conversation; no existing agents used.
 - Human approval: the user approved all slices, directed the qlty replacement,
   and asked to resume. Completion and closure approvals remain separate.
-- Active implementation slice: Slice 3 after the Slice 2 completion commit;
-  Slice 1 was committed as `7727546`.
+- Active implementation slice: none after the approved Slice 3 commit; Slices
+  1 and 2 were committed as `7727546` and `cf4879d`.
 
 ## Human Approval
 
@@ -39,12 +39,14 @@
 
 ## Completion Approval
 
-- Status: Approved for Slice 2
+- Status: Approved for Slice 3
 - Approved at: approved in current conversation
-- Approved scope: Slice 2 shared evidence SKILL and its recorded completion.
-- Approved paths: `.agents/skills/sdd-evidence/` and this `TASKS.md`.
+- Approved scope: Slice 3 shared evidence references and reduced duplicate
+  mechanical collection instructions.
+- Approved paths: `AGENTS.md`, `docs/specs/README.md`, relevant
+  `.agents/skills/sdd-*/SKILL.md`, and this `TASKS.md`.
 - Implementation review verdict: Ready, human review in current conversation
-- Commit status: focused Slice 2 completion commit authorized
+- Commit status: focused Slice 3 completion commit authorized
 
 ## Closure Approval
 
@@ -89,7 +91,7 @@
 
 ### Slice 2: Repository impact and validation evidence
 
-- Status: Complete; reviewed and approved for completion commit
+- Status: Complete; reviewed and committed as `cf4879d`
 - Scope: create one shared SKILL for collecting and recording raw Git change
   output, approved-scope correspondence, architecture-test results, executed
   validation, `engines.vscode` comparison, Node-import search, changed layers,
@@ -118,7 +120,7 @@
 
 ### Slice 3: Shared evidence use in lifecycle procedures
 
-- Status: In Progress
+- Status: Complete; reviewed and approved for completion commit
 - Scope: update existing planning, implementation, and review procedures to
   consume the shared SARIF and repository evidence. Remove duplicated
   mechanical collection wording while preserving Solution Shape judgment,
@@ -139,6 +141,18 @@
 - Production readiness: existing in-flight feature approval evidence remains
   valid. No extension behavior or CHANGELOG impact expected.
 
+#### Solution Shape Evidence
+
+- Semantic owner: `docs/specs/README.md` owns validation and qlty policy;
+  `AGENTS.md` owns routing; lifecycle SKILL files own their role-specific
+  procedure and use `$sdd-evidence` for mechanical facts.
+- Retained abstraction: the Slice 2 `$sdd-evidence` SKILL remains a shared
+  collection procedure with a versioned record. Slice 3 adds no runtime
+  abstraction, port, adapter, or factory.
+- Public contract and dependency direction: role procedures reference the
+  shared SKILL; no production API or layer dependency changes. Markdown lint,
+  skill validation, and comparable qlty SARIF are the applicable checks.
+
 ## Traceability
 
 - `TRACEABILITY.md` required: yes; seven harness requirements map to the
@@ -146,8 +160,8 @@
 
 ## Feature Exit
 
-- Definition of Done status: Pending slice completion, reviews, and gate
-  commits.
+- Definition of Done status: Pending Feature Exit review after the approved
+  Slice 3 completion commit.
 - Durable documentation: SDD evidence contract in `docs/specs/README.md`;
   later harness work remains in `docs/specs/roadmap.md`.
 - Open risks: installed tool versions differ across hosts; SARIF identity
@@ -177,6 +191,13 @@
       identical configuration and analyzed paths. Baseline `check` had one
       formatting finding in this file; final `check` and both `smells` files
       had zero findings. The final disposable-snapshot aggregate passed.
+- [x] Slice 3 consistency scan found `$sdd-evidence` references in planning,
+      implementation, review, Feature Exit, AGENTS, and the SDD policy;
+      duplicate check/smells command blocks were removed from those role
+      procedures.
+- [x] Slice 3 Markdown lint and diff checks passed. Comparable baseline/final
+      qlty SARIF had zero check and smells findings under identical version,
+      configuration, and scope; the final aggregate passed.
 - [x] Final aggregate passed in the disposable final snapshot. Its default
       changed-file selection reported zero files; the explicit-path SARIF runs are
       the substantive qlty evidence for this docs-only slice.

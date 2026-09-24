@@ -25,8 +25,9 @@ Read first:
 3. `docs/specs/roadmap.md` when repository sequencing is relevant
 
 Read related use cases, `TRACEABILITY.md`, and concrete symbols only when
-needed to confirm a plan claim. Resolve the selected feature once using the
-repository SSOT and do not mix inherited feature state into the plan.
+needed to confirm a plan claim. Use `$sdd-evidence` for mechanical impact and
+validation facts. Resolve the selected feature once using the repository SSOT
+and do not mix inherited feature state into the plan.
 
 ## Planning Mode
 
@@ -110,18 +111,9 @@ use-case-boundary responsibility as separate cases. A custom-gap justification
 is required only for a proposed custom mechanism. Record the automatic
 architecture-test evidence separately from reviewer judgments about semantic
 ownership, abstraction value, framework sufficiency, custom-gap credibility,
-and qlty disposition. For code slices, plan the same non-mutating `rtk pnpm
-exec qlty check` and `rtk pnpm exec qlty smells --no-snippets` observations in
-exact disposable snapshots using identical verified qlty configuration and
-analyzed scope, with the formatting-capable aggregate as separate final
-validation only in the disposable final snapshot. Keep qlty runtime
-artifacts snapshot-local; if aggregate formatting changes analyzed source
-or evidence, plan an allowlisted sync, final-snapshot rebuild, and repeated
-check/smells pair plus aggregate until stable. Plan each comparable finding's
-identity, explicit severity ordering, baseline/final severity, measured values,
-and higher-is-worse or lower-is-worse direction; new or reliably mapped adverse
-movement is Finding/NG, unmappable identity or direction is advisory, and
-unchanged unrelated findings are out of scope. Stop for Replanning when the
+and qlty disposition. For code slices, plan the inputs and raw artifacts
+required by `$sdd-evidence` and the qlty evidence contract in
+`docs/specs/README.md`. Stop for Replanning when the
 owner/package, contract/dependency direction, framework-versus-custom decision,
 abstraction/responsibility, affected surface, risk, validation, or approval
 boundary changes.
@@ -192,8 +184,8 @@ commentary. Update the smallest necessary durable surface.
 - do not edit runtime code, tests, generated artifacts, configuration, or
   implementation branches in Planning or Replanning Mode
 - use `docs/specs/README.md` as the SSOT for approval and lifecycle policy
-- use the shared disposable-snapshot qlty procedure in `AGENTS.md`; its
-  formatting-capable aggregate runs only in the disposable final snapshot
+- use `$sdd-evidence` for mechanical collection and `docs/specs/README.md`
+  for validation and qlty disposition policy
 - use `rtk pnpm run lint:md` as appropriate
 - return the issue to Main for planning when a new design decision, scope,
   impact, or approval boundary appears

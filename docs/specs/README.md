@@ -151,6 +151,10 @@ review signal only when no mapped adverse finding exists.
 
 ### qlty Evidence Format
 
+Use the repository's `$sdd-evidence` skill to collect and record mechanical
+facts for one selected feature and slice. The skill links raw command output;
+it does not grant approval or replace semantic review.
+
 Use a verified qlty version at least `0.645.0` that supports official SARIF
 output for both `check` and `smells`. In exact disposable baseline and final
 snapshots, run the same non-mutating `rtk pnpm exec qlty check --sarif --no-fix`

@@ -19,7 +19,8 @@ Read first:
 2. selected `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` when present
 3. concrete files, symbols, tests, and entry points named by the slice
 
-Confirm the feature is selected using the repository SSOT. Stop when the
+Confirm the feature is selected using the repository SSOT. Use
+`$sdd-evidence` for mechanical baseline and final facts. Stop when the
 selected feature, comparison base, approved slice, or approval evidence is
 ambiguous.
 
@@ -62,18 +63,9 @@ port-contract value. Justify a custom gap only when a custom mechanism is
 proposed, and keep framework use at the outer boundary. Record automatic
 architecture-test evidence separately from reviewer judgments.
 
-For code slices, capture the same non-mutating `rtk pnpm exec qlty check` and
-`rtk pnpm exec qlty smells --no-snippets` observations in exact disposable
-snapshots using identical verified qlty configuration and analyzed scope. Keep
-qlty runtime artifacts snapshot-local and run formatting-capable `rtk pnpm run
-qlty` only as separate final validation in the disposable final snapshot. If
-aggregate formatting changes analyzed source or evidence, synchronize only
-approved paths, rebuild the final snapshot, and repeat the check/smells pair
-plus aggregate until stable. Record each comparable finding's
-identity, explicit severity ordering, baseline/final severity, measured values,
-and higher-is-worse or lower-is-worse direction. A new finding or reliably
-mapped adverse movement is Finding/NG; only unmappable identity or direction is
-advisory, and unchanged unrelated findings stay out of scope. If the
+Use `$sdd-evidence` to capture the approved slice's mechanical facts and qlty
+SARIF records under the contract in `docs/specs/README.md`. Keep finding
+disposition and Solution Shape judgment with the implementer and reviewer. If the
 owner/package, contract/dependency direction, framework-versus-custom
 decision, abstraction/responsibility, affected surface, risk, validation, or
 approval boundary changes, stop and return for Replanning.
@@ -117,15 +109,10 @@ Propagate only reusable behavior, design, or repository-policy knowledge.
 ## Validation
 
 Use the nearest relevant check first and add only checks required by the
-changed surface and recorded risks. Typical checks include:
+changed surface and recorded risks. Record their results through
+`$sdd-evidence`. Typical checks in the reviewed primary state include:
 
 ```bash
-# In each disposable snapshot:
-rtk pnpm exec qlty check
-rtk pnpm exec qlty smells --no-snippets
-# In the disposable final snapshot only:
-rtk pnpm run qlty
-# In the reviewed primary state:
 rtk pnpm run lint:md
 rtk git diff --check
 ```
