@@ -3,15 +3,14 @@
 ## Agent Brief
 
 - Purpose: supply standard, reproducible evidence for SDD decisions.
-- Active slice: Slice 2, repository impact and validation evidence.
+- Active slice: Slice 3, shared evidence use in lifecycle procedures.
 - Do not create a custom qlty parser, comparator, or repository collector.
 - Do not infer Human Approval or replace independent semantic review.
 - Read first: `SPECS.md`, this file, `docs/specs/README.md`.
 - Validate: official SARIF in exact snapshots, focused skill checks,
   Markdown lint, and the final qlty aggregate.
 - Approval and document roles: `docs/specs/README.md`.
-- Next decision: commit the reviewed Slice 2 replan and approved SKILL, then
-  start Slice 3.
+- Next decision: commit the approved Slice 2 SKILL, then implement Slice 3.
 
 ## Plan Status
 
@@ -24,8 +23,8 @@
   current conversation; no existing agents used.
 - Human approval: the user approved all slices, directed the qlty replacement,
   and asked to resume. Completion and closure approvals remain separate.
-- Active implementation slice: Slice 2; Slice 1 was approved and committed as
-  `7727546`.
+- Active implementation slice: Slice 3 after the Slice 2 completion commit;
+  Slice 1 was committed as `7727546`.
 
 ## Human Approval
 
@@ -40,14 +39,12 @@
 
 ## Completion Approval
 
-- Status: Approved for Slice 1
+- Status: Approved for Slice 2
 - Approved at: approved in current conversation
-- Approved scope: Slice 1 official qlty SARIF evidence and removal of ignored
-  qlty configuration entries.
-- Approved paths: `.qlty/qlty.toml`, `docs/specs/README.md`, and this
-  `TASKS.md`.
+- Approved scope: Slice 2 shared evidence SKILL and its recorded completion.
+- Approved paths: `.agents/skills/sdd-evidence/` and this `TASKS.md`.
 - Implementation review verdict: Ready, human review in current conversation
-- Commit status: committed as `7727546`
+- Commit status: focused Slice 2 completion commit authorized
 
 ## Closure Approval
 
@@ -92,7 +89,7 @@
 
 ### Slice 2: Repository impact and validation evidence
 
-- Status: In Progress
+- Status: Complete; reviewed and approved for completion commit
 - Scope: create one shared SKILL for collecting and recording raw Git change
   output, approved-scope correspondence, architecture-test results, executed
   validation, `engines.vscode` comparison, Node-import search, changed layers,
@@ -121,7 +118,7 @@
 
 ### Slice 3: Shared evidence use in lifecycle procedures
 
-- Status: Approved
+- Status: In Progress
 - Scope: update existing planning, implementation, and review procedures to
   consume the shared SARIF and repository evidence. Remove duplicated
   mechanical collection wording while preserving Solution Shape judgment,
@@ -175,7 +172,11 @@
       two new SKILL files, unchanged `engines.vscode` (`^1.75.0`), and recorded
       approval fields without treating those fields as proof of approval.
 - [x] Markdown lint passed for the shared SKILL and changed feature documents;
-  the user reviewed and approved the Slice 2 replan and implementation.
+      the user reviewed and approved the Slice 2 replan and implementation.
+- [x] Comparable Slice 2 qlty `check` and `smells` SARIF observations used
+      identical configuration and analyzed paths. Baseline `check` had one
+      formatting finding in this file; final `check` and both `smells` files
+      had zero findings. The final disposable-snapshot aggregate passed.
 - [x] Final aggregate passed in the disposable final snapshot. Its default
       changed-file selection reported zero files; the explicit-path SARIF runs are
       the substantive qlty evidence for this docs-only slice.
