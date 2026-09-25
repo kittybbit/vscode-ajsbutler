@@ -30,8 +30,10 @@ any later delegation.
 ```mermaid
 flowchart TD
     A["Main: Investigation"] --> B["Main → feature-author → Main"]
-    B --> C["Main → plan-author → Main"]
+    B --> C["Main → planner (Planning) → Main"]
     C --> D["Main → plan-reviewer → Main"]
+    D -. "Findings" .-> R["Main → planner (Replanning) → Main"]
+    R --> D
     D --> E["Plan / Replan Human Approval"]
     E --> F["Main → approval-committer → Main<br/>plan gate"]
     F --> G["Main → implementer → Main"]
@@ -44,7 +46,7 @@ flowchart TD
     L --> M["Closure Approval"]
     M --> N["Main → approval-committer → Main<br/>closure gate"]
     N --> O["Feature Close"]
-    G -. "replan trigger" .-> C
+    G -. "replan trigger" .-> R
 ```
 
 Every explicit human approval is a commit gate for the state it approves. The
@@ -85,8 +87,8 @@ For non-trivial changes:
 1. create a dedicated git branch before implementation work starts and use
    `docs/...` only for docs-only slices
 2. delegate formal feature intake to `feature-author`
-3. delegate the complete implementation-slice plan to `plan-author`; route
-   Replanning Mode to `plan-reviser` when a replan trigger is present
+3. delegate the complete implementation-slice plan to `planner` in Planning
+   Mode; route Findings or a replan trigger to `planner` in Replanning Mode
 4. delegate independent plan review to `plan-reviewer`
 5. obtain clear Human Approval before editing runtime code, tests, generated
    artifacts, or configuration

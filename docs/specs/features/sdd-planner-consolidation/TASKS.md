@@ -4,22 +4,22 @@
 
 - Purpose: consolidate initial planning and replanning into one explicit-mode
   `planner` role.
-- Active slice: Slice 1, approved for implementation.
+- Active slice: Slice 1, reviewed and approved for completion commit.
 - Keep review, human approval, and commit gates intact.
 - Leave execution profiles and extension code outside this feature.
 - Read first: `SPECS.md`, this file, and `AGENTS.md`.
 - Validate: reference scan, agent discovery, Markdown lint, and the docs-only
   qlty procedure in `docs/specs/README.md`.
-- Next decision: implement Slice 1, then independent implementation review.
+- Next decision: focused completion commit, then Feature Exit.
 
 ## Plan Status
 
-- Status: Approved
+- Status: Complete
 - Planning scope: entire selected roadmap feature.
 - Review status: human independent review accepted in the current conversation
   as a one-time exception to the `plan-reviewer` role; no agent verdict claimed.
 - Human approval: Approved in the current conversation.
-- Active implementation slice: Slice 1, approved.
+- Active implementation slice: Slice 1, reviewed and approved for completion.
 
 ## Human Approval
 
@@ -38,12 +38,22 @@
 
 ## Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Approved scope: none
-- Approved paths: none
-- Implementation review verdict: Pending
-- Commit status: Not eligible
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: exact completed Slice 1 implementation and validation
+  evidence. Human independent review replaces the implementation-reviewer
+  subagent for this slice only; no agent verdict is claimed. Live agent
+  discovery remains an accepted unverified risk.
+- Approved paths: `.codex/agents/plan-author.toml`,
+  `.codex/agents/plan-reviser.toml`, `.codex/agents/planner.toml`,
+  `.codex/agents/feature-author.toml`, `.codex/agents/plan-reviewer.toml`,
+  `.agents/skills/sdd-plan-task/SKILL.md`,
+  `.agents/skills/sdd-plan-task/agents/openai.yaml`, `AGENTS.md`,
+  `docs/specs/README.md`, and
+  `docs/specs/features/sdd-planner-consolidation/TASKS.md`.
+- Implementation review verdict: Ready by human independent review in the
+  current conversation; no `implementation-reviewer` agent verdict claimed.
+- Commit status: Committed with the focused Slice 1 completion commit.
 
 ## Closure Approval
 
@@ -58,7 +68,7 @@
 
 ### Slice 1: One mode-aware planner role
 
-- Status: Approved
+- Status: Complete
 - Scope: replace `plan-author` and `plan-reviser` with one fixed-runtime
   `planner`; align all active routing references and mode contracts.
 - User / Domain Value: one unambiguous planning role for the SDD harness.
@@ -137,5 +147,33 @@
   completion commit, and Feature Exit.
 - Durable documentation updates: routing policy in `AGENTS.md` and
   `docs/specs/README.md` belongs to Slice 1; evaluate roadmap state at exit.
-- Open risks: agent discovery; a separate independent implementation review
-  and Completion Approval remain required after implementation.
+- Open risks: live Codex agent discovery is unverified in this already-running
+  session and was accepted by the human at Completion Approval. Feature Exit
+  must assign the follow-up to the SDD harness owner.
+
+## Validation Evidence
+
+- Comparison base: approved plan commit `13023f4`; final state is the current
+  working tree on `codex/sdd-planner-consolidation`.
+- Changed paths: only the approved agent definitions, skill files, routing
+  documents, and this feature's task record. No extension source, tests,
+  generated parser, `package.json`, or `engines.vscode` change.
+- Agent definitions: all seven remaining TOML files parsed; `planner` is the
+  unique planning writer name, with fixed `gpt-6-sol` and medium reasoning.
+  The two retired names have no active routing references. The skill entrypoint
+  YAML parsed.
+- Markdown: `rtk pnpm run lint:md` exited 0; `rtk git diff --check` exited 0.
+- qlty: version `0.645.0`; baseline and final snapshots use the same
+  `.qlty/qlty.toml` SHA-256
+  `f551fa47da3ac111a3e29857ff0f431abb0e0a20c17a8c794660c255f4dfb4c2`.
+  Both snapshots analyzed `AGENTS.md`, `docs/specs/README.md`,
+  `.agents/skills/sdd-plan-task`, and `.codex/agents` with matching
+  non-mutating `rtk pnpm exec qlty check --sarif --no-fix` and
+  `rtk pnpm exec qlty smells --sarif --no-snippets` commands. All four commands
+  exited 0 with valid SARIF 2.1.0 and zero findings. The final-only
+  `rtk pnpm run qlty` aggregate exited 0 and left analyzed content unchanged.
+  Raw files are in `/private/tmp/sdd-planner-validation.bR16OQ/{baseline,final}/`.
+- Architecture dependency and desktop/web tests: not run; no extension code or
+  boundary changed.
+- Agent discovery: static definition and references verified; live discovery
+  requires a fresh Codex role registry and remains unverified.

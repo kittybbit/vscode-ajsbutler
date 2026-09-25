@@ -11,7 +11,8 @@ Create or revise the full implementation plan for one selected SDD feature.
 This procedure stops before runtime code, tests, generated artifacts, and
 configuration changes.
 
-Use exactly one mode per run:
+Main must name exactly one mode per run; do not infer it from feature files or
+approval status:
 
 - Planning Mode: create the initial implementation-slice plan
 - Replanning Mode: revise the smallest affected part after a discovered gap
@@ -51,8 +52,10 @@ and do not mix inherited feature state into the plan.
 
 ## Replanning Mode
 
-Use only when implementation or review discovers a gap that prevents the
-approved plan from continuing unchanged.
+Use only when plan review, implementation, or implementation review identifies
+an actionable Finding or explicit trigger that prevents the existing plan from
+continuing unchanged. Main must supply the affected slice, trigger, and
+approved plan context.
 
 1. Identify the approved plan, affected slice, and discovered gap.
 2. Record why the current plan cannot continue unchanged.

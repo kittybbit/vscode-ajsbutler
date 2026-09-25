@@ -48,8 +48,8 @@ non-goals, roadmap/use-case impact, validation, and a recommended next route.
 Handoff:
 Return the validated intake, selected feature folder, unresolved questions,
 and recommended next route to Main. Main may then delegate planning to
-`plan-author`. If the feature is not ready for planning, return the exact
-missing decision to Main. Do not invoke or spawn `plan-author` directly.
+`planner` in Planning Mode. If the feature is not ready for planning, return
+the exact missing decision to Main. Do not invoke or spawn `planner` directly.
 
 Stop conditions:
 Stop and request clarification when the feature kind is ambiguous, the

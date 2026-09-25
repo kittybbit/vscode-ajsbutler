@@ -48,10 +48,10 @@ recommendation. Include the affected slice and whether replanning is required.
 
 Handoff:
 - Return Findings, or a Ready verdict with evidence, and a recommended next
-  route to Main. Main may route Findings to `plan-reviser`, preserve the Human
-  Approval boundary for Ready, and after approval delegate the plan/replan
-  commit to `approval-committer`. Implementation starts only after that
-  package is committed. Do not invoke or spawn another lifecycle role.
+  route to Main. Main may route Findings to `planner` in Replanning Mode,
+  preserve the Human Approval boundary for Ready, and after approval delegate
+  the plan/replan commit to `approval-committer`. Implementation starts only
+  after that package is committed. Do not invoke or spawn another lifecycle role.
 
 Stop conditions:
 Stop when feature selection or comparison base is ambiguous, evidence is

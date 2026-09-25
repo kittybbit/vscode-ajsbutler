@@ -82,9 +82,9 @@ Follow this lifecycle:
 
 1. Route trivial changes using the criteria in `docs/specs/README.md`.
 2. Delegate non-trivial feature intake to `feature-author`.
-3. Delegate Planning or Replanning to `plan-author` or `plan-reviser`.
+3. Delegate Planning or Replanning to `planner` with the explicit mode.
 4. Delegate plan review to the read-only `plan-reviewer`; Findings are routed
-   back through Main to `plan-reviser`.
+   back through Main to `planner` in Replanning Mode.
 5. Obtain clear Human Approval for the reviewed plan and approved slice scope.
 6. Delegate the approved plan or replan commit to `approval-committer` before
    implementation starts.
@@ -278,9 +278,9 @@ uses its dedicated release procedure because no release lifecycle role exists.
 - Skill invocation adapters: `.agents/skills/*/agents/openai.yaml`
 - SDD policy/document SSOT: `docs/specs/README.md`
 
-The role catalog is seven SDD lifecycle roles—`feature-author`, `plan-author`,
-`plan-reviewer`, `plan-reviser`, `implementer`,
-`implementation-reviewer`, and `feature-closer`—plus the
+The role catalog is six SDD lifecycle roles—`feature-author`, `planner`,
+`plan-reviewer`, `implementer`, `implementation-reviewer`, and
+`feature-closer`—plus the
 `approval-committer` gate role. Release is outside this catalog.
 
 ### Deterministic SDD Routing
@@ -298,7 +298,7 @@ or makes the next delegation only after the stated gate is satisfied.
    - Stop: Ambiguous purpose, feature kind, overlap, or compatibility evidence.
 2. **Planning**
    - Activation: The selected feature needs a complete slice plan.
-   - Delegate: `plan-author`.
+   - Delegate: `planner` in Planning Mode.
    - Main responsibility: Confirm feature selection and planning scope.
    - Result and return: Complete plan and validation evidence return to Main.
    - Stop: Missing impact, design evidence, or independently untestable slice.
@@ -307,11 +307,11 @@ or makes the next delegation only after the stated gate is satisfied.
    - Delegate: `plan-reviewer`.
    - Main responsibility: Preserve the read-only review and approval boundary.
    - Result and return: `Ready` or Findings return to Main; Main routes
-     Findings to `plan-reviser`.
+     Findings to `planner` in Replanning Mode.
    - Stop: Ambiguous selection/base or insufficient risk evidence.
 4. **Plan revision**
    - Activation: Findings or a replan trigger blocks continuation.
-   - Delegate: `plan-reviser`.
+   - Delegate: `planner` in Replanning Mode.
    - Main responsibility: Keep the change within the approved feature purpose.
    - Result and return: Revised plan and re-review recommendation return to
      Main.
