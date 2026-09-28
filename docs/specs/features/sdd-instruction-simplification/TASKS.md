@@ -6,8 +6,8 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: Slice 1 committed at `2837bdd2`; Slice 2 approved for implementation.
-- Next route: focused Slice 2 approval commit, then Slice 2 implementation.
+- State: Slice 1 committed; Slice 2 independently reviewed Ready and approved.
+- Next route: focused Slice 2 completion commit.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
@@ -20,15 +20,28 @@
   records.
 - Review status: Replan review `Ready`; replan commit recorded above.
 - Human Approval: Approved for Slice 2 within the reviewed plan.
-- Completion Approval: Pending for Slice 2; Slice 1 committed at `2837bdd2`.
+- Completion Approval: Approved for Slice 2 after implementation-reviewer Ready.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 2 after its approval commit.
+- Active implementation slice: Slice 2 complete; completion commit pending.
 
 ## Completion Approval
 
-- Status: Pending for Slice 2
-- Previous completion: Slice 1 independently reviewed Ready, approved, and
-  committed at `2837bdd2`.
+- Status: Approved
+- Approved at: approved in current conversation after implementation-reviewer Ready
+- Approved scope: completed Slice 2, SDD role contracts and procedures, within
+  its reviewed 25-path diff.
+- Approved paths: the seven files in `.codex/agents/`
+  (`approval-committer.toml`, `feature-author.toml`, `feature-closer.toml`,
+  `implementation-reviewer.toml`, `implementer.toml`, `plan-reviewer.toml`,
+  `planner.toml`); `SKILL.md` and `agents/openai.yaml` in each of
+  `.agents/skills/sdd-commit-gate/`, `sdd-create-feature/`, `sdd-evidence/`,
+  `sdd-feature-exit/`, `sdd-implement-task/`, `sdd-plan-task/`,
+  `sdd-review-implementation/`, and `sdd-review-plan/`; and
+  `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
+  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
+- Implementation review verdict: Ready after three Findings were fixed and
+  independently re-reviewed.
+- Commit status: Eligible; pending focused completion commit.
 
 ## Human Approval
 
@@ -119,7 +132,8 @@
 
 ### Slice 2: SDD role contracts and procedures
 
-- Status: Approved; implementation awaits its focused approval commit.
+- Status: Implemented and independently reviewed Ready within the approved
+  25-path scope; Completion Approval received, commit pending.
 - Value and scope: each role has only its authority, inputs, evidence, verdict,
   output, and stop conditions. Rewrite all seven `.codex/agents/*.toml`, eight
   `.agents/skills/sdd-*/SKILL.md`, and their eight
@@ -135,11 +149,13 @@
   evidence, stop condition, and return to Main. No child grants approval or
   another role's verdict; mandatory evidence and qlty comparability remain
   intact.
-- Validation: role/skill/adapter contract walkthrough; TOML/YAML parse, names,
-  links, stop-condition and approval matrix, Markdown lint, and policy-required
-  disposable-snapshot qlty observations plus the separate final aggregate. If
-  formatting changes analyzed content, synchronize approved paths, rebuild the
-  final snapshot, and repeat the observations and aggregate until stable.
+- Validation: TOML/YAML, `$sdd-*` markers and routes, roadmap/DoD risk
+  wording, local links, authority/approval matrix, lint, diff check, and final
+  qlty observations and aggregate passed; see evidence record.
+- Implementation evidence: final snapshot record at
+  `/private/tmp/sdd-instruction-simplification-slice2-final/evidence.txt`; it records
+  roadmap triggers, accepted-risk criteria, invocation markers, role/approval
+  checks, parsers, normative comparison, validation, and approved-path audit.
 - Production readiness: no runtime, host, or JP1/AJS3 impact; no
   README/user-doc or CHANGELOG update expected.
 - Proposed approval boundary and exact implementation/completion-commit paths:

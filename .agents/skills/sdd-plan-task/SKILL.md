@@ -1,194 +1,81 @@
 ---
 name: sdd-plan-task
-description: Create or revise the complete implementation-slice plan for one selected vscode-ajsbutler SDD feature in Planning or Replanning Mode.
+description: Create or minimally revise the complete implementation-slice plan for one selected feature in explicit mode.
 ---
 
 # SDD Plan Task
 
-## Purpose
-
-Create or revise the full implementation plan for one selected SDD feature.
-This procedure stops before runtime code, tests, generated artifacts, and
+Plan one selected feature or minimally revise its plan. Main must name exactly
+one mode for the run: Planning or Replanning. Never infer mode from files or
+approval state. Stop before product code, tests, generated artifacts, or
 configuration changes.
 
-Main must name exactly one mode per run; do not infer it from feature files or
-approval status:
+## Inputs
 
-- Planning Mode: create the initial implementation-slice plan
-- Replanning Mode: revise the smallest affected part after a discovered gap
+Resolve the selected feature and branch-owned plan from the SDD policy and
+keep them fixed. Use SPECS.md, TASKS.md, package.json when compatibility or
+dependencies matter, related use cases, roadmap, concrete references, and
+sdd-evidence only as needed to substantiate the plan. Do not mix inherited
+feature state into it.
 
-## Minimum Context
-
-Read first:
-
-1. `AGENTS.md`, `package.json`, and `docs/specs/README.md`
-2. the selected feature's `SPECS.md` and `TASKS.md`
-3. `docs/specs/roadmap.md` when repository sequencing is relevant
-
-Read related use cases, `TRACEABILITY.md`, and concrete symbols only when
-needed to confirm a plan claim. Use `$sdd-evidence` for mechanical impact and
-validation facts. Resolve the selected feature once using the repository SSOT
-and do not mix inherited feature state into the plan.
+Planning requires a concrete feature purpose and intake documents. Replanning
+requires the existing plan, affected slice, actionable Finding or trigger, and
+approved context from Main.
 
 ## Planning Mode
 
-1. Confirm the selected feature owns the plan and the current branch's active
-   implementation work.
-2. Compare `SPECS.md`, `TASKS.md`, related use cases, and `roadmap.md` when
-   repository-level sequencing matters.
-3. Decompose the whole feature into slices covering every requirement and
-   acceptance criterion.
-4. Order slices by dependency and value, preferring early uncertainty and
-   boundary decisions.
-5. Investigate affected files, symbols, commands, components, docs, tests,
-   desktop/web impact, failure modes, architecture boundaries, JP1/AJS
-   compatibility, malformed-input risk, README/CHANGELOG impact, and
-   undocumented assumptions.
-6. Update `TASKS.md` with scope, order, dependencies, approval boundaries,
-   validation, risks, production readiness, and out-of-scope work.
-7. Create or update `TRACEABILITY.md` when required.
-8. Keep `SPECS.md` focused on feature-level requirements and acceptance.
-9. Update durable docs only when the Durable Documentation Gate is met.
+Plan the whole feature so every requirement and acceptance criterion is
+covered. Define independently reviewable, testable, committable, and
+approvable slices with value, cohesive scope, order, dependencies, acceptance,
+validation, approval boundaries, risks, readiness, and out-of-scope work.
+Prefer resolving uncertainty and boundary risks early. Do not split coupled
+work without standalone value or leave a slice knowingly broken.
+
+Investigate only the references needed to establish affected files, symbols,
+tests, docs, architecture, JP1/AJS, desktop/web and failure risks, assumptions,
+and README/CHANGELOG impact. Keep SPECS.md at feature-level requirements and
+acceptance. Update durable docs only when they pass the Durable Documentation
+Gate.
 
 ## Replanning Mode
 
-Use only when plan review, implementation, or implementation review identifies
-an actionable Finding or explicit trigger that prevents the existing plan from
-continuing unchanged. Main must supply the affected slice, trigger, and
-approved plan context.
+Use only when a Finding or explicit trigger prevents the plan continuing
+unchanged. Revise the smallest affected area; preserve completed and unrelated
+approved slices. Update dependencies, approval boundaries, validation, risks,
+and traceability only where affected. Recommend another plan review when
+boundaries, dependencies, readiness, or approval scope changed. Do not redesign
+the feature unless the trigger invalidates it.
 
-1. Identify the approved plan, affected slice, and discovered gap.
-2. Record why the current plan cannot continue unchanged.
-3. Revise the smallest necessary part of the plan.
-4. Update dependencies, approval boundaries, validation, risks, and
-   traceability only where the gap reaches them.
-5. Preserve completed and unrelated approved slices.
-6. Request another plan review when boundaries, dependencies, production
-   readiness, or approval scope changed.
+## Solution Shape
 
-Do not use Replanning Mode to redesign the feature unless the discovered gap
-invalidates the whole plan.
-
-## Smallest Useful Slice
-
-Each slice must deliver one user value, domain meaning, or architecture
-responsibility and be independently reviewable, testable, committable, and
-approvable. Do not split tightly coupled work by file or layer when the pieces
-have no standalone value.
-
-A slice is too large when it combines independent outcomes or unrelated
-refactors. It is too small when it cannot be validated alone or leaves the
-feature knowingly broken.
-
-## Planning Gate
-
-Before updating `TASKS.md`, establish:
-
-- selected feature and selection evidence
-- requirements and acceptance criteria covered
-- slice list, order, and dependencies
-- value and cohesive change group for every slice
-- explicit approval boundary and out-of-scope work
-- validation and traceability for every slice
-- production readiness: failure mode, JP1/AJS compatibility, malformed or
-  large input risk, desktop/web impact, README/docs, and CHANGELOG impact
-- unresolved assumptions and risks
-
-## Solution Shape Gate
-
-Resolve the selected slice before recording evidence and use only that slice's
-`#### Solution Shape Evidence` block in `TASKS.md`; another slice's block
-cannot authorize or satisfy this slice. For every material new or retained
-abstraction, record the approved `Solution Shape`: semantic owner and
-package/layer for each material decision, invariant, translation, lifecycle,
-public name, contract, dependency, and applicable test; the abstraction's
-concrete responsibility and why it earns a boundary; public names, contracts,
-dependency direction, and tests where applicable; and the relevant framework,
-library, platform, or established repository capability.
-Use the compact material-abstraction definition from `AGENTS.md`; ordinary
-local helpers and type aliases are excluded unless they play one of those
-roles. Assess a dependency-inverting or host-neutral port, an adapter's
-applicable isolation/translation/error/lifecycle/compatibility/test-boundary
-responsibility, and any retained application factory's composition or
-use-case-boundary responsibility as separate cases. A custom-gap justification
-is required only for a proposed custom mechanism. Record the automatic
-architecture-test evidence separately from reviewer judgments about semantic
-ownership, abstraction value, framework sufficiency, custom-gap credibility,
-and qlty disposition. For code slices, plan the inputs and raw artifacts
-required by `$sdd-evidence` and the qlty evidence contract in
-`docs/specs/README.md`. Stop for Replanning when the
-owner/package, contract/dependency direction, framework-versus-custom decision,
-abstraction/responsibility, affected surface, risk, validation, or approval
+Record the approved Solution Shape for every material abstraction: semantic
+owner/layer for decisions, invariants, translations, lifecycles, names,
+contracts, dependencies, and applicable tests; concrete responsibility and
+boundary value; public names, contracts, dependency direction, and tests; and
+the relevant existing framework or capability. Apply the architecture
+definition for materiality. Assess ports, adapters, and retained application
+factories separately. A custom-gap justification is needed only for a
+proposed custom mechanism. Keep architecture-test facts separate from
+reviewer judgments. For code slices, plan sdd-evidence inputs and qlty SARIF
+evidence under docs/specs/README.md. Use the Solution Shape definition in
+docs/specs/architecture.md. Replan if the owner, layer, contract, direction,
+framework/custom choice, abstraction, surface, risk, validation, or approval
 boundary changes.
 
-## Approval-Commit Handoff
+## Return and stop
 
-Plan or Replanning Mode ends before implementation. Return the complete plan,
-validation evidence, and recommended next route to the parent Main
-orchestrator. After the independent plan review returns `Ready` and the human
-records `Human Approval: Approved` for the exact next-slice scope, Main may
-delegate the `approval-committer` role for the `plan` gate. The approved
-planning package must be committed before implementation starts. Do not stage
-or commit while Human Approval is pending, and do not invoke or spawn the next
-lifecycle role from this procedure.
+Keep TASKS.md limited to current state and decision fields required by the SDD
+document roles. For each slice record scope/value, order/dependencies,
+acceptance, validation, approval boundary, risks, production readiness, and
+out of scope. Keep TRACEABILITY.md compact and map requirements to slices and tests
+or validation.
 
-## TASKS.md Shape
+Return the complete plan or exact revisions, dependencies/boundaries changed,
+validation, traceability, risks, preserved slices, and recommended route to
+Main. In Planning, recommend review only when the feature plan is complete.
+Human Approval and the focused planning commit precede implementation. Do not
+stage or commit, change approval evidence, review the plan, or invoke another
+role.
 
-Keep `TASKS.md` focused on the current plan:
-
-```md
-## Plan Status
-
-- Status:
-- Planning scope:
-- Review status:
-- Human approval:
-- Active implementation slice:
-
-## Implementation Slices
-
-### Slice 1: <name>
-
-- Status:
-- Scope:
-- User / Domain Value:
-- Cohesive Change Group:
-- Acceptance:
-- Validation:
-- Production Readiness:
-- Approval Boundary:
-- Dependencies:
-- Risks:
-- Out of Scope:
-```
-
-Keep completed status and unresolved dependencies that affect later slices;
-remove obsolete work-log history.
-
-## Traceability
-
-For a non-trivial or multi-slice feature, map each slice to:
-
-- Use Case or requirement
-- `SPECS.md` requirement or acceptance criterion
-- test file or validation result
-
-## Durable Documentation Gate
-
-Before updating a long-lived document, confirm the information is reusable
-beyond this feature, describes durable behavior or repository policy, helps
-future work, is not duplicated, and is not implementation history or review
-commentary. Update the smallest necessary durable surface.
-
-## Rules
-
-- preserve `engines.vscode` and desktop/web compatibility expectations
-- do not plan only the next edit; plan the feature as a whole
-- do not edit runtime code, tests, generated artifacts, configuration, or
-  implementation branches in Planning or Replanning Mode
-- use `docs/specs/README.md` as the SSOT for approval and lifecycle policy
-- use `$sdd-evidence` for mechanical collection and `docs/specs/README.md`
-  for validation and qlty disposition policy
-- use `rtk pnpm run lint:md` as appropriate
-- return the issue to Main for planning when a new design decision, scope,
-  impact, or approval boundary appears
+Stop for ambiguous selection, missing design/impact evidence, an untestable
+slice, or a new scope, design, dependency, or approval decision.

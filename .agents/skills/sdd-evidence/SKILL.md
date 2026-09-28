@@ -1,77 +1,50 @@
 ---
 name: sdd-evidence
-description: Capture reproducible mechanical evidence for one selected vscode-ajsbutler SDD slice before planning, implementation review, or Feature Exit. Use existing CLI output and tests; leave design and approval judgments to their owners.
+description: Capture reproducible mechanical evidence for one SDD feature and slice; leave design and approval judgments to their owners.
 ---
 
 # SDD Evidence
 
-Prepare an evidence record for one selected feature and slice. This skill
-coordinates existing commands; it does not implement a repository collector,
-parse qlty findings, decide Solution Shape, or grant approval. Follow
-`docs/specs/README.md` for the snapshot, validation, review, and approval
-rules. Keep raw outputs outside the repository in the corresponding disposable
-snapshot.
+Capture mechanical facts for one selected feature and slice. Do not implement
+a collector, interpret qlty findings, judge Solution Shape, or approve work.
+Keep raw outputs in the corresponding disposable snapshot.
 
-## Inputs
+## Inputs and collection
 
-Resolve the selected feature, approved slice, comparison-base commit, final
-working tree or commit, approved path list, and required checks before
-collecting. If any is unclear, record `unknown` and return to Main. Do not
-silently choose a base or treat a feature document's approval field as proof of
-the human decision.
+Resolve the selected feature/slice, comparison base, final revision or working
+tree, approved paths, and required checks. If unclear, record unknown and
+return to Main; never infer approval from a document field.
 
-## Collection
+Record:
 
-1. Record the exact base and final revisions with Git. Capture Git's
-   `diff --name-status --find-renames -z` output against the base, plus
-   `ls-files --others --exclude-standard -z` for untracked paths. Check every
-   added, modified, deleted, and renamed path against the approved list;
-   evaluate both old and new paths for a rename. An unsupported path pattern,
-   unclear rename, or path outside scope is an explicit concern, not a pass.
-2. Follow `docs/specs/README.md` for qlty. Record the verified version,
-   identical configuration hash and analyzed paths, exact commands and exit
-   states, and paths to all four official baseline/final `check` and `smells`
-   SARIF files. Preserve the raw files. Do not create a textual-output parser
-   or a project-specific finding comparator.
-3. Record each required validation command and its observed exit status.
-   Mark an unrun, missing, interrupted, or unreadable check `unknown`; mark a
-   nonzero exit `failed`. Link the existing architecture dependency test result
-   separately. Its cataloged rule result is automatic evidence; semantic
-   ownership and abstraction value still need review.
-4. Compare `package.json` `engines.vscode` at base and final. Search changed
-   production files for Node built-in imports and list files touching desktop,
-   web, bootstrap, generated parser, or configuration boundaries. These are
-   risk signals, not compatibility verdicts. If a static search cannot resolve
-   a dynamic import or multiline declaration, record that ambiguity.
-5. From changed files and diffs, list affected layers, added exports,
-   dependency imports, and names that may represent ports, adapters,
-   factories, or lifecycle owners. The reviewer decides each semantic owner,
-   responsibility, contract, dependency direction, and abstraction value.
-6. Check whether selected `TRACEABILITY.md` exists and whether `TASKS.md`
-   contains the required approval sections and fields. Record only presence
-   and stated values. Human messages and gate verdicts remain the authority
-   for approval.
+- Exact base/final revisions; Git name-status with rename detection; untracked
+  paths; and every path outside or ambiguous against the approved list.
+- qlty version, configuration hash, identical analyzed paths and commands,
+  exit states, and all four baseline/final check/smells SARIF files.
+- Each required check's command, exit, raw-output path, and passed/failed/
+  unknown state; architecture dependency-test result separately.
+- engines.vscode before/after; Node-import scan and unresolved cases; desktop,
+  web, bootstrap, parser, and configuration surfaces touched.
+- Changed layers, exports, imports, and possible ports, adapters, factories,
+  or lifecycle owners, without deciding their semantic value.
+- TRACEABILITY.md presence and TASKS.md approval sections and stated fields.
 
-## Evidence Record
+Follow the disposable-snapshot, SARIF, and final-aggregate contract in
+docs/specs/README.md. Preserve complete SARIF 2.1.0 and command logs. Compare
+official SARIF records only; do not build a text parser or custom comparator.
+Keep cache and outputs local to each snapshot. Missing, malformed, failed, or
+mismatched evidence is not a pass.
 
-Use this compact format in the slice's `TASKS.md` or a snapshot-local evidence
-file linked from it. Keep command logs and raw artifacts snapshot-local.
+## Compact evidence record
 
-```text
-Evidence version: 1
-Selected feature / slice:
-Base SHA / final revision or working-tree identity:
-Approved path list / changed paths / out-of-scope or ambiguous paths:
-qlty version / config hash / analyzed paths / four SARIF paths / exits:
-Architecture test command / exit / raw output path:
-Other required checks: command / exit / raw output path / passed|failed|unknown
-engines.vscode before / after / changed|unchanged|unknown:
-Node imports / host-relevant paths / unresolved static scans:
-Changed layers / exports / imports / abstraction candidates:
-Traceability presence / recorded approval fields / missing fields:
-Unavailable or ambiguous evidence:
-```
+Record in TASKS.md or a snapshot-local file linked from it:
 
-Do not label a whole record `Ready` or `Approved`. Stop collection once the
-required facts are captured and hand the record to the role that owns the
-semantic decision.
+Evidence version; feature/slice; base/final identity; approved/changed/out-of-scope
+paths; qlty version/config/path scope/commands/exits/four SARIF paths; required
+check commands/exits/output paths/states and architecture-test command/result;
+engines.vscode and host/import signals;
+changed layers/exports/imports/abstraction candidates; traceability and stated
+approval fields; unavailable or ambiguous evidence.
+
+Do not label the record Ready or Approved. Stop when required facts are
+captured and return them to the role that owns the decision.
