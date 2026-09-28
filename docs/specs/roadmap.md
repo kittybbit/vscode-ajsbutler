@@ -17,51 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
-### Planner Custom-Agent Discovery
-
-- Owner: SDD harness maintainers.
-- Scope: in a fresh Codex session, verify that `planner` is selectable for
-  explicit Planning and Replanning requests and that `plan-author` and
-  `plan-reviser` are no longer selectable. Static TOML parsing in the
-  implementation session did not verify runtime discovery.
-- Entry condition for the next SDD harness optimization feature: record the
-  discovery result; route any failure through a scoped SDD fix before relying
-  on the new role.
-
-### SDD Harness Optimization Sequence
-
-- Source: the user's SDD harness improvement brief. Treat each item as a
-  separate SDD feature with its own plan, independent review, human approval,
-  and completion evidence. The shared deterministic evidence skill is available;
-  the remaining items are not approved implementation scope.
-- Measure token use, elapsed time, agent invocations, review findings,
-  retries, routing consistency, and approval violations before claiming an
-  efficiency or quality improvement.
-
-1. `sdd-deterministic-commit-gate`: evaluate and, only if authorization can be
-   verified without inference, migrate the approval-committer's mechanical
-   checks and focused commit operation to a fail-closed tool. Keep every human
-   approval and independent review gate. A `TASKS.md` status field alone is
-   insufficient proof of human approval; first establish an authoritative,
-   machine-verifiable approval source or retain the existing gate role.
-2. `sdd-execution-profiles`: define model-independent `standard` and `deep`
-   classification and record the profile in slice artifacts. The classifier
-   may consume reviewed declarations about semantic owner, contracts, and
-   material abstractions, but must not pretend those judgments can be
-   inferred from a path scan. Resolve unknown risk to `deep`; do not select a
-   model at runtime.
-3. `sdd-profile-agent-routing`: evaluate fixed-runtime variants for only the
-   implementer and implementation reviewer, and route by the recorded profile.
-   Add variants only when the measured quality and cost justify maintenance;
-   verify the new agent definitions are actually discoverable before routing.
-4. `sdd-feature-exit-responsibilities`: after prior changes are measured,
-   evaluate read-only exit review and approved durable-document propagation as
-   separate responsibilities.
-
-- Entry condition for each remaining item: its preceding evidence or routing
-  dependency is complete and the existing lifecycle's quality and approval
-  boundaries can be maintained. Do not create placeholder feature folders.
-
 ### Expanded Flow Graph Golden Alignment
 
 - Owner: Flow graph test maintainers.
