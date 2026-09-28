@@ -6,8 +6,8 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: Slice 1 committed; Slice 2 independently reviewed Ready and approved.
-- Next route: focused Slice 2 completion commit.
+- State: Slices 1 and 2 committed; Slice 3 approved for implementation.
+- Next route: focused Slice 3 approval commit, then Slice 3 implementation.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
@@ -19,51 +19,39 @@
   and release guidance, roles, adapters, templates, and inherited WebAPI
   records.
 - Review status: Replan review `Ready`; replan commit recorded above.
-- Human Approval: Approved for Slice 2 within the reviewed plan.
-- Completion Approval: Approved for Slice 2 after implementation-reviewer Ready.
+- Human Approval: Approved for Slice 3 within the reviewed plan.
+- Completion Approval: Pending for Slice 3; Slice 2 committed at `26f0af6e`.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 2 complete; completion commit pending.
+- Active implementation slice: Slice 3 after its approval commit.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: approved in current conversation after implementation-reviewer Ready
-- Approved scope: completed Slice 2, SDD role contracts and procedures, within
-  its reviewed 25-path diff.
-- Approved paths: the seven files in `.codex/agents/`
-  (`approval-committer.toml`, `feature-author.toml`, `feature-closer.toml`,
-  `implementation-reviewer.toml`, `implementer.toml`, `plan-reviewer.toml`,
-  `planner.toml`); `SKILL.md` and `agents/openai.yaml` in each of
-  `.agents/skills/sdd-commit-gate/`, `sdd-create-feature/`, `sdd-evidence/`,
-  `sdd-feature-exit/`, `sdd-implement-task/`, `sdd-plan-task/`,
-  `sdd-review-implementation/`, and `sdd-review-plan/`; and
-  `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
-  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
-- Implementation review verdict: Ready after three Findings were fixed and
-  independently re-reviewed.
-- Commit status: Eligible; pending focused completion commit.
+- Status: Pending for Slice 3
+- Previous completion: Slice 2 independently reviewed Ready, approved, and
+  committed at `26f0af6e`.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation for Slice 2 after the reviewed
-  plan and Slice 1 completion commit.
-- Approved scope: Slice 2, SDD role contracts and procedures, within its
-  recorded approval boundary. Selected-feature evidence documents may record
-  only this slice's state, validation, and evidence.
-- Approved paths (Slice 2 plan gate):
+- Approved at: approved in current conversation for Slice 3 after the reviewed
+  plan and Slice 2 completion commit.
+- Approved scope: Slice 3, Feature templates and inherited WebAPI records,
+  within its recorded approval boundary. Selected-feature evidence documents
+  may record only this slice's state, validation, and evidence.
+- Approved paths (Slice 3 plan gate):
   `docs/specs/features/sdd-instruction-simplification/TASKS.md`.
-- Approved Slice 2 implementation and completion paths: the seven files in
-  `.codex/agents/` (`approval-committer.toml`, `feature-author.toml`,
-  `feature-closer.toml`, `implementation-reviewer.toml`, `implementer.toml`,
-  `plan-reviewer.toml`, `planner.toml`); `SKILL.md` and `agents/openai.yaml` in
-  each of `.agents/skills/sdd-commit-gate/`, `sdd-create-feature/`,
-  `sdd-evidence/`, `sdd-feature-exit/`, `sdd-implement-task/`,
-  `sdd-plan-task/`, `sdd-review-implementation/`, and `sdd-review-plan/`;
+- Approved Slice 3 implementation and completion paths: the seven files in
+  `docs/specs/features/_templates/` (`ADR.template.md`,
+  `CODEX_IMPLEMENTATION_PROMPT.template.md`, `CODEX_SDD_PROMPT.template.md`,
+  `README_repository_native_sdd_templates.md`, `SPECS.template.md`,
+  `TASKS.template.md`, `TRACEABILITY.template.md`);
+  `docs/specs/features/import-definition-via-webapi/SPECS.md`,
+  `docs/specs/features/import-definition-via-webapi/TASKS.md`,
+  `docs/specs/features/import-definition-via-webapi/TRACEABILITY.md`;
   `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
   `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
 - Required review: plan-reviewer Ready for the four-slice plan and its
-  evidence-path replan; Slice 2 scope is unchanged from that review.
+  evidence-path replan; Slice 3 scope is unchanged from that review.
 
 ## Replan Trigger And Approval Scope
 
@@ -75,7 +63,7 @@
   seven-path Slice 1 scope now has new exact-scope Human Approval above and
   requires a focused replan commit of this `TASKS.md` before implementation
   resumes.
-  Slices 3–4 remain proposed and require their own later exact-scope approvals.
+  Slice 4 remains proposed and requires its own later exact-scope approval.
 - Each slice's proposed implementation and completion-commit paths now include
   the two selected-feature evidence documents plus its content paths. The
   selected `SPECS.md` is unchanged by these slices.
@@ -132,8 +120,8 @@
 
 ### Slice 2: SDD role contracts and procedures
 
-- Status: Implemented and independently reviewed Ready within the approved
-  25-path scope; Completion Approval received, commit pending.
+- Status: Implemented, independently reviewed Ready, approved, and committed
+  at `26f0af6e`.
 - Value and scope: each role has only its authority, inputs, evidence, verdict,
   output, and stop conditions. Rewrite all seven `.codex/agents/*.toml`, eight
   `.agents/skills/sdd-*/SKILL.md`, and their eight
@@ -171,7 +159,7 @@
 
 ### Slice 3: Feature templates and inherited WebAPI records
 
-- Status: Proposed.
+- Status: Approved; implementation awaits its focused approval commit.
 - Value and scope: decision-focused feature records. Rewrite all seven
   `docs/specs/features/_templates/*` Markdown files and
   instruction/status/duplicate-record text in
