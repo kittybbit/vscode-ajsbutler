@@ -1,93 +1,39 @@
-# Feature Specification: {{Feature Name}}
+# Feature Specification: {{Feature name}}
 
 ## Purpose
 
-{{What behavior or implementation boundary this feature defines.}}
+{{User or domain outcome and the boundary this feature defines.}}
 
-## Minimal Context
+## Source
 
-- Current decision: {{the decision this feature needs to make or deliver}}
-- Read first: this file and `TASKS.md`; read `TRACEABILITY.md` only when it
-  exists and the next decision needs it.
-- Do not create `CONTEXT.md`; link to `docs/specs/README.md` instead of
-  duplicating SDD policy.
+- {{Relevant use case, roadmap item, or other source}}
 
-## Origin
+## Requirements and acceptance
 
-- Source use case: {{docs/requirements/use-cases/uc-*.md}}
-- Implementation-slice plan: {{TASKS.md}}
+- {{Verifiable requirement or acceptance criterion}}
 
-## Requirements
+## Decisions and impact
 
-- {{requirement}}
+Record only material ownership, contract, dependency, compatibility, and
+affected-surface decisions. Include alternatives when they change the choice;
+put slice sequencing in `TASKS.md`.
 
-## Behavioral Scenarios (optional)
+- {{Decision and affected behavior, interfaces, tests, or documentation}}
 
-Use Gherkin only for behavior contracts, regression-prone behavior, domain
-rules, or bug recurrence prevention. Do not convert architecture, layering,
-dependency design, refactor plans, or internal algorithms into scenarios.
-When scenarios cover an acceptance note, keep the scenario and remove the
-duplicate note.
+## Compatibility (when relevant)
 
-```gherkin
-Feature: {{behavior area}}
+Record only affected JP1/AJS, VS Code `engines.vscode`, desktop/web, or
+API/data-contract constraints.
 
-Scenario: {{one observable behavior}}
-  Given {{domain precondition}}
-  When {{domain event or request}}
-  Then {{observable outcome}}
-```
+## Behavioral scenarios (optional)
 
-## Architecture
+Add Gherkin only when it clarifies observable behavior, a domain rule, or a
+regression-prone case. Do not repeat acceptance criteria already covered.
 
-- Domain: {{responsibility or "none"}}
-- Application: {{responsibility or "none"}}
-- Presentation: {{responsibility or "none"}}
-- Infrastructure: {{responsibility or "none"}}
+## Non-goals
 
-## Impact Analysis
+- {{Scope boundary that prevents a likely misunderstanding}}
 
-### Dependency Impact
+## Open questions (if any)
 
-- Affected callers, components, commands, adapters, tests, and docs:
-  {{impact summary}}
-- Propagation decision: {{what must change together and what is intentionally
-  unchanged}}
-
-### Breaking Change Analysis
-
-- User-visible behavior: {{none or impact}}
-- API/DTO/schema compatibility: {{none or impact}}
-- VS Code/web extension compatibility: {{none or impact}}
-- Changed scenarios: {{scenario IDs added, changed, removed, or "none"}}
-
-### Alternative Considerations
-
-- {{alternative}}: {{reason accepted or rejected}}
-
-### Approval Impact Decisions
-
-- Approval evidence owner: TASKS.md `Human Approval`, `Completion Approval`,
-  or `Closure Approval`, according to the lifecycle gate
-- Scope changes requiring re-approval: {{changes that exceed the approved
-  scope}}
-
-## Compatibility
-
-- VS Code compatibility follows `package.json` `engines.vscode`.
-- Web extension compatibility: {{impact}}
-- Desktop extension compatibility: {{impact}}
-- Model, Serena, or agent choice does not change this behavior contract or the
-  SDD approval gate.
-
-## Acceptance Criteria
-
-- {{criterion}}
-
-## Non-Goals
-
-- {{non-goal}}
-
-## Open Questions
-
-- {{question or "None"}}
+- {{Unresolved decision, if any}}

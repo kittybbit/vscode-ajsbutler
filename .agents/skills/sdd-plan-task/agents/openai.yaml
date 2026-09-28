@@ -3,5 +3,5 @@ interface:
   display_name: "SDD Plan Task"
   short_description: "Plan feature implementation slices"
   default_prompt: >-
-    Route to the plan-author or plan-reviser role and use $sdd-plan-task to
-    decompose or revise the active SDD feature's implementation slices.
+    Route to planner with explicitly named Planning or Replanning Mode and use
+    $sdd-plan-task for the selected feature.

@@ -1,94 +1,39 @@
 ---
 name: sdd-commit-gate
-description: Create one focused commit after an explicit SDD plan, completion, or closure approval gate.
+description: Commit one exact plan, completion, or closure gate after its required human approval.
 ---
 
 # SDD Approval-Gated Commit
 
-## Purpose
+Commit one already-approved SDD gate. A reviewer verdict is evidence, not
+human approval.
 
-Commit exactly one repository state that has just passed an explicit human SDD
-approval gate. This procedure is shared by plan/replan, implementation
-completion, and Feature Exit closure commits.
+## Required evidence
 
-The approval-committer is not an approver. A review verdict is evidence for the
-human gate, not a substitute for it.
+The selected feature and gate are clear. TASKS.md records the gate's exact
+approved paths, matching reviewer result, and human approval with status,
+approval time/result, and scope:
 
-## Minimum Context
+- Plan: plan-reviewer Ready and Human Approval Approved.
+- Completion: implementation-reviewer Ready and Completion Approval Approved.
+- Closure: feature-closer Close and Closure Approval Approved.
 
-Read first:
+Do not infer approval from prior gates, a verdict, an agent recommendation,
+changed files, or an approval field without human evidence.
 
-1. `AGENTS.md` and `docs/specs/README.md`
-2. the selected feature's `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` when
-   present
-3. the gate-specific final diff and the exact paths listed in `TASKS.md`
+## Commit
 
-The caller must provide one gate type:
+Inspect status and the final diff. Before staging, stop if any change is
+unrelated, outside the approved paths, ambiguous, or part of another gate.
+Stage only the exact approved paths, run git diff --cached --check, inspect
+the staged patch for scope and accidental content, then create one
+gate-specific commit.
 
-- `plan`: plan-reviewer `Ready` plus `Human Approval: Approved`
-- `completion`: implementation-reviewer `Ready` plus `Completion Approval:
-Approved`
-- `closure`: feature-closer `Close` plus `Closure Approval: Approved`
+Never edit files or approval evidence, stage broad globs, hide unrelated work,
+amend, reset, checkout, force-push, push, publish, or open a PR. If a check
+fails, leave the index unchanged when possible and stop without committing.
 
-## Preconditions
-
-Before staging, verify:
-
-- the selected feature is fixed using the repository SSOT
-- the required reviewer verdict is present and matches the gate type
-- the matching human approval has `Status: Approved`, `Approved at`, and
-  `Approved scope`
-- `Approved paths` lists the exact files or folders allowed in this commit
-- the requested commit is one gate only, not a combined lifecycle transition
-
-No approval may be inferred from a review verdict, an agent's recommendation,
-the presence of a changed file, or the user's earlier approval of another gate.
-
-## Commit Workflow
-
-1. Inspect `git status` and the final diff without changing the worktree.
-2. Compare every changed path with the gate's `Approved paths`.
-3. Stop before staging if unrelated, out-of-scope, or ambiguous dirty work is
-   present. Ask the coordinator to isolate it or obtain a new approval.
-4. Stage only the explicitly approved paths.
-5. Run `rtk git diff --cached --check`.
-6. Inspect the staged summary and patch for scope, minimality, and accidental
-   secrets or generated output.
-7. Create one focused commit with a gate-specific message.
-8. Report the commit hash, message, paths, validation, and next handoff.
-
-## Safety Rules
-
-- Never stage or commit before the matching human approval.
-- Never stage broad globs or the whole worktree as a shortcut.
-- Never edit approval evidence during commit preparation.
-- Never amend, reset, checkout, force-push, push, publish, or open a PR.
-- Never hide unrelated work with stash, discard, or destructive cleanup.
-- If a check fails or the scope is ambiguous, leave the index unchanged when
-  possible and stop without committing.
-
-## Output Contract
-
-```md
-## Approval-Gated Commit
-
-- Gate: plan | completion | closure
-- Required review: <verdict>
-- Human approval: <evidence>
-- Commit: <hash and message>
-- Paths: <committed paths>
-- Validation: <staged diff checks>
-- Next step: <handoff>
-```
-
-## Validation
-
-The minimum commit-time check is:
-
-```bash
-rtk git diff --cached --check
-```
-
-Do not repeat product tests solely because the commit gate has begun. Use the
-implementation or Feature Exit evidence already recorded by the owning role;
-rerun a check only when the staged scope or gate evidence is incomplete.
+Return gate, review and approval evidence, commit hash/message/paths, staged
+validation, blockers, and next route to Main. Do not invoke another role.
+Do not rerun product checks solely because a commit gate began; use owning-role
+evidence unless scope or evidence is incomplete.

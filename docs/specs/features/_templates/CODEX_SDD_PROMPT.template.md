@@ -1,45 +1,26 @@
-# Codex Prompt: Create Repository-Native SDD Documents
+# Create Repository-Native SDD Documents
 
-You are working in this repository using Specification Driven Development.
+Create concise, reviewable SDD documents for this goal.
 
-Follow the existing repository documentation structure:
+Feature: {{Feature name}}
+Goal: {{Feature goal}}
+Source use case: {{Use-case path, if any}}
 
-- docs/specs/roadmap.md
-- docs/requirements/use-cases/\_template.md
-- docs/specs/features/\_templates/SPECS.template.md
-- docs/specs/features/\_templates/TASKS.template.md
-- docs/specs/features/\_templates/ADR.template.md
-- docs/specs/features/\_templates/TRACEABILITY.template.md
+Use the roadmap, relevant use case, and templates in this folder. Create the
+feature under `docs/specs/features/{{feature-slug}}/`.
 
-Create repository-native SDD documents for the following feature:
+- Put purpose, requirements, acceptance, compatibility, boundaries, and
+  unresolved decisions in `SPECS.md`.
+- Put the current plan, slice status, approval state, validation, risks, and
+  readiness in `TASKS.md`.
+- Add `ADR.md` only for a material decision and `TRACEABILITY.md` only when a
+  requirement-to-slice validation map is useful.
+- Update a use case only when the durable behavior contract changes; use its
+  existing template. Use Gherkin only when it clarifies observable behavior.
+- Apply DDD and Clean Architecture, preserve `package.json`
+  `engines.vscode` compatibility when relevant, and prefer evolutionary
+  changes.
+- Follow the SDD roles and approval gates in
+  [`docs/specs/README.md`](../../README.md).
 
-Feature:
-{{Feature Name}}
-
-Goal:
-{{Feature goal}}
-
-Instructions:
-
-1. Inspect existing documentation style before writing.
-2. Use the existing use-case template for requirements.
-3. Create feature documents under:
-   docs/specs/features/{{feature-slug}}/
-4. Generate:
-   - SPECS.md
-   - TASKS.md
-   - ADR.md if an architectural decision is needed
-   - TRACEABILITY.md when required for use case / requirement / slice /
-     validation mapping
-5. Keep documents concise, repository-specific, and implementation-ready.
-6. Align with DDD and Clean Architecture.
-7. Preserve VS Code compatibility declared in `package.json` when relevant.
-8. Prefer evolutionary design over rewrite-oriented plans.
-9. Use Gherkin scenarios only when they clarify behavior contracts,
-   regression-prone behavior, domain rules, or bug recurrence prevention.
-
-Output:
-
-- List created files.
-- Summarize key decisions.
-- Identify open questions.
+Return the created or changed paths, key decisions, and unresolved questions.

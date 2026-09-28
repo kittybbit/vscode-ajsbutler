@@ -1,131 +1,40 @@
 ---
 name: sdd-review-plan
-description: Review a prepared vscode-ajsbutler SDD implementation-slice plan for value, cohesion, independence, traceability, risk, and production readiness.
+description: Independently review one complete SDD feature plan before Human Approval.
 ---
 
 # SDD Review Plan
 
-## Purpose
+Review the full plan for one selected feature. Return a verdict; do not revise
+it, implement work, or approve it for the human.
 
-Review a prepared feature implementation plan before implementation. The
-procedure evaluates the plan and reports a verdict; it does not create a new
-plan or edit runtime files.
+## Review
 
-## Minimum Context
+Keep the feature fixed and stop if selection, comparison base, or material-risk
+evidence is ambiguous. Check whole-feature requirement/acceptance coverage;
+slice value, cohesion, size, order, dependencies, reviewability and testability;
+exact in/out-of-scope and approval boundaries; traceability; production
+readiness; and validation.
 
-Read first:
+Assess architecture, Solution Shape, public contracts, dependency direction,
+relevant capabilities, desktop/web, VS Code, JP1/AJS, parser/UI and telemetry
+risks, failure modes, large/malformed input, and README/CHANGELOG impact. Use
+the approved slice's Solution Shape Evidence and
+docs/specs/architecture.md#solution-shape.
+Separate automatic architecture-test facts from reviewer judgment. Assess ports,
+adapters, and retained application factories separately. For code slices,
+challenge sdd-evidence scope and qlty disposition under the SDD policy.
 
-1. `AGENTS.md` and `docs/specs/README.md`
-2. the selected feature's `SPECS.md` and `TASKS.md`
+Recommend merge, split, reorder, or revision when needed. Route changes to
+owner/layer, contract/direction, framework/custom choice, abstraction, affected
+surface, risk, validation, or approval boundary to Main for Replanning.
 
-Read related use cases, `TRACEABILITY.md`, and concrete symbols only when
-needed to validate a plan claim. Keep the selected feature fixed and stop if
-selection evidence is ambiguous.
+## Verdict and handoff
 
-## Review Criteria
-
-Evaluate every slice and the plan as a whole for:
-
-- one user-visible value, domain meaning, or architecture responsibility
-- cohesive files and components
-- independent implementation, review, validation, and commit
-- acceptance criteria and validation that can prove the slice
-- explicit in-scope, out-of-scope, and approval boundaries
-- desktop/web, VS Code, JP1/AJS definition, parser/UI, and telemetry risks
-- failure modes, diagnostics, large/malformed input, and production readiness
-- README/docs and CHANGELOG impact using the repository SSOT
-- complete `TRACEABILITY.md` mappings
-- consistent naming, DTO/view-model/entity responsibilities, layers, public
-  interfaces, dependencies, and architecture boundaries
-- actionable qlty evidence for code slices
-
-## Solution Shape Review
-
-Resolve the selected slice first and challenge only its `#### Solution Shape
-Evidence` block in `TASKS.md`; evidence from another slice cannot authorize or
-satisfy the selected slice. Challenge every material new or retained
-abstraction against the recorded `Solution Shape`: semantic owner and
-package/layer for material decisions,
-invariants, translations, lifecycles, public names, contracts, dependencies,
-and applicable tests; concrete responsibility and boundary value; public names,
-contracts, dependency direction, and tests where applicable; and the relevant
-framework, library, platform, or established repository capability. Keep the
-port, adapter, and retained application-factory assessments separate. Accept a
-port for dependency inversion and/or a host-neutral contract without requiring
-adapter duties; require an adapter to own applicable isolation, translation,
-error normalization, lifecycle, compatibility, or test-boundary responsibility;
-reject a same-request/same-response forwarding wrapper without port-contract
-value. Require a custom-gap justification only for a proposed custom
-mechanism, and keep framework use at the outer boundary. Separate automatic
-architecture-test evidence from reviewer judgments. For code slices, challenge
-the planned same non-mutating check/smells pair in disposable snapshots using
-identical verified qlty configuration and analyzed scope, and keep aggregate
-final validation only in the disposable final snapshot. Keep qlty runtime
-artifacts snapshot-local; if aggregate formatting changes analyzed source or
-evidence, require an allowlisted sync, final-snapshot rebuild, and repeated
-check/smells pair plus aggregate until stable. Require each comparable finding's
-identity, explicit severity ordering, baseline/final severity, measured values,
-and higher-is-worse or lower-is-worse direction; a new or reliably mapped
-adverse movement is Finding/NG, only unmappable identity or direction is
-advisory, and unchanged unrelated findings stay out of scope. Route any changed
-owner/package, contract/dependency direction, framework-versus-custom
-decision, abstraction/responsibility, affected surface, risk, validation, or
-approval boundary to Replanning.
-
-## Review Workflow
-
-1. Resolve the selected feature and read the complete implementation plan.
-2. Check coverage of requirements and acceptance criteria without unrelated
-   scope.
-3. Propose merging, splitting, or reordering when slice sizing or dependency
-   direction is wrong.
-4. Check every slice for scope, value, change group, acceptance, validation,
-   traceability, production readiness, dependencies, risks, and out-of-scope
-   work.
-5. Inspect only the concrete repository references needed to confirm impact.
-6. Repeat review after revisions until the plan is ready or clearly blocked.
-
-## Output
-
-```md
-## Plan Review
-
-- Verdict: Ready for approval | Needs revision | Split recommended | Replan required
-- Value:
-- Cohesion:
-- Independence:
-- Testability:
-- Approval Boundary:
-- Risk:
-- Traceability:
-- Production Readiness:
-- Cross-Slice Architectural Consistency:
-
-## Findings
-
-- ...
-
-## Recommended Changes
-
-- ...
-```
-
-Use `Ready for approval` only when no actionable finding remains. Return the
-verdict, evidence, and recommended route to Main. Main may route Findings to
-the planning procedure and may delegate the approval gate after Human Approval;
-this procedure does not invoke or spawn another lifecycle role.
-
-## Approval-Commit Handoff
-
-`Ready for approval` is not Human Approval and does not authorize a commit.
-Return the Ready evidence to Main. After explicit Human Approval records the
-exact plan or replan scope, Main may delegate `approval-committer` with gate
-type `plan`. Implementation starts only after that focused planning commit
-succeeds.
-
-## Rules
-
-- do not broaden scope silently
-- prefer concrete, actionable findings
-- preserve `engines.vscode` and desktop/web compatibility expectations
-- use `docs/specs/README.md` as the SSOT for lifecycle and CHANGELOG policy
+Verdict: Ready for approval, Needs revision, Split recommended, or Replan
+required. Use Ready only when no actionable Finding remains. Otherwise return
+the affected slice, evidence, and concrete revision; state whether Replanning
+is needed. Main receives the review and decides
+whether to route Findings or, after Human Approval, request the focused plan
+commit. Ready is not Human Approval. Do not edit, grant approval, or invoke
+another role.

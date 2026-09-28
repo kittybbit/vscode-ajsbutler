@@ -1,167 +1,34 @@
 # Copilot CLI Instructions
 
-This file is for **Copilot CLI** (terminal agent).
-For multi-agent coordination details, see `AGENTS.md` § "AI Agent Routing
-Guide". This file is a Copilot CLI entry-point adapter, not an SDD policy
-source.
+This is the Copilot CLI entry-point adapter. Repository rules and routing are
+owned by [AGENTS.md](../AGENTS.md); SDD gates, approvals, validation, and
+document roles are owned by [the SDD policy](../docs/specs/README.md).
 
-## Overview
+## Routing
 
-This repository is a Visual Studio Code extension for viewing and analyzing
-JP1/AJS3 definition files.
-It supports both desktop and web extension execution.
+Use Copilot CLI for automation, Git operations, CI/CD, and batch work. Use
+Codex for interactive editing, SDD lifecycle work, and parser or webview
+changes. Follow the routing owner when scope or capabilities change.
 
-## Main-Agent and SDD Routing
+Main handles discussion, investigation, and informal analysis directly. Formal
+SDD operations must pass through Main to the designated role; Copilot CLI must
+not impersonate a role or execute its lifecycle procedure. A child returns to
+Main and does not start another role.
 
-The main Codex agent is the default chat entrypoint and repository
-orchestrator. Ad-hoc discussion, investigation, analysis, troubleshooting,
-scope clarification, informal feedback, and routing classification stay with
-Main; an SDD topic alone does not activate a lifecycle role. Formal SDD
-operations are delegated one at a time as `Main -> Child -> Main`, with the
-child returning its result, evidence, and recommended route. Main preserves
-safety and approval gates and decides any subsequent delegation. Copilot CLI
-must not impersonate an SDD role or execute a role-owned lifecycle procedure
-directly.
+## Repository Context
 
-## Architecture & Principles
+- Product: a VS Code extension for viewing and analyzing JP1/AJS3 definition
+  files on desktop and web.
+- Architecture and compatibility: follow the constraints and boundaries in
+  `AGENTS.md` and `docs/specs/architecture.md`.
+- Feature artifacts: the selected feature's `SPECS.md` records requirements
+  and boundaries, `TASKS.md` owns its current plan and state, and
+  `TRACEABILITY.md` maps requirements to slices and validation when required.
+- Durable behavior: use cases live in `docs/requirements/use-cases/`.
 
-**Source of Truth**:
-Read these in order before making changes
+## Commands And Validation
 
-1. **`AGENTS.md`** - Architecture rules, agent routing, and coding policies
-
-   - § "AI Agent Routing Guide" determines lifecycle routing and when to use
-     Copilot CLI vs Codex
-   - § "Architecture Rules" lists strict dependency rules
-     (domain, application, presentation, infrastructure)
-   - § "SDD Workflow" outlines the specification-driven process
-
-2. **`docs/specs/`** - Specification-driven development documentation
-
-   - `docs/specs/README.md` - SDD policy, document roles, approval, and
-     validation SSOT
-   - `README.md` - build/test commands and repository overview
-   - `.agents/skills/` - canonical reusable procedures selected by their
-     owning custom roles
-   - `features/*/SPECS.md` - Temporary feature requirements and boundaries
-   - `features/*/TASKS.md` - Sole plan and current state for its feature; the
-     selected feature owns active branch implementation work
-   - `features/*/TRACEABILITY.md` - Requirement to validation mapping when required
-   - `roadmap.md` - Unfinished repository-level future work
-
-3. **`README.md`** - Build/test commands and quick reference
-
-## When to Use Copilot CLI
-
-Check the routing matrix in `AGENTS.md` § "AI Agent Routing Guide":
-
-✅ **Good for Copilot CLI**:
-
-- Complex automation across multiple files
-- Git operations (branches, commits, workflows)
-- CI/CD setup and shell scripting
-- Batch operations and file generation
-- Multi-step refactoring with git coordination
-
-❌ **Prefer Codex for**:
-
-- Live coding and interactive editing
-- SDD workflow (creating/updating specs)
-- Refactoring with real-time error feedback
-- Parser or webview changes (use specialized skills)
-
-## Build and Test Commands
-
-Run CLI commands through `rtk` by default when a matching proxy exists. Use a
-native command only when `rtk` has no suitable proxy, exact unfiltered output is
-required, the command is interactive, or an `rtk` proxy needs native-command
-confirmation.
-
-```bash
-rtk pnpm run qlty      # Lint and quality checks
-rtk pnpm test          # Desktop extension tests
-rtk pnpm run test:web  # Web extension tests
-rtk pnpm run build     # Production build
-```
-
-**Full validation sequence** (use before pushing; run serially):
-
-```bash
-rtk pnpm run qlty
-rtk pnpm test
-rtk pnpm run test:web
-rtk pnpm run build
-```
-
-## Testing Policy
-
-When touching parser, list view, flow view, CSV export, diagnostics, hover,
-or adapter boundaries:
-
-- Add or update unit/integration tests
-- Run `rtk pnpm run qlty`, `rtk pnpm test`, and
-  `rtk pnpm run test:web`
-- For docs-only changes, run `rtk pnpm run qlty`; add
-  `rtk pnpm run lint:md` when markdown-specific validation is useful
-
-## Key Constraints
-
-- **Do not raise** `engines.vscode` without explicit approval
-- **Keep desktop and web extension** behavior intact
-- **Avoid direct** `vscode` imports in domain layer
-- **Separate concerns**: domain → application → presentation/infrastructure
-- **Preserve parser internals** from direct UI component access
-
-## Example Tasks
-
-### Automation
-
-- "Set up a pre-commit hook for linting"
-- "Generate boilerplate for a new use case"
-- "Batch-rename files across multiple modules"
-
-### Git Operations
-
-- "Create a branch with feature scaffolding"
-- "Automate the cherry-pick of fixes across branches"
-- "Set up CI/CD for a new workflow"
-
-### Complex Changes
-
-- "Refactor parser module while preserving behavior"
-- "Extract a new use case with tests"
-- "Migrate to a new UI library step by step"
-
-## Multi-Agent Coordination
-
-Both Copilot CLI and Codex share a routing guide:
-
-| Agent                      | Best For                               |
-| -------------------------- | -------------------------------------- |
-| **Codex** (VS Code chat)   | Live coding, refactoring, SDD workflow |
-| **Copilot CLI** (terminal) | Automation, git operations, batch work |
-
-**Single source of truth**: `AGENTS.md` § "AI Agent Routing Guide"
-
-If you're uncertain whether CLI or Codex should handle a task, check that
-routing matrix first. For formal SDD work, route the designated operation
-through Main to the owning custom role; do not chain directly from one child to
-another.
-
-## Next Steps
-
-- For complex changes, follow the SDD workflow in `AGENTS.md` § "SDD Workflow"
-- Refer to `docs/specs/README.md` for authoritative SDD gates and document
-  roles. Use `.agents/skills/` as the location map for canonical procedures;
-  the owning custom role selects and runs its procedure after Main delegates
-  the formal operation.
-- Keep assumptions and design decisions in the responsible SDD artifact:
-  use cases for durable behavior, `SPECS.md` for feature requirements,
-  `TASKS.md` for slice plans, and `TRACEABILITY.md` for requirement-to-test
-  mapping when required
-- Run full validation (`rtk pnpm run qlty`, `rtk pnpm test`,
-  `rtk pnpm run test:web`, `rtk pnpm run build`) before pushing
-
----
-
-This file is a living document. Update it when agent coordination patterns change.
+Run repository commands through `rtk` when available. Choose tests and other
+checks by changed surface using the SDD validation policy; docs-only validation
+includes the disposable-snapshot qlty procedure. Relevant package scripts
+include `build`, `test`, `test:web`, `lint:md`, and `qlty`.
