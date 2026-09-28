@@ -5,71 +5,47 @@ description: Prepare and publish a vscode-ajsbutler VS Code extension release wi
 
 # Release Extension
 
-## Purpose
+Prepare and publish `vscode-ajsbutler` releases. Release work is outside the
+SDD lifecycle.
 
-Prepare and publish a `vscode-ajsbutler` extension release without rewriting
-`main`, force-pushing protected refs, or changing GitHub rulesets. When SDD
-applies, use the repository's feature lifecycle before release work.
+## Safety
 
-## Safety Rules
+- Never disable, edit, bypass, or delete GitHub rulesets; rewrite `main`;
+  force-push `main`; push to `origin/main`; amend commits already
+  merged to `origin/main`; or move a published release tag.
+- Use `vsce` only after the exact version, tag, package contents, and command
+  pass the required approval gate.
+- Stop when the previous tag is ambiguous or an existing tag or version
+  requires a decision.
 
-- never disable, edit, bypass, or delete GitHub rulesets
-- never force-push `main` or push directly to `origin/main`
-- never amend commits already merged to `origin/main`
-- never move a published release tag
-- do not publish with `vsce` before the exact version, tag, package contents,
-  and command have passed the required approval gate
-- stop when an existing tag/version, protected-ref rejection, or merge-path
-  ambiguity requires a decision
+## Release Procedure
 
-## Inputs and Baseline
+1. Review `package.json`, `CHANGELOG.md`, `README.md`, and active release
+   feature docs. Fetch remote tags and confirm the base is clean and current.
+2. Identify the previous published semver tag. Compare it with the intended
+   head and classify runtime, parser, UI, packaging, dependency, README,
+   web-extension, and VS Code compatibility impact.
+3. Choose the highest applicable bump: major for breaking changes, minor for
+   compatible user-facing capability, or patch for fixes, documentation,
+   packaging-only, or internal changes. Create `codex/release-v<X.Y.Z>` from
+   `origin/main` after deciding the target version.
+4. Update `CHANGELOG.md`, validate the documentation, and commit that change
+   separately. Run `pnpm version <bump-or-version>` without suppressing its Git
+   tag; verify the version commit and `v<X.Y.Z>` tag point to the expected
+   commit.
+5. Run quality, Markdown, build, desktop, web, and VSIX packaging checks.
+   Inspect the VSIX for its version, engine, README, CHANGELOG, bundles, and
+   accidental source, documentation, or local coordination files.
+6. Push only the release branch and tag; stop on rejection. Confirm the PR
+   merge strategy preserves the tagged version commit in `main`; stop if a
+   squash or rebase would make it unreachable. After the publication gate, run
+   the approved `vsce` command for the validated version.
+7. Open or update the release PR with tag, validation, package, Marketplace,
+   and no-ruleset-change evidence. After merge, verify the tag is reachable
+   from `origin/main` without retagging or rewriting refs.
 
-Read `AGENTS.md`, `package.json`, `CHANGELOG.md`, `README.md`,
-`docs/specs/README.md`, and any active release feature docs. Fetch tags and
-confirm a clean, up-to-date base:
+## Report
 
-```bash
-rtk git fetch origin --tags
-rtk git status --short --branch
-```
-
-## Release Workflow
-
-1. Identify the previous published release from remote semver tags; do not use
-   memory. Stop when the tag is ambiguous.
-2. Compare the previous tag with the intended head and classify runtime,
-   parser, UI, packaging, dependency, README, web-extension, and VS Code
-   compatibility impact.
-3. Choose the highest applicable semver bump: major for breaking changes,
-   minor for compatible user-visible capability, and patch for fixes,
-   documentation, packaging-only, or internal changes.
-4. Create `codex/release-v<X.Y.Z>` from `origin/main` after the target version
-   is decided.
-5. Update `CHANGELOG.md`, run docs validation, and commit it separately.
-6. Run `rtk pnpm version <bump-or-version>` without suppressing its git tag.
-   Verify the version commit and `v<X.Y.Z>` tag point to the expected commit.
-7. Run quality, Markdown, build, desktop test, web test, and VSIX packaging
-   checks. Inspect the VSIX for version, engine, README, CHANGELOG, bundles,
-   and accidental source/docs/local coordination files.
-8. Push only the release branch and tag. Stop on rejection; do not change
-   rulesets or force-push.
-9. Confirm the PR merge strategy preserves the tagged version commit in
-   `main`; stop for a decision when squash or rebase would make it unreachable.
-10. Publish the exact validated version with the approved `vsce` command.
-11. Open or update the release PR with the tag, validation, package,
-    Marketplace, and no-ruleset-change evidence.
-12. After merge, verify tag reachability from `origin/main` without retagging
-    or rewriting refs.
-
-## Required Evidence
-
-Report the previous tag, target version and reason, branch and PR, CHANGELOG
-summary, version command and tag, validation/package result, Marketplace
-result, tag reachability, no-ruleset-change confirmation, and follow-up risks.
-
-## Rules
-
-- use repository tools and `rtk` for inspection, git, package scripts, and
-  validation
-- preserve VS Code engine and desktop/web compatibility
-- keep release decisions explicit and stop at an unresolved safety gate
+Include the previous tag; target version and reason; branch and PR; CHANGELOG
+summary; version command and tag; validation and package results; Marketplace
+result; tag reachability; no-ruleset-change confirmation; and follow-up risks.

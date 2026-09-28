@@ -6,8 +6,8 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: Slices 1–3 committed; Slice 4 approved for implementation.
-- Next route: focused Slice 4 approval commit, then Slice 4 implementation.
+- State: Slices 1–3 committed; Slice 4 independently reviewed Ready and Completion Approved.
+- Next route: Slice 4 completion commit, then Feature Exit.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
@@ -20,13 +20,22 @@
   records.
 - Review status: Replan review `Ready`; replan commit recorded above.
 - Human Approval: Approved for Slice 4 within the reviewed plan.
-- Completion Approval: Pending for Slice 4; Slice 3 committed at `04563ae6`.
+- Completion Approval: Approved for Slice 4; Slice 3 committed at `04563ae6`.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 4 after its approval commit.
+- Active implementation slice: Slice 4.
 
 ## Completion Approval
 
-- Status: Pending for Slice 4
+- Status: Approved for Slice 4 in the current conversation after independent
+  implementation review returned Ready.
+- Approved at: 2026-09-29 07:57 JST; result: approve Slice 4 Completion.
+- Approved scope and paths: the Slice 4 release instruction and evidence changes
+  in `.agents/skills/release-extension/SKILL.md`,
+  `.agents/skills/release-extension/agents/openai.yaml`,
+  `docs/specs/features/sdd-instruction-simplification/TASKS.md`, and
+  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
+- Review: Ready after restoring the baseline force-push ban to `main` and
+  re-reviewing the four approved paths. Focused completion commit is eligible.
 - Previous completion: Slice 3 independently reviewed Ready, approved, and
   committed at `04563ae6`.
 
@@ -199,7 +208,7 @@
 
 ### Slice 4: Release instruction alignment
 
-- Status: Approved; implementation awaits its focused approval commit.
+- Status: Independently reviewed Ready; Completion Approved; completion commit pending.
 - Value and scope: shorten `.agents/skills/release-extension/SKILL.md` and
   `.agents/skills/release-extension/agents/openai.yaml` while preserving
   protected-branch, tag, package, Marketplace, and publish-safety conditions.
@@ -208,14 +217,15 @@
   platform/repository capabilities suffice; no new owner, abstraction, public
   command, or custom mechanism. Release remains outside SDD roles and gates.
 - Acceptance: release entry, checks, irreversible publication boundary, and
-  result remain clear and unchanged.
-- Validation: before/after obligation comparison, skill/adapter consistency,
-  links, YAML/Markdown validity, and policy-required disposable-snapshot qlty
-  observations plus the separate final aggregate. If formatting changes
-  analyzed content, synchronize approved paths, rebuild the final snapshot,
-  and repeat the observations and aggregate until stable.
+  required result remain clear without changing release mechanics.
+- Validation: the baseline force-push target is restored to `main`; other
+  branch, tag, and publication safeguards remain intact. Obligation comparison,
+  adapter, YAML/Markdown, local-reference, and qlty results are in the
+  implementation evidence.
 - Production readiness: no release execution, package, workflow, Marketplace,
   runtime, or host change; no README/user-doc or CHANGELOG update expected.
+- Implementation evidence: final snapshot record at
+  `/private/tmp/sdd-instruction-simplification-slice4-final/.qlty/slice4-evidence/evidence.txt`.
 - Proposed approval boundary and exact implementation/completion-commit paths:
   the two release skill/adapter files plus selected-feature `TASKS.md` and
   `TRACEABILITY.md` for this slice's state, validation, and evidence.
