@@ -1,39 +1,29 @@
 # Repository-Native SDD Templates
 
-Use these templates when a slice needs feature-local SDD documents.
+Use these templates for feature documents under
+`docs/specs/features/<feature-slug>/`:
 
-```text
-docs/specs/features/_templates/
-  SPECS.template.md
-  TASKS.template.md
-  ADR.template.md
-  TRACEABILITY.template.md
-  CODEX_SDD_PROMPT.template.md
-  CODEX_IMPLEMENTATION_PROMPT.template.md
-```
+- `SPECS.md` for purpose, requirements, acceptance, and material boundaries.
+- `TASKS.md` for the current plan, slice, approval, and evidence.
+- `ADR.md` only when a material decision needs a durable record.
+- `TRACEABILITY.md` when requirement-to-slice validation mapping is useful.
+- `CODEX_SDD_PROMPT.template.md` and
+  `CODEX_IMPLEMENTATION_PROMPT.template.md` for the corresponding task.
 
-Keep repository-level behavior contracts in:
+Keep repository-level behavior contracts in
+[`docs/requirements/use-cases/_template.md`](../../../requirements/use-cases/_template.md).
+The SDD policy, role ownership, approval gates, and commit procedure are owned
+by [`docs/specs/README.md`](../../README.md).
 
-```text
-docs/requirements/use-cases/_template.md
-```
+## Use
 
-## Workflow
+1. Start from a roadmap item or concrete feature goal; keep one feature
+   selected for the work.
+2. Update a use case only when its durable behavior contract changes.
+3. Create only the feature documents needed to make its requirements and
+   current implementation plan reviewable.
+4. At Feature Exit, propagate reusable knowledge and close the selected
+   feature only under the SDD policy.
 
-1. Start from an unfinished roadmap item or a concrete branch goal.
-2. Create or update a use case only when the behavior contract changes.
-3. Create feature-specific SDD files from these templates under
-   `docs/specs/features/<feature-slug>/`.
-4. Use CODEX_SDD_PROMPT.template.md to generate SDD documents.
-5. Use CODEX_IMPLEMENTATION_PROMPT.template.md to implement from approved SDD.
-
-After each explicit approval gate, use the approval-gated commit procedure to
-commit only the approved planning package, implementation slice, or Feature
-Exit closure before advancing the lifecycle.
-
-Feature docs should be concise and decision-oriented. Completed refactor-only
-slices are not retained as long-lived feature folders. During Feature Exit,
-propagate only reusable current knowledge to its durable owner and move
-valuable unfinished repository-level work to `docs/specs/roadmap.md`. After
-closure approval, remove only the complete selected feature folder and preserve
-inherited feature folders.
+Keep feature documents concise and decision-focused. Do not copy lifecycle
+policy into them.

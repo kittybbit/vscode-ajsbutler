@@ -1,119 +1,21 @@
-# Codex Prompt: Implement Feature from Repository-Native SDD
+# Implement an Approved SDD Slice
 
-You are implementing a feature from repository-native SDD documents.
+Implement exactly one Human Approved slice in the selected feature's
+`TASKS.md`.
 
-Feature:
-{{Feature Name}}
+Feature: {{Feature name}}
+Slice: {{Slice name}}
 
-Read these documents first:
+Read the relevant use case, `SPECS.md`, and `TASKS.md`. Read `ADR.md` or
+`TRACEABILITY.md` only when they affect this slice. Follow the assigned role,
+the SDD policy in [`docs/specs/README.md`](../../README.md), and architecture
+boundaries in [`docs/specs/architecture.md`](../../architecture.md).
 
-- docs/requirements/use-cases/{{use-case-file}}.md
-- docs/specs/features/{{feature-slug}}/SPECS.md
-- docs/specs/features/{{feature-slug}}/TASKS.md
-- docs/specs/features/{{feature-slug}}/ADR.md if present
-- docs/specs/features/{{feature-slug}}/TRACEABILITY.md if present
+- Start only after the approved plan commit and explicit slice approval.
+- Preserve behavior and compatibility; implement no unrelated work.
+- Add or update relevant tests and run checks for the changed surface.
+- Stop and return to Main if work needs a new design, scope, dependency, or
+  approval decision.
 
-Implementation rules:
-
-1. Start with impact investigation.
-2. Before approval, only investigate and update SDD documents.
-3. Before approval, do not edit runtime code, tests, generated artifacts, or
-   configuration.
-4. Before approval, do not create implementation branches, implementation
-   commits, implementation refactors, or incidental fixes.
-5. Stop for clear human approval before implementation.
-6. After plan approval, commit the approved planning package with
-   `$sdd-commit-gate` before implementation.
-7. After approval, enumerate all affected references and track the complete fix.
-8. Implement exactly one approved TASKS.md slice.
-9. Do not rewrite unrelated code.
-10. Preserve existing behavior unless SPECS.md explicitly changes it.
-11. Respect DDD and Clean Architecture boundaries.
-12. Keep UI, application, domain, and infrastructure responsibilities separate.
-13. Preserve VS Code compatibility declared in `package.json`.
-14. Add or update tests for every behavior change.
-15. Update documentation if implementation decisions differ from the spec.
-16. Changing the model or coding assistant does not change the SDD gate.
-
-Approval definition, approval evidence, and re-approval rules are centralized
-in `docs/specs/README.md` `Implementation Change Gate`.
-
-Before editing:
-
-- Search affected functions, classes, components, commands, and DTOs.
-- Follow `docs/specs/README.md` semantic code navigation guidance when Serena
-  or an equivalent tool is available.
-- Start Serena with targeted symbol lookup, then direct references, then
-  call-site and dependency impact. Use broad exploration only when uncertainty
-  remains.
-- List changed areas, affected features, affected tests, related docs, and
-  breaking-change risk.
-- When behavior scenarios exist, list changed, added, or removed scenarios and
-  affected tests.
-- Record durable impact, propagation, alternatives, and boundary decisions in
-  SPECS.md.
-- Record implementation-slice plan, validation, risk, production readiness,
-  approval state, selected-feature branch state, and Feature Exit readiness in
-  TASKS.md. Do not create a second branch-level plan.
-- Resolve the selected feature using `docs/specs/README.md`, keep it fixed for
-  the run, and exclude inherited feature state from the approval boundary.
-- Update TRACEABILITY.md when required.
-- Record the TASKS.md `Human Approval` section with `Status: Pending`.
-- Record exact `Approved paths` for each Human Approval, Completion Approval,
-  and Closure Approval gate.
-- Keep TASKS.md focused on slice plan/status, approval, validation, risks, and
-  feature exit readiness; do not accumulate historical logs, prior approvals,
-  or long validation histories there.
-- Report only this approval request, then wait for approval:
-
-```md
-## Impact Investigation Summary
-
-- Planned change:
-- Affected files:
-- Affected functions/classes/components:
-- Affected features:
-- Affected tests:
-- Related docs:
-- Breaking-change risk:
-- Alternatives:
-
-## Approval Request
-
-Please approve implementation before I edit runtime code, tests,
-generated artifacts, or configuration.
-
-Implementation will not proceed until approval is given.
-```
-
-After approval:
-
-- Record `Status: Approved`, approval result, and approved scope in TASKS.md
-  before implementation. Do not copy the approval message.
-- Commit the approved plan/replan package with `$sdd-commit-gate` before
-  implementation starts.
-- Do not implement if TASKS.md does not contain `Status: Approved` and
-  `Approved scope`.
-- Do not switch to another feature because its inherited folder has pending or
-  approved work.
-- Medium- or lower-cost models may be used for simple implementation inside
-  the approved scope.
-- Keep Copilot or other supporting-agent suggestions inside the approved
-  `SPECS.md`, `TASKS.md`, and approval scope.
-- Inspect existing files and naming conventions.
-- Confirm every affected reference is either fixed or explicitly left
-  unchanged in SPECS.md.
-- Implement one coherent block at a time.
-- Compile or run the closest fast check after meaningful changes.
-- If required changes exceed the approved scope, stop, update the impact
-  record, and request additional clear approval before editing those areas.
-- If a specification decision, destructive change, or design judgment appears,
-  stop and return to high-accuracy investigation and re-approval.
-
-After editing:
-
-- Run available build/test commands through `rtk` by default.
-- Summarize changed files.
-- Summarize behavior compatibility.
-- Summarize production readiness and CHANGELOG impact.
-- List follow-up tasks.
+Return changed paths, acceptance, checks, compatibility and production
+readiness, traceability, follow-up work, and unresolved risks.

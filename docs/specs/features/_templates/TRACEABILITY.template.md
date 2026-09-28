@@ -1,9 +1,5 @@
-# Requirements Traceability: {{Feature Name}}
+# Requirements Traceability: {{Feature name}}
 
-<!-- markdownlint-disable MD013 -->
-
-| Use case / requirement      | SPECS.md section | Implementation slice | Test or validation     |
-| --------------------------- | ---------------- | -------------------- | ---------------------- |
-| {{use case or requirement}} | {{section}}      | {{slice}}            | {{test-or-validation}} |
-
-<!-- markdownlint-enable MD013 -->
+| Requirement or source | Slice     | Test or validation |
+| --------------------- | --------- | ------------------ |
+| {{requirement}}       | {{slice}} | {{check}}          |

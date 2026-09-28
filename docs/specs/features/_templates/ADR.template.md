@@ -1,4 +1,4 @@
-# ADR: {{Decision Title}}
+# ADR: {{Decision title}}
 
 ## Status
 
@@ -6,40 +6,17 @@ Proposed
 
 ## Context
 
-Describe the architectural context and forces.
-
----
+{{Constraints or forces that affect this decision.}}
 
 ## Decision
 
-Describe the chosen decision.
-
----
-
-## Alternatives Considered
-
-- {{option and trade-off}}
-
-## Rationale
-
-Explain why this option was chosen.
+{{Chosen option and why it fits. Include alternatives only when they materially
+affect the choice.}}
 
 ## Consequences
 
-- {{positive consequence}}
-- {{tradeoff}}
+- {{Material benefit, trade-off, risk, mitigation, or follow-up.}}
 
-## Risks
+## Related documents (optional)
 
-- {{risk}}
-
-## Mitigations
-
-- {{mitigation}}
-
-## Related Documents
-
-- Feature spec: {{SPECS.md}}
-- Feature plan: {{TASKS.md}}
-- Traceability: {{TRACEABILITY.md or "not required"}}
-- Use case: {{Use Case}}
+- {{Relevant feature or use-case document}}
