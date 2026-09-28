@@ -6,8 +6,8 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: Slice 1 independently reviewed Ready; Completion Approval received.
-- Next route: focused Slice 1 completion commit.
+- State: Slice 1 committed at `2837bdd2`; Slice 2 approved for implementation.
+- Next route: focused Slice 2 approval commit, then Slice 2 implementation.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
@@ -19,42 +19,38 @@
   and release guidance, roles, adapters, templates, and inherited WebAPI
   records.
 - Review status: Replan review `Ready`; replan commit recorded above.
-- Human Approval: Approved for the reviewed replan and revised Slice 1 scope.
-- Completion Approval: Approved for Slice 1 after implementation-reviewer Ready.
+- Human Approval: Approved for Slice 2 within the reviewed plan.
+- Completion Approval: Pending for Slice 2; Slice 1 committed at `2837bdd2`.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 1 complete; completion commit pending.
+- Active implementation slice: Slice 2 after its approval commit.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: approved in current conversation after implementation-reviewer Ready
-- Approved scope: completed Slice 1, Repository routing and SDD policy, within
-  its reviewed seven-path diff.
-- Approved paths: `AGENTS.md`, `docs/specs/README.md`,
-  `docs/specs/architecture.md`, `.agent.md`,
-  `.github/copilot-instructions.md`,
-  `docs/specs/features/sdd-instruction-simplification/TASKS.md`, and
-  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
-- Implementation review verdict: Ready after two rounds of Findings were fixed
-  and independently re-reviewed.
-- Commit status: Eligible; pending focused completion commit.
+- Status: Pending for Slice 2
+- Previous completion: Slice 1 independently reviewed Ready, approved, and
+  committed at `2837bdd2`.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation after independent replan review
-- Approved scope: the reviewed replan and Slice 1, Repository routing and SDD
-  policy; selected-feature evidence documents may record only its state,
-  validation, and evidence.
-- Approved paths (replan commit):
+- Approved at: approved in current conversation for Slice 2 after the reviewed
+  plan and Slice 1 completion commit.
+- Approved scope: Slice 2, SDD role contracts and procedures, within its
+  recorded approval boundary. Selected-feature evidence documents may record
+  only this slice's state, validation, and evidence.
+- Approved paths (Slice 2 plan gate):
   `docs/specs/features/sdd-instruction-simplification/TASKS.md`.
-- Approved Slice 1 implementation and completion paths: `AGENTS.md`,
-  `docs/specs/README.md`, `docs/specs/architecture.md`, `.agent.md`,
-  `.github/copilot-instructions.md`,
-  `docs/specs/features/sdd-instruction-simplification/TASKS.md`, and
+- Approved Slice 2 implementation and completion paths: the seven files in
+  `.codex/agents/` (`approval-committer.toml`, `feature-author.toml`,
+  `feature-closer.toml`, `implementation-reviewer.toml`, `implementer.toml`,
+  `plan-reviewer.toml`, `planner.toml`); `SKILL.md` and `agents/openai.yaml` in
+  each of `.agents/skills/sdd-commit-gate/`, `sdd-create-feature/`,
+  `sdd-evidence/`, `sdd-feature-exit/`, `sdd-implement-task/`,
+  `sdd-plan-task/`, `sdd-review-implementation/`, and `sdd-review-plan/`;
+  `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
   `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
-- Required review: plan-reviewer Ready for approval after the evidence-path
-  mismatch was corrected and independently re-reviewed.
+- Required review: plan-reviewer Ready for the four-slice plan and its
+  evidence-path replan; Slice 2 scope is unchanged from that review.
 
 ## Replan Trigger And Approval Scope
 
@@ -66,7 +62,7 @@
   seven-path Slice 1 scope now has new exact-scope Human Approval above and
   requires a focused replan commit of this `TASKS.md` before implementation
   resumes.
-  Slices 2–4 remain proposed and require their own later exact-scope approvals.
+  Slices 3–4 remain proposed and require their own later exact-scope approvals.
 - Each slice's proposed implementation and completion-commit paths now include
   the two selected-feature evidence documents plus its content paths. The
   selected `SPECS.md` is unchanged by these slices.
@@ -75,8 +71,8 @@
 
 ### Slice 1: Repository routing and SDD policy
 
-- Status: Implemented and independently reviewed Ready within the approved
-  seven-path scope; Completion Approval received, commit pending.
+- Status: Implemented, independently reviewed Ready, approved, and committed
+  at `2837bdd2`.
 - Value and scope: establish one owner per repository rule and SDD gate by
   rewriting instruction text in `AGENTS.md`, `docs/specs/README.md`,
   `docs/specs/architecture.md`, `.agent.md`, and
@@ -123,7 +119,7 @@
 
 ### Slice 2: SDD role contracts and procedures
 
-- Status: Proposed.
+- Status: Approved; implementation awaits its focused approval commit.
 - Value and scope: each role has only its authority, inputs, evidence, verdict,
   output, and stop conditions. Rewrite all seven `.codex/agents/*.toml`, eight
   `.agents/skills/sdd-*/SKILL.md`, and their eight
