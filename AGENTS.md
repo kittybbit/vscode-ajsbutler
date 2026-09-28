@@ -1,413 +1,157 @@
 # AGENTS.md
 
-## Project Overview
+## Project
 
-This repository is a Visual Studio Code extension for viewing and analyzing
-JP1/AJS3 definition files. It supports desktop and web extension execution.
+This VS Code extension views and analyzes JP1/AJS3 definition files on desktop
+and web. Preserve parser, list, flow, CSV export, unit definition, diagnostics,
+hover, navigation, WebAPI import, semantic diff/report, and telemetry behavior.
+Modernize dependencies without changing that behavior.
 
-Primary goals:
+## Compatibility And Architecture
 
-1. Keep VS Code compatibility stable.
-2. Modernize dependencies without breaking extension behavior.
-3. Use Specification-Driven Development (SDD) for non-trivial work.
-4. Maintain the verified Domain-Driven Design and Clean Architecture
-   boundaries.
-5. Preserve parser, list view, flow view, CSV export, unit definition,
-   diagnostics, hover, navigation, WebAPI import, semantic diff/report, and
-   telemetry behavior.
+- `package.json` `engines.vscode` is the minimum supported version; do not
+  raise it casually or use unavailable APIs.
+- Shared production code must support desktop and web and must not import Node
+  built-ins. Use injected capabilities or browser-safe adapters.
+- Domain imports no outer layer, VS Code, or UI framework. Application imports
+  no infrastructure, presentation, or bootstrap. Presentation imports no
+  domain, infrastructure, or bootstrap. Infrastructure imports no
+  presentation or bootstrap. Concrete infrastructure dependencies are used
+  only in infrastructure or bootstrap.
+- Generated parser code and ANTLR are consumed only under
+  `src/infrastructure/parser`; `AjsRawUnit` stays there. Do not restore retired
+  wrappers under `src/domain/models/units`.
+- VS Code imports are limited to `src/extension.ts`, bootstrap, infrastructure,
+  and `presentation/vscode`. UI frameworks are limited to
+  `presentation/webview`; components use DTOs and view models, not parser data.
+- The telemetry SDK stays in its infrastructure adapter. Application
+  factories are invoked only by application or bootstrap; infrastructure
+  implementations are constructed only by infrastructure or bootstrap.
+- The architecture dependency test enforces its full import, construction,
+  parser, telemetry, and layer catalog with zero exceptions. See
+  [architecture](docs/specs/architecture.md) for durable ownership and
+  dependency rules.
 
-## Product Constraints
-
-- Minimum VS Code compatibility is defined by `package.json`.
-- Do not casually raise the minimum VS Code version or use unavailable APIs.
-- Do not break web extension support.
-- Do not import Node built-ins from production source; use injected
-  capabilities or browser-safe adapters.
-
-## Architecture Rules
-
-Follow these dependency rules strictly:
-
-- `domain` must not import outer layers, `vscode`, or UI frameworks.
-- `application` must not import `infrastructure`, `presentation`, or
-  `bootstrap`.
-- `presentation` must not import `domain`, `infrastructure`, or `bootstrap`.
-- `infrastructure` must not import `presentation` or `bootstrap`.
-- Concrete infrastructure dependencies may be referenced only by
-  `infrastructure` and `bootstrap`.
-- Generated parser code and ANTLR may be consumed only under
-  `src/infrastructure/parser`; `AjsRawUnit` remains inside parser
-  infrastructure.
-- Retired unit-wrapper dependencies under `src/domain/models/units` must not
-  be reintroduced.
-- `vscode` imports are limited to `src/extension.ts`, `bootstrap`,
-  `infrastructure`, and `presentation/vscode`.
-- UI-framework imports are limited to `presentation/webview`.
-- UI components consume DTOs/view models, not parser internals.
-- Production source must not import Node built-ins.
-- The telemetry SDK remains in its infrastructure adapter.
-- Application factory functions may be invoked only by application or
-  bootstrap.
-- Infrastructure implementations may be constructed only by infrastructure or
-  bootstrap.
-
-See `docs/specs/architecture.md` for durable boundary definitions. The
-architecture dependency test enforces the complete catalog with zero
-exceptions.
-
-Production source structure:
-
-- `src/domain`
-- `src/application`
-- `src/infrastructure`
-- `src/presentation`
-- `src/bootstrap`
-- `src/resource`
-
-## Refactoring Policy
-
-1. Preserve behavior first.
-2. Add or update tests before large structural changes.
-3. Prefer vertical slices around one behavior or boundary.
-4. Extract one use case at a time.
-5. Keep pull requests small and reviewable.
+Production source lives under `src/domain`, `src/application`,
+`src/infrastructure`, `src/presentation`, `src/bootstrap`, and `src/resource`.
 
 ## SDD Workflow
 
-SDD is the only standard process for non-trivial changes. Use
-`docs/specs/README.md` as the Single Source of Truth for trivial-change
-criteria, document roles, approval, validation, and Feature Exit policy.
+- Preserve behavior. Prefer small vertical slices, one use case at a time, and
+  small, reviewable changes. Add or update tests before large structural work.
+- SDD is the only standard for non-trivial changes. `docs/specs/README.md` owns trivial-change
+  criteria, SDD gates, document roles, approval, and validation policy.
+- Before editing runtime code, tests, generated artifacts, or configuration,
+  require a Human Approved implementation slice in the selected feature's
+  `TASKS.md`. Route any scope, design, impact, or approval-boundary change to
+  Main for Replanning.
+- Record `Solution Shape` at planning, implementation, and review. Its
+  definition and stop conditions are in
+  [architecture](docs/specs/architecture.md); the validation and evidence
+  rules are in the SDD policy.
+- Add or update relevant tests for non-trivial changes. Parser, list, flow,
+  CSV, and adapter changes require their boundary tests. Select checks by the
+  changed surface using the SDD validation policy.
+- Treat `engines.vscode` as a compatibility contract. Verify desktop and web
+  whenever shared contracts, bootstrap, or extension entry points change.
+- Keep telemetry privacy-conscious: report only cataloged application events
+  through `TelemetryPort`. Do not expose raw event-name or property-map
+  reporting, or send definition content, paths, or personal identifiers.
+- Before changing durable documentation, keep only reusable current behavior,
+  design, or repository policy that is not duplicated; see the SDD Durable
+  Documentation Gate.
 
-Follow this lifecycle:
+## Repository Rules
 
-1. Route trivial changes using the criteria in `docs/specs/README.md`.
-2. Delegate non-trivial feature intake to `feature-author`.
-3. Delegate Planning or Replanning to `planner` with the explicit mode.
-4. Delegate plan review to the read-only `plan-reviewer`; Findings are routed
-   back through Main to `planner` in Replanning Mode.
-5. Obtain clear Human Approval for the reviewed plan and approved slice scope.
-6. Delegate the approved plan or replan commit to `approval-committer` before
-   implementation starts.
-7. Delegate exactly one approved slice to `implementer`.
-8. Delegate completed-slice review to the read-only
-   `implementation-reviewer`; Findings are routed back through Main to
-   `implementer`.
-9. Obtain explicit Completion Approval and commit the exact completed slice
-   through `approval-committer` before starting another slice.
-10. Delegate Feature Exit to `feature-closer` only after every slice is
-    complete and committed, then obtain explicit closure approval.
-11. Delegate the approved Feature Exit propagation and selected
-    feature-folder removal to `approval-committer` before closing the feature.
-12. Replan when a new slice, scope, design decision, wider impact, or approval
-    boundary is discovered.
-
-Before editing runtime code, tests, generated artifacts, or configuration, the
-selected feature must have an approved implementation slice recorded in
-`TASKS.md`. If scope or design changes, stop and use Replanning Mode.
-
-### Solution Shape Gate
-
-For every non-trivial slice, record the `Solution Shape` at planning,
-implementation, and review:
-
-- assign each material decision, invariant, translation, lifecycle, public
-  name, contract, dependency, and test where applicable to a semantic owner
-  and package/layer
-- identify every material new or retained abstraction, its concrete
-  responsibility, and why it earns a boundary; this includes exported or
-  layer-crossing abstractions, ports, adapters, contract-bearing wrappers,
-  lifecycle owners, and abstractions that change dependency direction or
-  semantic ownership, but excludes ordinary local helpers and type aliases
-  unless they play one of those roles
-- record public names, contracts, dependency direction, and applicable tests;
-  assess ports for dependency inversion and/or host-neutral contract value,
-  adapters for applicable isolation, translation, error normalization,
-  lifecycle, compatibility, or test-boundary responsibility, and retained
-  factories separately for composition or use-case-boundary responsibility
-- consider only the relevant framework, library, platform, or established
-  repository capability; justify a custom mechanism only when one is proposed,
-  and keep framework use at the outer boundary
-- treat the existing architecture dependency test as automatic evidence for
-  its cataloged import, construction, parser, telemetry, and layer rules;
-  semantic ownership, abstraction value, framework sufficiency, custom-gap
-  credibility, and qlty disposition remain reviewer judgments
-- use `$sdd-evidence` for reproducible mechanical collection and the qlty
-  SARIF procedure in `docs/specs/README.md` for comparable baseline/final
-  observations. Reviewer judgments about finding identity, adverse movement,
-  and disposition remain with the owning role.
-
-Stop for Replanning when the approved `Solution Shape` changes its semantic
-owner or package/layer, contract or dependency direction, framework-versus-
-custom decision, abstraction or responsibility, affected surface, risk,
-validation, or approval boundary.
-
-## Coding and Testing Rules
-
-- Use TypeScript with explicit exported API types.
-- Prefer pure functions in domain/application layers.
-- Keep functions small and names aligned with JP1/AJS concepts.
-- Do not mix UI formatting with parsing/domain logic.
-- Run the most relevant checks from `docs/specs/README.md` `Risk-Based
-Validation And Review` before finishing.
-- When touching parser, list, flow, CSV, or adapter boundaries, add or update
-  the relevant tests.
-- Production readiness covers failure modes, diagnostics/fallback behavior,
-  JP1/AJS compatibility, large/malformed input, desktop/web behavior,
-  README/user-doc impact, and CHANGELOG need.
-
-## Durable Documentation Gate
-
-Before updating a long-lived document, verify the content is reusable beyond
-one feature, describes durable behavior/specification/design/repository policy,
-helps future work, is not duplicated, and is not temporary investigation,
-implementation history, review commentary, or a resolved issue.
-
-## VS Code and Web Extension Policy
-
-- Treat `engines.vscode` as a compatibility contract.
-- Keep shared code free of Node built-ins and filesystem/process assumptions.
-- Verify desktop and web behavior whenever shared contracts, bootstrap, or
-  extension entry points change.
-
-## Telemetry Policy
-
-Telemetry remains minimal and privacy-conscious. Do not add file content, file
-paths, or personal identifiers. Report only application-catalog events through
-`TelemetryPort`; do not expose raw event-name or property-map reporting.
-
-## Output Expectations for Agents
-
-When finishing a task, report:
-
-1. what changed
-2. tests/checks run
-3. compatibility risks
-4. follow-up tasks
-
-## CLI Command Policy
-
-Use `rtk` by default for inspection, search, git/GitHub operations, package
-scripts, tests, builds, type checks, and browser tooling. Use a native command
-only when `rtk` has no suitable proxy, exact raw output is required, or the
-command is interactive.
-
-## Branch Naming
-
-- Use a dedicated branch for each feature.
-- Reserve `docs/...` for docs-only changes. The Verify docs-only allowlist is
-  `docs/**`, `README.md`, `.codex/**/*.md`, and `.github/**/*.md`.
-- If a `docs/...` branch needs a file outside that set, rename it or start a
-  non-doc branch before continuing.
-
-## Forbidden Changes
-
-Do not:
-
-- silently raise `engines.vscode`
-- mix parser internals directly into UI components
-- add direct `vscode` imports into domain
-- add an architecture-rule exception or allowlist entry
-- rewrite large areas without a migration plan
-- remove existing user-visible behavior unless explicitly requested
-- skip tests for non-trivial architectural changes
+- Use TypeScript and explicit exported API types. Prefer pure domain and
+  application functions, small functions, and JP1/AJS-aligned names.
+- Keep parsing/domain logic separate from UI formatting.
+- Do not add architecture exceptions, mix parser internals into UI, import
+  `vscode` from domain, rewrite large areas without a migration plan, skip
+  tests for non-trivial architecture work, or remove user-visible behavior
+  unless explicitly requested.
+- Update `CHANGELOG.md` only under the criteria in the SDD policy.
+- Use `rtk` by default for inspection, search, Git, package scripts, tests,
+  builds, type checks, and browser tooling. Use native commands only when no
+  suitable proxy exists, exact raw output is required, or the command is
+  interactive.
+- Use a dedicated feature branch. Reserve `docs/...` for docs-only changes;
+  the Verify docs-only allowlist is `docs/**`, `README.md`,
+  `.codex/**/*.md`, and `.github/**/*.md`. Rename or recreate a docs branch if
+  its scope crosses that allowlist.
+- When finishing work, report changes, checks, compatibility risks, and
+  follow-up work.
 
 ## AI Agent Routing Guide
 
-`AGENTS.md` owns repository routing. Role authority and handoffs live in the
-Codex role definitions; reusable procedures live in `.agents/skills`; the
-Codex skill directory contains invocation adapters only.
+`AGENTS.md` owns repository constraints and Main routing. SDD policy and
+document roles live in [`docs/specs/README.md`](docs/specs/README.md). Role
+definitions in `.codex/agents/*.toml` own authority, allowed input, forbidden
+actions, model/effort, output, and stop conditions. Canonical role procedures
+live in `.agents/skills/*/SKILL.md`; `agents/openai.yaml` files are invocation
+adapters. `.agent.md` and `.github/copilot-instructions.md` are entry points.
 
-### Main-Agent Orchestration Boundary
-
-The main Codex agent is the default chat entrypoint and repository
-orchestrator. Main may directly handle ad-hoc discussion, exploration,
-read-only investigation, architectural discussion, design comparison,
-analysis, explanation, troubleshooting, scope clarification, brainstorming,
-informal feedback, summarization, instruction or prompt preparation, and
-routing classification. Discussion of an SDD topic alone does not activate a
-lifecycle role. Trivial changes may also remain with Main when the SDD policy
-permits them.
-
-Formal, role-owned SDD execution is activated by operation intent, not by the
-topic. Main MUST delegate formal lifecycle execution to the designated custom
-subagent. Main MUST NOT execute the lifecycle skill directly, impersonate,
-assume, or internally perform the designated role, or edit the role-owned
-artifact in place of that role. Main MAY inspect enough repository state to
-classify the request, summarize delegated results, request Human Approval, and
-route Findings, approval results, completion results, or closure results. Main
-MUST wait for the delegated result before routing the next formal stage. Every
-formal handoff is
-`Main -> Child -> Main`; the child returns its result, evidence, and a
-recommended route, and Main decides whether and when to delegate the next
-operation.
-
-Skills are execution procedures used by delegated roles. They are not direct
-lifecycle entrypoints for Main.
-
-### Main-Agent Direct Work
-
-Main MAY directly perform repository exploration, read-only investigation,
-architecture or design discussion, explanation, troubleshooting analysis,
-task classification, scope clarification, summarization, brainstorming,
-informal review or feedback, preparation of instructions or migration guidance,
-and investigation needed only to choose the next lifecycle role. These
-activities do not activate a role merely because their subject is a feature,
-plan, implementation, or Feature Exit. Main MUST delegate when the requested
-action executes a formal role-owned lifecycle operation or crosses an
-approval-gated role boundary.
-
-### Discussion vs Lifecycle Execution
-
-Discussion, analysis, investigation, explanation, brainstorming, and informal
-feedback about an SDD stage do not by themselves activate that role. Delegate
-only when the user requests execution of the role-owned lifecycle operation or
-when continuing an active formal workflow requires that operation.
-
-Routing precedence is: safety and approval gates, role ownership, and active
-formal-work constraints take priority over an explicit routing preference. A
-user may name a role when the requested operation is formal and the request is
-safe; Main-specified investigation remains direct unless it continues an
-active formal operation. Release work remains outside the SDD lifecycle and
-uses its dedicated release procedure because no release lifecycle role exists.
-
-### Agent Entrypoints
-
-- Copilot CLI: `.github/copilot-instructions.md`
-- Codex custom-agent definitions: `.codex/agents/*.toml`
-- Role-owned reusable procedures: `.agents/skills/*/SKILL.md`
-- Skill invocation adapters: `.agents/skills/*/agents/openai.yaml`
-- SDD policy/document SSOT: `docs/specs/README.md`
-
-The role catalog is six SDD lifecycle roles—`feature-author`, `planner`,
-`plan-reviewer`, `implementer`, `implementation-reviewer`, and
-`feature-closer`—plus the
-`approval-committer` gate role. Release is outside this catalog.
-
-### Deterministic SDD Routing
-
-Formal routing is deterministic. Main activates the operation, delegates one
-role-owned operation, records or integrates the returned evidence, and stops
-or makes the next delegation only after the stated gate is satisfied.
-
-1. **Feature intake**
-   - Activation: A concrete non-trivial feature requires SDD artifacts.
-   - Delegate: `feature-author`.
-   - Main responsibility: Confirm purpose, selection, and intake boundary.
-   - Result and return: Valid feature artifacts and traceability
-     recommendation return to Main.
-   - Stop: Ambiguous purpose, feature kind, overlap, or compatibility evidence.
-2. **Planning**
-   - Activation: The selected feature needs a complete slice plan.
-   - Delegate: `planner` in Planning Mode.
-   - Main responsibility: Confirm feature selection and planning scope.
-   - Result and return: Complete plan and validation evidence return to Main.
-   - Stop: Missing impact, design evidence, or independently untestable slice.
-3. **Plan review**
-   - Activation: A complete plan is ready for independent review.
-   - Delegate: `plan-reviewer`.
-   - Main responsibility: Preserve the read-only review and approval boundary.
-   - Result and return: `Ready` or Findings return to Main; Main routes
-     Findings to `planner` in Replanning Mode.
-   - Stop: Ambiguous selection/base or insufficient risk evidence.
-4. **Plan revision**
-   - Activation: Findings or a replan trigger blocks continuation.
-   - Delegate: `planner` in Replanning Mode.
-   - Main responsibility: Keep the change within the approved feature purpose.
-   - Result and return: Revised plan and re-review recommendation return to
-     Main.
-   - Stop: New design, scope, dependency, or approval decision.
-5. **Approved plan commit**
-   - Activation: Plan-reviewer `Ready` plus Human Approval.
-   - Delegate: `approval-committer`.
-   - Main responsibility: Verify the exact gate and approved paths.
-   - Result and return: One focused plan/replan commit result returns to Main.
-   - Stop: Missing approval, verdict, exact scope, or clean boundary.
-6. **Implementation**
-   - Activation: One approved slice is committed and ready.
-   - Delegate: `implementer`.
-   - Main responsibility: Provide approved context and preserve scope.
-   - Result and return: Completed slice, diff, and evidence return to Main.
-   - Stop: Missing approval/dependency or required out-of-scope change.
-7. **Implementation review**
-   - Activation: One approved slice has a final diff and evidence.
-   - Delegate: `implementation-reviewer`.
-   - Main responsibility: Preserve independent read-only review.
-   - Result and return: `Ready` or Findings return to Main; Main routes
-     Findings to `implementer`.
-   - Stop: Ambiguous scope/base or incomplete evidence.
-8. **Completion commit**
-   - Activation: Implementation-reviewer `Ready` plus Completion Approval.
-   - Delegate: `approval-committer`.
-   - Main responsibility: Verify the exact completed-slice gate.
-   - Result and return: One focused completion commit result returns to Main.
-   - Stop: Missing approval, verdict, exact scope, or clean boundary.
-9. **Feature Exit**
-   - Activation: Every slice is complete and committed.
-   - Delegate: `feature-closer`.
-   - Main responsibility: Preserve independent exit review and closure
-     boundary.
-   - Result and return: `Close` or a blocker returns to Main.
-   - Stop: Incomplete slice, missing evidence, or unresolved risk.
-10. **Closure commit**
-    - Activation: Feature-closer `Close` plus Closure Approval.
-    - Delegate: `approval-committer`.
-    - Main responsibility: Verify approved propagation and folder-removal
-      scope.
-    - Result and return: One focused closure commit result returns to Main.
-    - Stop: Missing approval, verdict, exact scope, or clean boundary.
-
-Release remains an explicit non-SDD exception: use `$release-extension` and its
-canonical release procedure only for extension release work; it does not
-participate in SDD lifecycle routing.
-
-Role files are the authority for each role's fixed model/effort, allowed input,
-forbidden actions, output contract, and stop conditions. Do not duplicate those
-contracts in this routing guide.
-
-### General Task Routing Matrix
+Main is the default entrypoint. Discussion, investigation, analysis,
+architecture/design comparison, explanation, troubleshooting, scope
+clarification, brainstorming, informal feedback, summarization, instruction
+preparation, and routing classification stay with Main; an SDD topic alone
+does not activate a role. Trivial changes may also stay with Main when SDD
+criteria permit. Main owns feature selection, coordination, approval evidence, scope/design
+decisions, integration, final validation, and user communication. It may
+inspect enough state to classify work, request Human Approval, and route
+results. Users may name a role for a safe formal operation; safety, approval
+gates, and role ownership take precedence. Main must not perform a delegated
+lifecycle procedure, impersonate or internally assume a role, or edit its
+role-owned artifacts. Skills are procedures for delegated roles, not
+lifecycle entrypoints for Main. Each child returns its result, evidence, and
+recommended route to Main and must not invoke or spawn the next lifecycle role.
+Main waits for that result before deciding whether to delegate again after the
+required gate is satisfied. Delegate when the user requests a formal operation
+or an active workflow requires its next stage.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Category         | Task                                                           | Primary | Fallback | Notes                                                             |
-| ---------------- | -------------------------------------------------------------- | ------- | -------- | ----------------------------------------------------------------- |
-| **SDD Workflow** | Feature intake, planning, review, implementation, Feature Exit | Codex   | CLI      | Follow the deterministic SDD routing above and shared procedures. |
-| **Analysis**     | Repository analysis                                            | Codex   | CLI      | Workspace awareness preferred; CLI for complex search.            |
-| **Architecture** | Validate clean architecture                                    | Codex   | CLI      | Interactive guidance preferred; CLI for systematic checks.        |
-| **VS Code**      | Safe extension API changes                                     | Codex   | CLI      | Preserve declared engine compatibility.                           |
-| **Webview**      | React/webview changes                                          | Codex   | CLI      | Verify desktop and web behavior.                                  |
-| **Automation**   | CI/CD or batch operations                                      | CLI     | Codex    | Shell and git coordination preferred.                             |
-| **Complex Ops**  | Multi-slice refactor                                           | CLI     | Codex    | Use only after SDD scope and handoffs are clear.                  |
+| Operation                                                        | Delegate                                                                   |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Feature intake                                                   | `feature-author`                                                           |
+| Planning or replanning                                           | `planner` in the corresponding mode                                        |
+| Plan review                                                      | Read-only `plan-reviewer`; Main routes Findings to `planner`               |
+| Approved plan or replan commit                                   | `approval-committer`                                                       |
+| One approved implementation slice                                | `implementer`                                                              |
+| Implementation review                                            | Read-only `implementation-reviewer`; Main routes Findings to `implementer` |
+| Completion commit after `Ready` and explicit Completion Approval | `approval-committer`                                                       |
+| Feature Exit after all slices are committed                      | `feature-closer`                                                           |
+| Closure commit after `Close` and explicit Closure Approval       | `approval-committer`                                                       |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
-Switch to the fallback only for token/session loss, scope expansion, or a
-capability the primary lacks. Both agents still follow this file and the SDD
-SSOT.
+`docs/specs/README.md` defines each operation's prerequisites, approval
+boundary, and commit gate. Release work is outside SDD; use the
+`release-extension` procedure only for extension releases.
 
-### Coordination Sources
+Entrypoints:
 
-- `AGENTS.md`: repository architecture rules and routing
-- `docs/specs/`: SDD policy, feature artifacts, and durable specifications
-- `.codex/agents/`: Codex role contracts
-- `.agents/skills/*/SKILL.md`: role-owned reusable procedures
-- `.agents/skills/*/agents/openai.yaml`: skill invocation adapters
-- `.agent.md` and `.github/copilot-instructions.md`: lightweight entry-point
-  adapters, not policy SSOT
+- Copilot CLI: `.github/copilot-instructions.md`
+- Codex roles: `.codex/agents/*.toml`
+- Reusable procedures: `.agents/skills/*/SKILL.md`
+- Invocation adapters: `.agents/skills/*/agents/openai.yaml`
+- SDD policy: `docs/specs/README.md`
 
-Keep assumptions and design decisions in the responsible SDD artifact. Do not
-duplicate SDD policy in agent-specific adapters.
+<!-- markdownlint-disable MD013 MD060 -->
+
+| Primary | Work                                                                            | Fallback                             |
+| ------- | ------------------------------------------------------------------------------- | ------------------------------------ |
+| Codex   | SDD, repository analysis, architecture, VS Code, webview                        | CLI for complex or systematic search |
+| CLI     | Automation, CI/CD, batch, complex operations after scope and handoffs are clear | Codex                                |
+
+<!-- markdownlint-enable MD013 MD060 -->
+
+Use the fallback only for token/session loss, scope expansion, or a capability
+the primary lacks. All agents follow the same repository and SDD rules.
 
 ## Repository-Specific Guidance
 
-Current important concerns:
-
-- Keep the zero-exception architecture rule catalog synchronized with durable
-  policy whenever an approved architecture decision changes a boundary.
-- Keep read-only WebAPI import in beta until its owning feature records real
-  JP1/AJS3 environment evidence and enough user feedback.
-- Preserve normalized domain, application DTO, plain transport, and explicit
-  composition boundaries when adding behavior.
-- Keep diagnostics, hover, commands, panels, and rendering concerns in
-  presentation adapters.
-- Validate desktop and web behavior whenever shared contracts, bootstrap, or
-  extension entry points change.
+- Keep the zero-exception architecture test catalog aligned with approved
+  architecture decisions.
+- Keep read-only WebAPI import in beta until its owning feature records
+  real-environment evidence and enough user feedback.

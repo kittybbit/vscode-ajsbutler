@@ -55,55 +55,42 @@ These rules apply to static imports, type imports, exports, dynamic imports,
 
 ## Solution Shape
 
-Every material decision, invariant, translation, lifecycle, public name,
-contract, dependency, and applicable test has one semantic owner and an
-explicit package/layer. The owner belongs where that meaning is stable; outer
-layers translate host, transport, framework, and presentation concerns.
+Give every material decision, invariant, translation, lifecycle, public name,
+contract, dependency, and applicable test one semantic owner and package/layer.
+The owner belongs where the meaning is stable; outer layers translate host,
+transport, framework, and presentation concerns.
 
-For this gate, a material new or retained abstraction is an exported or
-layer-crossing abstraction, port or adapter, contract-bearing wrapper,
-lifecycle owner, or abstraction that changes dependency direction or semantic
-ownership. Ordinary local helpers and type aliases are excluded unless they
-play one of those roles. Each material abstraction records its concrete
-responsibility and why it earns a boundary. A port may earn its boundary by
-owning dependency inversion and/or a host-neutral contract; it need not also
-own adapter concerns. An adapter earns its boundary through one or more
+A material abstraction is exported, crosses a layer, owns a contract or
+lifecycle, or changes dependency direction or semantic ownership. This includes
+ports, adapters, contract-bearing wrappers, and lifecycle owners. Ordinary
+local helpers and type aliases are excluded, even when exported, unless they
+also cross a layer, own a contract or lifecycle, change dependency direction
+or semantic ownership, or serve as a port, adapter, contract-bearing wrapper,
+or lifecycle owner. Record each material abstraction's responsibility
+and why it earns a boundary. A port earns a boundary through dependency
+inversion and/or a host-neutral contract. An adapter earns one through
 applicable isolation, translation, error normalization, lifecycle,
-compatibility, or test-boundary responsibilities. A wrapper that only forwards
-the same request and response, with none of those responsibilities and no
-port-contract value, does not earn a boundary. Retained application factories
-are assessed separately for composition or use-case-boundary responsibility;
-they are not treated as ports or adapters by default.
+compatibility, or test-boundary work. A same-request/same-response wrapper
+earns no boundary without one of these responsibilities or port-contract
+value. Assess retained application factories separately for composition or
+use-case-boundary responsibility.
 
-Framework-first means considering only the relevant framework, library,
-platform, or established repository capability for the proposed responsibility.
-It does not require adoption or speculative surveys. A custom-gap
-justification is required only when a custom mechanism is proposed for a job a
-relevant existing capability could perform. Framework use remains at the outer
-boundary; inner layers stay host-neutral.
+Consider only the relevant existing framework, library, platform, or
+established repository capability. Do not survey speculatively. Justify a
+custom gap only when proposing a custom mechanism for work an existing
+capability could do. Keep framework use at the outer boundary and inner layers
+host-neutral.
 
-The architecture dependency test is automatic evidence only for the existing
-catalog of import, construction, parser, telemetry, and layer rules. Semantic
-ownership, whether an abstraction earns its boundary, framework sufficiency,
-custom-gap credibility, and qlty-delta disposition remain explicit reviewer
-judgments. For code slices, compare the same non-mutating `rtk pnpm exec qlty
-check` and `rtk pnpm exec qlty smells` with `--no-snippets` in exact disposable
-snapshots. For each comparable finding, record identity, explicit severity ordering,
-baseline/final severity, measured values, and whether higher or lower values
-are worse. A new finding or reliably mapped adverse movement is Finding/NG;
-only unmappable identity or direction is advisory, and unchanged unrelated
-findings remain out of scope. The formatting-capable aggregate qlty run is
-separate final validation in the disposable final snapshot, never the baseline
-observation. Apply the shared snapshot contract in `AGENTS.md`: baseline and
-final use identical verified configuration and analyzed scope, qlty runtime
-artifacts stay snapshot-local, and any aggregate formatting change requires an
-allowlisted sync, final-snapshot rebuild, and repeated check/smells pair plus
-aggregate until stable.
+The architecture dependency test automatically verifies only its cataloged
+import, construction, parser, telemetry, and layer rules. Reviewers decide
+semantic ownership, abstraction value, framework sufficiency, custom-gap
+credibility, and qlty finding disposition. Follow the SDD policy's qlty
+comparison and evidence rules; they own the validation procedure.
 
-An approved slice stops for Replanning when its semantic owner or package/layer,
-contract or dependency direction, framework-versus-custom decision,
+Stop for Replanning if an approved slice changes its owner or package/layer,
+contract or dependency direction, choice of framework or custom mechanism,
 abstraction or responsibility, affected surface, risk, validation, or approval
-boundary changes.
+boundary.
 
 ## Composition
 

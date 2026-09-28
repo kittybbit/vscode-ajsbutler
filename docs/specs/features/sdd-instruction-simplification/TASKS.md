@@ -6,23 +6,38 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: revised plan reviewed and approved; Slice 1 awaits the replan commit.
-- Next route: focused replan commit, then Slice 1.
+- State: Slice 1 independently reviewed Ready; Completion Approval received.
+- Next route: focused Slice 1 completion commit.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
 ## Plan Status
 
-- Status: Revised plan approved; original plan committed at `80b51203`;
-  replan commit pending.
+- Status: Revised plan committed at `52428e67`; original plan commit:
+  `80b51203`.
 - Planning scope: instruction text reachable from `AGENTS.md`, including SDD
   and release guidance, roles, adapters, templates, and inherited WebAPI
   records.
-- Review status: Ready for approval after independent re-review.
+- Review status: Replan review `Ready`; replan commit recorded above.
 - Human Approval: Approved for the reviewed replan and revised Slice 1 scope.
-- Completion Approval: Pending; no completed slice or verdict.
+- Completion Approval: Approved for Slice 1 after implementation-reviewer Ready.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 1 after the replan commit.
+- Active implementation slice: Slice 1 complete; completion commit pending.
+
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation after implementation-reviewer Ready
+- Approved scope: completed Slice 1, Repository routing and SDD policy, within
+  its reviewed seven-path diff.
+- Approved paths: `AGENTS.md`, `docs/specs/README.md`,
+  `docs/specs/architecture.md`, `.agent.md`,
+  `.github/copilot-instructions.md`,
+  `docs/specs/features/sdd-instruction-simplification/TASKS.md`, and
+  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
+- Implementation review verdict: Ready after two rounds of Findings were fixed
+  and independently re-reviewed.
+- Commit status: Eligible; pending focused completion commit.
 
 ## Human Approval
 
@@ -60,8 +75,8 @@
 
 ### Slice 1: Repository routing and SDD policy
 
-- Status: Approved for the revised seven-path scope; implementation awaits the
-  replan commit.
+- Status: Implemented and independently reviewed Ready within the approved
+  seven-path scope; Completion Approval received, commit pending.
 - Value and scope: establish one owner per repository rule and SDD gate by
   rewriting instruction text in `AGENTS.md`, `docs/specs/README.md`,
   `docs/specs/architecture.md`, `.agent.md`, and
@@ -83,6 +98,11 @@
   exception, and source-priority statements; role catalog and link/heading
   checks; Markdown lint; policy-required disposable-snapshot qlty observations
   and final aggregate.
+- Review findings addressed: export independently qualifies abstractions as
+  material; ordinary local helpers and type aliases remain excluded, even when
+  exported, unless they perform another listed role. The pre-approval report
+  lists its minimum impact fields and forbids claims that
+  implementation started or finished before approval.
 - Production readiness: no JP1/AJS3, failure-mode, desktop/web, or
   `engines.vscode` behavior change. Assess README/user-doc and CHANGELOG need;
   update neither absent a changed durable usage or user-facing fact.
@@ -98,6 +118,8 @@
   if ownership or approval semantics cannot be preserved.
 - Out of scope: changing architecture rules, SDD gate order, product behavior,
   release mechanics.
+- Implementation evidence: snapshot-local record at
+  `/private/tmp/sdd-instruction-simplification-final-52428e67/evidence.txt`.
 
 ### Slice 2: SDD role contracts and procedures
 
@@ -227,12 +249,10 @@
 
 ## Validation Feasibility
 
-- `rtk pnpm exec qlty --version` currently panics before reporting a version:
-  `tracing-appender` cannot create its initial log file (`PermissionDenied`).
-  This is a tool/environment blocker, not a passing observation. Investigate
-  writable disposable snapshot-local log/cache settings before implementation
-  review; if unavailable, return missing qlty evidence to Main at the required
-  validation gate.
-- Syntax, references, normative comparison, and Markdown lint can be checked
-  independently. Missing SARIF, failed commands, and unrun checks cannot be
-  recorded as passed.
+- qlty `0.645.0` ran with the approved paths and configuration in identical
+  disposable snapshots. Final `check`, `smells`, and aggregate passed; the
+  baseline check had two formatting findings that final formatting cleared.
+  Raw results and other validation evidence are in the linked snapshot record.
+- Normative comparison, Markdown lint, and `git diff --check` passed. Final
+  qlty observations and aggregate passed; baseline formatting findings cleared.
+  Missing SARIF, failed commands, and unrun checks cannot be recorded as passed.
