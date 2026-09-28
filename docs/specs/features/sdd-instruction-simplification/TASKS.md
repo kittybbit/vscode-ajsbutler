@@ -6,44 +6,62 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: plan reviewed and approved; Slice 1 approved, plan commit pending.
-- Next route: plan commit, then Slice 1.
+- State: revised plan reviewed and approved; Slice 1 awaits the replan commit.
+- Next route: focused replan commit, then Slice 1.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
 ## Plan Status
 
-- Status: Approved; plan commit pending.
+- Status: Revised plan approved; original plan committed at `80b51203`;
+  replan commit pending.
 - Planning scope: instruction text reachable from `AGENTS.md`, including SDD
   and release guidance, roles, adapters, templates, and inherited WebAPI
   records.
 - Review status: Ready for approval after independent re-review.
-- Human Approval: Approved for the reviewed plan and Slice 1.
+- Human Approval: Approved for the reviewed replan and revised Slice 1 scope.
 - Completion Approval: Pending; no completed slice or verdict.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 1, after the plan commit.
+- Active implementation slice: Slice 1 after the replan commit.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation after plan-reviewer Ready
-- Approved scope: the reviewed four-slice plan and Slice 1, Repository routing
-  and SDD policy, within its recorded approval boundary.
-- Approved paths (plan commit):
-  `docs/specs/features/sdd-instruction-simplification/SPECS.md`,
+- Approved at: approved in current conversation after independent replan review
+- Approved scope: the reviewed replan and Slice 1, Repository routing and SDD
+  policy; selected-feature evidence documents may record only its state,
+  validation, and evidence.
+- Approved paths (replan commit):
+  `docs/specs/features/sdd-instruction-simplification/TASKS.md`.
+- Approved Slice 1 implementation and completion paths: `AGENTS.md`,
+  `docs/specs/README.md`, `docs/specs/architecture.md`, `.agent.md`,
+  `.github/copilot-instructions.md`,
   `docs/specs/features/sdd-instruction-simplification/TASKS.md`, and
   `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
-- Approved Slice 1 implementation paths: `AGENTS.md`,
-  `docs/specs/README.md`, `docs/specs/architecture.md`, `.agent.md`, and
-  `.github/copilot-instructions.md`.
-- Required review: plan-reviewer Ready for approval; first review finding was
-  resolved and independently re-reviewed.
+- Required review: plan-reviewer Ready for approval after the evidence-path
+  mismatch was corrected and independently re-reviewed.
+
+## Replan Trigger And Approval Scope
+
+- Trigger: after plan commit `80b51203`, Slice 1 implementation stopped before
+  edits because its approved instruction paths omit this selected feature's
+  `TASKS.md` and `TRACEABILITY.md`. The implementation procedure requires
+  slice/evidence and validation-result updates in those documents.
+- The prior Human Approval covered only the original five paths. The reviewed
+  seven-path Slice 1 scope now has new exact-scope Human Approval above and
+  requires a focused replan commit of this `TASKS.md` before implementation
+  resumes.
+  Slices 2–4 remain proposed and require their own later exact-scope approvals.
+- Each slice's proposed implementation and completion-commit paths now include
+  the two selected-feature evidence documents plus its content paths. The
+  selected `SPECS.md` is unchanged by these slices.
 
 ## Implementation Slices
 
 ### Slice 1: Repository routing and SDD policy
 
-- Status: Approved; implementation awaits the plan commit.
+- Status: Approved for the revised seven-path scope; implementation awaits the
+  replan commit.
 - Value and scope: establish one owner per repository rule and SDD gate by
   rewriting instruction text in `AGENTS.md`, `docs/specs/README.md`,
   `docs/specs/architecture.md`, `.agent.md`, and
@@ -68,10 +86,14 @@
 - Production readiness: no JP1/AJS3, failure-mode, desktop/web, or
   `engines.vscode` behavior change. Assess README/user-doc and CHANGELOG need;
   update neither absent a changed durable usage or user-facing fact.
-- Approval boundary: exactly the five files named above, only instruction text
+- Proposed revised approval boundary and exact implementation/completion-commit
+  paths: the five instruction files named above, plus
+  `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
+  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md` for
+  this slice's state, validation, and evidence. Only instruction text changes
   in `architecture.md`. One implementation review, Completion Approval, and
   focused commit are required before dependent slices.
-- Dependency: reviewed, Human Approved, committed plan.
+- Dependency: reviewed, Human Approved, committed revised plan.
 - Risk and stop: consolidating a rule may weaken a gate or break a link; replan
   if ownership or approval semantics cannot be preserved.
 - Out of scope: changing architecture rules, SDD gate order, product behavior,
@@ -102,9 +124,11 @@
   final snapshot, and repeat the observations and aggregate until stable.
 - Production readiness: no runtime, host, or JP1/AJS3 impact; no
   README/user-doc or CHANGELOG update expected.
-- Approval boundary: the seven role files and eight SDD skill/adapter pairs
-  only; excludes release, templates, WebAPI, code, configuration, and approval
-  status changes.
+- Proposed approval boundary and exact implementation/completion-commit paths:
+  the seven role files and eight SDD skill/adapter pairs, plus selected-feature
+  `TASKS.md` and `TRACEABILITY.md` for this slice's state, validation, and
+  evidence. Excludes release, templates, WebAPI, code, configuration, and
+  unapproved approval-state changes.
 - Dependency: Slice 1 completion commit.
 - Risk and stop: unique authority or evidence can be lost during shortening;
   replan for a changed authority owner or gate.
@@ -142,9 +166,11 @@
 - Production readiness: retain malformed-response, authentication/network,
   browser-unsupported, manual, desktop/web, and VS Code constraints. No OpenAPI
   or generated-file edit; no README/user-doc or CHANGELOG update expected.
-- Approval boundary: exactly seven template Markdown files plus the three named
-  inherited WebAPI Markdown files. Do not grant/reset inherited approvals or
-  start its blocked task.
+- Proposed approval boundary and exact implementation/completion-commit paths:
+  seven template Markdown files, the three named inherited WebAPI Markdown
+  files, plus selected-feature `TASKS.md` and `TRACEABILITY.md` for this
+  slice's state, validation, and evidence. Do not grant/reset inherited
+  approvals or start its blocked task.
 - Dependency: Slice 2 completion commit.
 - Risk and stop: unique manual or unresolved facts may look repetitive; replan
   if WebAPI scope, beta decision, or `openapi/README.md` instruction change is
@@ -171,7 +197,9 @@
   and repeat the observations and aggregate until stable.
 - Production readiness: no release execution, package, workflow, Marketplace,
   runtime, or host change; no README/user-doc or CHANGELOG update expected.
-- Approval boundary: only the two release skill/adapter files.
+- Proposed approval boundary and exact implementation/completion-commit paths:
+  the two release skill/adapter files plus selected-feature `TASKS.md` and
+  `TRACEABILITY.md` for this slice's state, validation, and evidence.
 - Dependency: Slice 1 completion commit; independent of Slices 2 and 3
   thereafter.
 - Risk and stop: a publish condition may be lost; replan for a new release
@@ -183,9 +211,9 @@
 
 - `TRACEABILITY.md` maps all feature requirements to these independently
   approvable slices and their validation.
-- This plan grants no implementation approval. Plan review `Ready`, exact-scope
-  Human Approval, and the focused plan commit precede Slice 1. Every slice
-  needs independent implementation review `Ready`, explicit Completion
+- Replan review `Ready` and new exact-scope Human Approval are recorded; the
+  focused replan commit precedes Slice 1.
+  Every slice needs independent implementation review `Ready`, explicit Completion
   Approval, and its focused commit before a dependent slice. Slice 4 can
   proceed after Slice 1 regardless of Slices 2 and 3.
 - Feature Exit follows all four completed and committed slices. It checks
