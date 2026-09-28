@@ -6,8 +6,8 @@
   authority, decisions, and required gates.
 - Selected feature: this folder. The inherited WebAPI folder is a rewrite
   surface, not this branch's active plan.
-- State: Slices 1 and 2 committed; Slice 3 independently reviewed Ready and approved.
-- Next route: focused Slice 3 completion commit.
+- State: Slices 1–3 committed; Slice 4 approved for implementation.
+- Next route: focused Slice 4 approval commit, then Slice 4 implementation.
 - Do not change product behavior, approval order, role authority, WebAPI beta
   status, or document locations.
 
@@ -19,53 +19,34 @@
   and release guidance, roles, adapters, templates, and inherited WebAPI
   records.
 - Review status: Replan review `Ready`; replan commit recorded above.
-- Human Approval: Approved for Slice 3 within the reviewed plan.
-- Completion Approval: Approved for Slice 3 after implementation-reviewer Ready.
+- Human Approval: Approved for Slice 4 within the reviewed plan.
+- Completion Approval: Pending for Slice 4; Slice 3 committed at `04563ae6`.
 - Closure Approval: Pending; no Feature Exit verdict.
-- Active implementation slice: Slice 3 complete; completion commit pending.
+- Active implementation slice: Slice 4 after its approval commit.
 
 ## Completion Approval
 
-- Status: Approved
-- Approved at: approved in current conversation after implementation-reviewer Ready
-- Approved scope: completed Slice 3, Feature templates and inherited WebAPI
-  records, within its reviewed 12-path diff.
-- Approved paths: the seven files in `docs/specs/features/_templates/`
-  (`ADR.template.md`, `CODEX_IMPLEMENTATION_PROMPT.template.md`,
-  `CODEX_SDD_PROMPT.template.md`,
-  `README_repository_native_sdd_templates.md`, `SPECS.template.md`,
-  `TASKS.template.md`, `TRACEABILITY.template.md`);
-  `docs/specs/features/import-definition-via-webapi/SPECS.md`,
-  `docs/specs/features/import-definition-via-webapi/TASKS.md`,
-  `docs/specs/features/import-definition-via-webapi/TRACEABILITY.md`;
-  `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
-  `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
-- Implementation review verdict: Ready after the browser-host condition was
-  restored and independently re-reviewed.
-- Commit status: Eligible; pending focused completion commit.
+- Status: Pending for Slice 4
+- Previous completion: Slice 3 independently reviewed Ready, approved, and
+  committed at `04563ae6`.
 
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in current conversation for Slice 3 after the reviewed
-  plan and Slice 2 completion commit.
-- Approved scope: Slice 3, Feature templates and inherited WebAPI records,
-  within its recorded approval boundary. Selected-feature evidence documents
-  may record only this slice's state, validation, and evidence.
-- Approved paths (Slice 3 plan gate):
+- Approved at: approved in current conversation for Slice 4 after the reviewed
+  plan and Slice 3 completion commit.
+- Approved scope: Slice 4, Release instruction alignment, within its recorded
+  approval boundary. Selected-feature evidence documents may record only this
+  slice's state, validation, and evidence.
+- Approved paths (Slice 4 plan gate):
   `docs/specs/features/sdd-instruction-simplification/TASKS.md`.
-- Approved Slice 3 implementation and completion paths: the seven files in
-  `docs/specs/features/_templates/` (`ADR.template.md`,
-  `CODEX_IMPLEMENTATION_PROMPT.template.md`, `CODEX_SDD_PROMPT.template.md`,
-  `README_repository_native_sdd_templates.md`, `SPECS.template.md`,
-  `TASKS.template.md`, `TRACEABILITY.template.md`);
-  `docs/specs/features/import-definition-via-webapi/SPECS.md`,
-  `docs/specs/features/import-definition-via-webapi/TASKS.md`,
-  `docs/specs/features/import-definition-via-webapi/TRACEABILITY.md`;
+- Approved Slice 4 implementation and completion paths:
+  `.agents/skills/release-extension/SKILL.md`,
+  `.agents/skills/release-extension/agents/openai.yaml`,
   `docs/specs/features/sdd-instruction-simplification/TASKS.md` and
   `docs/specs/features/sdd-instruction-simplification/TRACEABILITY.md`.
 - Required review: plan-reviewer Ready for the four-slice plan and its
-  evidence-path replan; Slice 3 scope is unchanged from that review.
+  evidence-path replan; Slice 4 scope is unchanged from that review.
 
 ## Replan Trigger And Approval Scope
 
@@ -77,7 +58,7 @@
   seven-path Slice 1 scope now has new exact-scope Human Approval above and
   requires a focused replan commit of this `TASKS.md` before implementation
   resumes.
-  Slice 4 remains proposed and requires its own later exact-scope approval.
+  Slice 4 has separate exact-scope approval above.
 - Each slice's proposed implementation and completion-commit paths now include
   the two selected-feature evidence documents plus its content paths. The
   selected `SPECS.md` is unchanged by these slices.
@@ -173,8 +154,8 @@
 
 ### Slice 3: Feature templates and inherited WebAPI records
 
-- Status: Implemented and independently reviewed Ready within the approved
-  12-path scope; Completion Approval received, commit pending.
+- Status: Implemented, independently reviewed Ready, approved, and committed
+  at `04563ae6`.
 - Value and scope: decision-focused feature records. Rewrite all seven
   `docs/specs/features/_templates/*` Markdown files and
   instruction/status/duplicate-record text in
@@ -218,7 +199,7 @@
 
 ### Slice 4: Release instruction alignment
 
-- Status: Proposed.
+- Status: Approved; implementation awaits its focused approval commit.
 - Value and scope: shorten `.agents/skills/release-extension/SKILL.md` and
   `.agents/skills/release-extension/agents/openai.yaml` while preserving
   protected-branch, tag, package, Marketplace, and publish-safety conditions.
