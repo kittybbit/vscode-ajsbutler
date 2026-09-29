@@ -26,16 +26,25 @@
   comments identify file complexity 136/86/156 and function complexity 10;
   the summary additionally identifies `interpretScheduleDateDay` complexity
   24 and return count 9.
+- Evidence trigger for this narrow replan: on the exact committed pre-R1
+  baseline, qlty 0.645.0 `check --sarif --no-fix` and `smells --sarif
+  --no-snippets` both exited 0 while the latter reported 0 analyzed files;
+  both SARIF files contained 0 results. The changed-files default therefore
+  cannot substantiate R1's baseline/final comparison.
 - Plan review: independent plan-reviewer returned `Ready for approval` with
   zero Findings after two revision rounds. The user's conditional Human
   Approval is recorded below for the exact reviewed R1 boundary.
+- Evidence replan review: independent plan-reviewer returned `Ready for
+  approval` with zero Findings after one revision round. The user's
+  conditional Human Approval for the revised boundary is recorded below.
 
 ## Replan Impact And Alternatives
 
 - Direct paths: `ScheduleDate.ts`, `ScheduleCalendar.ts`,
   `ScheduleCandidateResolver.ts`, and `ScheduleProjection.ts` in
   `src/domain/schedule`; their private collaborators and nearest schedule
-  boundary tests listed in R1.
+  boundary tests listed in R1; and the reusable Qlty evidence procedure in
+  `docs/specs/README.md`.
 - Transitive behavior: schedule interpretation and projection feed Semantic
   Diff, schedule impact, diagnostics, and Unit List. Calendar hierarchy,
   selection precedence, operational months, candidate ordering, substitutions,
@@ -60,9 +69,11 @@
   cannot pass without a new boundary, stop for Replanning.
 - Compatibility: no public DTO, JSON, command, report, diagnostic, user
   workflow, JP1/AJS3 v13 meaning, or `engines.vscode` change is authorized.
-  No README, durable use-case, architecture, or CHANGELOG edit is expected
-  because output remains unchanged; a discovered observable change requires
-  Replanning and a new documentation decision.
+  The sole durable policy edit is the Qlty Evidence Format correction in
+  `docs/specs/README.md` specified below. No other README, durable use-case,
+  architecture, or CHANGELOG edit is expected because output remains
+  unchanged; a discovered observable change requires Replanning and a new
+  documentation decision.
 
 ## R1: Resolve Six Qlty Findings
 
@@ -238,6 +249,21 @@ import requires Replanning.
   month boundaries and candidate order; substitution modes, shifts, invalid
   periods, partial/no-runs statuses and preserved evidence. Existing scenario
   expectations must not be relaxed. A new test path is a Replanning trigger.
+- **Exact editable durable policy path:** `docs/specs/README.md`, limited to
+  the Qlty Evidence Format procedure. Correct the two example commands to
+  `rtk pnpm exec qlty check --all --sarif --no-fix` and
+  `rtk pnpm exec qlty smells --all --sarif --no-snippets`. Replace literal
+  identical analyzed-path-set wording with the same full-repository selection
+  rule and configuration in baseline/final, record a nonzero analyzed-path
+  inventory for each command/snapshot, match baseline paths against final,
+  and count findings on approved new final paths as new findings. State that
+  every new SARIF finding is NG regardless of severity, and every reliably
+  mapped adverse movement is NG using explicit severity ordering, measured
+  values, and whether higher or lower is worse. State that zero analyzed
+  files are NG. Keep the existing version, complete SARIF, cache isolation,
+  result comparison, and final aggregate requirements. This reusable
+  correction resolves a generally ineffective clean-baseline command; it
+  changes the evidence method, not Qlty rules or application behavior.
 - **Validation-only paths:** `src/test/suite/semanticDiffSchedule.test.ts`,
   `src/test/suite/semanticDiffScheduleImpact.test.ts`,
   `src/test/suite/semanticDiffContracts.test.ts`,
@@ -257,7 +283,8 @@ import requires Replanning.
 - Acceptance:
   1. All six identified findings are absent in final official Qlty SARIF and
      the current-head Qlty Cloud `qlty check` passes with no blockers.
-     No replacement file/function/return-count blocker may be introduced.
+     No new SARIF finding of any severity, including one in a new internal
+     file, or reliably mapped adverse finding movement may be introduced.
      Qlty configuration and rules are unchanged.
   2. Existing exported types, function signatures, output shapes, evidence,
      ordering, calendar-index lifecycle, period semantics, and exception/
@@ -265,16 +292,35 @@ import requires Replanning.
   3. Focused and transitive schedule, Unit List, diagnostics, architecture,
      desktop, and web validations pass; no old Semantic Diff owner or
      architecture exception is restored.
-- Local evidence: use `sdd-evidence` on exact disposable baseline (current
-  approved code before R1) and final snapshots, with qlty >=0.645.0,
-  identical analyzed paths/configuration hash, snapshot-local caches, complete
-  SARIF 2.1.0 from `rtk pnpm exec qlty check --sarif --no-fix` and
-  `rtk pnpm exec qlty smells --sarif --no-snippets`, command output/status,
-  stable finding identity and severity/value/direction comparison, then
-  `rtk pnpm run qlty` in the final snapshot. A failed, mismatched, malformed,
-  missing, new, or adversely moved result is NG; no advisory waiver resolves
-  one of the six. If formatting edits approved content, sync approved paths,
+  4. The SDD Qlty Evidence Format states the same executable full-repository
+     selection rule and path-accounting requirements used for R1 evidence;
+     Markdown validation passes.
+- Local evidence: use `sdd-evidence` on the exact disposable baseline
+  (committed pre-R1 code) and final snapshots with the same qlty >=0.645.0
+  version and unchanged configuration hash. In **both** snapshots run, from
+  the repository root, `rtk pnpm exec qlty check --all --sarif --no-fix` and
+  `rtk pnpm exec qlty smells --all --sarif --no-snippets`. `--all` makes the
+  analyzed selection independent of changed-files/upstream detection. Keep
+  caches and output local to each snapshot; save complete SARIF 2.1.0,
+  command output/status, qlty version, snapshot revisions, and the analyzed
+  path inventory/count for each command. Confirm that both commands actually
+  analyze the four pre-R1 schedule files in baseline and final, and all eight
+  new internal schedule files in final. The command scope is the full
+  repository in both snapshots; the only expected schedule path-set delta is
+  those eight new files, whose findings count as new rather than being
+  discarded as a scope mismatch. Compare shared-path findings by reliable
+  identity, explicit severity ordering, baseline/final measured values, and
+  whether higher or lower values are worse. Check every final new file for
+  findings of any severity. Zero analyzed files, missing target
+  files, a changed configuration/command/selection rule, malformed or missing
+  SARIF, execution failure, any new SARIF finding regardless of severity, or
+  reliably mapped adverse movement is NG;
+  no advisory waiver resolves one of the six. Run `rtk pnpm run qlty` in the
+  final snapshot. If formatting edits approved content, sync approved paths,
   rebuild, and repeat until stable.
+- Policy dependency: the `docs/specs/README.md` correction above must be
+  included in the reviewed R1 implementation boundary and land with its
+  evidence. The planner leaves that durable policy unchanged at this gate.
 - Functional/build evidence: `rtk pnpm exec tsc --noEmit -p tsconfig.json`,
   `rtk pnpm run build`, ordered
   `rtk pnpm run test:prepare:desktop` then
@@ -282,7 +328,10 @@ import requires Replanning.
   after the final build. Record the named editable and validation-only
   suites' pass results from the full desktop runner; the repository has no
   focused suite selector. Run `git diff --check` and an all-`src` import
-  audit. Validate current PR head's Qlty Cloud status after publish before
+  audit. Run `rtk pnpm run lint:md` for feature docs and
+  `npx markdownlint-cli2 docs/specs/README.md` for the durable
+  policy file (the package script does not include that path). Validate
+  current PR head's Qlty Cloud status after publish before
   Feature Exit; local success alone is not closure evidence.
 - Production readiness: guard large/malformed inputs, deterministic scans,
   unsupported and missing-context evidence, caller-controlled index
@@ -301,6 +350,12 @@ import requires Replanning.
   test edit manifests, behavior and compatibility boundaries, validation,
   and completion/Feature Exit gates recorded above. This approval authorizes
   the focused planning commit and subsequent R1 implementation only.
+- Replanned evidence boundary: **Approved** in the current conversation after
+  independent plan review returned `Ready for approval` with zero Findings.
+  This approval covers the exact revised R1 Qlty `--all` selection, nonzero
+  path inventories and SARIF comparison, new-finding rule, and the sole
+  durable policy edit to `docs/specs/README.md` with its Markdown validation.
+  All other R1 boundaries remain as previously approved.
 - Approved plan-commit paths:
   - `docs/specs/features/schedule-domain-ownership/SPECS.md`
   - `docs/specs/features/schedule-domain-ownership/TASKS.md`
