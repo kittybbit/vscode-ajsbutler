@@ -88,6 +88,7 @@ export const useFlowDocumentSubscription = ({
   setUnitDefinitionByPath,
 }: UseFlowDocumentSubscriptionParams) => {
   const renderReadyStartedAt = useRef(performance.now());
+  const readyPosted = useRef(false);
   useEffect(() => {
     const changeDocumentFn = (_type: string, data: unknown) => {
       const nextState = resolveFlowDocumentChange(
@@ -108,7 +109,10 @@ export const useFlowDocumentSubscription = ({
         ),
       }),
     );
-    window.vscode.postMessage(createViewerReadyRequest());
+    if (!readyPosted.current) {
+      readyPosted.current = true;
+      window.vscode.postMessage(createViewerReadyRequest());
+    }
     return () => {
       window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocumentFn);
     };

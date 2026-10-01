@@ -1,154 +1,65 @@
-import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import type { SemanticDiffScheduleRun } from "../../models/semantic-diff/SemanticDiff";
+import type { AjsParameter } from "../models/ajs/AjsDocument";
 import {
   relativeScheduleDateRequiresContext,
-  type SemanticDiffScheduleCalendarContext,
-} from "./semanticDiffScheduleCalendarContext";
-import type { ValidSchedulePeriod } from "./semanticDiffScheduleCandidateTypes";
-import { toUtcDate } from "./semanticDiffScheduleDateMath";
+  type ScheduleCalendarContext,
+} from "./ScheduleCalendar";
+import { toUtcDate } from "./ScheduleDate";
 import {
-  datePreflight,
-  scheduleRuleEvidenceId,
-  resolveSubstitutedCandidates,
-  type DatePreflight,
-} from "./semanticDiffScheduleSubstitutionProjection";
+  updateSubstitutionContextState,
+  substitutionResolution,
+} from "./ScheduleSubstitutionResolution";
 import {
-  substitutionState,
   type SubstitutionAnalysis,
   type SubstitutionAssociation,
   type SubstitutionRuleState,
-} from "./semanticDiffScheduleSubstitutionAnalysis";
+} from "./ScheduleSubstitutionAnalysis";
+import {
+  datePreflight,
+  scheduleRuleEvidenceId,
+  type DatePreflight,
+} from "./ScheduleProjectionOutcomes";
 import type {
-  SemanticDiffScheduleInterpretation,
-  SemanticDiffScheduleRuleInterpretation,
-} from "./semanticDiffScheduleTypes";
+  ScheduleInterpretation,
+  ScheduleRuleInterpretation,
+} from "./ScheduleInterpretation";
+import type { ScheduleRun } from "./ScheduleProjection";
+
+type ValidSchedulePeriod = { from: Date; to: Date };
 
 type RuleProjectionInput = {
-  interpretation: SemanticDiffScheduleInterpretation;
+  interpretation: ScheduleInterpretation;
   parsedPeriod: ValidSchedulePeriod;
   candidatePeriod: ValidSchedulePeriod;
-  calendarContext?: SemanticDiffScheduleCalendarContext;
+  calendarContext?: ScheduleCalendarContext;
   substitutions: SubstitutionAnalysis;
   unresolvedWholeRules: Set<number>;
 };
 
 type ProjectedRule = {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  runs: SemanticDiffScheduleRun[];
+  rule: ScheduleRuleInterpretation;
+  runs: ScheduleRun[];
 };
 
 type ProjectedRules = {
-  rules: SemanticDiffScheduleRuleInterpretation[];
-  runs: SemanticDiffScheduleRun[];
+  rules: ScheduleRuleInterpretation[];
+  runs: ScheduleRun[];
 };
 
 const cloneRule = (
-  rule: SemanticDiffScheduleRuleInterpretation,
-  patch: Partial<SemanticDiffScheduleRuleInterpretation>,
-): SemanticDiffScheduleRuleInterpretation => ({ ...rule, ...patch });
+  rule: ScheduleRuleInterpretation,
+  patch: Partial<ScheduleRuleInterpretation>,
+): ScheduleRuleInterpretation => ({ ...rule, ...patch });
 
 const isWithin = (date: Date, period: ValidSchedulePeriod): boolean =>
   date >= period.from && date < period.to;
 
-const updateSubstitutionContextState = (input: {
-  association: SubstitutionAssociation;
-  status: "invalid" | "missing-context";
-  calendarRawParameters: AjsParameter[];
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
-}): void => {
-  input.association.sh.forEach((substitutionRule) => {
-    const current = input.states.get(substitutionRule.interpretationRule);
-    if (!current || current.status !== "supported") {
-      return;
-    }
-    input.states.set(
-      substitutionRule.interpretationRule,
-      substitutionState({
-        status: input.status,
-        reason: "closed-day-substitution",
-        evidenceId: `schedule:sh:${input.status}:${substitutionRule.rule}`,
-        rawParameters: [
-          ...current.rawParameters,
-          ...input.calendarRawParameters,
-        ],
-        rule: substitutionRule.rule,
-      }),
-    );
-  });
-};
-
-type CandidateProjectionInput = {
+export type CandidateProjectionInput = {
   candidates: string[];
   association: SubstitutionAssociation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
   fullyQualified: boolean;
   unresolvedWholeRule: boolean;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
-};
-
-const invalidAssociation = (association: SubstitutionAssociation): boolean => {
-  const invalidMode = association.modeConflict || association.mode === "no";
-  const invalidRules = association.invalidSh.length > 0;
-  const invalidShiftDays =
-    association.shiftDaysConflict || association.invalidShiftDays.length > 0;
-  return invalidMode || invalidRules || invalidShiftDays;
-};
-
-type SubstitutionModeInput = Pick<
-  CandidateProjectionInput,
-  "association" | "fullyQualified" | "unresolvedWholeRule"
->;
-
-const hasAssociationMode = (input: SubstitutionModeInput): boolean =>
-  input.association?.mode !== undefined;
-
-const hasForcedEmptySubstitution = (input: SubstitutionModeInput): boolean =>
-  (input.association?.invalidSh.length ?? 0) !== 0 ||
-  input.association?.mode === "no";
-
-const isDirectSubstitutionProjection = (
-  input: SubstitutionModeInput,
-): boolean =>
-  !hasForcedEmptySubstitution(input) &&
-  (!hasAssociationMode(input) || !input.fullyQualified);
-
-const isEmptySubstitutionProjection = (input: SubstitutionModeInput): boolean =>
-  hasForcedEmptySubstitution(input) ||
-  (hasAssociationMode(input) &&
-    (invalidAssociation(input.association!) || input.unresolvedWholeRule));
-
-const substitutionMode = (
-  input: SubstitutionModeInput,
-): "direct" | "empty" | "resolve" => {
-  const direct = isDirectSubstitutionProjection(input);
-  const empty = isEmptySubstitutionProjection(input);
-  const key = `${direct}-${empty}`;
-  return {
-    "true-false": "direct",
-    "true-true": "direct",
-    "false-true": "empty",
-    "false-false": "resolve",
-  }[key] as "direct" | "empty" | "resolve";
-};
-
-const directResolution = (
-  input: CandidateProjectionInput,
-  mode: "direct" | "empty",
-): ReturnType<typeof resolveSubstitutedCandidates> => ({
-  candidates: mode === "empty" ? [] : input.candidates,
-});
-
-const substitutionResolution = (
-  input: CandidateProjectionInput,
-): ReturnType<typeof resolveSubstitutedCandidates> => {
-  const mode = substitutionMode(input);
-  return mode === "resolve"
-    ? resolveSubstitutedCandidates({
-        candidates: input.candidates,
-        association: input.association,
-        calendarContext: input.calendarContext,
-      })
-    : directResolution(input, mode);
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 };
 
 const projectedCandidates = (input: CandidateProjectionInput): string[] => {
@@ -169,10 +80,10 @@ const projectedCandidates = (input: CandidateProjectionInput): string[] => {
 const projectedRuns = (input: {
   candidates: string[];
   period: ValidSchedulePeriod;
-  interpretation: SemanticDiffScheduleInterpretation;
-  rule: SemanticDiffScheduleRuleInterpretation;
+  interpretation: ScheduleInterpretation;
+  rule: ScheduleRuleInterpretation;
   startTime: Extract<DatePreflight, { kind: "project" }>["startTime"];
-}): SemanticDiffScheduleRun[] =>
+}): ScheduleRun[] =>
   input.candidates
     .map((candidate) => ({ date: candidate, parsed: toUtcDate(candidate) }))
     .filter(
@@ -202,10 +113,10 @@ const substitutionParameters = (
 ];
 
 const projectedEvidenceParameters = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   startTime: Extract<DatePreflight, { kind: "project" }>["startTime"];
   association: SubstitutionAssociation | undefined;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  calendarContext: ScheduleCalendarContext | undefined;
 }): AjsParameter[] => [
   input.rule.parameter,
   input.startTime.parameter,
@@ -221,7 +132,7 @@ const projectedEvidenceParameters = (input: {
 ];
 
 const projectReadyDateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   preflight: Extract<DatePreflight, { kind: "project" }>;
   context: RuleProjectionInput;
 }): ProjectedRule => {
@@ -263,8 +174,8 @@ const projectReadyDateRule = (input: {
 };
 
 const projectDateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTime: SemanticDiffScheduleRuleInterpretation | undefined;
+  rule: ScheduleRuleInterpretation;
+  startTime: ScheduleRuleInterpretation | undefined;
   context: RuleProjectionInput;
 }): ProjectedRule => {
   const { rule, startTime, context } = input;
@@ -280,16 +191,16 @@ const projectDateRule = (input: {
 };
 
 const calendarSelection = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
-}): SemanticDiffScheduleCalendarContext["selection"] | undefined =>
+  rule: ScheduleRuleInterpretation;
+  calendarContext: ScheduleCalendarContext | undefined;
+}): ScheduleCalendarContext["selection"] | undefined =>
   input.rule.parameter.key === "jc"
     ? input.calendarContext?.selection
     : undefined;
 
 const calendarSelectionRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  calendarContext: SemanticDiffScheduleCalendarContext | undefined;
+  rule: ScheduleRuleInterpretation;
+  calendarContext: ScheduleCalendarContext | undefined;
 }): ProjectedRule | undefined => {
   const selection = calendarSelection(input);
   if (!selection) {
@@ -302,9 +213,9 @@ const calendarSelectionRule = (input: {
 };
 
 const calendarSelectionResult = (
-  rule: SemanticDiffScheduleRuleInterpretation,
-  selection: NonNullable<SemanticDiffScheduleCalendarContext["selection"]>,
-): SemanticDiffScheduleRuleInterpretation =>
+  rule: ScheduleRuleInterpretation,
+  selection: NonNullable<ScheduleCalendarContext["selection"]>,
+): ScheduleRuleInterpretation =>
   cloneRule(rule, {
     status: selection.status,
     reason: selection.status === "supported" ? undefined : "calendar-selection",
@@ -316,8 +227,8 @@ const calendarSelectionResult = (
   });
 
 const substitutionStateRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  rule: ScheduleRuleInterpretation;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): ProjectedRule | undefined => {
   const substitution = input.states.get(input.rule);
   return substitution
@@ -337,8 +248,8 @@ const substitutionStateRule = (input: {
 };
 
 const projectRule = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
-  startTimes: Map<number, SemanticDiffScheduleRuleInterpretation>;
+  rule: ScheduleRuleInterpretation;
+  startTimes: Map<number, ScheduleRuleInterpretation>;
   context: RuleProjectionInput;
 }): ProjectedRule => {
   const { rule, startTimes, context } = input;
@@ -362,9 +273,9 @@ const projectRule = (input: {
 };
 
 const firstStartTimes = (
-  rules: SemanticDiffScheduleRuleInterpretation[],
-): Map<number, SemanticDiffScheduleRuleInterpretation> => {
-  const startTimes = new Map<number, SemanticDiffScheduleRuleInterpretation>();
+  rules: ScheduleRuleInterpretation[],
+): Map<number, ScheduleRuleInterpretation> => {
+  const startTimes = new Map<number, ScheduleRuleInterpretation>();
   rules.forEach((rule) => {
     if (rule.rule !== undefined && !startTimes.has(rule.rule)) {
       startTimes.set(rule.rule, rule);

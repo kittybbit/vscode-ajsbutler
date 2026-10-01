@@ -2,7 +2,7 @@ import type { AjsParameter } from "../../models/ajs/AjsDocument";
 import {
   interpretScheduleDateValue,
   type ScheduleDateDay,
-} from "../../models/parameters/scheduleDateInterpreter";
+} from "../../schedule/ScheduleDate";
 
 export type ParsedExplicitScheduleDateValue = {
   hasExplicitRuleNumber: boolean;

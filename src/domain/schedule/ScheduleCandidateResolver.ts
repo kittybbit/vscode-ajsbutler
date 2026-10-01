@@ -1,23 +1,52 @@
-import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import { interpretScheduleDateValue } from "../../models/parameters/scheduleDateInterpreter";
-import {
-  relativeScheduleDateRequiresContext,
-  type SemanticDiffScheduleCalendarContext,
-} from "./semanticDiffScheduleCalendarContext";
-import {
-  deferredScheduleDateCandidates,
-  emptyScheduleDateCandidates,
-  invalidScheduleDateCandidates,
-  singleScheduleDateCandidate,
-  type ScheduleDateCandidateResult,
-  type ValidSchedulePeriod,
-} from "./semanticDiffScheduleCandidateTypes";
+import type { AjsParameter } from "../models/ajs/AjsDocument";
 import {
   createScheduleDate,
   daysInGregorianMonthOrUndefined,
   formatScheduleDate,
-} from "./semanticDiffScheduleDateMath";
-import { operationalDateCandidates } from "./semanticDiffScheduleOperationalCandidates";
+  interpretScheduleDateValue,
+} from "./ScheduleDate";
+import {
+  relativeScheduleDateRequiresContext,
+  type ScheduleCalendarContext,
+} from "./ScheduleCalendar";
+import { operationalDateCandidates } from "./ScheduleOperationalCandidates";
+
+type ValidSchedulePeriod = { from: Date; to: Date };
+
+export type ScheduleDateCandidateResult = {
+  candidates: string[];
+  invalid: boolean;
+  deferred: boolean;
+  contextInvalid?: boolean;
+  contextMissing?: boolean;
+  contextEvidenceId?: string;
+};
+
+const emptyScheduleDateCandidates = (): ScheduleDateCandidateResult => ({
+  candidates: [],
+  invalid: false,
+  deferred: false,
+});
+
+const deferredScheduleDateCandidates = (): ScheduleDateCandidateResult => ({
+  candidates: [],
+  invalid: false,
+  deferred: true,
+});
+
+const invalidScheduleDateCandidates = (): ScheduleDateCandidateResult => ({
+  candidates: [],
+  invalid: true,
+  deferred: false,
+});
+
+const singleScheduleDateCandidate = (
+  candidate: string,
+): ScheduleDateCandidateResult => ({
+  candidates: [candidate],
+  invalid: false,
+  deferred: false,
+});
 
 type ParsedScheduleDate = NonNullable<
   ReturnType<typeof interpretScheduleDateValue>
@@ -237,17 +266,17 @@ const absoluteCandidates = (
 
 const relativeCandidates = (
   parsed: ParsedScheduleDate,
-  context: SemanticDiffScheduleCalendarContext | undefined,
+  context: ScheduleCalendarContext | undefined,
 ): ScheduleDateCandidateResult =>
   context
     ? operationalDateCandidates({ parsed, context })
     : deferredScheduleDateCandidates();
 
 /** Route one interpreted schedule date to absolute or calendar-relative candidates. */
-export const scheduleDateCandidates = (input: {
+export const resolveScheduleDateCandidates = (input: {
   parameter: AjsParameter;
   period: ValidSchedulePeriod;
-  calendarContext?: SemanticDiffScheduleCalendarContext;
+  calendarContext?: ScheduleCalendarContext;
 }): ScheduleDateCandidateResult => {
   const parsed = interpretScheduleDateValue(input.parameter.value);
   if (!parsed) {

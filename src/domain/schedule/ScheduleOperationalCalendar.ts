@@ -1,19 +1,19 @@
-import type { AjsParameter, AjsUnit } from "../../models/ajs/AjsDocument";
-import type { ScheduleDateWeekday } from "../../models/parameters/scheduleDateInterpreter";
+import type { AjsParameter, AjsUnit } from "../models/ajs/AjsDocument";
 import {
   createScheduleDate,
   daysInGregorianMonth,
-} from "./semanticDiffScheduleDateMath";
+  type ScheduleDateWeekday,
+} from "./ScheduleDate";
 import {
+  baseCalendarParameters,
   resolveCalendarGroups,
-  type CalendarGroupsResult,
-} from "./semanticDiffScheduleCalendarSelectors";
+} from "./ScheduleCalendarEntries";
 import type {
-  SemanticDiffScheduleBaseDay,
-  SemanticDiffScheduleCalendarContext,
-  SemanticDiffScheduleCalendarSelection,
-} from "./semanticDiffScheduleCalendarTypes";
-import { createScheduleCalendarContext } from "./semanticDiffScheduleCalendarTypes";
+  ScheduleCalendarBaseDay,
+  ScheduleCalendarContext,
+  ScheduleCalendarSelection,
+  ScheduleOperationalMonth,
+} from "./ScheduleCalendar";
 
 type BaseParameterResult = {
   parameter?: AjsParameter;
@@ -47,18 +47,14 @@ const findBaseParameter = (
     invalid: false,
   };
 
-const numericBaseDay = (
-  value: string,
-): SemanticDiffScheduleBaseDay | undefined => {
+const numericBaseDay = (value: string): ScheduleCalendarBaseDay | undefined => {
   const numeric = Number(value);
   return /^\d{1,2}$/.test(value) && numeric >= 1 && numeric <= 31
     ? { kind: "numeric", value: numeric }
     : undefined;
 };
 
-const weekdayBaseDay = (
-  value: string,
-): SemanticDiffScheduleBaseDay | undefined => {
+const weekdayBaseDay = (value: string): ScheduleCalendarBaseDay | undefined => {
   const weekday = /^(su|mo|tu|we|th|fr|sa)(?::([1-5]))?$/.exec(value);
   return weekday
     ? {
@@ -69,23 +65,16 @@ const weekdayBaseDay = (
     : undefined;
 };
 
-export const parseBaseDay = (
-  value: string,
-): SemanticDiffScheduleBaseDay | undefined =>
+const parseBaseDay = (value: string): ScheduleCalendarBaseDay | undefined =>
   numericBaseDay(value) ?? weekdayBaseDay(value);
 
-export const isValidBaseTime = (value: string): boolean => {
+const isValidBaseTime = (value: string): boolean => {
   const matched = /^(\d{2}):(\d{2})$/.exec(value);
   return matched !== null && Number(matched[1]) < 24 && Number(matched[2]) < 60;
 };
 
-const calendarParameters = (group: AjsUnit): AjsParameter[] =>
-  group.parameters.filter(
-    (parameter) => parameter.key === "op" || parameter.key === "cl",
-  );
-
 type BaseSettings = {
-  baseDay: SemanticDiffScheduleBaseDay;
+  baseDay: ScheduleCalendarBaseDay;
   baseMonth: "th" | "ne";
   baseTime: string;
   rawParameters: AjsParameter[];
@@ -131,7 +120,7 @@ const parseBaseTime = (value: string): string | undefined =>
   isValidBaseTime(value) ? value : undefined;
 
 type ParsedBaseSettings = {
-  baseDay: SemanticDiffScheduleBaseDay | undefined;
+  baseDay: ScheduleCalendarBaseDay | undefined;
   baseMonth: "th" | "ne" | undefined;
   baseTime: string | undefined;
 };
@@ -159,7 +148,7 @@ const resolveBaseSettings = (input: {
   const rawParameters = [
     ...input.rawSelector,
     ...baseParameterValues(baseParameters),
-    ...input.groups.flatMap(calendarParameters),
+    ...input.groups.flatMap(baseCalendarParameters),
   ];
   const invalidParameter = firstInvalidBaseParameter(baseParameters);
   const parsedSettings = parseBaseSettings(baseParameters);
@@ -169,7 +158,7 @@ const resolveBaseSettings = (input: {
     return { status: "invalid", key: invalidKey, rawParameters };
   }
   const settings: BaseSettings = {
-    baseDay: parsedSettings.baseDay as SemanticDiffScheduleBaseDay,
+    baseDay: parsedSettings.baseDay as ScheduleCalendarBaseDay,
     baseMonth: parsedSettings.baseMonth as "th" | "ne",
     baseTime: parsedSettings.baseTime as string,
     rawParameters,
@@ -180,43 +169,39 @@ const resolveBaseSettings = (input: {
 };
 
 const invalidBaseContext = (
-  selection: SemanticDiffScheduleCalendarSelection,
+  selection: ScheduleCalendarSelection,
   rawParameters: AjsParameter[],
   key: string,
-): SemanticDiffScheduleCalendarContext =>
-  createScheduleCalendarContext({
-    status: "invalid",
-    selection,
-    rawParameters,
-    evidenceId: `schedule:calendar:invalid-base-or-conflict:${key}`,
-  });
+): ScheduleCalendarContext => ({
+  status: "invalid",
+  selection,
+  rawParameters,
+  evidenceId: `schedule:calendar:invalid-base-or-conflict:${key}`,
+});
 
 const missingTimeContext = (
   input: {
-    selection: SemanticDiffScheduleCalendarSelection;
+    selection: ScheduleCalendarSelection;
     sourceGroup: AjsUnit;
   },
   settings: BaseSettings,
-): SemanticDiffScheduleCalendarContext =>
-  createScheduleCalendarContext({
-    status: "missing-context",
-    selection: input.selection,
-    sourceGroup: input.sourceGroup,
-    ...settings,
-    evidenceId: "schedule:calendar:missing-context:stt",
-  });
+): ScheduleCalendarContext => ({
+  status: "missing-context",
+  selection: input.selection,
+  sourceGroup: input.sourceGroup,
+  ...settings,
+  evidenceId: "schedule:calendar:missing-context:stt",
+});
 
 const resolvedCalendarContext = (
   input: {
     groups: AjsUnit[];
-    selection: SemanticDiffScheduleCalendarSelection;
+    selection: ScheduleCalendarSelection;
     sourceGroup: AjsUnit;
   },
   settings: BaseSettings,
-): SemanticDiffScheduleCalendarContext => {
-  const resolvedCalendarGroups: CalendarGroupsResult = resolveCalendarGroups(
-    input.groups,
-  );
+): ScheduleCalendarContext => {
+  const resolvedCalendarGroups = resolveCalendarGroups(input.groups);
   if (resolvedCalendarGroups.invalidKey) {
     return invalidBaseContext(
       input.selection,
@@ -224,24 +209,24 @@ const resolvedCalendarContext = (
       resolvedCalendarGroups.invalidKey,
     );
   }
-  return createScheduleCalendarContext({
+  return {
     status: "supported",
     selection: input.selection,
     sourceGroup: input.sourceGroup,
     ...settings,
     evidenceId: "schedule:calendar:resolved",
     calendarGroups: resolvedCalendarGroups.groups,
-  });
+  };
 };
 
 const contextForBaseSettings = (
   input: {
     groups: AjsUnit[];
-    selection: SemanticDiffScheduleCalendarSelection;
+    selection: ScheduleCalendarSelection;
     sourceGroup: AjsUnit;
   },
   settings: Exclude<BaseSettingsResult, { status: "invalid" }>,
-): SemanticDiffScheduleCalendarContext =>
+): ScheduleCalendarContext =>
   settings.status === "missing-context"
     ? missingTimeContext(input, settings.settings)
     : resolvedCalendarContext(input, settings.settings);
@@ -249,9 +234,9 @@ const contextForBaseSettings = (
 export const resolveScheduleCalendarBaseContext = (input: {
   groups: AjsUnit[];
   sourceGroup: AjsUnit;
-  selection: SemanticDiffScheduleCalendarSelection;
+  selection: ScheduleCalendarSelection;
   rawSelector: AjsParameter[];
-}): SemanticDiffScheduleCalendarContext => {
+}): ScheduleCalendarContext => {
   const settings = resolveBaseSettings(input);
   if (settings.status === "invalid") {
     return invalidBaseContext(
@@ -265,14 +250,14 @@ export const resolveScheduleCalendarBaseContext = (input: {
 
 const numericBaseDayNumber = (
   days: number,
-  baseDay: Extract<SemanticDiffScheduleBaseDay, { kind: "numeric" }>,
+  baseDay: Extract<ScheduleCalendarBaseDay, { kind: "numeric" }>,
 ): number | undefined => (baseDay.value <= days ? baseDay.value : undefined);
 
 type WeekdayBaseDayInput = {
   year: number;
   month: number;
   days: number;
-  baseDay: Extract<SemanticDiffScheduleBaseDay, { kind: "weekday" }>;
+  baseDay: Extract<ScheduleCalendarBaseDay, { kind: "weekday" }>;
 };
 
 const weekdayBaseDayNumber = ({
@@ -289,10 +274,10 @@ const weekdayBaseDayNumber = ({
   return day <= days ? day : undefined;
 };
 
-export const baseDayNumber = (
+const baseDayNumber = (
   year: number,
   month: number,
-  baseDay: SemanticDiffScheduleBaseDay,
+  baseDay: ScheduleCalendarBaseDay,
 ): number | undefined => {
   const days = daysInGregorianMonth(year, month);
   return baseDay.kind === "numeric"
@@ -317,20 +302,20 @@ const monthBoundary = (
     ? previousMonth(year, month)
     : nextMonth(year, month);
 
-type OperationalCalendarContext = SemanticDiffScheduleCalendarContext & {
+type OperationalCalendarContext = ScheduleCalendarContext & {
   status: "supported";
-  baseDay: SemanticDiffScheduleBaseDay;
+  baseDay: ScheduleCalendarBaseDay;
   baseMonth: "th" | "ne";
 };
 
-const isOperationalMonthInput = (
-  context: SemanticDiffScheduleCalendarContext,
+export const isOperationalMonthInput = (
+  context: ScheduleCalendarContext,
   month: number,
 ): context is OperationalCalendarContext =>
   hasOperationalBase(context) && isValidCalendarMonth(month);
 
 const hasOperationalBase = (
-  context: SemanticDiffScheduleCalendarContext,
+  context: ScheduleCalendarContext,
 ): context is OperationalCalendarContext =>
   context.status === "supported" &&
   context.baseDay !== undefined &&
@@ -344,7 +329,7 @@ type OperationalBoundaries = {
   end: CalendarMonth;
 };
 
-const operationalBoundaries = (
+export const operationalBoundaries = (
   context: OperationalCalendarContext,
   year: number,
   month: number,
@@ -356,10 +341,10 @@ const operationalBoundaries = (
     : { start: previous, end: { year, month } };
 };
 
-const createOperationalMonth = (
+export const createOperationalMonth = (
   context: OperationalCalendarContext,
   boundaries: OperationalBoundaries,
-): SemanticDiffOperationalMonth | undefined => {
+): ScheduleOperationalMonth | undefined => {
   const startDay = baseDayNumber(
     boundaries.start.year,
     boundaries.start.month,
@@ -388,36 +373,3 @@ const createOperationalMonth = (
 };
 
 /** Build one definition-backed operational month without host calendar data. */
-export const resolveOperationalMonth = (
-  context: SemanticDiffScheduleCalendarContext,
-  year: number,
-  month: number,
-): SemanticDiffOperationalMonth | undefined => {
-  if (!isOperationalMonthInput(context, month)) {
-    return undefined;
-  }
-  const boundaries = operationalBoundaries(context, year, month);
-  return createOperationalMonth(context, boundaries);
-};
-
-export type SemanticDiffOperationalMonth = {
-  start: Date;
-  endExclusive: Date;
-};
-
-export const isWithinOperationalMonth = (
-  date: Date,
-  month: SemanticDiffOperationalMonth,
-): boolean => date >= month.start && date < month.endExclusive;
-
-export const operationalMonthLength = (
-  month: SemanticDiffOperationalMonth,
-): number =>
-  Math.floor(
-    (month.endExclusive.getTime() - month.start.getTime()) / 86_400_000,
-  );
-
-export const operationalMonthDate = (
-  month: SemanticDiffOperationalMonth,
-  offset: number,
-): Date => new Date(month.start.getTime() + offset * 86_400_000);

@@ -1,32 +1,23 @@
-import type { AjsParameter } from "../../models/ajs/AjsDocument";
-import { classifyScheduleCalendarDay } from "./semanticDiffScheduleCalendarContext";
-import type { SemanticDiffScheduleCalendarDayResult } from "./semanticDiffScheduleCalendarTypes";
-import { formatScheduleDate, toUtcDate } from "./semanticDiffScheduleDateMath";
+import type { AjsParameter } from "../models/ajs/AjsDocument";
 import {
   parseClosedDaySubstitutionValue,
   parseShiftDaysValue,
-} from "../../models/parameters/scheduleRuleHelpers";
+} from "./ScheduleRule";
 import type {
-  SemanticDiffScheduleInterpretation,
-  SemanticDiffScheduleRuleInterpretation,
-} from "./semanticDiffScheduleTypes";
+  ScheduleInterpretation,
+  ScheduleRuleInterpretation,
+} from "./ScheduleInterpretation";
 
 export type SubstitutionMode = "be" | "af" | "ca" | "no";
 
-export type SubstitutionResolution = {
-  candidates: string[];
-  contextStatus?: "invalid" | "missing-context";
-  contextEvidenceId?: string;
-};
-
-export type ParsedSubstitutionRule = {
-  interpretationRule: SemanticDiffScheduleRuleInterpretation;
+type ParsedSubstitutionRule = {
+  interpretationRule: ScheduleRuleInterpretation;
   value: SubstitutionMode;
   rule: number;
 };
 
-export type ParsedShiftDaysRule = {
-  interpretationRule: SemanticDiffScheduleRuleInterpretation;
+type ParsedShiftDaysRule = {
+  interpretationRule: ScheduleRuleInterpretation;
   value: number;
   rule: number;
   rawValue?: string;
@@ -34,7 +25,7 @@ export type ParsedShiftDaysRule = {
 
 export type SubstitutionAssociation = {
   sh: ParsedSubstitutionRule[];
-  invalidSh: SemanticDiffScheduleRuleInterpretation[];
+  invalidSh: ScheduleRuleInterpretation[];
   shd: ParsedShiftDaysRule[];
   invalidShiftDays: ParsedShiftDaysRule[];
   mode?: SubstitutionMode;
@@ -44,8 +35,8 @@ export type SubstitutionAssociation = {
 };
 
 export type SubstitutionRuleState = {
-  status: SemanticDiffScheduleRuleInterpretation["status"];
-  reason?: SemanticDiffScheduleRuleInterpretation["reason"];
+  status: ScheduleRuleInterpretation["status"];
+  reason?: ScheduleRuleInterpretation["reason"];
   evidenceId: string;
   rawParameters: AjsParameter[];
   rule?: number;
@@ -53,30 +44,14 @@ export type SubstitutionRuleState = {
 
 export type SubstitutionAnalysis = {
   associations: Map<number, SubstitutionAssociation>;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
   fullyQualifiedDateRules: Set<number>;
 };
 
-type SubstitutionContext = NonNullable<
-  Parameters<typeof classifyScheduleCalendarDay>[0]
->;
-
-type Classification =
-  | "open"
-  | "closed"
-  | { status: "invalid" | "missing-context"; evidenceId: string };
-
-type CandidateResolution = {
-  candidate?: string;
-  failure?: SubstitutionResolution;
-};
-
-type ShiftSearch = CandidateResolution;
-
 type ParsedRuleInput = {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   associations: Map<number, SubstitutionAssociation>;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 };
 
 export const substitutionState = (input: {
@@ -132,9 +107,9 @@ const malformedShiftDays = (
 };
 
 const recordInvalidSubstitution = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   association: SubstitutionAssociation;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.invalidSh.push(input.rule);
   input.states.set(
@@ -169,11 +144,11 @@ const analyzeShRule = (input: ParsedRuleInput): void => {
 };
 
 const recordInvalidShiftDays = (input: {
-  rule: SemanticDiffScheduleRuleInterpretation;
+  rule: ScheduleRuleInterpretation;
   association: SubstitutionAssociation;
   ruleNumber: number;
   rawValue?: string;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.invalidShiftDays.push({
     interpretationRule: input.rule,
@@ -243,7 +218,7 @@ const analyzeSubstitutionRule = (input: ParsedRuleInput): void => {
 };
 
 const ruleNumbers = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): { dateRules: Set<number>; fullyQualifiedDateRules: Set<number> } => ({
   dateRules: new Set(
     interpretation.scheduleDateRules
@@ -266,7 +241,7 @@ const completeAssociation = (input: {
   ruleNumber: number;
   dateRules: Set<number>;
   fullyQualifiedDateRules: Set<number>;
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   const modeValues = new Set(input.association.sh.map((rule) => rule.value));
   input.association.modeConflict = modeValues.size > 1;
@@ -401,7 +376,7 @@ const recordSubstitutionStates = (input: {
   dateRules: Set<number>;
   fullyQualifiedDateRules: Set<number>;
   rawParameters: AjsParameter[];
-  states: Map<SemanticDiffScheduleRuleInterpretation, SubstitutionRuleState>;
+  states: Map<ScheduleRuleInterpretation, SubstitutionRuleState>;
 }): void => {
   input.association.sh.forEach((rule) => {
     const status = substitutionStatus(input);
@@ -439,164 +414,11 @@ const recordSubstitutionStates = (input: {
   });
 };
 
-const contextFailure = (
-  classification: Exclude<Classification, "open" | "closed">,
-): SubstitutionResolution => ({
-  candidates: [],
-  contextStatus: classification.status,
-  contextEvidenceId: classification.evidenceId,
-});
-
-const classifyDate = (
-  context: SubstitutionContext,
-  date: Date,
-): Classification => {
-  const result: SemanticDiffScheduleCalendarDayResult =
-    classifyScheduleCalendarDay(context, date);
-  return "evidenceId" in result
-    ? { status: result.status, evidenceId: result.evidenceId }
-    : result.status;
-};
-
-const shiftedDate = (input: {
-  offset: number;
-  baseDate: Date;
-  mode: SubstitutionMode;
-}): Date => {
-  const direction = input.mode === "be" ? -1 : 1;
-  return new Date(
-    input.baseDate.getTime() + direction * input.offset * 86_400_000,
-  );
-};
-
-const shiftResult = (input: {
-  date: Date;
-  classification: Classification;
-}): ShiftSearch | undefined => {
-  if (typeof input.classification !== "string") {
-    return { failure: contextFailure(input.classification) };
-  }
-  if (input.classification !== "open") {
-    return undefined;
-  }
-  return {
-    candidate: formatScheduleDate(
-      input.date.getUTCFullYear(),
-      input.date.getUTCMonth() + 1,
-      input.date.getUTCDate(),
-    ),
-  };
-};
-
-const continueShift = (
-  state: ShiftSearch,
-  next: ShiftSearch | undefined,
-): ShiftSearch => {
-  if (state.candidate !== undefined || state.failure !== undefined) {
-    return state;
-  }
-  return next ?? state;
-};
-
-const shiftStep = (input: {
-  state: ShiftSearch;
-  offset: number;
-  baseDate: Date;
-  mode: SubstitutionMode;
-  context: SubstitutionContext;
-}): ShiftSearch => {
-  const date = shiftedDate(input);
-  const classification = classifyDate(input.context, date);
-  return continueShift(input.state, shiftResult({ date, classification }));
-};
-
-const shiftedCandidate = (input: {
-  baseDate: Date;
-  mode: SubstitutionMode;
-  shiftDays: number;
-  context: SubstitutionContext;
-}): ShiftSearch => {
-  const offsets = Array.from(
-    { length: input.shiftDays },
-    (_, index) => index + 1,
-  );
-  return offsets.reduce<ShiftSearch>(
-    (state, offset) => shiftStep({ ...input, state, offset }),
-    {},
-  );
-};
-
-type ClassifiedCandidateInput = {
-  candidate: string;
-  mode: SubstitutionMode;
-  shiftDays: number;
-  context: SubstitutionContext;
-  baseDate: Date;
-  classification: Classification;
-  failure: SubstitutionResolution | undefined;
-};
-
-const cancelCandidate = (
-  input: ClassifiedCandidateInput,
-): CandidateResolution =>
-  (input.failure ? { failure: input.failure } : undefined) ??
-  (input.classification === "open" ? { candidate: input.candidate } : {});
-
-const openOrShiftedCandidate = (
-  input: ClassifiedCandidateInput,
-): CandidateResolution =>
-  (input.failure ? { failure: input.failure } : undefined) ??
-  (input.classification === "open"
-    ? { candidate: input.candidate }
-    : shiftedCandidate({
-        baseDate: input.baseDate,
-        mode: input.mode,
-        shiftDays: input.shiftDays,
-        context: input.context,
-      }));
-
-const candidateHandlers: Record<
-  SubstitutionMode,
-  (input: ClassifiedCandidateInput) => CandidateResolution
-> = {
-  ca: cancelCandidate,
-  be: openOrShiftedCandidate,
-  af: openOrShiftedCandidate,
-  no: cancelCandidate,
-};
-
-/** Resolve one candidate while preserving substitution order and stop rules. */
-export const resolveSubstitutionCandidate = (input: {
-  candidate: string;
-  mode: SubstitutionMode;
-  shiftDays: number;
-  context: SubstitutionContext;
-}): CandidateResolution => {
-  const baseDate = toUtcDate(input.candidate);
-  if (!baseDate) {
-    return {};
-  }
-  const classification = classifyDate(input.context, baseDate);
-  const failure =
-    typeof classification !== "string"
-      ? contextFailure(classification)
-      : undefined;
-  return candidateHandlers[input.mode]({
-    ...input,
-    baseDate,
-    classification,
-    failure,
-  });
-};
-
 export const createSubstitutionAnalysis = (
-  interpretation: SemanticDiffScheduleInterpretation,
+  interpretation: ScheduleInterpretation,
 ): SubstitutionAnalysis => {
   const associations = new Map<number, SubstitutionAssociation>();
-  const states = new Map<
-    SemanticDiffScheduleRuleInterpretation,
-    SubstitutionRuleState
-  >();
+  const states = new Map<ScheduleRuleInterpretation, SubstitutionRuleState>();
   interpretation.rules.forEach((rule) =>
     analyzeSubstitutionRule({ rule, associations, states }),
   );

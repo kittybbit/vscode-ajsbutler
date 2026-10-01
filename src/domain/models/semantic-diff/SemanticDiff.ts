@@ -154,11 +154,3 @@ export type SemanticDiffComparisonPeriod = {
   from: string;
   to: string;
 };
-
-export type SemanticDiffScheduleRun = {
-  unitPath: string;
-  unitName: string;
-  rule: number;
-  date: string;
-  time: string;
-};

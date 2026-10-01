@@ -129,6 +129,28 @@ suite("Semantic Diff Schedule", () => {
       ],
     );
     assert.deepStrictEqual(
+      [
+        result.scheduleComparison?.runChanges[1]?.before,
+        result.scheduleComparison?.runChanges[1]?.after,
+      ],
+      [
+        {
+          unitPath: "/root/main",
+          unitName: "main",
+          rule: 1,
+          date: "2026-04-10",
+          time: "09:00",
+        },
+        {
+          unitPath: "/root/main",
+          unitName: "main",
+          rule: 1,
+          date: "2026-04-10",
+          time: "10:00",
+        },
+      ],
+    );
+    assert.deepStrictEqual(
       result.confirmationRequired.map((item) => item.reasonCode),
       ["calculated-schedule-run-removed"],
     );

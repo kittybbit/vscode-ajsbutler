@@ -3,7 +3,8 @@ interface:
   display_name: "Release Extension"
   short_description: "Prepare and publish VS Code extension releases"
   default_prompt: >-
-    Use $release-extension to prepare a VS Code extension release, update
-    CHANGELOG, bump version with pnpm, publish with vsce, and open the PR. This
-    adapter is outside the seven-role SDD lifecycle.
-    Fixed execution metadata: model Luna; reasoning effort medium.
+    Use $release-extension to prepare and publish a VS Code extension release.
+    Update and validate CHANGELOG, set and tag the version, validate the
+    package, publish with the approved vsce command, and open or update the
+    release PR. This procedure is outside the SDD lifecycle. Use model Luna
+    with medium reasoning effort.

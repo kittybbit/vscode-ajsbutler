@@ -3,80 +3,40 @@
 ## Agent Brief
 
 - Purpose: record real-environment evidence for the delivered WebAPI beta.
-- Active slice: blocked pending usable JP1/AJS3 WebAPI evidence.
-- Do not remove beta labeling or broaden WebAPI scope.
-- Do not invent smoke results from generated mocks.
-- Do not edit runtime code, tests, generated artifacts, or configuration.
-- Read first: `SPECS.md`, this file, and `TRACEABILITY.md`.
-- Read OpenAPI notes only when the evidence concerns the supported endpoint.
-- Validate evidence records with `rtk pnpm run qlty`.
-- Approval policy and feature exit: see `docs/specs/README.md`.
-- Next decision: obtain real-environment evidence or keep the task blocked.
+- State: Blocked; no usable JP1/AJS3 WebAPI environment or evidence is
+  available.
+- Constraints: keep beta and read-only scope; do not treat generated mocks as
+  real smoke evidence or edit runtime code, tests, generated artifacts, or
+  configuration for this evidence task.
+- Next: record smoke results and enough user feedback to assess beta exit.
+  Broader or beta-exit implementation requires new approval.
 
-## Sync Rule
-
-- Update this file in the same commit whenever one task or follow-up is
-  completed, re-scoped, or intentionally dropped.
-- This file is the sole plan and current-state owner for this feature. Folder
-  presence or policy-only compatibility edits do not select it for unrelated
-  branch work.
-- Update `docs/specs/roadmap.md` only when unfinished repository-level future
-  work, ordering, entry conditions, or unresolved product concerns change.
-- Keep this file focused on current state only; do not retain historical logs,
-  prior approvals, or long validation diaries once they stop being actionable.
-
-## Current Task
+## Current task
 
 - Status: Blocked
-- Scope:
-  record real JP1/AJS3 environment smoke verification evidence for the
-  delivered read-only desktop WebAPI import beta.
-- Acceptance:
-  document the product/version context, tested scenario, observed result,
-  host constraints, and whether `searchTarget=DEFINITION` returns enough
-  definition attributes for the current beta scope. Do not remove beta
-  labeling or broaden WebAPI scope in this task.
-- Validation:
-  docs-only evidence recording requires `rtk pnpm run qlty`.
+- Scope: document real-environment smoke verification for the delivered
+  read-only desktop import beta.
+- Acceptance: record product/version, scenario, observed result, host limits,
+  and whether `searchTarget=DEFINITION` returns enough attributes. Keep beta
+  labels and current scope.
+- Validation: `rtk pnpm run qlty` for evidence-document changes.
 
 ## Human Approval
 
 - Status: Pending
-- Approved at:
-- Approved scope:
 
-Implementation must not start while Status is Pending.
-Only clear human approval can change Status to Approved.
-`Approved at` records the approval result only, such as `none` or `approved in
-current conversation`; do not copy the approval message.
+## Progress
 
-Reset this section back to Pending when the approved slice is complete and no
-active implementation approval remains.
+- Done: record the supported read-only endpoint, OpenAPI contract, generated
+  artifacts, application port, and desktop adapter flow.
+- Blocked: real-environment smoke verification; no usable environment or
+  evidence is available.
+- Pending: record enough user feedback to assess beta exit. Obtain new approval
+  before beta-exit or broader WebAPI implementation.
 
-## Active Tasks
+## Follow-up
 
-- [x] Record the first supported read-only import boundary, OpenAPI contract,
-      generated artifacts, application port, and desktop adapter flow.
-- [ ] Record real-environment smoke verification.
-- [ ] Record enough user feedback to decide whether beta exit is appropriate.
-- [ ] Request new approval before any beta-exit or broader WebAPI scope
-      implementation work.
-
-## Validation
-
-- [x] Reproducibility and feature-validation expectations are documented in the
-      feature specs.
-
-## Notes
-
-- Keep traceability details in `TRACEABILITY.md`.
-- Keep durable scope and host-boundary decisions in `SPECS.md`.
-- The next task depends on externally supplied real JP1/AJS3 environment
-  smoke evidence or explicit access to such an environment; do not invent
-  verification results from generated mocks.
-- Real-environment smoke verification is currently blocked because no usable
-  JP1/AJS3 WebAPI environment or evidence is available.
-- Before correcting the stale checked-in Prism artifact reported by
-  `rtk pnpm run openapi:check`, use Replanning Mode to define and review a
-  focused generated-artifact reproducibility slice. This note does not approve
-  that work or change the blocked real-environment evidence task.
+Before correcting the stale checked-in Prism artifact reported by
+`rtk pnpm run openapi:check`, define and review a focused generated-artifact
+reproducibility slice in Replanning Mode. This note does not approve that work
+or change the blocked real-environment evidence task.

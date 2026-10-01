@@ -10,8 +10,8 @@ import {
   parseWaitCountValue,
   parseWaitTimeValue,
   resolveEffectiveStartConditionMonitoringPair,
-} from "../../domain/models/parameters/scheduleRuleHelpers";
-import { interpretScheduleDateValue } from "../../domain/models/parameters/scheduleDateInterpreter";
+} from "../../domain/schedule/ScheduleRule";
+import { interpretScheduleDateValue } from "../../domain/schedule/ScheduleDate";
 
 suite("Schedule rule helpers", () => {
   test("interprets schedule-date rule association and token categories", () => {
@@ -68,6 +68,12 @@ suite("Schedule rule helpers", () => {
         occurrence: "b",
       },
     });
+    assert.deepStrictEqual(interpretScheduleDateValue("+su:6")?.day, {
+      kind: "weekday",
+      prefix: "+",
+      weekday: "su",
+      occurrence: 6,
+    });
     assert.deepStrictEqual(interpretScheduleDateValue("0,ud"), {
       rule: 0,
       hasExplicitRuleNumber: true,
@@ -108,6 +114,26 @@ suite("Schedule rule helpers", () => {
       dayValue: "ud",
       day: { kind: "ud" },
     });
+  });
+
+  test("rejects malformed schedule-date tokens without a partial interpretation", () => {
+    [undefined, "", "malformed", "2,2026/04/xx", "+su:x"].forEach((value) => {
+      assert.strictEqual(interpretScheduleDateValue(value), undefined);
+    });
+  });
+
+  test("keeps schedule-date keyword interpretations independent", () => {
+    for (const [keyword, otherKeyword] of [
+      ["en", "ud"],
+      ["ud", "en"],
+    ] as const) {
+      const parsed = interpretScheduleDateValue(keyword);
+      assert.ok(parsed);
+      (parsed.day as { kind: string }).kind = otherKeyword;
+      assert.deepStrictEqual(interpretScheduleDateValue(keyword)?.day, {
+        kind: keyword,
+      });
+    }
   });
 
   test("parses supported schedule-rule values with omitted rule defaults", () => {

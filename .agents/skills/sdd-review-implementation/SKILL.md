@@ -1,141 +1,39 @@
 ---
 name: sdd-review-implementation
-description: Review one completed vscode-ajsbutler SDD implementation slice for scope, regressions, architecture, compatibility, validation, and production readiness.
+description: Independently assess one completed SDD slice for scope, regressions, architecture, validation, and readiness.
 ---
 
 # SDD Review Implementation
 
-## Purpose
+Review the final diff and evidence for exactly one approved slice. Return
+actionable Findings or Ready; do not edit files or grant completion approval.
 
-Review the final diff and evidence for exactly one approved implementation
-slice. Report actionable findings or a Ready verdict.
+## Review
 
-## Minimum Context
+Keep the selected feature and slice fixed. Stop if feature, approved scope,
+comparison base, or evidence is ambiguous. Compare the final diff with the
+approved paths and acceptance.
 
-Read `AGENTS.md`, `docs/specs/README.md`, the selected feature's `SPECS.md`,
-`TASKS.md`, and `TRACEABILITY.md` when present. Inspect the approved slice,
-final diff, changed symbols, tests, validation output, and relevant desktop
-and web entry points.
+Assess regressions, tests and validation; architecture and Solution Shape;
+desktop/web, VS Code, Node/web and JP1/AJS compatibility; parser/UI and
+telemetry boundaries; failure/fallback behavior and large or malformed input;
+qlty findings; README/CHANGELOG and durable-document impact; traceability and
+implementation feedback. Inspect relevant references and host entry points as
+needed. Use docs/specs/architecture.md#solution-shape and qlty disposition
+rules in docs/specs/README.md. Architecture tests are evidence only for their
+cataloged rules; assess semantic ownership, abstractions, and qlty disposition
+independently.
 
-Keep the selected feature and slice fixed. Stop when the feature, approved
-scope, comparison base, or completion evidence is ambiguous.
+Run a relevant read-only check only when evidence is missing or a concern
+requires it. Do not fix the change, broaden scope, or turn a design decision
+into an implementation Finding; return it to Main for Replanning.
 
-## Review Criteria
+## Verdict and handoff
 
-Check the final change for:
-
-- approved slice scope, acceptance criteria, and diff minimality
-- behavior regressions, missing tests, and weak or misleading validation
-- desktop and web extension compatibility
-- `engines.vscode` drift and unsupported VS Code APIs
-- Node-only assumptions in shared or web paths
-- parser internals leaking into UI components
-- domain/application/presentation/infrastructure boundary violations
-- telemetry privacy and application-catalog event constraints
-- qlty findings, complexity, performance, dependencies, and readability
-- `Solution Shape` preservation: semantic owner/package, responsibility,
-  public names, contracts, dependency direction, tests where applicable,
-  relevant capability, and the separate port/adapter/factory assessments
-- qlty baseline/final comparison from the same non-mutating check/smells pair
-  in disposable snapshots, with explicit finding severity ordering, measured
-  values, and higher-is-worse or lower-is-worse direction; a new or reliably
-  mapped adverse movement is Finding/NG, only unmappable identity or direction
-  is advisory, and unchanged unrelated findings stay out of scope
-- failure modes, diagnostics/fallback behavior, large or malformed input
-- JP1/AJS definition-file compatibility
-- README/docs and CHANGELOG impact using the repository SSOT
-- `TRACEABILITY.md` validation result and implementation feedback
-- durable-document changes against the Durable Documentation Gate
-
-## Solution Shape Review
-
-Resolve the selected slice first and compare the final diff only with its
-`#### Solution Shape Evidence` block in `TASKS.md`; another slice's evidence
-cannot authorize or satisfy the selected slice. Compare the final diff with the
-approved `Solution Shape` for every material new or retained abstraction. Verify
-semantic owner and package/layer for each
-material decision, invariant, translation, lifecycle, public name, contract,
-dependency, and applicable test; concrete responsibility and boundary value;
-public names, contracts, dependency direction, and tests where applicable; and
-the relevant framework, library, platform, or established repository
-capability. Keep the port, adapter, and retained application-factory checks
-separate. Accept a port for dependency inversion and/or a host-neutral contract
-without requiring adapter duties; require an adapter's applicable isolation,
-translation, error normalization, lifecycle, compatibility, or test-boundary
-responsibility; and reject a same-request/same-response forwarding wrapper
-without port-contract value. A custom-gap justification is needed only for a
-proposed custom mechanism, and framework use must remain at the outer boundary.
-Confirm automatic architecture-test evidence is not presented as proof of
-reviewer-only judgments. Compare the same non-mutating check/smells pair in
-disposable snapshots using identical verified qlty configuration and analyzed
-scope, and treat the formatting-capable aggregate as separate final validation
-only in the disposable final snapshot. Keep qlty runtime artifacts
-snapshot-local; if aggregate formatting changes analyzed source or evidence,
-require an allowlisted sync, final-snapshot rebuild, and repeated check/smells
-pair plus aggregate until stable. Compare finding identity, explicit severity ordering,
-baseline/final severity, measured values, and higher-is-worse or lower-is-worse
-direction; list new or reliably mapped adverse findings as Finding/NG,
-unmappable identity or direction as advisory, and unchanged unrelated findings
-out of scope. If the final diff changes the owner/package, contract/dependency
-direction, framework-versus-custom decision, abstraction/responsibility,
-affected surface, risk, validation, or approval boundary, return it for
-Replanning rather than treating it as an implementation fix.
-
-## Review Workflow
-
-1. Confirm the selected slice and its required approval evidence in `TASKS.md`.
-2. Compare the final diff to the exact approval boundary and acceptance.
-3. Inspect direct and transitive references needed to assess architecture,
-   desktop/web, parser, telemetry, and compatibility impact.
-4. Re-run only the relevant validation when evidence is missing or a finding
-   requires it; do not modify files to make a check pass.
-5. Classify every concern as an actionable Finding or explain why it is not a
-   finding.
-
-## Output Contract
-
-Return one of:
-
-```md
-## Implementation Review
-
-- Verdict: Ready | Findings
-- Slice:
-- Scope:
-- Acceptance:
-- Validation:
-- Compatibility:
-- Production Readiness:
-
-## Findings
-
-- [P1/P2/P3] file:line — evidence and concrete fix
-
-## Next Step
-
-- Ready: return completion evidence and the recommended completion-gate route
-  to Main.
-- Findings: return the exact fixes and validation requirements to Main for
-  routing to the implementation procedure.
-```
-
-`Ready` means no actionable finding remains. It is not Completion Approval and
-does not authorize a commit. Do not conceal an unresolved risk or turn a new
-design/scope decision into an implementation fix.
-
-## Completion Approval Handoff
-
-After `Ready`, return the full evidence package to Main. Only after explicit
-human approval is recorded for the exact completed slice may Main delegate
-`approval-committer` with gate type `completion`. Return Findings to Main for
-routing to `implementer`; return a new scope or design decision to Main for
-Planning or Replanning. This procedure does not invoke or spawn another
-lifecycle role.
-
-## Rules
-
-- keep the review evidence-based
-- do not broaden the approved slice or invent a design decision
-- preserve `engines.vscode`, desktop/web behavior, architecture boundaries,
-  and telemetry privacy
-- use `docs/specs/README.md` as the SSOT for validation and documentation gates
+Return Ready only when no actionable Finding remains. Otherwise report each
+Finding as priority, file/line, evidence, risk, concrete fix, and check to
+rerun. Summarize the slice, scope, acceptance, validation, compatibility, and
+production readiness. Ready is not Completion Approval and authorizes no
+commit. Return verdict and evidence to Main; Main routes Findings to the
+implementer and may route the approved completion gate after human approval.
+Do not invoke another role.

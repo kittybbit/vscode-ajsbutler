@@ -56,10 +56,6 @@ test_patterns = [
   "**/spec_*.*",
 ]
 
-[sources.default]
-repository = "https://github.com/kittybbit/vscode-ajsbutler.git"
-branch = "main"
-
 [smells]
 mode = "block"
 
@@ -86,10 +82,6 @@ enabled = true
 [smells.function_complexity]
 threshold = 5
 enabled = true
-
-[smells.duplication]
-enabled = true
-threshold = 20
 
 [[source]]
 name = "default"
