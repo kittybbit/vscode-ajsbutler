@@ -138,22 +138,35 @@ movement is a review signal only when no mapped adverse finding exists.
 Use `$sdd-evidence` for mechanical facts; it neither approves work nor replaces
 semantic review. Use qlty `0.645.0` or newer with official SARIF output for
 both `check` and `smells`. In exact disposable baseline and final snapshots,
-run these same commands over identical analyzed paths and configuration:
+run these same commands with the same full-repository selection and
+configuration:
 
 ```sh
-rtk pnpm exec qlty check --sarif --no-fix
-rtk pnpm exec qlty smells --sarif --no-snippets
+rtk pnpm exec qlty check --all --sarif --no-fix
+rtk pnpm exec qlty smells --all --sarif --no-snippets
 ```
 
 Save each complete SARIF 2.1.0 file, command output, and exit status. Record
-the version, analyzed paths, configuration hash, snapshot revisions, and
-commands. Keep qlty cache and output local to each snapshot. Missing or
-malformed SARIF, failed commands, version/configuration/scope mismatch, or
-missing results cannot pass. Compare official SARIF records; do not create a
-repository-specific parser or textual-output comparator. Run `rtk pnpm run
-qlty` only in the disposable final snapshot. If formatting changes approved
-content, sync those paths, rebuild that snapshot, and repeat both observations
-and the aggregate until stable.
+the version, nonzero analyzed-path inventory and count for each command in
+each snapshot, configuration hash, snapshot revisions, and commands. The
+selection is the full repository in both snapshots; match baseline paths
+against final paths, and treat findings on paths added in the final snapshot
+as new findings. Keep qlty cache and output local to each snapshot. Zero
+analyzed files, missing or malformed SARIF, an incomplete scan, version or
+configuration or selection mismatch, or missing results cannot pass. A
+nonzero `check` exit caused by findings from a completed scan is a
+finding-triggered status, not a command execution failure: retain the raw
+status and complete SARIF and evaluate the findings. A command that cannot
+start or complete is an execution failure and cannot pass. Compare official
+SARIF records; do not create a repository-specific parser or textual-output
+comparator. Any new SARIF finding is NG regardless of severity. Compare
+reliably mapped findings using explicit severity ordering, measured values,
+and whether higher or lower is worse; any mapped adverse movement is NG.
+Run `rtk pnpm run qlty` only in the disposable final snapshot, and require
+that final aggregate to pass. The current-head Qlty Cloud check must also
+pass before Feature Exit. If formatting changes approved content, sync those
+paths, rebuild that snapshot, and repeat both observations and the aggregate
+until stable.
 
 The plan review is the pre-approval scope gate. After implementation and final
 validation, make one integrated review of scope, acceptance, quality, and

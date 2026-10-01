@@ -14,6 +14,7 @@ import {
   type UnitListDocumentDto,
 } from "../../application/unit-list/unitListDocument";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
+import type { ValidatedFlowGraphDocument } from "../../application/flow-graph/flowGraphDocument";
 import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
 import {
   CHANGE_DOCUMENT,
@@ -22,6 +23,9 @@ import {
   REVEAL_UNIT,
 } from "../../presentation/webview/viewerHostMessages";
 import type { NavigationRequestDto } from "../../application/navigation/resolveNavigationTarget";
+import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
+import { createSemanticDiffExplorerSessionId } from "../../application/semantic-diff/semanticDiffExplorerDto";
+import { createSemanticDiffFlowAction } from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 import {
   useFlowDocumentSubscription,
   useFlowScopeReset,
@@ -180,13 +184,14 @@ const FitViewFixture = ({
 };
 
 const DocumentSubscriptionFixture = () => {
-  const [flowDocument, setFlowDocument] = useState<unknown>();
+  const [flowDocument, setFlowDocument] =
+    useState<ValidatedFlowGraphDocument>();
   const [currentUnitId, setCurrentUnitId] = useState<string>();
   const [unitDefinitionByPath, setUnitDefinitionByPath] = useState(new Map());
   const previousUnitIdRef = useRef<string | undefined>(undefined);
   useFlowDocumentSubscription({
     previousUnitIdRef,
-    setFlowDocument: setFlowDocument as never,
+    setFlowDocument,
     setCurrentUnitId,
     setUnitDefinitionByPath: setUnitDefinitionByPath as never,
   });
@@ -197,6 +202,11 @@ const DocumentSubscriptionFixture = () => {
       "output",
       { "data-testid": "document-status" },
       flowDocument ? "available" : "unavailable",
+    ),
+    React.createElement(
+      "output",
+      { "data-testid": "overlay" },
+      JSON.stringify(flowDocument?.document.semanticDiffOverlay ?? null),
     ),
     React.createElement(
       "output",
@@ -349,6 +359,140 @@ suite("Flow viewer effects", () => {
     );
 
     view.unmount();
+    assert.strictEqual(bridge.callbacks[CHANGE_DOCUMENT]?.length, 0);
+  });
+
+  test("first Explorer opening keeps rendered marks after StrictMode readiness", async () => {
+    const bridge = createViewerEventBridge();
+    const pendingReady: Array<() => void> = [];
+    const delivered: string[] = [];
+    const baseDocument = documentPayload();
+    window.EventBridge = bridge;
+    window.vscode = {
+      postMessage: (message: { type: string }) => {
+        if (message.type === "ready") {
+          delivered.push("ready");
+          pendingReady.push(() => {
+            delivered.push("base");
+            bridge.dispatch({
+              data: createViewerDocumentChangedMessage(baseDocument),
+            } as MessageEvent);
+          });
+        }
+      },
+    } as never;
+    const view = render(
+      React.createElement(
+        React.StrictMode,
+        null,
+        React.createElement(DocumentSubscriptionFixture),
+      ),
+    );
+    let resolveReady!: (value: { document: UnitListDocumentDto }) => void;
+    const ready = new Promise<{ document: UnitListDocumentDto }>((resolve) => {
+      resolveReady = resolve;
+    });
+    const action = createSemanticDiffFlowAction({
+      host: {
+        open: async () => ({
+          flowUri: "file:///after.ajs",
+          ready,
+          postMessage: (message: unknown) => {
+            const typed = message as { type: string };
+            delivered.push(
+              typed.type === CHANGE_DOCUMENT ? "overlay" : typed.type,
+            );
+            bridge.dispatch({ data: message } as MessageEvent);
+            return Promise.resolve(true);
+          },
+        }),
+      },
+    });
+    const context = {
+      result: {
+        inputs: {
+          before: { side: "before", unitIds: [], relations: [] },
+          after: { side: "after", unitIds: ["root-id"], relations: [] },
+        },
+        changes: [
+          {
+            id: "added-root",
+            kind: "added",
+            elementKind: "unit",
+            confirmationLevel: "confirmed",
+            after: {
+              kind: "unit",
+              unit: {
+                id: "root-id",
+                name: "root",
+                absolutePath: "/root",
+                unitType: "n",
+              },
+            },
+            relationPair: null,
+          },
+        ],
+        identityDecisions: [],
+        confirmationRequired: [],
+        unsupportedItems: [],
+        limitations: [],
+      },
+      summary: {},
+    } as SemanticDiffOutputContext;
+    const actionResult = action(
+      {
+        sessionId: createSemanticDiffExplorerSessionId(1),
+        side: "after",
+        targetId: "root-id",
+        targetKind: "unit",
+        recordId: "added-root",
+        recordKind: "change",
+        recordOccurrence: 0,
+        recordTarget: {
+          kind: "unit",
+          unit: {
+            id: "root-id",
+            name: "root",
+            absolutePath: "/root",
+            unitType: "n",
+          },
+        },
+      },
+      context,
+      () => true,
+    );
+
+    assert.ok(pendingReady.length > 0);
+    act(() => pendingReady.shift()?.());
+    let result: Awaited<typeof actionResult> | undefined;
+    await act(async () => {
+      resolveReady({ document: baseDocument });
+      result = await actionResult;
+    });
+    assert.deepStrictEqual(result, { ok: true });
+    act(() => pendingReady.shift()?.());
+
+    assert.match(view.getByTestId("overlay").textContent ?? "", /added-root/);
+    assert.deepStrictEqual(delivered, [
+      "ready",
+      "base",
+      "overlay",
+      "revealUnit",
+    ]);
+    view.unmount();
+
+    const remounted = render(
+      React.createElement(
+        React.StrictMode,
+        null,
+        React.createElement(DocumentSubscriptionFixture),
+      ),
+    );
+    assert.strictEqual(pendingReady.length, 1);
+    act(() => pendingReady.shift()?.());
+    assert.strictEqual(remounted.getByTestId("overlay").textContent, "null");
+    assert.strictEqual(bridge.callbacks[CHANGE_DOCUMENT]?.length, 1);
+    remounted.unmount();
     assert.strictEqual(bridge.callbacks[CHANGE_DOCUMENT]?.length, 0);
   });
 

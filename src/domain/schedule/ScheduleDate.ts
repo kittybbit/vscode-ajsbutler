@@ -38,94 +38,125 @@ export type ScheduleDateInterpretation = {
 const scheduleDateValuePattern =
   /^((\d{1,3}),)?(?:(?:(\d{4})\/)?(\d{2})\/)?(.+)$/;
 
-const scheduleDateWeekdayPattern = /^(\+?)(su|mo|tu|we|th|fr|sa)(?::(\d|b))?$/;
+type ScheduleDateDayDecoder = (dayValue: string) => ScheduleDateDay | undefined;
 
-const scheduleDateWeekdays = new Set<ScheduleDateWeekday>([
-  "su",
-  "mo",
-  "tu",
-  "we",
-  "th",
-  "fr",
-  "sa",
-]);
+const numericDayKinds = {
+  "": "calendar",
+  "+": "relative",
+  "*": "open",
+  "@": "closed",
+} as const;
 
-const interpretScheduleDateDay = (
-  dayValue: string,
-): ScheduleDateDay | undefined => {
-  const numericDay = /^([+*@])?(\d{2})$/.exec(dayValue);
-  if (numericDay) {
-    const value = Number(numericDay[2]);
-    switch (numericDay[1]) {
-      case "+":
-        return { kind: "relative", value };
-      case "*":
-        return { kind: "open", value };
-      case "@":
-        return { kind: "closed", value };
-      default:
-        return { kind: "calendar", value };
-    }
-  }
+const backwardDayOffset = (value: string | undefined): number | undefined =>
+  value === undefined ? undefined : Number(value);
 
-  const backwardDay = /^([+*@])?b(?:-(\d{2}))?$/.exec(dayValue);
-  if (backwardDay) {
-    return {
-      kind: "backward",
-      prefix: backwardDay[1] as "+" | "*" | "@" | undefined,
-      offset: backwardDay[2] === undefined ? undefined : Number(backwardDay[2]),
-    };
-  }
+const decodeNumericDay: ScheduleDateDayDecoder = (dayValue) => {
+  const matched = /^([+*@])?(\d{2})$/.exec(dayValue);
+  return matched
+    ? {
+        kind: numericDayKinds[
+          (matched[1] ?? "") as keyof typeof numericDayKinds
+        ],
+        value: Number(matched[2]),
+      }
+    : undefined;
+};
 
-  const weekday = scheduleDateWeekdayPattern.exec(dayValue);
-  if (weekday && scheduleDateWeekdays.has(weekday[2] as ScheduleDateWeekday)) {
-    const occurrence = weekday[3];
-    return {
-      kind: "weekday",
-      prefix: weekday[1] as "+" | "",
-      weekday: weekday[2] as ScheduleDateWeekday,
-      occurrence:
-        occurrence === undefined
-          ? undefined
-          : occurrence === "b"
-            ? "b"
-            : Number(occurrence),
-    };
-  }
+const decodeBackwardDay: ScheduleDateDayDecoder = (dayValue) => {
+  const matched = /^([+*@])?b(?:-(\d{2}))?$/.exec(dayValue);
+  return matched
+    ? {
+        kind: "backward",
+        prefix: matched[1] as "+" | "*" | "@" | undefined,
+        offset: backwardDayOffset(matched[2]),
+      }
+    : undefined;
+};
 
+const decodeWeekday: ScheduleDateDayDecoder = (dayValue) => {
+  const matched = /^(\+?)(su|mo|tu|we|th|fr|sa)(?::(\d|b))?$/.exec(dayValue);
+  return matched
+    ? {
+        kind: "weekday",
+        prefix: matched[1] as "+" | "",
+        weekday: matched[2] as ScheduleDateWeekday,
+        occurrence: weekdayOccurrence(matched[3]),
+      }
+    : undefined;
+};
+
+const weekdayOccurrenceSpecialCases: Readonly<Partial<Record<string, "b">>> = {
+  b: "b",
+};
+
+const weekdayOccurrence = (
+  occurrence: string | undefined,
+): number | "b" | undefined =>
+  occurrence === undefined
+    ? undefined
+    : (weekdayOccurrenceSpecialCases[occurrence] ?? Number(occurrence));
+
+const decodeScheduleDateKeyword: ScheduleDateDayDecoder = (dayValue) => {
   if (dayValue === "en") {
     return { kind: "en" };
   }
-
   if (dayValue === "ud") {
     return { kind: "ud" };
   }
-
   return undefined;
 };
+
+const scheduleDateDayDecoders: readonly ScheduleDateDayDecoder[] = [
+  decodeNumericDay,
+  decodeBackwardDay,
+  decodeWeekday,
+  decodeScheduleDateKeyword,
+];
+
+const interpretScheduleDateDay = (
+  dayValue: string,
+): ScheduleDateDay | undefined =>
+  scheduleDateDayDecoders
+    .map((decode) => decode(dayValue))
+    .find(isScheduleDateDay);
+
+const isScheduleDateDay = (
+  day: ScheduleDateDay | undefined,
+): day is ScheduleDateDay => day !== undefined;
+
+const scheduleDateRuleNumber = (matched: RegExpExecArray): number =>
+  matched[1] === undefined ? 1 : Number(matched[2]);
+
+const scheduleDateYear = (matched: RegExpExecArray): number | undefined =>
+  matched[3] === undefined ? undefined : Number(matched[3]);
+
+const scheduleDateMonth = (matched: RegExpExecArray): number | undefined =>
+  matched[4] === undefined ? undefined : Number(matched[4]);
+
+const scheduleDateInterpretation = (
+  matched: RegExpExecArray,
+  day: ScheduleDateDay,
+): ScheduleDateInterpretation => ({
+  rule: scheduleDateRuleNumber(matched),
+  hasExplicitRuleNumber: matched[1] !== undefined,
+  year: scheduleDateYear(matched),
+  month: scheduleDateMonth(matched),
+  dayValue: matched[5],
+  day,
+});
 
 export const interpretScheduleDateValue = (
   rawValue: string | undefined,
 ): ScheduleDateInterpretation | undefined => {
   const matched = scheduleDateValuePattern.exec(rawValue ?? "");
-  if (!matched) {
+  if (matched === null) {
     return undefined;
   }
-
-  const dayValue = matched[5];
-  const day = interpretScheduleDateDay(dayValue);
-  if (!day) {
+  const day = interpretScheduleDateDay(matched[5]);
+  if (day === undefined) {
     return undefined;
   }
-
-  return {
-    rule: matched[1] === undefined ? 1 : Number(matched[2]),
-    hasExplicitRuleNumber: matched[1] !== undefined,
-    year: matched[3] === undefined ? undefined : Number(matched[3]),
-    month: matched[4] === undefined ? undefined : Number(matched[4]),
-    dayValue,
-    day,
-  };
+  return scheduleDateInterpretation(matched, day);
 };
 
 export const daysInGregorianMonth = (year: number, month: number): number => {

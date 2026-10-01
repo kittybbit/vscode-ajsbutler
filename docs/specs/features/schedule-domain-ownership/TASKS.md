@@ -6,7 +6,8 @@
   Semantic Diff, Unit List, diagnostics, desktop, and web behavior while
   removing all six blocking Qlty findings on PR #321.
 - Active work: one remedial code slice, **R1**, after the focused planning
-  commit. Implementation has not started.
+  commit. The independent implementation review returned Findings; this
+  revision addresses those Findings and awaits independent re-review.
 - Read: this file, `SPECS.md`, `TRACEABILITY.md`,
   `docs/specs/README.md`, and `docs/specs/architecture.md`.
 - Do not: implement F2/F3 or later roadmap work; change schedule semantics,
@@ -28,14 +29,14 @@
   24 and return count 9.
 - Evidence trigger for this narrow replan: on the exact committed pre-R1
   baseline, qlty 0.645.0 `check --sarif --no-fix` and `smells --sarif
-  --no-snippets` both exited 0 while the latter reported 0 analyzed files;
+--no-snippets` both exited 0 while the latter reported 0 analyzed files;
   both SARIF files contained 0 results. The changed-files default therefore
   cannot substantiate R1's baseline/final comparison.
 - Plan review: independent plan-reviewer returned `Ready for approval` with
   zero Findings after two revision rounds. The user's conditional Human
   Approval is recorded below for the exact reviewed R1 boundary.
 - Evidence replan review: independent plan-reviewer returned `Ready for
-  approval` with zero Findings after one revision round. The user's
+approval` with zero Findings after one revision round. The user's
   conditional Human Approval for the revised boundary is recorded below.
 
 ## Replan Impact And Alternatives
@@ -124,20 +125,20 @@ logic moves with its owner; final SARIF, not these estimates, decides pass.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| File after R1 | Current symbols moved or retained | Cohesive reason and expected effect |
-| --- | --- | --- |
-| `ScheduleDate.ts` (existing) | Retain all exports; refactor private `interpretScheduleDateDay` and exported `interpretScheduleDateValue` in place | Date token grammar/default rule is one owner. Target both functions below complexity threshold 5 and the day function below return threshold 4 without a new file. |
-| `ScheduleCalendarIndex.ts` (new) | Move private `appendChildren` through `ancestorsOf` and `selectionEvidence` through `resolveScheduleCalendarSource` | Document identity, ancestor uniqueness/cycles, and `jc` source selection share the hierarchy invariant. Removes roughly the index/source portion of calendar complexity; no generic F2 document index. |
-| `ScheduleCalendarEntries.ts` (new) | Move private `isInvalidExactSelector` through `classifyCalendarSelector`, plus `calendarParameters` currently beside the base-setting helpers | `op`/`cl` selector parsing, conflict detection, and exact-before-weekday classification change together. Removes the entry/classification portion; `classifyScheduleCalendarDay` remains public and decision-bearing in the existing file. |
-| `ScheduleOperationalCalendar.ts` (new) | Move private `baseParameterResult` through `createOperationalMonth`, except `calendarParameters` assigned to Entries | `sdd`/`md`/`stt` base settings and operational-month bounds share the operational calendar invariant. Removes the largest remaining calendar block while keeping public month functions in the existing file. |
-| `ScheduleCalendar.ts` (existing) | Retain all exports; keep `createScheduleCalendarContextIndex`, `classifyScheduleCalendarDay`, `resolveOperationalMonth`, `isWithinOperationalMonth`, `operationalMonthLength`, `operationalMonthDate`, relative-date validators, and `resolveScheduleCalendarContext` decision-bearing | Owns the public calendar contract and context orchestration. Three extracted areas should leave less than 55 file complexity; no forwarding export. |
-| `ScheduleOperationalCandidates.ts` (new) | Move private `classificationFailure` through `classifiedDayCandidates`, then `dateCandidateAt` through `operationalDateCandidates`, with associated private types | Classified and relative/weekday candidates within an operational month share the context and month-bound invariant. Moving both source regions balances the 86 total so both resulting files can be below 55. |
-| `ScheduleCandidateResolver.ts` (existing) | Retain both exports; keep result constructors, `absoluteBackwardCandidate` through `relativeCandidates`, and the public `resolveScheduleDateCandidates` decision | Owns absolute candidates and the public absolute-versus-operational decision. Its residual complexity must be below 55; avoid splitting by individual calculation step. |
-| `ScheduleProjectionRules.ts` (new) | Move private `cloneRule` through `projectScheduleRules`, except substitution-specific `updateSubstitutionContextState` and `invalidAssociation` through `substitutionResolution`; include `RuleProjectionInput`, `ProjectedRule`, `ProjectedRules`, and `CandidateProjectionInput` | Candidate-to-run ordering, rule association, and projected evidence are one per-rule projection invariant. Removes the rule-generation portion of projection complexity. |
-| `ScheduleSubstitutionAnalysis.ts` (new) | Move private `substitutionState` through `recordSubstitutionStates`, plus `createSubstitutionAnalysis` and `hasScheduleSubstitution`; associated private types | `sh`/`shd` association validity, default shift, and evidence grouping share the substitution-definition invariant. Removes the analysis portion; no independent public service. |
-| `ScheduleSubstitutionResolution.ts` (new) | Move private `updateSubstitutionContextState`, `invalidAssociation` through `substitutionResolution`, `contextFailure` through `resolveSubstitutionCandidate`, and `isInvalidSubstitutionAssociation` through `resolveSubstitutedCandidates`; associated private types | Closed-day cancel/before/after search, mode choice, and bounded shift behavior share the substitution-resolution invariant. Removes the search portion. |
-| `ScheduleProjectionOutcomes.ts` (new) | Move private `cloneSubstitutionRule` through `datePreflight`; associated private types | Rule status precedence and exact raw/evidence outcomes for invalid, missing, unsupported, or ready dates are one decision. Removes the outcome/preflight portion; not a pipeline wrapper. |
-| `ScheduleProjection.ts` (existing) | Retain all exports; keep private period/status/summary helpers through `projectValidatedSchedule`, early outcomes, and `projectScheduleRuns` | Owns the half-open projection contract and aggregate status. Four extracted areas should leave less than 55 file complexity; no public API move. |
+| File after R1                             | Current symbols moved or retained                                                                                                                                                                                                                                                      | Cohesive reason and expected effect                                                                                                                                                                                                        |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ScheduleDate.ts` (existing)              | Retain all exports; refactor private `interpretScheduleDateDay` and exported `interpretScheduleDateValue` in place                                                                                                                                                                     | Date token grammar/default rule is one owner. Target both functions below complexity threshold 5 and the day function below return threshold 4 without a new file.                                                                         |
+| `ScheduleCalendarIndex.ts` (new)          | Move private `appendChildren` through `ancestorsOf` and `selectionEvidence` through `resolveScheduleCalendarSource`                                                                                                                                                                    | Document identity, ancestor uniqueness/cycles, and `jc` source selection share the hierarchy invariant. Removes roughly the index/source portion of calendar complexity; no generic F2 document index.                                     |
+| `ScheduleCalendarEntries.ts` (new)        | Move private `isInvalidExactSelector` through `classifyCalendarSelector`, plus `calendarParameters` currently beside the base-setting helpers                                                                                                                                          | `op`/`cl` selector parsing, conflict detection, and exact-before-weekday classification change together. Removes the entry/classification portion; `classifyScheduleCalendarDay` remains public and decision-bearing in the existing file. |
+| `ScheduleOperationalCalendar.ts` (new)    | Move private `baseParameterResult` through `createOperationalMonth`, except `calendarParameters` assigned to Entries                                                                                                                                                                   | `sdd`/`md`/`stt` base settings and operational-month bounds share the operational calendar invariant. Removes the largest remaining calendar block while keeping public month functions in the existing file.                              |
+| `ScheduleCalendar.ts` (existing)          | Retain all exports; keep `createScheduleCalendarContextIndex`, `classifyScheduleCalendarDay`, `resolveOperationalMonth`, `isWithinOperationalMonth`, `operationalMonthLength`, `operationalMonthDate`, relative-date validators, and `resolveScheduleCalendarContext` decision-bearing | Owns the public calendar contract and context orchestration. Three extracted areas should leave less than 55 file complexity; no forwarding export.                                                                                        |
+| `ScheduleOperationalCandidates.ts` (new)  | Move private `classificationFailure` through `classifiedDayCandidates`, then `dateCandidateAt` through `operationalDateCandidates`, with associated private types                                                                                                                      | Classified and relative/weekday candidates within an operational month share the context and month-bound invariant. Moving both source regions balances the 86 total so both resulting files can be below 55.                              |
+| `ScheduleCandidateResolver.ts` (existing) | Retain both exports; keep result constructors, `absoluteBackwardCandidate` through `relativeCandidates`, and the public `resolveScheduleDateCandidates` decision                                                                                                                       | Owns absolute candidates and the public absolute-versus-operational decision. Its residual complexity must be below 55; avoid splitting by individual calculation step.                                                                    |
+| `ScheduleProjectionRules.ts` (new)        | Move private `cloneRule` through `projectScheduleRules`, except substitution-specific `updateSubstitutionContextState` and `invalidAssociation` through `substitutionResolution`; include `RuleProjectionInput`, `ProjectedRule`, `ProjectedRules`, and `CandidateProjectionInput`     | Candidate-to-run ordering, rule association, and projected evidence are one per-rule projection invariant. Removes the rule-generation portion of projection complexity.                                                                   |
+| `ScheduleSubstitutionAnalysis.ts` (new)   | Move private `substitutionState` through `recordSubstitutionStates`, plus `createSubstitutionAnalysis` and `hasScheduleSubstitution`; associated private types                                                                                                                         | `sh`/`shd` association validity, default shift, and evidence grouping share the substitution-definition invariant. Removes the analysis portion; no independent public service.                                                            |
+| `ScheduleSubstitutionResolution.ts` (new) | Move private `updateSubstitutionContextState`, `invalidAssociation` through `substitutionResolution`, `contextFailure` through `resolveSubstitutionCandidate`, and `isInvalidSubstitutionAssociation` through `resolveSubstitutedCandidates`; associated private types                 | Closed-day cancel/before/after search, mode choice, and bounded shift behavior share the substitution-resolution invariant. Removes the search portion.                                                                                    |
+| `ScheduleProjectionOutcomes.ts` (new)     | Move private `cloneSubstitutionRule` through `datePreflight`; associated private types                                                                                                                                                                                                 | Rule status precedence and exact raw/evidence outcomes for invalid, missing, unsupported, or ready dates are one decision. Removes the outcome/preflight portion; not a pipeline wrapper.                                                  |
+| `ScheduleProjection.ts` (existing)        | Retain all exports; keep private period/status/summary helpers through `projectValidatedSchedule`, early outcomes, and `projectScheduleRuns`                                                                                                                                           | Owns the half-open projection contract and aggregate status. Four extracted areas should leave less than 55 file complexity; no public API move.                                                                                           |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -200,17 +201,17 @@ because no public symbol or source path moves:
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Exact existing path | Imported symbols to retain |
-| --- | --- |
-| `src/domain/schedule/ScheduleInterpretation.ts` | `interpretScheduleDateValue`, `ScheduleDateDay` |
-| `src/domain/services/diagnostics/ScheduleDateRules.ts` | `interpretScheduleDateValue`, `ScheduleDateDay` |
-| `src/application/unit-list/unitListScheduleValueHelpers.ts` | `interpretScheduleDateValue`, `ScheduleDateDay`, `ScheduleDateInterpretation` |
-| `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts` | `projectScheduleRuns`, `ScheduleProjection`, `ScheduleProjectionPeriod`, `ScheduleRun`, `createScheduleCalendarContextIndex`, `isFullyQualifiedRelativeScheduleDate`, `resolveScheduleCalendarContext`, `ScheduleCalendarContextIndex` |
-| `src/domain/services/semantic-diff/semanticDiffScheduleComparison.ts` | `ScheduleRun` |
-| `src/application/semantic-diff/compareScheduleDiff.ts` | `ScheduleRun` |
-| `src/test/suite/scheduleRuleHelpers.test.ts` | `interpretScheduleDateValue` |
-| `src/test/suite/semanticDiffScheduleCalendar.test.ts` | `classifyScheduleCalendarDay`, `createScheduleCalendarContextIndex`, `resolveOperationalMonth`, `resolveScheduleCalendarContext`, `projectScheduleRuns` |
-| `src/test/suite/semanticDiffScheduleRules.test.ts` | `ScheduleRun`, `projectScheduleRuns` |
+| Exact existing path                                                   | Imported symbols to retain                                                                                                                                                                                                             |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/domain/schedule/ScheduleInterpretation.ts`                       | `interpretScheduleDateValue`, `ScheduleDateDay`                                                                                                                                                                                        |
+| `src/domain/services/diagnostics/ScheduleDateRules.ts`                | `interpretScheduleDateValue`, `ScheduleDateDay`                                                                                                                                                                                        |
+| `src/application/unit-list/unitListScheduleValueHelpers.ts`           | `interpretScheduleDateValue`, `ScheduleDateDay`, `ScheduleDateInterpretation`                                                                                                                                                          |
+| `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`      | `projectScheduleRuns`, `ScheduleProjection`, `ScheduleProjectionPeriod`, `ScheduleRun`, `createScheduleCalendarContextIndex`, `isFullyQualifiedRelativeScheduleDate`, `resolveScheduleCalendarContext`, `ScheduleCalendarContextIndex` |
+| `src/domain/services/semantic-diff/semanticDiffScheduleComparison.ts` | `ScheduleRun`                                                                                                                                                                                                                          |
+| `src/application/semantic-diff/compareScheduleDiff.ts`                | `ScheduleRun`                                                                                                                                                                                                                          |
+| `src/test/suite/scheduleRuleHelpers.test.ts`                          | `interpretScheduleDateValue`                                                                                                                                                                                                           |
+| `src/test/suite/semanticDiffScheduleCalendar.test.ts`                 | `classifyScheduleCalendarDay`, `createScheduleCalendarContextIndex`, `resolveOperationalMonth`, `resolveScheduleCalendarContext`, `projectScheduleRuns`                                                                                |
+| `src/test/suite/semanticDiffScheduleRules.test.ts`                    | `ScheduleRun`, `projectScheduleRuns`                                                                                                                                                                                                   |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -223,6 +224,7 @@ rules, and their current types. Test direct imports in editable suites may
 change only for new private collaborator assertions; existing public imports
 must remain. Editing any external production consumer or changing any public
 import requires Replanning.
+
 - **Exact editable production paths:** existing
   `src/domain/schedule/ScheduleDate.ts`,
   `src/domain/schedule/ScheduleCalendar.ts`,
@@ -363,10 +365,21 @@ import requires Replanning.
 
 ## Completion And Feature Exit Gates
 
-- R1 status: Planned; no implementation or completion approval recorded.
-- Implementation review: required after R1 local evidence and behavior tests.
-  Given the shared domain schedule surface, the SDD policy also requires an
-  independent second review of the integrated result.
+- R1 status: Implementation revision completed locally; validation and
+  evidence are recorded in `TRACEABILITY.md`. Independent re-review and
+  Completion Approval remain pending.
+- Implementation review: the first independent review returned Findings.
+  The date-decoder finding and evidence auditability findings are corrected
+  within the approved R1 boundary. The required second independent review
+  found shared mutable `en`/`ud` keyword results; the decoder now returns fresh
+  objects and the focused suite tests caller mutation isolation. The focused
+  test's `+su:6` malformed-value assertion was itself a behavior regression:
+  the approved pre-R1 parser contract interprets its weekday occurrence as 6,
+  leaving semantic validity to calendar/candidate validation. The decoder and
+  test now preserve that contract and use the lexically malformed `+su:x` for
+  rejection coverage. Both independent review gates must return Ready before
+  Completion Approval. Given the shared domain schedule surface, the SDD policy
+  requires independent review of the integrated result.
 - Completion Approval: Pending; R1 cannot be committed before review
   `Ready` and explicit approval.
 - Feature Exit: reassess only after R1 completion commit and current-head

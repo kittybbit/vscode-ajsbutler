@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed the first Flow opening from Semantic Diff Explorer so validated diff
+  marks appear without repeating the action.
 - Unified Semantic Diff Explorer and Schedule Impact Calendar MUI filter menus
   and opaque scrolling surfaces across themes and narrow layouts.
 - Removed internal Calendar identifiers from visible details and accessible
