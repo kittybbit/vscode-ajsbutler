@@ -29,6 +29,10 @@ import type {
   ScheduleUnsupportedReason,
 } from "../../schedule/ScheduleInterpretation";
 import type { SemanticDiffUnitMatch } from "./semanticDiffStructuralRules";
+import {
+  parseSchedulePeriod,
+  type SchedulePeriod,
+} from "../../schedule/SchedulePeriod";
 
 export type SemanticDiffScheduleMatchedUnit = Pick<
   SemanticDiffUnitMatch,
@@ -110,39 +114,17 @@ const isJobnetUnit = (unit: AjsUnit): boolean => jobnetTypes.has(unit.unitType);
 const hasDirectScheduleParameters = (unit: AjsUnit): boolean =>
   unit.parameters.some((parameter) => scheduleParameterKeys.has(parameter.key));
 
-type UtcDateParts = readonly [year: number, month: number, day: number];
-
-const parseUtcDateParts = (value: string): UtcDateParts | undefined => {
-  const matched = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  return matched
-    ? [Number(matched[1]), Number(matched[2]), Number(matched[3])]
-    : undefined;
-};
-
-const matchesUtcDateParts = (
-  date: Date,
-  [year, month, day]: UtcDateParts,
-): boolean =>
-  date.getUTCFullYear() === year &&
-  date.getUTCMonth() === month - 1 &&
-  date.getUTCDate() === day;
-
-const toUtcDate = (value: string): Date | undefined => {
-  const parts = parseUtcDateParts(value);
-  if (!parts) {
-    return undefined;
-  }
-  const [year, month, day] = parts;
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return matchesUtcDateParts(date, parts) ? date : undefined;
-};
+// Date.UTC historically maps years 0000–0099 into 1900–1999 in this consumer.
+const passesLegacyDateUtcYearCheck = (period: SchedulePeriod): boolean =>
+  period.from.slice(0, 4) >= "0100" && period.to.slice(0, 4) >= "0100";
 
 const parsePeriod = (
   period: SemanticDiffComparisonPeriod,
 ): SemanticDiffComparisonPeriod | undefined => {
-  const from = toUtcDate(period.from);
-  const to = toUtcDate(period.to);
-  return from && to && from < to ? period : undefined;
+  const parsed = parseSchedulePeriod(period);
+  return parsed.kind === "valid" && passesLegacyDateUtcYearCheck(parsed.period)
+    ? period
+    : undefined;
 };
 
 const toScheduleProjectionPeriod = (

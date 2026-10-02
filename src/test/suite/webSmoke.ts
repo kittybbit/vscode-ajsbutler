@@ -14,6 +14,7 @@ import {
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarSessionMessage,
 } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
+import { parseSchedulePeriod } from "../../domain/schedule/SchedulePeriod";
 
 const LANGUAGE_ID = "jp1ajs";
 
@@ -50,6 +51,19 @@ const waitForCondition = async (
 
 export async function run(): Promise<void> {
   await activateExtension();
+
+  const browserPeriod = parseSchedulePeriod({
+    from: "2000-02-28",
+    to: "2000-03-01",
+  });
+  if (
+    browserPeriod.kind !== "valid" ||
+    browserPeriod.fromDate.toISOString() !== "2000-02-28T00:00:00.000Z" ||
+    browserPeriod.toDate.toISOString() !== "2000-03-01T00:00:00.000Z"
+  ) {
+    throw new Error("WEB-11 canonical schedule period failed in the browser");
+  }
+  reportWebScenario("WEB-11 passed: browser canonical schedule period");
 
   const commands = await vscode.commands.getCommands(true);
   for (const command of [

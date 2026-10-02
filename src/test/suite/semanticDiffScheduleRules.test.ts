@@ -918,4 +918,84 @@ suite("Semantic Diff Schedule Rules", () => {
     assert.strictEqual(projection.completeness, "none");
     assert.deepStrictEqual(projection.runs, []);
   });
+
+  test("keeps malformed projection periods invalid before rule-zero handling", () => {
+    const interpretation = interpretSchedule(
+      jobnet("/root/no-runs", { sd: "0,ud", st: "09:00" }),
+    );
+    const malformedPeriods: unknown[] = [
+      undefined,
+      null,
+      {},
+      { from: null, to: "2026-05-01" },
+      { from: "2026-04-01", to: undefined },
+      { from: "2026-04-01", to: 42 },
+      { from: "2026-02-29", to: "2026-03-01" },
+      { from: "2026-04-01", to: "2026-04-01" },
+      { from: "2026-05-01", to: "2026-04-01" },
+    ];
+
+    for (const period of malformedPeriods) {
+      const projection = projectScheduleRuns({
+        interpretation,
+        period: period as never,
+      });
+      assert.strictEqual(projection.status, "invalid");
+      assert.strictEqual(projection.completeness, "none");
+      assert.deepStrictEqual(projection.runs, []);
+    }
+
+    const validZeroRun = projectScheduleRuns({
+      interpretation,
+      period: { from: "0099-12-31", to: "0100-01-01" },
+    });
+    assert.strictEqual(validZeroRun.status, "no-runs");
+    assert.strictEqual(validZeroRun.completeness, "complete");
+  });
+
+  test("projects low-year dates through the canonical UTC period bounds", () => {
+    const interpretation = interpretSchedule(
+      jobnet("/root/low-year", {
+        sd: "0099/12/31",
+        st: "09:00",
+      }),
+    );
+    const projection = projectScheduleRuns({
+      interpretation,
+      period: { from: "0099-12-31", to: "0100-01-01" },
+    });
+
+    assert.deepStrictEqual(
+      projection.runs.map((run) => [run.date, run.time]),
+      [["0099-12-31", "09:00"]],
+    );
+  });
+
+  test("retains legacy low-year rejection in Semantic Diff schedule evaluation", () => {
+    for (const period of [
+      { from: "0000-01-01", to: "0001-01-01" },
+      { from: "0001-01-01", to: "0002-01-01" },
+      { from: "0099-12-31", to: "0100-01-01" },
+    ]) {
+      assert.deepStrictEqual(
+        evaluateSemanticDiffSchedule({
+          beforeUnits: [],
+          afterUnits: [],
+          matches: [],
+          period,
+        }),
+        { kind: "invalid-period", period },
+      );
+    }
+
+    assert.strictEqual(
+      evaluateSemanticDiffSchedule({
+        beforeUnits: [],
+        afterUnits: [],
+        matches: [],
+        period: { from: "0100-01-01", to: "0100-01-02" },
+      }).kind,
+      "evaluated",
+    );
+  });
 });

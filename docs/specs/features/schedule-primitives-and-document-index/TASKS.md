@@ -2,15 +2,23 @@
 
 ## Current state
 
-- Mode: approved implementation plan; implementation not started.
+- Mode: S1 implementation and validation complete; two independent
+  implementation reviewers returned Ready with no actionable Findings.
+- S1 final quality: full check retains the same three inherited findings;
+  smells retains 151 findings without new issues; aggregate passed. The
+  final post-sync evidence supersedes the historical pending note below:
+  `/private/tmp/ajs-s1-evidence-oy97lf2l/metadata.json`.
+- Active slice: S1, `SLICE_APPROVED`. Completion Approval is recorded below;
+  S2 waits for S1's focused completion commit.
 - Plan review: Ready for approval, confirmed by independent plan-reviewer
   in the current conversation. All findings are resolved; slice scopes,
   order and validation remain unchanged.
 - Approved slices: S1, S2, S3 in the recorded order. The focused planning
-  commit is required before implementation.
+  commit is `bc914bfa21ad972a66f7893232d27835c25f6586`.
 - Feature: `schedule-primitives-and-document-index`; branch:
-  `docs/schedule-primitives-and-document-index`.
+  `codex/schedule-primitives-and-document-index`.
 - Inspected production baseline: `4976541822b1da44a3e8e0cab7501191e7ea214e`.
+- S1 exact predecessor: `bc914bfa21ad972a66f7893232d27835c25f6586`.
 - Documentation validation: Markdown and full-repository qlty evidence
   accepted by independent review; final aggregate passed. Main captures
   the final gate-record stabilization under the evidence path below.
@@ -27,6 +35,16 @@
   `docs/specs/features/schedule-primitives-and-document-index/SPECS.md`,
   `docs/specs/features/schedule-primitives-and-document-index/TASKS.md`,
   `docs/specs/features/schedule-primitives-and-document-index/TRACEABILITY.md`.
+
+## S1 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation (2026-10-02, Asia/Tokyo)
+- Approved scope: the exact S1 implementation reviewed Ready by both
+  independent implementation reviewers, including its ten changed paths and
+  validation evidence. No S2 implementation or closure approval is implied.
+- Reviewed identity: `/private/tmp/ajs-s1-evidence-oy97lf2l/metadata.json`;
+  review gate annotations are separate metadata under the Evidence Contract.
 
 ## Agent Brief
 
@@ -314,6 +332,67 @@ to: string }`; `SchedulePeriodInvalidReason` is the three existing reason
   Independent implementation review must cover the shared-contract risk and
   exact compatibility matrix; Main arranges an additional independent review
   if required by SDD's higher-risk policy.
+
+## S1 Implementation Evidence
+
+- Changed paths are exactly the approved S1 paths: production
+  `src/domain/schedule/SchedulePeriod.ts`,
+  `src/application/semantic-diff/parseSemanticDiffComparisonPeriod.ts`,
+  `src/domain/schedule/ScheduleProjection.ts`, and
+  `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`; tests
+  `src/test/suite/SchedulePeriod.test.ts`,
+  `src/test/suite/parseSemanticDiffComparisonPeriod.test.ts`,
+  `src/test/suite/semanticDiffScheduleRules.test.ts`, and
+  `src/test/suite/webSmoke.ts`. S1 does not edit
+  `src/test/suite/semanticDiffSchedule.test.ts`; its existing suite is part of
+  validation. No `ScheduleDate.ts`, DTO, package, configuration, README,
+  CHANGELOG, or durable architecture file changed.
+- Implementation Solution Shape: `ScheduleDate.toUtcDate` remains the sole
+  canonical Gregorian UTC date parser. `SchedulePeriod` owns readonly string
+  bounds, the increasing-range invariant, validation-reason precedence and
+  call-local parsed dates. Application parsing maps the shared result to its
+  existing DTO; projection keeps its malformed-input guard and invalid-before-
+  rule-zero ordering; Semantic Diff retains its named local year-0000–0099
+  compatibility check after shared validation. No port, adapter, factory,
+  cache, or dependency was added. The new domain owner imports only
+  `ScheduleDate`; application and domain-service consumers depend inward on
+  `domain/schedule`.
+- Acceptance: pre-integration characterization passed before consumer
+  replacement. After integration, `rtk pnpm run test:compile` passed;
+  `SchedulePeriod`, application period, schedule-rules, semantic-diff schedule,
+  and architecture dependency suites passed (69 tests). Coverage includes
+  strict Gregorian dates and centuries, years 0000–9999, preserved strings,
+  reason precedence, malformed projection bounds, rule-zero ordering,
+  low-year consumer compatibility, and half-open run boundaries.
+- Shared-host validation against the final parser: `rtk pnpm run test` exited
+  0 on VS Code 1.140.0; `rtk pnpm run test:web` exited 0 and logged WEB-11
+  plus WEB-7 through WEB-10; `rtk pnpm run build` exited 0 for desktop and web.
+  The web harness logged one ECONNRESET and two ERR_STREAM_PREMATURE_CLOSE
+  messages during teardown after all scenarios passed. A sandbox browser launch
+  initially failed before tests with macOS MachPort permission denied; the
+  authorized elevated rerun passed. Webpack emitted asset/entrypoint-size
+  recommendations; no build error occurred.
+- Compatibility and readiness: `engines.vscode` remains `^1.75.0`; the new
+  production code has no Node built-in or host/UI imports. Desktop and web
+  bundles and smoke paths passed. No externally observable behavior, user
+  workflow, telemetry, dependency, or support target changed, so README and
+  CHANGELOG updates are not indicated. Production readiness awaits final qlty
+  evidence and independent implementation review; Completion Approval remains
+  pending.
+- qlty round-4 evidence uses version `0.645.0`, exact predecessor
+  `bc914bfa21ad972a66f7893232d27835c25f6586`, baseline tree
+  `481d911fef55b97b3f0c21cb49f6adfb8bb1e9cc`, and configuration SHA-256
+  `f551fa47da3ac111a3e29857ff0f431abb0e0a20c17a8c794660c255f4dfb4c2`.
+  Inventories were 724/726 for check and 431/432 for smells (baseline/final).
+  Smells exited 0 in both snapshots with the same 151 findings; no new or
+  adverse movement was found. The check scan contained the same three inherited
+  findings plus one TRACEABILITY formatting note; the disposable final
+  aggregate exited 0 and formatted only that table row. The formatting is synced
+  here; Main's post-sync official comparison and aggregate are pending.
+- Raw qlty evidence is under `/private/tmp/ajs-s1-evidence-oy97lf2l/`; raw test
+  and build outputs are under
+  `/private/tmp/ajs-s1-implementation-evidence/`. Main will add the final
+  post-sync check result and metadata reference after stabilization.
 
 ## Risks, production readiness and deferred work
 
