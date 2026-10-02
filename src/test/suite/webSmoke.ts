@@ -15,6 +15,12 @@ import {
   createScheduleImpactCalendarSessionMessage,
 } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 import { parseSchedulePeriod } from "../../domain/schedule/SchedulePeriod";
+import {
+  collectUniqueAjsUnits,
+  createAjsDocumentIndex,
+} from "../../domain/models/ajs/AjsDocumentIndex";
+import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import { createScheduleCalendarContextIndex } from "../../domain/schedule/ScheduleCalendar";
 
 const LANGUAGE_ID = "jp1ajs";
 
@@ -64,6 +70,59 @@ export async function run(): Promise<void> {
     throw new Error("WEB-11 canonical schedule period failed in the browser");
   }
   reportWebScenario("WEB-11 passed: browser canonical schedule period");
+
+  const web12Jobnet: AjsUnit = {
+    id: "/web12/jobnet",
+    name: "jobnet",
+    unitAttribute: "jobnet,,jp1admin,",
+    unitType: "n",
+    absolutePath: "/web12/jobnet",
+    depth: 1,
+    parentId: "/web12",
+    isRoot: false,
+    isRootJobnet: true,
+    hasSchedule: true,
+    hasWaitedFor: false,
+    layout: { h: 1, v: 1 },
+    parameters: [],
+    relations: [],
+    children: [],
+  };
+  const web12Group: AjsUnit = {
+    ...web12Jobnet,
+    id: "/web12",
+    name: "group",
+    unitAttribute: "group,,jp1admin,",
+    unitType: "g",
+    absolutePath: "/web12",
+    depth: 0,
+    parentId: undefined,
+    isRoot: true,
+    isRootJobnet: false,
+    hasSchedule: false,
+    parameters: [{ key: "ty", value: "g" }],
+    children: [web12Jobnet],
+  };
+  const web12Document: AjsDocument = {
+    rootUnits: [web12Group],
+    warnings: [],
+  };
+  const web12Units = collectUniqueAjsUnits(web12Document);
+  const web12Index = createAjsDocumentIndex(web12Units);
+  const web12CalendarIndex = createScheduleCalendarContextIndex(web12Document);
+  if (
+    web12Units.length !== 2 ||
+    web12Units[0] !== web12Group ||
+    web12Units[1] !== web12Jobnet ||
+    web12Index.byId.get("/web12/jobnet")?.[0] !== web12Jobnet ||
+    web12CalendarIndex.byPath.get("/web12")?.[0] !== web12Group ||
+    web12CalendarIndex.duplicatePath
+  ) {
+    throw new Error("WEB-12 normalized calendar document index failed");
+  }
+  reportWebScenario(
+    "WEB-12 passed: browser normalized calendar document index",
+  );
 
   const commands = await vscode.commands.getCommands(true);
   for (const command of [

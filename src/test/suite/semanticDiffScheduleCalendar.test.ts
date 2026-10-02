@@ -12,6 +12,10 @@ import {
   resolveOperationalMonth,
   resolveScheduleCalendarContext,
 } from "../../domain/schedule/ScheduleCalendar";
+import {
+  collectUnits,
+  indexUnits,
+} from "../../domain/schedule/ScheduleCalendarIndex";
 import { interpretSchedule } from "../../domain/schedule/ScheduleInterpretation";
 import { projectScheduleRuns } from "../../domain/schedule/ScheduleProjection";
 import { evaluateSemanticDiffSchedule } from "../../domain/services/semantic-diff/semanticDiffScheduleRules";
@@ -126,6 +130,49 @@ const assertCalendarUnsupportedItems = (
 };
 
 suite("Semantic Diff Schedule Calendar Context", () => {
+  test("characterizes calendar preorder, identity deduplication, and buckets", () => {
+    const shared = jobnet("/shared", {});
+    const first = group("/first", [shared]);
+    const second = group("/second", [shared]);
+    const cycle = jobnet("/cycle", {});
+    cycle.children.push(cycle);
+
+    const ordered = collectUnits(document([first, second, cycle, first]));
+    assert.deepStrictEqual(ordered, [first, shared, second, cycle]);
+    assert.strictEqual(ordered[1], shared);
+    assert.strictEqual(ordered[3], cycle);
+
+    const duplicateIdFirst = jobnet("/duplicate", {});
+    const duplicateIdSecond = jobnet("/duplicate", {});
+    duplicateIdFirst.id = "duplicate-id";
+    duplicateIdSecond.id = "duplicate-id";
+    const byId = indexUnits(
+      [duplicateIdFirst, duplicateIdSecond],
+      (item) => item.id,
+    );
+    assert.deepStrictEqual([...byId.keys()], ["duplicate-id"]);
+    assert.deepStrictEqual(byId.get("duplicate-id"), [
+      duplicateIdFirst,
+      duplicateIdSecond,
+    ]);
+  });
+
+  test("characterizes iterative collection across a deep hierarchy", () => {
+    const root = jobnet("/deep/0", {});
+    let parent = root;
+    const expectedLast = 20_000;
+    for (let depth = 1; depth <= expectedLast; depth += 1) {
+      const child = jobnet(`/deep/${depth}`, {}, parent.id);
+      parent.children.push(child);
+      parent = child;
+    }
+
+    const ordered = collectUnits(document([root]));
+    assert.strictEqual(ordered.length, expectedLast + 1);
+    assert.strictEqual(ordered[0], root);
+    assert.strictEqual(ordered[expectedLast], parent);
+  });
+
   test("resolves containing-group defaults and projects relative dates", () => {
     const main = jobnet("/root/main", {
       sd: ["1,2026/04/+01", "2,2026/04/+b", "3,2026/04/+mo:2"],
@@ -890,6 +937,16 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     assert.strictEqual(first.status, "supported");
     assert.strictEqual(second.status, "supported");
     assert.deepStrictEqual(snapshot(), before);
+  });
+
+  test("retains distinct duplicate context matches in encounter order", () => {
+    const first = group("/root", []);
+    const second = group("/root", []);
+    const index = createScheduleCalendarContextIndex(document([first, second]));
+
+    assert.deepStrictEqual(index.byId.get("/root"), [first, second]);
+    assert.deepStrictEqual(index.byPath.get("/root"), [first, second]);
+    assert.strictEqual(index.duplicatePath, true);
   });
 
   test("rejects hierarchy cycles and duplicate normalized paths recoverably", () => {

@@ -2,14 +2,25 @@
 
 ## Current state
 
-- Mode: S1 implementation and validation complete; two independent
-  implementation reviewers returned Ready with no actionable Findings.
+- Mode: S1 committed after Completion Approval; S2 is `SLICE_APPROVED` after
+  two independent Ready reviews and resolution of the counter-record Finding.
+  S1's two independent reviewers returned Ready with no actionable Findings.
 - S1 final quality: full check retains the same three inherited findings;
   smells retains 151 findings without new issues; aggregate passed. The
   final post-sync evidence supersedes the historical pending note below:
   `/private/tmp/ajs-s1-evidence-oy97lf2l/metadata.json`.
-- Active slice: S1, `SLICE_APPROVED`. Completion Approval is recorded below;
-  S2 waits for S1's focused completion commit.
+- Active slice: S2, `SLICE_APPROVED`; Completion Approval is recorded below;
+  predecessor S1 is `SLICE_COMMITTED`:
+  `259113106e70ec8c201a9687987b6526bed9bd7d`.
+- S2 approval provenance: the recorded Human Approval covers the complete
+  reviewed plan; S2's exact production/test paths are the S2 boundary below.
+- S2 review identity: substantive tree
+  `610ee04de33b4b1009e2b245c0163cd450805ee3`; validation and counter repair:
+  `/private/tmp/ajs-s2-evidence-20261002/metadata.json`. Current-state and
+  dispatch-counter annotations are separate metadata, outside the full scans.
+- S1 completion commit: `259113106e70ec8c201a9687987b6526bed9bd7d`;
+  focused ten-path commit, staged checks passed. Integration quality evidence:
+  `/private/tmp/ajs-s1-integration-refresh-20261002/metadata.json`.
 - Plan review: Ready for approval, confirmed by independent plan-reviewer
   in the current conversation. All findings are resolved; slice scopes,
   order and validation remain unchanged.
@@ -45,6 +56,18 @@
   validation evidence. No S2 implementation or closure approval is implied.
 - Reviewed identity: `/private/tmp/ajs-s1-evidence-oy97lf2l/metadata.json`;
   review gate annotations are separate metadata under the Evidence Contract.
+
+## S2 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation (2026-10-03, Asia/Tokyo)
+- Approved scope: the exact eight-path S2 implementation reviewed Ready by
+  both independent reviewers, including the targeted counter-record repair.
+  S3 implementation remains within the existing plan approval; its completion
+  and feature closure remain separate gates.
+- Reviewed identity: substantive tree
+  `610ee04de33b4b1009e2b245c0163cd450805ee3`, with separately validated counter
+  and Main gate annotations in `/private/tmp/ajs-s2-evidence-20261002/`.
 
 ## Agent Brief
 
@@ -393,6 +416,103 @@ to: string }`; `SchedulePeriodInvalidReason` is the three existing reason
   and build outputs are under
   `/private/tmp/ajs-s1-implementation-evidence/`. Main will add the final
   post-sync check result and metadata reference after stabilization.
+
+## S2 Implementation Evidence
+
+- Changed paths are exactly the approved S2 implementation boundary plus its
+  feature evidence records: new `src/domain/models/ajs/AjsDocumentIndex.ts`,
+  `src/domain/schedule/ScheduleCalendarIndex.ts`,
+  `src/domain/schedule/ScheduleCalendar.ts`, new
+  `src/test/suite/AjsDocumentIndex.test.ts`,
+  `src/test/suite/semanticDiffScheduleCalendar.test.ts`,
+  `src/test/suite/webSmoke.ts`, this file, and `TRACEABILITY.md`. `SPECS.md`
+  remains unchanged. No parser/model helpers, application consumers,
+  architecture catalog, configuration, package manifest, README, or CHANGELOG
+  changed.
+- Implementation Solution Shape: `AjsDocumentIndex` in normalized-model domain
+  owns the existing iterative, root-first unique-object preorder collector and
+  duplicate-preserving ID/path buckets over an already selected sequence.
+  It retains the same stack/`Set` traversal, `Map` insertion order, unit
+  references, and per-call arrays/maps. `ScheduleCalendarContextIndex` reuses
+  that index and adds its existing duplicate-path fact. Calendar ambiguity,
+  parent resolution, source selection and evidence remain calendar-owned;
+  `ancestorsOf` and `resolveScheduleCalendarSource` are unchanged. Existing
+  `collectUnits`/`indexUnits` exports are direct re-export aliases, not wrappers.
+  No port, adapter, factory, cache, dependency, or custom mechanism was added.
+- Acceptance: pre-move characterization passed unchanged after integration.
+  `AjsDocumentIndex.test.ts` covers empty input, multi-root root-first preorder,
+  shared objects, self/mutual cycles, exact object references, distinct
+  duplicate IDs/paths, key and bucket order, a 4,096-child duplicate-heavy graph,
+  and a 20,001-node hierarchy. Calendar tests retain explicit-versus-containing
+  `jc`, hierarchy/ambiguity failures, evidence and duplicate-path behavior, and
+  assert distinct duplicate matches remain in encounter order.
+- Validation: `rtk pnpm run test:compile` passed. Focused index, calendar,
+  schedule, schedule-rule and architecture dependency suites passed (99 tests).
+  `rtk pnpm run test` passed on VS Code 1.140.0. `rtk pnpm run test:web`
+  passed WEB-12's actual browser document/calendar-index scenario and WEB-7
+  through WEB-10. Web teardown logged EPIPE and
+  ERR_STREAM_PREMATURE_CLOSE after all scenarios passed, matching the previous
+  S1 harness behavior. `rtk pnpm run build` passed for desktop and web with
+  existing webpack asset/entrypoint-size recommendations. `engines.vscode`
+  remains `^1.75.0`.
+- Compatibility and risks: changed production source imports only normalized
+  domain types and uses no Node, VS Code, UI, parser, application DTO or
+  telemetry capability. Large/deep and malformed calendar selection behavior
+  remains consumer-owned and covered; unique traversal terminates object cycles
+  while distinct objects with matching keys remain separate. Schedule-impact
+  occurrence traversal and its stack-limited cycle behavior remain for S3.
+  No observable behavior, API selection policy, user workflow, dependency or
+  support target changed. Existing architecture ownership is sufficient, so no
+  README/CHANGELOG or other durable-document update is needed.
+- qlty 0.645.0 exact-snapshot comparison used the same full-repository
+  selection/configuration (`f551fa47da3ac111a3e29857ff0f431abb0e0a20c17a8c794660c255f4dfb4c2`):
+  baseline check 6 results/710 paths (exit 1, findings-triggered), final check
+  5 results/712 paths (exit 1). All five final results match baseline; one
+  baseline Markdown formatter note on unchanged `docs/specs/README.md` is
+  absent, and there is no new result.
+  Baseline/final smells each have 151 results, with 432/433 paths respectively
+  (both exit 0; no new or mapped adverse finding). The final aggregate passed.
+  Complete SARIF, logs, inventories, snapshot identities, and cache/output
+  records are under `/private/tmp/ajs-s2-evidence-20261002/metadata.json`.
+- Review/readiness: implementation is limited to S2 and is ready for the
+  independent implementation review. The shared-domain contract is a higher-
+  risk surface; Main routes the required independent reviews. Completion Approval
+  and the S2 commit remain separate gates.
+
+### S2 Workflow Counters
+
+- Main-owned gates and delegations: one inherited Human Approval applies to
+  the complete plan and all slices; two S2 implementer dispatches (initial
+  implementation and this Finding repair); three review dispatches (two
+  independent reviews and one targeted counter-repair review); one Completion
+  Approval and zero successful commits before the commit gate.
+- Producer test/build executions in retained evidence: test compilation 2
+  (initial and after formatting sync), focused/architecture suite 1 (99 tests),
+  desktop suite 1, web suite 1, build 1. Markdown lint has three earlier logs;
+  this metadata-only repair adds one targeted lint run. Exact producer Git
+  status/diff inspection counts are unknown; no history-collection pass was
+  added. The repair adds one targeted `git diff --check` execution.
+- Main executions during S2: zero product tests, builds or qlty runs; six Git
+  status/diff inspections (initial diff check, post-handoff status and final
+  gate-annotation diff check, approval-entry status and approval-annotation
+  diff checks including an annotation correction), one additional Git HEAD
+  inspection, and four Markdown-lint runs (initial state, final gate annotation,
+  Completion Approval and its annotation correction).
+- qlty executions: baseline check 1 and smells 1; final full check 4 and smells
+  3; one captured final aggregate success, with one status-capture retry. The
+  baseline was reused, not recreated. Check exit 1 is findings-triggered; it
+  is not an execution failure. Superseded changed-files-mode and preflight
+  attempts are listed in the evidence metadata.
+- Evidence refresh reasons: baseline scans were reused (zero recreations); one
+  test-compilation rerun followed approved formatting sync. Four final full
+  checks and three final full smells observations are recorded, including
+  refreshes for formatter sync and the corrected full-repository invocation;
+  the final check also covered its evidence-note edit. The final smells input
+  set was unchanged by that Markdown-only edit and reused. No product test,
+  build, or full scan was rerun after this counter repair. The complete
+  reason/count record is in `/private/tmp/ajs-s2-evidence-20261002/metadata.json`.
+- S2 rollup: producer and Main counts above are separated by owner; feature-wide
+  aggregation awaits Feature Exit after the remaining slices.
 
 ## Risks, production readiness and deferred work
 
