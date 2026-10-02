@@ -15,6 +15,11 @@ SDD operations must pass through Main to the designated role; Copilot CLI must
 not impersonate a role or execute its lifecycle procedure. A child returns to
 Main and does not start another role.
 
+Role contracts and complete procedures live in `.codex/agents/*.toml`.
+SDD has no lifecycle Skills or Skill adapters. Main forwards the policy's
+handoff record; consumers reuse evidence under its identity and freshness
+rules rather than recollecting facts at each gate.
+
 ## Repository Context
 
 - Product: a VS Code extension for viewing and analyzing JP1/AJS3 definition
