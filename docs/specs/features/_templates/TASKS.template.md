@@ -3,7 +3,7 @@
 ## Agent Brief
 
 - Purpose: {{outcome}}
-- Active or approved slice: {{slice and status}}
+- Active or approved slice: {{slice and lifecycle state}}
 - Read first: `SPECS.md` and this file; add only needed supporting docs.
 - Validate: use the active slice's checks below.
 - Constraints / next decision: {{scope boundary and next gate}}
@@ -11,9 +11,12 @@
 ## Current state
 
 - Lifecycle state: {{state from the SDD Lifecycle State Contract}}
-- Plan: Proposed | Review Needed | Pending Approval | Approved | In Progress |
-  Replan Required | Complete
-- Plan review: Pending | Ready | Findings
+- Next decision / blocker: {{next gate or missing decision; none if absent}}
+- Gate evidence: {{review verdict and identity, approval and commit references}}
+
+Use Lifecycle state as the sole state field for new features. Keep review and
+approval results as gate evidence. Preserve inherited status vocabulary only
+under the policy's legacy mapping rule; a field never grants approval.
 
 ## Human Approval
 
@@ -32,8 +35,7 @@ approval messages and superseded narrative do not belong here.
 
 ### Slice 1: {{slice name}}
 
-- Status: Proposed | Approved | In Progress | Implemented | Complete | Blocked |
-  Replan Required
+- Lifecycle state: {{substantiated slice state from the Lifecycle State Contract}}
 - Scope and value: {{cohesive change and user/domain value}}
 - Acceptance: {{observable or reviewable result}}
 - Dependencies / risks / stop conditions: {{only material items}}
@@ -42,24 +44,23 @@ approval messages and superseded narrative do not belong here.
   desktop/web/VS Code, and documentation impact}}
 - Approval boundary: {{exact paths and excluded work}}
 
-#### Validation record
+#### Validation index
 
-- Producer / record version:
-- Base revision / final content identity / resulting commit:
-- Approved, changed, untracked, out-of-scope or ambiguous paths:
-- Check inputs and coverage / configuration, dependency and tool identities:
-- Required commands / exits / states / raw-output references:
-- qlty version, config, inventories, four SARIF references and final aggregate:
-- Compatibility / architecture facts / traceability reference:
-- Reviewed patch identity / independent verdict and gate references:
-- Missing facts / invalidation or reproduction reason / reused evidence:
-- Execution counts: {{delegations, qlty check/smells, tests, builds, Git
-  inspections, regenerations, human gates, commits; unknown when unavailable}}
+- Identity / result: {{validated content reference; pass, fail, or unknown}}
+- Coverage: {{required checks and covered surfaces}}
+- Evidence artifact: {{retained manifest, mechanical detail, and raw outputs}}
+- Review / approval / commit: {{exact patch and gate evidence references}}
+- Missing facts / refresh or exception: {{decision-relevant reason/reference,
+  or none}}
 
 Apply the Evidence Contract in [`SDD policy`](../../README.md#evidence-contract).
-Include only facts applicable to this slice; keep raw logs outside inspected
-inputs and retain them through Feature Exit. A later role consumes matching
-evidence rather than creating another validation package.
+The linked artifact owns producer/version, base/final identities, detailed path
+manifest, configuration/dependency/tool identities, command exits, raw outputs,
+and unexpected reruns/regenerations/extra reviews. Add inventories, four SARIF
+files and aggregate result only when the validation tier requires qlty. Keep
+artifacts outside inspected inputs, readable and retained through Feature Exit.
+A later role consumes matching evidence without copying details or creating
+another validation package.
 
 #### Solution Shape (when material)
 
