@@ -165,6 +165,18 @@ suite("Semantic Diff Schedule Rules", () => {
     );
     assert.deepStrictEqual(result.unsupportedDecisions, []);
     assert.deepStrictEqual(result.zeroRunCandidates, []);
+    const changedRootRun = result.runDecisions.find(
+      (decision) =>
+        decision.kind === "changed-time" && decision.unitPath === "/root/main",
+    );
+    const rootPair = result.pairEvaluations.find(
+      (pair) => pair.before.unit.absolutePath === "/root/main",
+    );
+    assert.ok(changedRootRun);
+    assert.ok(rootPair);
+    if (changedRootRun?.kind === "changed-time" && rootPair) {
+      assert.notStrictEqual(changedRootRun.before, rootPair.before.runs[0]);
+    }
     assert.deepStrictEqual(result.zeroRunCandidatesBySide, {
       before: [],
       after: [],
@@ -222,6 +234,30 @@ suite("Semantic Diff Schedule Rules", () => {
         ["st", "3,11:00", "unpaired-start-time", 3],
       ].sort(),
     );
+    const uncalculatedDate = result.unsupportedDecisions.find(
+      (decision) => decision.parameter.value === "en",
+    );
+    const invalidDate = result.unsupportedDecisions.find(
+      (decision) => decision.parameter.value === "2026/04/31",
+    );
+    assert.ok(uncalculatedDate);
+    assert.ok(invalidDate);
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(uncalculatedDate, "status"),
+      false,
+    );
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(uncalculatedDate, "scheduleRule"),
+      true,
+    );
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(invalidDate, "status"),
+      false,
+    );
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(invalidDate, "scheduleRule"),
+      true,
+    );
     assert.deepStrictEqual(
       result.zeroRunCandidates.map((unit) => unit.id),
       [],
@@ -252,6 +288,58 @@ suite("Semantic Diff Schedule Rules", () => {
       before: [before],
       after: [after],
     });
+    assert.strictEqual(
+      result.zeroRunCandidates,
+      result.zeroRunCandidatesBySide.after,
+    );
+  });
+
+  test("preserves moved-path pairing and match-order compatibility", () => {
+    const beforeFirst = jobnet("/root/old/first", {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    const afterFirst = jobnet("/root/new/first", {
+      sd: "2026/04/10",
+      st: "09:00",
+    });
+    const beforeSecond = jobnet("/root/old/second", {
+      sd: "2026/04/11",
+      st: "10:00",
+    });
+    const afterSecond = jobnet("/root/new/second", {
+      sd: "2026/04/11",
+      st: "10:00",
+    });
+    const afterNoRuns = jobnet("/root/new/no-runs", {
+      sd: "2026/06/01",
+      st: "09:00",
+    });
+    const result = evaluateSemanticDiffSchedule({
+      beforeUnits: [beforeFirst, beforeSecond],
+      afterUnits: [afterSecond, afterFirst, afterNoRuns],
+      matches: [
+        { before: beforeSecond, after: afterSecond },
+        { before: beforeFirst, after: afterFirst },
+      ],
+      period: { from: "2026-04-01", to: "2026-05-01" },
+    });
+
+    assert.strictEqual(result.kind, "evaluated");
+    if (result.kind !== "evaluated") return;
+    assert.deepStrictEqual(result.runDecisions, []);
+    assert.deepStrictEqual(
+      result.pairEvaluations.map((pair) => [pair.before.unit, pair.after.unit]),
+      [
+        [beforeSecond, afterSecond],
+        [beforeFirst, afterFirst],
+      ],
+    );
+    assert.deepStrictEqual(result.zeroRunCandidatesBySide.after, [afterNoRuns]);
+    assert.strictEqual(
+      result.zeroRunCandidates,
+      result.zeroRunCandidatesBySide.after,
+    );
   });
 
   test("classifies mixed supported and unsupported evidence without losing pairs", () => {

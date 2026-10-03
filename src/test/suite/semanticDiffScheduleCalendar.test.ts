@@ -667,6 +667,19 @@ suite("Semantic Diff Schedule Calendar Context", () => {
         ["2,2026/04/+mo:6", "invalid-calendar-day", 2],
       ].sort(),
     );
+    const missingSelection = combinedResult.unsupportedDecisions.find(
+      (decision) => decision.parameter.value === "/root/missing-group",
+    );
+    assert.ok(missingSelection);
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(missingSelection, "status"),
+      true,
+    );
+    assert.strictEqual(missingSelection.status, "missing-context");
+    assert.strictEqual(
+      Object.prototype.hasOwnProperty.call(missingSelection, "scheduleRule"),
+      false,
+    );
   });
 
   test("maps calendar context failures through the existing application contract", () => {

@@ -10,15 +10,13 @@
 - Constraints: preserve facade exports, ordering, optional-property presence,
   legacy low-year rejection, calendars, completeness and duplicate pairing.
   No application projection restructuring or deferred semantics.
-- Next route: independent review of the picker-spec clarification, then Main
-  confirms continuation under existing exact four-file approval. No extra mocks.
+- Next route: approved focused completion commit, then Feature Exit.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: picker clarification review; required host remains
-  FAILED (180/182 passed). Japanese spelling correction is unvalidated. Fresh
-  compile, all182 host pass and affected final quality evidence remain required.
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: focused completion commit. Explicit Completion
+  Approval recorded; both independent reviews and required validation pass.
 - Selected feature: `semantic-diff-schedule-facade`.
 - Branch: `codex/semantic-diff-schedule-facade`.
 - Fixed base: `fbe562b201ca780d6e0a2add8dff90fa55900d8f`.
@@ -114,7 +112,7 @@ approval gate. No completed slices or inherited approvals exist to preserve.
 
 ### S1: Reuse semantic owners and retain compatibility assembly
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: PLAN_COMMITTED
 - Value: the facade delegates reusable schedule selection and context/projection
   work to existing schedule owners and run correspondence to the existing
   differ, while callers receive the exact current compatibility result.
@@ -508,13 +506,13 @@ checks block readiness; reuse matching evidence across reviewers and gates.
   [record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/plan/record.md)
   with exact input manifest and raw outputs. Coverage: three feature Markdown
   files, local links/structure, R1–R6 mapping, scope and approval provenance.
-- Code: owner/architecture, web, build and original check/aggregate retained.
-  Smells inventory repair complete; isolated baseline/final match (0 passing,
-  7 failing each, exit 1); conditional 15-suite host run: 177 passing, 5 failing,
-  exit 1. No passing host gate or readiness claim.
-  [Repair record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/validation-repair/record.md)
-  retains raw references and the approval rejection. No host rerun in this
-  metadata handoff.
+- Code: `schedule-facade-test-repair-v2`; IMPLEMENTED, fresh compile0;
+  actual15 host182 passing/0 failing/0 pending, exit0; golden30 equality;
+  final aggregate0, complete official quality reconciliation no new/adverse
+  finding. Matched repair snapshots retain frozen4becc planning content;
+  latest substantive picker clarification is separately reviewed/validated.
+  [Current repair record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/test-repair/record.md)
+  binds exact identities, coverage, raw outputs and retained failed provenance.
 - Plan review: independent `plan-reviewer`, Ready with no Findings; reviewed
   identity `e8ea041e284c78091dae9c2fa9ef24ae0c98b4ee083aead9f644e325cb3c17d7`.
   Handoff returned in the current conversation; unchanged plan evidence reused.
@@ -523,7 +521,7 @@ checks block readiness; reuse matching evidence across reviewers and gates.
 - Planning commit: `ca122e02efa0d6fa675caa7a688a4dad4a56018c`; exact
   three planning paths; staged scope and whitespace checks passed.
 
-## S1 implementation handoff
+## Historical S1 implementation handoff
 
 - Prior implementation handoff state was `IMPLEMENTING`; current feature/S1
   validation repair returned to `IMPLEMENTING`. Approved product changes remain
@@ -838,7 +836,7 @@ durable narration is needed. Preserve unrelated/inherited feature folders.
 - Exact selected TASKS/TRACEABILITY paths; staged scope/whitespace passed.
 - Failed host gate still blocks Ready pending repaired 182-case validation.
 
-## Test repair implementation hard stop
+## Historical test repair implementation hard stop
 
 - Lifecycle `IMPLEMENTING`; original runtime/owner changes preserved. Four test
   repairs applied; no dependency/configuration/public contract change.
@@ -894,3 +892,91 @@ durable narration is needed. Preserve unrelated/inherited feature folders.
 - Original Test-Only Repair Approval remains applicable; exact clarification
   commit paths are selected TASKS.md and TRACEABILITY.md only.
 - Next gate: focused clarification commit, then existing authorized repair.
+
+## Compatibility picker clarification commit gate
+
+- Commit: `f2c9a1dd302871b32e7f35ddf9e898750d7407ad`.
+- Exact selected TASKS/TRACEABILITY paths; staged scope and whitespace passed.
+- Existing approved four-file repair resumes; all182 host and fresh final
+  quality evidence remain required before implementation readiness.
+
+## Current S1 implementation result
+
+- Lifecycle `IMPLEMENTED`; final repair input identity is
+  `test-repair/final-v2-input-manifest.json` (750 paths), current source matches.
+  Four exact approved test repairs completed after substantive picker
+  clarification `f2c9a1dd`; no runtime/config/dependency boundary change.
+- Actual15 host182 tests all pass, zero failed/pending, exit0,3601ms. Fresh
+  compile and final aggregate pass. Golden30 full content/UTF8bytes/SHA and
+  immutable fixtures equal fixed ca122 renderer; producer semantic assessment
+  retained for independent reviewers. No test/suite pruning or failed-check waiver.
+- Full official repair check5->3 inherited findings, no new/adverse movement;
+  smells151 complete records equal, inventories713 check/433 smells on both
+  sides, matching path sets and config/dependencies, Qlty0.645.0. Full source
+  snapshots freeze4becc planning content, latest substantive clarification docs
+  covered separately; no claim latest docs were scanned by these snapshots.
+- Solution Shape: Interpretation eligibility; Projection indexed batch context;
+  facade compatibility assembly and existing correspondence. Existing exports,
+  optional fields, period ordering, duplicate pairing and low-year rejection
+  preserved. No new port/adapter/factory or dependency direction change.
+- Owner/architecture102, WEB7–13 and desktop/web build reused for unchanged
+  inputs; architecture zero exceptions separately substantiated. Engines remain
+  ^1.75.0, no Node or telemetry surface added. README/CHANGELOG unchanged.
+- Historical180/2 host and earlier177/5 results are retained evidence, superseded
+  for selected current182 gate; unrelated full desktop run/table follow-ups remain
+  owned and unclaimed healthy. Original gate approvals/rejection history preserved.
+- [Repair acceptance and validation](/private/tmp/ajsbutler-semantic-diff-schedule-facade/test-repair/record.md)
+  with exact manifests/raw artifacts is the reusable handoff. Main routes two
+  independent implementation reviews; completion/closure approval not granted.
+
+## Quality freshness correction gate metadata
+
+- Review Finding `review_s1_a/P1` addressed; lifecycle remains `IMPLEMENTED`.
+  This section is post-validation gate metadata only, no specification change.
+- Latest substantive picker clarification and both feature docs are included
+  identically in refreshed matched snapshots. The earlier frozen4becc quality
+  coverage annotations above are superseded for current evidence.
+- Stable official check3/3 equal; smells151/151 with only known unreliable
+  duplicate orientation, no new/reliably mapped adverse finding; inventories
+ 713 check source paths/433 smells paths match; final aggregate0 and immutable
+  input hashes verified afterward. Passing host182 and other code checks reused.
+- [Freshness correction](/private/tmp/ajsbutler-semantic-diff-schedule-facade/test-repair/freshness-v3.md)
+  binds substantive manifests/raw4SARIF/status/inventories and ancillary cached
+  invocation history explicitly. Main routes reviewer follow-up and second review.
+
+## S1 independent implementation review gate
+
+- First independent reviewer: Ready after the quality freshness Finding was
+  resolved; no actionable Findings remain.
+- Second distinct independent reviewer: Ready; no actionable Findings.
+- Reviewed substantive snapshot:
+  `9d6bca751539d79961e3762930be1f52697b902fc7583a8188d34821d30e9a16`.
+- Reviewed metadata: TASKS SHA-256
+  `be10946a41f99e9e878b7fa41d53424e57aae9c5852871ec4b1fd5211ce6b3c6`;
+  TRACEABILITY SHA-256
+  `b38bc2a1843530708f8a5db9154c9f1c3ffd9d578d38d8bfa550231933a7a00e`.
+- Both reviews reuse the matching 182-case host pass, owner/architecture,
+  web/build, immutable golden30 and refreshed quality evidence.
+- Main records SLICE_READY from both review results. This section and lifecycle
+  updates are separate gate metadata; substantive validation inputs unchanged.
+
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation (2026-10-03).
+- Approved scope: reviewed S1 completion commit, three domain files, seven
+  changed/new test files and selected TASKS/TRACEABILITY. No publication or
+  closure is included.
+- Exact completion paths:
+  - `src/domain/schedule/ScheduleInterpretation.ts`
+  - `src/domain/schedule/ScheduleProjection.ts`
+  - `src/domain/services/semantic-diff/semanticDiffScheduleRules.ts`
+  - `src/test/suite/ScheduleProjectionUnits.test.ts`
+  - `src/test/suite/semanticDiffScheduleRules.test.ts`
+  - `src/test/suite/semanticDiffScheduleCalendar.test.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  - `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+  - `docs/specs/features/semantic-diff-schedule-facade/TASKS.md`
+  - `docs/specs/features/semantic-diff-schedule-facade/TRACEABILITY.md`
