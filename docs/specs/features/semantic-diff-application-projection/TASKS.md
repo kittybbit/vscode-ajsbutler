@@ -4,20 +4,22 @@
 
 - Purpose: separate schedule-impact application responsibilities while retaining
   one cohesive capability and observable behavior.
-- Active or approved slice: S1 Human Approved; implementation awaits plan commit.
+- Active or approved slice: S1 implemented and independently reviewed Ready.
 - Read: `SPECS.md`, `TRACEABILITY.md`, Solution Shape below, source contracts,
   and linked discovery/evidence. Selection and base remain fixed.
 - Validate planning docs with Markdown, links/structure and diff checks. S1 has
   the required code and host checks below.
-- Next gate: focused plan commit, then S1 implementation. Do not edit durable
-  docs or include later roadmap features.
+- Next gate: focused S1 completion commit, then Feature Exit. Do not edit
+  durable docs or include later roadmap features.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused plan commit; no approval blocker.
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: focused S1 completion commit; both independent
+  implementation reviews are Ready and explicit Completion Approval was
+  received in current conversation. Feature Exit remains pending.
 - Gate evidence: independent plan review Ready and explicit Human Approval in
-  current conversation; plan commit pending. Reviewed substantive identity:
+  current conversation; focused plan commit succeeded. Reviewed substantive identity:
   `c9b2b08098835d4897291b2b182dc6b29b6ba41bb5c36504610aa04757781207`.
 - Selected feature kind: roadmap.
 - Branch: `codex/semantic-diff-application-projection`.
@@ -46,6 +48,29 @@
   - `docs/specs/features/semantic-diff-application-projection/TASKS.md`
   - `docs/specs/features/semantic-diff-application-projection/TRACEABILITY.md`
 - Approval metadata: [Main human gate record](/private/tmp/ajsbutler-semantic-diff-application-projection-plan/main-human-approval.md).
+
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: reviewed S1 completion and focused commit of the exact eight
+  paths below, including separately validated metadata; Closure Approval is
+  excluded.
+- Reviewed S1: both independent implementation reviewers returned Ready.
+- Reviewed substantive content manifest SHA-256:
+  `9904aaaed82e3f53cae1bf5271874890a9ee763530c8a8b995d6b524c4f9735a`.
+- Review record: [Main S1 readiness and reviews](/private/tmp/ajsbutler-semantic-diff-application-projection-s1/main-slice-ready.md).
+- Approved completion commit paths:
+  - `src/application/semantic-diff/semanticDiffScheduleImpact.ts`
+  - `src/application/semantic-diff/semanticDiffScheduleImpactDto.ts`
+  - `src/application/semantic-diff/semanticDiffScheduleImpactIdentity.ts`
+  - `src/application/semantic-diff/semanticDiffScheduleProjectionFacts.ts`
+  - `src/application/semantic-diff/semanticDiffScheduleImpactTimeline.ts`
+  - `src/test/suite/semanticDiffScheduleImpact.test.ts`
+  - `docs/specs/features/semantic-diff-application-projection/TASKS.md`
+  - `docs/specs/features/semantic-diff-application-projection/TRACEABILITY.md`
+
+- Completion approval metadata: [Main approval record](/private/tmp/ajsbutler-semantic-diff-application-projection-s1/main-completion-approved.md).
 
 ## Solution Shape
 
@@ -114,7 +139,7 @@ through its observable application and consumer boundaries.
 
 ## S1: cohesive schedule-impact application projection
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Value: independently reviewable, behavior-preserving application capability
   with explicit DTO, identity, facts, timeline and orchestration ownership.
 - Order / dependencies: sole slice; requires the merged schedule facade at the
@@ -281,8 +306,45 @@ Replanning. Plan review and Human Approval cover this concrete disposition.
 - Review: independent plan-reviewer returned Ready; F1 test sequencing corrected
   and re-reviewed at the substantive identity above. No actionable Findings.
 - Gate metadata: [Main state and review record](/private/tmp/ajsbutler-semantic-diff-application-projection-plan/main-plan-ready.md).
-- Human Approval: Approved for exact reviewed plan and S1; plan commit pending.
-  Completion/Closure Approval remain pending. S1 code evidence: not produced.
+- Human Approval: Approved for exact reviewed plan and S1.
+- Plan commit: `f34560b4c8cfb01aa74cf58cc301b837132d3216`.
+- Commit metadata: [Main plan-commit record](/private/tmp/ajsbutler-semantic-diff-application-projection-plan/main-plan-committed.md).
+  Completion/Closure Approval remain pending.
+- S1 implementation: the public entry remains the orchestration and immutable
+  output owner; DTO, identity, projection facts and timeline are now separate
+  cohesive application modules. Compatibility names are direct re-exports, and
+  the existing builder aliases retain function identity. No ports, adapters,
+  factories, dependencies, telemetry or durable product documentation changed.
+- Acceptance: legacy and canonical API identity/type assertions, evaluated
+  snapshot immutability, the full 17-suite desktop selection, relevant
+  host-neutral suites, web smoke, architecture rules and production builds are
+  recorded in the implementation artifact. Desktop actual-host coverage used
+  an evidence-local runner because the supported launcher returned exit 0
+  without running Mocha; the paired Electron selection passed 137/137 at
+  baseline and 139/139 after the two approved assertions, with the active light
+  theme and `en` locale verified via the VS Code API. The final supported
+  launcher also returned exit 0 without executing Mocha; the matched host
+  fallback is the test result. Final host-neutral coverage passed 102/102,
+  nearest schedule-impact tests passed 15/15 final (13/13 in the unmodified
+  baseline snapshot); the exact-base, test-only pre-extraction characterization
+  refresh passed 14/14, including legacy aliases and evaluated snapshot
+  immutability. Web smoke passed 7/7, and TypeScript checks plus both production
+  builds passed. The historical 14-test raw output was unavailable; the
+  evidence artifact labels the reproducible refresh and its exact source identity.
+- Quality evidence: the final aggregate passed. Cold full-repository qlty
+  inventory checked 2,790 files (baseline 2,776); final check SARIF has the
+  same three non-TRACEABILITY baseline findings and no new results. Smells
+  retained 151 warning records; 149 are unchanged, and the only mapped change
+  improves an existing similar-code metric from 17 to 15. Exact inventories,
+  records, SARIF and raw outputs are linked in the implementation artifact.
+- Compatibility and risk: `engines.vscode` remains `^1.75.0`; shared code adds
+  no Node/VS Code/UI imports and JP1/AJS schedule semantics and source dates
+  remain unchanged. Both independent implementation reviews returned Ready;
+  Completion Approval was received; completion commit and Feature Exit remain
+  pending.
+- Implementation artifact: [S1 baseline/final evidence](/private/tmp/ajsbutler-semantic-diff-application-projection-s1/evidence.md),
+  including exact inputs, runner/preload, host outputs, qlty observations and
+  validation exceptions.
 - Refresh only affected input coverage; no runtime baseline scans required here.
 
 ## Documentation and exit readiness
