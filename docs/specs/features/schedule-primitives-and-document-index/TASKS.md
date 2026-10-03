@@ -2,16 +2,23 @@
 
 ## Current state
 
-- Mode: S1 committed after Completion Approval; S2 is `SLICE_APPROVED` after
-  two independent Ready reviews and resolution of the counter-record Finding.
+- Mode: Replanning, limited to S3 formatter-produced table column widths in
+  `.agent.md` and `docs/specs/README.md`. Revised S3 is `PLAN_APPROVED`, awaiting
+  the focused replan commit. The existing S3
+  implementation is preserved; added-path formatting is present and awaits
+  delegated validation after the planning commit.
+  S2 completed two independent Ready reviews and the counter-record repair.
   S1's two independent reviewers returned Ready with no actionable Findings.
 - S1 final quality: full check retains the same three inherited findings;
   smells retains 151 findings without new issues; aggregate passed. The
   final post-sync evidence supersedes the historical pending note below:
   `/private/tmp/ajs-s1-evidence-oy97lf2l/metadata.json`.
-- Active slice: S2, `SLICE_APPROVED`; Completion Approval is recorded below;
-  predecessor S1 is `SLICE_COMMITTED`:
-  `259113106e70ec8c201a9687987b6526bed9bd7d`.
+- Active slice: the widened S3 plan has renewed Human Approval; the original
+  implementation remains within its recorded approval boundary;
+  predecessors S1 and S2 are `SLICE_COMMITTED`. S3 comparison base:
+  `573847284dc5885a7552eda0e36358b005146c55`.
+- S2 completion commit: `573847284dc5885a7552eda0e36358b005146c55`;
+  exact eight-path commit, staged checks passed; no product checks rerun.
 - S2 approval provenance: the recorded Human Approval covers the complete
   reviewed plan; S2's exact production/test paths are the S2 boundary below.
 - S2 review identity: substantive tree
@@ -21,10 +28,10 @@
 - S1 completion commit: `259113106e70ec8c201a9687987b6526bed9bd7d`;
   focused ten-path commit, staged checks passed. Integration quality evidence:
   `/private/tmp/ajs-s1-integration-refresh-20261002/metadata.json`.
-- Plan review: Ready for approval, confirmed by independent plan-reviewer
-  in the current conversation. All findings are resolved; slice scopes,
-  order and validation remain unchanged.
-- Approved slices: S1, S2, S3 in the recorded order. The focused planning
+- Original plan review: Ready for approval, confirmed by independent
+  plan-reviewer in the current conversation. It remains applicable to unchanged
+  scope; it does not cover the two added S3 formatting paths.
+- Original approved slices: S1, S2, S3 in the recorded order. The focused planning
   commit is `bc914bfa21ad972a66f7893232d27835c25f6586`.
 - Feature: `schedule-primitives-and-document-index`; branch:
   `codex/schedule-primitives-and-document-index`.
@@ -46,6 +53,67 @@
   `docs/specs/features/schedule-primitives-and-document-index/SPECS.md`,
   `docs/specs/features/schedule-primitives-and-document-index/TASKS.md`,
   `docs/specs/features/schedule-primitives-and-document-index/TRACEABILITY.md`.
+
+## S3 Formatting Replan: Pending Gates
+
+- Independent plan review: Ready for approval, no actionable Findings. Reviewed
+  substantive plan patch SHA-256:
+  `4251009cebf8671086ad1b90681ba50062b6772b4dc1296a22060f7ef3a99809`.
+  Reviewed metadata patch SHA-256:
+  `bc717ac93d218efb05d08c75795d4642f2da3d721abb34d96dec0c4d1d7329da`.
+  This plan verdict does not clear the S3 implementation quality gate.
+
+- Proposed scope: retain the original S3 production/test and feature-document
+  boundary; add only formatter-produced table column width normalization in
+  `.agent.md` and `docs/specs/README.md`. No wording, policy, semantic, link,
+  heading, directive, configuration or behavior change is authorized by this
+  replan. Renewed Human Approval: Approved in this conversation
+  (2026-10-03, Asia/Tokyo), user message: "承認します。".
+- Existing Human Approval above remains the original provenance for S1–S3.
+  It does not authorize these two added paths. S1 and S2 completion approvals,
+  commits, and matching evidence are preserved. Do not rewrite their approvals.
+- The original plan Ready/approval/commit do not cover the widened S3 boundary;
+  independent plan review, renewed Human Approval and focused replan commit
+  are required before added-path implementation. The two S3 implementation
+  reviews accepted the existing semantic/compatibility work but returned qlty
+  P2 Findings. Preserve those judgments for their inspected inputs; neither
+  supplies Ready or review coverage for the added paths. Renew integrated S3
+  implementation review after formatting and affected quality refresh, reusing
+  matching semantic/compatibility judgments and product evidence.
+- No S3 Completion Approval or completion commit exists. They and Feature Exit
+  remain later gates; this replan neither grants approval nor clears the P2.
+
+### S3 replan documentation evidence
+
+- Record: `/private/tmp/ajs-s3-format-replan/metadata.json`. Only TASKS.md and
+  TRACEABILITY.md changed in this replan; SPECS.md, all existing S3 code/tests,
+  and both added durable paths were preserved. Before-doc copies and exact
+  replan-only diffs are retained there; input patch identity is recorded above.
+- Substantive final full-repository manifest SHA-256:
+  `cdac3803c40f1e18ef00df92b02c91d4926010c731578a50f05cec95f006af46`.
+  It differs from the retained paired final only in these two planning docs.
+  Qlty 0.645.0, configuration/lock hashes and full selection remain unchanged;
+  matching inventories (check 712, smells 433 paths) and baseline records are
+  retained, not regenerated. Product and smells inspected inputs still match.
+- Affected final full check completed with six official SARIF results, exit 1
+  due to findings: the five retained paired-baseline findings plus one new
+  `markdownlint:fmt` on `.agent.md`. No planning-path finding exists. This does
+  not supersede the controlled paired reproduction's two new formatter records
+  or clear strict quality: both exact pending repairs remain proposed above.
+  Final disposable aggregate passed, exit 0, and changed no tracked input.
+  Aggregate success is not a clean full-check result or an approval substitute.
+- Documentation checks passed: `rtk pnpm run lint:md` (30 files, zero errors)
+  and `rtk git diff --check`. One initial MD013 line-length failure was repaired.
+  This evidence/status annotation is a separate metadata patch after the
+  immutable substantive manifest; validate it with targeted non-mutating lint
+  and diff/scope checks, without claiming full scans covered the annotation.
+- Planner executions: full check one completed plus one sandbox log-appender
+  startup failure, final aggregate one, full smells zero (matching reuse),
+  product tests/builds zero, Markdown lint two before this annotation; baseline
+  recreations zero. Annotation validation adds one lint and one diff check.
+  Exact Git status/diff inspection total is unknown; replan patch/scope and
+  unchanged product hashes are recorded in the evidence. Main owns dispatch,
+  human gate and review counters. No implementation, staging or commit occurred.
 
 ## S1 Completion Approval
 
@@ -82,6 +150,8 @@
   review, Completion Approval and completion commit.
 - No facade slimming, application decomposition, parser/UI/bootstrap changes,
   dependencies, model readonly conversion or inherited WebAPI-feature edits.
+- For the widened S3 scope, implement only the two exact table-format diffs
+  below after renewed gates. Preserve all other content and existing S3 work.
 
 ## Compatibility and impact evidence
 
@@ -312,6 +382,76 @@ to: string }`; `SchedulePeriodInvalidReason` is the three existing reason
   that could hang unrelated ancestor logic. No cache/mutation.
 - Approval boundary: listed production/test paths and feature evidence docs.
   No DTO/identity/timeline/orchestration-owner redesign or application splitting.
+  The proposed formatting addition below is pending renewed approval.
+
+### S3 formatting addition and affected evidence
+
+- Trigger/value: strict any-new-SARIF policy blocks S3 completion on two
+  `markdownlint:fmt` records. Normalize the existing table widths so required
+  final quality observations can stabilize without changing durable policy.
+  Keep this correction within S3; it has no product dependency or design change.
+- Exact added surfaces: `.agent.md` Concern/Owner table (one hunk);
+  `docs/specs/README.md` Lifecycle State Contract Input state/Operation/Output
+  table and Evidence Contract Record/Producer/Consumers table (two hunks).
+  Use only the official formatter outputs in
+  `/private/tmp/ajs-s3-implementation-evidence/paired/final/agent-format.diff`
+  and `readme-format.diff`. Padding spaces and separator dash widths may change;
+  preserve cell text, order, links, row count, and surrounding Markdown exactly.
+  No other durable path or table, README.md, CHANGELOG.md, product, test,
+  configuration, dependency or generated edit is added.
+- Complete proposed S3 boundary: the six production/test paths enumerated above,
+  the three selected feature documents, and only the specified tables in
+  `.agent.md` and `docs/specs/README.md`. Actual original S3 implementation has
+  eight modified paths (six production/test paths, TASKS.md, TRACEABILITY.md);
+  SPECS.md stays unchanged. Only the two formatting paths are new work.
+- Solution Shape: all approved domain/application owners, occurrence/index
+  contracts, dependency directions, tests and per-call lifecycle remain as
+  recorded. No material abstraction, port, adapter, retained application
+  factory, framework choice or custom gap changes. Existing markdownlint
+  formatting is sufficient. Automatic architecture-test facts and reviewers'
+  semantic ownership judgments remain separate retained evidence.
+- Durable Documentation Gate: both documents retain existing reusable
+  repository routing/policy. The smallest necessary table surfaces change
+  only formatting; no new content, duplicated policy, feature history or
+  investigation narrative is propagated. No README.md/CHANGELOG/use-case,
+  architecture or roadmap update is needed for this correction.
+- Discovery identity: fixed S3 base
+  `573847284dc5885a7552eda0e36358b005146c55`; preserved pre-replan eight-path
+  annotation patch SHA-256
+  `878dd5fa1c969637ae7af0a7930e0a55abee4849093d54d17af5d4812dc25001`.
+  Complete evidence: `/private/tmp/ajs-s3-implementation-evidence/metadata.json`;
+  controlled `paired/baseline/check.sarif` and `paired/final/check.sarif`.
+  One fresh-cache paired full check used qlty 0.645.0, markdownlint 0.41.0,
+  identical configuration/lock and full 712-path selection: baseline five,
+  final seven findings, adding these two formatter records. Identical source
+  hashes or a passing prior aggregate do not dispose of the new findings.
+- Acceptance: exact approved formatter hunks only; no non-format content or
+  rendering structure change; neither formatter record remains new in the
+  refreshed official full-check comparison; no other new/adverse finding;
+  final aggregate passes and final observed content remains stable.
+- Validation after renewed approval: preserve the matching paired baseline;
+  refresh final `rtk pnpm exec qlty check --all --sarif --no-fix` and final
+  disposable `rtk pnpm run qlty`, with complete official SARIF/log/status,
+  full selection/inventory, configuration/version and exact final manifest.
+  Observe before aggregate; if aggregate changes inspected content, sync only
+  approved paths and refresh affected observations until stable. Refresh final
+  check for substantive planning-doc inputs as well; do not claim old full
+  scans cover the new plan or widened approved path set.
+- Reuse individual tests, desktop/web/build, architecture and smells evidence
+  only when their own inspected inputs, coverage, commands, tool/configuration
+  remain matching. The two Markdown formatting paths and plan changes do not
+  change product or code-smells inputs; bind reuse explicitly to those input
+  sets and the original substantive identity. Update path-set/scope metadata
+  separately; do not claim the original record approved or scanned new docs.
+  No product test/build or smells rerun is required solely for this docs change.
+- Focused documentation checks: run non-mutating Markdown validation covering
+  both added files and selected feature docs, plus `rtk pnpm run lint:md` and
+  `rtk git diff --check`; inspect exact diff and before/after table cell content.
+  Record separate replan and later implementation patch identities/counters.
+- Readiness/risk: renewed review and Human Approval must precede writes to added
+  paths. Stop if formatter output changes wording, table topology or any other
+  surface; return to Main rather than broaden silently. S1/S2 order and commits
+  are unchanged. New strict quality findings still block completion.
 
 ## Validation and evidence requirements
 
@@ -485,7 +625,8 @@ to: string }`; `SchedulePeriodInvalidReason` is the three existing reason
   the complete plan and all slices; two S2 implementer dispatches (initial
   implementation and this Finding repair); three review dispatches (two
   independent reviews and one targeted counter-repair review); one Completion
-  Approval and zero successful commits before the commit gate.
+  Approval, one completion-committer dispatch and one successful completion
+  commit (`573847284dc5885a7552eda0e36358b005146c55`).
 - Producer test/build executions in retained evidence: test compilation 2
   (initial and after formatting sync), focused/architecture suite 1 (99 tests),
   desktop suite 1, web suite 1, build 1. Markdown lint has three earlier logs;
@@ -514,18 +655,147 @@ to: string }`; `SchedulePeriodInvalidReason` is the three existing reason
 - S2 rollup: producer and Main counts above are separated by owner; feature-wide
   aggregation awaits Feature Exit after the remaining slices.
 
+## S3 Implementation Evidence
+
+- Changed paths are exactly the approved S3 implementation boundary plus its
+  feature evidence records: `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
+  `src/domain/models/ajs/AjsDocumentIndex.ts`, `src/test/suite/AjsDocumentIndex.test.ts`,
+  `src/test/suite/semanticDiffScheduleImpact.test.ts`,
+  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`,
+  `src/test/suite/webSmoke.ts`, this file, and `TRACEABILITY.md`. `SPECS.md`
+  remains unchanged. No parser/model helper, DTO, presentation, report, adapter,
+  architecture catalog, configuration, package manifest, README, or CHANGELOG
+  changed.
+- Solution Shape: normalized-model domain owns `collectAjsUnitOccurrences` as
+  the existing recursive root-first push traversal, retaining repeated object
+  occurrences and its stack-limited `RangeError` cycle behavior. Impact builds
+  one occurrence list and `AjsDocumentIndex` per before/after document. The
+  application converts duplicate-preserving ID/path buckets to last-match maps,
+  retaining first-key insertion order; root filtering and path sorting remain
+  application-owned. S2's unique traversal, index contracts, and calendar
+  source policy are unchanged. No port, adapter, factory, cache, dependency, or
+  custom mechanism was added. Architecture test facts are recorded separately
+  from the independent review of semantic ownership and abstraction value.
+- Acceptance: pre-integration characterization passed unchanged after impact
+  integration. Tests assert occurrence and root order, shared references,
+  ID/path disagreement, last-hit source identity on each side, duplicate-ID
+  candidate selection, model-mutation rebuild, run IDs and references, and
+  exact counts. The occurrence helper has a 4,096-child wide case, a bounded
+  128-level deep case, and a self-cycle `RangeError` assertion without depending
+  on its message or stack. `WEB-13` compares actual browser-produced schedule
+  changes and presentation artifacts against expected IDs, times, and source
+  references.
+- Validation: baseline characterization compiled and passed 31 focused tests;
+  its first run exposed and corrected an expected fixture path, then the same
+  characterization passed. `test:web` passed WEB-13 before impact integration.
+  Post-integration `test:compile`, 148 host-neutral focused tests including the
+  architecture dependency suite, the full desktop suite, elevated VS Code Web
+  suite, and desktop/web production build passed; compilation, desktop, browser,
+  and build checks were repeated after qlty formatting and after the local
+  last-hit helper simplification. Direct Mocha attempts for suites requiring
+  the VS Code host or resource aliases failed as expected outside their host;
+  the desktop harness passed. Default browser attempts failed before scenarios
+  (first asset-fetch `ETIMEDOUT`, later macOS Chromium Mach-port permission);
+  elevated retries passed. Build emitted webpack bundle-size recommendations
+  without errors. Raw outputs are under
+  `/private/tmp/ajs-s3-implementation-evidence/`.
+- Compatibility and readiness: `engines.vscode` remains `^1.75.0`. New imports
+  point only to normalized domain code; no Node built-in, VS Code, UI, parser,
+  application DTO, or telemetry dependency entered domain. The recursive
+  collector keeps one result-array push per occurrence and no growing-array
+  copies; ID/path indexing is per-call and retains input references. Deep input
+  remains stack-limited by design. No schedule facts, no-runs, partial or
+  uncalculated outcomes, report JSON, IDs, source references, telemetry, or
+  user workflow changed. README and CHANGELOG changes are outside the current
+  S3 approval. The independent review found no semantic, scope, or compatibility
+  issue; its qlty P2 is reproduced below. Main directed preparation of a
+  minimal S3 replan for formatter-produced table-width normalization in
+  `.agent.md` and `docs/specs/README.md`, without policy/content changes,
+  pending independent plan review and renewed Human Approval. No such
+  out-of-boundary edit was made. Completion Approval and commit remain pending.
+- qlty `0.645.0` used configuration SHA-256
+  `f551fa47da3ac111a3e29857ff0f431abb0e0a20c17a8c794660c255f4dfb4c2`,
+  dependency lock SHA-256
+  `c4e91db0c1ab2176f06484a970dd735b6bb87654213c2dba612805144b6f1de8`, and
+  full-repository `--all` selection. Exact S3 baseline is commit
+  `573847284dc5885a7552eda0e36358b005146c55`, tree
+  `5a45c8143e2aa69e6350e3a3687749f8bf4e46b7`; its check was reproduced once
+  after the final scan showed a formatter note on an unchanged path. Final
+  scans used that same HEAD plus the eight-path implementation patch, whose
+  pre-evidence-note binary diff SHA-256 was
+  `25833b8e0d18605c804909b3e45f6fa0adf97217341604c026f9a6e934477b8b`.
+  Check/smells inventories were 712/433 paths in both snapshots; path lists
+  are reused from S2 because S3 has no path additions, deletions or renames.
+  The earlier exact-base check had six results and final had seven. One
+  controlled paired reproduction then used fresh snapshot-local caches with
+  the same qlty `0.645.0`, markdownlint `0.41.0`, config/lock hashes, and full
+  `--all` selection: baseline had five results and final had seven. The final
+  adds official `markdownlint:fmt` records on unchanged `.agent.md` and
+  `docs/specs/README.md`; the baseline has neither. Both records have no SARIF
+  region, and all five baseline records also appear in final. Source hashes
+  match across snapshots. Qlty's formatter driver ran `markdownlint --fix` on
+  both files in temporary copies; read-only diffs show table-width changes on
+  both baseline and final copies. No repository file outside S3's approved
+  paths was written. The strict new-finding rule blocks this slice; Main owns
+  the separately scoped replan. No S3-path check finding exists. Full smells
+  returned 151 baseline-reused/final results with no impact-module finding; an
+  earlier final complexity warning was removed by the local helper
+  simplification and rechecked. The previously completed final disposable
+  aggregate exited 0, but does not clear the full-check gate. Paired SARIF,
+  invocation/plugin/cache records, formatter diffs, source hashes, inventories,
+  counters, and post-scan metadata validation are in
+  `/private/tmp/ajs-s3-implementation-evidence/metadata.json`.
+
+### S3 Workflow Counters
+
+- Main-owned current counts: one inherited plan Human Approval; two S3
+  implementer dispatches and two review dispatches; zero Completion Approvals,
+  successful commits, or Main-run product checks. Main recorded two
+  status/diff inspections, one HEAD inspection, and one documentation lint.
+- Producer attempts, including failures: test compilation 5; focused Mocha 6
+  (one initial fixture expectation failure, two direct-host/resource failures,
+  and passing characterization/focused suites); desktop suite 3; browser suite
+  6 (two default pre-scenario host/network failures and four elevated passes);
+  builds 3; Markdown lint 5; targeted diff checks 5. Full qlty `check` ran 6
+  times (four final observations, one exact-base formatter-note reproduction,
+  and one controlled paired baseline/final reproduction); full qlty `smells`
+  ran twice after matching final-input changes; the final aggregate command
+  was attempted 3 times (one sandbox cache/log permission failure, two
+  successful disposable-snapshot runs).
+  Qlty baseline smells and inventories were reused where their content, tool,
+  configuration, selection and path set matched; one current-base check and
+  one controlled paired full-check reproduction were run solely for the
+  unchanged-file formatter records. Git status/diff command
+  totals were not tracked exactly during normal execution and remain unknown;
+  no retrospective collection pass was run. Regenerations followed approved
+  formatter sync, the targeted qlty complexity finding, and this formatter-note
+  reproduction. Raw failed attempts and successful outputs are
+  retained under `/private/tmp/ajs-s3-implementation-evidence/`.
+- Main routing after the formatter blocker: one Replanning dispatch and one
+  independent plan-review dispatch; revised plan Ready. One renewed Human
+  Approval recorded; one replan-committer dispatch follows this annotation.
+  Main ran no product checks or full scans. Earlier gate metadata added two
+  targeted lint and diff checks. Approval metadata adds four lint and diff
+  checks, including three line-length corrections. Routine policy/document
+  reads were not counted exactly; no historical collection pass was added.
+  Feature-wide counters await remaining lifecycle gates.
+
 ## Risks, production readiness and deferred work
 
 - No user behavior, dependencies, APIs, configurations or support targets change.
   Maintain `engines.vscode: ^1.75.0` and host-neutral production imports.
 - Preserve parser/list/flow/CSV/definition/diagnostics/hover/navigation/WebAPI,
   comparison/report and telemetry behavior. No content/path telemetry is added.
-- Large and malformed inputs have the existing consumer-specific failures;
-  occurrence recursion remains a known limitation, while calendar collection
-  retains its existing iterative safety. Improving failure behavior is deferred.
-- README, CHANGELOG, use cases, architecture and roadmap require no edit for
+- Large and malformed inputs retain existing consumer-specific behavior;
+  schedule-impact occurrence recursion remains stack-limited and calendar's
+  unique collector remains iterative and cycle-safe. Improving failure
+  behavior is deferred.
+- Product README, CHANGELOG, use cases, architecture and roadmap require no
+  edit for
   this internal behavior-preserving foundation; existing durable ownership rules
-  already cover it. Reassess at review/exit. Any observable behavior correction
+  already cover it. The two routing/policy formatting surfaces above are the
+  only proposed durable-document addition. Reassess at review/exit.
+  Any observable behavior correction
   requires Main's scope decision and replanning, including changelog evaluation.
 - Deferred owners remain roadmap `semantic-diff-schedule-facade` and
   `semantic-diff-application-projection`; presentation, readonly and architecture
@@ -539,7 +809,7 @@ to: string }`; `SchedulePeriodInvalidReason` is the three existing reason
   framework/dependency/cache decisions, untestable equivalence or invalidated
   compatibility evidence; route exact issue to Main for Replanning.
 
-## Validation state and gate readiness
+## Original planning validation and gate readiness
 
 - Markdown: `rtk pnpm run lint:md` passed with 38 files and zero errors;
   `rtk git diff --check` passed. This evidence follow-up changes only TASKS.md;
