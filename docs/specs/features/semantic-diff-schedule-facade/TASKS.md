@@ -4,21 +4,21 @@
 
 - Purpose: thin schedule compatibility orchestration with unchanged results.
 - Active or approved slice: S1 runtime implementation retained; proposed
-  four-file test-only repair approved; replan commit pending.
+  four-file test-only repair approved and committed.
 - Read: [SPECS](SPECS.md), this plan, [TRACEABILITY](TRACEABILITY.md), and
   discovery/validation references below.
 - Constraints: preserve facade exports, ordering, optional-property presence,
   legacy low-year rejection, calendars, completeness and duplicate pairing.
   No application projection restructuring or deferred semantics.
-- Next route: focused approved test-only repair replan commit.
-  No runtime behavior changes.
+- Next route: independent review of the picker-spec clarification, then Main
+  confirms continuation under existing exact four-file approval. No extra mocks.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: approved test-only repair replan commit. Baseline/final
-  five failures match; required host gate remains FAILED until repaired tests
-  and all 15 required suites pass. No exception is requested or granted.
+- Next decision / blocker: picker clarification review; required host remains
+  FAILED (180/182 passed). Japanese spelling correction is unvalidated. Fresh
+  compile, all182 host pass and affected final quality evidence remain required.
 - Selected feature: `semantic-diff-schedule-facade`.
 - Branch: `codex/semantic-diff-schedule-facade`.
 - Fixed base: `fbe562b201ca780d6e0a2add8dff90fa55900d8f`.
@@ -624,14 +624,20 @@ is authorized to change. README/CHANGELOG remain unnecessary for test repair.
    supplies empty root path. Retain both repeated child paths and g/mg types,
    exact statuses, deterministic ordering and empty change set. Do not filter
    out root, broaden matching or change the fixture to evade the assertion.
-4. Command adapter fixture: supply typed `showWorkflowQuickPick` selecting the
-   provided item whose workflowKind is `file`, with an assertion that it exists.
-   Keep fallback `showQuickPick` cancellation semantics intact and unused by
-   this intended-success workflow; do not modify production selection behavior.
-   Preserve expected file source/evaluated period, exactly-once capture, adapter,
-   registration/open context identity, options and capture→callback→register→open
-   event order, and legacy builder non-use. Assert source selection/file dialog
-   counts so the successful path is exercised rather than bypassed.
+4. Command adapter fixture: keep optional `showWorkflowQuickPick` and
+   `showInputBox` absent, preserving the original compatibility-adapter runner.
+   From existing required fallback `showQuickPick`, return the supplied item
+   with workflowKind `file`; assert item presence with a test-local structural
+   type check/type narrowing appropriate to the fallback API. Do not introduce
+   the optional workflow hook: its presence selects the full interactive period
+   flow, which this compatibility test does not cover. Do not add period/date
+   mocks, cast fabricated picker items, or bypass source selection.
+   Preserve expected file source/evaluated period and the original period object
+   reference, exactly-once capture, adapter, registration/open context identity,
+   options, capture→callback→register→open order and legacy builder non-use.
+   Assert exactly one source file selection and one file dialog. Production
+   cancellation semantics remain unchanged; this intended-success fixture picks
+   the real supplied file item through the original fallback API.
 5. Immutable Markdown goldens: derive corrections from the immutable `ca122e02`
    production renderer and unchanged empty/populated fixture values, not from
    repaired final output alone. Approved test repairs change expectations/mock
@@ -825,3 +831,66 @@ durable narration is needed. Preserve unrelated/inherited feature folders.
 - Reviewed substantive identity:
   `3d7fef6af15b1b82b2db632777155d3d68cbecb24cc10285ec6c7887ce8c9541`.
 - Required failed host check remains blocking; repair approval recorded above.
+
+## Test-only repair commit gate
+
+- Commit: `4becc4e8ef13fd4193bb7cbe4985bc2bca204cf2`.
+- Exact selected TASKS/TRACEABILITY paths; staged scope/whitespace passed.
+- Failed host gate still blocks Ready pending repaired 182-case validation.
+
+## Test repair implementation hard stop
+
+- Lifecycle `IMPLEMENTING`; original runtime/owner changes preserved. Four test
+  repairs applied; no dependency/configuration/public contract change.
+- Immutable ca122 renderer golden30 full outputs/UTF8bytes/SHA and unchanged
+  fixture inputs equal repaired final;12 distinct locale cases; only2 stale
+  English populated Full/Audit constants corrected,10 kept. Full-content producer
+  assessment and provenance in [repair record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/test-repair/record.md).
+- Corrected compile passed; actual15 host182 cases:180 pass/2 fail,exit1. Japanese
+  escaped-key expectation subsequently corrected without another run; command
+  optional hook introduces period picker beyond approved file-only specification.
+  Main replans mock boundary; no extra interactive mocks or rerun attempted.
+- Repair baseline check1/smells0, final check1/smells0, aggregate0 retained for
+  exact pre-Japanese-correction snapshot; no new check findings. Fresh analyzer
+  inventory/full-smells disposition and affected final refresh remain pending.
+  Original433/151 Qlty and owner102/web/build evidence preserved.
+- Latest Japanese test edit invalidates its compile/host and current final-check
+  coverage; retained raw evidence is historical, not a current passing gate.
+  Golden renderer equivalence unaffected. Both reviews and completion gates wait.
+
+## Picker specification clarification
+
+- [Clarification record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/replan-picker/record.md)
+  binds the implementation hard stop and targeted documentation checks.
+- Prior handoff was IMPLEMENTING after approved `4becc4e8`; current clarification
+  returns the reviewed plan to PLANNED. Runtime/tests remain uncommitted.
+- Scope assessment: no material scope, Solution Shape, production dependency,
+  accepted behavior, required validation, risk or approval-boundary change.
+  This corrects the test-local picker API choice to preserve the already approved
+  compatibility-adapter purpose and period-reference acceptance. The unintended
+  optional hook selected a broader workflow; that workflow is excluded here.
+- Main's supplied decision retains existing explicit four-file authorization.
+  Original Human Approval and `4becc4e8` provenance are unchanged; no new human
+  approval is inferred or recorded. Independent review of this clarification
+  is required before Main routes continuation. Any need for full interactive
+  workflow, extra mocks or changed acceptance returns for a new scoped decision.
+- Golden30 complete baseline/final content/byte/SHA equality remains reusable;
+  picker and Japanese assertion changes do not change those fixture/render inputs.
+  Unchanged owner/web/build and valid repair baseline quality evidence remain.
+  Pre-Japanese final scans and 180/2 host result are stale for current tests.
+  Refresh compile, unchanged actual15 all182 with exit0, affected final qlty
+  check/smells/aggregate and complete analyzer inventory/value reconciliation.
+  Discovery738 paths is not analyzer433 input proof; preserve raw stage evidence.
+  No new baseline, production build, web run or full unrelated UI launch without
+  an input mismatch. Failed/missing required checks continue to block readiness.
+
+## Compatibility picker clarification review and authorization
+
+- Independent plan-reviewer: Ready; no Findings; identity
+  `b6c696e50fd84001e6be38d31645fc9f8fb031601a7b8c37de8aafb691661e1f`.
+- Main and reviewer confirm correction stays within the existing explicit
+  four-file repair approval, same compatibility purpose and validation scope.
+  No new human approval is inferred or granted.
+- Original Test-Only Repair Approval remains applicable; exact clarification
+  commit paths are selected TASKS.md and TRACEABILITY.md only.
+- Next gate: focused clarification commit, then existing authorized repair.
