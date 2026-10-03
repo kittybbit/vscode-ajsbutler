@@ -3,25 +3,29 @@
 ## Agent Brief
 
 - Purpose: thin schedule compatibility orchestration with unchanged results.
-- Active or approved slice: S1 approved; awaiting planning commit.
+- Active or approved slice: S1 product implementation retained; validation-only
+  validation replan approved; replan commit pending.
 - Read: [SPECS](SPECS.md), this plan, [TRACEABILITY](TRACEABILITY.md), and
   discovery/validation references below.
 - Constraints: preserve facade exports, ordering, optional-property presence,
   legacy low-year rejection, calendars, completeness and duplicate pairing.
   No application projection restructuring or deferred semantics.
-- Next route: approved planning commit. Runtime/tests/configuration edits require
-  exact Human Approval and a focused planning commit first.
+- Next route: focused approved replan commit. Completion/closure remain pending.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: approved planning commit; no review Findings.
+- Next decision / blocker: approved validation-only replan commit; no review Findings.
+  Desktop baseline isolation and complete smells inventories remain required
+  evidence, with hard stop conditions below.
 - Selected feature: `semantic-diff-schedule-facade`.
 - Branch: `codex/semantic-diff-schedule-facade`.
 - Fixed base: `fbe562b201ca780d6e0a2add8dff90fa55900d8f`.
 - Prerequisites: ownership `49765418` and shared primitives `cdc84f2a` merged.
 - Gate evidence: intake, plan documentation and independent Ready review below.
-  Human Approval recorded below; no planning commit or completion yet.
+  Human Approval recorded below; planning commit complete; S1 implementation
+  retained from IMPLEMENTING. Changed validation scope is approved;
+  completion/closure approval has not been granted.
 
 ## Human Approval
 
@@ -41,6 +45,23 @@
   - `docs/specs/features/semantic-diff-schedule-facade/SPECS.md`
   - `docs/specs/features/semantic-diff-schedule-facade/TASKS.md`
   - `docs/specs/features/semantic-diff-schedule-facade/TRACEABILITY.md`
+
+## Validation Replan Approval
+
+- Status: Approved
+- Approved at: approved in current conversation (2026-10-03).
+- Approved scope: reviewed validation-only replan; bounded baseline/final UI
+  failure isolation, conditional 15-suite in-host coverage, and complete smells
+  inventories. Focused replan commit and validation execution authorized;
+  completion and closure not approved.
+- Approved replan commit paths:
+  - `docs/specs/features/semantic-diff-schedule-facade/TASKS.md`
+  - `docs/specs/features/semantic-diff-schedule-facade/TRACEABILITY.md`
+- Original Human Approval and plan commit remain historical gate facts for the
+  unchanged seven-path product boundary. Renewed approval above covers this revision.
+- Independent review Ready and renewed approval substantiated through Main;
+  focused replan commit is required before executing the changed validation.
+  Previous implementation review/completion evidence: none to invalidate.
 
 ## Plan and approval boundary
 
@@ -124,9 +145,9 @@ facade. No layer direction or public application contract changes.
   `interpretSchedule` inputs/output and all current interpretations.
 - `ScheduleProjection` owns document-backed batch projection. Export
   `projectDirectScheduleUnits(input: ScheduleUnitsProjectionInput):
-  ScheduleUnitProjection[]`. The explicitly exported input has `units:
-  AjsUnit[]`, `period: ScheduleProjectionPeriod`, and optional `document:
-  AjsDocument`; each result has `interpretation: ScheduleInterpretation` and
+ScheduleUnitProjection[]`. The explicitly exported input has `units:
+AjsUnit[]`, `period: ScheduleProjectionPeriod`, and optional `document:
+AjsDocument`; each result has `interpretation: ScheduleInterpretation` and
   `projection: ScheduleProjection`. Preserve selected input-unit order and
   duplicates; no aggregate compatibility counts, side labels or sorting here.
   It selects eligible units, interprets each, shares one Calendar index,
@@ -216,20 +237,77 @@ rtk pnpm exec mocha --ui tdd \
   out/test/suite/semanticDiffScheduleImpact.test.js \
   out/test/suite/semanticDiffFlowHighlights.test.js
 rtk pnpm run test:prepare:desktop
-rtk pnpm run test:desktop:run
 rtk pnpm run test:prepare:web
 rtk pnpm run test:web:run
 rtk pnpm run build
 ```
 
-The desktop runner covers its complete suite; the web runner bundles existing
-`webSmoke.ts`, which exercises browser semantic comparison/calendar and
-schedule-impact. Host smoke does not substitute for the owner regressions.
-If a host-free downstream suite actually requires VS Code, use its same suite
-in the required desktop run and record the coverage correction through Main;
-do not silently report a failed standalone invocation as a pass. Known roadmap
-expanded-Flow golden mismatch is not waived: a required failing suite blocks
-readiness until Main records a permitted resolution/replan or external owner.
+The original full desktop invocation is replaced only under the conditional
+validation repair below. Its failure remains explicit; no full-suite pass is
+claimed. The web runner bundles existing `webSmoke.ts`, which exercises browser
+semantic comparison/calendar and schedule-impact. Matching completed owner,
+web and build results are reused; phase changes do not justify reruns.
+The five downstream host-neutral tests remain required, but their failed load
+is replaced by actual in-host execution of those same suites below.
+
+### Validation repair: desktop baseline and selective in-host coverage
+
+Product paths, contracts, Solution Shape, risks and acceptance are unchanged.
+Do not edit the repository runner, UI, dependencies, aliases or configuration.
+Temporary validation runners/wrappers and isolated host profiles live under
+`/private/tmp/ajsbutler-semantic-diff-schedule-facade/validation-repair/` and are
+hashed in evidence. Retain the original CLI exit-0/no-tests and terminated
+full-suite logs; neither is a successful desktop gate.
+
+1. Reconstruct an exact disposable approved-plan baseline `ca122e02`, with
+   matching dependency/configuration identities and its own compiled outputs.
+   Use the same VS Code 1.140.0 Code executable, alias translations and
+   `DEVELOPMENT=true` as final6. A temporary Mocha in-host runner uses the
+   existing tdd mode and loads baseline test files in the same recorded order;
+   select only the `Table shell integration` suite for execution. First recover
+   the observed final6 file/load order or record an explicit deterministic order
+   identically for baseline and final. Repeat the same isolated selection on
+   final code because importing a full suite can affect DOM global setup.
+2. Bound each isolated run to 60 seconds with an external watchdog. Stop the
+   uniquely profiled test app on the first matching TypeError plus repeated
+   React depth loop; retain exact signature, test name/line, host/wrapper,
+   definition fixture, loaded-path identities, partial output and termination
+   status. No success summary means failure, including watchdog termination.
+   The planner has not run or predicted a baseline result.
+3. Conditional disposition: only matching baseline/final failure signatures,
+   with inspected failing fixture/runtime import paths showing no changed
+   schedule dependency, establish this as inherited/out-of-scope for S1.
+   Main assigns the full-runner execution problem to test-harness maintainers
+   and table-shell failure/React loop to unit-list/webview test maintainers as
+   explicit follow-ups before readiness. Keep their evidence and ownership in
+   this feature until closure routes durable roadmap records; planner has no
+   authority to edit roadmap or waive those failures.
+4. Execute an isolated actual VS Code in-host runner for these exact suites:
+   `ScheduleProjectionUnits`, `semanticDiffScheduleRules`,
+   `semanticDiffScheduleCalendar`, `semanticDiffSchedule`, `SchedulePeriod`,
+   `architectureDependencyRules`, `semanticDiffJson`,
+   `semanticDiffMarkdownProjections`, `renderSemanticDiffMarkdown`,
+   `semanticDiffScheduleImpact`, `semanticDiffFlowHighlights`,
+   `compareSemanticDiff`, `compareSemanticDiffWithArtifacts`,
+   `semanticDiffCommandScheduleImpact`, `semanticDiffWiring` (all `.test.js`
+   under `out/test/suite`). Use existing Mocha tdd API, explicit file list and
+   nonzero failure propagation, the same alias/define wrapper and real Code
+   executable. Do not mock VS Code or replace assertions. Record expected and
+   loaded suites, nonzero assertion counts, a complete passing Mocha summary,
+   exits and profile identities. Use at most 60-second waits and a five-minute
+   external run limit; no summary/failing test/loop is unresolved, never pass.
+5. If baseline failure differs, cannot be reproduced, uses materially different
+   execution inputs, or the failure involves changed schedule code, stop:
+   return evidence through Main for a separate scoped runner/UI repair decision
+   or S1 correction. Do not automatically broaden S1 or drop another suite.
+
+The SDD risk-based policy allows targeted host coverage for this unchanged
+shared-domain boundary; this reviewed, renewed approval condition replaces the
+original complete desktop suite requirement. It does not declare the complete
+suite healthy. Actual in-host downstream coverage plus matching baseline
+failure evidence is mandatory before implementation review. Second independent
+implementation review remains required. Known expanded-Flow golden follow-up
+stays with Flow test maintainers; do not alter that golden in this feature.
 
 For S1 qlty, use exact disposable baseline (approved plan commit) and final
 substantive snapshots, full-repository selection and matching configuration:
@@ -249,6 +327,40 @@ Node-import/layer/export/import changes, unchanged engines, dependencies,
 ignored generated build/test inputs, snapshot manifests and any unrelated
 inputs explicitly. Keep output/cache outside inspected inputs.
 
+### Validation repair: complete smells analyzed-path inventory
+
+The existing smells counts and result paths do not satisfy complete-input
+inventory. Retain existing check SARIF/inventories and final aggregate when
+identities match; refresh only missing smells coverage in both preserved exact
+snapshots, using qlty 0.645.0 and unchanged full-repository selection/config:
+
+```sh
+QLTY_LOG=qlty_analysis=trace QLTY_LOG_STDERR=1 \
+  rtk pnpm exec qlty smells --all --sarif --no-snippets
+```
+
+Capture stdout as official SARIF and stderr as raw trace/log, outside analyzed
+inputs. Request normal tooling permission for qlty's existing global log write
+if required; never repurpose HOME or change scan configuration to avoid it.
+Official v0.645.0 `workspace_entry_finder.rs` emits every accepted File workspace
+entry at TRACE; `logging.rs` supplies these environment filters and stderr
+routing. Both structure and duplication use `files_for_qlty` with all-files,
+exclude-tests selection. Retain official source/version references in evidence.
+Manually reconcile accepted path sets and their distinct nonzero counts against
+both structure and duplication counts, including duplicate selection passes,
+skips and processing errors. Retain full raw trace plus plain path inventories;
+no custom collector, SARIF parser or textual findings comparator.
+
+Before reuse, prove retained baseline/final contents and configuration match
+original scans, and outputs/logs/caches remain excluded. Compare refreshed
+complete official smells SARIF to the matching originals and counterpart under
+the existing policy. If source/path selection changes, logging is incomplete,
+counts cannot reconcile, trace exposes processing failures, or a new/adverse
+finding appears, readiness is blocked. Return through Main; do not substitute
+finding paths or repository file lists for analyzed inputs or waive the gate.
+A tools feature or a supported tool upgrade with matching two-snapshot scans
+requires a separate explicit decision if this bounded inventory repair fails.
+
 For changed feature Markdown use targeted markdownlint-cli2, local links,
 structure, traceability/provenance inspection and `rtk git diff --check`.
 Current-head Qlty Cloud must pass before Feature Exit. Missing/failed required
@@ -264,12 +376,46 @@ checks block readiness; reuse matching evidence across reviewers and gates.
   [record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/plan/record.md)
   with exact input manifest and raw outputs. Coverage: three feature Markdown
   files, local links/structure, R1–R6 mapping, scope and approval provenance.
-- Code: not executed; S1 required coverage above. No baseline scans performed
-  for planning. Implementer owns one baseline/final set retained through Exit.
+- Code: owner/architecture, web and build results retained as below; downstream
+  in-host results and desktop baseline disposition pending validation repair.
+  Implementer retains the original check/aggregate and supplies only missing
+  smells inventory coverage. No product baseline was run during replanning.
 - Plan review: independent `plan-reviewer`, Ready with no Findings; reviewed
   identity `e8ea041e284c78091dae9c2fa9ef24ae0c98b4ee083aead9f644e325cb3c17d7`.
   Handoff returned in the current conversation; unchanged plan evidence reused.
-- Approval: S1 approved in current conversation; planning commit pending.
+- Approval: original S1 approved in current conversation; revised validation
+  scope explicitly approved in current conversation.
+- Planning commit: `ca122e02efa0d6fa675caa7a688a4dad4a56018c`; exact
+  three planning paths; staged scope and whitespace checks passed.
+
+## S1 implementation handoff
+
+- Implementation diff covers the approved schedule interpretation/projection
+  and semantic-diff facade paths, plus their characterization/boundary tests.
+  Prior S1 state was `IMPLEMENTING`; retained code/evidence is unchanged.
+  The changed validation plan is approved `PLAN_APPROVED`; no completion claim.
+- Passed: `test:compile`; required host-neutral owner and architecture suites
+  (102 passing); web smoke WEB-7 through WEB-13; production desktop/web build.
+  Architecture dependency tests report zero violations.
+- Desktop gate is unresolved and blocks readiness. The actual isolated VS Code
+  1.140.0 run loaded assertions after using a temporary runner wrapper for the
+  existing tsconfig aliases and `DEVELOPMENT=true` (the development build's
+  existing DefinePlugin value). `tableShellIntegration.test.js:206` raised
+  `TypeError: Cannot read properties of null (reading 'tag')`, followed by a
+  runaway React “Maximum update depth exceeded” loop. No Mocha completion
+  summary was emitted; only the disposable test app was terminated. Main must
+  decide the validation repair through replanning before review routing.
+- Qlty baseline/final observations report no new mapped findings; the final
+  aggregate passed. Full snapshot identities, inventories, statuses, SARIF,
+  logs, desktop execution exception, and generated-input manifests are in the
+  [S1 evidence record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/implementation-evidence.md).
+- Smells complete clean-input path inventories are explicitly unavailable in
+  the original evidence; counts and finding paths alone cannot pass this gate.
+- Replan evidence: [validation repair plan record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/replan/record.md).
+  Original reviewed plan and `ca122e02` commit remain preserved; the previous
+  plan review no longer covers changed desktop coverage/evidence commands.
+- Current-head Qlty Cloud, independent implementation review, replan commit,
+  completion approval, and completion commit remain pending.
 
 ## Readiness and exit ownership
 
@@ -281,3 +427,10 @@ Main routes roadmap item 1 removal and reassesses item 2 entry condition under
 closure approval; neither roadmap nor durable-document edits are in S1.
 Reusable layering rules already have architecture ownership, so no duplicate
 durable narration is needed. Preserve unrelated/inherited feature folders.
+
+## Validation replan review gate
+
+- Independent plan-reviewer: Ready; no Findings, current conversation.
+- Reviewed substantive identity:
+  `6340dad031653a3ffd306e0fa0d0e9e64a8299220142347ba7abe9f08e709092`.
+- Replan evidence reused; renewed approval recorded above.
