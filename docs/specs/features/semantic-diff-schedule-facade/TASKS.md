@@ -938,7 +938,7 @@ durable narration is needed. Preserve unrelated/inherited feature folders.
   coverage annotations above are superseded for current evidence.
 - Stable official check3/3 equal; smells151/151 with only known unreliable
   duplicate orientation, no new/reliably mapped adverse finding; inventories
- 713 check source paths/433 smells paths match; final aggregate0 and immutable
+  713 check source paths/433 smells paths match; final aggregate0 and immutable
   input hashes verified afterward. Passing host182 and other code checks reused.
 - [Freshness correction](/private/tmp/ajsbutler-semantic-diff-schedule-facade/test-repair/freshness-v3.md)
   binds substantive manifests/raw4SARIF/status/inventories and ancillary cached
