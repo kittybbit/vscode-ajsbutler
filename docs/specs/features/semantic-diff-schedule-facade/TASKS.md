@@ -3,23 +3,22 @@
 ## Agent Brief
 
 - Purpose: thin schedule compatibility orchestration with unchanged results.
-- Active or approved slice: S1 product implementation retained; five-failure
-  bounded baseline investigation approved; replan commit pending.
+- Active or approved slice: S1 runtime implementation retained; proposed
+  four-file test-only repair approved; replan commit pending.
 - Read: [SPECS](SPECS.md), this plan, [TRACEABILITY](TRACEABILITY.md), and
   discovery/validation references below.
 - Constraints: preserve facade exports, ordering, optional-property presence,
   legacy low-year rejection, calendars, completeness and duplicate pairing.
   No application projection restructuring or deferred semantics.
-- Next route: focused approved baseline-investigation replan commit.
-  No host launch or correction before that commit.
+- Next route: focused approved test-only repair replan commit.
+  No runtime behavior changes.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: commit approved bounded same-host baseline
-  characterization. Five failures remain unresolved and block readiness until
-  baseline investigation and a separate explicit gate decision are completed.
-  Inherited classification alone cannot unblock a failed required check.
+- Next decision / blocker: approved test-only repair replan commit. Baseline/final
+  five failures match; required host gate remains FAILED until repaired tests
+  and all 15 required suites pass. No exception is requested or granted.
 - Selected feature: `semantic-diff-schedule-facade`.
 - Branch: `codex/semantic-diff-schedule-facade`.
 - Fixed base: `fbe562b201ca780d6e0a2add8dff90fa55900d8f`.
@@ -83,6 +82,27 @@
 - Changed validation requires independent plan review, renewed human approval
   through Main and a focused replan commit before execution. Previous product
   evidence remains valid; no implementation review exists to invalidate.
+
+## Test-Only Repair Approval
+
+- Status: Approved
+- Approved at: approved in current conversation (2026-10-03).
+- Approved scope: reviewed four-file test-only repair, immutable baseline golden
+  provenance, all 182 cases across 15 host suites passing, and required quality
+  validation. No production behavior or failed-gate exception authorized.
+- Approved additional test paths:
+  - `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+  - `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`
+- Approved replan commit paths:
+  - `docs/specs/features/semantic-diff-schedule-facade/TASKS.md`
+  - `docs/specs/features/semantic-diff-schedule-facade/TRACEABILITY.md`
+- Preserve original runtime/test approval, `ca122e02`, validation repair approval
+  and `f1096747`, investigation approval and `49aa14a5998de64a89104c2c0d57bb32977c5af6`.
+  New approval above authorizes these four test edits.
+- Renew independent plan review and human approval for exact test scope,
+  golden provenance and validation, then focused replan commit before edits.
 
 ## Plan and approval boundary
 
@@ -506,8 +526,7 @@ checks block readiness; reuse matching evidence across reviewers and gates.
 ## S1 implementation handoff
 
 - Prior implementation handoff state was `IMPLEMENTING`; current feature/S1
-  validation replan is `PLAN_APPROVED`. Approved product changes remain
-  uncommitted and
+  validation repair returned to `IMPLEMENTING`. Approved product changes remain
   uncommitted. Solution Shape and original seven-path boundary are unchanged.
   Interpretation owns eligibility; Projection owns indexed batch projection;
   the facade retains compatibility assembly and delegates run correspondence.
@@ -546,6 +565,156 @@ checks block readiness; reuse matching evidence across reviewers and gates.
   approved repair storage. Left untouched; no guessed restoration attempted.
 - Both independent implementation reviews, current-head Cloud at Exit,
   completion/closure approvals and commits remain pending. Readiness is blocked.
+
+## S1 test-only required-gate repair
+
+Main selected repair rather than an inherited-failure exception. The bounded
+investigation is complete: baseline14 177 tests/172 pass/5 fail, final15
+182 tests/177 pass/5 fail; all 177 common outcomes and the five exact failures
+match. Five final-only tests pass. Baseline sources/generated identities prove
+no final-test contamination. Investigation findings remain evidence, not a pass.
+
+### Exact additional paths and independent value
+
+Add these four test files to S1 only after new reviewed Human Approval:
+
+- `src/test/suite/semanticDiffMarkdownProjections.test.ts`
+- `src/test/suite/renderSemanticDiffMarkdown.test.ts`
+- `src/test/suite/compareSemanticDiff.test.ts`
+- `src/test/suite/semanticDiffCommandScheduleImpact.test.ts`
+
+Value: restore meaningful required downstream checks against verified existing
+report escaping/localization, full-document identity and intended command flow.
+The repair stays one cohesive S1 completion boundary with the original domain
+work: it resolves the exact failing checks needed to assess that feature.
+Original seven product/test paths and runtime Solution Shape remain unchanged.
+Existing report functions, localized resource keys, structural identity and
+workflow selection are reused; no new material abstraction/port/adapter/factory.
+Test-local helper changes must earn clearer expectations, not a production API.
+
+This addition supersedes earlier test-path exclusions only for these four files.
+Exclude every other test/fixture, runtime, generated, runner, dependency,
+configuration, durable-document and external golden path. Goldens stay inline
+in the existing Markdown test; retained full-output artifacts live outside
+repository inputs. An unexpected extra path, production mismatch or semantic
+change returns through Main for Replanning, not automatic fixture adjustment.
+No production reports/JSON, command cancellation, parser or identity behavior
+is authorized to change. README/CHANGELOG remain unnecessary for test repair.
+
+### Repair specification and acceptance
+
+1. Markdown typed-removal test: assert explicit localized English audit labels
+   `Before values` and `Raw values` rather than internal resource-key names.
+   Renderer `auditText` and repository English resources independently establish
+   these names; retain exact date/time text, raw empty array, typed DTO contents,
+   Full removed-run wording, Japanese wording and immutable input assertions.
+   Expected strings remain test literals, not computed by the same production
+   label/escaping helpers being tested. Strengthen localized checks where useful
+   inside this same case without changing typed fixture meaning.
+2. Job-group Markdown key: assert exact Markdown-safe `nested/nest\_jg`
+   spelling (literal backslash in output), unit type and existing Key label.
+   Repository escaping rules and use-case raw-value preservation justify this;
+   the underscore must remain represented, not deleted or loosely regex-matched.
+   Keep plain DTO `nested/nest_jg` unchanged; test evidence and wording remain
+   complete. No call to the renderer's own escaping helper to form expectations.
+3. Exact-key comparison fixture: include the root g exact key with empty
+   scope-relative jobGroupPath in the expected ordered key list, before the two
+   existing children. The fixture document explicitly includes root /root and
+   full-document comparison emits it; the canonical scope-relative contract
+   supplies empty root path. Retain both repeated child paths and g/mg types,
+   exact statuses, deterministic ordering and empty change set. Do not filter
+   out root, broaden matching or change the fixture to evade the assertion.
+4. Command adapter fixture: supply typed `showWorkflowQuickPick` selecting the
+   provided item whose workflowKind is `file`, with an assertion that it exists.
+   Keep fallback `showQuickPick` cancellation semantics intact and unused by
+   this intended-success workflow; do not modify production selection behavior.
+   Preserve expected file source/evaluated period, exactly-once capture, adapter,
+   registration/open context identity, options and capture→callback→register→open
+   event order, and legacy builder non-use. Assert source selection/file dialog
+   counts so the successful path is exercised rather than bypassed.
+5. Immutable Markdown goldens: derive corrections from the immutable `ca122e02`
+   production renderer and unchanged empty/populated fixture values, not from
+   repaired final output alone. Approved test repairs change expectations/mock
+   selection only; no Markdown result fixture inputs change. Retain full
+   baseline output for all 2 fixtures × 3 modes × 5 languages (30 cases, 12
+   distinct locale cases), UTF-8 bytes and SHA-256 identities in external evidence.
+   Independently inspect complete contents against report use-case contracts,
+   fixture identities/counts/details/periods, localized labels and raw-value
+   escaping before changing inline constants. Explain each stale constant's
+   mismatch; keep unaffected constants unchanged. Compare every repaired final
+   output byte-for-byte with its matching immutable baseline and verify all
+   locale mappings (undefined/en/fr English; ja/ja-JP Japanese). Require full
+   content equality, bytes, digest and input immutability; never assert only
+   regenerated hashes or skip a mode/locale. Independent implementation reviewer
+   examines full golden content/provenance and semantic coverage, not just green
+   snapshots. If baseline production content violates a durable contract or
+   cannot independently justify an expectation, stop for Main's semantic decision.
+
+These are independently established existing contracts, not permission to make
+all actual output the expected output. All five assertions remain meaningful;
+no deletion, skip, weakened equality or accepted failed-check disposition.
+
+### Validation, freshness and readiness
+
+Implementer owns repair evidence at
+`/private/tmp/ajsbutler-semantic-diff-schedule-facade/test-repair/` including
+exact added approval paths, pre/post test hashes, baseline full-output provenance,
+30 paired outputs/byte/digests, commands/statuses and generated input manifests.
+
+Run `rtk pnpm run test:compile`, then the unchanged actual Code 1.140.0 retained
+15-suite loader/alias/DEVELOPMENT configuration and five-minute watchdog with a
+fresh non-overwritten profile. Every one of the same 182 named tests must run,
+including original five repaired cases and five final-only owner/moved cases;
+any added in-file checks/tests are recorded and cannot replace original cases.
+Require complete Mocha summary, zero failures/pending/skipped, nonzero assertion
+count and exit 0. Reuse matching previous fixture/host identities; no full UI
+suite launch or another table-loop investigation is required for these edits.
+A failure returns through Main/implementer without pruning coverage.
+
+Four changed test inputs invalidate their old results and the integrated host
+15-suite result. Unchanged owner102, WEB7–13, production build and runtime/
+architecture evidence remain reusable; test-only source edits do not justify
+another production build or web run. Keep historical failed commands explicit.
+The golden extraction/provenance check uses immutable baseline and matching
+final outputs; planning has executed no renderer/test/product scan.
+
+Qlty: repair is code/test surface, so full-repository official check/smells
+baseline/final observations plus final aggregate remain mandatory. Use exact
+repair baseline (renewed replan commit plus retained approved S1 domain patch,
+four unchanged tests) and repair final (same inputs plus four test repairs).
+Keep the same substantive planning content in both; later gate annotations are
+separately recorded metadata. Record full manifests/config/tool/dependency
+identities and nonzero complete analyzed inventories. Reuse an old individual
+scan only if that exact input identity truly matches; original S1 qlty evidence
+remains preserved but does not automatically cover changed tests/planning.
+Run policy commands `qlty check --all --sarif --no-fix` and
+`qlty smells --all --sarif --no-snippets` via rtk pnpm; reuse official TRACE
+inventory method where needed, raw stdout/stderr separately. Require all four
+SARIF files, no new or reliably mapped adverse finding, qlty >=0.645.0, and
+`rtk pnpm run qlty` passing in final snapshot only. Sync formatting only allowed
+paths and refresh affected observations until stable. No parser/comparator or
+policy exception. Run targeted Markdown/link/structure and diff checks for
+changed feature metadata, then both independent implementation reviews.
+
+Required gate remains blocked until repaired all15 pass and quality/acceptance
+are satisfied. Completion Approval/commit and Feature Exit/current-head Cloud
+remain separate. Prior approvals are historical facts; new repair review and
+approval grant only the exact four-file addition and validation above.
+
+### Risks and follow-up preservation
+
+Golden refresh could conceal a semantic regression: immutable baseline/full
+content review and exact final equality are required. Matching original failure
+does not by itself justify a new expected result. UI selection mocks can bypass
+workflow logic: select the actual supplied typed file item and retain ordered
+side-effect assertions. Root evidence must include all document units and stable
+scope-relative names. Localization and escaping stay test literals grounded in
+resources/use cases, preventing tautological expectations.
+
+Previously assigned harness/table-shell owners and historical full-suite issues
+remain outside this repair and retained for Exit routing. No pending report/
+identity/command repair debt is deferred if these four-file changes meet their
+acceptance; any remaining semantic issue receives an explicit Main decision.
 
 ## Readiness and exit ownership
 
@@ -616,3 +785,43 @@ durable narration is needed. Preserve unrelated/inherited feature folders.
   `53bb94597d5abe49a8e6e586331ce0634e02e5ee6e356a20c812e4587930b324`.
 - Investigation approved in current conversation; failed-gate exception not
   authorized.
+
+## Five-failure investigation commit gate
+
+- Commit: `49aa14a5998de64a89104c2c0d57bb32977c5af6`.
+- Exact selected TASKS/TRACEABILITY paths; staged scope and whitespace passed.
+- Approval covers bounded investigation only; failed checks still block Ready.
+
+## Five-failure investigation result
+
+- Lifecycle: `IMPLEMENTING`; one approved baseline14 run complete. Baseline177
+  tests:172 passing/5 failing, exit1; retained final182:177 passing/5 failing.
+  All177 common suite/test outcomes and five names/expected-actual/lines match.
+  Final-only4 owner tests and1 moved-path characterization test pass; common
+  case additions strengthen assertions without altering baseline fixtures.
+- All14 baseline test sources plus3 runtime sources match ca122e02; retained
+  compiled JS matches read-only in-memory emission in both snapshots. No stale
+  final compiled inputs or fixture contamination found. First3 render supplied
+  results; comparison takes unchanged no-period guard; command source selection
+  cancels before injected artifact builder. Exact import/fixture identities retained.
+- [Investigation record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/validation-repair/five-investigation.md)
+  links raw summaries, every common outcome, final-only cases, identities and
+  minimal source clues for separately scoped repair. No rerun or fix performed.
+- Failed required gate remains blocked despite inherited/no-regression evidence.
+  Main selects separately approved repair or explicitly reviewed exception/changed
+  validation contract; no Ready, waiver or replacement gate is claimed.
+
+## Test repair planning evidence
+
+- [Repair plan record](/private/tmp/ajsbutler-semantic-diff-schedule-facade/replan-test-repair/record.md)
+  covers exact proposal/discovery and targeted documentation validation.
+- Previous baseline investigation is complete; current feature/S1 replan is
+  PLANNED, retained implementation uncommitted. No repair or product scan run
+  by planner. Original approval/review/commit history is preserved.
+
+## Test-only repair review gate
+
+- Independent plan-reviewer: Ready; no Findings.
+- Reviewed substantive identity:
+  `3d7fef6af15b1b82b2db632777155d3d68cbecb24cc10285ec6c7887ce8c9541`.
+- Required failed host check remains blocking; repair approval recorded above.
