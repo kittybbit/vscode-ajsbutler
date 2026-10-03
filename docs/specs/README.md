@@ -63,21 +63,21 @@ state and records the missing decision.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Input state | Operation and owner | Output state / required fact |
-| --- | --- | --- |
-| Concrete proposal | Intake: `feature-author` | `INTAKE`: scoped intake recorded |
-| `INTAKE` | Planning: `planner` | `PLANNED`: complete feature plan |
-| `PLANNED` | Independent review: `plan-reviewer` | `PLAN_READY`: Ready for approval; Findings return to planner |
-| `PLAN_READY` | Human Approval: human, recorded by Main | `PLAN_APPROVED`: exact reviewed scope approved |
-| `PLAN_APPROVED` | Plan commit: `approval-committer` | `PLAN_COMMITTED`: focused planning commit succeeded |
-| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer` | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded |
-| `IMPLEMENTED` | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer |
-| `SLICE_READY` | Completion Approval: human, recorded by Main | `SLICE_APPROVED`: exact reviewed completion approved |
-| `SLICE_APPROVED` | Completion commit: `approval-committer` | `SLICE_COMMITTED`: focused slice commit succeeded |
-| All slices `SLICE_COMMITTED` | Exit entry check: Main | `FEATURE_EXIT_READY`: no pending scope/design decision |
-| `FEATURE_EXIT_READY` | Aggregate exit review: `feature-closer` | `CLOSE_READY`: Close recommendation |
-| `CLOSE_READY` | Closure Approval: human, recorded by Main | `CLOSE_APPROVED`: exact propagation and removal paths approved |
-| `CLOSE_APPROVED` | Closure commit: `approval-committer` | `CLOSED`: focused closure commit succeeded |
+| Input state                                     | Operation and owner                           | Output state / required fact                                     |
+| ----------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| Concrete proposal                               | Intake: `feature-author`                      | `INTAKE`: scoped intake recorded                                 |
+| `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                 |
+| `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner     |
+| `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                   |
+| `PLAN_APPROVED`                                 | Plan commit: `approval-committer`             | `PLAN_COMMITTED`: focused planning commit succeeded              |
+| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded |
+| `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer             |
+| `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved             |
+| `SLICE_APPROVED`                                | Completion commit: `approval-committer`       | `SLICE_COMMITTED`: focused slice commit succeeded                |
+| All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision           |
+| `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                              |
+| `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact propagation and removal paths approved   |
+| `CLOSE_APPROVED`                                | Closure commit: `approval-committer`          | `CLOSED`: focused closure commit succeeded                       |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -256,13 +256,13 @@ proof. Do not build a collector service, custom SARIF parser, or comparator.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Record | Producer | Consumers / purpose |
-| --- | --- | --- |
-| Discovery facts | Intake/planner for the references actually needed | Planner and plan-reviewer: scope, affected symbols/tests, boundaries and risks |
-| Documentation validation | Role changing the documentation | Reviewer and next role: validate that changed documentation surface |
-| Slice validation | Implementer, one baseline/final set per slice | Implementation-reviewer: semantic review; feature-closer: aggregate completeness |
-| Review findings | Independent reviewer | Main and author: verdict, precise Findings, reviewed patch identity, affected revalidation |
-| Closure evidence | Feature-closer | Main and committer: cross-slice completeness, durable ownership, risk ownership, current-head global gates |
+| Record                   | Producer                                          | Consumers / purpose                                                                                        |
+| ------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Discovery facts          | Intake/planner for the references actually needed | Planner and plan-reviewer: scope, affected symbols/tests, boundaries and risks                             |
+| Documentation validation | Role changing the documentation                   | Reviewer and next role: validate that changed documentation surface                                        |
+| Slice validation         | Implementer, one baseline/final set per slice     | Implementation-reviewer: semantic review; feature-closer: aggregate completeness                           |
+| Review findings          | Independent reviewer                              | Main and author: verdict, precise Findings, reviewed patch identity, affected revalidation                 |
+| Closure evidence         | Feature-closer                                    | Main and committer: cross-slice completeness, durable ownership, risk ownership, current-head global gates |
 
 <!-- markdownlint-enable MD013 MD060 -->
 

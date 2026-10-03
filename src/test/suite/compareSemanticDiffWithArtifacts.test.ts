@@ -154,6 +154,26 @@ suite("Semantic Diff comparison artifacts", () => {
       artifacts.result.scheduleComparison?.runChanges.length,
       1,
     );
+    assert.deepStrictEqual(
+      artifacts.result.scheduleComparison?.runChanges.map((change) => [
+        change.id,
+        change.kind,
+        change.unitPath,
+        change.date,
+        change.before?.time ?? null,
+        change.after?.time ?? null,
+      ]),
+      [
+        [
+          "schedule:changed-time:/root/main:2026-04-10",
+          "changed-time",
+          "/root/main",
+          "2026-04-10",
+          "09:00",
+          "10:00",
+        ],
+      ],
+    );
 
     const presentation = buildSemanticDiffPresentationArtifactsFromComparison({
       result: artifacts.result,
@@ -178,6 +198,10 @@ suite("Semantic Diff comparison artifacts", () => {
     const timelineItem = presentation.scheduleImpact.sidecar.timelineItems[0]!;
     assert.strictEqual(timelineItem.time, "5:09:005:10:00");
     assert.ok(timelineItem.sourceChangeRef);
+    assert.deepStrictEqual(timelineItem.sourceChangeRef, {
+      id: "schedule:changed-time:/root/main:2026-04-10",
+      occurrenceOrdinal: 0,
+    });
     assert.deepStrictEqual(
       timelineItem.before?.sourceChangeRef,
       timelineItem.sourceChangeRef,

@@ -43,6 +43,18 @@ export const collectUniqueAjsUnits = (document: AjsDocument): AjsUnit[] => {
   return units;
 };
 
+export const collectAjsUnitOccurrences = (document: AjsDocument): AjsUnit[] => {
+  const units: AjsUnit[] = [];
+  const visit = (children: readonly AjsUnit[]): void => {
+    children.forEach((unit) => {
+      units.push(unit);
+      visit(unit.children);
+    });
+  };
+  visit(document.rootUnits);
+  return units;
+};
+
 const appendUnit = (
   index: Map<string, AjsUnit[]>,
   key: string,

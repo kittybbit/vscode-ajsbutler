@@ -5,6 +5,8 @@ import {
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import type { SemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import { buildSemanticDiffPresentationArtifactsFromComparison } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import { compareSemanticDiffWithArtifacts } from "../../application/semantic-diff/compareSemanticDiffWithArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import { createScheduleAwareExplorerSession } from "../../bootstrap/extension/createScheduleAwareExplorerSession";
@@ -122,6 +124,107 @@ export async function run(): Promise<void> {
   }
   reportWebScenario(
     "WEB-12 passed: browser normalized calendar document index",
+  );
+
+  const web13Document = (time: string): AjsDocument => {
+    const jobnet: AjsUnit = {
+      ...web12Jobnet,
+      id: "/web13/main",
+      name: "main",
+      absolutePath: "/web13/main",
+      parentId: "/web13",
+      parameters: [
+        { key: "ty", value: "n" },
+        { key: "sd", value: "2026/04/10" },
+        { key: "st", value: time },
+      ],
+    };
+    const group: AjsUnit = {
+      ...jobnet,
+      id: "/web13",
+      name: "web13",
+      unitAttribute: "group,,jp1admin,",
+      unitType: "g",
+      absolutePath: "/web13",
+      depth: 0,
+      parentId: undefined,
+      isRoot: true,
+      isRootJobnet: false,
+      hasSchedule: false,
+      parameters: [{ key: "ty", value: "g" }],
+      children: [jobnet],
+    };
+    return { rootUnits: [group], warnings: [] };
+  };
+  const web13Artifacts = compareSemanticDiffWithArtifacts({
+    before: web13Document("09:00"),
+    after: web13Document("10:00"),
+    options: {
+      scheduleComparisonPeriod: {
+        from: "2026-04-01",
+        to: "2026-05-01",
+      },
+    },
+  });
+  const web13Presentation =
+    buildSemanticDiffPresentationArtifactsFromComparison({
+      result: web13Artifacts.result,
+      scheduleProjectionFacts: web13Artifacts.scheduleProjectionFacts,
+    });
+  const web13Changes =
+    web13Artifacts.result.scheduleComparison?.runChanges.map((change) => [
+      change.id,
+      change.kind,
+      change.unitPath,
+      change.date,
+      change.before?.time ?? null,
+      change.after?.time ?? null,
+    ]) ?? [];
+  const web13Timeline =
+    web13Presentation.scheduleImpact.kind === "available"
+      ? web13Presentation.scheduleImpact.sidecar.timelineItems.map((item) => [
+          item.state,
+          item.before?.unitPath ?? item.after?.unitPath,
+          item.before?.time ?? null,
+          item.after?.time ?? null,
+          item.sourceChangeRef?.id ?? null,
+          item.sourceChangeRef?.occurrenceOrdinal ?? null,
+        ])
+      : [];
+  if (
+    web13Artifacts.scheduleProjectionFacts.kind !== "evaluated" ||
+    web13Changes.length !== 1 ||
+    JSON.stringify(web13Changes[0]) !==
+      JSON.stringify([
+        "schedule:changed-time:/web13/main:2026-04-10",
+        "changed-time",
+        "/web13/main",
+        "2026-04-10",
+        "09:00",
+        "10:00",
+      ]) ||
+    JSON.stringify(web13Timeline) !==
+      JSON.stringify([
+        [
+          "changed-time",
+          "/web13/main",
+          "09:00",
+          "10:00",
+          "schedule:changed-time:/web13/main:2026-04-10",
+          0,
+        ],
+      ])
+  ) {
+    throw new Error(
+      `WEB-13 browser comparison/artifact equivalence failed: ${JSON.stringify({
+        kind: web13Artifacts.scheduleProjectionFacts.kind,
+        changes: web13Changes,
+        timeline: web13Timeline,
+      })}`,
+    );
+  }
+  reportWebScenario(
+    "WEB-13 passed: browser comparison and schedule-impact artifact equivalence",
   );
 
   const commands = await vscode.commands.getCommands(true);

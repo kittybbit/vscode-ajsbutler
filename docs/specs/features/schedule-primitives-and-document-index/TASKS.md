@@ -2,19 +2,20 @@
 
 ## Current state
 
-- Mode: Replanning, limited to S3 formatter-produced table column widths in
-  `.agent.md` and `docs/specs/README.md`. Revised S3 is `PLAN_APPROVED`, awaiting
-  the focused replan commit. The existing S3
-  implementation is preserved; added-path formatting is present and awaits
-  delegated validation after the planning commit.
+- Mode: S3 implementation validation. Replan commit
+  `73a63ab6148eecf2a861d37e126e2765f820c88c` approved only the formatter's
+  table-width normalization in `.agent.md` and `docs/specs/README.md`.
+  Formatting and affected quality checks are complete; targeted documentation
+  validation is recorded below.
   S2 completed two independent Ready reviews and the counter-record repair.
   S1's two independent reviewers returned Ready with no actionable Findings.
 - S1 final quality: full check retains the same three inherited findings;
   smells retains 151 findings without new issues; aggregate passed. The
   final post-sync evidence supersedes the historical pending note below:
   `/private/tmp/ajs-s1-evidence-oy97lf2l/metadata.json`.
-- Active slice: the widened S3 plan has renewed Human Approval; the original
-  implementation remains within its recorded approval boundary;
+- Active slice: S3 is implemented on the renewed approved scope and returned to
+  Main for independent implementation review; the original implementation
+  remains within its recorded approval boundary;
   predecessors S1 and S2 are `SLICE_COMMITTED`. S3 comparison base:
   `573847284dc5885a7552eda0e36358b005146c55`.
 - S2 completion commit: `573847284dc5885a7552eda0e36358b005146c55`;
@@ -54,7 +55,7 @@
   `docs/specs/features/schedule-primitives-and-document-index/TASKS.md`,
   `docs/specs/features/schedule-primitives-and-document-index/TRACEABILITY.md`.
 
-## S3 Formatting Replan: Pending Gates
+## S3 Formatting Replan And Implementation Handoff
 
 - Independent plan review: Ready for approval, no actionable Findings. Reviewed
   substantive plan patch SHA-256:
@@ -63,7 +64,7 @@
   `bc717ac93d218efb05d08c75795d4642f2da3d721abb34d96dec0c4d1d7329da`.
   This plan verdict does not clear the S3 implementation quality gate.
 
-- Proposed scope: retain the original S3 production/test and feature-document
+- Approved scope: retain the original S3 production/test and feature-document
   boundary; add only formatter-produced table column width normalization in
   `.agent.md` and `docs/specs/README.md`. No wording, policy, semantic, link,
   heading, directive, configuration or behavior change is authorized by this
@@ -72,14 +73,14 @@
 - Existing Human Approval above remains the original provenance for S1–S3.
   It does not authorize these two added paths. S1 and S2 completion approvals,
   commits, and matching evidence are preserved. Do not rewrite their approvals.
-- The original plan Ready/approval/commit do not cover the widened S3 boundary;
-  independent plan review, renewed Human Approval and focused replan commit
-  are required before added-path implementation. The two S3 implementation
-  reviews accepted the existing semantic/compatibility work but returned qlty
-  P2 Findings. Preserve those judgments for their inspected inputs; neither
-  supplies Ready or review coverage for the added paths. Renew integrated S3
-  implementation review after formatting and affected quality refresh, reusing
-  matching semantic/compatibility judgments and product evidence.
+- The original plan Ready/approval/commit did not cover the widened S3 boundary.
+  Independent plan review, renewed Human Approval and the focused replan commit
+  are now recorded above. The two S3 implementation reviews accepted the
+  existing semantic/compatibility work but returned qlty P2 Findings on their
+  inspected inputs. Preserve those judgments; neither reviewed the added paths.
+  Return the integrated S3 slice for independent implementation review after
+  this formatting repair and affected quality refresh, reusing matching
+  semantic/compatibility judgments and product evidence.
 - No S3 Completion Approval or completion commit exists. They and Feature Exit
   remain later gates; this replan neither grants approval nor clears the P2.
 
@@ -114,6 +115,82 @@
   Exact Git status/diff inspection total is unknown; replan patch/scope and
   unchanged product hashes are recorded in the evidence. Main owns dispatch,
   human gate and review counters. No implementation, staging or commit occurred.
+
+### S3 Post-repair Validation
+
+- Status: `SLICE_APPROVED`; two independent implementation reviewers returned
+  Ready with no actionable Findings. Explicit S3 Completion Approval is recorded
+  below; its focused completion commit is pending.
+- Reviewed base-to-worktree patch SHA-256:
+  `f3853cf10135a85c669f78f447138b08aea278953e3579c99bf198d4c33f9cf5`.
+  Review covers the ten-path cumulative S3 diff plus validated gate metadata.
+- Both reviewers accepted the metadata exception: post-scan TASKS delta is
+  approval/status/evidence only; no scope, acceptance, command or risk change.
+  Independent derived delta SHA-256:
+  `8b431e2caddb0a75920496095fa6ecae19771dfaaa3bfcf37d2048bfbf1aa96e`.
+- Main counters: three implementer dispatches; four implementation-review
+  dispatches; one planner, one plan-reviewer and one replan-committer dispatch.
+  One renewed Human Approval and one replan commit; one S3 Completion
+  Approval, one completion-committer dispatch and zero completion commits.
+  Main ran no product checks or full scans.
+  This Ready annotation adds one targeted Markdown lint and diff check.
+- The formatting output is byte-identical to the retained official qlty
+  formatter copies. Before hashes: `.agent.md`
+  `71501e949a4afc40ff7a0d976fd4fd3d7730d7b6484f221e0b382b8505c41255` and
+  `docs/specs/README.md`
+  `37472dce5811d1703da9c4c29c9e887d0cf5aa3b5d901a87d2c68cb73a42e2da`.
+  Formatted hashes: `.agent.md`
+  `9e919e9f31d3830d6f2664d94f5b09996af9695789c7c5021015d0d947866282` and
+  README `cfefc612b8830607e5ae6bc833bdaa70d937202931baaa8da56c45b64c39b28f`.
+  The diff is one table in `.agent.md` and two tables in README; cell text,
+  links, ordering, surrounding content and document topology are unchanged.
+- Final qlty `check --all --sarif --no-fix` completed with three results and
+  exit 1: the three retained exact-base records. It removes the two baseline
+  `prettier:fmt` records, and neither of the paired-final `markdownlint:fmt`
+  records remains. No new SARIF result is present. Baseline/final raw SARIF,
+  final manifest, command outputs and aggregate logs are in
+  `/private/tmp/ajs-s3-format-final-evidence/`; the retained paired evidence is
+  under `/private/tmp/ajs-s3-implementation-evidence/paired/`.
+- Qlty version is `0.645.0 macos-arm64 (70886ba 2026-09-23)`, markdownlint
+  plugin `0.41.0`; configuration SHA-256
+  `f551fa47da3ac111a3e29857ff0f431abb0e0a20c17a8c794660c255f4dfb4c2`, lock
+  SHA-256 `c4e91db0c1ab2176f06484a970dd735b6bb87654213c2dba612805144b6f1de8`.
+  Full `--all` selection and 712-path check inventory match the retained
+  evidence. The scanned pre-annotation snapshot has 749 files and manifest
+  SHA-256
+  `07a718e3951fa587cbba218e02d5178144cec8d7202ddd46544fb93676e22b72`.
+- The disposable final aggregate passed with exit 0 and changed no tracked
+  files. Prior 148 focused tests, desktop and web suites, and desktop/web builds
+  remain valid because runtime and test inputs did not change. VS Code minimum
+  remains `^1.75.0`; no user-facing behavior, changelog, or traceability mapping
+  changed. Final documentation validation passed: `rtk pnpm run lint:md`
+  checked 30 files; targeted markdownlint checked four files; the diff check
+  from the S2 comparison base passed.
+- Repair execution counters: two full-check attempts (one startup failure,
+  exit 99; one completed finding-triggered check, exit 1); one aggregate pass;
+  two Markdown lint commands passed; one base diff check passed. No product
+  test/build or baseline recreation was needed.
+
+## S3 Completion Approval
+
+- Status: Approved
+- Provenance: user message "承認します。" in this conversation
+  (2026-10-03, Asia/Tokyo), responding to the exact S3 completion request.
+- Scope: the complete S3 implementation and approved formatter-only repairs,
+  reviewed Ready by both independent reviewers; no feature closure is implied.
+- Reviewed cumulative patch SHA-256:
+  `f3853cf10135a85c669f78f447138b08aea278953e3579c99bf198d4c33f9cf5`.
+- Evidence: `/private/tmp/ajs-s3-format-final-evidence/metadata.json` plus
+  separately validated Main Ready and Completion Approval metadata patches.
+- Exact completion commit paths: `.agent.md`, `docs/specs/README.md`, this
+  TASKS.md, `src/application/semantic-diff/semanticDiffScheduleImpact.ts`,
+  `src/domain/models/ajs/AjsDocumentIndex.ts`,
+  `src/test/suite/AjsDocumentIndex.test.ts`,
+  `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`,
+  `src/test/suite/semanticDiffScheduleImpact.test.ts`, and
+  `src/test/suite/webSmoke.ts`. TRACEABILITY.md is already in the replan commit.
+- This approval annotation adds two targeted Markdown lint and diff checks,
+  including one line-length correction. No product checks or full scans rerun.
 
 ## S1 Completion Approval
 

@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import {
+  collectAjsUnitOccurrences,
   collectUniqueAjsUnits,
   createAjsDocumentIndex,
 } from "../../domain/models/ajs/AjsDocumentIndex";
@@ -60,6 +61,68 @@ suite("AjsDocumentIndex", () => {
     ]);
     assert.strictEqual(units[2], shared);
     assert.strictEqual(units[4], secondRoot);
+  });
+
+  test("collects every occurrence in recursive root-first preorder", () => {
+    const root = unit("/root");
+    const shared = unit("/shared");
+    root.id = "root-id";
+    shared.id = "shared-id";
+    root.children.push(shared);
+
+    const occurrences = collectAjsUnitOccurrences(
+      document([root, shared, root]),
+    );
+    const index = createAjsDocumentIndex(occurrences);
+
+    assert.deepStrictEqual(occurrences, [root, shared, shared, root, shared]);
+    assert.strictEqual(occurrences[1], shared);
+    assert.strictEqual(occurrences[3], root);
+    assert.deepStrictEqual([...index.byId.keys()], ["root-id", "shared-id"]);
+    assert.deepStrictEqual([...index.byPath.keys()], ["/root", "/shared"]);
+    assert.deepStrictEqual(index.byId.get("shared-id"), [
+      shared,
+      shared,
+      shared,
+    ]);
+    assert.deepStrictEqual(index.byPath.get("/root"), [root, root]);
+  });
+
+  test("retains bounded deep and wide occurrence order", () => {
+    const root = unit("/wide");
+    const leaves = Array.from({ length: 4_096 }, (_, position) =>
+      unit(`/wide/${position}`),
+    );
+    root.children.push(...leaves);
+    const wide = collectAjsUnitOccurrences(document([root]));
+
+    assert.strictEqual(wide.length, leaves.length + 1);
+    assert.strictEqual(wide[0], root);
+    assert.deepStrictEqual(wide.slice(1), leaves);
+
+    const deepRoot = unit("/deep/0");
+    let parent = deepRoot;
+    const deepestLevel = 128;
+    for (let depth = 1; depth <= deepestLevel; depth += 1) {
+      const child = unit(`/deep/${depth}`);
+      parent.children.push(child);
+      parent = child;
+    }
+    const deep = collectAjsUnitOccurrences(document([deepRoot]));
+
+    assert.strictEqual(deep.length, deepestLevel + 1);
+    assert.strictEqual(deep[0], deepRoot);
+    assert.strictEqual(deep[deepestLevel], parent);
+  });
+
+  test("retains recursive occurrence traversal cycle failure", () => {
+    const selfCycle = unit("/self-cycle");
+    selfCycle.children.push(selfCycle);
+
+    assert.throws(
+      () => collectAjsUnitOccurrences(document([selfCycle])),
+      RangeError,
+    );
   });
 
   test("preserves distinct duplicate matches, key order, and references", () => {

@@ -1,3 +1,7 @@
+import {
+  collectAjsUnitOccurrences,
+  createAjsDocumentIndex,
+} from "../../domain/models/ajs/AjsDocumentIndex";
 import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import type {
   SemanticDiffComparisonPeriod,
@@ -224,37 +228,12 @@ const deepFreeze = <T>(value: T): T => {
 const isRootJobnet = (unit: AjsUnit): boolean =>
   [unit.unitType === "n", unit.isRootJobnet === true].every(Boolean);
 
-const unitsById = (document: AjsDocument): Map<string, AjsUnit> => {
+const lastUnitByKey = (
+  unitsByKey: ReadonlyMap<string, readonly AjsUnit[]>,
+): Map<string, AjsUnit> => {
   const units = new Map<string, AjsUnit>();
-  const visit = (children: readonly AjsUnit[]): void => {
-    children.forEach((unit) => {
-      units.set(unit.id, unit);
-      visit(unit.children);
-    });
-  };
-  visit(document.rootUnits);
-  return units;
-};
-
-const unitsByPath = (document: AjsDocument): Map<string, AjsUnit> => {
-  const units = new Map<string, AjsUnit>();
-  const visit = (children: readonly AjsUnit[]): void => {
-    children.forEach((unit) => {
-      units.set(unit.absolutePath, unit);
-      visit(unit.children);
-    });
-  };
-  visit(document.rootUnits);
-  return units;
-};
-
-const flattenUnits = (
-  children: readonly AjsUnit[],
-  units: AjsUnit[] = [],
-): AjsUnit[] => {
-  children.forEach((unit) => {
-    units.push(unit);
-    flattenUnits(unit.children, units);
+  unitsByKey.forEach((matches, key) => {
+    units.set(key, matches[matches.length - 1]!);
   });
   return units;
 };
@@ -263,8 +242,11 @@ const isSelectedRoot = (unit: AjsUnit, jobGroupPath?: string): boolean =>
   isRootJobnet(unit) &&
   (!jobGroupPath || isWithinRoot(unit.absolutePath, jobGroupPath));
 
-const rootUnits = (document: AjsDocument, jobGroupPath?: string): AjsUnit[] =>
-  flattenUnits(document.rootUnits)
+const rootUnits = (
+  units: readonly AjsUnit[],
+  jobGroupPath?: string,
+): AjsUnit[] =>
+  units
     .filter((unit) => isSelectedRoot(unit, jobGroupPath))
     .sort((left, right) =>
       compareOrdinal(left.absolutePath, right.absolutePath),
@@ -2215,21 +2197,25 @@ const noRunsBySide = (
 };
 
 const createRootsContext = (input: CreateRootsInput): CreateRootsContext => {
+  const beforeOccurrences = collectAjsUnitOccurrences(input.before);
+  const afterOccurrences = collectAjsUnitOccurrences(input.after);
+  const beforeIndex = createAjsDocumentIndex(beforeOccurrences);
+  const afterIndex = createAjsDocumentIndex(afterOccurrences);
   const beforeRoots = rootUnits(
-    input.before,
+    beforeOccurrences,
     input.result.inputs.before.jobGroupPath,
   );
   const afterRoots = rootUnits(
-    input.after,
+    afterOccurrences,
     input.result.inputs.after.jobGroupPath,
   );
-  const beforeById = unitsById(input.before);
-  const afterById = unitsById(input.after);
+  const beforeById = lastUnitByKey(beforeIndex.byId);
+  const afterById = lastUnitByKey(afterIndex.byId);
   const identity = identityDecisionsByUnit(input.result.identityDecisions);
   const sourceKeyForRun = createSourceKeyForRun(input.result);
   const sourceUnitsByPath = {
-    before: unitsByPath(input.before),
-    after: unitsByPath(input.after),
+    before: lastUnitByKey(beforeIndex.byPath),
+    after: lastUnitByKey(afterIndex.byPath),
   };
   const runs = scheduleRunsBySide(input.evaluation, sourceUnitsByPath);
   const noRuns = noRunsBySide(input.evaluation);

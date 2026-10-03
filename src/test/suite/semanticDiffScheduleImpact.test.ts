@@ -72,6 +72,200 @@ const result: SemanticDiffResult = {
 };
 
 suite("Semantic Diff schedule impact", () => {
+  test("preserves side-local last-hit indexes and nested root order", () => {
+    const sourceUnit = (id: string, path: string): AjsUnit => ({
+      ...rootJobnet(path),
+      id,
+      name: id,
+      unitType: "j",
+      isRootJobnet: false,
+      hasSchedule: false,
+    });
+    const beforeRoot = rootJobnet("/root/before");
+    const beforeNestedRoot = rootJobnet("/root/before/nested");
+    const beforeFirst = sourceUnit("before-first", "/root/before/task");
+    const beforeLast = sourceUnit("before-last", "/root/before/task");
+    beforeRoot.children.push(beforeFirst, beforeLast, beforeNestedRoot);
+
+    const afterRoot = rootJobnet("/root/after");
+    const afterNestedRoot = rootJobnet("/root/after/nested");
+    const afterFirst = sourceUnit("after-first", "/root/after/task");
+    const afterLast = sourceUnit("after-last", "/root/after/task");
+    afterRoot.children.push(afterFirst, afterLast, afterNestedRoot);
+
+    const beforeRun = {
+      unitPath: "/root/before/task",
+      unitName: "before task",
+      rule: 0,
+      date: "2026-04-10",
+      time: "09:00",
+    };
+    const afterRun = {
+      unitPath: "/root/after/task",
+      unitName: "after task",
+      rule: 0,
+      date: "2026-04-10",
+      time: "10:00",
+    };
+    const evaluation: SemanticDiffScheduleEvaluation = {
+      kind: "evaluated",
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      runDecisions: [
+        {
+          kind: "removed",
+          unitPath: beforeRun.unitPath,
+          date: beforeRun.date,
+          before: beforeRun,
+        },
+        {
+          kind: "added",
+          unitPath: afterRun.unitPath,
+          date: afterRun.date,
+          after: afterRun,
+        },
+      ],
+      unsupportedDecisions: [],
+      zeroRunCandidates: [],
+      zeroRunCandidatesBySide: { before: [], after: [] },
+      pairEvaluations: [],
+    };
+
+    const facts = buildScheduleProjectionFacts({
+      result,
+      before: document([beforeRoot]),
+      after: document([afterRoot]),
+      scheduleEvaluation: evaluation,
+    });
+
+    assert.strictEqual(facts.kind, "evaluated");
+    if (facts.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      facts.before.rootProjections.map((root) => root.unitPath),
+      ["/root/before", "/root/before/nested"],
+    );
+    assert.deepStrictEqual(
+      facts.after.rootProjections.map((root) => root.unitPath),
+      ["/root/after", "/root/after/nested"],
+    );
+    assert.deepStrictEqual(
+      facts.before.rootProjections.map((root) =>
+        root.runs.map((run) => [
+          run.unitId,
+          run.unitPath,
+          run.occurrenceOrdinal,
+        ]),
+      ),
+      [[["before-last", "/root/before/task", 0]], []],
+    );
+    assert.deepStrictEqual(
+      facts.after.rootProjections.map((root) =>
+        root.runs.map((run) => [
+          run.unitId,
+          run.unitPath,
+          run.occurrenceOrdinal,
+        ]),
+      ),
+      [[["after-last", "/root/after/task", 0]], []],
+    );
+    assert.strictEqual(facts.before.rootProjections[0]?.runs.length, 1);
+    assert.strictEqual(facts.after.rootProjections[0]?.runs.length, 1);
+  });
+
+  test("resolves candidate roots from the last occurrence for each ID", () => {
+    const duplicateRoot = (path: string, name: string): AjsUnit => ({
+      ...rootJobnet(path),
+      id: "duplicate-root-id",
+      name,
+    });
+    const beforeFirst = duplicateRoot("/root/before-first", "before first");
+    const beforeLast = duplicateRoot("/root/before-last", "before last");
+    const afterFirst = duplicateRoot("/root/after-first", "after first");
+    const afterLast = duplicateRoot("/root/after-last", "after last");
+    const identityDecision = {
+      id: "identity:duplicate-root-id",
+      status: "candidate" as const,
+      rule: "ambiguous-fingerprint" as const,
+      before: [
+        {
+          id: "duplicate-root-id",
+          name: beforeFirst.name,
+          absolutePath: beforeFirst.absolutePath,
+          unitType: beforeFirst.unitType,
+        },
+      ],
+      after: [
+        {
+          id: "duplicate-root-id",
+          name: afterFirst.name,
+          absolutePath: afterFirst.absolutePath,
+          unitType: afterFirst.unitType,
+        },
+      ],
+      evidence: {
+        kind: "fingerprint" as const,
+        strategyId: "legacy-all-parameters-v1" as const,
+        unitType: "n",
+        fields: [],
+      },
+    };
+    const evaluation: SemanticDiffScheduleEvaluation = {
+      kind: "evaluated",
+      period: { from: "2026-04-01", to: "2026-05-01" },
+      runDecisions: [],
+      unsupportedDecisions: [],
+      zeroRunCandidates: [],
+      zeroRunCandidatesBySide: { before: [], after: [] },
+      pairEvaluations: [],
+    };
+
+    const facts = buildScheduleProjectionFacts({
+      result: { ...result, identityDecisions: [identityDecision] },
+      before: document([beforeFirst, beforeLast]),
+      after: document([afterFirst, afterLast]),
+      scheduleEvaluation: evaluation,
+    });
+
+    assert.strictEqual(facts.kind, "evaluated");
+    if (facts.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      facts.candidateGroups?.map((group) => [
+        group.before.map(({ unitId, unitName, unitPath }) => [
+          unitId,
+          unitName,
+          unitPath,
+        ]),
+        group.after.map(({ unitId, unitName, unitPath }) => [
+          unitId,
+          unitName,
+          unitPath,
+        ]),
+      ]),
+      [
+        [
+          [["duplicate-root-id", "before last", "/root/before-last"]],
+          [["duplicate-root-id", "after last", "/root/after-last"]],
+        ],
+      ],
+    );
+
+    beforeLast.name = "before updated";
+    beforeLast.absolutePath = "/root/before-updated";
+    const rebuiltFacts = buildScheduleProjectionFacts({
+      result: { ...result, identityDecisions: [identityDecision] },
+      before: document([beforeFirst, beforeLast]),
+      after: document([afterFirst, afterLast]),
+      scheduleEvaluation: evaluation,
+    });
+    assert.strictEqual(rebuiltFacts.kind, "evaluated");
+    if (rebuiltFacts.kind !== "evaluated") return;
+    assert.deepStrictEqual(
+      rebuiltFacts.candidateGroups?.[0]?.before.map(
+        ({ unitName, unitPath }) => [unitName, unitPath],
+      ),
+      [["before updated", "/root/before-updated"]],
+    );
+  });
+
   test("length-prefixes UTF-8 components without delimiter collisions", () => {
     const left = encodeSemanticDiffScheduleImpactId("a:b", "c");
     const right = encodeSemanticDiffScheduleImpactId("a", "b:c");
