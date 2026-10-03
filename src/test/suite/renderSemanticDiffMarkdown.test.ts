@@ -515,12 +515,12 @@ suite("Render Semantic Diff Markdown", () => {
 
     assert.ok(
       report.includes(
-        "Key: job-group; jobGroupPath=nested/nest_jg; unitType=g",
+        "Key: job-group; jobGroupPath=nested/nest\\_jg; unitType=g",
       ),
     );
     assert.ok(
       japanese.includes(
-        "キー: job-group; jobGroupPath=nested/nest_jg; unitType=g",
+        "キー: job-group; jobGroupPath=nested/nest\\_jg; unitType=g",
       ),
     );
   });

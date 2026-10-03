@@ -17,6 +17,27 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
+### Desktop Test Host Bootstrap
+
+- Owner: Test-harness maintainers.
+- Scope: make the supported desktop test command resolve its VS Code executable
+  and Electron entry point and load the existing TypeScript aliases and
+  development define consistently.
+- Done condition: the repository's documented desktop test command launches
+  the intended extension host and reports the full suite result without a
+  temporary executable, alias, or define wrapper.
+
+### Table Shell Host Failures
+
+- Owner: Unit-list/webview test maintainers.
+- Scope: investigate the seven paired Table shell integration failures and the
+  historical full-suite React update-depth loop. The isolated baseline and
+  final runs both fail all seven selected tests; the historical loop was not
+  reproduced in those bounded runs.
+- Done condition: identify and resolve the inherited test failures, then record
+  a successful full desktop suite or a separately reviewed disposition for any
+  remaining failure.
+
 ### Expanded Flow Graph Golden Alignment
 
 - Owner: Flow graph test maintainers.
@@ -57,23 +78,24 @@ entry conditions that make planning each item useful.
   plans, reviews, approvals, and completion evidence. Do not create one umbrella
   implementation feature; this roadmap section is the coordination record.
 
-1. `semantic-diff-schedule-facade`: return the compatibility facade to thin
-   orchestration after schedule ownership and shared primitives are settled.
-2. `semantic-diff-application-projection`: separate the schedule-impact DTO,
+1. `semantic-diff-application-projection`: separate the schedule-impact DTO,
    build orchestration, identity, and timeline responsibilities without
    recreating domain-level over-fragmentation.
-3. `semantic-diff-vscode-dependencies`: narrow command dependency groups and
+2. `semantic-diff-vscode-dependencies`: narrow command dependency groups and
    move source-freshness behavior out of bootstrap while retaining bootstrap as
    the composition root.
-4. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
+3. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
    wrappers and single-consumer helpers that do not earn an independent React,
    interaction, accessibility, state, reuse, test, or complexity boundary.
-5. `domain-model-readonly`: migrate normalized domain model parts to readonly
+4. `domain-model-readonly`: migrate normalized domain model parts to readonly
    contracts incrementally after mutation impact is characterized.
-6. `architecture-test-cohesion`: split the architecture-test implementation
+5. `architecture-test-cohesion`: split the architecture-test implementation
    only when its size or change pressure justifies the boundary; do not build a
    speculative static-analysis framework.
 
+- Entry condition for item 1: the completed schedule-facade dependency is
+  available, and intake confirms that application projection remains one
+  independently valuable outcome.
 - Entry condition for each later item: the preceding dependency that affects
   its semantic owner or public contract is complete, and intake confirms that
   the item still represents one independently valuable outcome. Unrelated

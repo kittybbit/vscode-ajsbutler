@@ -9,19 +9,13 @@ import type {
   SemanticDiffScheduleRunDecision,
   SemanticDiffScheduleSide,
 } from "./semanticDiffScheduleComparison";
-import { interpretSchedule } from "../../schedule/ScheduleInterpretation";
 import {
-  projectScheduleRuns,
+  projectDirectScheduleUnits,
   type ScheduleProjection,
   type ScheduleProjectionPeriod,
   type ScheduleRun,
+  type ScheduleUnitProjection,
 } from "../../schedule/ScheduleProjection";
-import {
-  createScheduleCalendarContextIndex,
-  isFullyQualifiedRelativeScheduleDate,
-  resolveScheduleCalendarContext,
-  type ScheduleCalendarContextIndex,
-} from "../../schedule/ScheduleCalendar";
 import type {
   ScheduleInterpretation,
   ScheduleRuleInterpretation,
@@ -94,25 +88,8 @@ export type EvaluateSemanticDiffScheduleInput = {
   afterDocument?: AjsDocument;
 };
 
-const jobnetTypes = new Set(["n", "rn", "rm", "rr"]);
-const scheduleParameterKeys = new Set([
-  "sd",
-  "st",
-  "cy",
-  "sh",
-  "shd",
-  "jc",
-  "ln",
-  "cftd",
-]);
-
 const compareStrings = (left: string, right: string): number =>
   left.localeCompare(right);
-
-const isJobnetUnit = (unit: AjsUnit): boolean => jobnetTypes.has(unit.unitType);
-
-const hasDirectScheduleParameters = (unit: AjsUnit): boolean =>
-  unit.parameters.some((parameter) => scheduleParameterKeys.has(parameter.key));
 
 // Date.UTC historically maps years 0000–0099 into 1900–1999 in this consumer.
 const passesLegacyDateUtcYearCheck = (period: SchedulePeriod): boolean =>
@@ -226,45 +203,6 @@ type ScheduleUnitCollection = {
   unitEvaluation: SemanticDiffScheduleSideEvaluation;
 };
 
-type ScheduleUnitCollectionInput = {
-  side: SemanticDiffScheduleSide;
-  unit: AjsUnit;
-  period: SemanticDiffComparisonPeriod;
-  document?: AjsDocument;
-  contextIndex?: ScheduleCalendarContextIndex;
-};
-
-const hasContextRelativeDate = (
-  interpretation: ScheduleInterpretation,
-): boolean =>
-  interpretation.scheduleDateRules.some(
-    (rule) =>
-      rule.date !== undefined &&
-      isFullyQualifiedRelativeScheduleDate(rule.date),
-  );
-
-const hasClosedDaySubstitution = (
-  interpretation: ScheduleInterpretation,
-): boolean => interpretation.rules.some((rule) => rule.parameter.key === "sh");
-
-const resolveUnitCalendarContext = (input: {
-  interpretation: ScheduleInterpretation;
-  unit: AjsUnit;
-  document?: AjsDocument;
-  contextIndex?: ScheduleCalendarContextIndex;
-}): ReturnType<typeof resolveScheduleCalendarContext> | undefined => {
-  const needsContext =
-    hasContextRelativeDate(input.interpretation) ||
-    hasClosedDaySubstitution(input.interpretation);
-  return input.document && input.contextIndex && needsContext
-    ? resolveScheduleCalendarContext(
-        input.document,
-        input.unit,
-        input.contextIndex,
-      )
-    : undefined;
-};
-
 const supportedSchedulePairCount = (
   interpretation: ScheduleInterpretation,
   projection: ScheduleProjection,
@@ -286,22 +224,13 @@ const zeroRunCandidates = (
     : [];
 
 const collectScheduleUnit = (
-  input: ScheduleUnitCollectionInput,
+  side: SemanticDiffScheduleSide,
+  unitProjection: ScheduleUnitProjection,
 ): ScheduleUnitCollection => {
-  const interpretation = interpretSchedule(input.unit);
-  const calendarContext = resolveUnitCalendarContext({
-    interpretation,
-    unit: input.unit,
-    document: input.document,
-    contextIndex: input.contextIndex,
-  });
-  const projection = projectScheduleRuns({
-    interpretation,
-    period: toScheduleProjectionPeriod(input.period),
-    ...(calendarContext === undefined ? {} : { calendarContext }),
-  });
+  const { interpretation, projection } = unitProjection;
+  const unit = interpretation.unit;
   const unsupportedDecisions = collectUnsupportedDecisions(
-    input.side,
+    side,
     interpretation,
     projection,
   );
@@ -309,13 +238,13 @@ const collectScheduleUnit = (
     interpretation,
     projection,
   );
-  const unitZeroRunCandidates = zeroRunCandidates(input.unit, projection);
+  const unitZeroRunCandidates = zeroRunCandidates(unit, projection);
   return {
     runs: projection.runs,
     unsupportedDecisions,
     zeroRunCandidates: unitZeroRunCandidates,
     unitEvaluation: {
-      unit: input.unit,
+      unit,
       evidence: sideEvaluationEvidence(
         supportedPairCount,
         unsupportedDecisions.length,
@@ -343,21 +272,11 @@ type ScheduleCollection = {
 const collectScheduleSide = (
   input: ScheduleSideCollectionInput,
 ): ScheduleCollection => {
-  const contextIndex = input.document
-    ? createScheduleCalendarContextIndex(input.document)
-    : undefined;
-  const unitCollections = input.units
-    .filter(isJobnetUnit)
-    .filter(hasDirectScheduleParameters)
-    .map((unit) =>
-      collectScheduleUnit({
-        side: input.side,
-        unit,
-        period: input.period,
-        document: input.document,
-        contextIndex,
-      }),
-    );
+  const unitCollections = projectDirectScheduleUnits({
+    units: input.units,
+    period: toScheduleProjectionPeriod(input.period),
+    ...(input.document === undefined ? {} : { document: input.document }),
+  }).map((unitProjection) => collectScheduleUnit(input.side, unitProjection));
   return {
     runs: unitCollections
       .flatMap((collection) => collection.runs)
@@ -378,14 +297,6 @@ const collectScheduleSide = (
     ),
   };
 };
-
-const canonicalRun = (
-  run: ScheduleRun,
-  canonicalPathByPath: Map<string, string>,
-): ScheduleRun => ({
-  ...run,
-  unitPath: canonicalPathByPath.get(run.unitPath) ?? run.unitPath,
-});
 
 const toPairEvaluations = (
   matches: SemanticDiffScheduleMatchedUnit[],
@@ -440,8 +351,9 @@ export const evaluateSemanticDiffSchedule = (
     kind: "evaluated",
     period,
     runDecisions: compareScheduleRuns(
-      before.runs.map((run) => canonicalRun(run, afterPathByBeforePath)),
+      before.runs.map((run) => ({ ...run })),
       after.runs,
+      afterPathByBeforePath,
     ),
     unsupportedDecisions: [
       ...before.unsupportedDecisions,

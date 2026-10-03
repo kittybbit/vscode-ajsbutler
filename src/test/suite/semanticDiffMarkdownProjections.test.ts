@@ -326,9 +326,9 @@ const markdownBaselineSnapshots = {
     },
     full: {
       english: {
-        bytes: 3617,
+        bytes: 3610,
         digest:
-          "6675c6e088fb10c3e108b47e10c344ed6cf9588bd6ede97ebc20fd1447dbec6a",
+          "48458048dac57949170aa715b62e39d807196945fee44dea808ac1cc5eec959c",
       },
       japanese: {
         bytes: 3612,
@@ -338,9 +338,9 @@ const markdownBaselineSnapshots = {
     },
     audit: {
       english: {
-        bytes: 16612,
+        bytes: 16605,
         digest:
-          "f9d3acc4572537367b0b557a48458d40d1a3107d2eb11780a434a0b67515cec7",
+          "0a9cdf05bbea7f7ed2165e98d30f1a3083e139d015caed0048a6ef4cdaa3ab51",
       },
       japanese: {
         bytes: 18259,
@@ -530,8 +530,8 @@ suite("Semantic Diff Markdown Projections", () => {
     const audit = renderSemanticDiffAuditMarkdown(
       buildSemanticDiffOutputContext(result),
     );
-    assert.ok(audit.includes("beforeValues: [date=2026-04-11, time=10:00]"));
-    assert.ok(audit.includes("rawValues: []"));
+    assert.ok(audit.includes("Before values: [date=2026-04-11, time=10:00]"));
+    assert.ok(audit.includes("Raw values: []"));
     const removedConfirmation = result.confirmationRequired.find(
       (item) => item.reasonCode === "calculated-schedule-run-removed",
     );
@@ -554,6 +554,7 @@ suite("Semantic Diff Markdown Projections", () => {
       empty: buildSemanticDiffOutputContext(emptyResult()),
       populated: populatedMarkdownContext(),
     };
+    const originalContexts = JSON.stringify(contexts);
     const languages: Array<string | undefined> = [
       undefined,
       "en",
@@ -578,6 +579,7 @@ suite("Semantic Diff Markdown Projections", () => {
             expected.bytes,
           );
           assert.strictEqual(markdownDigest(content), expected.digest);
+          assert.strictEqual(JSON.stringify(contexts), originalContexts);
         });
       });
     });

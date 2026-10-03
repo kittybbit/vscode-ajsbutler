@@ -1,11 +1,21 @@
-import type { AjsUnit } from "../models/ajs/AjsDocument";
-import { type ScheduleCalendarContext } from "./ScheduleCalendar";
+import type { AjsDocument, AjsUnit } from "../models/ajs/AjsDocument";
+import {
+  createScheduleCalendarContextIndex,
+  isFullyQualifiedRelativeScheduleDate,
+  resolveScheduleCalendarContext,
+  type ScheduleCalendarContext,
+  type ScheduleCalendarContextIndex,
+} from "./ScheduleCalendar";
 import { parseSchedulePeriod } from "./SchedulePeriod";
 import {
   createSubstitutionAnalysis,
   hasScheduleSubstitution,
 } from "./ScheduleSubstitutionAnalysis";
 import { projectScheduleRules } from "./ScheduleProjectionRules";
+import {
+  interpretSchedule,
+  isDirectScheduleJobnet,
+} from "./ScheduleInterpretation";
 import type {
   ScheduleEvidence,
   ScheduleInterpretation,
@@ -19,6 +29,12 @@ export type ScheduleProjectionInput = Readonly<{
   interpretation: ScheduleInterpretation;
   period: ScheduleProjectionPeriod;
   calendarContext?: ScheduleCalendarContext;
+}>;
+
+export type ScheduleUnitsProjectionInput = Readonly<{
+  units: AjsUnit[];
+  period: ScheduleProjectionPeriod;
+  document?: AjsDocument;
 }>;
 
 export type ScheduleRun = {
@@ -37,6 +53,11 @@ export type ScheduleProjection = {
   rules: ScheduleRuleInterpretation[];
   evidence: ScheduleEvidence[];
 };
+
+export type ScheduleUnitProjection = Readonly<{
+  interpretation: ScheduleInterpretation;
+  projection: ScheduleProjection;
+}>;
 
 type ValidSchedulePeriod = { from: Date; to: Date };
 
@@ -248,5 +269,71 @@ export const projectScheduleRuns = (
       period: parsedPeriod!,
       calendarContext: input.calendarContext,
     })
+  );
+};
+
+const needsCalendarContext = (
+  interpretation: ScheduleInterpretation,
+): boolean =>
+  interpretation.rules.some((rule) => rule.parameter.key === "sh") ||
+  interpretation.scheduleDateRules.some(
+    (rule) =>
+      rule.date !== undefined &&
+      isFullyQualifiedRelativeScheduleDate(rule.date),
+  );
+
+const resolveUnitCalendarContext = (input: {
+  interpretation: ScheduleInterpretation;
+  unit: AjsUnit;
+  document?: AjsDocument;
+  contextIndex?: ScheduleCalendarContextIndex;
+}): ScheduleCalendarContext | undefined =>
+  input.document &&
+  input.contextIndex &&
+  needsCalendarContext(input.interpretation)
+    ? resolveScheduleCalendarContext(
+        input.document,
+        input.unit,
+        input.contextIndex,
+      )
+    : undefined;
+
+const projectDirectScheduleUnit = (input: {
+  unit: AjsUnit;
+  period: ScheduleProjectionPeriod;
+  document?: AjsDocument;
+  contextIndex?: ScheduleCalendarContextIndex;
+}): ScheduleUnitProjection => {
+  const interpretation = interpretSchedule(input.unit);
+  const calendarContext = resolveUnitCalendarContext({
+    interpretation,
+    unit: input.unit,
+    document: input.document,
+    contextIndex: input.contextIndex,
+  });
+  return {
+    interpretation,
+    projection: projectScheduleRuns({
+      interpretation,
+      period: input.period,
+      ...(calendarContext === undefined ? {} : { calendarContext }),
+    }),
+  };
+};
+
+/** Interpret and project selected direct schedules with one document index. */
+export const projectDirectScheduleUnits = (
+  input: ScheduleUnitsProjectionInput,
+): ScheduleUnitProjection[] => {
+  const contextIndex = input.document
+    ? createScheduleCalendarContextIndex(input.document)
+    : undefined;
+  return input.units.filter(isDirectScheduleJobnet).map((unit) =>
+    projectDirectScheduleUnit({
+      unit,
+      period: input.period,
+      document: input.document,
+      contextIndex,
+    }),
   );
 };

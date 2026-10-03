@@ -65,6 +65,25 @@ export type ScheduleInterpretation = {
   hasRuleZeroUndefined: boolean;
 };
 
+const directScheduleJobnetTypes = new Set(["n", "rn", "rm", "rr"]);
+const directScheduleParameterKeys = new Set([
+  "sd",
+  "st",
+  "cy",
+  "sh",
+  "shd",
+  "jc",
+  "ln",
+  "cftd",
+]);
+
+/** Whether a unit has its own schedule parameters on a supported jobnet type. */
+export const isDirectScheduleJobnet = (unit: AjsUnit): boolean =>
+  directScheduleJobnetTypes.has(unit.unitType) &&
+  unit.parameters.some((parameter) =>
+    directScheduleParameterKeys.has(parameter.key),
+  );
+
 type ScheduleRuleEvidenceInput = {
   parameter: AjsParameter;
   id: string;

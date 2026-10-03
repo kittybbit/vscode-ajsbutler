@@ -41,11 +41,15 @@ suite("Semantic Diff command calendar adapter", () => {
       inputs: unknown[];
       contexts: unknown[];
       legacyBuilds: number;
+      sourceSelections: number;
+      fileDialogs: number;
       events: string[];
     } = {
       inputs: [],
       contexts: [],
       legacyBuilds: 0,
+      sourceSelections: 0,
+      fileDialogs: 0,
       events: [],
     };
     const artifacts = makeArtifacts();
@@ -71,7 +75,13 @@ suite("Semantic Diff command calendar adapter", () => {
             getText: () => "unit=after,,jp1admin,;{ty=g;}",
           },
         }) as unknown as vscode.TextEditor,
-      showOpenDialog: async () => [beforeUri],
+      showOpenDialog: async (options) => {
+        observed.fileDialogs += 1;
+        assert.strictEqual(options.canSelectFiles, true);
+        assert.strictEqual(options.canSelectFolders, false);
+        assert.strictEqual(options.canSelectMany, false);
+        return [beforeUri];
+      },
       readFile: async () =>
         new TextEncoder().encode("unit=before,,jp1admin,;{ty=g;}"),
       openTextDocument: async () =>
@@ -80,7 +90,14 @@ suite("Semantic Diff command calendar adapter", () => {
           version: 1,
           getText: () => "unit=before,,jp1admin,;{ty=g;}",
         }) as unknown as vscode.TextDocument,
-      showQuickPick: async () => undefined,
+      showQuickPick: async (items) => {
+        observed.sourceSelections += 1;
+        const fileItem = items.find(
+          (item) => (item as { workflowKind?: string }).workflowKind === "file",
+        );
+        assert.ok(fileItem);
+        return fileItem;
+      },
       showErrorMessage: async () => undefined,
       openReport: async () => undefined,
       buildSemanticDiffReportData: () => {
@@ -131,6 +148,8 @@ suite("Semantic Diff command calendar adapter", () => {
     assert.strictEqual(observed.contexts.length, 1);
     assert.strictEqual(observed.contexts[0], artifacts.context);
     assert.strictEqual(observed.legacyBuilds, 0);
+    assert.strictEqual(observed.sourceSelections, 1);
+    assert.strictEqual(observed.fileDialogs, 1);
     assert.deepStrictEqual(observed.events, [
       "capture",
       "callback",

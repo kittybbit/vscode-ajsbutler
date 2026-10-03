@@ -121,6 +121,7 @@ suite("Compare Semantic Diff", () => {
           : undefined,
       ),
       [
+        { kind: "job-group", jobGroupPath: "", unitType: "g" },
         { kind: "job-group", jobGroupPath: "one/nest_jg", unitType: "g" },
         { kind: "job-group", jobGroupPath: "two/nest_mg", unitType: "mg" },
       ],
