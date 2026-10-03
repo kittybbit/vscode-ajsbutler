@@ -18,7 +18,8 @@ Check whole-feature requirement/acceptance coverage, cross-slice integration,
 traceability, compatibility/readiness, unresolved risks/owners. Reuse valid
 slice evidence. Verify current-head global gates including Qlty Cloud. Run
 only missing/stale global or cross-slice checks required by the plan or a
-specific integration concern; record coverage, reason and counters. Return
+specific integration concern; record coverage, reason and execution exceptions
+in the linked evidence artifact. Return
 stale slice facts to producer via Main. Feature Exit is aggregate review;
 missing evidence never passes.
 

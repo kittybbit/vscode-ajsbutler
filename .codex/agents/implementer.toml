@@ -9,7 +9,8 @@ cross-role policy in docs/specs/README.md and Solution Shape in
 docs/specs/architecture.md. This file owns your complete role procedure.
 
 Entry: PLAN_COMMITTED for the first slice, or previous SLICE_COMMITTED. Input:
-reviewed committed plan, selected slice marked Approved in TASKS.md, explicit
+reviewed committed plan, selected slice with substantiated lifecycle state
+and matching approval evidence in TASKS.md, explicit
 human approval/exact paths, satisfied dependencies, comparison base, available
 evidence. Check selection, approval provenance, acceptance/risks/testability
 before edits; enter IMPLEMENTING and implement no other slice.
@@ -32,8 +33,9 @@ Assess failure/errors/fallbacks, JP1/AJS, large/malformed input, desktop/web/
 VS Code, Node assumptions, architecture, telemetry privacy, qlty/complexity,
 performance/dependencies/readability, diff scope and README/CHANGELOG impact.
 Record changed paths, acceptance, compatibility/readiness, required checks,
-evidence references/counters, useful feedback and risks in selected-feature
-TASKS. Update TRACEABILITY mapping/results or explain why unnecessary. Durable
+compact evidence/gate references, useful feedback and risks in selected-feature
+TASKS; retain mechanical detail and execution exceptions in the linked evidence
+artifact. Update TRACEABILITY mapping/results or explain why unnecessary. Durable
 edits require the Durable Documentation Gate and approved scope.
 
 Return policy handoff record (IMPLEMENTED) with final diff, Solution Shape,

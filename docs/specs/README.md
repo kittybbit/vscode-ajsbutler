@@ -55,11 +55,14 @@ in [AGENTS.md](../../AGENTS.md). Complete role procedures live in
 
 ### Lifecycle State Contract
 
-`TASKS.md` records the current feature state and each slice's state. The names
-below describe gate results, not permission inferred from a document field.
-Main advances a state only from the corresponding role result, actual human
-approval, or successful commit. Blocked work retains its last substantiated
-state and records the missing decision.
+`TASKS.md` records the current feature state and each slice's state. For new
+features, `Lifecycle state` is the sole authoritative state field; review
+verdicts, approvals, and commits are supporting gate evidence, not parallel
+plan or slice status vocabularies. The names below describe gate results, not
+permission inferred from a document field. Main advances a state only from the
+corresponding role result, actual human approval, or successful commit.
+Blocked work retains its last substantiated state and records the missing
+decision.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -105,8 +108,13 @@ result: verdict or completed operation
 evidence_refs: discovery, validation, review, or closure records and identities
 changed_paths: exact paths changed, or none for a read-only role
 blocking_decisions: missing decisions or none
-recommended_next_role: recommendation to Main, never a direct invocation
+recommended_next_role: optional exception route to Main
 ```
+
+Omit `recommended_next_role` for the normal next gate in the Lifecycle State
+Contract. Include it with a reason for Findings, blocked work, a required human
+decision, or another departure from that transition. Main still selects the
+next operation and checks its prerequisites.
 
 Main forwards the record and references rather than reconstructing investigation
 or recollecting facts. A reviewer adds its judgment and reviewed patch identity;
@@ -180,11 +188,22 @@ unchanged checks only because the workflow or reviewer has changed. Intake and
 planning need discovery facts and validation of their documentation changes;
 they do not require implementation baseline/final scans for proposed code.
 
-- **Docs-only:** compare non-mutating qlty check/smells observations in exact
-  disposable baseline and final snapshots, then run the formatting-capable
-  aggregate only in the disposable final snapshot. Add `rtk pnpm run lint:md`
-  when Markdown structure or links need focused checking. Build is not
-  required; do not rely on the repository `Verify` workflow as a required gate.
+- **SDD coordination/specification docs only:** for feature intake, plans,
+  replans, `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, and their templates, run
+  Markdown lint covering every changed Markdown path, validate local links
+  and document structure, and run `rtk git diff --check`. Inspect scope,
+  traceability, state transitions, and approval provenance as applicable.
+  `rtk pnpm run lint:md` covers feature/use-case Markdown; pass other changed
+  paths explicitly to markdownlint-cli2. Full-repository qlty baseline/final
+  scans and the aggregate are not required for this surface.
+- **Repository-wide durable or configuration-sensitive docs:** policy,
+  architecture, agent routing/procedures, and documentation that affects check
+  commands or configuration retain non-mutating qlty check/smells comparisons
+  in exact disposable baseline/final snapshots and the formatting-capable
+  aggregate in the final snapshot only. Add targeted Markdown/link/structure
+  and diff checks. For mixed documentation changes, use this broader tier.
+  Docs-only work needs no product build; the repository `Verify` workflow is
+  not a required local documentation gate.
 - **Isolated code:** run relevant tests and the same qlty observations and final
   aggregate; build when compilation, bundling, packaging, or final confidence
   requires it.
@@ -202,10 +221,10 @@ movement is a review signal only when no mapped adverse finding exists.
 ### qlty Evidence Format
 
 The owning producer records mechanical facts under the Evidence Contract;
-those facts neither approve work nor replace semantic review. Use qlty
-`0.645.0` or newer with official SARIF output for
-both `check` and `smells`. In exact disposable baseline and final snapshots,
-run these same commands with the same full-repository selection and
+those facts neither approve work nor replace semantic review. When the
+validation tier requires qlty, use `0.645.0` or newer with official SARIF
+output for both `check` and `smells`. In exact disposable baseline and final
+snapshots, run these same commands with the same full-repository selection and
 configuration:
 
 ```sh
@@ -245,14 +264,20 @@ review defined below, rather than another per-slice implementation review.
 ### Evidence Contract
 
 Evidence is a reusable artifact with one owner, not a separate operation or
-delegation. Keep compact decision facts in `TASKS.md` and complete raw outputs
-in retained disposable snapshots or a local artifact directory linked from
-it. Keep outputs/caches outside inspected inputs. Records must be readable by
-the next role; missing artifacts are unavailable evidence, never a pass.
-Preserve them through review, approval, commit, and Feature Exit. Carry the
-compact acceptance, validation, review, approval, and commit references for all
-completed slices until closure; remove superseded narrative, not necessary gate
-proof. Do not build a collector service, custom SARIF parser, or comparator.
+delegation. Keep `TASKS.md` as a decision index: validation identity, result,
+coverage, artifact reference, missing facts or invalidation reason, and gate
+references. Keep mechanical detail in a retained evidence artifact or sidecar
+outside inspected inputs: producer/version, path manifests,
+configuration/dependency/ tool identities, command exits, analyzed-path
+inventories, SARIF references, raw outputs, and execution observations. Link
+that artifact from `TASKS.md`; do not duplicate its manifest in each slice.
+Keep outputs/caches outside inspected inputs. Records must be readable by the
+next role; missing artifacts are unavailable evidence, never a pass. Preserve
+them through review, approval, commit, and Feature Exit. Carry the compact
+acceptance, validation, review, approval, and commit references for all
+completed slices until closure; remove superseded narrative, not necessary
+gate proof. Do not build a collector service, custom SARIF parser, or
+comparator.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -277,14 +302,15 @@ Each validation record identifies:
   configuration/dependency hashes, required command set, exit status,
   passed/failed/unknown state, and raw-output reference. Record the architecture
   dependency test separately from semantic architecture judgments.
-- For qlty: version, configuration hash, full-repository selection, nonzero
-  analyzed-path inventory/count in both snapshots for both commands, all four
+- When the validation tier requires qlty: version, configuration hash,
+  full-repository selection, nonzero analyzed-path inventory/count in both
+  snapshots for both commands, all four
   complete SARIF references, command logs/status, and final aggregate result.
 - When relevant: `engines.vscode` before/after; touched desktop/web/bootstrap/
   parser/configuration surfaces; Node-import scan and unresolved cases; changed
   layers/exports/imports and abstraction candidates; traceability mapping.
   These are mechanical signals, not Solution Shape or approval verdicts.
-- Missing/ambiguous facts and execution counters. Human approval provenance
+- Missing/ambiguous facts and execution exceptions. Human approval provenance
   and review judgments remain separate gate records.
 
 A commit hash alone cannot identify uncommitted validation inputs. For a
@@ -337,18 +363,20 @@ An unavailable or failed required check blocks readiness. Committers must not
 rerun product validation: changed scope/evidence returns through Main to the
 producer and reviewer before committing. Staged diff checks remain mandatory.
 
-#### Workflow Counters
+#### Evidence Reuse Observations
 
-Keep lightweight counters alongside evidence in `TASKS.md`, per slice and
-aggregated for Feature Exit: role delegations, qlty check/smells executions,
-test/build executions, Git status/diff inspections, evidence regenerations,
-human gates, and successful commits. Main records dispatch/gate counts;
-producers and consumers record their actual executions, including failures.
-Report unknown counts as unknown. Count baseline/final and justified reruns
-separately, with a reason for each regeneration. Record during normal work,
-without an extra agent, collection pass, or runtime telemetry. The target is
-zero duplicate mechanical work for matching inputs; counters do not replace
-required checks or independent judgments.
+Routine role dispatches, tests/builds, Git inspections, human gates, and commits
+do not need execution counters. Record only unexpected reruns, evidence
+regenerations, and extra reviews, with the reason, affected identity/coverage,
+and result, in the linked evidence artifact. Distinguish a justified refresh
+from duplicate work on matching inputs. Use `none` only when observed and
+`unknown` when unavailable; do not reconstruct historical counts.
+
+Keep a compact exception reference in `TASKS.md` only when it affects the next
+decision. Feature Exit consumes existing observations without a counting or
+collection pass. Existing counter records may be retained as evidence without
+continuing routine counts. These observations never replace required checks,
+independent review, or approval.
 
 ## Solution Shape And Impact
 
@@ -369,13 +397,20 @@ changes.
 
 Prefer high-accuracy models for planning, impact, design, architecture,
 specification, and review; medium- or lower-cost models may be used for
-approved-scope implementation and simple fixes. Follow role model/effort
-assignments. If implementation reveals an out-of-scope, specification, or
-design decision, stop and return for investigation and re-approval. Model or
-agent choice does not change SDD gates or approved scope. Check Copilot or
-other agent suggestions against the approved `SPECS.md`, `TASKS.md`, and
-paths; reject out-of-scope changes and return them for investigation and
-approval.
+approved-scope implementation and simple fixes. For implementer,
+implementation-reviewer, and feature-closer, Main selects reasoning effort by
+the approved slice's risk within the role's supported settings: `xhigh` for
+parser, shared contracts, bootstrap, web, architecture, or unresolved review
+concerns; `high` for isolated code or documentation; `medium` or `high` for
+mechanical approved fixes. Preserve role model quality and independent
+reviewers. Fixed host/role settings take precedence when overrides are
+unavailable; never change a model merely to reduce cost. Record an effort
+exception only when it affects risk or readiness. If implementation reveals an
+out-of-scope, specification, or design decision, stop and return for
+investigation and re-approval. Model or agent choice does not change SDD gates
+or approved scope. Check Copilot or other agent suggestions against the
+approved `SPECS.md`, `TASKS.md`, and paths; reject out-of-scope changes and
+return them for investigation and approval.
 
 ## User-Facing Change Records
 
