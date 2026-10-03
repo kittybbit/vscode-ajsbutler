@@ -1,6 +1,6 @@
 import type { AjsUnit } from "../models/ajs/AjsDocument";
 import { type ScheduleCalendarContext } from "./ScheduleCalendar";
-import { toUtcDate } from "./ScheduleDate";
+import { parseSchedulePeriod } from "./SchedulePeriod";
 import {
   createSubstitutionAnalysis,
   hasScheduleSubstitution,
@@ -57,9 +57,10 @@ const parsePeriod = (
   period: ScheduleProjectionPeriod | undefined,
 ): ValidSchedulePeriod | undefined => {
   const bounds = projectionPeriodOrEmptyBounds(period);
-  const from = toUtcDate(bounds.from);
-  const to = toUtcDate(bounds.to);
-  return from && to && from < to ? { from, to } : undefined;
+  const parsed = parseSchedulePeriod(bounds);
+  return parsed.kind === "valid"
+    ? { from: parsed.fromDate, to: parsed.toDate }
+    : undefined;
 };
 
 const addUtcDays = (date: Date, days: number): Date =>

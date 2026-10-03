@@ -1,71 +1,14 @@
-import type {
-  AjsDocument,
-  AjsParameter,
-  AjsUnit,
-} from "../models/ajs/AjsDocument";
+import type { AjsParameter, AjsUnit } from "../models/ajs/AjsDocument";
 import type {
   ScheduleCalendarContextIndex,
   ScheduleCalendarContextStatus,
   ScheduleCalendarSelection,
 } from "./ScheduleCalendar";
 
-const appendChildren = (pending: AjsUnit[], unit: AjsUnit): void => {
-  [...unit.children].reverse().forEach((child) => pending.push(child));
-};
-
-const visitUnit = (
-  units: AjsUnit[],
-  visited: Set<AjsUnit>,
-  unit: AjsUnit,
-): boolean => {
-  if (visited.has(unit)) {
-    return false;
-  }
-  visited.add(unit);
-  units.push(unit);
-  return true;
-};
-
-const processPendingUnit = (
-  pending: AjsUnit[],
-  units: AjsUnit[],
-  visited: Set<AjsUnit>,
-): void => {
-  const unit = pending.pop() as AjsUnit;
-  if (visitUnit(units, visited, unit)) {
-    appendChildren(pending, unit);
-  }
-};
-
-export const collectUnits = (document: AjsDocument): AjsUnit[] => {
-  const units: AjsUnit[] = [];
-  const pending = [...document.rootUnits].reverse();
-  const visited = new Set<AjsUnit>();
-  while (pending.length > 0) {
-    processPendingUnit(pending, units, visited);
-  }
-  return units;
-};
-
-const appendUnit = (
-  index: Map<string, AjsUnit[]>,
-  key: string,
-  unit: AjsUnit,
-): Map<string, AjsUnit[]> => {
-  const matches = index.get(key) ?? [];
-  matches.push(unit);
-  index.set(key, matches);
-  return index;
-};
-
-export const indexUnits = (
-  units: AjsUnit[],
-  key: (unit: AjsUnit) => string,
-): Map<string, AjsUnit[]> =>
-  units.reduce(
-    (index, unit) => appendUnit(index, key(unit), unit),
-    new Map<string, AjsUnit[]>(),
-  );
+export {
+  collectUniqueAjsUnits as collectUnits,
+  indexAjsUnits as indexUnits,
+} from "../models/ajs/AjsDocumentIndex";
 
 export type AncestorResult =
   | { status: "supported"; ancestors: AjsUnit[] }

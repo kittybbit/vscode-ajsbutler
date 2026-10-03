@@ -1,5 +1,8 @@
 # Create Repository-Native SDD Documents
 
+Main: route intake to `feature-author`, then route the returned intake to
+`planner` in explicit Planning Mode. Each role returns to Main before the next
+delegation. Use `.codex/agents/*.toml` directly; no lifecycle Skill invocation.
 Create concise, reviewable SDD documents for this goal.
 
 Feature: {{Feature name}}
@@ -23,4 +26,5 @@ feature under `docs/specs/features/{{feature-slug}}/`.
 - Follow the SDD roles and approval gates in
   [`docs/specs/README.md`](../../README.md).
 
-Return the created or changed paths, key decisions, and unresolved questions.
+Return the policy handoff record with created or changed paths, key decisions,
+discovery/validation references, and unresolved questions.

@@ -50,7 +50,69 @@ explicit Closure Approval, and focused closure commit are separate gates.
 Every human approval authorizes only its stated gate and scope. Replanning is
 the route for changing approved scope; do not make a silent change between
 commits. Main coordinates each handoff. Role ownership and routing are defined
-in [AGENTS.md](../../AGENTS.md) and the role definitions.
+in [AGENTS.md](../../AGENTS.md). Complete role procedures live in
+`.codex/agents/*.toml`; SDD has no lifecycle Skills or Skill adapters.
+
+### Lifecycle State Contract
+
+`TASKS.md` records the current feature state and each slice's state. The names
+below describe gate results, not permission inferred from a document field.
+Main advances a state only from the corresponding role result, actual human
+approval, or successful commit. Blocked work retains its last substantiated
+state and records the missing decision.
+
+<!-- markdownlint-disable MD013 MD060 -->
+
+| Input state                                     | Operation and owner                           | Output state / required fact                                     |
+| ----------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| Concrete proposal                               | Intake: `feature-author`                      | `INTAKE`: scoped intake recorded                                 |
+| `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                 |
+| `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner     |
+| `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                   |
+| `PLAN_APPROVED`                                 | Plan commit: `approval-committer`             | `PLAN_COMMITTED`: focused planning commit succeeded              |
+| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded |
+| `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer             |
+| `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved             |
+| `SLICE_APPROVED`                                | Completion commit: `approval-committer`       | `SLICE_COMMITTED`: focused slice commit succeeded                |
+| All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision           |
+| `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                              |
+| `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact propagation and removal paths approved   |
+| `CLOSE_APPROVED`                                | Closure commit: `approval-committer`          | `CLOSED`: focused closure commit succeeded                       |
+
+<!-- markdownlint-enable MD013 MD060 -->
+
+A new scope/design/approval-boundary decision routes through Main to planner
+in Replanning Mode. The affected plan returns to `PLANNED` for review and new
+approval; preserve completed and unaffected slices. A Finding within an
+approved implementation boundary returns that slice to `IMPLEMENTED` pending
+revision and review, without resetting unrelated gates.
+
+Existing features may retain their current status vocabulary. Main maps it to
+these states only using recorded review, human provenance, and commit facts;
+migration does not grant approval or require rewriting inherited plans.
+Legacy mentions of the retired evidence Skill mean the Evidence Contract
+below, not an instruction to discover or invoke a Skill.
+
+### Handoff Record
+
+Every role returns this compact envelope, with role-specific results attached:
+
+```yaml
+feature: selected feature folder
+slice: selected slice or not-applicable
+state_transition: input -> substantiated output
+result: verdict or completed operation
+evidence_refs: discovery, validation, review, or closure records and identities
+changed_paths: exact paths changed, or none for a read-only role
+blocking_decisions: missing decisions or none
+recommended_next_role: recommendation to Main, never a direct invocation
+```
+
+Main forwards the record and references rather than reconstructing investigation
+or recollecting facts. A reviewer adds its judgment and reviewed patch identity;
+it does not create a second validation package. Main owns state/gate checks,
+human approval provenance, routing, and final integration validation only when
+integration inputs or required coverage differ from recorded evidence.
 
 ### Human Approval
 
@@ -91,9 +153,10 @@ before approval. Proceed only after the approved boundary is recorded in
 
 Only `approval-committer` may make plan, completion, and closure workflow
 commits. Before staging, it requires the matching review verdict, explicit
-approval, exact paths, and a clean scope boundary. It must stop if any are
-missing or unrelated work is present; broad staging cannot hide it. Make one
-focused commit per gate. Do not amend, reset, force-push, publish, or alter
+approval, exact paths, reviewed patch identity, and a clean scope boundary.
+It must stop if any are missing or unrelated work is present; broad staging
+cannot hide it. Make one focused commit per gate. Do not amend, reset,
+force-push, publish, or alter
 approval evidence to manufacture authorization.
 
 <!-- markdownlint-disable MD013 MD060 -->
@@ -112,7 +175,10 @@ follow-up decision.
 ## Risk-Based Validation And Review
 
 Choose checks for the changed surface, beginning with the nearest useful
-check. Do not rerun unchanged checks only because the workflow has advanced.
+check. Reuse matching evidence under the Evidence Contract. Do not rerun
+unchanged checks only because the workflow or reviewer has changed. Intake and
+planning need discovery facts and validation of their documentation changes;
+they do not require implementation baseline/final scans for proposed code.
 
 - **Docs-only:** compare non-mutating qlty check/smells observations in exact
   disposable baseline and final snapshots, then run the formatting-capable
@@ -135,8 +201,9 @@ movement is a review signal only when no mapped adverse finding exists.
 
 ### qlty Evidence Format
 
-Use `$sdd-evidence` for mechanical facts; it neither approves work nor replaces
-semantic review. Use qlty `0.645.0` or newer with official SARIF output for
+The owning producer records mechanical facts under the Evidence Contract;
+those facts neither approve work nor replace semantic review. Use qlty
+`0.645.0` or newer with official SARIF output for
 both `check` and `smells`. In exact disposable baseline and final snapshots,
 run these same commands with the same full-repository selection and
 configuration:
@@ -168,11 +235,120 @@ pass before Feature Exit. If formatting changes approved content, sync those
 paths, rebuild that snapshot, and repeat both observations and the aggregate
 until stable.
 
-The plan review is the pre-approval scope gate. After implementation and final
-validation, make one integrated review of scope, acceptance, quality, and
-production readiness. Add an independent second review for the higher-risk
-surfaces above or when the first review finds a concern. Feature Exit remains
-a separate review by `feature-closer`.
+The plan review is the pre-approval scope gate. The independent
+`implementation-reviewer` makes the integrated review of scope, acceptance,
+quality, and production readiness after validation. Add a second independent
+review for the higher-risk surfaces above or when the first review finds a
+concern, reusing the same valid evidence. Feature Exit is the separate aggregate
+review defined below, rather than another per-slice implementation review.
+
+### Evidence Contract
+
+Evidence is a reusable artifact with one owner, not a separate operation or
+delegation. Keep compact decision facts in `TASKS.md` and complete raw outputs
+in retained disposable snapshots or a local artifact directory linked from
+it. Keep outputs/caches outside inspected inputs. Records must be readable by
+the next role; missing artifacts are unavailable evidence, never a pass.
+Preserve them through review, approval, commit, and Feature Exit. Carry the
+compact acceptance, validation, review, approval, and commit references for all
+completed slices until closure; remove superseded narrative, not necessary gate
+proof. Do not build a collector service, custom SARIF parser, or comparator.
+
+<!-- markdownlint-disable MD013 MD060 -->
+
+| Record                   | Producer                                          | Consumers / purpose                                                                                        |
+| ------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Discovery facts          | Intake/planner for the references actually needed | Planner and plan-reviewer: scope, affected symbols/tests, boundaries and risks                             |
+| Documentation validation | Role changing the documentation                   | Reviewer and next role: validate that changed documentation surface                                        |
+| Slice validation         | Implementer, one baseline/final set per slice     | Implementation-reviewer: semantic review; feature-closer: aggregate completeness                           |
+| Review findings          | Independent reviewer                              | Main and author: verdict, precise Findings, reviewed patch identity, affected revalidation                 |
+| Closure evidence         | Feature-closer                                    | Main and committer: cross-slice completeness, durable ownership, risk ownership, current-head global gates |
+
+<!-- markdownlint-enable MD013 MD060 -->
+
+#### Identity And Required Facts
+
+Each validation record identifies:
+
+- Record version, feature/slice, producer, base revision and exact final
+  revision or working-tree content identity; approved path set; changed paths
+  with rename detection, untracked paths, and out-of-scope or ambiguous paths.
+- Inputs and coverage for each check, command/arguments, tool versions,
+  configuration/dependency hashes, required command set, exit status,
+  passed/failed/unknown state, and raw-output reference. Record the architecture
+  dependency test separately from semantic architecture judgments.
+- For qlty: version, configuration hash, full-repository selection, nonzero
+  analyzed-path inventory/count in both snapshots for both commands, all four
+  complete SARIF references, command logs/status, and final aggregate result.
+- When relevant: `engines.vscode` before/after; touched desktop/web/bootstrap/
+  parser/configuration surfaces; Node-import scan and unresolved cases; changed
+  layers/exports/imports and abstraction candidates; traceability mapping.
+  These are mechanical signals, not Solution Shape or approval verdicts.
+- Missing/ambiguous facts and execution counters. Human approval provenance
+  and review judgments remain separate gate records.
+
+A commit hash alone cannot identify uncommitted validation inputs. For a
+working tree, record a reproducible content manifest/hash covering inspected
+tracked and untracked inputs, deletions and renames, check configuration and
+dependency inputs. For full-repository qlty scans this is the full analyzed
+repository surface, not just approved paths. Identify any unrelated changes
+included in a snapshot; never silently mix another slice into its baseline or
+final evidence. Ignored generated inputs used by a check must also be covered.
+
+Check coverage may differ. Reuse an individual result only when its own inputs,
+configuration, tool version and required command still match; a valid targeted
+test cannot stand in for a required full-repository or host check. Planning
+facts need their reference/base identity and coverage, not a qlty package for
+code that has not been implemented.
+
+#### Freshness And Invalidation
+
+Evidence is stale for the affected facts only when one of these occurs:
+
+1. Inspected content or a relevant dependency/configuration input changes.
+2. The approved path set or required validation commands/coverage change.
+3. The comparison base changes.
+4. A relevant tool version or qlty configuration/selection changes.
+5. A check modifies its inspected snapshot after observations were recorded.
+
+Otherwise matching identity and sufficient facts require reuse. Phase changes,
+new reviewers, returning to Main, human approval, and entering a commit gate
+do not invalidate evidence. Linking a validated content identity to its new
+commit does not require another run. Current-head CI/Cloud gates remain bound
+to their exact commit; a prior commit's status is not a current-head pass.
+
+Treat approval/status/evidence/commit annotations as a separate metadata patch.
+Record its exact diff and run targeted non-mutating documentation validation
+and scope inspection; metadata-only annotations do not start another qlty
+baseline/final cycle. Bind existing scans to the immutable substantive snapshot
+they actually inspected, never claim they scanned later annotations. Metadata
+may be excluded from product-check inputs only when recorded explicitly and
+when it cannot affect that check. Any specification, scope, command, risk or
+acceptance change is substantive, never a metadata exception, and invalidates
+affected facts. Review and human approval cover the exact substantive patch
+plus the separately inspected gate metadata.
+
+Missing facts, an identity mismatch, or a specific Finding requiring
+reproduction are the only reasons for a consumer to request refresh or run an
+affected non-mutating check. Record the reason and coverage; rerun only what
+that reason invalidates. Retain a matching baseline; do not recreate it at each
+review. Writes and formatting belong to the producer, not read-only reviewers.
+An unavailable or failed required check blocks readiness. Committers must not
+rerun product validation: changed scope/evidence returns through Main to the
+producer and reviewer before committing. Staged diff checks remain mandatory.
+
+#### Workflow Counters
+
+Keep lightweight counters alongside evidence in `TASKS.md`, per slice and
+aggregated for Feature Exit: role delegations, qlty check/smells executions,
+test/build executions, Git status/diff inspections, evidence regenerations,
+human gates, and successful commits. Main records dispatch/gate counts;
+producers and consumers record their actual executions, including failures.
+Report unknown counts as unknown. Count baseline/final and justified reruns
+separately, with a reason for each regeneration. Record during normal work,
+without an extra agent, collection pass, or runtime telemetry. The target is
+zero duplicate mechanical work for matching inputs; counters do not replace
+required checks or independent judgments.
 
 ## Solution Shape And Impact
 
@@ -288,6 +464,14 @@ behavior, user-document impact, and changelog need. User docs change only when
 user-facing behavior changes.
 
 ### Feature Exit Review Output
+
+Feature Exit reviews cross-slice completeness, integration, durable knowledge
+ownership, and unresolved risk ownership. Consume the committed slices'
+validation and independent reviews; do not re-review each diff or recreate
+each qlty baseline/final set. Check current-head global required gates and
+missing/stale cross-slice coverage only. A specific integration concern may
+require a targeted check with its reason recorded. Validate new durable-doc
+changes separately; they do not invalidate unrelated product checks.
 
 `feature-closer` reports completed slices, acceptance, validation,
 traceability, production readiness, durable updates, risks, and a `Close`,

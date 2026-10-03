@@ -1,8 +1,0 @@
----
-interface:
-  display_name: "SDD Evidence"
-  short_description: "Capture evidence for one SDD slice"
-  default_prompt: >-
-    Use $sdd-evidence to capture mechanical evidence for one selected feature
-    and slice. Return it to the owning role; leave design and approval
-    judgments there.

@@ -1,7 +1,0 @@
----
-interface:
-  display_name: "SDD Plan Task"
-  short_description: "Plan feature implementation slices"
-  default_prompt: >-
-    Route to planner with explicitly named Planning or Replanning Mode and use
-    $sdd-plan-task for the selected feature.

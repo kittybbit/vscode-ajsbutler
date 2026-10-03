@@ -10,6 +10,7 @@
 
 ## Current state
 
+- Lifecycle state: {{state from the SDD Lifecycle State Contract}}
 - Plan: Proposed | Review Needed | Pending Approval | Approved | In Progress |
   Replan Required | Complete
 - Plan review: Pending | Ready | Findings
@@ -23,8 +24,9 @@
 
 Add Completion Approval only after implementation review; add Closure Approval
 only after Feature Exit. Each record contains its status, exact scope and paths,
-review verdict, approval result, and commit status. Keep only the active gate
-and current state; approval messages and superseded history do not belong here.
+review verdict, approval result, and commit status. Keep the active gate near
+the top and compact references for completed slice gates through Feature Exit;
+approval messages and superseded narrative do not belong here.
 
 ## Implementation Slices
 
@@ -39,6 +41,25 @@ and current state; approval messages and superseded history do not belong here.
 - Production readiness: {{relevant failure, JP1/AJS, input-size,
   desktop/web/VS Code, and documentation impact}}
 - Approval boundary: {{exact paths and excluded work}}
+
+#### Validation record
+
+- Producer / record version:
+- Base revision / final content identity / resulting commit:
+- Approved, changed, untracked, out-of-scope or ambiguous paths:
+- Check inputs and coverage / configuration, dependency and tool identities:
+- Required commands / exits / states / raw-output references:
+- qlty version, config, inventories, four SARIF references and final aggregate:
+- Compatibility / architecture facts / traceability reference:
+- Reviewed patch identity / independent verdict and gate references:
+- Missing facts / invalidation or reproduction reason / reused evidence:
+- Execution counts: {{delegations, qlty check/smells, tests, builds, Git
+  inspections, regenerations, human gates, commits; unknown when unavailable}}
+
+Apply the Evidence Contract in [`SDD policy`](../../README.md#evidence-contract).
+Include only facts applicable to this slice; keep raw logs outside inspected
+inputs and retain them through Feature Exit. A later role consumes matching
+evidence rather than creating another validation package.
 
 #### Solution Shape (when material)
 

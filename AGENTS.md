@@ -39,8 +39,9 @@ Production source lives under `src/domain`, `src/application`,
 
 - Preserve behavior. Prefer small vertical slices, one use case at a time, and
   small, reviewable changes. Add or update tests before large structural work.
-- SDD is the only standard for non-trivial changes. `docs/specs/README.md` owns trivial-change
-  criteria, SDD gates, document roles, approval, and validation policy.
+- SDD is the only standard for non-trivial changes. `docs/specs/README.md` owns
+  trivial-change criteria, SDD gates, document roles, approval, and validation
+  policy.
 - Before editing runtime code, tests, generated artifacts, or configuration,
   require a Human Approved implementation slice in the selected feature's
   `TASKS.md`. Route any scope, design, impact, or approval-boundary change to
@@ -86,10 +87,11 @@ Production source lives under `src/domain`, `src/application`,
 
 `AGENTS.md` owns repository constraints and Main routing. SDD policy and
 document roles live in [`docs/specs/README.md`](docs/specs/README.md). Role
-definitions in `.codex/agents/*.toml` own authority, allowed input, forbidden
-actions, model/effort, output, and stop conditions. Canonical role procedures
-live in `.agents/skills/*/SKILL.md`; `agents/openai.yaml` files are invocation
-adapters. `.agent.md` and `.github/copilot-instructions.md` are entry points.
+definitions in `.codex/agents/*.toml` own authority, procedure, allowed input,
+forbidden actions, model/effort, output, and stop conditions. SDD lifecycle
+operations use explicit role delegation; they have no discoverable Skills or
+Skill invocation adapters. `.agent.md` and `.github/copilot-instructions.md`
+are entry points.
 
 Main is the default entrypoint. Discussion, investigation, analysis,
 architecture/design comparison, explanation, troubleshooting, scope
@@ -102,12 +104,12 @@ inspect enough state to classify work, request Human Approval, and route
 results. Users may name a role for a safe formal operation; safety, approval
 gates, and role ownership take precedence. Main must not perform a delegated
 lifecycle procedure, impersonate or internally assume a role, or edit its
-role-owned artifacts. Skills are procedures for delegated roles, not
-lifecycle entrypoints for Main. Each child returns its result, evidence, and
-recommended route to Main and must not invoke or spawn the next lifecycle role.
-Main waits for that result before deciding whether to delegate again after the
-required gate is satisfied. Delegate when the user requests a formal operation
-or an active workflow requires its next stage.
+role-owned artifacts. Each child returns the policy's handoff record to Main
+and must not invoke or spawn the next lifecycle role. Main forwards that record
+and its evidence references without recollecting unchanged facts. Main checks
+the state and human gate, selects the next role, and waits for its result before
+delegating again. Delegate when the user requests a formal operation or an
+active workflow requires its next stage; an SDD topic alone is not a trigger.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -132,9 +134,8 @@ boundary, and commit gate. Release work is outside SDD; use the
 Entrypoints:
 
 - Copilot CLI: `.github/copilot-instructions.md`
-- Codex roles: `.codex/agents/*.toml`
-- Reusable procedures: `.agents/skills/*/SKILL.md`
-- Invocation adapters: `.agents/skills/*/agents/openai.yaml`
+- Codex role contracts and procedures: `.codex/agents/*.toml`
+- Release procedure: `.agents/skills/release-extension/SKILL.md`
 - SDD policy: `docs/specs/README.md`
 
 <!-- markdownlint-disable MD013 MD060 -->

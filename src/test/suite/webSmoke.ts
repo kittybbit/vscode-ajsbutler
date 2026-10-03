@@ -5,6 +5,8 @@ import {
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import type { SemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
 import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import { buildSemanticDiffPresentationArtifactsFromComparison } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import { compareSemanticDiffWithArtifacts } from "../../application/semantic-diff/compareSemanticDiffWithArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
 import { createScheduleAwareExplorerSession } from "../../bootstrap/extension/createScheduleAwareExplorerSession";
@@ -14,6 +16,13 @@ import {
   createScheduleImpactCalendarFailureMessage,
   createScheduleImpactCalendarSessionMessage,
 } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
+import { parseSchedulePeriod } from "../../domain/schedule/SchedulePeriod";
+import {
+  collectUniqueAjsUnits,
+  createAjsDocumentIndex,
+} from "../../domain/models/ajs/AjsDocumentIndex";
+import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
+import { createScheduleCalendarContextIndex } from "../../domain/schedule/ScheduleCalendar";
 
 const LANGUAGE_ID = "jp1ajs";
 
@@ -50,6 +59,173 @@ const waitForCondition = async (
 
 export async function run(): Promise<void> {
   await activateExtension();
+
+  const browserPeriod = parseSchedulePeriod({
+    from: "2000-02-28",
+    to: "2000-03-01",
+  });
+  if (
+    browserPeriod.kind !== "valid" ||
+    browserPeriod.fromDate.toISOString() !== "2000-02-28T00:00:00.000Z" ||
+    browserPeriod.toDate.toISOString() !== "2000-03-01T00:00:00.000Z"
+  ) {
+    throw new Error("WEB-11 canonical schedule period failed in the browser");
+  }
+  reportWebScenario("WEB-11 passed: browser canonical schedule period");
+
+  const web12Jobnet: AjsUnit = {
+    id: "/web12/jobnet",
+    name: "jobnet",
+    unitAttribute: "jobnet,,jp1admin,",
+    unitType: "n",
+    absolutePath: "/web12/jobnet",
+    depth: 1,
+    parentId: "/web12",
+    isRoot: false,
+    isRootJobnet: true,
+    hasSchedule: true,
+    hasWaitedFor: false,
+    layout: { h: 1, v: 1 },
+    parameters: [],
+    relations: [],
+    children: [],
+  };
+  const web12Group: AjsUnit = {
+    ...web12Jobnet,
+    id: "/web12",
+    name: "group",
+    unitAttribute: "group,,jp1admin,",
+    unitType: "g",
+    absolutePath: "/web12",
+    depth: 0,
+    parentId: undefined,
+    isRoot: true,
+    isRootJobnet: false,
+    hasSchedule: false,
+    parameters: [{ key: "ty", value: "g" }],
+    children: [web12Jobnet],
+  };
+  const web12Document: AjsDocument = {
+    rootUnits: [web12Group],
+    warnings: [],
+  };
+  const web12Units = collectUniqueAjsUnits(web12Document);
+  const web12Index = createAjsDocumentIndex(web12Units);
+  const web12CalendarIndex = createScheduleCalendarContextIndex(web12Document);
+  if (
+    web12Units.length !== 2 ||
+    web12Units[0] !== web12Group ||
+    web12Units[1] !== web12Jobnet ||
+    web12Index.byId.get("/web12/jobnet")?.[0] !== web12Jobnet ||
+    web12CalendarIndex.byPath.get("/web12")?.[0] !== web12Group ||
+    web12CalendarIndex.duplicatePath
+  ) {
+    throw new Error("WEB-12 normalized calendar document index failed");
+  }
+  reportWebScenario(
+    "WEB-12 passed: browser normalized calendar document index",
+  );
+
+  const web13Document = (time: string): AjsDocument => {
+    const jobnet: AjsUnit = {
+      ...web12Jobnet,
+      id: "/web13/main",
+      name: "main",
+      absolutePath: "/web13/main",
+      parentId: "/web13",
+      parameters: [
+        { key: "ty", value: "n" },
+        { key: "sd", value: "2026/04/10" },
+        { key: "st", value: time },
+      ],
+    };
+    const group: AjsUnit = {
+      ...jobnet,
+      id: "/web13",
+      name: "web13",
+      unitAttribute: "group,,jp1admin,",
+      unitType: "g",
+      absolutePath: "/web13",
+      depth: 0,
+      parentId: undefined,
+      isRoot: true,
+      isRootJobnet: false,
+      hasSchedule: false,
+      parameters: [{ key: "ty", value: "g" }],
+      children: [jobnet],
+    };
+    return { rootUnits: [group], warnings: [] };
+  };
+  const web13Artifacts = compareSemanticDiffWithArtifacts({
+    before: web13Document("09:00"),
+    after: web13Document("10:00"),
+    options: {
+      scheduleComparisonPeriod: {
+        from: "2026-04-01",
+        to: "2026-05-01",
+      },
+    },
+  });
+  const web13Presentation =
+    buildSemanticDiffPresentationArtifactsFromComparison({
+      result: web13Artifacts.result,
+      scheduleProjectionFacts: web13Artifacts.scheduleProjectionFacts,
+    });
+  const web13Changes =
+    web13Artifacts.result.scheduleComparison?.runChanges.map((change) => [
+      change.id,
+      change.kind,
+      change.unitPath,
+      change.date,
+      change.before?.time ?? null,
+      change.after?.time ?? null,
+    ]) ?? [];
+  const web13Timeline =
+    web13Presentation.scheduleImpact.kind === "available"
+      ? web13Presentation.scheduleImpact.sidecar.timelineItems.map((item) => [
+          item.state,
+          item.before?.unitPath ?? item.after?.unitPath,
+          item.before?.time ?? null,
+          item.after?.time ?? null,
+          item.sourceChangeRef?.id ?? null,
+          item.sourceChangeRef?.occurrenceOrdinal ?? null,
+        ])
+      : [];
+  if (
+    web13Artifacts.scheduleProjectionFacts.kind !== "evaluated" ||
+    web13Changes.length !== 1 ||
+    JSON.stringify(web13Changes[0]) !==
+      JSON.stringify([
+        "schedule:changed-time:/web13/main:2026-04-10",
+        "changed-time",
+        "/web13/main",
+        "2026-04-10",
+        "09:00",
+        "10:00",
+      ]) ||
+    JSON.stringify(web13Timeline) !==
+      JSON.stringify([
+        [
+          "changed-time",
+          "/web13/main",
+          "09:00",
+          "10:00",
+          "schedule:changed-time:/web13/main:2026-04-10",
+          0,
+        ],
+      ])
+  ) {
+    throw new Error(
+      `WEB-13 browser comparison/artifact equivalence failed: ${JSON.stringify({
+        kind: web13Artifacts.scheduleProjectionFacts.kind,
+        changes: web13Changes,
+        timeline: web13Timeline,
+      })}`,
+    );
+  }
+  reportWebScenario(
+    "WEB-13 passed: browser comparison and schedule-impact artifact equivalence",
+  );
 
   const commands = await vscode.commands.getCommands(true);
   for (const command of [

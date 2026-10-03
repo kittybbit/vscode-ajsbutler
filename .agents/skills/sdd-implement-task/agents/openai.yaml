@@ -1,7 +1,0 @@
----
-interface:
-  display_name: "SDD Implement Task"
-  short_description: "Implement one approved SDD slice"
-  default_prompt: >-
-    Route to implementer and use $sdd-implement-task for exactly one approved
-    TASKS.md slice, then return it for independent review.

@@ -3,14 +3,17 @@ import type {
   AjsParameter,
   AjsUnit,
 } from "../models/ajs/AjsDocument";
+import {
+  collectUniqueAjsUnits,
+  createAjsDocumentIndex,
+  type AjsDocumentIndex,
+} from "../models/ajs/AjsDocumentIndex";
 import type {
   ScheduleDateInterpretation,
   ScheduleDateWeekday,
 } from "./ScheduleDate";
 import {
   ancestorsOf,
-  collectUnits,
-  indexUnits,
   resolveScheduleCalendarSource,
   type ScheduleCalendarSourceResolution,
 } from "./ScheduleCalendarIndex";
@@ -75,9 +78,7 @@ export type ScheduleCalendarContext = {
   calendarGroups?: ScheduleCalendarGroup[];
 };
 
-export type ScheduleCalendarContextIndex = {
-  byId: Map<string, AjsUnit[]>;
-  byPath: Map<string, AjsUnit[]>;
+export type ScheduleCalendarContextIndex = AjsDocumentIndex & {
   duplicatePath: boolean;
 };
 
@@ -93,9 +94,8 @@ export type ScheduleCalendarDayResult =
 export const createScheduleCalendarContextIndex = (
   document: AjsDocument,
 ): ScheduleCalendarContextIndex => {
-  const units = collectUnits(document);
-  const byId = indexUnits(units, (unit) => unit.id);
-  const byPath = indexUnits(units, (unit) => unit.absolutePath);
+  const units = collectUniqueAjsUnits(document);
+  const { byId, byPath } = createAjsDocumentIndex(units);
   return {
     byId,
     byPath,
