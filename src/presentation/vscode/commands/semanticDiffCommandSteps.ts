@@ -130,7 +130,7 @@ export const commandError = (
 });
 
 export const safeShowErrorMessage = async (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<SemanticDiffCommandDeps, "showErrorMessage">,
   message: string,
 ): Promise<void> => {
   try {

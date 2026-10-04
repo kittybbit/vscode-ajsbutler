@@ -38,6 +38,52 @@ import {
 import { isSemanticDiffSourceCaptureError } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import { parseFailureMessage } from "./semanticDiffCommandWorkflowInput";
 
+type PresentationCaptureDeps = Pick<
+  SemanticDiffCommandDeps,
+  "sourceHandleIdAllocator" | "beginSemanticDiffSourceCapture"
+>;
+type PresentationArtifactPeriodDeps = Pick<
+  SemanticDiffCommandDeps,
+  "scheduleComparisonPeriod"
+>;
+type PresentationArtifactBuildDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "language"
+  | "sourceHandleIdAllocator"
+  | "beginSemanticDiffSourceCapture"
+  | "buildSemanticDiffPresentationArtifacts"
+  | "scheduleComparisonPeriod"
+>;
+type ExplorerContextDeps = Pick<
+  SemanticDiffCommandDeps,
+  "buildSemanticDiffOutputContext"
+>;
+type ExplorerContextRegistrationDeps = ExplorerContextDeps &
+  Pick<
+    SemanticDiffCommandDeps,
+    "registerSemanticDiffSourceCapture" | "unregisterSemanticDiffSourceCapture"
+  >;
+type ExplorerScheduleOpenDeps = Pick<
+  SemanticDiffCommandDeps,
+  "openScheduleAwareExplorerSession" | "unregisterSemanticDiffSourceCapture"
+>;
+type ExplorerDefaultOpenDeps = Pick<
+  SemanticDiffCommandDeps,
+  "openExplorer" | "unregisterSemanticDiffSourceCapture"
+>;
+type ExplorerOpenDeps = ExplorerScheduleOpenDeps & ExplorerDefaultOpenDeps;
+export type ExplorerCommandDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "getActiveEditor"
+  | "showOpenDialog"
+  | "openTextDocument"
+  | "readFile"
+  | "buildSemanticDiffReportData"
+> &
+  PresentationArtifactBuildDeps &
+  ExplorerContextRegistrationDeps &
+  ExplorerOpenDeps;
+
 type PresentationSourceDescriptors = NonNullable<
   CommandReportData["sourceDescriptors"]
 >;
@@ -55,7 +101,7 @@ export type CommandReadyExplorer = Readonly<{
 }>;
 
 const beginPresentationSourceCapture = (
-  deps: SemanticDiffCommandDeps,
+  deps: PresentationCaptureDeps,
   request: CommandReportData,
 ):
   | ReturnType<
@@ -71,7 +117,7 @@ const beginPresentationSourceCapture = (
 };
 
 const createPresentationSourceDescriptors = (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<SemanticDiffCommandDeps, "sourceHandleIdAllocator">,
   request: CommandReportData,
 ): PresentationSourceDescriptors => {
   if (request.beforeUri === undefined || request.afterUri === undefined) {
@@ -113,7 +159,7 @@ const createPresentationCaptureInput = (
 });
 
 const presentationArtifactInput = (
-  deps: SemanticDiffCommandDeps,
+  deps: PresentationArtifactPeriodDeps,
   request: CommandReportData,
 ) =>
   deps.scheduleComparisonPeriod === undefined
@@ -197,7 +243,7 @@ const presentationArtifactError = (
 };
 
 const buildPresentationArtifactsStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: PresentationArtifactBuildDeps,
   request: CommandReportData,
 ): CommandStep<PresentationCommandData> => {
   const localization = getSemanticDiffCommandLocalization(deps.language);
@@ -232,7 +278,7 @@ const buildPresentationArtifactsStep = (
 };
 
 const createExplorerContextStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerContextDeps,
   result: CommandReadyReport,
   releaseSourceCapture: () => void,
 ): CommandStep<SemanticDiffOutputContext> => {
@@ -251,7 +297,7 @@ const createExplorerContextStep = (
 };
 
 const explorerContextStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerContextDeps,
   request: CommandReportData & {
     result: CommandReadyReport;
     presentation?: SemanticDiffPresentationArtifacts;
@@ -295,7 +341,7 @@ const buildExplorerRequest = ({
 };
 
 const buildExplorerContextStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerContextRegistrationDeps,
   request: CommandReportData & {
     result: CommandReadyReport;
     presentation?: SemanticDiffPresentationArtifacts;
@@ -328,7 +374,7 @@ const failedExplorerOpen = (): CommandFailure =>
   );
 
 const openScheduleAwareExplorer = async (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerScheduleOpenDeps,
   request: CommandReadyExplorer,
 ): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
   try {
@@ -342,7 +388,7 @@ const openScheduleAwareExplorer = async (
 };
 
 const openDefaultExplorer = async (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerDefaultOpenDeps,
   request: CommandReadyExplorer,
 ): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
   if (deps.openExplorer === undefined) {
@@ -358,7 +404,7 @@ const openDefaultExplorer = async (
 };
 
 const openExplorerStep = async (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerOpenDeps,
   request: CommandReadyExplorer,
 ): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> =>
   request.presentation && deps.openScheduleAwareExplorerSession
@@ -366,7 +412,10 @@ const openExplorerStep = async (
     : openDefaultExplorer(deps, request);
 
 const selectExplorerBefore = async (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<
+    SemanticDiffCommandDeps,
+    "showOpenDialog" | "openTextDocument" | "readFile"
+  >,
   activeEditor: import("vscode").TextEditor,
 ): Promise<CommandStep<CommandReportRequest>> =>
   mapCommandStep(
@@ -386,7 +435,7 @@ const selectExplorerBefore = async (
   );
 
 export const runExplorerCommand = async (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerCommandDeps,
 ): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
   const activeEditor = readSemanticDiffActiveEditor(deps);
   const beforeDefinition = await continueCommandStep(activeEditor, (editor) =>

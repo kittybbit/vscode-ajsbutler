@@ -4,22 +4,25 @@
 
 - Purpose: narrow command collaborator contracts and move flow-source freshness
   policy from bootstrap to VS Code presentation, preserving behavior.
-- Active or approved slice: S1 then S2 approved; S1 awaits planning commit.
+- Active or approved slice: S1 SLICE_APPROVED; S2 remains approved and waits for
+  S1 completion approval and focused commit.
 - Read first: [SPECS.md](SPECS.md), [TRACEABILITY.md](TRACEABILITY.md),
   [SDD policy](../../README.md), [architecture](../../architecture.md), and
   discovery/evidence references below.
-- Next operation: Main routes the approved planning commit. No runtime/test/
-  configuration edits
-  before that gate.
+- Next operation: Main routes the explicitly approved S1 completion commit.
+  S2 waits for that focused commit.
 - Prohibitions: no dependency upgrades, new behavior, application/domain/parser
   changes, architecture exceptions, calendar consolidation, or host-harness fix.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: approved planning commit, then S1 implementation.
+- Lifecycle state: SLICE_APPROVED
+- Readiness: independent implementation re-review Ready, no Findings.
+  Main's S1-only validation disposition is recorded below.
+- Next decision / blocker: focused S1 completion commit, then approved S2.
 - Gate evidence: independent plan review Ready; explicit Human Approval in the
-  current conversation; planning commit pending.
+  current conversation; planning commit
+  `c535a718c86e44b8e39f4771ca932f76c6bd654d` succeeded.
 - Selection / base: explicit user choice; branch
   `codex/semantic-diff-vscode-dependencies`; base `main` at
   `b00da4f378b0e4a578d7563f69a81efbe32c83d2`.
@@ -39,14 +42,56 @@
   `docs/specs/features/semantic-diff-vscode-dependencies/TASKS.md`,
   `docs/specs/features/semantic-diff-vscode-dependencies/TRACEABILITY.md`.
 
+## S1 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: reviewed S1 implementation, its evidence and focused
+  completion commit; S2 implementation then proceeds under the existing plan
+  approval. No S2 completion or feature closure approval is implied.
+- Approved paths: exactly the 16 S1 paths in the implementation evidence's
+  `identity.changedPaths` (14 command modules, the command test and TASKS.md).
+- Candidate scope: reviewed S1 implementation and evidence, with exactly the
+  16 changed paths in the implementation evidence's `identity.changedPaths`.
+- Review: independent implementation-reviewer Ready, no actionable Findings;
+  substantive identity `6c150254f0cffd25f2b18a92450f3ea9f9b454a03470feb295d2df2ccd7569d0`,
+  plus separately inspected producer/Main gate metadata.
+- Review record: [S1 Ready handoff](/tmp/semantic-diff-vscode-dependencies-evidence/refreshed/review-s1-ready.json).
+
+## Main validation disposition: S1
+
+- Decision: the refreshed, named VS Code diagnostic coverage is sufficient
+  equivalent desktop evidence for S1 under this plan's explicit Main decision
+  boundary. The formal command was attempted; its exit 0 remains an unproven
+  full-suite result, not a claimed test pass.
+- Basis: all 10 relevant command, schedule, capture, registration, source,
+  panel and report suites executed on the final compiled inputs: 117 pass,
+  one baseline-matched assertion failure. Architecture passed 29/29, web
+  WEB-7 through WEB-13 passed, and both production bundles built. Exact
+  source/generated/runtime identities and outcomes are in the linked
+  implementation evidence's `refreshed/check-inputs-and-outcomes.json`.
+- Failure disposition: retain the one registration-error assertion as an
+  inherited test discrepancy, not a passing assertion. Its baseline inputs
+  and actual error match; S1 changes dependency types and preserves that
+  runtime path. Do not change behavior or the assertion in this slice.
+- Follow-up owners: Test-harness maintainers retain the roadmap-owned desktop
+  launcher issue. Semantic Diff command-test maintainers own the inherited
+  error-message assertion alignment; Feature Exit must preserve that ownership.
+- Limits: S1 only, with the approved paths and acceptance unchanged. No full
+  desktop suite, minimum-version host run, or S2 validation is claimed. S2
+  needs its own coverage and review. No harness/configuration edit or quality
+  exception is authorized.
+- Gate: independent reviewer must assess this disposition and refreshed
+  evidence before Ready; explicit Completion Approval remains required.
+
 ## Slice order and gate boundaries
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Slice | Value | Dependency | Lifecycle state |
-| ----- | ----- | ---------- | --------------- |
-| S1 | Command collaborators expose responsibility-sized dependencies | Plan commit | PLANNED |
-| S2 | Presentation owns live flow-source freshness and host translation | S1 focused completion commit | PLANNED |
+| Slice | Value                                                             | Dependency                   | Lifecycle state |
+| ----- | ----------------------------------------------------------------- | ---------------------------- | --------------- |
+| S1    | Command collaborators expose responsibility-sized dependencies    | Plan commit                  | SLICE_APPROVED  |
+| S2    | Presentation owns live flow-source freshness and host translation | S1 focused completion commit | PLANNED         |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -193,6 +238,47 @@ optional behavior and sufficiency of existing platform capabilities.
 - Readiness: no new persistence, telemetry, user workflow or JP1/AJS semantic
   source; errors and optional fallback remain the existing behavior.
 
+### S1 implementation handoff
+
+- Solution Shape: command ownership stays in `presentation/vscode/commands`;
+  the flat `SemanticDiffCommandDeps` composition contract and runtime behavior
+  are unchanged. Leaf signatures use local named capability subsets. The
+  orchestrators compose the existing source/stage capability types, including
+  `WorkflowSourcePreparationDeps`, `WorkflowArtifactBuildDeps`,
+  `WorkflowArtifactOpenDeps`, and `PresentationArtifactBuildDeps`. No runtime
+  wrapper, new module, or stronger optional requirement was added.
+- Changed scope: the 14 approved production paths above, the approved command
+  test, and this coordination record. No bootstrap, flow-source, report,
+  application, domain, config, README, or CHANGELOG paths changed. R1/R4/R5
+  remain mapped to S1 in `TRACEABILITY.md`; the mapping was checked and needs no
+  edit.
+- Compatibility: `engines.vscode` remains `^1.75.0`; command IDs/results and
+  report, Explorer, prompted file/Git, calendar-compatibility, and fallback
+  selection remain unchanged. No new production Node built-in import was added.
+- Validation (refreshed against final substantive tracked manifest
+  `6c150254f0cffd25f2b18a92450f3ea9f9b454a03470feb295d2df2ccd7569d0`): test
+  compilation passed; `architectureDependencyRules` passed 29/29; desktop and
+  web preparation passed; `pnpm run build` emitted both production bundles.
+  The formal web host passed WEB-7 through WEB-13 with exit 0; its log also
+  records ECONNRESET/EPIPE/stream-close diagnostics after those cases. The
+  formal desktop host exited 0 but did not demonstrate named suite execution.
+  The retained nearest-suite diagnostic ran 117 tests successfully and failed
+  one assertion; the same assertion failure is recorded on baseline. The
+  refreshed per-check inputs, generated output manifests, tool/runtime
+  identities, raw logs and statuses are in the linked implementation evidence.
+  F1's stale product evidence is resolved. F2 remains pending Main's explicit
+  disposition of formal desktop coverage and the baseline-matched assertion;
+  readiness remains blocked until then. Production webpack emitted its usual
+  performance recommendations for the existing large webview and web bundles.
+- Qlty: exact complete 754-path baseline/final inventories and the final
+  check/smells SARIF comparison, aggregate status, command logs, and distinct
+  snapshot caches are retained in the linked implementation evidence. A prior
+  clone-based final snapshot omitted 12 baseline files and is explicitly
+  invalidated there; it is excluded from the disposition.
+- Independent review route: Main routes the evidence disposition and then an
+  implementation reviewer. This handoff does not grant `Ready`, completion
+  approval, or the S2 dependency gate.
+
 ## S2: Move flow-source host policy into presentation
 
 - Acceptance: R2/R3 and remaining R4/R5. Bootstrap contains composition rather
@@ -323,6 +409,14 @@ discovery with matching manifests; the changed docs need fresh validation.
   in the linked planning evidence. Main records this verdict as gate metadata;
   it does not grant Human Approval or invalidate substantive validation.
 - Approval: reviewed S1/S2 plan approved in current conversation. Planning
-  commit pending. Code evidence: pending implementation.
-- Missing facts: no blocking planning fact; required host outcome/disposition is
-  evaluated during implementation as described above.
+  commit `c535a718c86e44b8e39f4771ca932f76c6bd654d`;
+  staged checks and approved manifest passed. Implementation evidence:
+  [/tmp/semantic-diff-vscode-dependencies-evidence/evidence.json](/tmp/semantic-diff-vscode-dependencies-evidence/evidence.json).
+- Residual limitation: formal full desktop-suite execution remains unproven;
+  the inherited assertion remains failing. Main's S1-only equivalent-coverage
+  disposition above was accepted by independent re-review. S1 is Ready;
+  completion approval is recorded above. Product checks bind to the
+  exact substantive manifest above. This TASKS update is a separate metadata
+  revision made after those runs; the evidence records its hash separately and
+  does not claim earlier scans inspected this revision. Qlty baseline/final
+  SARIF and aggregate remain attached to their original matched manifests.

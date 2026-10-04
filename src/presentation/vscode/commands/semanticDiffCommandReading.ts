@@ -3,6 +3,11 @@ import type { SemanticDiffCommandDeps } from "./semanticDiffCommand";
 
 const textDecoder = new TextDecoder("utf-8");
 
+type BeforeFileReaderDeps = Pick<
+  SemanticDiffCommandDeps,
+  "openTextDocument" | "readFile"
+>;
+
 export type BeforeFileReadResult =
   | { kind: "ready"; content: string; version: number | null; uri: vscode.Uri }
   | { kind: "failed" };
@@ -41,7 +46,7 @@ const readBeforeBytes = async (
 };
 
 export const readSemanticDiffBeforeFile = (
-  deps: SemanticDiffCommandDeps,
+  deps: BeforeFileReaderDeps,
   beforeUri: vscode.Uri,
 ): Promise<BeforeFileReadResult> =>
   deps.openTextDocument

@@ -19,6 +19,11 @@ import type {
 import type { SemanticDiffCommandLocalization } from "./semanticDiffCommandLocalization";
 import type { WorkflowSourceDescriptor } from "./semanticDiffCommandWorkflowSource";
 
+type SourceRegistrationDeps = Pick<
+  SemanticDiffCommandDeps,
+  "registerSemanticDiffSourceCapture" | "unregisterSemanticDiffSourceCapture"
+>;
+
 export type SourceBinding = Readonly<
   Extract<SemanticDiffSourceCaptureBindResult, { ok: true }>
 >;
@@ -27,7 +32,7 @@ export type SourceBindingStep = CommandStep<void>;
 type PreparedSourceBindingStep = CommandStep<SourceBinding | undefined>;
 
 type SourceBindingOptions = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: SourceRegistrationDeps;
   request: CommandReportData & { result: CommandReadyReport };
   context: SemanticDiffOutputContext;
   releaseSourceCapture: () => void;
@@ -183,7 +188,7 @@ export const createSourceCaptureRelease = (
 };
 
 export const unregisterAndReleaseWorkflowCapture = (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<SemanticDiffCommandDeps, "unregisterSemanticDiffSourceCapture">,
   context: SemanticDiffOutputContext,
   release: () => void,
 ): void => {
@@ -238,7 +243,7 @@ export type WorkflowSourceRegistrationResult =
   | "failed";
 
 export const registerWorkflowSource = (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<SemanticDiffCommandDeps, "registerSemanticDiffSourceCapture">,
   state: WorkflowBindingState,
   binding: SourceBinding,
 ): WorkflowSourceRegistrationResult => {
@@ -253,7 +258,7 @@ export const registerWorkflowSource = (
 };
 
 export const cleanupExplorerRequest = (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<SemanticDiffCommandDeps, "unregisterSemanticDiffSourceCapture">,
   request: Readonly<{
     context: SemanticDiffOutputContext;
     sourceCaptureRelease?: () => void;

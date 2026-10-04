@@ -18,6 +18,7 @@ import {
   beginWorkflowCapture,
   prepareWorkflowSource,
   type WorkflowCaptureState,
+  type WorkflowSourcePreparationDeps,
   type WorkflowSourceDescriptor,
   type WorkflowSourceRequest,
 } from "./semanticDiffCommandWorkflowSource";
@@ -35,6 +36,28 @@ import {
   type SourceBinding,
 } from "./semanticDiffCommandSourceBinding";
 import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/panel/semanticDiffExplorerPanel";
+
+type WorkflowArtifactBuildDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "sourceHandleIdAllocator"
+  | "beginSemanticDiffSourceCapture"
+  | "buildSemanticDiffPresentationArtifacts"
+>;
+type WorkflowArtifactOpenDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "registerSemanticDiffSourceCapture"
+  | "unregisterSemanticDiffSourceCapture"
+  | "openScheduleAwareExplorerSession"
+>;
+type FileComparisonWorkflowDeps = Pick<
+  SemanticDiffCommandDeps,
+  "getActiveEditor" | "showInputBox" | "language"
+> &
+  WorkflowSourcePreparationDeps &
+  WorkflowArtifactBuildDeps &
+  WorkflowArtifactOpenDeps;
+export type CalendarCompatibilityWorkflowDeps = FileComparisonWorkflowDeps &
+  Pick<SemanticDiffCommandDeps, "scheduleComparisonPeriod">;
 
 export type WorkflowExplorerResult = Readonly<{
   handle: SemanticDiffExplorerSessionHandle;
@@ -60,7 +83,7 @@ type WorkflowArtifactSelection = Extract<
 >;
 
 export type WorkflowArtifactBuildOptions = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: WorkflowArtifactBuildDeps;
   source: WorkflowSourceRequest;
   selection: WorkflowArtifactSelection;
   localization: SemanticDiffCommandLocalization;
@@ -183,7 +206,7 @@ const workflowArtifactError = (
 };
 
 type WorkflowOpenFailureContext = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: Pick<SemanticDiffCommandDeps, "unregisterSemanticDiffSourceCapture">;
   state: WorkflowArtifactState;
   localization: SemanticDiffCommandLocalization;
   code: "source-capture-failed" | "explorer-open-failed";
@@ -192,7 +215,7 @@ type WorkflowOpenFailureContext = Readonly<{
 const selectWorkflowFailureMessage = ({
   localization,
   code,
-}: WorkflowOpenFailureContext): string =>
+}: Pick<WorkflowOpenFailureContext, "localization" | "code">): string =>
   code === "source-capture-failed"
     ? localization.sourceCaptureFailed
     : localization.explorerOpenFailed;
@@ -208,14 +231,11 @@ const workflowOpenFailure = ({
     state.artifacts.context,
     state.release,
   );
-  return failedStep(
-    code,
-    selectWorkflowFailureMessage({ deps, state, localization, code }),
-  );
+  return failedStep(code, selectWorkflowFailureMessage({ localization, code }));
 };
 
 const openRegisteredWorkflowArtifacts = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowArtifactOpenDeps,
   state: WorkflowArtifactState,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
@@ -245,7 +265,7 @@ const openRegisteredWorkflowArtifacts = async (
 };
 
 type OpenRegisteredWorkflowCaptureContext = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: WorkflowArtifactOpenDeps;
   state: WorkflowArtifactState;
   binding: SourceBinding;
   localization: SemanticDiffCommandLocalization;
@@ -278,7 +298,7 @@ const openRegisteredWorkflowCapture = async ({
 };
 
 const openWorkflowArtifacts = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowArtifactOpenDeps,
   state: WorkflowArtifactState,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
@@ -296,7 +316,7 @@ const openWorkflowArtifacts = async (
 };
 
 export const runFileComparisonWorkflow = async (
-  deps: SemanticDiffCommandDeps,
+  deps: FileComparisonWorkflowDeps,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
   const localization = getSemanticDiffCommandLocalization(deps.language);
   const afterStep = readWorkflowAfterSnapshot(deps, localization);
@@ -317,14 +337,14 @@ export const runFileComparisonWorkflow = async (
 };
 
 const prepareCalendarCompatibilitySource = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowSourcePreparationDeps,
   after: import("./semanticDiffCommandWorkflowInput").WorkflowAfterSnapshot,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowSourceRequest>> =>
   prepareWorkflowSource(deps, after, localization);
 
 export const runCalendarCompatibilityWorkflow = async (
-  deps: SemanticDiffCommandDeps,
+  deps: CalendarCompatibilityWorkflowDeps,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
   const localization = getSemanticDiffCommandLocalization(deps.language);
   const afterStep = readWorkflowAfterSnapshot(deps, localization);

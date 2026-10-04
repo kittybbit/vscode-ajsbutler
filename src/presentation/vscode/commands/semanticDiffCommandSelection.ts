@@ -20,8 +20,13 @@ type BeforeSelection =
   | { kind: "cancelled" }
   | { kind: "failed" };
 
+type BeforeFileSelectionDeps = Pick<SemanticDiffCommandDeps, "showOpenDialog">;
+type BeforeDefinitionDeps = BeforeFileSelectionDeps &
+  Pick<SemanticDiffCommandDeps, "openTextDocument" | "readFile">;
+type OutputModeSelectionDeps = Pick<SemanticDiffCommandDeps, "showQuickPick">;
+
 const selectBeforeUri = async (
-  deps: SemanticDiffCommandDeps,
+  deps: BeforeFileSelectionDeps,
 ): Promise<BeforeSelection> => {
   let result: BeforeSelection;
   try {
@@ -42,7 +47,7 @@ const selectBeforeUri = async (
 };
 
 export const readBeforeDefinition = async (
-  deps: SemanticDiffCommandDeps,
+  deps: BeforeDefinitionDeps,
 ): Promise<
   | { kind: "ready"; content: string; version: number | null; uri: vscode.Uri }
   | { kind: "cancelled" }
@@ -55,7 +60,7 @@ export const readBeforeDefinition = async (
 };
 
 export const selectOutputMode = async (
-  deps: SemanticDiffCommandDeps,
+  deps: OutputModeSelectionDeps,
 ): Promise<
   | { kind: "selected"; mode: SemanticDiffOutputMode }
   | { kind: "cancelled" }
@@ -81,7 +86,7 @@ const outputModeFailures: Record<"cancelled" | "failed", CommandFailure> = {
 };
 
 const selectOutputModeStep = async (
-  deps: SemanticDiffCommandDeps,
+  deps: OutputModeSelectionDeps,
 ): Promise<CommandStep<SemanticDiffOutputMode>> => {
   const selectedMode = await selectOutputMode(deps);
   return selectedMode.kind === "selected"
@@ -90,7 +95,7 @@ const selectOutputModeStep = async (
 };
 
 export const selectModeForEditor = async (
-  deps: SemanticDiffCommandDeps,
+  deps: OutputModeSelectionDeps,
   activeEditor: vscode.TextEditor,
 ): Promise<CommandStep<CommandSelection>> =>
   mapCommandStep(await selectOutputModeStep(deps), (mode) => ({
@@ -109,7 +114,7 @@ const beforeDefinitionFailures: Record<"cancelled" | "failed", CommandFailure> =
   };
 
 export const readBeforeDefinitionStep = async (
-  deps: SemanticDiffCommandDeps,
+  deps: BeforeDefinitionDeps,
 ): Promise<
   CommandStep<
     Extract<Awaited<ReturnType<typeof readBeforeDefinition>>, { kind: "ready" }>
@@ -122,7 +127,7 @@ export const readBeforeDefinitionStep = async (
 };
 
 export const selectBeforeForCommand = async (
-  deps: SemanticDiffCommandDeps,
+  deps: BeforeDefinitionDeps,
   selection: CommandSelection,
 ): Promise<CommandStep<CommandReportRequest>> =>
   mapCommandStep(

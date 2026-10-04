@@ -10,6 +10,8 @@ import {
 } from "./semanticDiffCommandSteps";
 import type { SemanticDiffCommandDeps } from "./semanticDiffCommand";
 
+type WorkflowEditorDeps = Pick<SemanticDiffCommandDeps, "getActiveEditor">;
+
 export const MAX_SEMANTIC_DIFF_SOURCE_BYTES = 8 * 1024 * 1024;
 
 export type WorkflowAfterSnapshot = Readonly<{
@@ -95,7 +97,7 @@ export const parseFailureMessage = (
 };
 
 const readWorkflowEditor = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowEditorDeps,
   localization: SemanticDiffCommandLocalization,
 ): CommandStep<vscode.TextEditor> => {
   try {
@@ -156,7 +158,7 @@ const workflowAfterSnapshot = (
 };
 
 export const readWorkflowAfterSnapshot = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowEditorDeps,
   localization: SemanticDiffCommandLocalization,
 ): CommandStep<WorkflowAfterSnapshot> => {
   const editorStep = readWorkflowEditor(deps, localization);

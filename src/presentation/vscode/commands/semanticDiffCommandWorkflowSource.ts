@@ -32,6 +32,43 @@ import {
   type WorkflowAfterSnapshot,
 } from "./semanticDiffCommandWorkflowInput";
 
+type WorkflowDocumentReaderDeps = Pick<
+  SemanticDiffCommandDeps,
+  "openTextDocument"
+>;
+type WorkflowSourceIdDeps = Pick<
+  SemanticDiffCommandDeps,
+  "sourceHandleIdAllocator"
+>;
+type WorkflowFilePickerDeps = Pick<SemanticDiffCommandDeps, "showOpenDialog">;
+type WorkflowFileSourceDeps = WorkflowDocumentReaderDeps &
+  WorkflowSourceIdDeps &
+  WorkflowFilePickerDeps;
+type WorkflowGitReaderDeps = Pick<
+  SemanticDiffCommandDeps,
+  "readGitHeadDefinition"
+>;
+type WorkflowGitProviderDeps = Pick<
+  SemanticDiffCommandDeps,
+  "gitHeadSnapshotProvider"
+>;
+type WorkflowGitHeadDeps = WorkflowGitReaderDeps &
+  WorkflowGitProviderDeps &
+  WorkflowSourceIdDeps;
+type WorkflowSourceSelectionDeps = Pick<
+  SemanticDiffCommandDeps,
+  "showWorkflowQuickPick" | "showQuickPick"
+>;
+export type WorkflowSourcePreparationDeps = WorkflowSourceSelectionDeps &
+  WorkflowFileSourceDeps &
+  WorkflowGitHeadDeps;
+type WorkflowCaptureDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "sourceHandleIdAllocator"
+  | "beginSemanticDiffSourceCapture"
+  | "buildSemanticDiffPresentationArtifacts"
+>;
+
 export type WorkflowSourceDescriptor = ImmutableSourceDescriptor & {
   uri: vscode.Uri;
 };
@@ -50,7 +87,7 @@ export type WorkflowCaptureState = Readonly<{
 }>;
 
 const readWorkflowBefore = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowDocumentReaderDeps & WorkflowSourceIdDeps,
   uri: vscode.Uri,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowSourceDescriptor>> => {
@@ -72,7 +109,7 @@ const readWorkflowBefore = async (
 };
 
 const readWorkflowDocument = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowDocumentReaderDeps,
   uri: vscode.Uri,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<vscode.TextDocument>> => {
@@ -87,7 +124,7 @@ const readWorkflowDocument = async (
 };
 
 type WorkflowBeforeDescription = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: WorkflowSourceIdDeps;
   uri: vscode.Uri;
   document: vscode.TextDocument;
   localization: SemanticDiffCommandLocalization;
@@ -121,7 +158,7 @@ const describeWorkflowBefore = ({
 };
 
 const selectWorkflowFile = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowFilePickerDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<vscode.Uri>> => {
   try {
@@ -143,7 +180,7 @@ const selectWorkflowFile = async (
 };
 
 const readWorkflowSourceFile = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowFileSourceDeps,
   after: WorkflowAfterSnapshot,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowSourceRequest>> => {
@@ -159,7 +196,7 @@ const readWorkflowSourceFile = async (
 };
 
 const missingGitHeadReader = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowGitReaderDeps,
   localization: SemanticDiffCommandLocalization,
 ): CommandFailure | undefined =>
   deps.readGitHeadDefinition
@@ -172,7 +209,7 @@ const missingGitHeadReader = (
       );
 
 const missingGitHeadProvider = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowGitProviderDeps,
   localization: SemanticDiffCommandLocalization,
 ): CommandFailure | undefined =>
   deps.gitHeadSnapshotProvider
@@ -185,7 +222,7 @@ const missingGitHeadProvider = (
       );
 
 const gitHeadDependencyFailure = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowGitReaderDeps & WorkflowGitProviderDeps,
   localization: SemanticDiffCommandLocalization,
 ): CommandFailure | undefined =>
   missingGitHeadReader(deps, localization) ??
@@ -225,7 +262,7 @@ const validateGitHeadResult = (
 };
 
 type GitHeadWorkflowOptions = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: WorkflowGitProviderDeps & WorkflowSourceIdDeps;
   after: WorkflowAfterSnapshot;
   result: Extract<GitHeadDefinitionResult, { kind: "ready" }>;
   localization: SemanticDiffCommandLocalization;
@@ -269,7 +306,7 @@ const workflowFromGitHead = ({
 };
 
 const readWorkflowGitHead = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowGitHeadDeps,
   after: WorkflowAfterSnapshot,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowSourceRequest>> => {
@@ -288,7 +325,7 @@ const readWorkflowGitHead = async (
 };
 
 export const prepareWorkflowSource = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowSourcePreparationDeps,
   after: WorkflowAfterSnapshot,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowSourceRequest>> => {
@@ -302,7 +339,7 @@ export const prepareWorkflowSource = async (
 };
 
 const createWorkflowAfterDescriptor = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowSourceIdDeps,
   source: WorkflowSourceRequest,
 ): WorkflowAfterSnapshot & WorkflowSourceDescriptor => ({
   side: "after",
@@ -331,13 +368,13 @@ const createWorkflowCaptureInput = (
 });
 
 const workflowCaptureDependenciesAvailable = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowCaptureDeps,
 ): boolean =>
   deps.beginSemanticDiffSourceCapture !== undefined &&
   deps.buildSemanticDiffPresentationArtifacts !== undefined;
 
 export const beginWorkflowCapture = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowCaptureDeps,
   source: WorkflowSourceRequest,
   localization: SemanticDiffCommandLocalization,
 ): CommandStep<WorkflowCaptureState> => {

@@ -143,8 +143,34 @@ export type CommandReadyReport = Extract<
   { ok: true }
 >["result"];
 
+type ReportPresentationDeps = Pick<
+  SemanticDiffCommandDeps,
+  "buildSemanticDiffOutputContext" | "presentSemanticDiffOutput" | "language"
+>;
+type ReportDisplayDeps = Pick<SemanticDiffCommandDeps, "openReport">;
+type ReportWorkflowDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "getActiveEditor"
+  | "showQuickPick"
+  | "showOpenDialog"
+  | "openTextDocument"
+  | "readFile"
+  | "sourceHandleIdAllocator"
+  | "beginSemanticDiffSourceCapture"
+  | "openExplorer"
+  | "buildSemanticDiffReportData"
+  | "buildSemanticDiffOutputContext"
+  | "presentSemanticDiffOutput"
+  | "openReport"
+  | "language"
+>;
+type CommandFinalizationDeps = Pick<
+  SemanticDiffCommandDeps,
+  "showErrorMessage" | "language"
+>;
+
 const renderReportStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportPresentationDeps,
   request: CommandReportData & { result: CommandReadyReport },
 ): CommandStep<SemanticDiffOutputDocument> => {
   let step: CommandStep<SemanticDiffOutputDocument>;
@@ -165,7 +191,7 @@ const renderReportStep = (
 };
 
 const displayReportStep = async (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportDisplayDeps,
   output: SemanticDiffOutputDocument,
 ): Promise<CommandStep<SemanticDiffOutputDocument>> => {
   let step: CommandStep<SemanticDiffOutputDocument>;
@@ -183,7 +209,7 @@ const displayReportStep = async (
 };
 
 const runSemanticDiffCommand = async (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportWorkflowDeps,
 ): Promise<CommandStep<SemanticDiffOutputDocument>> => {
   const activeEditor = readSemanticDiffActiveEditor(deps);
   const selectedMode = await continueCommandStep(activeEditor, (editor) =>
@@ -208,7 +234,7 @@ const runSemanticDiffCommand = async (
 };
 
 const finalizeCommandFailure = async (
-  deps: SemanticDiffCommandDeps,
+  deps: CommandFinalizationDeps,
   failure: CommandFailure["error"],
 ): Promise<SemanticDiffCommandResult> => {
   const message =
@@ -220,7 +246,7 @@ const finalizeCommandFailure = async (
 };
 
 const finalizeSemanticDiffCommand = async (
-  deps: SemanticDiffCommandDeps,
+  deps: CommandFinalizationDeps,
   step: CommandStep<SemanticDiffOutputDocument>,
 ): Promise<SemanticDiffCommandResult> =>
   step.kind === "failed"
@@ -228,7 +254,7 @@ const finalizeSemanticDiffCommand = async (
     : { ok: true, report: step.value.content, action: "displayed" };
 
 const finalizeExplorerCommand = async (
-  deps: SemanticDiffCommandDeps,
+  deps: CommandFinalizationDeps,
   step: CommandStep<SemanticDiffExplorerSessionHandle>,
 ): Promise<SemanticDiffCommandResult> =>
   step.kind === "failed"
