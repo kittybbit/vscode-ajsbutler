@@ -23,6 +23,9 @@ import {
 } from "../../domain/models/ajs/AjsDocumentIndex";
 import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 import { createScheduleCalendarContextIndex } from "../../domain/schedule/ScheduleCalendar";
+import { createSemanticDiffFlowSourceHost } from "../../presentation/vscode/semantic-diff/flow/semanticDiffFlowSourceHost";
+import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes";
+import type { SemanticDiffFlowPanel } from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 
 const LANGUAGE_ID = "jp1ajs";
 
@@ -226,6 +229,92 @@ export async function run(): Promise<void> {
   reportWebScenario(
     "WEB-13 passed: browser comparison and schedule-impact artifact equivalence",
   );
+
+  const web14Uri = vscode.Uri.parse("untitled:web-14-source");
+  const web14Context = {} as SemanticDiffOutputContext;
+  let web14Text = "ty=g;";
+  let web14Version = 1;
+  const web14Capture = {
+    binding: {} as never,
+    sources: {
+      before: {
+        side: "before" as const,
+        sourceHandleId: "web-14-before",
+        version: 1,
+        text: "before text",
+        uri: vscode.Uri.parse("untitled:web-14-before"),
+      },
+      after: {
+        side: "after" as const,
+        sourceHandleId: "web-14-after",
+        version: 1,
+        text: "ty=g;",
+        uri: web14Uri,
+      },
+    },
+    release: () => undefined,
+  } as unknown as SemanticDiffSourceCaptureEntry;
+  const web14Document = {
+    uri: web14Uri,
+    get version() {
+      return web14Version;
+    },
+    getText: () => web14Text,
+  } as vscode.TextDocument;
+  let web14OpenedUri: vscode.Uri | undefined;
+  const web14FlowPanel = {
+    flowUri: web14Uri.toString(),
+  } as SemanticDiffFlowPanel;
+  const web14Host = createSemanticDiffFlowSourceHost({
+    sourceCapture: () => web14Capture,
+    getOpenTextDocuments: () => [web14Document],
+    openFlow: async (uri) => {
+      web14OpenedUri = uri;
+      return web14FlowPanel;
+    },
+  });
+  const web14Snapshot = web14Host.getSourceSnapshot?.("after", web14Context);
+  if (
+    !web14Snapshot ||
+    !web14Host.isSourceCurrent?.("after", web14Context, web14Snapshot)
+  ) {
+    throw new Error("WEB-14 browser fresh flow source failed");
+  }
+  await web14Host.open("after", "/web14/job", web14Context);
+  if (web14OpenedUri?.toString() !== web14Uri.toString()) {
+    throw new Error("WEB-14 browser flow source URI translation failed");
+  }
+  web14Text = "ty=g; edited";
+  web14Version += 1;
+  if (web14Host.isSourceCurrent?.("after", web14Context, web14Snapshot)) {
+    throw new Error("WEB-14 browser stale flow source was accepted");
+  }
+  reportWebScenario(
+    "WEB-14 passed: browser fresh/stale source and captured URI opening",
+  );
+
+  web14Text = "ty=g;";
+  web14Version = 9;
+  const web15NullCapture = {
+    ...web14Capture,
+    sources: {
+      ...web14Capture.sources,
+      after: { ...web14Capture.sources.after, version: null },
+    },
+  } as SemanticDiffSourceCaptureEntry;
+  const web15Host = createSemanticDiffFlowSourceHost({
+    sourceCapture: () => web15NullCapture,
+    getOpenTextDocuments: () => [web14Document],
+    openFlow: async () => web14FlowPanel,
+  });
+  const web15Snapshot = web15Host.getSourceSnapshot?.("after", web14Context);
+  if (
+    !web15Snapshot ||
+    !web15Host.isSourceCurrent?.("after", web14Context, web15Snapshot)
+  ) {
+    throw new Error("WEB-15 null-version source compatibility failed");
+  }
+  reportWebScenario("WEB-15 passed: browser null-version source compatibility");
 
   const commands = await vscode.commands.getCommands(true);
   for (const command of [

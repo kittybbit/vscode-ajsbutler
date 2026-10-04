@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { BuildSemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
-import type { SemanticDiffOutputContext } from "../../application/semantic-diff/semanticDiffDto";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -28,8 +27,8 @@ import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridg
 import {
   createSemanticDiffFlowAction,
   SemanticDiffFlowOverlayRegistry,
-  type SemanticDiffFlowSourceSnapshot,
 } from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
+import { createSemanticDiffFlowSourceHost } from "../../presentation/vscode/semantic-diff/flow/semanticDiffFlowSourceHost";
 import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
 import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
 import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarSessionRegistry";
@@ -54,121 +53,6 @@ export type SemanticDiffWiringDeps = {
 type SourceCaptureRegistration = NonNullable<
   SemanticDiffCommandDeps["registerSemanticDiffSourceCapture"]
 >;
-
-const createSourceSnapshotGetter =
-  (contextRegistry: SemanticDiffExplorerContextRegistry) =>
-  (
-    side: "before" | "after",
-    context: SemanticDiffOutputContext,
-  ): SemanticDiffFlowSourceSnapshot | undefined => {
-    const source = contextRegistry.sourceCapture(context)?.sources[side];
-    return source
-      ? {
-          sourceHandleId: source.sourceHandleId,
-          version: source.version,
-          text: source.text,
-          uri: source.uri.toString(),
-        }
-      : undefined;
-  };
-
-const sourceIdentityMatches = (
-  current: SemanticDiffFlowSourceSnapshot,
-  snapshot: SemanticDiffFlowSourceSnapshot,
-): boolean =>
-  current.sourceHandleId === snapshot.sourceHandleId &&
-  current.uri === snapshot.uri;
-
-const sourceVersionMatches = (
-  currentVersion: number | null,
-  snapshotVersion: number | null,
-): boolean => snapshotVersion === null || currentVersion === snapshotVersion;
-
-const sourceSnapshotMatches = (
-  current: SemanticDiffFlowSourceSnapshot,
-  snapshot: SemanticDiffFlowSourceSnapshot,
-): boolean =>
-  sourceVersionMatches(current.version, snapshot.version) &&
-  current.text === snapshot.text;
-
-const documentSnapshotMatches = (
-  document: vscode.TextDocument | undefined,
-  snapshot: SemanticDiffFlowSourceSnapshot,
-): boolean =>
-  document !== undefined &&
-  sourceVersionMatches(document.version, snapshot.version) &&
-  document.getText() === snapshot.text;
-
-const isSourceCurrent = ({
-  getSourceSnapshot,
-  side,
-  context,
-  snapshot,
-}: Readonly<{
-  getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
-  side: "before" | "after";
-  context: SemanticDiffOutputContext;
-  snapshot: SemanticDiffFlowSourceSnapshot;
-}>): boolean => {
-  const current = getSourceSnapshot(side, context);
-  if (current === undefined || !sourceIdentityMatches(current, snapshot)) {
-    return false;
-  }
-  const currentDocument = vscode.workspace.textDocuments.find(
-    (document) => document.uri.toString() === snapshot.uri,
-  );
-  return (
-    sourceSnapshotMatches(current, snapshot) &&
-    documentSnapshotMatches(currentDocument, snapshot)
-  );
-};
-
-const openFlowSource = async ({
-  flowBridge,
-  contextRegistry,
-  side,
-  targetUnitId,
-  context,
-}: Readonly<{
-  flowBridge: SemanticDiffFlowViewerBridge;
-  contextRegistry: SemanticDiffExplorerContextRegistry;
-  side: "before" | "after";
-  targetUnitId: string;
-  context: SemanticDiffOutputContext;
-}>) => {
-  const source = contextRegistry.sourceCapture(context)?.sources[side];
-  if (!source) throw new Error("Semantic Diff source is unavailable.");
-  return flowBridge.open(source.uri, targetUnitId);
-};
-
-const createFlowHost = ({
-  flowBridge,
-  contextRegistry,
-  getSourceSnapshot,
-}: Readonly<{
-  flowBridge: SemanticDiffFlowViewerBridge;
-  contextRegistry: SemanticDiffExplorerContextRegistry;
-  getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
-}>) => ({
-  getSourceSnapshot,
-  isSourceCurrent: (
-    side: "before" | "after",
-    context: SemanticDiffOutputContext,
-    snapshot: SemanticDiffFlowSourceSnapshot,
-  ) => isSourceCurrent({ getSourceSnapshot, side, context, snapshot }),
-  open: (
-    side: "before" | "after",
-    targetUnitId: string,
-    context: SemanticDiffOutputContext,
-  ) =>
-    openFlowSource({
-      flowBridge,
-      contextRegistry,
-      side,
-      targetUnitId,
-      context,
-    }),
-});
 
 export const createSourceCaptureRegistrar =
   (
@@ -198,7 +82,7 @@ const createOpenExplorer = ({
   reportDocuments,
   contextRegistry,
   flowOverlayRegistry,
-  getSourceSnapshot,
+  flowSourceHost,
   sidecarRegistry,
   calendarSessionRegistry,
 }: Readonly<{
@@ -206,7 +90,7 @@ const createOpenExplorer = ({
   reportDocuments: SemanticDiffReportDocumentProvider;
   contextRegistry: SemanticDiffExplorerContextRegistry;
   flowOverlayRegistry: SemanticDiffFlowOverlayRegistry;
-  getSourceSnapshot: ReturnType<typeof createSourceSnapshotGetter>;
+  flowSourceHost: ReturnType<typeof createSemanticDiffFlowSourceHost>;
   sidecarRegistry: ScheduleImpactSidecarRegistry;
   calendarSessionRegistry: ScheduleImpactCalendarSessionRegistry;
 }>) =>
@@ -227,11 +111,7 @@ const createOpenExplorer = ({
     actionIdAllocator: deps.actionIdAllocator,
     flowAction: deps.flowBridge
       ? createSemanticDiffFlowAction({
-          host: createFlowHost({
-            flowBridge: deps.flowBridge,
-            contextRegistry,
-            getSourceSnapshot,
-          }),
+          host: flowSourceHost,
           registry: flowOverlayRegistry,
         })
       : undefined,
@@ -297,7 +177,15 @@ export const createSemanticDiffSubscriptions = (
 ): vscode.Disposable[] => {
   const contextRegistry = new SemanticDiffExplorerContextRegistry();
   const flowOverlayRegistry = new SemanticDiffFlowOverlayRegistry();
-  const getSourceSnapshot = createSourceSnapshotGetter(contextRegistry);
+  const flowBridge = deps.flowBridge;
+  const flowSourceHost = createSemanticDiffFlowSourceHost({
+    sourceCapture: (context) => contextRegistry.sourceCapture(context),
+    getOpenTextDocuments: () => vscode.workspace.textDocuments,
+    openFlow: (uri, targetUnitId) =>
+      flowBridge
+        ? flowBridge.open(uri, targetUnitId)
+        : Promise.reject(new Error("Flow viewer is not registered.")),
+  });
   const reportDocuments = createReportDocuments();
   const sidecarRegistry = new ScheduleImpactSidecarRegistry();
   const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
@@ -306,7 +194,7 @@ export const createSemanticDiffSubscriptions = (
     reportDocuments,
     contextRegistry,
     flowOverlayRegistry,
-    getSourceSnapshot,
+    flowSourceHost,
     sidecarRegistry,
     calendarSessionRegistry,
   });

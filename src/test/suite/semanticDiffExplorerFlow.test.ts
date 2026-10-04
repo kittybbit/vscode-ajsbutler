@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import * as vscode from "vscode";
 import {
   createSemanticDiffFlowAction,
   SemanticDiffFlowOverlayRegistry,
@@ -25,6 +26,8 @@ import type { UnitListDocumentDto } from "../../application/unit-list/unitListDo
 import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 import { unitInformationMessage } from "../../presentation/webview/editor/unitInformationLocalization";
 import { SemanticDiffExplorerActionRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
+import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes";
+import { createSemanticDiffFlowSourceHost } from "../../presentation/vscode/semantic-diff/flow/semanticDiffFlowSourceHost";
 
 const unit = (id: string, name: string, parentId?: string) => ({
   id,
@@ -132,6 +135,60 @@ const createContext = (): SemanticDiffOutputContext => {
     limitations: [],
   };
   return { result, summary: {} as SemanticDiffOutputContext["summary"] };
+};
+
+const createMutableFlowSourceHost = ({
+  initialText = "after",
+  initialVersion = 1,
+  openFlow,
+}: Readonly<{
+  initialText?: string;
+  initialVersion?: number;
+  openFlow: Parameters<typeof createSemanticDiffFlowSourceHost>[0]["openFlow"];
+}>) => {
+  const beforeUri = vscode.Uri.parse("file:///before.ajs");
+  const afterUri = vscode.Uri.parse("file:///after.ajs");
+  const capture = {
+    binding: {} as never,
+    sources: {
+      before: {
+        side: "before" as const,
+        sourceHandleId: "source-before",
+        version: 1,
+        text: "before",
+        uri: beforeUri,
+      },
+      after: {
+        side: "after" as const,
+        sourceHandleId: "source-after",
+        version: 1,
+        text: "after",
+        uri: afterUri,
+      },
+    },
+    release: () => undefined,
+  } as unknown as SemanticDiffSourceCaptureEntry;
+  let currentText = initialText;
+  let currentVersion = initialVersion;
+  const document = {
+    uri: afterUri,
+    get version() {
+      return currentVersion;
+    },
+    getText: () => currentText,
+  } as vscode.TextDocument;
+  const host = createSemanticDiffFlowSourceHost({
+    sourceCapture: () => capture,
+    getOpenTextDocuments: () => [document],
+    openFlow,
+  });
+  return {
+    host,
+    setDocument: (text: string, version: number) => {
+      currentText = text;
+      currentVersion = version;
+    },
+  };
 };
 
 const relationTarget = {
@@ -689,28 +746,27 @@ suite("Semantic diff Explorer Flow integration", () => {
   });
 
   test("returns not-ready before validating a target after ready becomes stale", async () => {
-    let freshnessChecks = 0;
-    const sourceSnapshot = {
-      sourceHandleId: "source-after",
-      version: 1,
-      text: "after",
-      uri: "file:///after.ajs",
-    };
+    let opened = false;
+    let updateDocument = (): void => undefined;
     const panel: SemanticDiffFlowPanel = {
       flowUri: "file:///after.ajs",
-      ready: Promise.resolve({ document: createRelationFlowDocument(0) }),
+      ready: Promise.resolve({ document: createRelationFlowDocument(0) }).then(
+        (ready) => {
+          updateDocument();
+          return ready;
+        },
+      ),
       postMessage: () => Promise.resolve(true),
     };
-    const action = createSemanticDiffFlowAction({
-      host: {
-        getSourceSnapshot: () => sourceSnapshot,
-        isSourceCurrent: () => {
-          freshnessChecks += 1;
-          return freshnessChecks < 2;
-        },
-        open: async () => panel,
+    const sourceHost = createMutableFlowSourceHost({
+      openFlow: async () => {
+        opened = true;
+        return panel;
       },
     });
+    updateDocument = () =>
+      sourceHost.setDocument("edited while Flow opened", 2);
+    const action = createSemanticDiffFlowAction({ host: sourceHost.host });
     const result = await action(
       {
         ...request(createSemanticDiffExplorerSessionId(8)),
@@ -724,26 +780,20 @@ suite("Semantic diff Explorer Flow integration", () => {
       () => true,
     );
     assert.deepStrictEqual(result, { ok: false, code: "flow-not-ready" });
-    assert.strictEqual(freshnessChecks, 2);
+    assert.strictEqual(opened, true);
   });
 
   test("fails closed when the retained source snapshot is stale", async () => {
     let opened = false;
-    const sourceSnapshot = {
-      sourceHandleId: "source-after",
-      version: 1,
-      text: "after",
-      uri: "file:///after.ajs",
-    };
-    const action = createSemanticDiffFlowAction({
-      host: {
-        getSourceSnapshot: () => sourceSnapshot,
-        isSourceCurrent: () => false,
-        open: async () => {
-          opened = true;
-          throw new Error("should not open stale Flow");
-        },
+    const sourceHost = createMutableFlowSourceHost({
+      initialText: "edited after capture",
+      openFlow: async () => {
+        opened = true;
+        throw new Error("should not open stale Flow");
       },
+    });
+    const action = createSemanticDiffFlowAction({
+      host: sourceHost.host,
     });
     const result = await action(
       request(createSemanticDiffExplorerSessionId(6)),
@@ -756,34 +806,31 @@ suite("Semantic diff Explorer Flow integration", () => {
 
   test("rechecks source freshness after Flow readiness before posting", async () => {
     const messages: unknown[] = [];
-    let freshnessChecks = 0;
     let opened = false;
+    let updateDocument = (): void => undefined;
     const panel: SemanticDiffFlowPanel = {
       flowUri: "file:///after.ajs",
-      ready: Promise.resolve({ document: createFlowDocument() }),
+      ready: Promise.resolve({ document: createFlowDocument() }).then(
+        (ready) => {
+          updateDocument();
+          return ready;
+        },
+      ),
       postMessage: (message) => {
         messages.push(message);
         return Promise.resolve(true);
       },
     };
-    const sourceSnapshot = {
-      sourceHandleId: "source-after",
-      version: 1,
-      text: "after",
-      uri: "file:///after.ajs",
-    };
-    const action = createSemanticDiffFlowAction({
-      host: {
-        getSourceSnapshot: () => sourceSnapshot,
-        isSourceCurrent: () => {
-          freshnessChecks += 1;
-          return freshnessChecks < 2;
-        },
-        open: async () => {
-          opened = true;
-          return panel;
-        },
+    const sourceHost = createMutableFlowSourceHost({
+      openFlow: async () => {
+        opened = true;
+        return panel;
       },
+    });
+    updateDocument = () =>
+      sourceHost.setDocument("edited after Flow became ready", 2);
+    const action = createSemanticDiffFlowAction({
+      host: sourceHost.host,
     });
     const result = await action(
       request(createSemanticDiffExplorerSessionId(7)),
@@ -792,7 +839,6 @@ suite("Semantic diff Explorer Flow integration", () => {
     );
     assert.deepStrictEqual(result, { ok: false, code: "flow-not-ready" });
     assert.strictEqual(opened, true);
-    assert.strictEqual(freshnessChecks, 2);
     assert.deepStrictEqual(messages, []);
   });
 

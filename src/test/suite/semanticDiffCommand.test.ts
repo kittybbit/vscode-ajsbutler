@@ -1794,7 +1794,7 @@ suite("Semantic diff command", () => {
       ok: false,
       error: {
         code: "source-capture-failed",
-        message: "Semantic diff source targets could not be registered.",
+        message: "Semantic diff source capture could not be established.",
       },
     });
     assert.deepStrictEqual(events, ["release"]);

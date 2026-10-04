@@ -4,24 +4,24 @@
 
 - Purpose: narrow command collaborator contracts and move flow-source freshness
   policy from bootstrap to VS Code presentation, preserving behavior.
-- Active slice: S2 affected replan is PLAN_APPROVED; the added single-assertion
+- Active slice: S2 is SLICE_APPROVED; the added single-assertion
   boundary is approved by the user's explicit correction instruction.
 - Read first: [SPECS.md](SPECS.md), [TRACEABILITY.md](TRACEABILITY.md),
   [SDD policy](../../README.md), [architecture](../../architecture.md), and
   discovery/evidence references below.
-- Next operation: focused replan commit before the assertion correction.
-  Two affected implementation reviews and Completion Approval follow.
+- Next operation: the explicitly approved S2 completion commit.
+  Feature Exit follows both committed slices.
 - Prohibitions: no dependency upgrades, new behavior, application/domain/parser
   changes, architecture exceptions, calendar consolidation, or host-harness fix.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED (affected S2 boundary only)
-- Readiness: the prior two S2 Ready reviews are retained for unchanged facts,
-  but their completion candidate is superseded by the added assertion path.
-  Product-input identity Finding F1 remains resolved for its recorded inputs.
-- Next decision / blocker: focused replan commit. No implementation, S2
-  Completion Approval, completion commit or closure approval is implied.
+- Lifecycle state: SLICE_APPROVED
+- Readiness: both affected independent implementation reviews returned Ready,
+  with no Findings. Product-input identity Finding F1 remains resolved, and the
+  corrected assertion passed in the refreshed 176-test run.
+- Next decision / blocker: focused S2 completion commit. No feature closure
+  approval is implied.
 - Gate evidence: independent plan review Ready; explicit Human Approval in the
   current conversation; planning commit
   `c535a718c86e44b8e39f4771ca932f76c6bd654d` succeeded.
@@ -64,6 +64,9 @@
   `bbdbdf8d3a39e37b2c9906da1fa72d2bf8e9aea7d0029601b7ac538f79f6ffb3`.
 - Gate: this approval permits the focused replan commit and correction after
   that commit. S2 Completion Approval and Closure Approval remain separate.
+- Replan commit: `871ef0dba1d560917399861a2085fea6662d2e1d`; only TASKS.md,
+  approved identity and staged diff checks passed. Related S2 source/test
+  changes remain unstaged.
 
 ## S1 Completion Approval
 
@@ -85,23 +88,25 @@
 
 ## S2 Completion Approval
 
-- Status: Pending
-- Approved at: none
-- Candidate scope: pending revision to the exact eight paths below: two
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: the reviewed eight S2 paths and their completion commit,
+  including the one command-test expectation correction, validation evidence
+  and separately inspected gate metadata. Closure Approval remains separate.
+- Candidate scope: the reviewed exact eight paths below: two
   production files, five test files and selected-feature TASKS.md. The added
   command-test path permits only the one specified expectation correction.
-- Prior reviewed substantive identity:
-  `a174fd0e9bedf34f19342d46872c3375d53b02dedcf0ce4c1d61a708d4d26c0f`.
-- Prior reviews: [first independent Ready](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/review-a-ready.json)
-  and [second independent Ready](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/review-b-ready.json).
-  Both require affected re-review after implementation; neither approves the
-  added test path or the revised completion candidate.
-- Retained validation: [implementation evidence](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/evidence.json)
-  and [check-specific input identities](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/product/product-check-identities.json).
-  Reuse only check-specific matching inputs under the replan below.
+- Reviewed substantive identity:
+  `4c6b876229c50d9b8cab525c192e052cedd96dc000e4a7b7b805508d2a4e9282`.
+- Reviews: [first affected Ready](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/assertion-fix/review-a-ready.json)
+  and [second affected Ready](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/assertion-fix/review-b-ready.json).
+  Both cover the revised scope and evidence; neither grants Completion Approval.
+- Validation: [assertion correction evidence](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/assertion-fix/evidence.json),
+  including refreshed desktop/quality inputs and matching web/build evidence
+  reused under the approved replan.
 - Residual limits: formal full desktop-suite and minimum-version host execution
-  remain unproven. The inherited assertion is targeted for resolution in S2;
-  its previous failure is retained as historical evidence, not a current pass.
+  remain unproven. The inherited assertion is resolved in the refreshed S2 run;
+  its previous failure remains historical evidence for S1 and prior S2 inputs.
 
 ## Main validation disposition: S1
 
@@ -138,14 +143,15 @@
   full-suite pass.
 - Basis: the retained 16-suite run includes the adapter, wiring, real-adapter
   flow actions, source/panel/registry/capture/report, lifecycle/subscriptions,
-  command/schedule regressions and architecture. It records 175 passes and
-  the one inherited registration-error assertion failure. Web WEB-7 through
+  command/schedule regressions and architecture. The refreshed assertion-fix
+  run records 176 passes, zero failures/pending. Web WEB-7 through
   WEB-15 and both production builds are separately recorded.
-- Revised assertion disposition: resolve the inherited message mismatch with
-  the single expectation change below and require the named suite to pass.
+- Revised assertion disposition: the inherited message mismatch is resolved
+  by the approved single expectation change and the passing named-suite run.
   Earlier 175-pass/one-failure evidence remains historical; S1's disposition
-  and committed validation are unchanged. Semantic Diff command-test follow-up
-  ownership may be discharged only after refreshed evidence and review.
+  and committed validation are unchanged. Both affected independent reviews
+  accepted the refreshed evidence; the command-test mismatch follow-up is
+  resolved. The separate desktop launcher follow-up remains assigned below.
 - Limits: S2 only. No full-suite or minimum-version host pass, harness fix,
   quality exception or production message change is implied. Test-harness
   maintainers retain the roadmap-owned desktop launcher follow-up. A new
@@ -165,7 +171,7 @@
 | Slice | Value                                                             | Dependency                   | Lifecycle state |
 | ----- | ----------------------------------------------------------------- | ---------------------------- | --------------- |
 | S1    | Command collaborators expose responsibility-sized dependencies    | Plan commit                  | SLICE_COMMITTED |
-| S2    | Presentation owns live flow-source freshness and host translation | S1 focused completion commit | PLAN_APPROVED   |
+| S2    | Presentation owns live flow-source freshness and host translation | S1 focused completion commit | SLICE_APPROVED  |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -456,7 +462,7 @@ optional behavior and sufficiency of existing platform capabilities.
   `src/test/suite/webSmoke.ts`, `src/test/suite/semanticDiffCommand.test.ts`,
   and `docs/specs/features/semantic-diff-vscode-dependencies/TASKS.md`.
 - Added change: in `releases without unregister when source registration is
-  unavailable` (currently line 1797), replace only the expected message
+unavailable` (currently line 1797), replace only the expected message
   `Semantic diff source targets could not be registered.` with
   `Semantic diff source capture could not be established.`. Preserve the
   `source-capture-failed` code, fixture, release-only event assertion and all
@@ -638,3 +644,33 @@ discovery with matching manifests; the changed docs need fresh validation.
   retain their requirements and mapping. Documentation checks cover the final
   substantive plan; product/quality refresh belongs to implementation after
   the renewed plan gate.
+
+## S2 assertion correction implementation
+
+- Approved change: in `src/test/suite/semanticDiffCommand.test.ts`, the
+  `releases without unregister when source registration is unavailable` test
+  now expects the established localized message `Semantic diff source capture
+could not be established.`. The error code, fixture, release-only event
+  assertion and all other registration-failure expectations are unchanged.
+- Solution Shape: production ownership, dependency direction, host adapter,
+  contracts, bootstrap lifecycle and runtime behavior are unchanged. This is a
+  test expectation correction for the existing source-capture failure path.
+- Acceptance: test compilation passed; the retained 16-suite real VS Code
+  runner passed 176/176 tests, including architecture dependency rules 29/29.
+  Desktop full-host launcher and minimum-version host execution remain
+  unproven. Existing web WEB-7 through WEB-15 and production build checks were
+  reused because the assertion test is not an input to those surfaces.
+- Quality: refreshed final `qlty check --all`, `qlty smells --all`, and package
+  aggregate results, exact final snapshot selection and identities are indexed
+  in [assertion-fix evidence](/private/tmp/semantic-diff-vscode-dependencies-evidence/s2/assertion-fix/evidence.json).
+  Baseline SARIF and unchanged review facts are reused; no quality exception is
+  claimed.
+- Traceability: no edit needed. Existing R4 command/capture/rollback mapping in
+  TRACEABILITY already covers this assertion and its release behavior.
+- Compatibility and risk: no production source, VS Code API, minimum engine,
+  telemetry, JP1/AJS semantics, README or CHANGELOG change. The remaining risk
+  is an incorrectly matched expectation; the 16-suite run checks the actual
+  command result and cleanup behavior.
+- Handoff: IMPLEMENTED pending two affected independent implementation
+  reviews. Completion Approval and the focused completion commit remain
+  separate gates.
