@@ -23,6 +23,8 @@ import {
   createSemanticDiffExplorerSessionIdAllocator,
 } from "../../application/semantic-diff/semanticDiffExplorerDto";
 import { VscodeGitHeadContentProvider } from "../../infrastructure/git/VscodeGitHeadContentProvider";
+import { createSemanticDiffFlowSourceHost } from "../../presentation/vscode/semantic-diff/flow/semanticDiffFlowSourceHost";
+import type { SemanticDiffFlowViewerBridge } from "../../bootstrap/extension/semanticDiffFlowViewerBridge";
 
 const emptyResult = (): SemanticDiffResult => ({
   inputs: {
@@ -78,6 +80,7 @@ suite("Semantic diff wiring", () => {
     );
     const beforeUri = vscode.Uri.parse("file:///wiring-before.ajs");
     const afterUri = vscode.Uri.parse("file:///wiring-after.ajs");
+    const beforeUriString = beforeUri.toString();
     const sourceHandleIds = createSemanticDiffSourceHandleIdAllocator();
     const capture = beginCapture({
       before: {
@@ -131,8 +134,52 @@ suite("Semantic diff wiring", () => {
       registry.sourceCapture(context)?.sources.before.uri,
       beforeUri,
     );
+    const sourceHost = createSemanticDiffFlowSourceHost({
+      sourceCapture: (outputContext) => registry.sourceCapture(outputContext),
+      getOpenTextDocuments: () => [],
+      openFlow: async () => {
+        throw new Error("Flow viewer is not registered.");
+      },
+    });
+    assert.deepStrictEqual(sourceHost.getSourceSnapshot?.("before", context), {
+      sourceHandleId: binding.before.sourceHandleId,
+      version: 1,
+      text: "unit=before,,jp1admin,;{ty=g;}",
+      uri: beforeUriString,
+    });
     registry.unregisterSourceCapture(context);
     release();
     assert.strictEqual(registry.sourceCapture(context), undefined);
+  });
+
+  test("keeps the flow bridge optional during subscription composition", () => {
+    let openCalls = 0;
+    const flowBridge: SemanticDiffFlowViewerBridge = {
+      setFactory: () => undefined,
+      onReady: () => undefined,
+      onDocumentChanged: () => undefined,
+      open: async () => {
+        openCalls += 1;
+        throw new Error("Flow should open only after a user action.");
+      },
+    };
+    const subscriptions = createSemanticDiffSubscriptions({
+      extensionContext: { subscriptions: [] } as vscode.ExtensionContext,
+      buildSemanticDiffReportData: () => ({
+        ok: true,
+        result: emptyResult(),
+      }),
+      beginSemanticDiffSourceCapture: () => {
+        throw new Error("not called");
+      },
+      sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
+      sessionIdAllocator: createSemanticDiffExplorerSessionIdAllocator(),
+      actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
+      flowBridge,
+    });
+
+    assert.strictEqual(openCalls, 0);
+    subscriptions.forEach((subscription) => subscription.dispose());
+    assert.strictEqual(openCalls, 0);
   });
 });

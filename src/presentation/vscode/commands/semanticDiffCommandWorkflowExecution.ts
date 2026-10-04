@@ -8,37 +8,64 @@ import type { CommandStep } from "./semanticDiffCommandSteps";
 import {
   runCalendarCompatibilityWorkflow,
   runFileComparisonWorkflow,
+  type CalendarCompatibilityWorkflowDeps,
   type WorkflowExplorerResult,
 } from "./semanticDiffCommandWorkflowArtifacts";
-import { runExplorerCommand } from "./semanticDiffCommandExplorerWorkflow";
+import {
+  runExplorerCommand,
+  type ExplorerCommandDeps,
+} from "./semanticDiffCommandExplorerWorkflow";
 
 export type SemanticDiffCommandExecution = (
   deps: SemanticDiffCommandDeps,
 ) => Promise<SemanticDiffCommandResult>;
 
+type WorkflowRunnerDeps = CalendarCompatibilityWorkflowDeps;
+type ExplorerRunnerDeps = ExplorerCommandDeps;
+type ReportRunnerDeps = Pick<
+  SemanticDiffCommandDeps,
+  | "getActiveEditor"
+  | "showQuickPick"
+  | "showOpenDialog"
+  | "openTextDocument"
+  | "readFile"
+  | "sourceHandleIdAllocator"
+  | "beginSemanticDiffSourceCapture"
+  | "openExplorer"
+  | "buildSemanticDiffReportData"
+  | "buildSemanticDiffOutputContext"
+  | "presentSemanticDiffOutput"
+  | "openReport"
+  | "language"
+>;
+type FinalizationDeps = Pick<
+  SemanticDiffCommandDeps,
+  "showErrorMessage" | "language"
+>;
+
 type WorkflowRunner = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowRunnerDeps,
 ) => Promise<CommandStep<WorkflowExplorerResult>>;
 
 type ExplorerRunner = (
-  deps: SemanticDiffCommandDeps,
+  deps: ExplorerRunnerDeps,
 ) => Promise<CommandStep<SemanticDiffExplorerSessionHandle>>;
 
 type ExecutionHandlers = Readonly<{
   finalizeWorkflow: (
-    deps: SemanticDiffCommandDeps,
+    deps: FinalizationDeps,
     step: CommandStep<WorkflowExplorerResult>,
   ) => Promise<SemanticDiffCommandResult>;
   finalizeExplorer: (
-    deps: SemanticDiffCommandDeps,
+    deps: FinalizationDeps,
     step: CommandStep<SemanticDiffExplorerSessionHandle>,
   ) => Promise<SemanticDiffCommandResult>;
   finalizeReport: (
-    deps: SemanticDiffCommandDeps,
+    deps: FinalizationDeps,
     step: CommandStep<SemanticDiffOutputDocument>,
   ) => Promise<SemanticDiffCommandResult>;
   runReport: (
-    deps: SemanticDiffCommandDeps,
+    deps: ReportRunnerDeps,
   ) => Promise<CommandStep<SemanticDiffOutputDocument>>;
 }>;
 
@@ -65,17 +92,32 @@ export const executeReportCommand =
   async (deps) =>
     handlers.finalizeReport(deps, await handlers.runReport(deps));
 
-const hasCalendarAdapter = (deps: SemanticDiffCommandDeps): boolean =>
+const hasCalendarAdapter = (
+  deps: Pick<
+    SemanticDiffCommandDeps,
+    | "buildSemanticDiffPresentationArtifacts"
+    | "openScheduleAwareExplorerSession"
+  >,
+): boolean =>
   deps.buildSemanticDiffPresentationArtifacts !== undefined &&
   deps.openScheduleAwareExplorerSession !== undefined;
 
-const selectCalendarRunner = (deps: SemanticDiffCommandDeps): WorkflowRunner =>
+const selectCalendarRunner = (
+  deps: Pick<SemanticDiffCommandDeps, "showWorkflowQuickPick" | "showInputBox">,
+): WorkflowRunner =>
   deps.showWorkflowQuickPick !== undefined || deps.showInputBox !== undefined
     ? runFileComparisonWorkflow
     : runCalendarCompatibilityWorkflow;
 
 const selectExecutionRunner = (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<
+    SemanticDiffCommandDeps,
+    | "buildSemanticDiffPresentationArtifacts"
+    | "openScheduleAwareExplorerSession"
+    | "showWorkflowQuickPick"
+    | "showInputBox"
+    | "openExplorer"
+  >,
   handlers: ExecutionHandlers,
 ): SemanticDiffCommandExecution => {
   if (hasCalendarAdapter(deps)) {
@@ -90,6 +132,13 @@ const selectExecutionRunner = (
 };
 
 export const commandExecution = (
-  deps: SemanticDiffCommandDeps,
+  deps: Pick<
+    SemanticDiffCommandDeps,
+    | "buildSemanticDiffPresentationArtifacts"
+    | "openScheduleAwareExplorerSession"
+    | "showWorkflowQuickPick"
+    | "showInputBox"
+    | "openExplorer"
+  >,
   handlers: ExecutionHandlers,
 ): SemanticDiffCommandExecution => selectExecutionRunner(deps, handlers);

@@ -27,6 +27,12 @@ import {
   type SemanticDiffCommandDeps,
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import { getSemanticDiffCommandLocalization } from "../../presentation/vscode/commands/semanticDiffCommandLocalization";
+import { readSemanticDiffBeforeFile } from "../../presentation/vscode/commands/semanticDiffCommandReading";
+import { selectWorkflowSource } from "../../presentation/vscode/commands/semanticDiffCommandWorkflowSelection";
+import {
+  registerWorkflowSource,
+  type WorkflowBindingState,
+} from "../../presentation/vscode/commands/semanticDiffCommandSourceBinding";
 import {
   MAX_GIT_HEAD_SNAPSHOT_ENTRIES,
   VscodeGitHeadContentProvider,
@@ -238,6 +244,99 @@ const createWorkflowHarness = (
 };
 
 suite("Semantic diff command", () => {
+  test("uses responsibility-sized acquisition, selection, and registration collaborators", async () => {
+    const beforeUri = vscode.Uri.parse("untitled:minimal-before.ajs");
+    const beforeContent = "unit=before,,jp1admin,;{ty=g;}";
+    const read = await readSemanticDiffBeforeFile(
+      {
+        readFile: async () => new TextEncoder().encode(beforeContent),
+      },
+      beforeUri,
+    );
+
+    assert.deepStrictEqual(read, {
+      kind: "ready",
+      content: beforeContent,
+      version: null,
+      uri: beforeUri,
+    });
+
+    const selection = await selectWorkflowSource(
+      {
+        showQuickPick: async (items) => items[0],
+      },
+      getSemanticDiffCommandLocalization("en"),
+    );
+    assert.deepStrictEqual(selection, { kind: "file" });
+
+    const afterUri = vscode.Uri.parse("untitled:minimal-after.ajs");
+    const sourceHandleIdAllocator = createSemanticDiffSourceHandleIdAllocator();
+    const before = {
+      side: "before" as const,
+      sourceHandleId: sourceHandleIdAllocator(),
+      text: beforeContent,
+      version: null,
+      uri: beforeUri,
+    };
+    const after = {
+      side: "after" as const,
+      sourceHandleId: sourceHandleIdAllocator(),
+      text: "unit=after,,jp1admin,;{ty=g;}",
+      version: 1,
+      uri: afterUri,
+    };
+    const context: SemanticDiffOutputContext = {
+      result: emptyResult(),
+      summary: {} as never,
+    };
+    const artifacts: SemanticDiffPresentationArtifacts = {
+      context,
+      scheduleImpact: { kind: "unavailable", reason: "not-requested" },
+    };
+    const capture = createTestCaptureFactory(createTestParser())({
+      before: {
+        side: before.side,
+        sourceHandleId: before.sourceHandleId,
+        text: before.text,
+        version: before.version,
+      },
+      after: {
+        side: after.side,
+        sourceHandleId: after.sourceHandleId,
+        text: after.text,
+        version: after.version,
+      },
+    });
+    capture.parser.parse(before.text);
+    capture.parser.parse(after.text);
+    const binding = capture.bind(context);
+    if (!binding.ok) throw new Error("Expected source capture to bind.");
+
+    const registered: unknown[] = [];
+    const state: WorkflowBindingState = {
+      artifacts,
+      capture,
+      sources: { before, after },
+      release: () => undefined,
+    };
+    const registration = registerWorkflowSource(
+      {
+        registerSemanticDiffSourceCapture: (registeredContext, entry) => {
+          registered.push({ context: registeredContext, entry });
+        },
+      },
+      state,
+      binding,
+    );
+
+    assert.strictEqual(registration, "registered");
+    assert.strictEqual(registered.length, 1);
+    assert.strictEqual(
+      (registered[0] as { context: SemanticDiffOutputContext }).context,
+      context,
+    );
+  });
+
   test("uses the contributed command id", () => {
     assert.strictEqual(
       COMPARE_SEMANTIC_DIFF_COMMAND,
@@ -1695,7 +1794,7 @@ suite("Semantic diff command", () => {
       ok: false,
       error: {
         code: "source-capture-failed",
-        message: "Semantic diff source targets could not be registered.",
+        message: "Semantic diff source capture could not be established.",
       },
     });
     assert.deepStrictEqual(events, ["release"]);

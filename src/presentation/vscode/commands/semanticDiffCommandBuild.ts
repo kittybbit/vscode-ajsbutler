@@ -13,6 +13,20 @@ import type {
   CommandStep,
 } from "./semanticDiffCommandSteps";
 
+type ReportSourceIdDeps = Pick<
+  SemanticDiffCommandDeps,
+  "sourceHandleIdAllocator"
+>;
+type ReportSourceCaptureDeps = Pick<
+  SemanticDiffCommandDeps,
+  "sourceHandleIdAllocator" | "beginSemanticDiffSourceCapture" | "openExplorer"
+>;
+type ReportBuilderDeps = Pick<
+  SemanticDiffCommandDeps,
+  "buildSemanticDiffReportData"
+>;
+type ReportBuildDeps = ReportSourceCaptureDeps & ReportBuilderDeps;
+
 export const readSemanticDiffReportInputStep = (
   request: CommandReportRequest,
 ): CommandStep<CommandReportData> => {
@@ -36,7 +50,7 @@ export const readSemanticDiffReportInputStep = (
 };
 
 const createSourceDescriptors = (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportSourceIdDeps,
   request: CommandReportData,
 ): NonNullable<CommandReportData["sourceDescriptors"]> => {
   const sourceHandleIds = deps.sourceHandleIdAllocator;
@@ -62,7 +76,7 @@ const createSourceDescriptors = (
 };
 
 const beginSourceCapture = (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportSourceCaptureDeps,
   request: CommandReportData,
 ): SemanticDiffSourceCapture | undefined => {
   if (!deps.beginSemanticDiffSourceCapture || !deps.openExplorer) {
@@ -87,7 +101,7 @@ const beginSourceCapture = (
 };
 
 const beginSourceCaptureStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportSourceCaptureDeps,
   request: CommandReportData,
 ): CommandStep<SemanticDiffSourceCapture | undefined> => {
   try {
@@ -102,7 +116,7 @@ const beginSourceCaptureStep = (
 };
 
 const buildReportResultStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportBuilderDeps,
   request: CommandReportData,
   sourceCapture: SemanticDiffSourceCapture | undefined,
 ): CommandStep<
@@ -148,7 +162,7 @@ const reportBuildFailure = (
 };
 
 export const buildSemanticDiffReportDataStep = (
-  deps: SemanticDiffCommandDeps,
+  deps: ReportBuildDeps,
   request: CommandReportData,
 ): CommandStep<
   CommandReportData & {

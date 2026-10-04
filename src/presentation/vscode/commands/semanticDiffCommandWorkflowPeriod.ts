@@ -21,6 +21,13 @@ import {
 } from "./semanticDiffCommandWorkflowSelection";
 import type { WorkflowSourceRequest } from "./semanticDiffCommandWorkflowSource";
 
+type WorkflowPeriodQuickPickDeps = Pick<
+  SemanticDiffCommandDeps,
+  "showWorkflowQuickPick" | "showQuickPick"
+>;
+type WorkflowPeriodInputDeps = Pick<SemanticDiffCommandDeps, "showInputBox">;
+type WorkflowPeriodDeps = WorkflowPeriodQuickPickDeps & WorkflowPeriodInputDeps;
+
 export type WorkflowPeriodSelection =
   | { kind: "not-requested" }
   | { kind: "evaluated"; period: SemanticDiffComparisonPeriod }
@@ -45,7 +52,7 @@ const periodValidationMessage = (
 };
 
 const showWorkflowInput = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodInputDeps,
   options: vscode.InputBoxOptions,
 ): Thenable<string | undefined> =>
   deps.showInputBox ? deps.showInputBox(options) : Promise.resolve(undefined);
@@ -70,7 +77,7 @@ const periodModeFromItem = (
 };
 
 const selectWorkflowPeriodMode = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodQuickPickDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<WorkflowPeriodMode> =>
   selectWorkflowSelection({
@@ -122,7 +129,7 @@ const workflowToDateOptions = (
 });
 
 const readWorkflowDate = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodInputDeps,
   options: vscode.InputBoxOptions,
 ): Thenable<string | undefined> => showWorkflowInput(deps, options);
 
@@ -140,7 +147,7 @@ const periodInputsFromValues = (
     : { kind: "ready", from, to };
 
 const readWorkflowPeriodValues = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodInputDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<Readonly<{ from?: string; to?: string }>> => {
   const from = await readWorkflowDate(
@@ -155,7 +162,7 @@ const readWorkflowPeriodValues = async (
 };
 
 const readWorkflowPeriodInputs = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodInputDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<WorkflowPeriodInputs> => {
   const values = await readWorkflowPeriodValues(deps, localization);
@@ -190,13 +197,13 @@ const periodSelectionFromInputs = (
     : PERIOD_INPUT_FAILURES[inputs.kind];
 
 const readWorkflowPeriodDates = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodInputDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<WorkflowPeriodSelection> =>
   periodSelectionFromInputs(await readWorkflowPeriodInputs(deps, localization));
 
 const selectWorkflowPeriod = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<WorkflowPeriodSelection> => {
   const mode = await selectWorkflowPeriodMode(deps, localization);
@@ -220,7 +227,7 @@ const workflowPeriodFailure = (
       );
 
 export const selectWorkflowPeriodStep = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowPeriodDeps,
   source: WorkflowSourceRequest,
   localization: SemanticDiffCommandLocalization,
 ): Promise<

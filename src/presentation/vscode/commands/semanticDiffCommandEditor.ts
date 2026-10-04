@@ -9,6 +9,11 @@ type SemanticDiffCommandErrorCode = Extract<
   { ok: false }
 >["error"]["code"];
 
+type SemanticDiffCommandEditorDeps = Pick<
+  SemanticDiffCommandDeps,
+  "getActiveEditor"
+>;
+
 type CommandStep<T> =
   | { kind: "ready"; value: T }
   | {
@@ -34,7 +39,7 @@ const failedStep = (
 });
 
 export const readSemanticDiffActiveEditor = (
-  deps: SemanticDiffCommandDeps,
+  deps: SemanticDiffCommandEditorDeps,
 ): CommandStep<vscode.TextEditor> => {
   try {
     const activeEditor = deps.getActiveEditor();

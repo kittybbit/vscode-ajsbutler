@@ -12,8 +12,13 @@ import type {
 import type { SemanticDiffCommandLocalization } from "./semanticDiffCommandLocalization";
 import type { SemanticDiffOutputModeItem } from "../semantic-diff/report/semanticDiffOutputModePicker";
 
+type WorkflowQuickPickDeps = Pick<
+  SemanticDiffCommandDeps,
+  "showWorkflowQuickPick" | "showQuickPick"
+>;
+
 const workflowQuickPick = (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowQuickPickDeps,
   items: readonly SemanticDiffWorkflowQuickPickItem[],
   options: vscode.QuickPickOptions,
 ): Thenable<SemanticDiffWorkflowQuickPickItem | undefined> => {
@@ -43,7 +48,7 @@ const workflowPickOptions = (
 ): vscode.QuickPickOptions => ({ placeHolder, title });
 
 const selectWorkflowItem = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowQuickPickDeps,
   items: readonly SemanticDiffWorkflowQuickPickItem[],
   options: vscode.QuickPickOptions,
 ): Promise<WorkflowQuickPickResult> => {
@@ -58,7 +63,7 @@ const selectWorkflowItem = async (
 };
 
 type WorkflowSelectionOptions<T> = Readonly<{
-  deps: SemanticDiffCommandDeps;
+  deps: WorkflowQuickPickDeps;
   items: readonly SemanticDiffWorkflowQuickPickItem[];
   options: vscode.QuickPickOptions;
   map: (item: SemanticDiffWorkflowQuickPickItem | undefined) => T;
@@ -98,7 +103,7 @@ const sourceSelectionFromItem = (
 };
 
 export const selectWorkflowSource = async (
-  deps: SemanticDiffCommandDeps,
+  deps: WorkflowQuickPickDeps,
   localization: SemanticDiffCommandLocalization,
 ): Promise<WorkflowSourceSelection> =>
   selectWorkflowSelection({

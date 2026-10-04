@@ -78,15 +78,12 @@ entry conditions that make planning each item useful.
   plans, reviews, approvals, and completion evidence. Do not create one umbrella
   implementation feature; this roadmap section is the coordination record.
 
-1. `semantic-diff-vscode-dependencies`: narrow command dependency groups and
-   move source-freshness behavior out of bootstrap while retaining bootstrap as
-   the composition root.
-2. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
+1. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
    wrappers and single-consumer helpers that do not earn an independent React,
    interaction, accessibility, state, reuse, test, or complexity boundary.
-3. `domain-model-readonly`: migrate normalized domain model parts to readonly
+2. `domain-model-readonly`: migrate normalized domain model parts to readonly
    contracts incrementally after mutation impact is characterized.
-4. `architecture-test-cohesion`: split the architecture-test implementation
+3. `architecture-test-cohesion`: split the architecture-test implementation
    only when its size or change pressure justifies the boundary; do not build a
    speculative static-analysis framework.
 
