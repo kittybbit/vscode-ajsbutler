@@ -35,6 +35,12 @@ read-only Semantic Diff Explorer session.
 - Git `Repository.show` supplies the decoded/textconv before snapshot; binary,
   unsupported, missing, and oversized sources remain explicit failures
 - source and period selection are per-run values and are not persisted
+- a new Semantic Diff Flow action uses a captured source only while the same
+  source identity and URI still resolve to an open document with matching
+  text; a captured non-null document version must also match, while a null
+  version adds no version check
+- a missing capture, missing matching open document, or stale captured source
+  is unavailable for a new Flow action
 - cancellation does not create a comparison, report, Explorer, or partial
   source session
 - the Explorer is the successful default; copy and save actions remain
