@@ -2,22 +2,20 @@
 
 <!-- markdownlint-disable MD013 -->
 
-| Requirement or source | Slice | Test or validation | S1 execution result |
-| --------------------- | ----- | ----------------- | ------------------- |
-| R1; roadmap item 1 | S1, S2 | Solution Shape and consumer review; S1 removes Sections/SectionBody, S2 removes bounded helper module; retained boundaries assessed in TASKS | S1 stale-import search passes; the two forwarding files are removed; Contents and ResultSection retain ownership described in TASKS |
-| R2; section order, empty/populated results and counts | S1 | Components characterization of ordered sections and filter transitions; existing View root/scope/identity and timeline tests | Ordered sections and populated/empty/populated counts, list names, and alert labels pass in pre- and post-refactor component tests |
-| R2; immutable facts, period, conjunctive filters and run ordering | S1, S2 | Existing Components and View suites; no model/projection or host-contract changes | Non-large View cases pass; existing 10,000-item View case is SIGKILLed on both the base and S1 snapshots; no model or projection path changed |
-| R3; bounded list semantics, state, keyboard and focus | S2 | New BoundedList boundary suite: handler chaining, clamping, threshold and virtualized End/Home; View 10,000-item test; Accessibility retry suite | S2 remains planned; S1 does not change bounded-list code; the inherited 10,000-item View test is blocked on base and S1 |
-| R3; labels, empty alerts, announcements, theme and safe text | S1, S2 | Components and View suites; Accessibility, Localization and ThemeContext suites; unchanged shared styles/text rendering reviewed | S1 component and Accessibility/Theme tests pass; the existing English announcement assertion fails identically on base and S1; expectation-only colon removal in Localization is proposed, pending replan gates; runtime/Japanese text stays unchanged; alert transitions pass |
-| R4; architecture and compatibility | S1, S2 | architectureDependencyRules suite (mechanical catalog); separate ownership review; TypeScript and test compilation; production desktop/web/webview build; code-tier qlty evidence | S1 architecture suite 29/29, TypeScript, test compilation, and desktop/web/webview build pass; final qlty observations/aggregate await Main's replan |
-| Documentation and approval boundaries | S1, S2 | Markdown/local links/structure/scope/diff checks; exact path and gate evidence in TASKS | S1 feature Markdown lint and diff check passed before these outcome annotations; rerun is pending; original approval scope remains preserved; proposed Localization path needs renewed S1 review/approval/commit; Main preserves required 10,000-item check unchanged as implementation-readiness blocker |
+| Requirement or source | Slice | Test or validation |
+| --- | --- | --- |
+| R1; roadmap item 1 | S1, S2 | Solution Shape/consumer review; S1 removes Sections/SectionBody, S2 removes bounded helper module; retained semantic boundaries assessed in TASKS |
+| R2; order, empty/populated results and counts | S1 | Components characterization of ordered sections and populated/empty/populated filter transitions; unchanged global and correct visible counts/list names/alerts |
+| R2; immutable facts, period, conjunctive filters and ordering | S1, S2 | Existing Components and View suites including root/scope/identity and timeline facts; no model/projection or host-contract changes |
+| R3; custom row focus/ref/aria contract | S1 | View integration: CandidateGroupCard, CandidateDetails, IssueCard, RootStatusCard and ValidNoRunsCard, small and virtualized focus/navigation; roving tabIndex, bounded index, aria position/set size and actual activeElement |
+| R3; nested candidate event ownership | S1 | View: two groups with multiple before/after candidates, inner ArrowUp/Down/Home/End stays in owning side without activating/navigating parent; article-self group keys still work |
+| R3; bounded large-result access | S1, S2 | Intact 10,000-item View bounded DOM/count/candidate-group/issue/timeline focus coverage; S1 adds threshold-plus-one nested candidate/root/no-runs integration; same strict DOM identity predicate with compact failure output |
+| R3; bounded-list lifecycle and handler chaining | S2 | New public BoundedList boundary suite: small list semantics, original handler chaining, shrink clamping, threshold/threshold-plus-one and virtualized End/Home; Accessibility retry suite |
+| R3; labels, announcements, theme and safe text | S1, S2 | Components/View, Accessibility, ThemeContext and Localization suites; approved English selectedItem colon-only expectation correction; Japanese/runtime text preserved |
+| R4; architecture and compatibility | S1, S2 | Mechanical architectureDependencyRules catalog separately from semantic ownership review; TypeScript/test compilation, desktop/web/webview production build and code-tier qlty |
+| Documentation and approval boundary | S1, S2 | Markdown lint, local links/structure/scope/diff checks; exact approval and gate records in TASKS; S1 CHANGELOG records observable keyboard repair |
 
 <!-- markdownlint-enable MD013 -->
 
-S1 outcomes and unresolved baseline failures are recorded here and in
-`TASKS.md`; raw commands, exits, SARIF, and snapshot references are in its
-linked evidence artifact. S2 checks remain planned.
-
-The minimal S1 proposal in `TASKS.md` maps the expectation-only wording repair
-to R3. Required 10,000-item bounded DOM/count/focus coverage is retained; no
-waiver, replacement check, fixture reduction or View-test edit is approved.
+Validation identities, outcomes, retained approvals and pending renewal are
+indexed only in `TASKS.md`; complete raw artifacts remain linked from that index.

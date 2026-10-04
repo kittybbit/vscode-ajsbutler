@@ -31,6 +31,9 @@ earn React, interaction, accessibility, state, reuse, test, or complexity value.
   focus behavior, bounded rendering, virtualization thresholds, and access to
   large result sets. Preserve theme, high contrast, reduced motion, zoom,
   Japanese labels, and English fallback. Render raw values through React text.
+  Restore this existing contract where custom bounded-list rows currently drop
+  focus attributes, handlers and refs, including nested candidate lists. Inner
+  candidate navigation must not trigger outer candidate-group navigation.
 - R4: Keep the presentation owner and existing application/host contracts.
   Require zero-exception architecture validation and behavior regression
   evidence for the selected implementation boundary.
@@ -50,8 +53,9 @@ earn React, interaction, accessibility, state, reuse, test, or complexity value.
 - Shared result components, model projection, focus/accessibility utilities,
   and app/bridge lifecycle remain existing owners. Their behavior and contracts
   are constraints, not additional refactoring outcomes.
-- No durable use-case, README, or CHANGELOG change is expected for a behavior-
-  preserving internal refactor. Feature Exit must evaluate roadmap completion
+- The required keyboard contract repair is observable and requires a concise
+  CHANGELOG entry. The existing durable use case already owns that contract;
+  no use-case or README extension is needed. Feature Exit evaluates completion
   and any necessary reusable architecture knowledge without duplicating policy.
 
 ## Compatibility

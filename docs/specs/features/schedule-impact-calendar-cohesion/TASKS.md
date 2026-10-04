@@ -4,35 +4,39 @@
 
 - Purpose: co-locate calendar presentation with its semantic owner and preserve
   the read-only workflow.
-- Active or approved slice: S1 first; S1 and S2 plans Human Approved.
+- Active slice: S1 focus extension Human Approved; original approvals retained.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, linked discovery and
   planning evidence, and the Present Schedule Impact use case.
-- Constraints: implementation is limited to approved S1 runtime/test paths and
-  selected feature records; S2 waits for S1 review, approval, and commit.
-- Next operation: focused S1 replan commit; Main owns gate and routing.
+- Constraints: retain the partial approved S1 patch; do not implement the
+  proposed focus repair before renewed review, Human Approval and replan commit.
+  S2 waits for S1 review, Completion Approval, and completion commit.
+- Next operation: focused replan commit, then S1 implementation; Main owns gates.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused commit of the reviewed and Human Approved
-  S1 wording-test extension. Main elected to
-  preserve the required 10,000-item test unchanged as an implementation-
-  readiness blocker; final qlty evidence remains pending.
+- Next decision / blocker: focused planning commit for the reviewed and approved
+  S1 focus repair, View-test changes and CHANGELOG.
+  Original approved S1 is partially implemented and uncommitted; the required
+  10,000-item test is blocked by a diagnosed inherited row-focus defect.
 - Selected feature: `schedule-impact-calendar-cohesion`, roadmap item 1.
 - Source/base: `30b3f689af6d236ec8dcc427f7ea7789ce12888b`.
 - Branch: `codex/schedule-impact-calendar-cohesion`.
 - Gate evidence: independent plan review Ready; Human Approval recorded;
   planning commit `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`.
-- Approved implementation scope: S1 and S2; no completed slices.
+- Approved implementation scope: original S1 and S2, expectation-only
+  Localization correction, and reviewed S1 focus extension below.
+  No completed slices.
 
 ## Human Approval
 
 - Status: Approved
 - Approved at: approved in current conversation
-- Approved scope: reviewed S1 and S2 plan, including exact implementation,
-  acceptance, validation, dependency and exclusion boundaries below.
-- Approved paths: S1 and S2 runtime/test paths listed below, plus selected
-  feature `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` for plan and gate records.
+- Approved scope: original reviewed S1 and S2 consolidation plan; excludes the
+  proposed S1 focus repair, View-test edits and CHANGELOG described below.
+- Approved paths: original S1 Contents, Sections (delete), ResultSection,
+  SectionBody (delete), and Components test; unchanged S2 runtime/test paths;
+  selected feature `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md` for gate records.
 - Provenance: human approval in response to Main's explicit S1/S2 plan approval
   request; applies to planning and implementation, not Completion or Closure.
 - Plan commit paths, exactly:
@@ -47,6 +51,8 @@
   `2a637486bab04eaab9fcb53a8dad909e71ee5e5e3e4af9fdebaaff30abc33edc`;
   TRACEABILITY SHA256
   `e0f6f1e38e135739c50a502a4364387fd7e80fd9d400c60ca81858f0a6011a95`.
+- Replan commit: `ccdbc6af46d4511e2c55e79f54654e3d84f16ce5`; focused
+  planning gate completed; S1 implementation remains uncommitted.
 - Status: Approved.
 - Approved at: approved in current conversation.
 - Approved scope: exact expectation-only English colon removal described below
@@ -62,57 +68,70 @@
 - These state/review/approval entries are separate gate metadata; substantive
   replan and required large-test coverage are unchanged.
 
-## S1 minimal replan and preserved validation blocker
+## S1 replan outcome and validation blocker
 
-- Mode/base: Replanning, S1, planning commit
-  `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`; preserve the existing uncommitted
-  S1 implementation patch and the unchanged S2 plan. No completion commit exists.
-- Trigger: the required Localization test expects
-  `Selected schedule impact: ...`, while the existing English resource prefix
-  and formatter produce `Selected schedule impact ...` at both base and final.
-- Proposed additional S1 path, exactly:
-  `src/test/suite/scheduleImpactCalendarLocalization.test.ts`. Change only the
-  English `selectedItem` expected string in
-  `does not localize facts in result announcements`, removing its colon.
-  Keep its date/path/occurrence facts and final period, all Japanese assertions,
-  resource text and runtime formatting unchanged. No other test repair is
-  included. This restores the regression assertion to current behavior under
-  R3 without changing a public contract or introducing an abstraction.
-- Approval provenance: original S1/S2 Human Approval above is preserved. Main
-  supplied explicit later human authorization for wording-difference test
-  fixes, interpreted as this exact expectation-only correction. It is input
-  authorization, not a planner-granted approval or completed replan gate.
-  Main must record renewed provenance after independent review of the changed
-  S1 boundary; the prior reviewed identity covers only the original scope.
-- Review/evidence renewal: the S1 scope extension needs independent plan review
-  and a focused replan commit before implementation resumes. Preserve S2's
-  design, order, dependency on S1 completion, and approval. Reuse each existing
-  passing check only if its own inspected inputs/configuration/tools/coverage
-  still match. Refresh Localization and test compilation for the changed test;
-  final full-repository qlty must include it and these revised documents.
-  Baseline SARIF may be reused only with complete required inventory facts;
-  the recorded unknown check analyzed count is not a passing evidence package.
-- Unresolved required coverage: the View test
-  `keeps every repeated section bounded and keyboard-reachable` constructs
-  10,000 candidates, issues and timeline entries and checks fewer than 300 DOM
-  entries, global counts, and End-key focus for all three large lists using
-  `VirtuosoMockContext`. Both current and baseline commands are SIGKILLed,
-  including the baseline isolated run. The retained raw log has no elapsed
-  time, RSS, render-stage marker or killer provenance; it establishes identical
-  termination, not an OOM, timeout, harness defect or runtime defect diagnosis.
-  `.timeout(5000)` cannot interrupt synchronous render work. No View test,
-  list algorithm, fixture size, assertion, skip or required coverage change is
-  authorized by the wording-fix instruction.
-- Main decision: plan only the exact wording expectation correction now.
-  Preserve the required 10,000-item test/check unchanged, with no replacement,
-  waiver, diagnosis scope or View-test edit. After renewed review/approval/commit,
-  resume S1 to complete unaffected required checks and the wording test while
-  retaining large-test failure as a blocker to implementation Ready. A concrete
-  repair or changed coverage later returns through Main for its own decision.
-- Replan readiness: the changed scope is reviewable and no new scope/design or
-  validation decision is unresolved. Independent review is required for this
-  S1 extension. The existing S1 patch remains paused in IMPLEMENTING until the
-  replan gates complete; its required large-test evidence is still not passing.
+- Replan commit: `ccdbc6af46d4511e2c55e79f54654e3d84f16ce5`; independent
+  review returned Ready with no Findings and Main recorded renewed Human
+  Approval. The exact additional path is
+  `src/test/suite/scheduleImpactCalendarLocalization.test.ts`.
+- Applied only the approved English `selectedItem` expectation correction:
+  removed the colon after `Selected schedule impact`; date, path, occurrence,
+  final period, Japanese assertions, resources and runtime formatting are
+  unchanged. Test compilation and all three Localization tests pass.
+- The required View test `keeps every repeated section bounded and
+  keyboard-reachable` remains unchanged and was SIGKILLed on both base and final
+  snapshots. Main's retained diagnosis below identifies a real focus failure
+  and expensive DOM assertion diffing; neither termination is a passing result.
+  No coverage waiver or View change is approved. Required coverage stays intact.
+- Complete command outputs, SARIF, snapshot identities, reused check references
+  and missing facts are linked in the S1 implementation evidence artifact.
+
+## Proposed S1 focus-contract extension
+
+- Trigger and identity: Main read-only diagnosis at HEAD
+  `ccdbc6af46d4511e2c55e79f54654e3d84f16ce5`, with original S1 code comparison
+  base `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf` and the partial S1 patch
+  retained. [Diagnosis evidence](/private/tmp/calendar-large-diagnosis/evidence.json)
+  records exact inspected inputs, profile and compact-failure logs.
+- Cause: BoundedList clones `tabIndex`, ref, `onFocus`, `onKeyDown`,
+  `aria-posinset`, `aria-setsize` and bounded index onto custom row elements.
+  CandidateGroupCard, CandidateDetails, IssueCard, RootStatusCard and
+  ValidNoRunsCard drop those props instead of forwarding to their DOM root.
+  The candidate article cannot receive focus; the last timeline item remains
+  active. A failed strict DOM-object comparison spends over 12 seconds in
+  Node's assertion diff at about 1.3 GB memory before termination. A diagnostic
+  scalar assertion preserving the identity predicate reveals the failure in
+  about one second. This is discovery, not replacement validation or a pass.
+- Main design decision: restore forwarding at existing row owners only;
+  preserve ResultCard article and ListItem li roots, labels, facts and styles.
+  CandidateGroupCard must invoke injected outer `onFocus`/`onKeyDown` only for
+  `event.target === event.currentTarget`, leaving nested candidate events with
+  their inner list. Do not change BoundedList, its helper algorithms or Timeline.
+- Slice decision: keep the minimum repair in S1 because it restores R3's
+  required contract for the very result sections being consolidated and
+  unblocks their mandatory integrated acceptance. A separate independent fix
+  slice would leave the existing S1 acceptance knowingly broken or require
+  shelving the partial patch and changing sequencing. No umbrella redesign.
+- Renewal: prior review/approval remains valid for original consolidation,
+  exact colon-only correction and unchanged S2, but does not cover these
+  additions. Integrated S1 readiness, review and approval must be renewed.
+  Existing partial code is retained; no completed slice or commit is revoked.
+- New Human Approval: Approved; approved at approved in current conversation.
+  Provenance: human approved Main's explicit added focus-repair/View/CHANGELOG
+  boundary request after independent Ready review. This authorization covers
+  implementation and planning only, not Completion Approval or Closure.
+- Approved added paths, exactly:
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarCandidates.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarIssues.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarRootSections.tsx`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+  - `CHANGELOG.md`
+  - Selected feature `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`.
+- Approved scope: reviewed forwarding and outer-self event design, compact test
+  failure reporting with intact 10,000-item coverage, extended regressions,
+  one Unreleased entry, and all required validation; no other scope additions.
+- Replan commit boundary: exactly selected feature SPECS, TASKS and TRACEABILITY
+  after review and approval; leave existing runtime/test changes unstaged.
 
 ## Solution Shape and candidate decisions
 
@@ -149,6 +168,22 @@ selection changes. No new custom mechanism is needed.
   production consumer and no separate test or contract consumer. The cohesive
   module has about 270 lines; no flattening of hook/component responsibilities
   or algorithm rewrite is authorized.
+- **Custom row contract repair (S1):** Candidates, Issues and RootSections stay
+  their existing presentation semantic owners. Their five private row
+  components retain separate semantic rendering responsibilities and pass
+  BoundedList's already-existing DOM contract to their current root. Use
+  React's existing typed ref forwarding capability (`React.forwardRef`, already
+  used by ResultCard) with HTMLAttributes and the actual root element type;
+  ResultCard roots follow its current HTMLDivElement ref contract and ListItem
+  roots use HTMLLIElement. Exclude conflicting semantic `title`/children props
+  where needed; preserve semantic props and deliberate markup/style precedence.
+  Do not leak DTO/labels props onto DOM, add public exports, wrappers, a shared
+  prop adapter, new hook, dependency, or custom focus mechanism. React 19,
+  ResultCard and MUI already provide the required ref/attribute forwarding.
+  Guard only the outer candidate article's focus/key callbacks against nested
+  events, invoking its injected callback once for an article-self event.
+  View boundary tests own real-row focus/aria/nested integration; S2's unchanged
+  public BoundedList suite owns its algorithm and generic handler chaining.
 - **Retain Timeline and TimelineHelpers:** Timeline owns the accessible region,
   navigation hook invocation and empty fallback. Its roughly 470-line helper
   module separates run details, navigation state/ref lifecycle, standard date
@@ -173,16 +208,18 @@ value above; no test result constitutes that semantic judgment.
 
 ## Implementation slices
 
-Each slice is one independently testable, reviewable and committable behavior-
-preserving result. Execute S1 first. S2 starts only after S1 is independently
-Ready, explicitly Completion Approved and committed; its baseline is that
+Each slice is one independently testable, reviewable and committable result
+preserving the specified behavior contract. Execute S1 first. S2 starts after
+S1 is independently Ready, explicitly Completion Approved and committed;
+its baseline is that
 commit. There is no external feature dependency or cross-layer migration.
 
-### S1: Co-locate section composition and empty-state selection
+### S1: Co-locate result sections and restore their bounded-row focus contract
 
-- Lifecycle state: IMPLEMENTING
+- Lifecycle state: PLANNED (extension); original implementation retained partial.
 - Value: page ordering lives with Contents; each result region owns its body
-  choice. Remove two forwarding boundaries without changing result children.
+  choice. Remove two forwarding boundaries and restore the existing keyboard
+  contract for their custom result rows without changing displayed facts.
 - Runtime paths, exactly:
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
@@ -190,41 +227,75 @@ commit. There is no external feature dependency or cross-layer migration.
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarResultSection.tsx`
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSectionBody.tsx`
     (delete)
-- Test path:
-  `src/test/suite/scheduleImpactCalendarComponents.test.tsx`.
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarCandidates.tsx`
+    (proposed: CandidateGroupCard/CandidateDetails DOM forwarding and outer
+    article event ownership only)
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarIssues.tsx`
+    (proposed: IssueCard DOM forwarding only)
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarRootSections.tsx`
+    (proposed: RootStatusCard/ValidNoRunsCard DOM forwarding only)
+- Test paths, exactly:
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+    (existing approved section characterization)
+  - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
+    (existing approved colon-only expectation correction)
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+    (proposed: compact DOM identity failures and real-row keyboard boundaries)
+- Document path: `CHANGELOG.md` (proposed: one Unreleased keyboard-fix entry).
 - Acceptance: R1 removes the two exports/files and obsolete imports with no
   remaining consumer. R2/R3 preserve period, the five-section order before
   timeline, count attributes and labels, empty alert versus bounded list, and
   unchanged populated sections after filter changes. R4 preserves the existing
   calendar ResultSection props and dependency direction.
+- Extended R3 acceptance: all five custom row types attach the cloned ref,
+  roving tab index, bounded index, position/set size and focus/key handlers to
+  their existing DOM root. Small and virtualized lists permit ArrowUp/Down and
+  Home/End within the owning list. Nested before/after candidate navigation
+  cannot change outer-group focus/active index; outer-group-self navigation
+  still works. Preserve data/labels/counts/DOM size and all 10,000-item assertions.
 - Characterize before restructuring: strengthen the existing component test to
   assert ordered semantic regions/legend/timeline, and populated-to-empty-to-
   populated filter transitions with unchanged global counts, correct visible
   counts, accessible list names and alert labels. Test observable rendering,
   not module count or private helper calls. Run these against pre-refactor code.
+- Repair characterization: in the existing View suite, first replace only DOM
+  object identity assertions with the same strict identity boolean predicate
+  and compact context; no fixture, timeout, equality rule, retry, selector or
+  covered assertion is weakened. Record the 10,000-item test's inherited
+  compact failure before repair. Add small-list integration coverage of all
+  five row types and virtualized coverage of previously untested roots,
+  valid-no-runs and nested before/after candidates using threshold-plus-one
+  fixtures and existing VirtuosoMockContext/DOM setup. Retain existing 10,000
+  candidate-group/issue/timeline coverage unchanged except compact reporting.
+  Exercise ArrowDown/Up and End/Home, actual activeElement identity, roving
+  tabIndex, position/set size, bounded count and render limits. Include two
+  groups with multiple before/after candidates: inner navigation stays inside
+  its side, does not activate/navigate the parent group, and outer-self keys
+  still move groups. Record red boundary failures before the repair and green
+  results after. Keep helpers local to this suite; no shared harness/module.
 - Validation: common code checks below, including existing view coverage for
   root outcomes, one-sided/scope facts, independent filters, timeline semantics
   and large results. No bounded-list implementation edits in this slice.
 - Risk: removing a stateless parent can alter reconciliation position. Preserve
   markup and child keys/types; rerender tests must catch state/visibility loss.
-- Implementation: exact approved S1 runtime and test paths changed; R1 and the
+- Repair risks: wrong ref/root types or prop ordering can lose DOM registration
+  or semantic attributes; nested event bubbling can move both list owners.
+  Use existing roots and explicit typed forwarding, guard outer-self events,
+  and verify both nesting and virtualization. Observable keyboard repair is a
+  compatible bug fix; no VS Code API, package, host or source-fact changes.
+- Implementation: approved S1 runtime/test paths and the replan-authorized
+  Localization expectation changed; R1 and the
   observable component transitions pass characterization before and after the
   refactor. No S2 or other runtime path changed.
-- Validation evidence: see the S1 partial evidence artifact in the Validation
-  index. Production TypeScript, test compilation, architecture rules, and build
-  pass. Markdown lint and diff check passed before the final outcome annotations
-  and need rerunning. The targeted component and non-large view,
-  accessibility, theme, and most localization tests pass. Required calendar
-  coverage is not Ready: the existing announcement wording assertion fails on
-  both S1 and the comparison base, and the existing 10,000-item view test is
-  SIGKILLed on both. Final qlty observations and aggregate are deferred until
-  Main resolves the scope change.
-- Readiness: implementation handoff paused in IMPLEMENTING. User authorized
-  fixing the wording mismatch, which is outside the approved paths; Main routes
-  minimal replan review, renewed approval provenance and commit before that
-  edit. Main preserves the large-test requirement unchanged as a blocker to
-  implementation Ready; unaffected checks may resume after the replan gates.
-  No completion approval or commit.
+- Validation evidence: see the S1 implementation evidence artifact in the
+  Validation index. TypeScript, test compilation, architecture rules, build,
+  focused Localization, and non-large calendar coverage pass. The required
+  10,000-item View test is SIGKILLed on both base and final. Final qlty status
+  and exact inventory are recorded in the linked artifact; missing inventory
+  facts, if any, remain explicit.
+- Readiness: proposed scope extension awaits review, Human Approval and focused
+  replan commit. Existing passes cover their recorded inputs only; full required
+  large-result coverage must pass after repair. No Completion Approval/commit.
 - Completion Approval: Pending; approved at none; scope none; commit none.
 
 ### S2: Co-locate bounded rendering with its focus lifecycle
@@ -262,17 +333,19 @@ commit. There is no external feature dependency or cross-layer migration.
 
 ## Approval boundaries and exclusions
 
-Human Approval must name S1 and S2, their exact runtime/test paths above, and
-selected feature documents used for state, evidence and traceability updates.
+Renewed Human Approval must name the proposed S1 additions, exact production,
+View-test and CHANGELOG paths, nested-event design and intact validation above.
+Original approvals and S2 boundary remain recorded separately; they do not
+authorize new S1 paths. Selected feature documents carry gate/evidence updates.
 The focused plan commit includes only this feature's three Markdown documents
 and explicit approval metadata. Each slice commit includes only its listed
-runtime/test paths and necessary selected-feature records.
+runtime/test/document paths and necessary selected-feature records.
 
-All other paths are excluded: Timeline/TimelineHelpers, Candidates, Issues,
-RootSections, Legend, Header, Filters, model, accessibility/focus utilities,
+All other paths are excluded: Timeline/TimelineHelpers, Legend, Header, Filters,
+model, accessibility/focus utilities,
 App/bridge, shared results, i18n, application/domain/infrastructure/bootstrap,
 host calendar/Explorer, transport, parser/generated artifacts, architecture
-rules/tests, dependencies/configuration, README, CHANGELOG, roadmap and the
+rules/tests, dependencies/configuration, README, roadmap and the
 inherited WebAPI feature. Required check failures, new tests needing another
 path, a qlty Finding needing a design change, or a contract/behavior change
 return through Main; no widening or silently deferred required check.
@@ -281,6 +354,9 @@ Material alternatives: keep all files (preserves behavior but leaves the
 selected unearned boundaries), or merge every helper (would concentrate
 Timeline complexity and obscure lifecycle ownership). The selected scope keeps
 internal React ownership while removing only three unnecessary file boundaries.
+For the blocker, changing BoundedList algorithms, adding DOM wrappers, weakening
+the fixture/assertions, or merely raising test timeout are rejected: existing
+row-owner forwarding closes the concrete contract gap with the smallest scope.
 
 ## Required implementation validation and evidence
 
@@ -288,7 +364,10 @@ For each slice, implementer owns a retained artifact outside inspected inputs.
 Record the approved manifest, before/after identities including tests/deletions,
 config/dependency/tool hashes, command logs and exits, exact coverage and missing
 facts under the Evidence Contract. S1 starts from the focused planning commit;
-S2 starts from S1's completion commit. Characterization test results identify
+S2 starts from S1's completion commit. Keep S1's original code comparison base
+`550bcb46a80cf96488a6e5d1bb407b199a4b2bbf` and retain its matching baseline
+artifact; the renewed replan commit authorizes implementation but does not
+silently replace that comparison. Characterization test results identify
 the temporary test-only content separately from the approved final snapshot.
 
 Required commands, from the exact slice snapshot:
@@ -307,6 +386,22 @@ rtk pnpm run build
 rtk pnpm exec markdownlint-cli2 'docs/specs/features/schedule-impact-calendar-cohesion/*.md'
 rtk git diff --check
 ```
+
+For S1, additionally lint `CHANGELOG.md` explicitly with
+`rtk pnpm exec markdownlint-cli2 CHANGELOG.md`; validate changed local links and
+document structure in all four Markdown paths. Run the complete View suite,
+including the existing 10,000-item test, after repair; a compact red failure
+is characterization only, never acceptance. S2 retains its existing command set.
+
+Evidence renewal: changed View tests and row source invalidate affected calendar
+test, TypeScript/test-compilation and build inputs, so renew those results and
+architecture dependency validation for the new forwarding paths. Full-repository
+final qlty inputs change (source/tests/docs/CHANGELOG); renew both final official
+observations and aggregate, reusing the original baseline only when base,
+full input inventory, tools/config/dependencies and required scan selection
+match. Do not reinterpret an old final scan as having inspected these additions.
+Matching untouched targeted results, historical characterization and gate proof
+remain reusable; record each reuse and its coverage explicitly.
 
 S2 additionally runs:
 
@@ -359,16 +454,27 @@ requires current-head Qlty Cloud success.
   `7e419204798d11477b165db6b154d351eedfb1f9cf1f22027c25d007126b70a2`.
   Discovery and planning evidence matched; existing documentation validation
   reused. Main's state/gate annotations are separate metadata, not a new plan.
-- Minimal replan documentation evidence:
-  [replan evidence](/private/tmp/calendar-s1-minimal-replan-evidence.json).
-  Expectation-only scope is concrete; Main preserves the unchanged large-test
-  requirement as an implementation-readiness blocker. No runtime/test change
-  or new approval was produced by the planner.
-- S1 implementation evidence (partial; validation findings prevent Ready):
-  [evidence artifact](/private/tmp/calendar-s1-pre-replan-evidence.json). It
-  retains the implementation patch identity, commands and raw logs, base
-  comparisons, and qlty baseline SARIF. S1 implementation review, Completion
-  Approval, and slice commit are pending. S2 remains PLANNED.
+- Minimal replan and implementation evidence:
+  [S1 evidence artifact](/private/tmp/calendar-s1-final-evidence.json). It
+  retains original and replan gate references, exact patch identity, commands,
+  raw logs, qlty observations, comparison facts and explicit evidence gaps.
+  S1 implementation review, Completion Approval and slice commit are pending;
+  S2 remains PLANNED.
+- Focus-contract discovery:
+  [Main diagnosis](/private/tmp/calendar-large-diagnosis/evidence.json), plus its
+  `compact-failure.log` and `profile-test.log`; not an implementation pass.
+- Focus replan documentation evidence:
+  [replan evidence](/private/tmp/calendar-focus-replan/evidence.json).
+  Covers exactly the three changed selected-feature Markdown files, link and
+  structure checks, traceability, approval provenance, and whitespace. No
+  production/check baseline was collected for this planning operation.
+
+- Focus extension review: `calendar_focus_plan_review` returned Ready, no
+  actionable Findings; reviewed planning patch SHA256
+  `4f61bf9a8e18ab9609ccd8563a59eed3f53d575160050415506c3f28b711f5ed`.
+  Per-document hashes are retained in focus replan evidence. Discovery and
+  documentation checks matched and were reused. New Human Approval is Approved.
+  Main state/review entries are separate metadata; proposed scope unchanged.
 
 ## Production readiness and document impact
 
@@ -380,8 +486,14 @@ language still falls back to English; theme/high contrast, reduced motion and
 zoom styling remain unchanged. Session failures and host lifecycle remain
 existing owners. Telemetry and other extension workflows are excluded.
 
-No README, CHANGELOG or durable use-case changes are needed for preserved
-observable behavior. No durable updates are authorized in implementation.
+CHANGELOG evaluation: the repair changes observable keyboard accessibility and
+therefore requires one concise Unreleased entry stating that keyboard navigation
+is restored for calendar result rows, including nested candidates. The durable
+gate is satisfied by reusable product behavior, without diagnosis, memory/profile
+facts, branch status or module history. Main explicitly allowed this document in
+the proposed plan; implementation still awaits renewed Human Approval. No README
+or durable use-case change is needed: existing use-case acceptance already owns
+the keyboard/bounded-rendering contract. No other durable updates are authorized.
 Feature Exit evaluates completion of roadmap item 1 and durable propagation
 under its separate scope/gate; do not remove the roadmap item prematurely.
 Existing desktop harness, table and graph-golden follow-ups retain their owners;
