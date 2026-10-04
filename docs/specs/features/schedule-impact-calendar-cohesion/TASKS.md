@@ -7,18 +7,16 @@
 - Active slice: S1 focus extension Human Approved; original approvals retained.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, linked discovery and
   planning evidence, and the Present Schedule Impact use case.
-- Constraints: retain the partial approved S1 patch; do not implement the
-  proposed focus repair before renewed review, Human Approval and replan commit.
-  S2 waits for S1 review, Completion Approval, and completion commit.
-- Next operation: focused replan commit, then S1 implementation; Main owns gates.
+- Constraints: preserve the implemented approved S1 boundary; S2 waits for S1
+  review, Completion Approval, and completion commit.
+- Next operation: focused S1 completion commit, then approved S2 implementation.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit for the reviewed and approved
-  S1 focus repair, View-test changes and CHANGELOG.
-  Original approved S1 is partially implemented and uncommitted; the required
-  10,000-item test is blocked by a diagnosed inherited row-focus defect.
+- Lifecycle state: SLICE_APPROVED
+- Next decision: focused S1 completion commit; independent review Ready and
+  explicit Completion Approval recorded. S2 waits for the successful commit.
+- Focus replan commit: `205f16fa1d38865cf66b6db089664b7a8612cb09`.
 - Selected feature: `schedule-impact-calendar-cohesion`, roadmap item 1.
 - Source/base: `30b3f689af6d236ec8dcc427f7ea7789ce12888b`.
 - Branch: `codex/schedule-impact-calendar-cohesion`.
@@ -26,7 +24,37 @@
   planning commit `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`.
 - Approved implementation scope: original S1 and S2, expectation-only
   Localization correction, and reviewed S1 focus extension below.
-  No completed slices.
+  S1 completion-approved; no committed slices. S2 remains approved, unstarted.
+
+## S1 Completion Approval
+
+- Status: Approved.
+- Approved at: approved in current conversation.
+- Provenance: human approved Main's explicit S1 completion-commit request after
+  independent implementation review Ready; no Closure or S2 Completion approval.
+- Approved scope: exact reviewed S1 completed implementation, tests, CHANGELOG,
+  selected-feature evidence/state records and separate gate metadata.
+- Review: `calendar_s1_review` Ready, no actionable Findings.
+- Reviewed substantive patch SHA256:
+  `41b84c3aaf2858b0e084b9d1c503fbdf504fa63de7ad964cab732970fd3dee24`.
+- Completion commit paths, exactly:
+  - `CHANGELOG.md`
+  - `docs/specs/features/schedule-impact-calendar-cohesion/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar-cohesion/TRACEABILITY.md`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarCandidates.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarContents.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarIssues.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarResultSection.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarRootSections.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSectionBody.tsx`
+    (delete)
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSections.tsx`
+    (delete)
+  - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
+  - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
+  - `src/test/suite/scheduleImpactCalendarView.test.tsx`
+- Main approval/state metadata is separate from the reviewed substantive
+  snapshot. No product/test/CHANGELOG, scope, or validation changes were made.
 
 ## Human Approval
 
@@ -79,14 +107,14 @@
   final period, Japanese assertions, resources and runtime formatting are
   unchanged. Test compilation and all three Localization tests pass.
 - The required View test `keeps every repeated section bounded and
-  keyboard-reachable` remains unchanged and was SIGKILLed on both base and final
+keyboard-reachable` remains unchanged and was SIGKILLed on both base and final
   snapshots. Main's retained diagnosis below identifies a real focus failure
   and expensive DOM assertion diffing; neither termination is a passing result.
   No coverage waiver or View change is approved. Required coverage stays intact.
 - Complete command outputs, SARIF, snapshot identities, reused check references
   and missing facts are linked in the S1 implementation evidence artifact.
 
-## Proposed S1 focus-contract extension
+## Reviewed S1 focus-contract extension
 
 - Trigger and identity: Main read-only diagnosis at HEAD
   `ccdbc6af46d4511e2c55e79f54654e3d84f16ce5`, with original S1 code comparison
@@ -114,8 +142,10 @@
   shelving the partial patch and changing sequencing. No umbrella redesign.
 - Renewal: prior review/approval remains valid for original consolidation,
   exact colon-only correction and unchanged S2, but does not cover these
-  additions. Integrated S1 readiness, review and approval must be renewed.
-  Existing partial code is retained; no completed slice or commit is revoked.
+  additions. The focus extension received its own Ready review, explicit Human
+  Approval and focused replan commit; integrated S1 readiness and Completion
+  Approval remain pending. Existing partial code is retained; no completed
+  slice or commit is revoked.
 - New Human Approval: Approved; approved at approved in current conversation.
   Provenance: human approved Main's explicit added focus-repair/View/CHANGELOG
   boundary request after independent Ready review. This authorization covers
@@ -216,7 +246,7 @@ commit. There is no external feature dependency or cross-layer migration.
 
 ### S1: Co-locate result sections and restore their bounded-row focus contract
 
-- Lifecycle state: PLANNED (extension); original implementation retained partial.
+- Lifecycle state: SLICE_APPROVED; uncommitted pending focused completion commit.
 - Value: page ordering lives with Contents; each result region owns its body
   choice. Remove two forwarding boundaries and restore the existing keyboard
   contract for their custom result rows without changing displayed facts.
@@ -228,20 +258,20 @@ commit. There is no external feature dependency or cross-layer migration.
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarSectionBody.tsx`
     (delete)
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarCandidates.tsx`
-    (proposed: CandidateGroupCard/CandidateDetails DOM forwarding and outer
+    (approved: CandidateGroupCard/CandidateDetails DOM forwarding and outer
     article event ownership only)
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarIssues.tsx`
-    (proposed: IssueCard DOM forwarding only)
+    (approved: IssueCard DOM forwarding only)
   - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarRootSections.tsx`
-    (proposed: RootStatusCard/ValidNoRunsCard DOM forwarding only)
+    (approved: RootStatusCard/ValidNoRunsCard DOM forwarding only)
 - Test paths, exactly:
   - `src/test/suite/scheduleImpactCalendarComponents.test.tsx`
     (existing approved section characterization)
   - `src/test/suite/scheduleImpactCalendarLocalization.test.ts`
     (existing approved colon-only expectation correction)
   - `src/test/suite/scheduleImpactCalendarView.test.tsx`
-    (proposed: compact DOM identity failures and real-row keyboard boundaries)
-- Document path: `CHANGELOG.md` (proposed: one Unreleased keyboard-fix entry).
+    (approved: compact DOM identity failures and real-row keyboard boundaries)
+- Document path: `CHANGELOG.md` (approved: one Unreleased keyboard-fix entry).
 - Acceptance: R1 removes the two exports/files and obsolete imports with no
   remaining consumer. R2/R3 preserve period, the five-section order before
   timeline, count attributes and labels, empty alert versus bounded list, and
@@ -283,20 +313,35 @@ commit. There is no external feature dependency or cross-layer migration.
   Use existing roots and explicit typed forwarding, guard outer-self events,
   and verify both nesting and virtualization. Observable keyboard repair is a
   compatible bug fix; no VS Code API, package, host or source-fact changes.
-- Implementation: approved S1 runtime/test paths and the replan-authorized
-  Localization expectation changed; R1 and the
-  observable component transitions pass characterization before and after the
-  refactor. No S2 or other runtime path changed.
-- Validation evidence: see the S1 implementation evidence artifact in the
-  Validation index. TypeScript, test compilation, architecture rules, build,
-  focused Localization, and non-large calendar coverage pass. The required
-  10,000-item View test is SIGKILLed on both base and final. Final qlty status
-  and exact inventory are recorded in the linked artifact; missing inventory
-  facts, if any, remain explicit.
-- Readiness: proposed scope extension awaits review, Human Approval and focused
-  replan commit. Existing passes cover their recorded inputs only; full required
-  large-result coverage must pass after repair. No Completion Approval/commit.
-- Completion Approval: Pending; approved at none; scope none; commit none.
+- Pre-repair characterization: `/opt/homebrew/bin/rtk pnpm exec mocha --ui
+tdd --grep 'forwards bounded focus behavior|keeps nested candidate focus
+and keyboard events|focuses virtualized root'
+out/test/suite/scheduleImpactCalendarView.test.js` exited 3 (0 passing, 3
+  failing) before any row source edit. The small-row test found the candidate
+  article at `tabIndex=-1`; nested candidate focus found the outer row at
+  `tabIndex=-1`; virtualized root End could not render/focus the final row.
+  Compact raw output:
+  `/private/tmp/calendar-s1-focus-red.log`, SHA256
+  `258dc4aa0849e0134463a10271ab51a86d50cc38ff48289b4b7c96b0a4fb0602`.
+- Implementation: original approved S1 partial source/test changes and the
+  replan-authorized Localization expectation are retained. Approved View
+  characterization now adds all five row types, nested side ownership and
+  threshold-plus-one virtualized roots/no-runs/candidate sides; the existing
+  10,000-item assertions retain their strict identity predicate with compact
+  context. No S2 or other runtime path changed.
+- Validation evidence: [focused S1 implementation evidence](/private/tmp/calendar-s1-implementation-evidence.json)
+  records the exact final snapshot, approved paths, check outputs, qlty
+  comparison and documentation-metadata validation. The earlier S1 evidence
+  remains historical for its narrower pre-focus input set.
+- Readiness: SLICE_READY; independent review Ready, no actionable Findings.
+  Completion Approval recorded. TypeScript, test compile,
+  architecture (29/29), all five calendar suites (14 passing, including the
+  10,000-item case), desktop/web/webview build, required documentation checks
+  and qlty aggregate passed. Official qlty observations contain only mapped
+  baseline findings; details and retained SARIF are in the evidence artifact.
+  No Completion Approval/commit.
+- Completion Approval: Approved; approved at approved in current conversation;
+  scope exact reviewed S1 completion and metadata below; commit pending.
 
 ### S2: Co-locate bounded rendering with its focus lifecycle
 
@@ -333,10 +378,10 @@ commit. There is no external feature dependency or cross-layer migration.
 
 ## Approval boundaries and exclusions
 
-Renewed Human Approval must name the proposed S1 additions, exact production,
-View-test and CHANGELOG paths, nested-event design and intact validation above.
-Original approvals and S2 boundary remain recorded separately; they do not
-authorize new S1 paths. Selected feature documents carry gate/evidence updates.
+Renewed Human Approval named the S1 additions, exact production, View-test and
+CHANGELOG paths, nested-event design and intact validation above. Original
+approvals and the S2 boundary remain recorded separately; they do not authorize
+new S1 paths. Selected feature documents carry gate/evidence updates.
 The focused plan commit includes only this feature's three Markdown documents
 and explicit approval metadata. Each slice commit includes only its listed
 runtime/test/document paths and necessary selected-feature records.
@@ -469,12 +514,37 @@ requires current-head Qlty Cloud success.
   structure checks, traceability, approval provenance, and whitespace. No
   production/check baseline was collected for this planning operation.
 
+- Focus S1 implementation: [implementation evidence](/private/tmp/calendar-s1-implementation-evidence.json).
+  Approved-manifest implementation is complete at source HEAD
+  `205f16fa1d38865cf66b6db089664b7a8612cb09`, compared with code base
+  `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`. TypeScript, test compilation,
+  architecture, calendar integration (including all 10,000 items), production
+  build and documentation checks pass. Final qlty official check is
+  finding-triggered with three unchanged baseline identities and no findings on
+  changed paths; smells inventory retains 151 results with none on changed
+  calendar paths. The required aggregate passes. The final implementation
+  snapshot and exact separate documentation-evidence metadata checks are linked
+  in the artifact. S1 awaits independent implementation review; no Completion
+  Approval or commit has been recorded.
+
 - Focus extension review: `calendar_focus_plan_review` returned Ready, no
   actionable Findings; reviewed planning patch SHA256
   `4f61bf9a8e18ab9609ccd8563a59eed3f53d575160050415506c3f28b711f5ed`.
   Per-document hashes are retained in focus replan evidence. Discovery and
   documentation checks matched and were reused. New Human Approval is Approved.
   Main state/review entries are separate metadata; proposed scope unchanged.
+
+- S1 implementation review: `calendar_s1_review` returned Ready, no actionable
+  Findings. Reviewed patch SHA256
+  `41b84c3aaf2858b0e084b9d1c503fbdf504fa63de7ad964cab732970fd3dee24`
+  at HEAD `205f16fa1d38865cf66b6db089664b7a8612cb09`, comparison base
+  `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`. Approved paths and evidence
+  matched. Baseline/final SARIF findings and mapped values were compared;
+  no new or adverse findings. Documentation links and structure checked.
+  Existing validation reused; no product scans repeated for review.
+- Main state/review entries are separate gate metadata; reviewed product, test,
+  CHANGELOG, acceptance and required validation are unchanged. Completion
+  Approval remains Pending; S2 cannot start before S1 approval and commit.
 
 ## Production readiness and document impact
 
@@ -497,9 +567,8 @@ the keyboard/bounded-rendering contract. No other durable updates are authorized
 Feature Exit evaluates completion of roadmap item 1 and durable propagation
 under its separate scope/gate; do not remove the roadmap item prematurely.
 Existing desktop harness, table and graph-golden follow-ups retain their owners;
-this plan does not resolve or waive them. No completed slices exist.
-Original approval and matching evidence remain
-recorded; the proposed S1 extension needs renewed independent plan review and
-approval provenance through Main. Main preserves the required 10,000-item
-check as an implementation-readiness blocker; S2 scope and approval are
-preserved.
+this implementation does not resolve or waive them. S1 focus extension has its
+own Ready review and explicit Human Approval; all approved S1 acceptance checks
+now pass, including the 10,000-item View test. S1 still needs independent
+implementation review, Completion Approval and the completion commit before S2
+can begin. Original S1/S2 approval and matching evidence remain recorded.

@@ -12,9 +12,14 @@ import { VirtuosoMockContext } from "react-virtuoso";
 import { ScheduleImpactCalendarView } from "../../presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarApp";
 import type {
   SemanticDiffScheduleImpact,
+  SemanticDiffScheduleImpactCandidateGroup,
+  SemanticDiffScheduleImpactIssue,
   SemanticDiffScheduleImpactRoot,
 } from "../../application/semantic-diff/semanticDiffScheduleImpact";
-import { buildScheduleImpactCalendarModel } from "../../presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarModel";
+import {
+  buildScheduleImpactCalendarModel,
+  SCHEDULE_IMPACT_CALENDAR_VIRTUALIZATION_THRESHOLD,
+} from "../../presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarModel";
 
 type GlobalValue = {
   key: string;
@@ -272,6 +277,445 @@ suite("Schedule impact calendar view", () => {
     restoreDom(dom, globals);
   });
 
+  test("forwards bounded focus behavior to every small custom row", () => {
+    const base = sidecar();
+    const createGroup = (
+      index: number,
+    ): SemanticDiffScheduleImpactCandidateGroup => ({
+      id: `focus-group-${index}`,
+      before: [0, 1].map((candidateIndex) => ({
+        id: `focus-before-${index}-${candidateIndex}`,
+        unitId: `before-unit-${index}-${candidateIndex}`,
+        unitName: `before-${index}-${candidateIndex}`,
+        unitPath: `/jobs/before-${index}-${candidateIndex}`,
+      })),
+      after: [0, 1].map((candidateIndex) => ({
+        id: `focus-after-${index}-${candidateIndex}`,
+        unitId: `after-unit-${index}-${candidateIndex}`,
+        unitName: `after-${index}-${candidateIndex}`,
+        unitPath: `/jobs/after-${index}-${candidateIndex}`,
+      })),
+    });
+    const roots = [0, 1].map((index) => {
+      const source = root();
+      return {
+        ...source,
+        id: `focus-root-${index}`,
+        canonicalPath: `/jobs/focus-root-${index}.ajs`,
+        before: source.before
+          ? {
+              ...source.before,
+              unitId: `focus-before-root-${index}`,
+              unitPath: `/jobs/focus-root-${index}.ajs`,
+            }
+          : null,
+        after: source.after
+          ? {
+              ...source.after,
+              unitId: `focus-after-root-${index}`,
+              unitPath: `/jobs/focus-root-${index}.ajs`,
+            }
+          : null,
+      };
+    });
+    const sourceIssue = base.issues[0]!;
+    const issues: SemanticDiffScheduleImpactIssue[] = [0, 1].map((index) => ({
+      ...sourceIssue,
+      id: `focus-issue-${index}`,
+      rootId: roots[index]!.id,
+      targetId: `focus-target-${index}`,
+    }));
+    const small: SemanticDiffScheduleImpact = {
+      ...base,
+      roots,
+      candidateGroups: [createGroup(0), createGroup(1)],
+      issues,
+    };
+    const view = render(
+      <ScheduleImpactCalendarView sidecar={small} language="en" />,
+    );
+
+    const assertBoundedRows = (
+      rows: readonly HTMLElement[],
+      label: string,
+    ): void => {
+      assert.strictEqual(rows.length, 2, `${label} row count`);
+      rows.forEach((row, index) => {
+        assert.strictEqual(
+          row.tabIndex,
+          index === 0 ? 0 : -1,
+          `${label} tabIndex`,
+        );
+        assert.strictEqual(
+          row.getAttribute("data-schedule-impact-calendar-bounded-index"),
+          String(index),
+          `${label} bounded index`,
+        );
+        assert.strictEqual(
+          row.getAttribute("aria-posinset"),
+          String(index + 1),
+          `${label} position`,
+        );
+        assert.strictEqual(
+          row.getAttribute("aria-setsize"),
+          "2",
+          `${label} set size`,
+        );
+      });
+      rows[0]!.focus();
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[0],
+        true,
+        `${label} first row receives focus`,
+      );
+      fireEvent.keyDown(rows[0]!, { key: "ArrowDown" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[1],
+        true,
+        `${label} ArrowDown moves to the second row`,
+      );
+      assert.strictEqual(
+        rows[0]!.tabIndex,
+        -1,
+        `${label} first roving tabIndex`,
+      );
+      assert.strictEqual(
+        rows[1]!.tabIndex,
+        0,
+        `${label} second roving tabIndex`,
+      );
+      fireEvent.keyDown(rows[1]!, { key: "ArrowUp" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[0],
+        true,
+        `${label} ArrowUp moves to the first row`,
+      );
+      fireEvent.keyDown(rows[0]!, { key: "End" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[1],
+        true,
+        `${label} End moves to the last row`,
+      );
+      fireEvent.keyDown(rows[1]!, { key: "Home" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[0],
+        true,
+        `${label} Home moves to the first row`,
+      );
+    };
+    const queryRows = (selector: string): HTMLElement[] => [
+      ...view.container.querySelectorAll<HTMLElement>(selector),
+    ];
+
+    assertBoundedRows(
+      queryRows("[data-schedule-impact-calendar-candidate-group-id]"),
+      "candidate group",
+    );
+    assertBoundedRows(
+      queryRows(
+        "[data-schedule-impact-calendar-candidate-id^='focus-before-0-']",
+      ),
+      "before candidate",
+    );
+    assertBoundedRows(
+      queryRows(
+        "[data-schedule-impact-calendar-candidate-id^='focus-after-0-']",
+      ),
+      "after candidate",
+    );
+    assertBoundedRows(
+      queryRows("[data-schedule-impact-calendar-issue-id]"),
+      "issue",
+    );
+    assertBoundedRows(
+      queryRows("[data-schedule-impact-calendar-root-id]"),
+      "root status",
+    );
+    assertBoundedRows(
+      queryRows("[data-schedule-impact-calendar-no-runs-root-id]"),
+      "valid no-runs",
+    );
+  });
+
+  test("keeps nested candidate focus and keyboard events in their own list", () => {
+    const base = sidecar();
+    const createGroup = (
+      index: number,
+    ): SemanticDiffScheduleImpactCandidateGroup => ({
+      id: `nested-group-${index}`,
+      before: [0, 1].map((candidateIndex) => ({
+        id: `nested-before-${index}-${candidateIndex}`,
+        unitId: `nested-before-unit-${index}-${candidateIndex}`,
+        unitName: `nested-before-${index}-${candidateIndex}`,
+        unitPath: `/jobs/nested-before-${index}-${candidateIndex}`,
+      })),
+      after: [0, 1].map((candidateIndex) => ({
+        id: `nested-after-${index}-${candidateIndex}`,
+        unitId: `nested-after-unit-${index}-${candidateIndex}`,
+        unitName: `nested-after-${index}-${candidateIndex}`,
+        unitPath: `/jobs/nested-after-${index}-${candidateIndex}`,
+      })),
+    });
+    const view = render(
+      <ScheduleImpactCalendarView
+        sidecar={{
+          ...base,
+          candidateGroups: [createGroup(0), createGroup(1)],
+        }}
+        language="en"
+      />,
+    );
+    const groupRows = [
+      ...view.container.querySelectorAll<HTMLElement>(
+        "[data-schedule-impact-calendar-candidate-group-id]",
+      ),
+    ];
+    const beforeRows = [
+      ...view.container.querySelectorAll<HTMLElement>(
+        "[data-schedule-impact-calendar-candidate-id^='nested-before-0-']",
+      ),
+    ];
+    const afterRows = [
+      ...view.container.querySelectorAll<HTMLElement>(
+        "[data-schedule-impact-calendar-candidate-id^='nested-after-0-']",
+      ),
+    ];
+    assert.strictEqual(groupRows.length, 2);
+    assert.strictEqual(beforeRows.length, 2);
+    assert.strictEqual(afterRows.length, 2);
+    groupRows[0]!.focus();
+    assert.strictEqual(groupRows[0]!.tabIndex, 0);
+    fireEvent.keyDown(groupRows[0]!, { key: "ArrowDown" });
+    assert.strictEqual(
+      dom.window.document.activeElement === groupRows[1],
+      true,
+    );
+    assert.strictEqual(groupRows[0]!.tabIndex, -1);
+    assert.strictEqual(groupRows[1]!.tabIndex, 0);
+
+    const assertNestedNavigation = (
+      rows: readonly HTMLElement[],
+      label: string,
+    ): void => {
+      rows[0]!.focus();
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[0],
+        true,
+        `${label} first row receives focus`,
+      );
+      assert.strictEqual(
+        groupRows[0]!.tabIndex,
+        -1,
+        `${label} outer first index`,
+      );
+      assert.strictEqual(
+        groupRows[1]!.tabIndex,
+        0,
+        `${label} outer active index`,
+      );
+      fireEvent.keyDown(rows[0]!, { key: "ArrowDown" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[1],
+        true,
+        `${label} ArrowDown stays in its list`,
+      );
+      assert.strictEqual(
+        groupRows[0]!.tabIndex,
+        -1,
+        `${label} ArrowDown outer index`,
+      );
+      assert.strictEqual(
+        groupRows[1]!.tabIndex,
+        0,
+        `${label} ArrowDown outer active`,
+      );
+      fireEvent.keyDown(rows[1]!, { key: "ArrowUp" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[0],
+        true,
+        `${label} ArrowUp stays in its list`,
+      );
+      fireEvent.keyDown(rows[0]!, { key: "End" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[1],
+        true,
+        `${label} End stays in its list`,
+      );
+      fireEvent.keyDown(rows[1]!, { key: "Home" });
+      assert.strictEqual(
+        dom.window.document.activeElement === rows[0],
+        true,
+        `${label} Home stays in its list`,
+      );
+      assert.strictEqual(
+        groupRows[0]!.tabIndex,
+        -1,
+        `${label} Home outer index`,
+      );
+      assert.strictEqual(
+        groupRows[1]!.tabIndex,
+        0,
+        `${label} Home outer active`,
+      );
+    };
+    assertNestedNavigation(beforeRows, "before candidates");
+    assertNestedNavigation(afterRows, "after candidates");
+
+    fireEvent.keyDown(groupRows[1]!, { key: "ArrowUp" });
+    assert.strictEqual(
+      dom.window.document.activeElement === groupRows[0],
+      true,
+      "outer ArrowUp remains available on the candidate article",
+    );
+  });
+
+  test("focuses virtualized root, no-runs, and nested candidate rows", async () => {
+    const itemCount = SCHEDULE_IMPACT_CALENDAR_VIRTUALIZATION_THRESHOLD + 1;
+    const base = sidecar();
+    const createCandidate = (side: string, index: number) => ({
+      id: `virtual-${side}-${index}`,
+      unitId: `virtual-${side}-unit-${index}`,
+      unitName: `virtual-${side}-${index}`,
+      unitPath: `/jobs/virtual-${side}-${index}`,
+    });
+    const createGroup = (
+      id: string,
+      candidates: number,
+    ): SemanticDiffScheduleImpactCandidateGroup => ({
+      id,
+      before: Array.from({ length: candidates }, (_, index) =>
+        createCandidate(`before-${id}`, index),
+      ),
+      after: Array.from({ length: candidates }, (_, index) =>
+        createCandidate(`after-${id}`, index),
+      ),
+    });
+    const roots = Array.from({ length: itemCount }, (_, index) => {
+      const source = root();
+      return {
+        ...source,
+        id: `virtual-root-${index}`,
+        canonicalPath: `/jobs/virtual-root-${index}.ajs`,
+        before: source.before
+          ? {
+              ...source.before,
+              unitId: `virtual-before-root-${index}`,
+              unitPath: `/jobs/virtual-root-${index}.ajs`,
+              outcome: "valid-no-runs" as const,
+            }
+          : null,
+        after: source.after
+          ? {
+              ...source.after,
+              unitId: `virtual-after-root-${index}`,
+              unitPath: `/jobs/virtual-root-${index}.ajs`,
+              outcome: "valid-no-runs" as const,
+            }
+          : null,
+      };
+    });
+    const virtual: SemanticDiffScheduleImpact = {
+      ...base,
+      roots,
+      candidateGroups: [
+        createGroup("virtual-group-0", itemCount),
+        ...Array.from({ length: itemCount - 1 }, (_, index) =>
+          createGroup(`virtual-group-${index + 1}`, 0),
+        ),
+      ],
+      issues: [],
+      timelineItems: [],
+    };
+    const view = render(
+      <VirtuosoMockContext.Provider
+        value={{ itemHeight: 48, viewportHeight: 480 }}
+      >
+        <ScheduleImpactCalendarView sidecar={virtual} language="en" />
+      </VirtuosoMockContext.Provider>,
+    );
+    const assertVirtualizedEnd = async (
+      initialSelector: string,
+      finalSelector: string,
+      label: string,
+    ): Promise<void> => {
+      const first = view.container.querySelector(
+        initialSelector,
+      ) as HTMLElement;
+      assert.ok(first, `${label} initial row is rendered`);
+      first.focus();
+      fireEvent.keyDown(first, { key: "End" });
+      const endTime = Date.now() + 1_000;
+      let last: HTMLElement | null = null;
+      while (Date.now() < endTime) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 10));
+        last = view.container.querySelector(
+          finalSelector,
+        ) as HTMLElement | null;
+        if (last && dom.window.document.activeElement === last) break;
+      }
+      const active = dom.window.document.activeElement as HTMLElement | null;
+      const renderedPositions = [
+        ...view.container.querySelectorAll<HTMLElement>(
+          `[aria-setsize='${itemCount}']`,
+        ),
+      ].map((row) => row.getAttribute("aria-posinset"));
+      const activeRowId =
+        active?.getAttribute("data-schedule-impact-calendar-root-id") ??
+        active?.getAttribute("data-schedule-impact-calendar-no-runs-root-id") ??
+        active?.getAttribute("data-schedule-impact-calendar-candidate-id");
+      assert.strictEqual(
+        last !== null,
+        true,
+        `${label} final row is rendered (active=${activeRowId ?? "none"}; positions=${renderedPositions.slice(0, 6).join(",")}/${renderedPositions.slice(-6).join(",")})`,
+      );
+      assert.strictEqual(
+        dom.window.document.activeElement === last,
+        true,
+        `${label} End focuses last row`,
+      );
+      assert.strictEqual(last!.tabIndex, 0, `${label} last row tabIndex`);
+      assert.strictEqual(
+        last!.getAttribute("aria-posinset"),
+        String(itemCount),
+        `${label} position`,
+      );
+      assert.strictEqual(
+        last!.getAttribute("aria-setsize"),
+        String(itemCount),
+        `${label} set size`,
+      );
+    };
+
+    const finalRootId =
+      buildScheduleImpactCalendarModel(virtual).visibleRootOptions.at(-1)?.id;
+    assert.ok(finalRootId);
+    await assertVirtualizedEnd(
+      "[data-schedule-impact-calendar-root-id='virtual-root-0']",
+      `[data-schedule-impact-calendar-root-id='${finalRootId}']`,
+      "root status",
+    );
+    await assertVirtualizedEnd(
+      "[data-schedule-impact-calendar-no-runs-root-id='virtual-root-0']",
+      `[data-schedule-impact-calendar-no-runs-root-id='${finalRootId}']`,
+      "valid no-runs",
+    );
+    await assertVirtualizedEnd(
+      "[data-schedule-impact-calendar-candidate-id='virtual-before-virtual-group-0-0']",
+      `[data-schedule-impact-calendar-candidate-id='virtual-before-virtual-group-0-${itemCount - 1}']`,
+      "before candidates",
+    );
+    await assertVirtualizedEnd(
+      "[data-schedule-impact-calendar-candidate-id='virtual-after-virtual-group-0-0']",
+      `[data-schedule-impact-calendar-candidate-id='virtual-after-virtual-group-0-${itemCount - 1}']`,
+      "after candidates",
+    );
+    assert.ok(
+      view.container.querySelectorAll(
+        "[data-schedule-impact-calendar-root-id], [data-schedule-impact-calendar-no-runs-root-id], [data-schedule-impact-calendar-candidate-group-id], [data-schedule-impact-calendar-candidate-id]",
+      ).length < 300,
+    );
+  });
+
   test("exposes period, root outcome, separate filters, and timeline semantics", () => {
     const view = render(
       <ScheduleImpactCalendarView sidecar={sidecar()} language="ja-JP" />,
@@ -504,7 +948,11 @@ suite("Schedule impact calendar view", () => {
     ) as HTMLElement;
     assert.ok(firstTimeline);
     firstTimeline.focus();
-    assert.strictEqual(dom.window.document.activeElement, firstTimeline);
+    assert.strictEqual(
+      dom.window.document.activeElement === firstTimeline,
+      true,
+      "the first timeline row receives focus",
+    );
     fireEvent.keyDown(firstTimeline, { key: "End" });
     await waitFor(() =>
       assert.strictEqual(
@@ -523,7 +971,11 @@ suite("Schedule impact calendar view", () => {
     ) as HTMLElement;
     assert.ok(firstCandidate);
     firstCandidate.focus();
-    assert.strictEqual(dom.window.document.activeElement, firstCandidate);
+    assert.strictEqual(
+      dom.window.document.activeElement === firstCandidate,
+      true,
+      "the first candidate group receives focus",
+    );
     fireEvent.keyDown(firstCandidate, { key: "End" });
     await waitFor(() =>
       assert.strictEqual(
@@ -539,7 +991,11 @@ suite("Schedule impact calendar view", () => {
     ) as HTMLElement;
     assert.ok(firstIssue);
     firstIssue.focus();
-    assert.strictEqual(dom.window.document.activeElement, firstIssue);
+    assert.strictEqual(
+      dom.window.document.activeElement === firstIssue,
+      true,
+      "the first issue receives focus",
+    );
     fireEvent.keyDown(firstIssue, { key: "End" });
     await waitFor(() =>
       assert.strictEqual(

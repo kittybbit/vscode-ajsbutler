@@ -1,6 +1,7 @@
 import React from "react";
 import ResultSection from "../shared/result/ResultSection";
-import { ScheduleImpactCalendarSectionBody } from "./ScheduleImpactCalendarSectionBody";
+import ResultEmptyState from "../shared/result/ResultEmptyState";
+import { ScheduleImpactCalendarBoundedList } from "./ScheduleImpactCalendarBoundedList";
 
 export const ScheduleImpactCalendarResultSection = ({
   title,
@@ -24,10 +25,10 @@ export const ScheduleImpactCalendarResultSection = ({
     dataGlobalCount={globalCount}
     dataVisibleCount={visibleCount}
   >
-    <ScheduleImpactCalendarSectionBody
-      rows={rows}
-      ariaLabel={title}
-      emptyLabel={emptyLabel}
-    />
+    {rows.length === 0 ? (
+      <ResultEmptyState role="alert">{emptyLabel}</ResultEmptyState>
+    ) : (
+      <ScheduleImpactCalendarBoundedList items={rows} ariaLabel={title} />
+    )}
   </ResultSection>
 );

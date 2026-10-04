@@ -122,49 +122,53 @@ const rootOptionFacts = (
   ].filter((fact): fact is CalendarFact => fact !== undefined),
 ];
 
-const RootStatusCard = ({
-  root,
-  sourceRoot,
-  labels,
-}: Readonly<{
+type RootStatusCardProps = Readonly<{
   root: ScheduleImpactCalendarModel["visibleRootOptions"][number];
   sourceRoot: SemanticDiffScheduleImpactRoot | undefined;
   labels: ScheduleImpactCalendarLabels;
-}>): React.ReactElement => {
-  const outcomes = sourceRoot
-    ? getScheduleImpactCalendarRootOutcomes(sourceRoot)
-    : [];
-  return (
-    <ListItem
-      component="li"
-      data-schedule-impact-calendar-root-id={root.id}
-      sx={{ display: "block", py: 0.5 }}
-    >
-      <ResultCard ariaLabel={`${labels.root}: ${root.label}`} sx={{ p: 0 }}>
-        <ResultKeyValueList items={rootOptionFacts(root, outcomes, labels)} />
-        <ResultComparison
-          beforeLabel={labels.before}
-          afterLabel={labels.after}
-          before={
-            <RootSideDetails
-              side={sourceRoot?.before ?? null}
-              labels={labels}
-              includeUnitName
-            />
-          }
-          after={
-            <RootSideDetails
-              side={sourceRoot?.after ?? null}
-              labels={labels}
-              includeUnitName
-            />
-          }
-          ariaLabel={`${labels.root}: ${root.label}, ${labels.before} / ${labels.after}`}
-        />
-      </ResultCard>
-    </ListItem>
-  );
-};
+}> &
+  Omit<React.HTMLAttributes<HTMLLIElement>, "children">;
+
+const RootStatusCard = React.forwardRef<HTMLLIElement, RootStatusCardProps>(
+  ({ root, sourceRoot, labels, ...rowProps }, ref): React.ReactElement => {
+    const outcomes = sourceRoot
+      ? getScheduleImpactCalendarRootOutcomes(sourceRoot)
+      : [];
+    return (
+      <ListItem
+        {...rowProps}
+        ref={ref}
+        component="li"
+        data-schedule-impact-calendar-root-id={root.id}
+        sx={{ display: "block", py: 0.5 }}
+      >
+        <ResultCard ariaLabel={`${labels.root}: ${root.label}`} sx={{ p: 0 }}>
+          <ResultKeyValueList items={rootOptionFacts(root, outcomes, labels)} />
+          <ResultComparison
+            beforeLabel={labels.before}
+            afterLabel={labels.after}
+            before={
+              <RootSideDetails
+                side={sourceRoot?.before ?? null}
+                labels={labels}
+                includeUnitName
+              />
+            }
+            after={
+              <RootSideDetails
+                side={sourceRoot?.after ?? null}
+                labels={labels}
+                includeUnitName
+              />
+            }
+            ariaLabel={`${labels.root}: ${root.label}, ${labels.before} / ${labels.after}`}
+          />
+        </ResultCard>
+      </ListItem>
+    );
+  },
+);
+RootStatusCard.displayName = "RootStatusCard";
 
 export const RootStatus = ({
   model,
@@ -195,57 +199,62 @@ export const RootStatus = ({
   );
 };
 
-const ValidNoRunsCard = ({
-  root,
-  labels,
-}: Readonly<{
+type ValidNoRunsCardProps = Readonly<{
   root: SemanticDiffScheduleImpactRoot;
   labels: ScheduleImpactCalendarLabels;
-}>): React.ReactElement => {
-  const path = rootPath(root);
-  return (
-    <ListItem
-      component="li"
-      data-schedule-impact-calendar-no-runs-root-id={root.id}
-      sx={{ display: "block", py: 0.5 }}
-    >
-      <ResultCard ariaLabel={`${labels.root}: ${path}`} sx={{ p: 0 }}>
-        <ResultKeyValueList
-          items={[
-            { label: labels.unitPath, value: path },
-            ...(root.scopeTransition
-              ? [
-                  {
-                    label: labels.scopeTransition,
-                    value: root.scopeTransition.kind,
-                  },
-                ]
-              : []),
-          ]}
-        />
-        <ResultComparison
-          beforeLabel={labels.before}
-          afterLabel={labels.after}
-          before={
-            <RootSideDetails
-              side={root.before}
-              labels={labels}
-              includeUnitName={false}
-            />
-          }
-          after={
-            <RootSideDetails
-              side={root.after}
-              labels={labels}
-              includeUnitName={false}
-            />
-          }
-          ariaLabel={`${labels.root}: ${path}, ${labels.before} / ${labels.after}`}
-        />
-      </ResultCard>
-    </ListItem>
-  );
-};
+}> &
+  Omit<React.HTMLAttributes<HTMLLIElement>, "children">;
+
+const ValidNoRunsCard = React.forwardRef<HTMLLIElement, ValidNoRunsCardProps>(
+  ({ root, labels, ...rowProps }, ref): React.ReactElement => {
+    const path = rootPath(root);
+    return (
+      <ListItem
+        {...rowProps}
+        ref={ref}
+        component="li"
+        data-schedule-impact-calendar-no-runs-root-id={root.id}
+        sx={{ display: "block", py: 0.5 }}
+      >
+        <ResultCard ariaLabel={`${labels.root}: ${path}`} sx={{ p: 0 }}>
+          <ResultKeyValueList
+            items={[
+              { label: labels.unitPath, value: path },
+              ...(root.scopeTransition
+                ? [
+                    {
+                      label: labels.scopeTransition,
+                      value: root.scopeTransition.kind,
+                    },
+                  ]
+                : []),
+            ]}
+          />
+          <ResultComparison
+            beforeLabel={labels.before}
+            afterLabel={labels.after}
+            before={
+              <RootSideDetails
+                side={root.before}
+                labels={labels}
+                includeUnitName={false}
+              />
+            }
+            after={
+              <RootSideDetails
+                side={root.after}
+                labels={labels}
+                includeUnitName={false}
+              />
+            }
+            ariaLabel={`${labels.root}: ${path}, ${labels.before} / ${labels.after}`}
+          />
+        </ResultCard>
+      </ListItem>
+    );
+  },
+);
+ValidNoRunsCard.displayName = "ValidNoRunsCard";
 
 export const ValidNoRuns = ({
   model,

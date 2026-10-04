@@ -30,7 +30,7 @@ suite("Schedule impact calendar localization", () => {
     assert.strictEqual(japanese.results(2, 5), "5 件中 2 件を表示");
     assert.strictEqual(
       english.selectedItem("2026-01-01 /jobs/example.ajs, occurrence 2"),
-      "Selected schedule impact: 2026-01-01 /jobs/example.ajs, occurrence 2.",
+      "Selected schedule impact 2026-01-01 /jobs/example.ajs, occurrence 2.",
     );
     assert.strictEqual(
       japanese.selectedItem("2026-01-01 /jobs/example.ajs, occurrence 2"),
