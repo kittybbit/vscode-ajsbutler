@@ -1,12 +1,23 @@
 import * as assert from "assert";
 import {
   buildSemanticDiffScheduleImpact,
+  buildScheduleImpact,
   buildScheduleProjectionFacts,
   encodeSemanticDiffScheduleImpactId,
+  encodeScheduleImpactId,
   type ScheduleProjectionFacts,
   type SemanticDiffScheduleImpactIssue,
   type SemanticDiffScheduleImpactRoot,
 } from "../../application/semantic-diff/semanticDiffScheduleImpact";
+import * as legacyScheduleImpact from "../../application/semantic-diff/semanticDiffScheduleImpact";
+import { buildScheduleProjectionFacts as buildCanonicalScheduleProjectionFacts } from "../../application/semantic-diff/semanticDiffScheduleProjectionFacts";
+import {
+  encodeSemanticDiffScheduleImpactId as encodeCanonicalScheduleImpactId,
+  encodeScheduleImpactId as encodeCanonicalScheduleId,
+} from "../../application/semantic-diff/semanticDiffScheduleImpactIdentity";
+import type * as canonicalScheduleImpactDtos from "../../application/semantic-diff/semanticDiffScheduleImpactDto";
+import type * as canonicalScheduleProjectionFacts from "../../application/semantic-diff/semanticDiffScheduleProjectionFacts";
+import type * as legacyScheduleImpactTypes from "../../application/semantic-diff/semanticDiffScheduleImpact";
 import type {
   AjsDocument,
   AjsParameter,
@@ -71,7 +82,148 @@ const result: SemanticDiffResult = {
   limitations: [],
 };
 
+type SameType<Left, Right> =
+  (<Value>() => Value extends Left ? 1 : 2) extends <
+    Value,
+  >() => Value extends Right ? 1 : 2
+    ? true
+    : false;
+type Assert<T extends true> = T;
+
 suite("Semantic Diff schedule impact", () => {
+  test("preserves legacy builder and identity aliases", () => {
+    assert.strictEqual(buildScheduleImpact, buildSemanticDiffScheduleImpact);
+    assert.strictEqual(
+      encodeScheduleImpactId,
+      encodeSemanticDiffScheduleImpactId,
+    );
+  });
+
+  test("re-exports canonical application contracts and functions directly", () => {
+    const typeCompatibility: readonly [
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRootOutcome,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRootOutcome
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRunState,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRunState
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactIssueKind,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactIssueKind
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRun,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRun
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactIssue,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactIssue
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRootSide,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRootSide
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRootMatchKind,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRootMatchKind
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRoot,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRoot
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactCandidate,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactCandidate
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactCandidateGroup,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactCandidateGroup
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactTimelineItem,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactTimelineItem
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpact,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpact
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.SemanticDiffScheduleImpactRootStatus,
+          canonicalScheduleImpactDtos.SemanticDiffScheduleImpactRootStatus
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.ScheduleProjectionFacts,
+          canonicalScheduleImpactDtos.ScheduleProjectionFacts
+        >
+      >,
+      Assert<
+        SameType<
+          legacyScheduleImpactTypes.BuildSemanticDiffScheduleImpactInput,
+          canonicalScheduleProjectionFacts.BuildSemanticDiffScheduleImpactInput
+        >
+      >,
+    ] = [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+    ];
+
+    assert.strictEqual(
+      legacyScheduleImpact.buildScheduleProjectionFacts,
+      buildCanonicalScheduleProjectionFacts,
+    );
+    assert.strictEqual(
+      legacyScheduleImpact.encodeSemanticDiffScheduleImpactId,
+      encodeCanonicalScheduleImpactId,
+    );
+    assert.strictEqual(
+      legacyScheduleImpact.encodeScheduleImpactId,
+      encodeCanonicalScheduleId,
+    );
+    assert.deepStrictEqual(typeCompatibility, Array(15).fill(true));
+  });
+
   test("preserves side-local last-hit indexes and nested root order", () => {
     const sourceUnit = (id: string, path: string): AjsUnit => ({
       ...rootJobnet(path),
@@ -277,21 +429,68 @@ suite("Semantic Diff schedule impact", () => {
   });
 
   test("keeps an evaluated empty period available and immutable", () => {
-    const facts: Extract<ScheduleProjectionFacts, { kind: "evaluated" }> = {
+    const evaluation: SemanticDiffScheduleEvaluation = {
       kind: "evaluated",
       period: { from: "2026-04-01", to: "2026-05-01" },
-      before: { rootProjections: [], statuses: [], issues: [] },
-      after: { rootProjections: [], statuses: [], issues: [] },
-      correspondence: [],
-      candidateGroups: [],
+      runDecisions: [],
+      unsupportedDecisions: [],
+      zeroRunCandidates: [],
+      zeroRunCandidatesBySide: { before: [], after: [] },
+      pairEvaluations: [],
+    };
+    const builtFacts = buildScheduleProjectionFacts({
+      result,
+      before: document([]),
+      after: document([]),
+      scheduleEvaluation: evaluation,
+    });
+    assert.strictEqual(builtFacts.kind, "evaluated");
+    if (builtFacts.kind !== "evaluated") return;
+
+    const candidate = {
+      id: "candidate-id",
+      unitId: "candidate-unit",
+      unitName: "candidate",
+      unitPath: "/root/candidate",
+    };
+    const facts: Extract<ScheduleProjectionFacts, { kind: "evaluated" }> = {
+      ...builtFacts,
+      candidateGroups: [
+        { id: "candidate-group", before: [candidate], after: [] },
+      ],
     };
     const sidecar = buildSemanticDiffScheduleImpact({ result, facts });
 
     assert.deepStrictEqual(sidecar.period, facts.period);
     assert.deepStrictEqual(sidecar.roots, []);
     assert.deepStrictEqual(sidecar.timelineItems, []);
+    assert.deepStrictEqual(sidecar.candidateGroups, [
+      { id: "candidate-group", before: [candidate], after: [] },
+    ]);
+    assert.notStrictEqual(sidecar.candidateGroups, facts.candidateGroups);
+    assert.notStrictEqual(sidecar.candidateGroups[0]?.before[0], candidate);
+    assert.ok(Object.isFrozen(builtFacts));
+    assert.ok(Object.isFrozen(builtFacts.period));
+    assert.ok(Object.isFrozen(builtFacts.before.rootProjections));
+    assert.ok(Object.isFrozen(sidecar));
+    assert.ok(Object.isFrozen(sidecar.period));
+    assert.ok(Object.isFrozen(sidecar.candidateGroups));
+    assert.ok(Object.isFrozen(sidecar.candidateGroups[0]));
+    assert.ok(Object.isFrozen(sidecar.candidateGroups[0]?.before));
+    assert.ok(Object.isFrozen(sidecar.candidateGroups[0]?.before[0]));
+
+    candidate.unitName = "changed source";
+    assert.strictEqual(
+      sidecar.candidateGroups[0]?.before[0]?.unitName,
+      "candidate",
+    );
+
     assert.throws(() => {
       (sidecar as unknown as { period: { from: string } }).period.from =
+        "changed";
+    }, TypeError);
+    assert.throws(() => {
+      (sidecar.candidateGroups[0]!.before[0] as { unitName: string }).unitName =
         "changed";
     }, TypeError);
   });

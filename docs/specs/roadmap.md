@@ -78,28 +78,22 @@ entry conditions that make planning each item useful.
   plans, reviews, approvals, and completion evidence. Do not create one umbrella
   implementation feature; this roadmap section is the coordination record.
 
-1. `semantic-diff-application-projection`: separate the schedule-impact DTO,
-   build orchestration, identity, and timeline responsibilities without
-   recreating domain-level over-fragmentation.
-2. `semantic-diff-vscode-dependencies`: narrow command dependency groups and
+1. `semantic-diff-vscode-dependencies`: narrow command dependency groups and
    move source-freshness behavior out of bootstrap while retaining bootstrap as
    the composition root.
-3. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
+2. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
    wrappers and single-consumer helpers that do not earn an independent React,
    interaction, accessibility, state, reuse, test, or complexity boundary.
-4. `domain-model-readonly`: migrate normalized domain model parts to readonly
+3. `domain-model-readonly`: migrate normalized domain model parts to readonly
    contracts incrementally after mutation impact is characterized.
-5. `architecture-test-cohesion`: split the architecture-test implementation
+4. `architecture-test-cohesion`: split the architecture-test implementation
    only when its size or change pressure justifies the boundary; do not build a
    speculative static-analysis framework.
 
-- Entry condition for item 1: the completed schedule-facade dependency is
-  available, and intake confirms that application projection remains one
-  independently valuable outcome.
-- Entry condition for each later item: the preceding dependency that affects
+- Entry condition for each remaining item: the preceding dependency that affects
   its semantic owner or public contract is complete, and intake confirms that
   the item still represents one independently valuable outcome. Unrelated
-  later items may be reconsidered or reordered through their own intake when
+  items may be reconsidered or reordered through their own intake when
   evidence shows no dependency.
 
 ### Deferred Schedule Semantics
