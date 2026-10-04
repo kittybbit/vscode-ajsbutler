@@ -2,14 +2,14 @@
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Requirement/source | Slice | Tests or validation |
-| ------------------ | ----- | ------------------- |
-| R1; Compare AJS Definitions | S1 | Command/schedule-impact suites; minimal capability compilation and helper cases |
-| R2; Roadmap item 1; Composition | S2 | Flow-source host and wiring suites; semantic Solution Shape review |
-| R3; snapshot freshness | S2 | Flow-source host matrix; integrated Explorer flow stale/readiness tests; browser smoke |
-| R4; comparison use case | S1, S2 | Command, capture, registry, source action, Explorer flow/panel, subscriptions/lifecycle suites |
-| R4; report use case | S1, S2 | Report document, report action and output regressions; existing copy/save cases |
-| R5; compatibility | S1, S2 | Architecture dependency suite; Node-import/engine checks; desktop/web tests and production builds |
+| Requirement/source              | Slice  | Tests or validation                                                                               |
+| ------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| R1; Compare AJS Definitions     | S1     | Command/schedule-impact suites; minimal capability compilation and helper cases                   |
+| R2; Roadmap item 1; Composition | S2     | Flow-source host and wiring suites; semantic Solution Shape review                                |
+| R3; snapshot freshness          | S2     | Flow-source host matrix; integrated Explorer flow stale/readiness tests; browser smoke            |
+| R4; comparison use case         | S1, S2 | Command, capture, registry, source action, Explorer flow/panel, subscriptions/lifecycle suites    |
+| R4; report use case             | S1, S2 | Report document, report action and output regressions; existing copy/save cases                   |
+| R5; compatibility               | S1, S2 | Architecture dependency suite; Node-import/engine checks; desktop/web tests and production builds |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
