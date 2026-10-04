@@ -7,18 +7,22 @@
 - Active or approved slice: S1 first; S1 and S2 plans Human Approved.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, linked discovery and
   planning evidence, and the Present Schedule Impact use case.
-- Constraints: no runtime, test, generated, or configuration edits until the
-  reviewed plan has explicit Human Approval and its focused planning commit.
-- Next operation: focused planning commit; Main owns approval and routing.
+- Constraints: implementation is limited to approved S1 runtime/test paths and
+  selected feature records; S2 waits for S1 review, approval, and commit.
+- Next operation: focused S1 replan commit; Main owns gate and routing.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit, then S1 implementation.
+- Next decision / blocker: focused commit of the reviewed and Human Approved
+  S1 wording-test extension. Main elected to
+  preserve the required 10,000-item test unchanged as an implementation-
+  readiness blocker; final qlty evidence remains pending.
 - Selected feature: `schedule-impact-calendar-cohesion`, roadmap item 1.
 - Source/base: `30b3f689af6d236ec8dcc427f7ea7789ce12888b`.
 - Branch: `codex/schedule-impact-calendar-cohesion`.
-- Gate evidence: independent plan review Ready; Human Approval recorded; no commit.
+- Gate evidence: independent plan review Ready; Human Approval recorded;
+  planning commit `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`.
 - Approved implementation scope: S1 and S2; no completed slices.
 
 ## Human Approval
@@ -35,6 +39,80 @@
   - `docs/specs/features/schedule-impact-calendar-cohesion/SPECS.md`
   - `docs/specs/features/schedule-impact-calendar-cohesion/TASKS.md`
   - `docs/specs/features/schedule-impact-calendar-cohesion/TRACEABILITY.md`
+
+## S1 renewed approval and review
+
+- Review: `calendar_replan_review` returned Ready, no Findings.
+- Reviewed substantive identity: TASKS SHA256
+  `2a637486bab04eaab9fcb53a8dad909e71ee5e5e3e4af9fdebaaff30abc33edc`;
+  TRACEABILITY SHA256
+  `e0f6f1e38e135739c50a502a4364387fd7e80fd9d400c60ca81858f0a6011a95`.
+- Status: Approved.
+- Approved at: approved in current conversation.
+- Approved scope: exact expectation-only English colon removal described below
+  in `src/test/suite/scheduleImpactCalendarLocalization.test.ts`, plus the
+  selected feature records. Original S1/S2 scope remains approved.
+- Provenance: human explicitly authorized wording-difference test fixes after
+  Main reported the English announcement colon mismatch. Review confirms this
+  exact correction fits that authorization. No new approval question needed.
+- Replan commit paths, exactly: selected feature `TASKS.md` and
+  `TRACEABILITY.md`. Existing S1 runtime/test changes are intentionally retained
+  unstaged and excluded from this planning commit; their partial identity and
+  path manifest are in the linked S1 evidence. No Completion Approval granted.
+- These state/review/approval entries are separate gate metadata; substantive
+  replan and required large-test coverage are unchanged.
+
+## S1 minimal replan and preserved validation blocker
+
+- Mode/base: Replanning, S1, planning commit
+  `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`; preserve the existing uncommitted
+  S1 implementation patch and the unchanged S2 plan. No completion commit exists.
+- Trigger: the required Localization test expects
+  `Selected schedule impact: ...`, while the existing English resource prefix
+  and formatter produce `Selected schedule impact ...` at both base and final.
+- Proposed additional S1 path, exactly:
+  `src/test/suite/scheduleImpactCalendarLocalization.test.ts`. Change only the
+  English `selectedItem` expected string in
+  `does not localize facts in result announcements`, removing its colon.
+  Keep its date/path/occurrence facts and final period, all Japanese assertions,
+  resource text and runtime formatting unchanged. No other test repair is
+  included. This restores the regression assertion to current behavior under
+  R3 without changing a public contract or introducing an abstraction.
+- Approval provenance: original S1/S2 Human Approval above is preserved. Main
+  supplied explicit later human authorization for wording-difference test
+  fixes, interpreted as this exact expectation-only correction. It is input
+  authorization, not a planner-granted approval or completed replan gate.
+  Main must record renewed provenance after independent review of the changed
+  S1 boundary; the prior reviewed identity covers only the original scope.
+- Review/evidence renewal: the S1 scope extension needs independent plan review
+  and a focused replan commit before implementation resumes. Preserve S2's
+  design, order, dependency on S1 completion, and approval. Reuse each existing
+  passing check only if its own inspected inputs/configuration/tools/coverage
+  still match. Refresh Localization and test compilation for the changed test;
+  final full-repository qlty must include it and these revised documents.
+  Baseline SARIF may be reused only with complete required inventory facts;
+  the recorded unknown check analyzed count is not a passing evidence package.
+- Unresolved required coverage: the View test
+  `keeps every repeated section bounded and keyboard-reachable` constructs
+  10,000 candidates, issues and timeline entries and checks fewer than 300 DOM
+  entries, global counts, and End-key focus for all three large lists using
+  `VirtuosoMockContext`. Both current and baseline commands are SIGKILLed,
+  including the baseline isolated run. The retained raw log has no elapsed
+  time, RSS, render-stage marker or killer provenance; it establishes identical
+  termination, not an OOM, timeout, harness defect or runtime defect diagnosis.
+  `.timeout(5000)` cannot interrupt synchronous render work. No View test,
+  list algorithm, fixture size, assertion, skip or required coverage change is
+  authorized by the wording-fix instruction.
+- Main decision: plan only the exact wording expectation correction now.
+  Preserve the required 10,000-item test/check unchanged, with no replacement,
+  waiver, diagnosis scope or View-test edit. After renewed review/approval/commit,
+  resume S1 to complete unaffected required checks and the wording test while
+  retaining large-test failure as a blocker to implementation Ready. A concrete
+  repair or changed coverage later returns through Main for its own decision.
+- Replan readiness: the changed scope is reviewable and no new scope/design or
+  validation decision is unresolved. Independent review is required for this
+  S1 extension. The existing S1 patch remains paused in IMPLEMENTING until the
+  replan gates complete; its required large-test evidence is still not passing.
 
 ## Solution Shape and candidate decisions
 
@@ -102,7 +180,7 @@ commit. There is no external feature dependency or cross-layer migration.
 
 ### S1: Co-locate section composition and empty-state selection
 
-- Lifecycle state: PLANNED
+- Lifecycle state: IMPLEMENTING
 - Value: page ordering lives with Contents; each result region owns its body
   choice. Remove two forwarding boundaries without changing result children.
 - Runtime paths, exactly:
@@ -129,7 +207,24 @@ commit. There is no external feature dependency or cross-layer migration.
   and large results. No bounded-list implementation edits in this slice.
 - Risk: removing a stateless parent can alter reconciliation position. Preserve
   markup and child keys/types; rerender tests must catch state/visibility loss.
-- Readiness: proposed, no review/approval/validation of implementation yet.
+- Implementation: exact approved S1 runtime and test paths changed; R1 and the
+  observable component transitions pass characterization before and after the
+  refactor. No S2 or other runtime path changed.
+- Validation evidence: see the S1 partial evidence artifact in the Validation
+  index. Production TypeScript, test compilation, architecture rules, and build
+  pass. Markdown lint and diff check passed before the final outcome annotations
+  and need rerunning. The targeted component and non-large view,
+  accessibility, theme, and most localization tests pass. Required calendar
+  coverage is not Ready: the existing announcement wording assertion fails on
+  both S1 and the comparison base, and the existing 10,000-item view test is
+  SIGKILLed on both. Final qlty observations and aggregate are deferred until
+  Main resolves the scope change.
+- Readiness: implementation handoff paused in IMPLEMENTING. User authorized
+  fixing the wording mismatch, which is outside the approved paths; Main routes
+  minimal replan review, renewed approval provenance and commit before that
+  edit. Main preserves the large-test requirement unchanged as a blocker to
+  implementation Ready; unaffected checks may resume after the replan gates.
+  No completion approval or commit.
 - Completion Approval: Pending; approved at none; scope none; commit none.
 
 ### S2: Co-locate bounded rendering with its focus lifecycle
@@ -264,7 +359,16 @@ requires current-head Qlty Cloud success.
   `7e419204798d11477b165db6b154d351eedfb1f9cf1f22027c25d007126b70a2`.
   Discovery and planning evidence matched; existing documentation validation
   reused. Main's state/gate annotations are separate metadata, not a new plan.
-- Implementation evidence, implementation reviews, approvals and commits: none.
+- Minimal replan documentation evidence:
+  [replan evidence](/private/tmp/calendar-s1-minimal-replan-evidence.json).
+  Expectation-only scope is concrete; Main preserves the unchanged large-test
+  requirement as an implementation-readiness blocker. No runtime/test change
+  or new approval was produced by the planner.
+- S1 implementation evidence (partial; validation findings prevent Ready):
+  [evidence artifact](/private/tmp/calendar-s1-pre-replan-evidence.json). It
+  retains the implementation patch identity, commands and raw logs, base
+  comparisons, and qlty baseline SARIF. S1 implementation review, Completion
+  Approval, and slice commit are pending. S2 remains PLANNED.
 
 ## Production readiness and document impact
 
@@ -281,5 +385,9 @@ observable behavior. No durable updates are authorized in implementation.
 Feature Exit evaluates completion of roadmap item 1 and durable propagation
 under its separate scope/gate; do not remove the roadmap item prematurely.
 Existing desktop harness, table and graph-golden follow-ups retain their owners;
-this plan does not resolve or waive them. No prior slices or inherited approvals
-are invalidated. No unresolved new scope/design decision remains.
+this plan does not resolve or waive them. No completed slices exist.
+Original approval and matching evidence remain
+recorded; the proposed S1 extension needs renewed independent plan review and
+approval provenance through Main. Main preserves the required 10,000-item
+check as an implementation-readiness blocker; S2 scope and approval are
+preserved.
