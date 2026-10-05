@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restored keyboard navigation for Schedule Impact Calendar result rows,
+  including nested candidates.
 - Fixed the first Flow opening from Semantic Diff Explorer so validated diff
   marks appear without repeating the action.
 - Unified Semantic Diff Explorer and Schedule Impact Calendar MUI filter menus

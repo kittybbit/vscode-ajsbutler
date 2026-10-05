@@ -10,26 +10,31 @@ import { ScheduleImpactCalendarBoundedList } from "./ScheduleImpactCalendarBound
 import { ScheduleImpactCalendarResultSection } from "./ScheduleImpactCalendarResultSection";
 import type { ScheduleImpactCalendarModel } from "./scheduleImpactCalendarModel";
 
-const CandidateDetails = ({
-  candidate,
-  labels,
-}: Readonly<{
+type CandidateDetailsProps = Readonly<{
   candidate: SemanticDiffScheduleImpactCandidateGroup["before"][number];
   labels: ScheduleImpactCalendarLabels;
-}>): React.ReactElement => (
-  <ListItem
-    component="li"
-    data-schedule-impact-calendar-candidate-id={candidate.id}
-    sx={{ display: "block" }}
-  >
-    <ResultKeyValueList
-      items={[
-        { label: labels.unitName, value: candidate.unitName },
-        { label: labels.unitPath, value: candidate.unitPath },
-      ]}
-    />
-  </ListItem>
+}> &
+  Omit<React.HTMLAttributes<HTMLLIElement>, "children">;
+
+const CandidateDetails = React.forwardRef<HTMLLIElement, CandidateDetailsProps>(
+  ({ candidate, labels, ...rowProps }, ref): React.ReactElement => (
+    <ListItem
+      {...rowProps}
+      ref={ref}
+      component="li"
+      data-schedule-impact-calendar-candidate-id={candidate.id}
+      sx={{ display: "block" }}
+    >
+      <ResultKeyValueList
+        items={[
+          { label: labels.unitName, value: candidate.unitName },
+          { label: labels.unitPath, value: candidate.unitPath },
+        ]}
+      />
+    </ListItem>
+  ),
 );
+CandidateDetails.displayName = "CandidateDetails";
 
 const CandidateSide = ({
   candidates,
@@ -55,47 +60,63 @@ const CandidateSide = ({
     />
   );
 
-const CandidateGroupCard = ({
-  group,
-  index,
-  labels,
-}: Readonly<{
+type CandidateGroupCardProps = Readonly<{
   group: SemanticDiffScheduleImpactCandidateGroup;
   index: number;
   labels: ScheduleImpactCalendarLabels;
-}>): React.ReactElement => {
-  const groupLabel = labels.candidateGroup(index + 1);
-  return (
-    <ResultCard
-      title={groupLabel}
-      ariaLabel={groupLabel}
-      dataAttributes={{
-        "data-schedule-impact-calendar-candidate-group-id": group.id,
-      }}
-      sx={{ p: 1, mb: 1 }}
-    >
-      <ResultComparison
-        beforeLabel={labels.candidateBefore}
-        afterLabel={labels.candidateAfter}
-        before={
-          <CandidateSide
-            candidates={group.before}
-            label={`${groupLabel}: ${labels.candidateBefore}`}
-            labels={labels}
-          />
-        }
-        after={
-          <CandidateSide
-            candidates={group.after}
-            label={`${groupLabel}: ${labels.candidateAfter}`}
-            labels={labels}
-          />
-        }
-        ariaLabel={`${groupLabel}: ${labels.candidateBefore} / ${labels.candidateAfter}`}
-      />
-    </ResultCard>
-  );
-};
+}> &
+  Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "title">;
+
+const CandidateGroupCard = React.forwardRef<
+  HTMLDivElement,
+  CandidateGroupCardProps
+>(
+  (
+    { group, index, labels, onFocus, onKeyDown, ...cardProps },
+    ref,
+  ): React.ReactElement => {
+    const groupLabel = labels.candidateGroup(index + 1);
+    return (
+      <ResultCard
+        {...cardProps}
+        ref={ref}
+        onFocus={(event) => {
+          if (event.target === event.currentTarget) onFocus?.(event);
+        }}
+        onKeyDown={(event) => {
+          if (event.target === event.currentTarget) onKeyDown?.(event);
+        }}
+        title={groupLabel}
+        ariaLabel={groupLabel}
+        dataAttributes={{
+          "data-schedule-impact-calendar-candidate-group-id": group.id,
+        }}
+        sx={{ p: 1, mb: 1 }}
+      >
+        <ResultComparison
+          beforeLabel={labels.candidateBefore}
+          afterLabel={labels.candidateAfter}
+          before={
+            <CandidateSide
+              candidates={group.before}
+              label={`${groupLabel}: ${labels.candidateBefore}`}
+              labels={labels}
+            />
+          }
+          after={
+            <CandidateSide
+              candidates={group.after}
+              label={`${groupLabel}: ${labels.candidateAfter}`}
+              labels={labels}
+            />
+          }
+          ariaLabel={`${groupLabel}: ${labels.candidateBefore} / ${labels.candidateAfter}`}
+        />
+      </ResultCard>
+    );
+  },
+);
+CandidateGroupCard.displayName = "CandidateGroupCard";
 
 export const ScheduleImpactCalendarCandidates = ({
   model,

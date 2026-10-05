@@ -242,6 +242,21 @@ suite("Schedule impact calendar components", () => {
     assert.ok(
       view.getByRole("region", { name: "Uncalculated schedule portions" }),
     );
+    const orderedRegions = [
+      view.getByRole("region", { name: "Root outcomes" }),
+      view.getByRole("region", { name: "Valid no-runs" }),
+      view.getByRole("region", { name: "Identity candidates" }),
+      view.getByRole("region", { name: "Uncalculated schedule portions" }),
+      view.getByRole("region", { name: "Calendar legend" }),
+      view.getByRole("region", { name: "Schedule impact timeline" }),
+    ];
+    orderedRegions.slice(0, -1).forEach((region, index) => {
+      assert.notStrictEqual(
+        region.compareDocumentPosition(orderedRegions[index + 1]!) &
+          dom.window.Node.DOCUMENT_POSITION_FOLLOWING,
+        0,
+      );
+    });
     const keyValueRows = [
       ...view.container.querySelectorAll("[data-result-key-value-row]"),
     ];
@@ -286,13 +301,76 @@ suite("Schedule impact calendar components", () => {
       /issue-a/,
     );
 
-    const outcome = view.getByRole("combobox", { name: "Root outcome" });
-    selectFilterOption(dom, outcome, "valid-no-runs");
+    const rootStatus = view.getByRole("region", { name: "Root outcomes" });
+    const noRuns = view.getByRole("region", { name: "Valid no-runs" });
+    const issues = view.getByRole("region", {
+      name: "Uncalculated schedule portions",
+    });
+    const assertCounts = (
+      section: HTMLElement,
+      globalCount: string,
+      visibleCount: string,
+    ): void => {
+      assert.strictEqual(
+        section.getAttribute("data-global-count"),
+        globalCount,
+      );
+      assert.strictEqual(
+        section.getAttribute("data-visible-count"),
+        visibleCount,
+      );
+    };
+    assertCounts(rootStatus, "2", "2");
+    assertCounts(noRuns, "1", "1");
+    assertCounts(issues, "1", "1");
+    assert.ok(view.getByRole("list", { name: "Root outcomes" }));
+    assert.ok(view.getByRole("list", { name: "Valid no-runs" }));
+    assert.ok(
+      view.getByRole("list", { name: "Uncalculated schedule portions" }),
+    );
+
+    const rootFilter = view.getByRole("combobox", { name: "Root jobnet" });
+    selectFilterOption(dom, rootFilter, "root-a");
+    assertCounts(rootStatus, "2", "1");
+    assertCounts(noRuns, "1", "0");
+    assertCounts(issues, "1", "1");
     assert.strictEqual(
-      view
-        .getByRole("region", { name: "Root outcomes" })
-        .getAttribute("data-visible-count"),
-      "1",
+      view.getByRole("alert").querySelector(".MuiAlert-message")?.textContent,
+      "No roots have a valid no-run outcome.",
+    );
+    assert.strictEqual(
+      view.queryByRole("list", { name: "Valid no-runs" }),
+      null,
+    );
+    assert.ok(
+      view.getByRole("list", { name: "Uncalculated schedule portions" }),
+    );
+
+    selectFilterOption(dom, rootFilter, "root-b");
+    assertCounts(rootStatus, "2", "1");
+    assertCounts(noRuns, "1", "1");
+    assertCounts(issues, "1", "0");
+    assert.strictEqual(
+      view.getByRole("alert").querySelector(".MuiAlert-message")?.textContent,
+      "No uncalculated schedule portions.",
+    );
+    assert.ok(view.getByRole("list", { name: "Valid no-runs" }));
+    assert.strictEqual(
+      view.queryByRole("list", {
+        name: "Uncalculated schedule portions",
+      }),
+      null,
+    );
+
+    selectFilterOption(dom, rootFilter, "root-a");
+    assertCounts(noRuns, "1", "0");
+    assertCounts(issues, "1", "1");
+    assert.strictEqual(
+      view.getByRole("alert").querySelector(".MuiAlert-message")?.textContent,
+      "No roots have a valid no-run outcome.",
+    );
+    assert.ok(
+      view.getByRole("list", { name: "Uncalculated schedule portions" }),
     );
     assert.strictEqual(
       view

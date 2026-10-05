@@ -10,7 +10,10 @@ import { scheduleImpactCalendarAnnouncement } from "./scheduleImpactCalendarAcce
 import { getScheduleImpactCalendarLabels } from "../../../../resource/i18n/scheduleImpactCalendar";
 import { ScheduleImpactCalendarFilters as CalendarFilters } from "./ScheduleImpactCalendarFilters";
 import { ScheduleImpactCalendarHeader } from "./ScheduleImpactCalendarHeader";
-import { ScheduleImpactCalendarSections } from "./ScheduleImpactCalendarSections";
+import { ScheduleImpactCalendarCandidates } from "./ScheduleImpactCalendarCandidates";
+import { ScheduleImpactCalendarIssues } from "./ScheduleImpactCalendarIssues";
+import { ScheduleImpactCalendarLegend } from "./ScheduleImpactCalendarLegend";
+import { RootStatus, ValidNoRuns } from "./ScheduleImpactCalendarRootSections";
 import { ScheduleImpactCalendarTimeline } from "./ScheduleImpactCalendarTimeline";
 import ResultSection from "../shared/result/ResultSection";
 import { formatLocalizedDateRange } from "../shared/result/formatLocalizedDateRange";
@@ -88,7 +91,13 @@ export const ScheduleImpactCalendarContents = ({
           }}
         />
       </ResultSection>
-      <ScheduleImpactCalendarSections model={model} labels={labels} />
+      <Stack spacing={1.5}>
+        <RootStatus model={model} labels={labels} />
+        <ValidNoRuns model={model} labels={labels} />
+        <ScheduleImpactCalendarCandidates model={model} labels={labels} />
+        <ScheduleImpactCalendarIssues model={model} labels={labels} />
+        <ScheduleImpactCalendarLegend labels={labels} />
+      </Stack>
       <ScheduleImpactCalendarTimeline
         model={model}
         labels={labels}

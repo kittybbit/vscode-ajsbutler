@@ -41,30 +41,35 @@ const issueFacts = (
   { label: labels.detail, value: <IssueDetail detail={issue.detail} /> },
 ];
 
-const IssueCard = ({
-  issue,
-  labels,
-}: Readonly<{
+type IssueCardProps = Readonly<{
   issue: SemanticDiffScheduleImpactIssue;
   labels: ScheduleImpactCalendarLabels;
-}>): React.ReactElement => {
-  const issueLabel = `${labels.issue}: ${issue.kind}, ${labels.occurrence} ${issue.occurrenceOrdinal}, ${labels.targetId} ${issue.targetId ?? labels.none}`;
-  return (
-    <ResultCard
-      ariaLabel={issueLabel}
-      dataAttributes={{ "data-schedule-impact-calendar-issue-id": issue.id }}
-      sx={{
-        p: 0,
-        "& .MuiCardContent-root": {
-          p: 0.5,
-          "&:last-child": { pb: 0.5 },
-        },
-      }}
-    >
-      <ResultKeyValueList dense items={issueFacts(issue, labels)} />
-    </ResultCard>
-  );
-};
+}> &
+  Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "title">;
+
+const IssueCard = React.forwardRef<HTMLDivElement, IssueCardProps>(
+  ({ issue, labels, ...cardProps }, ref): React.ReactElement => {
+    const issueLabel = `${labels.issue}: ${issue.kind}, ${labels.occurrence} ${issue.occurrenceOrdinal}, ${labels.targetId} ${issue.targetId ?? labels.none}`;
+    return (
+      <ResultCard
+        {...cardProps}
+        ref={ref}
+        ariaLabel={issueLabel}
+        dataAttributes={{ "data-schedule-impact-calendar-issue-id": issue.id }}
+        sx={{
+          p: 0,
+          "& .MuiCardContent-root": {
+            p: 0.5,
+            "&:last-child": { pb: 0.5 },
+          },
+        }}
+      >
+        <ResultKeyValueList dense items={issueFacts(issue, labels)} />
+      </ResultCard>
+    );
+  },
+);
+IssueCard.displayName = "IssueCard";
 
 export const ScheduleImpactCalendarIssues = ({
   model,
