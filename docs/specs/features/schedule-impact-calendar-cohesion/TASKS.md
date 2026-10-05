@@ -4,18 +4,19 @@
 
 - Purpose: co-locate calendar presentation with its semantic owner and preserve
   the read-only workflow.
-- Active slice: S1 focus extension Human Approved; original approvals retained.
+- Active slice: S2 independently reviewed Ready; S1 completion committed.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, linked discovery and
   planning evidence, and the Present Schedule Impact use case.
-- Constraints: preserve the implemented approved S1 boundary; S2 waits for S1
-  review, Completion Approval, and completion commit.
-- Next operation: focused S1 completion commit, then approved S2 implementation.
+- Constraints: preserve the committed S1 boundary and implement only approved
+  S2 paths.
+- Next operation: approved S2 completion commit by `approval-committer`.
 
 ## Current state
 
 - Lifecycle state: SLICE_APPROVED
-- Next decision: focused S1 completion commit; independent review Ready and
-  explicit Completion Approval recorded. S2 waits for the successful commit.
+- Next decision: S2 completion commit; explicit Completion Approval recorded.
+  S1 was Ready, Completion Approved and committed as
+  `14b8751d3986d88521e391f59ea0ef271fed6ce7`.
 - Focus replan commit: `205f16fa1d38865cf66b6db089664b7a8612cb09`.
 - Selected feature: `schedule-impact-calendar-cohesion`, roadmap item 1.
 - Source/base: `30b3f689af6d236ec8dcc427f7ea7789ce12888b`.
@@ -24,9 +25,13 @@
   planning commit `550bcb46a80cf96488a6e5d1bb407b199a4b2bbf`.
 - Approved implementation scope: original S1 and S2, expectation-only
   Localization correction, and reviewed S1 focus extension below.
-  S1 completion-approved; no committed slices. S2 remains approved, unstarted.
+  S1 completion committed; S2 implementation is complete under its original
+  Human Approval.
 
 ## S1 Completion Approval
+
+- Completion commit: `14b8751d3986d88521e391f59ea0ef271fed6ce7`;
+  exact 13-path gate committed; staged check passed; worktree clean at commit.
 
 - Status: Approved.
 - Approved at: approved in current conversation.
@@ -55,6 +60,47 @@
   - `src/test/suite/scheduleImpactCalendarView.test.tsx`
 - Main approval/state metadata is separate from the reviewed substantive
   snapshot. No product/test/CHANGELOG, scope, or validation changes were made.
+
+## S2 Completion Approval
+
+- Status: Approved.
+- Approved at: approved in current conversation.
+- Provenance: human approved Main's explicit S2 completion-commit request after
+  independent implementation review Ready. Closure Approval is not included.
+- Approved scope: exact reviewed S2 implementation, test and selected-feature
+  evidence/state records, including separate Main review/approval metadata.
+- Review: `calendar_s2_review` Ready, no actionable Findings.
+- Reviewed patch SHA256:
+  `c618825734643b1ef9bc4490754a65ebcb95fecb0811b5e456ae89e7604693a5`.
+- Completion commit paths, exactly:
+  - `src/presentation/webview/editor/scheduleImpactCalendar/ScheduleImpactCalendarBoundedList.tsx`
+  - `src/presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBoundedListHelpers.tsx`
+    (delete)
+  - `src/test/suite/scheduleImpactCalendarBoundedList.test.tsx`
+  - `docs/specs/features/schedule-impact-calendar-cohesion/TASKS.md`
+  - `docs/specs/features/schedule-impact-calendar-cohesion/TRACEABILITY.md`
+- Product/test content and approved scope remain unchanged from review.
+- Separate Main metadata validation: [Ready metadata](/private/tmp/calendar-s2-ready/evidence.json)
+  and [approval metadata](/private/tmp/calendar-s2-completion-approved/evidence.json).
+
+## S2 implementation review
+
+- Review: `calendar_s2_review` returned Ready, no actionable Findings.
+- Reviewed base: `14b8751d3986d88521e391f59ea0ef271fed6ce7`.
+- Reviewed patch SHA256:
+  `c618825734643b1ef9bc4490754a65ebcb95fecb0811b5e456ae89e7604693a5`.
+- Reviewed content manifest SHA256:
+  `46cae686a4057632d08a30d59f5db76641bd03a0479759aab5be305e727e0b4f`.
+- Approved five-path scope and acceptance matched. Public props, helper bodies,
+  hook/component boundaries, focus lifecycle and virtualization are preserved.
+- Existing validation reused: 18 calendar tests, 29 architecture checks,
+  TypeScript, test compilation, desktop/web/webview build and document checks.
+  All official SARIF result records match baseline, including severity and
+  measured values; no new or adverse findings. Final aggregate passed.
+- Evidence: [S2 implementation](/private/tmp/calendar-s2-evidence/evidence.json)
+  and [mechanical details](/private/tmp/calendar-s2-evidence/evidence-details.json).
+- Main state/review entries are separate metadata. Reviewed product/test,
+  scope, acceptance and validation are unchanged. Completion Approval recorded.
 
 ## Human Approval
 
@@ -246,7 +292,7 @@ commit. There is no external feature dependency or cross-layer migration.
 
 ### S1: Co-locate result sections and restore their bounded-row focus contract
 
-- Lifecycle state: SLICE_APPROVED; uncommitted pending focused completion commit.
+- Lifecycle state: SLICE_COMMITTED; completion committed as `14b8751d3986d88521e391f59ea0ef271fed6ce7`.
 - Value: page ordering lives with Contents; each result region owns its body
   choice. Remove two forwarding boundaries and restore the existing keyboard
   contract for their custom result rows without changing displayed facts.
@@ -333,19 +379,20 @@ out/test/suite/scheduleImpactCalendarView.test.js` exited 3 (0 passing, 3
   records the exact final snapshot, approved paths, check outputs, qlty
   comparison and documentation-metadata validation. The earlier S1 evidence
   remains historical for its narrower pre-focus input set.
-- Readiness: SLICE_READY; independent review Ready, no actionable Findings.
-  Completion Approval recorded. TypeScript, test compile,
+- Readiness: SLICE_COMMITTED; independent review Ready, no actionable Findings.
+  Completion Approval and completion commit recorded. TypeScript, test compile,
   architecture (29/29), all five calendar suites (14 passing, including the
   10,000-item case), desktop/web/webview build, required documentation checks
   and qlty aggregate passed. Official qlty observations contain only mapped
   baseline findings; details and retained SARIF are in the evidence artifact.
-  No Completion Approval/commit.
+  Completion commit is recorded below.
 - Completion Approval: Approved; approved at approved in current conversation;
-  scope exact reviewed S1 completion and metadata below; commit pending.
+  scope exact reviewed S1 completion and metadata below;
+  commit `14b8751d3986d88521e391f59ea0ef271fed6ce7`.
 
 ### S2: Co-locate bounded rendering with its focus lifecycle
 
-- Lifecycle state: PLANNED
+- Lifecycle state: SLICE_APPROVED
 - Depends on: S1 completion commit and matching review/approval evidence.
 - Value: one component module owns the bounded-list contract and its private
   lifecycle/rendering implementation instead of exposing a one-consumer model.
@@ -361,6 +408,9 @@ out/test/suite/scheduleImpactCalendarView.test.js` exited 3 (0 passing, 3
   outside the rendered viewport. R4 retains the public component signature and
   browser-safe imports. Threshold, overscan, list height and algorithms stay
   byte-for-byte equivalent except import/export/co-location formatting.
+- Acceptance result: Pass. The public component props and all bounded-list
+  lifecycle, list semantics, handler chaining, threshold and focus behavior
+  remain unchanged; the new suite passes all four approved cases.
 - Characterize before moving: add boundary tests through the public BoundedList
   component for small-list semantics and handler chaining, rerender with a
   shorter nonempty list, threshold and threshold-plus-one rendering, and
@@ -373,8 +423,18 @@ out/test/suite/scheduleImpactCalendarView.test.js` exited 3 (0 passing, 3
 - Risk: hook, ref or component identity changes can lose focus or active state.
   Move declarations at module scope, retain hook execution under BoundedList,
   and do not change forwardRef placement or ref registration/cleanup.
-- Readiness: proposed, no review/approval/validation of implementation yet.
-- Completion Approval: Pending; approved at none; scope none; commit none.
+- Validation result: TypeScript, test compilation, 29 architecture rules, all
+  18 calendar tests, desktop/web/webview build, feature Markdown lint, diff
+  check, qlty SARIF comparison and final aggregate pass under the evidence
+  artifact below. No qlty findings map to changed paths.
+- Implementation evidence: [S2 evidence](/private/tmp/calendar-s2-evidence/evidence.json).
+- Changed paths: the two runtime paths and new test path above, plus this
+  feature's `TASKS.md` and `TRACEABILITY.md` gate/result records. The artifact
+  retains their exact final identity and complete command outputs.
+- Readiness: SLICE_APPROVED; `calendar_s2_review` returned Ready, no actionable
+  Findings. Completion Approval recorded; completion commit pending.
+- Completion Approval: Approved; approved at approved in current conversation;
+  scope exact reviewed S2 completion and separate gate metadata; commit pending.
 
 ## Approval boundaries and exclusions
 
@@ -503,8 +563,8 @@ requires current-head Qlty Cloud success.
   [S1 evidence artifact](/private/tmp/calendar-s1-final-evidence.json). It
   retains original and replan gate references, exact patch identity, commands,
   raw logs, qlty observations, comparison facts and explicit evidence gaps.
-  S1 implementation review, Completion Approval and slice commit are pending;
-  S2 remains PLANNED.
+  S1's completion gate and commit are recorded above; S2 uses that commit as
+  its fresh comparison base.
 - Focus-contract discovery:
   [Main diagnosis](/private/tmp/calendar-large-diagnosis/evidence.json), plus its
   `compact-failure.log` and `profile-test.log`; not an implementation pass.
@@ -543,8 +603,8 @@ requires current-head Qlty Cloud success.
   no new or adverse findings. Documentation links and structure checked.
   Existing validation reused; no product scans repeated for review.
 - Main state/review entries are separate gate metadata; reviewed product, test,
-  CHANGELOG, acceptance and required validation are unchanged. Completion
-  Approval remains Pending; S2 cannot start before S1 approval and commit.
+  CHANGELOG, acceptance and required validation are unchanged. S1 Completion
+  Approval and its commit are recorded above; S2 started from that commit.
 
 ## Production readiness and document impact
 
