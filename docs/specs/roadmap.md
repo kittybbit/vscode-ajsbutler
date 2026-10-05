@@ -78,12 +78,9 @@ entry conditions that make planning each item useful.
   plans, reviews, approvals, and completion evidence. Do not create one umbrella
   implementation feature; this roadmap section is the coordination record.
 
-1. `schedule-impact-calendar-cohesion`: co-locate or merge presentation-only
-   wrappers and single-consumer helpers that do not earn an independent React,
-   interaction, accessibility, state, reuse, test, or complexity boundary.
-2. `domain-model-readonly`: migrate normalized domain model parts to readonly
+1. `domain-model-readonly`: migrate normalized domain model parts to readonly
    contracts incrementally after mutation impact is characterized.
-3. `architecture-test-cohesion`: split the architecture-test implementation
+2. `architecture-test-cohesion`: split the architecture-test implementation
    only when its size or change pressure justifies the boundary; do not build a
    speculative static-analysis framework.
 
