@@ -3,23 +3,25 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: S1 next; reviewed S1–S3 scope is Human Approved.
+- Active or approved slice: S1 Completion Approved; focused commit pending.
+  S2 follows that commit. Reviewed S1–S3 scope is Human Approved.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
-- Validate: selected documentation checks now; per-slice checks below after
-  the reviewed plan receives Human Approval and its focused planning commit.
+- Validate: S1 acceptance and full validation evidence are recorded below and
+  in the linked evidence artifact; later slices use the required gates below.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused approved planning commit, then S1 baseline.
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: focused S1 completion commit, then S2.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
 - Gate evidence: independent plan review Ready, no Findings; Human Approval
-  received in the current conversation on 2026-10-07. Planning commit pending.
+  received in the current conversation on 2026-10-07. Planning commit
+  `2817260eb3338e82185cf1ec9253fa4f1da91553` succeeded.
 - Preserved slices: none completed; no inherited approval changed.
 
 ## Human Approval
@@ -99,13 +101,13 @@
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Owner / package / layer | Public contract and responsibility | Boundary value and dependency direction | Applicable validation |
-| --- | --- | --- | --- |
-| Normalized AJS model / `src/domain/models/ajs` / domain | Existing `AjsDocument`, `AjsUnit`, `AjsParameter`, `AjsRelation`, `AjsNormalizationWarning`, `AjsUnitLayout` and navigation helpers; readonly published values, accepting readonly collections; fresh helper result arrays retain ownership | Stable JP1 identity, structure and raw evidence; no host/parser mechanics. Domain remains independent; parser infrastructure and application depend inward | Compile-only contract examples, normalizer/parser and behavior boundary suites |
-| Normalized lookup / same domain package | Existing `AjsDocumentIndex`, `createAjsDocumentIndex`, `indexAjsUnits`; readonly Map properties, Maps and buckets; local mutable construction | Duplicate-preserving shared lookup, reference/order preservation; no new wrapper/service or changed traversal algorithm | Contract checks; index deep/wide/duplicate/shared/cycle cases; schedule/projection tests |
-| Normalization / `src/infrastructure/parser/normalization` / infrastructure | Existing builders return domain types; retain owned warning/children/relation construction buffers | Translation from parser-only `AjsRawUnit` to normalized domain values; imports point inward | Existing normalized tree/relation/warning/source evidence and parser tests |
-| Parser ports / `src/application/parsing` / application | Existing `AjsParserPort`, `AjsParserWithSourceIndexPort` publish the same result containing readonly domain values | Existing host-neutral parser contract earns inversion boundary; no port added or signature shape/failure changed | Parser boundary, list/flow/editor/WebAPI use-case tests and type checks |
-| Consumer projections / application and domain owners | Schedule and Semantic Diff keep existing derived-output ownership; Flow/List copy normalized values into their existing DTOs | Model reference types propagate readonly; no DTO migration, new capability, or layer crossing | Schedule/semantic suites, DTO serialization and list/flow/CSV/definition boundary tests |
+| Owner / package / layer                                                    | Public contract and responsibility                                                                                                                                                                                                          | Boundary value and dependency direction                                                                                                                    | Applicable validation                                                                    |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Normalized AJS model / `src/domain/models/ajs` / domain                    | Existing `AjsDocument`, `AjsUnit`, `AjsParameter`, `AjsRelation`, `AjsNormalizationWarning`, `AjsUnitLayout` and navigation helpers; readonly published values, accepting readonly collections; fresh helper result arrays retain ownership | Stable JP1 identity, structure and raw evidence; no host/parser mechanics. Domain remains independent; parser infrastructure and application depend inward | Compile-only contract examples, normalizer/parser and behavior boundary suites           |
+| Normalized lookup / same domain package                                    | Existing `AjsDocumentIndex`, `createAjsDocumentIndex`, `indexAjsUnits`; readonly Map properties, Maps and buckets; local mutable construction                                                                                               | Duplicate-preserving shared lookup, reference/order preservation; no new wrapper/service or changed traversal algorithm                                    | Contract checks; index deep/wide/duplicate/shared/cycle cases; schedule/projection tests |
+| Normalization / `src/infrastructure/parser/normalization` / infrastructure | Existing builders return domain types; retain owned warning/children/relation construction buffers                                                                                                                                          | Translation from parser-only `AjsRawUnit` to normalized domain values; imports point inward                                                                | Existing normalized tree/relation/warning/source evidence and parser tests               |
+| Parser ports / `src/application/parsing` / application                     | Existing `AjsParserPort`, `AjsParserWithSourceIndexPort` publish the same result containing readonly domain values                                                                                                                          | Existing host-neutral parser contract earns inversion boundary; no port added or signature shape/failure changed                                           | Parser boundary, list/flow/editor/WebAPI use-case tests and type checks                  |
+| Consumer projections / application and domain owners                       | Schedule and Semantic Diff keep existing derived-output ownership; Flow/List copy normalized values into their existing DTOs                                                                                                                | Model reference types propagate readonly; no DTO migration, new capability, or layer crossing                                                              | Schedule/semantic suites, DTO serialization and list/flow/CSV/definition boundary tests  |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -134,7 +136,7 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ### S1: Readonly normalized leaf values
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Value: prevent edits to parameter evidence, relations, warnings and layout
   through normalized values and existing aliases, independently of hierarchy.
 - Dependency: focused approved planning commit.
@@ -147,16 +149,32 @@ paths or failed-check disposition returns through Main for Replanning.
 - Acceptance: every required and optional leaf property rejects assignment;
   nested unit leaf writes and Flow parameter/relation alias field writes reject;
   literal construction, mapping/copies, warning buffer appends and reads compile.
-  Parser/normalization, DTO serialization and behavior remain identical.
-- Validation: common commands below, all parser/normalization suites and
-  `flowGraphDocument`, `buildUnitList`, `AjsDocument`, `unitEdgeHelpers` suites
-  present in the desktop run. Contract negatives must fail compilation if
-  readonly is removed; no cast/ignore or runtime execution masks the check.
+  All 14 properties in the four approved leaf types are covered. Parser/
+  normalization, DTO serialization and behavior remain identical. PASS.
+- Solution Shape result: existing normalized leaf contracts remain owned by
+  the domain model; only TypeScript property modifiers changed. Producers keep
+  local mutable construction and Flow aliases inherit the published readonly
+  fields. No port, adapter, wrapper, new capability or dependency direction
+  changed. The compile-only test checks consumer assignments and producer use.
+- Validation: all required commands below PASS in the exact disposable S1
+  snapshot. Production and test TypeScript checks include all negative and
+  positive contracts. Desktop run includes parser/normalization,
+  `flowGraphDocument`, `buildUnitList`, `AjsDocument` and `unitEdgeHelpers`; the
+  architecture dependency catalog passes. Web preparation and Chromium smoke
+  pass, as do production desktop/web builds. Final qlty aggregate PASS; full
+  qlty findings map only to unchanged baseline issues after the selected task
+  document was formatted. Detailed outputs, host retry and input identities:
+  `/private/tmp/domain-model-readonly-s1-evidence/evidence.json`.
+- Traceability: existing S1 mapping already names the compile-only contract
+  test and required checks; no mapping or result row changed.
 - Risks/readiness: TypeScript permits some structural assignment aliases;
   readonly is a published consumer view, never a runtime guarantee. Existing
   Flow leaf aliases intentionally inherit readonly properties; their copied
-  containers remain mutable. No user documentation or changelog change.
-- Review/Completion Approval/commit: pending / none / none.
+  containers remain mutable. `engines.vscode` remains `^1.75.0`; no shared host,
+  parser, generated code, user documentation or changelog changed. Two
+  independent reviews are Ready; Completion Approval received, commit pending.
+- Review/Completion Approval/commit: two independent Ready verdicts / Approved /
+  pending.
 
 ### S2: Readonly normalized document and unit graph
 
@@ -330,9 +348,40 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   `/private/tmp/domain-model-readonly-plan-gate-12158349/evidence.json`.
   Planning validation remains bound to its original substantive identity;
   gate metadata grants no approval and changes no scope or validation command.
-- Implementation: none; required per-slice evidence remains unproduced. No
-  runtime, tests, generated files or configuration have been changed by planning.
-- Product/architecture/qlty checks: not run in planning; policy requires only
-  documentation validation for this changed surface. No claimed product PASS.
-- Blocking decisions: planning commit pending; implementation readiness remains
-  conditional on required checks and the human/commit gates above.
+- Planning commit: `2817260eb3338e82185cf1ec9253fa4f1da91553`; only the three
+  approved planning paths committed; staged checks PASS, worktree clean at
+  commit. Main commit-state metadata validation:
+  `/private/tmp/domain-model-readonly-plan-committed/evidence.json`.
+- Implementation: S1 SLICE_READY; exact S1 paths, acceptance, compatibility,
+  Solution Shape result, traceability disposition and review gate are recorded
+  above. Reusable validation artifact:
+  `/private/tmp/domain-model-readonly-s1-evidence/evidence.json`.
+- Product/architecture/qlty checks: required S1 commands PASS; architecture
+  dependency test passes its catalog. qlty check has only unchanged baseline
+  findings, and the required final aggregate passes. The evidence artifact
+  records full-snapshot SARIF, analyzed inputs, output references and the host
+  permission retry.
+- Blocking decisions: focused S1 completion commit pending.
+  Both required independent implementation reviews returned Ready with no
+  actionable Findings; S2 remains gated.
+
+## S1 review and Completion Approval
+
+- Review: two independent `implementation-reviewer` Ready verdicts, no
+  actionable Findings; exact substantive patch and validation identities are
+  retained in `/private/tmp/domain-model-readonly-s1-review-gate/reviews.json`.
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-07
+- Approved scope: exact reviewed S1 completion and evidence; substantive tracked
+  patch `adabea52232bfa6e4c3f4eca529fd41b0e4f3552e8bffb741c81a52959a95029`
+  plus separately validated review and approval gate metadata.
+- Approved completion paths: `src/domain/models/ajs/AjsDocument.ts`,
+  `src/test/suite/AjsReadonlyContracts.test.ts`, and
+  `docs/specs/features/domain-model-readonly/TASKS.md` (S1 evidence and gates).
+- Gate metadata validation:
+  `/private/tmp/domain-model-readonly-s1-review-gate/evidence.json`.
+- This state/review/approval metadata is separate from the immutable substantive
+  snapshot reviewed and validated by the implementation roles. It changes no
+  scope, specification, acceptance, risk, command or product input.
+- Completion Approval metadata evidence:
+  `/private/tmp/domain-model-readonly-s1-completion-approval/evidence.json`.

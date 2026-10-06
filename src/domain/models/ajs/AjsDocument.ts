@@ -4,29 +4,29 @@ export type AjsUnitType = TySymbol;
 export type AjsGroupType = "n" | "p";
 export type AjsRelationType = "seq" | "con";
 export type AjsParameter = {
-  key: string;
-  value: string;
-  position?: number;
-  line?: number;
-  column?: number;
-  length?: number;
+  readonly key: string;
+  readonly value: string;
+  readonly position?: number;
+  readonly line?: number;
+  readonly column?: number;
+  readonly length?: number;
 };
 
 export type AjsRelation = {
-  sourceUnitId: string;
-  targetUnitId: string;
-  type: AjsRelationType;
+  readonly sourceUnitId: string;
+  readonly targetUnitId: string;
+  readonly type: AjsRelationType;
 };
 
 export type AjsNormalizationWarning = {
-  code: string;
-  message: string;
-  unitPath?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly unitPath?: string;
 };
 
 export type AjsUnitLayout = {
-  h: number;
-  v: number;
+  readonly h: number;
+  readonly v: number;
 };
 
 export type AjsUnit = {
