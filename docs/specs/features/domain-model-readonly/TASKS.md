@@ -3,8 +3,9 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: S1 Completion Approved; focused commit pending.
-  S2 follows that commit. Reviewed S1–S3 scope is Human Approved.
+- Active or approved slice: amended S2 Human Approved; replan commit pending.
+  S1 is committed; S3 retains
+  its original approval and waits for S2 completion.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
 - Validate: S1 acceptance and full validation evidence are recorded below and
@@ -14,15 +15,16 @@
 
 ## Current state
 
-- Lifecycle state: SLICE_APPROVED
-- Next decision / blocker: focused S1 completion commit, then S2.
+- Lifecycle state: PLAN_APPROVED
+- Next decision / blocker: focused approved S2 replan commit, then resume S2.
+  S3 still waits for S2 review, Completion Approval and focused commit.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
 - Gate evidence: independent plan review Ready, no Findings; Human Approval
   received in the current conversation on 2026-10-07. Planning commit
   `2817260eb3338e82185cf1ec9253fa4f1da91553` succeeded.
-- Preserved slices: none completed; no inherited approval changed.
+- Preserved slices: S1 committed; no inherited approval changed.
 
 ## Human Approval
 
@@ -41,6 +43,77 @@
   Exclusions and dependency gates remain in force.
 - Approval metadata evidence:
   `/private/tmp/domain-model-readonly-approval-12158349/evidence.json`.
+
+## S2 narrow replan and renewed Human Approval
+
+- Trigger: partial S2 TypeScript checks each exit 2 with 59 diagnostics. The
+  only newly revealed diagnostic outside the approved S2 test paths is
+  `src/test/suite/unitListViewHelpers.test.ts:83`, TS2540 on
+  `root.children = [child, qjob]`. The remaining 58 diagnostics are in already
+  approved S2 paths and remain implementation work, not this replan's scope.
+- Main's selected proposal: add only that test file's normalized fixture
+  preparation to S2. This is an AjsUnit fixture, not an application DTO.
+  Its root/child/QUEUE job feed priority precedence and parent inheritance;
+  preserve all three objects, `[child, qjob]` order, parameter values and
+  assertions (root/child priority 4, QUEUE priority 3).
+- Construction decision: retain an owned local `AjsUnit[]` children buffer,
+  supply it through the existing `createUnit` overrides when building root,
+  then append the existing child and qjob before constructing/publishing the
+  document. No reassignment through `root.children`, mutation cast, changed
+  helper algorithm, new fixture abstraction or unrelated test edit.
+- Solution Shape: unchanged normalized model/domain owner, constructor/helper
+  boundaries and dependency directions. Existing TypeScript and local producer
+  arrays suffice. No material abstraction, port, adapter, retained factory,
+  public name or runtime contract changes beyond approved S2 readonly work.
+- Dependencies: S1 stays SLICE_COMMITTED at
+  `80533f721838592b771e51b94ef3cc543bcc6fb2`; both Ready reviews, explicit
+  Completion Approval and all matching S1 validation remain valid. S3 scope,
+  approval and S2-completion dependency remain unchanged.
+- Review/approval renewal: original plan review/approval still proves its
+  original identity and original boundaries. It does not authorize the added
+  path; the amended S2 boundary returns to PLANNED for a new independent plan
+  review and renewed Human Approval before a replan commit/resumption.
+  No S2 completion review, approval or final validation exists to preserve.
+- Independent replan review: Ready for approval, no Findings; reviewed document
+  identity `30f9eb1bc2f36102e4677bbcb113392e3470a95da1ebc7626b93f25ae5a35739`.
+  Record: `/private/tmp/domain-model-readonly-s2-replan/review.json`, SHA-256
+  `1d8937c5bf5c512415af4ade3c34b3a6ed7d4c6b79561eb9c0e8d470ccabb0c7`.
+  Main state/review metadata validation:
+  `/private/tmp/domain-model-readonly-s2-replan-ready/evidence.json`.
+- Renewed Status: Approved
+- Renewed Approved at: approved in current conversation on 2026-10-07
+- Renewed Approved scope: exact amended S2 plan reviewed at identity
+  `30f9eb1bc2f36102e4677bbcb113392e3470a95da1ebc7626b93f25ae5a35739`,
+  adding only `src/test/suite/unitListViewHelpers.test.ts` normalized priority
+  fixture construction. All prior S2 exclusions, validations and gates remain;
+  original S1/S3 approval and S1 completion remain preserved.
+- Renewed approval metadata evidence:
+  `/private/tmp/domain-model-readonly-s2-replan-approval/evidence.json`.
+- Exact approved replan commit paths:
+  `docs/specs/features/domain-model-readonly/TASKS.md` and
+  `docs/specs/features/domain-model-readonly/TRACEABILITY.md` only, including
+  subsequent review/approval metadata separately validated under policy.
+  `SPECS.md` requirements and acceptance need no edit.
+- Held partial implementation: `src/domain/models/ajs/AjsDocument.ts` and
+  `src/test/suite/AjsReadonlyContracts.test.ts` remain byte-for-byte unchanged
+  by Replanning and explicitly excluded from the replan commit. The producer's
+  S2 IMPLEMENTING annotation and Main's S1 commit metadata are retained in the
+  entry documentation snapshot; the amended state records this hold, not
+  completed implementation. No product file may be staged with the replan.
+- Trigger evidence:
+  `/private/tmp/domain-model-readonly-s2-evidence/evidence.json`, SHA-256
+  `99e012620815fcd80d70973d594aae71e1c1073c4573cc17880e120130e3d150`;
+  partial patch `/private/tmp/domain-model-readonly-s2-evidence/partial-scope-blocked.patch`,
+  SHA-256 `99189dd666c16497cc910f62eb6c74737a5c9da15f5af7ebccc0a301c5f15ca5`.
+- Validation renewal: preserve S1 evidence and the retained partial S2 failure
+  outputs as discovery facts. The added approval path invalidates S2 scope/final
+  readiness evidence; resumed implementation must produce required S2 final
+  validation after all fixture adaptations, including this priority suite.
+  Keep the valid S2 predecessor baseline; this replan changes no required
+  command, qlty selection/configuration, host coverage or failure disposition.
+- Replan documentation evidence:
+  `/private/tmp/domain-model-readonly-s2-replan/evidence.json`.
+  Documentation validation only; no product/qlty scan or test rerun in Replanning.
 
 ## Discovery and impact
 
@@ -83,8 +156,10 @@
 - Production mutation inspection found owned normalizer warning buffers and
   copied DTO mutation, with no normalized consumer write requiring redesign.
   Fixture writes in S2 are normalized AJS values, chiefly Semantic Diff and
-  cyclic/deep index/calendar construction. Flow/List, Explorer transport, and
-  webview fixture mutations are separate DTO scenarios and stay unchanged.
+  cyclic/deep index/calendar construction. The newly identified
+  `unitListViewHelpers` priority fixture is also normalized and belongs to S2.
+  Flow/List DTO, Explorer transport, and webview fixture mutations remain
+  separate scenarios and stay unchanged.
 - Transitive behavior coverage includes list/CSV/definition, flow/expansion,
   diagnostics/hover/navigation, schedule/semantic comparison/report, WebAPI
   import and telemetry. Ports/host wiring keep their names and shapes; readonly
@@ -136,7 +211,7 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ### S1: Readonly normalized leaf values
 
-- Lifecycle state: SLICE_APPROVED
+- Lifecycle state: SLICE_COMMITTED
 - Value: prevent edits to parameter evidence, relations, warnings and layout
   through normalized values and existing aliases, independently of hierarchy.
 - Dependency: focused approved planning commit.
@@ -172,9 +247,9 @@ paths or failed-check disposition returns through Main for Replanning.
   Flow leaf aliases intentionally inherit readonly properties; their copied
   containers remain mutable. `engines.vscode` remains `^1.75.0`; no shared host,
   parser, generated code, user documentation or changelog changed. Two
-  independent reviews are Ready; Completion Approval received, commit pending.
+  independent reviews are Ready; Completion Approval received and committed.
 - Review/Completion Approval/commit: two independent Ready verdicts / Approved /
-  pending.
+  `80533f721838592b771e51b94ef3cc543bcc6fb2`.
 
 ### S2: Readonly normalized document and unit graph
 
@@ -191,8 +266,11 @@ paths or failed-check disposition returns through Main for Replanning.
   `semanticDiffScheduleCalendar.test.ts`, `semanticDiffScheduleImpact.test.ts`,
   `semanticDiffEvidenceRules.test.ts`, `semanticDiffStructuralRules.test.ts`,
   `semanticDiffContracts.test.ts`, `semanticDiffConditions.test.ts`,
-  `compareSemanticDiff.test.ts`, `semanticDiffFlowHighlights.test.ts`.
+  `compareSemanticDiff.test.ts`, `semanticDiffFlowHighlights.test.ts`,
+  `unitListViewHelpers.test.ts` (added in this replan, fixture construction only).
   Only normalized fixture construction and contract/regression assertions change.
+  For the added `unitListViewHelpers.test.ts`, edits are restricted to preparing
+  the existing priority-inheritance fixture; all scenarios/assertions remain.
 - Fixture approach: constructor overrides for changed fields/relations;
   explicit owned mutable child arrays for shared/cyclic/deep graph preparation.
   Retain original input identities, malformed/duplicate scenarios and assertions,
@@ -218,6 +296,8 @@ paths or failed-check disposition returns through Main for Replanning.
   boundaries. `AjsDocumentModel` adds focused parent/ancestor/root-jobnet,
   first-hit/repeated-parameter, traversal reference/order and fresh-result-array
   ownership assertions absent from the current helper-specific coverage.
+  The existing `unitListViewHelpers` priority-inheritance suite must pass with
+  unchanged assertions/order/identity after its owned buffer adaptation.
   Web smoke exercises common host behavior. Existing assertions are
   preserved; add only missing contract/identity characterization needed here.
 - Risks/readiness: losing fixture identity or changing occurrence/unique traversal
@@ -352,7 +432,7 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   approved planning paths committed; staged checks PASS, worktree clean at
   commit. Main commit-state metadata validation:
   `/private/tmp/domain-model-readonly-plan-committed/evidence.json`.
-- Implementation: S1 SLICE_READY; exact S1 paths, acceptance, compatibility,
+- Implementation: S1 SLICE_COMMITTED; exact S1 paths, acceptance, compatibility,
   Solution Shape result, traceability disposition and review gate are recorded
   above. Reusable validation artifact:
   `/private/tmp/domain-model-readonly-s1-evidence/evidence.json`.
@@ -361,9 +441,12 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   findings, and the required final aggregate passes. The evidence artifact
   records full-snapshot SARIF, analyzed inputs, output references and the host
   permission retry.
-- Blocking decisions: focused S1 completion commit pending.
-  Both required independent implementation reviews returned Ready with no
-  actionable Findings; S2 remains gated.
+- S2 narrow replan: complete reviewable amendment; documentation evidence at
+  `/private/tmp/domain-model-readonly-s2-replan/evidence.json`. Held partial
+  TypeScript failures remain discovery, never final PASS. S1 gates/evidence
+  remain valid; revised S2 requires renewed review, approval and replan commit.
+- Blocking decisions: no unresolved replan design decision. S2 implementation
+  remains held for its new path/approval boundary; S3 remains dependent.
 
 ## S1 review and Completion Approval
 
@@ -385,3 +468,7 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   scope, specification, acceptance, risk, command or product input.
 - Completion Approval metadata evidence:
   `/private/tmp/domain-model-readonly-s1-completion-approval/evidence.json`.
+- S1 completion commit: `80533f721838592b771e51b94ef3cc543bcc6fb2`; exact
+  approved paths/hash and staged checks PASS; clean worktree at commit.
+- Main commit-state metadata validation:
+  `/private/tmp/domain-model-readonly-s1-committed/evidence.json`.
