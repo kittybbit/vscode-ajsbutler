@@ -3,22 +3,23 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: S2 test-side alias resolution/restoration PLAN_APPROVED;
-  focused planning commit precedes implementation. S1 is
-  committed; S3 retains its approval and dependency.
+- Active or approved slice: S2 stable-theme fixture amendment PLAN_APPROVED; held
+  implementation awaits independent review, new Human Approval and focused
+  planning commit. S1 is committed; S3 retains approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
 - Validate: retain S1 acceptance/gates and matching non-host evidence; its
   desktop full-suite coverage is unestablished until repaired shared validation
-  supplies actual results. Use the renewed S2 evidence boundary below.
+  supplies actual results. S2 test-side alias work is blocked at an unrelated
+  Flow Viewer Controller test loop; see its current evidence below.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit for the approved test-side
-  alias scope, then implementation and full-suite validation. S3 remains pending.
+- Next decision / blocker: commit the approved fixture amendment plan, then
+  implement and validate; actual full-suite completion remains unestablished.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -355,6 +356,7 @@
 
 ## S2 test-side alias resolution and restoration
 
+- Lifecycle state: IMPLEMENTING
 - Human direction: resolve aliases in test tooling and restore every relative
   import rewrite made by this work. The unapproved single report-relative-import
   proposal is withdrawn; its Ready review is not approval for implementation.
@@ -438,7 +440,7 @@
   `77a2930dab9f959001d9cacf1534c9bd3fba084af0c59c6b302cc196ea6c5916`.
   Review record:
   `/private/tmp/domain-model-readonly-s2-test-alias-replan-approval/review.json`.
-- Gate: PLAN_APPROVED; current direct human instruction authorizes this exact
+- Gate: PLAN_COMMITTED; current direct human instruction authorizes this exact
   reviewed boundary and its prerequisite focused planning commit.
 - Status: Approved
 - Approved at: approved in current conversation on 2026-10-08
@@ -452,6 +454,93 @@
   All runtime/test/dependency/contributor/workflow paths remain unstaged here.
 - Documentation evidence:
   `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
+
+- Implementation evidence (blocked handoff):
+  `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`.
+  Both TypeScript checks, desktop preparation, the alias-resolution assertion
+  observed in the actual host run, and eight external bootstrap lifecycle probes
+  pass. The full VS Code suite reached `Flow Viewer Controller`, then emitted
+  repeated React “Maximum update depth exceeded” warnings and became
+  unresponsive. The run was interrupted after 713 visible success markers and
+  no visible failure marker; it produced no final summary or architecture-suite
+  result, so desktop coverage is unknown rather than PASS. The failing fixture
+  is outside this approved boundary and remains unchanged. Web, production
+  build, final qlty observations and aggregate remain pending until Main routes
+  this blocker; no S2 completion or readiness claim is made.
+
+- Planning commit: `8fdcbb7ec2df1e51fd60c869dd40e252fbdb7d10`; exact three
+  approved planning paths, staged checks and hashes PASS. All 22 held product
+  paths remained unchanged and unstaged. Main commit-state metadata validation:
+  `/private/tmp/domain-model-readonly-s2-test-alias-replan-committed/evidence.json`.
+
+## S2 stable-theme fixture amendment
+
+- Trigger: alias plan commit `8fdcbb7ec2df1e51fd60c869dd40e252fbdb7d10` is
+  approved. Actual alias boundary and eight bootstrap lifecycle probes pass;
+  both TypeScript checks, desktop preparation and frozen install pass. The
+  actual full desktop run shows 713 success markers, then stalls at Flow Viewer
+  Controller and is interrupted with exit 130, without a final summary.
+  Success markers are partial discovery facts, not full-suite PASS.
+- Trigger artifact:
+  `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`,
+  SHA-256 `5cd3bb2a18159c41ee1ac0c2ac93ee94b05847738de56fe8f2637e568d3c1fc7`.
+  Main discovery/source identities:
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-discovery/evidence.json`.
+- Source facts: unchanged `ControllerFixture` creates a new theme on every
+  render. `useFlowGraphState` callback depends on theme; its effect depends on
+  that callback and publishes fresh node/edge arrays. This supports an unstable
+  fixture identity hypothesis; it is not isolated runtime causal proof.
+- Exact proposed implementation path: `src/test/suite/flowViewerController.test.ts`
+  only. Create one test-owned theme outside `ControllerFixture`, and pass that
+  same instance to `useFlowViewerController` on every render. Preserve every
+  fixture definition, nested graph, controller key, event bridge and assertion.
+  No production source, hook algorithm, exported contract, golden expectation,
+  test selection/skipping, framework or dependency changes are authorized.
+- Solution Shape: the existing test fixture owns its stable theme input lifetime.
+  Existing `createTheme` and local ownership supply the needed capability; no
+  new abstraction/export/port/adapter/factory or layer direction is needed.
+  Production controller/theme ownership remains unchanged. Platform-neutral
+  launcher, restored aliases, SDK 3.1.0 and Node >=22 approvals remain fixed.
+- Acceptance: existing Flow Viewer Controller tests complete with unchanged
+  assertions, including the nested-selection/event/graph cases. Record actual
+  targeted execution and the completed unchanged full desktop command with
+  nonzero inventory and pass/fail/pending summary. The candidate must demonstrate
+  resolution of the observed stall; source inspection alone cannot establish
+  readiness. A continued stall or another failure returns to Main, not a waiver.
+- Validation/evidence renewal: refresh affected test TypeScript/desktop preparation,
+  targeted Flow Viewer Controller coverage, actual full desktop suite and final
+  qlty observations/aggregate on stable final bytes. Existing S2 required web
+  preparation/smoke, both builds, architecture zero exceptions, all S1/S2
+  acceptance and resolver/global cleanup/nonzero-failure probes remain required.
+  Reuse recorded alias/bootstrap/installation/baseline facts only when their
+  actual inputs/coverage/tools/configuration match. Original S1-commit baseline
+  stays fixed; no scans are required merely for this planning gate.
+- Preservation: all historical approvals and commits, S1 completion and S3 scope/
+  dependency stay unchanged. Held current product bytes and all three restored
+  original alias sources remain unchanged during planning. The existing alias
+  review/approval does not authorize this additional fixture path; a new
+  independent plan review, explicit Human Approval and focused planning commit
+  precede edits. S2 completion reviews/approval remain pending whole-slice evidence.
+- Independent plan review: Ready for approval, no Findings; reviewed identity
+  `20466f71487c77b96bdebb69509a4a6a5bee88113f3bb8de9fc174d7bb8de707`.
+  Prior stale-current-evidence P2 resolved. Review and gate metadata:
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-replan-ready/review.json`
+  and `/private/tmp/domain-model-readonly-s2-flow-fixture-replan-ready/evidence.json`.
+- Gate: PLAN_APPROVED; explicit Human Approval received for the added fixture.
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-08
+- Approved scope: exact reviewed stable-theme fixture amendment at identity
+  `20466f71487c77b96bdebb69509a4a6a5bee88113f3bb8de9fc174d7bb8de707`;
+  add only `src/test/suite/flowViewerController.test.ts` theme lifetime changes,
+  preserving assertions and production code, plus the focused planning commit
+  of `TASKS.md` and `TRACEABILITY.md`. Completion Approval remains separate.
+- Approval metadata evidence:
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-replan-approval/evidence.json`.
+- Exact proposed planning commit paths: selected `TASKS.md` and `TRACEABILITY.md`
+  only, with separately validated review/approval metadata. SPECS requirements
+  are unchanged. Product/test/dependency/workflow/contributor paths stay unstaged.
+- Documentation artifact:
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-replan/revision2/evidence.json`.
 
 ## Discovery and impact
 
@@ -595,13 +684,17 @@ paths or failed-check disposition returns through Main for Replanning.
 ### S2: Readonly normalized document and unit graph
 
 - Lifecycle state: PLAN_APPROVED
-- Current execution: SDK 3.1.0 with Node 22.22.0 launches the actual stable
-  VS Code host and propagates exit 1, but loading stops at the unapproved
-  `src/presentation/semantic-diff/report/semanticDiffReportText.ts:1` import
-  `@resource/i18n/message`. No tests ran; this path is outside the approved
-  S2 boundaries. Raw outputs and exact four-path identities:
+- Current execution: test-side aliases resolve correctly, the new alias boundary
+  and eight bootstrap lifecycle probes pass, and both TypeScript checks,
+  desktop preparation and frozen install pass. The actual stable VS Code desktop
+  suite shows 713 success markers, then stalls at Flow Viewer Controller;
+  interruption exits 130 without a final summary. This is incomplete full-suite
+  evidence, not PASS. Latest raw outputs and identities:
+  `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`.
+  The earlier SDK-stage report-alias failure is historical and resolved by
+  test-side registration; its immutable discovery record remains at
   `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`.
-  Returned to Main for Replanning; no out-of-scope source edit was made.
+  The new fixture path awaits review and Human Approval before edits.
 - Value: prevent hierarchy, identity, flags and nested collection mutation;
   permit readonly consumer inputs while preserving every existing read operation.
 - Dependency: S1 committed.
@@ -612,6 +705,8 @@ paths or failed-check disposition returns through Main for Replanning.
   actual executable launcher and suite-global behavior. Apply the exact test-side
   alias dependency/registration/new boundary-test and seven-import restoration
   scope above; existing SDK/Node/CI/contributor changes retain approval.
+- Proposed additional test path: `src/test/suite/flowViewerController.test.ts`,
+  only stable fixture-theme lifetime as specified above.
 - Exact test paths under `src/test/suite/`:
   `AjsReadonlyContracts.test.ts`, new `AjsDocumentModel.test.ts`,
   `AjsDocumentIndex.test.ts`,
@@ -713,9 +808,9 @@ paths or failed-check disposition returns through Main for Replanning.
 - Traceability result: the existing S2 mappings in `TRACEABILITY.md` cover the
   model characterization and approved priority-fixture adaptation; this replan
   adds explicit parser/resource/desktop-runner coverage mapping.
-- Implementation handoff: alias resolution/restoration plan is PLAN_APPROVED; hold
-  implementation until independent review, Main human gate and planning commit.
-  Completion Approval remains separate and requires truthful full validation.
+- Implementation handoff: full desktop run stalled without final summary; S2
+  stable-theme fixture amendment is PLAN_APPROVED pending its focused planning commit.
+  No partial pass count establishes readiness or Completion Approval.
 - Review/Completion Approval/commit: pending / none / none.
 
 ### S3: Readonly published normalized indexes
@@ -862,13 +957,17 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   artifact `/private/tmp/domain-model-readonly-s2-host-replan/evidence.json`;
   retains P2 correction and gate history while requiring truthful full coverage.
 - SDK prerequisite: reviewed, Human Approved and committed at `20bb4c7`;
-  implementation install/frozen lock and actual host launch recorded in
+  historical SDK-stage install/host-launch and report-alias failure recorded in
   `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`.
-  Suite discovery fails on the report alias before tests execute.
-- Test-side alias amendment: PLAN_APPROVED; documentation evidence
+  Alias registration resolves that loading failure. The latest full host run is
+  incomplete after 713 success markers and interruption 130, as recorded in
+  `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`.
+- Test-side alias amendment: PLAN_COMMITTED; documentation evidence
   `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
-- Blocking decisions: independent plan review, Main gate recording from direct
-  human instruction and focused planning commit before implementation resumes.
+- Stable-theme fixture amendment: PLAN_APPROVED; documentation evidence
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-replan/revision2/evidence.json`.
+- Blocking decisions: independent plan review, explicit Human Approval for the
+  added fixture path and focused planning commit before implementation resumes.
   S3 remains dependent on S2 Completion Approval and commit.
 
 ## S1 review and Completion Approval
