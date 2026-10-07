@@ -16,6 +16,7 @@
 | R4: semantic comparison/report and schedule impact | S1, S2, S3 | Changed semantic fixture suites; schedule, compareSemanticDiff, contracts, presentation-artifact, schedule-impact, report/JSON suites in desktop selection |
 | R4: WebAPI import and telemetry | S1, S2, S3 | Existing WebAPI adapter/import and telemetry boundary suites in full desktop selection; desktop-only beta and privacy unchanged |
 | R5: desktop/web, VS Code minimum and architecture | S1, S2, S3 | Both TypeScript checks; full desktop run including architectureDependencyRules; Chromium web smoke; both preparations and production build; unchanged engines ^1.75.0 |
+| R5: supported desktop host validation and preserved parser/resource ownership | S2 | Actual full desktop test inventory/counts/results, controlled nonzero suite-load failure probe, isolated/restored test globals, parser/normalizer, nls, tableColumnDef, extensionDependencies/telemetry, architecture catalog, web smoke and both builds |
 | Required quality/evidence policy | S1, S2, S3 | Exact baseline/final qlty official SARIF observations, final aggregate, required commands/identities and independent reviews in TASKS; current-head Cloud at exit |
 | Planning documentation | Not applicable | Selected Markdown lint, local links/structure/scope/state/traceability/approval inspection and diff checks; TASKS plan artifact |
 

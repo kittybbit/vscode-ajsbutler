@@ -74,6 +74,9 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 - Parser grammar/generated-code changes or a raw-parser model redesign.
 - Blanket readonly conversion, architecture refactoring, test-framework work,
   dependency modernization, or resolution of unrelated inherited failures.
+  A narrowly approved S2 validation repair may replace existing runtime alias
+  imports with equivalent relative paths and correct desktop test executable/
+  isolated test-global initialization; it adds no loader or framework.
 - WebAPI beta exit, write operations, or additional host support.
 
 ## Acceptance boundaries
@@ -94,6 +97,12 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 - Preserve reference identity and existing construction copies. Readonly does
   not guarantee that an independently held mutable producer alias cannot write.
   Do not introduce mutation bypasses into published-contract consumers.
+
+- Required desktop validation must load and execute the actual full suite,
+  report a nonzero test count and actual pass/fail totals, and propagate suite
+  loading/test failures as nonzero command exits. Wrapper exit 0 alone is not
+  host coverage. This repair does not change bundled product parser/resource
+  semantics or telemetry collection.
 
 ## Open questions
 

@@ -3,21 +3,23 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: amended S2 Human Approved; replan commit pending.
-  S1 is committed; S3 retains
-  its original approval and waits for S2 completion.
+- Active or approved slice: S2 held for desktop-validation Replanning; amended
+  scope has independent review Ready and Human Approval. S1 is committed;
+  S3 retains its approval and waits for S2 completion.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
-- Validate: S1 acceptance and full validation evidence are recorded below and
-  in the linked evidence artifact; later slices use the required gates below.
+- Validate: retain S1 acceptance/gates and matching non-host evidence; its
+  desktop full-suite coverage is unestablished until repaired shared validation
+  supplies actual results. Use the renewed S2 evidence boundary below.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused approved S2 replan commit, then resume S2.
-  S3 still waits for S2 review, Completion Approval and focused commit.
+- Next decision / blocker: focused commit of the approved S2 desktop
+  validation replan, then implementation and truthful
+  full-suite evidence. S3 remains dependent on S2 completion gates.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -89,6 +91,11 @@
   original S1/S3 approval and S1 completion remain preserved.
 - Renewed approval metadata evidence:
   `/private/tmp/domain-model-readonly-s2-replan-approval/evidence.json`.
+- Replan commit: `a169215dd755c274001d1871acbecf87a832a075`; only the two
+  approved planning documents committed, staged checks and hashes PASS.
+  Held partial product files remained unchanged and unstaged.
+- Main replan-commit metadata validation:
+  `/private/tmp/domain-model-readonly-s2-replan-committed/evidence.json`.
 - Exact approved replan commit paths:
   `docs/specs/features/domain-model-readonly/TASKS.md` and
   `docs/specs/features/domain-model-readonly/TRACEABILITY.md` only, including
@@ -114,6 +121,94 @@
 - Replan documentation evidence:
   `/private/tmp/domain-model-readonly-s2-replan/evidence.json`.
   Documentation validation only; no product/qlty scan or test rerun in Replanning.
+
+## S2 desktop-validation replan and Human Approval
+
+- Trigger: the P2 relation-fixture correction passes both TypeScript checks,
+  one directly selected Mocha test and documented desktop preparation. Actual
+  VS Code host logs show full-suite discovery fails on
+  `@generate/parser/AjsLexer`; the existing CLI-path launcher returns 0 despite
+  that failure. Prior S2 final evidence remains immutable, not full-host PASS.
+- Trigger record:
+  `/private/tmp/domain-model-readonly-s2-evidence/revision2/revision2-record.json`,
+  SHA-256 `7deb7f537182f148e101ec6011fdc138d24e3beec62842d75a58ca74fdcdf56d`.
+  Its approved P2 correction patch is
+  `/private/tmp/domain-model-readonly-s2-evidence/revision2/fixture-correction.patch`,
+  SHA-256 `a40d4994dd43390a1b1950d9f3e089222fd2cc1c17b99a2842cbed15810238af`.
+- Main's final candidate adds five exact paths to existing S2, with symbols and
+  restrictions listed in S2 below. Runtime alias imports resolve to the same
+  generated/resource modules; the actual executable and isolated test globals
+  permit the existing CommonJS suite to run and propagate failures.
+- Exact discovery: parser lexer/parser imports remain runtime requires after
+  CommonJS emit. NLS is loaded by `nls.test.ts`; the syntax resource adapter is
+  loaded by that suite and `extensionDependencies.test.ts`. Their resource
+  aliases are runtime requires too. `AjsEvaluator` listener/context imports
+  and `group10` parameter import are used only as types and erase from emitted
+  JavaScript; those two paths are excluded, with no unsolicited normalization.
+- `AntlrRawAjsParser` and existing telemetry tests require `DEVELOPMENT` at
+  runtime; CommonJS emit supplies no webpack define. Set test-only true to
+  match development desktop preparation. `extensionDependencies` tests call
+  uninjected `createTelemetry()`; test-only `CONNECTION_STRING = ""` selects
+  the existing NoopTelemetryAdapter before SDK construction. No credential,
+  telemetry collection change, production fallback or network setup is added.
+- Solution Shape: existing parser infrastructure still owns generated/ANTLR
+  consumption and raw translation; existing NLS/resource owners keep identical
+  imports resolved to neutral resources. No semantic owner, public contract,
+  dependency direction, port, adapter, application factory or abstraction
+  changes. The desktop launcher/suite own host process failure propagation and
+  isolated test constants; shared production never imports Node test tooling.
+- Alternatives: retaining aliases plus a custom loader, new dependency or
+  webpack test bundling adds configuration/ownership and is excluded. Retaining
+  CLI execution or accepting wrapper exit 0 fails the evidence contract.
+  Relative runtime imports and the installed test-electron executable API cover
+  the concrete gap with existing capabilities. Type-only alias edits add no
+  validation value and are excluded.
+- Independent replan review: Ready, no Findings; reviewed document identity
+  `322cda2f02689e8411c16d9880a9a0148ff8275310603ab2c6022df0ba26b3fb`.
+  Review record: `/private/tmp/domain-model-readonly-s2-host-replan-ready/review.json`.
+  Main gate metadata validation:
+  `/private/tmp/domain-model-readonly-s2-host-replan-ready/evidence.json`.
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-08
+- Approved scope: exact amended S2 plan reviewed at identity
+  `322cda2f02689e8411c16d9880a9a0148ff8275310603ab2c6022df0ba26b3fb`,
+  including the five validation repair paths below and the focused planning
+  commit of `SPECS.md`, `TASKS.md` and `TRACEABILITY.md`. Completion Approval
+  remains separate.
+- Approval metadata evidence:
+  `/private/tmp/domain-model-readonly-s2-host-replan-approval/evidence.json`.
+- Original S1/S2/S3 approval and committed priority-fixture replan approval above
+  remain historical proof of their exact identities; neither authorizes this
+  added scope. Independent plan review Ready and explicit Human Approval cover
+  this
+  added scope; the focused replan commit is required before implementation.
+- Proposed replan commit paths: selected `SPECS.md`, `TASKS.md` and
+  `TRACEABILITY.md` only. All partial S2 product/test changes, including the
+  corrected P2 fixture and untracked `AjsDocumentModel.test.ts`, stay unchanged
+  and unstaged by Replanning and are excluded from the replan commit.
+- Evidence invalidation: original S1 commit/reviews/Completion Approval stay
+  recorded; its wrapper-only full-desktop/architecture-runtime claims are
+  unestablished. The repaired full S2 suite must cover S1 and S2 acceptance
+  together; this will be current shared coverage, not retroactive S1 PASS.
+  S1 TypeScript/web/build/qlty results remain reusable only for matching inputs.
+  S3 approval/scope/dependencies stay unchanged. Prior S2 full-host PASS is
+  invalid, and changed fixture/parser/resource/runner inputs invalidate affected
+  final checks; no S2 final qlty refresh has yet covered the P2 correction.
+- Evidence reuse: retain the exact S1-commit S2 baseline, its full inventory,
+  configuration/tool identities and matching qlty baseline observations.
+  Refresh S2 final full-repository qlty observations/aggregate and affected
+  TypeScript, desktop/web preparations/tests, parser/resource/architecture
+  coverage and production builds after repair. Do not recreate the baseline or
+  refresh unrelated checks merely because this review/approval gate changes.
+- Production readiness: required full-suite PASS is mandatory. If the real
+  host reveals remaining Table/golden/fixture failures or another loading issue,
+  retain actual counts/errors and nonzero status and return to Main; this replan
+  authorizes no unrelated repair or failure waiver. Roadmap follow-ups remain
+  unchanged pending their separate durable decisions.
+- Replan discovery/documentation evidence:
+  `/private/tmp/domain-model-readonly-s2-host-replan/evidence.json`.
+  Planning performs documentation checks and reuses retained raw trigger facts;
+  it does not run a product baseline, full host test or qlty scan.
 
 ## Discovery and impact
 
@@ -231,12 +326,13 @@ paths or failed-check disposition returns through Main for Replanning.
   local mutable construction and Flow aliases inherit the published readonly
   fields. No port, adapter, wrapper, new capability or dependency direction
   changed. The compile-only test checks consumer assignments and producer use.
-- Validation: all required commands below PASS in the exact disposable S1
-  snapshot. Production and test TypeScript checks include all negative and
-  positive contracts. Desktop run includes parser/normalization,
-  `flowGraphDocument`, `buildUnitList`, `AjsDocument` and `unitEdgeHelpers`; the
-  architecture dependency catalog passes. Web preparation and Chromium smoke
-  pass, as do production desktop/web builds. Final qlty aggregate PASS; full
+- Validation: S1's retained artifact originally reported all required commands
+  PASS, but its desktop wrapper supplies no actual suite coverage. Full desktop
+  and architecture runtime coverage is now unestablished; repaired S2 shared
+  validation must cover S1 too without retroactively relabeling its snapshot.
+  Matching production/test TypeScript, web preparation/Chromium smoke,
+  desktop/web build and qlty evidence remains retained. Final qlty aggregate
+  in that historical snapshot PASS; full
   qlty findings map only to unchanged baseline issues after the selected task
   document was formatted. Detailed outputs, host retry and input identities:
   `/private/tmp/domain-model-readonly-s1-evidence/evidence.json`.
@@ -260,6 +356,27 @@ paths or failed-check disposition returns through Main for Replanning.
 - Exact runtime path: `src/domain/models/ajs/AjsDocument.ts`; all `AjsDocument`
   and `AjsUnit` properties readonly, nested collections readonly, and helper
   collection inputs readonly. Fresh helper output collections remain mutable.
+- Added validation repair paths and exact changes:
+  - `src/infrastructure/parser/AntlrRawAjsParser.ts`: replace only the two
+    runtime lexer/parser `@generate` imports with
+    `../../generate/parser/AjsLexer` and `../../generate/parser/AjsParser`.
+    Keep parsing, listeners, errors and DEVELOPMENT behavior unchanged.
+  - `src/domain/services/i18n/nls.ts`: replace only four runtime `@resource`
+    imports with `../../../resource/i18n/message`, `ty`, `parameter` and
+    `ajscolumn` at that same directory. Keep localization/functions unchanged.
+  - `src/infrastructure/i18n/ParameterSyntaxResourceAdapter.ts`: replace only
+    its runtime resource import with `../../resource/i18n/parameter`.
+    Keep syntax lookup/fallback and port implementation unchanged.
+  - `src/test/runTest.ts`: remove CLI-resolver import/variable and pass the
+    actual `downloadAndUnzipVSCode()` executable to existing `runTests`.
+    Keep launch/test selection and catch-to-exit-1 behavior; no custom loader.
+  - `src/test/suite/index.ts`: initialize test-only `DEVELOPMENT = true` and
+    `CONNECTION_STRING = ""` before Mocha loads any test files, using standard
+    `globalThis`/Reflect operations. Capture original property descriptors and
+    restore them (or delete newly added properties) in finally after all test
+    loading/execution, on success or failure. Failed initialization must reject,
+    never silently continue. Preserve existing glob selection, TDD interface,
+    Mocha failure rejection and test assertions; no exported helper/framework.
 - Exact test paths under `src/test/suite/`:
   `AjsReadonlyContracts.test.ts`, new `AjsDocumentModel.test.ts`,
   `AjsDocumentIndex.test.ts`,
@@ -278,8 +395,11 @@ paths or failed-check disposition returns through Main for Replanning.
   casts, broad recursive mutable types, shared builder framework, or assertion
   deletion. DTO fixture mutation needs no adaptation.
 - Exclusions: index publication (S3), helper result ownership, runtime algorithms,
-  parser raw/generated code, all other production paths, DTO/SemanticDiff/
-  schedule output-wide readonly changes, host/configuration and fixture files.
+  raw model/evaluator/grammar/generated edits, other production paths beyond
+  the five validation paths, DTO/SemanticDiff/
+  schedule output-wide readonly changes, configuration, generated/fixture files,
+  all harness changes outside the exact launcher/suite initialization above,
+  type-only `AjsEvaluator`/`group10` import edits and unrelated runtime repairs.
 - Acceptance: property reassignment, nested parameter/relation/warning writes,
   children/root/warning/parameter/relation array writes and mutators reject;
   optional identity/context fields reject writes. Parser-result, helper-result,
@@ -289,6 +409,11 @@ paths or failed-check disposition returns through Main for Replanning.
   normalization warnings, parent/ancestor/root lookup and all consumer results
   retain their existing meaning/order. Unique traversal remains cycle-aware;
   occurrence traversal retains occurrences and its existing cycle failure.
+  Validation repair additionally resolves the same runtime modules under
+  CommonJS and desktop/web webpack; real desktop suites load/execute, produce
+  nonzero test counts/actual totals and propagate loading/assertion failure
+  as nonzero wrapper exit. Test globals match development true/empty telemetry
+  settings, are isolated/restored, and leave production flags/privacy unchanged.
 - Validation: common commands; complete desktop suite covers changed fixture
   suites, 20,000-level unique traversal, 4,096-child ordering/duplicate buckets,
   bounded recursive occurrence cases and existing parser/normalizer/list/flow/
@@ -300,11 +425,46 @@ paths or failed-check disposition returns through Main for Replanning.
   unchanged assertions/order/identity after its owned buffer adaptation.
   Web smoke exercises common host behavior. Existing assertions are
   preserved; add only missing contract/identity characterization needed here.
+  Full desktop results must include parser/normalization, NLS/syntax adapter,
+  Table Column Definition, extensionDependencies/telemetry and the architecture
+  zero-exception catalog, plus all S1/S2 suites. Record selected compiled test
+  inventory and actual passing/failing/pending counts, not just process status.
+  Prove nonzero failure propagation with a controlled suite-load failure in
+  the approved index path in a separately identified disposable verification
+  snapshot; remove the sentinel afterward and run the untouched full final
+  suite. Retain both identities/raw outputs/status; no sentinel enters the
+  product diff, final PASS snapshot or qlty observations. Verify test-global
+  descriptors restore in both success/failure paths through focused inspection
+  and the same isolated probe. No new checked-in test/harness path is approved.
 - Risks/readiness: losing fixture identity or changing occurrence/unique traversal
   would alter schedule impact. Do not fix cycles, recursion or inherited golden
   failures in this migration. A newly discovered consumer requiring another
   production path is a scope Finding requiring Replanning, not permission to
   expand this list. No user documentation or changelog change.
+- Initial validation record (before the review correction):
+  `/private/tmp/domain-model-readonly-s2-evidence/final-evidence.json`, SHA-256
+  `36e874fe5484d7c953cc7409ed96e46002f59f1d89669b6430bed55960fcdbe1`.
+  The P2 review finding showed that the relation-comparison fixture in that
+  snapshot did not preserve its initial `seq` relations; its desktop-suite
+  wrapper exit 0 is not accepted as evidence that the full suite passed.
+- Review revision: moved the before/after `seq` relation setup into
+  `compares relations after applying unit correspondence` and removed it from
+  the fingerprint-only test. The unchanged-result and removed-`seq`/added-`con`
+  assertions remain. Both TypeScript no-emit checks and the directly run named
+  compiled Mocha test pass; desktop preparation passes. The elevated desktop
+  host log shows suite discovery stops with `Cannot find module
+  '@generate/parser/AjsLexer'`; the existing `runTest.ts` wrapper still exits 0.
+  The runner and alias-resolution paths were outside the previous S2 approval,
+  so no workaround was applied. This replan proposes exact repairs; implementation
+  remains held for new review/approval/commit. Full desktop coverage, final Qlty
+  refresh and readiness are not established. Raw host
+  logs, command outputs, correction-only patch and identities:
+  `/private/tmp/domain-model-readonly-s2-evidence/revision2/revision2-record.json`.
+- Traceability result: the existing S2 mappings in `TRACEABILITY.md` cover the
+  model characterization and approved priority-fixture adaptation; this replan
+  adds explicit parser/resource/desktop-runner coverage mapping.
+- Implementation handoff: revision returned to Main; review and Completion
+  Approval remain pending new plan review/approval and repaired validation.
 - Review/Completion Approval/commit: pending / none / none.
 
 ### S3: Readonly published normalized indexes
@@ -403,8 +563,10 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   bootstrap, Table shell, expanded-flow golden, WebAPI fixture reproducibility.
   Before editing each slice, its implementer establishes the relevant current
   baseline and reports any required-check execution failure to Main. Do not use
-  a temporary host wrapper as the supported-command PASS or repair harness,
-  golden or generated fixtures here. If required commands fail or cannot launch,
+  a temporary wrapper as supported-command PASS. Only the specifically reviewed
+  S2 executable/test-global/runtime-import repair is proposed here; other harness,
+  golden and generated-fixture repairs remain excluded. If commands fail or
+  cannot launch,
   readiness is blocked until Main resolves a separately reviewed prerequisite
   or routes a replan with explicit disposition. No failure is pre-approved.
   `openapi:check` is not required here because no WebAPI generated input changes.
@@ -436,17 +598,20 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   Solution Shape result, traceability disposition and review gate are recorded
   above. Reusable validation artifact:
   `/private/tmp/domain-model-readonly-s1-evidence/evidence.json`.
-- Product/architecture/qlty checks: required S1 commands PASS; architecture
-  dependency test passes its catalog. qlty check has only unchanged baseline
-  findings, and the required final aggregate passes. The evidence artifact
-  records full-snapshot SARIF, analyzed inputs, output references and the host
-  permission retry.
+- Product/architecture/qlty checks: matching S1 non-host evidence is retained;
+  its wrapper-only desktop/architecture coverage is unestablished pending actual
+  repaired shared S2 results. Historical qlty check/aggregate facts remain bound
+  to their exact snapshots; no corrected S2 final refresh yet exists.
 - S2 narrow replan: complete reviewable amendment; documentation evidence at
   `/private/tmp/domain-model-readonly-s2-replan/evidence.json`. Held partial
   TypeScript failures remain discovery, never final PASS. S1 gates/evidence
   remain valid; revised S2 requires renewed review, approval and replan commit.
-- Blocking decisions: no unresolved replan design decision. S2 implementation
-  remains held for its new path/approval boundary; S3 remains dependent.
+- Desktop-validation replan: complete exact five-path amendment, documentation
+  artifact `/private/tmp/domain-model-readonly-s2-host-replan/evidence.json`;
+  retains P2 correction and gate history while requiring truthful full coverage.
+- Blocking decisions: independent plan review Ready, no Findings. Amended S2
+  implementation remains held for the focused replan commit; S3 remains
+  dependent.
 
 ## S1 review and Completion Approval
 
