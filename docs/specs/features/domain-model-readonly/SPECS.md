@@ -74,9 +74,10 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 - Parser grammar/generated-code changes or a raw-parser model redesign.
 - Blanket readonly conversion, architecture refactoring, test-framework work,
   dependency modernization, or resolution of unrelated inherited failures.
-  A narrowly approved S2 validation repair may replace existing runtime alias
-  imports with equivalent relative paths and correct desktop test executable/
-  isolated test-global initialization; it adds no loader or framework. The
+  The requested S2 validation repair retains production aliases and resolves
+  them in desktop test tooling through a standard library, restoring all seven
+  import rewrites. Platform-neutral executable launch and isolated/restored test
+  globals remain required; no production loader or framework is added. The
   proposed official test SDK upgrade keeps project launching platform-neutral
   and explicitly transitions development/CI from Node 20 to Node >=22; extension
   runtime and the VS Code minimum remain unchanged.

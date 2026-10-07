@@ -3,9 +3,9 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: S2 platform-neutral SDK prerequisite PLAN_APPROVED;
-  implementation is held for the approved
-  focused replan commit. S1 is committed; S3 retains its approval and dependency.
+- Active or approved slice: S2 test-side alias resolution/restoration PLAN_APPROVED;
+  focused planning commit precedes implementation. S1 is
+  committed; S3 retains its approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
 - Validate: retain S1 acceptance/gates and matching non-host evidence; its
@@ -17,9 +17,8 @@
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused commit of the approved plan
-  for the SDK/Node-22 tooling prerequisite below; then focused replan commit.
-  S2 full-suite evidence and S3 remain pending.
+- Next decision / blocker: focused planning commit for the approved test-side
+  alias scope, then implementation and full-suite validation. S3 remains pending.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -255,10 +254,9 @@
     not feature history or duplicated lifecycle policy; explicit input scope
     is this minimum/tooling sentence, with unchanged remaining instructions.
 - Compatibility boundary: SDK 3.1.0 requires Node >=22, so Node 20 development
-  and CI support would end under this proposal. This is an explicit additional
-  compatibility decision requiring human approval, not an already approved
-  internal change. VS Code minimum and extension desktop/web runtime support
-  remain fixed; no production Node-22 API, SDK import or platform-specific code
+  and CI support ends under the approved implementation boundary. VS Code
+  minimum and extension desktop/web runtime support remain fixed; no production
+  Node-22 API, SDK import or platform-specific code
   may be introduced. The only existing SDK import is the test launcher.
   If investigation shows the tooling engine transition changes extension runtime
   eligibility, stop to Main before implementation rather than raise VS Code.
@@ -313,20 +311,21 @@
   observations and aggregate after stable formatting. No qlty dependency change.
 - Preservation and approval: original/narrow/five-path approvals remain exact
   historical proof, S1 completion and S3 scope/dependency remain unchanged.
-  All 18 held product paths and the P2 fixture correction remain unchanged during
+  All 18 held product paths and the P2 fixture correction stayed unchanged during
   Replanning. Prior five-path plan review/approval does not authorize these four
-  added paths or the Node-22 minimum. The affected S2 proposal is PLANNED and
-  requires new independent plan review, explicit Human Approval and a focused
-  planning commit before SDK/lock/workflow/contributor changes. No S2 final
-  completion review/approval exists; final evidence must cover the whole S2 diff.
+  added paths or the Node-22 minimum. The platform-neutral plan has independent
+  review Ready, explicit Human Approval and focused commit
+  `20bb4c7c462c3ac3de8f6ed8ca5f16c671521b38`; implementation is now authorized.
+  No S2 final completion review/approval exists; final evidence must cover the
+  whole S2 diff.
 - Independent replan review: Ready, no Findings; reviewed document identity
   `7abce7dd572497335282bc92862e0f3ccdac5d290ec87c458bc6be1c0f282f99`.
   Review: `/private/tmp/domain-model-readonly-s2-sdk-replan-ready/review.json`.
   Main review/state metadata validation:
   `/private/tmp/domain-model-readonly-s2-sdk-replan-ready/evidence.json`.
 - Local environment fact: the human confirmed Node 22.22.0 on 2026-10-08.
-  No local Node update is needed; the proposed SDK, CI and declared development
-  support changes remain pending approval.
+  No local Node update is needed; SDK, CI and declared development support are
+  covered by the approved replan.
 - Status: Approved
 - Approved at: approved in current conversation on 2026-10-08
 - Approved scope: reviewed platform-neutral SDK/Node-22 S2 prerequisite at
@@ -345,6 +344,114 @@
 - Documentation validation artifact:
   `/private/tmp/domain-model-readonly-s2-sdk-replan/evidence.json`.
   Planning performs no installation, host download, product test or qlty scan.
+
+- Replan commit: `20bb4c7c462c3ac3de8f6ed8ca5f16c671521b38`; exact three approved
+  planning paths, staged hashes and diff checks PASS. All held product paths
+  remained unchanged and unstaged. CLI fallback delegated the same role because
+  the primary collaboration tool could not start a committer at its thread limit.
+  Handoff: `/private/tmp/domain-model-readonly-s2-sdk-cli-commit/handoff.md`.
+  Main commit-state metadata validation:
+  `/private/tmp/domain-model-readonly-s2-sdk-replan-committed/evidence.json`.
+
+## S2 test-side alias resolution and restoration
+
+- Human direction: resolve aliases in test tooling and restore every relative
+  import rewrite made by this work. The unapproved single report-relative-import
+  proposal is withdrawn; its Ready review is not approval for implementation.
+  `semanticDiffReportText.ts` already uses its original alias and stays unchanged.
+- Discovery: `/private/tmp/domain-model-readonly-s2-alias-discovery/evidence.json`
+  identifies all seven rewritten imports and the standard tsconfig-paths 4.2.0
+  API. The SDK host discovery blocker remains retained at
+  `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`;
+  it proves the missing runtime alias capability, not permission to change
+  report behavior. No new product investigation or baseline scan was run here.
+- Exact implementation scope:
+  - `package.json`: add exact development dependency `tsconfig-paths: 4.2.0`;
+    preserve approved SDK 3.1.0, Node >=22 and every other declaration.
+  - `pnpm-lock.yaml`: generate only the necessary added dependency closure using
+    normal pnpm installation; no handwritten lock changes or unrelated upgrades.
+  - `src/test/suite/index.ts`: register standard runtime alias resolution before
+    Mocha loads files. Use `register` with compiled root
+    `path.resolve(__dirname, "../..")`, mappings `@resource/*` to `resource/*`
+    and `@generate/*` to `generate/*`, and `addMatchAll: false`. These map the
+    existing TypeScript/webpack source aliases onto their compiled out layout.
+    Ordinary packages retain normal resolution. Retain existing Mocha selection,
+    assertions, nonzero rejection, test-global initialization and restoration.
+    Call returned cleanup on success, loading/assertion failure and initialization
+    failure alongside descriptor restoration. Registration failure must reject;
+    attempt every applicable cleanup even if another restoration fails, retaining
+    meaningful failure information. No exported helper or generic config parser.
+  - New `src/test/suite/testAliasResolution.test.ts`: small boundary assertions
+    use `require.resolve` to compare both resource and generated-parser aliases
+    with expected compiled module paths via ordinary `path.resolve`. Assert
+    identical resolved locations without parsing definitions or adding production
+    behavior; no new fixture framework or generic helper.
+  - `src/infrastructure/parser/AntlrRawAjsParser.ts`: restore the original two
+    `@generate/parser/AjsLexer` and `@generate/parser/AjsParser` imports.
+  - `src/domain/services/i18n/nls.ts`: restore the four original
+    `@resource/i18n/message`, `ty`, `parameter`, `ajscolumn` imports.
+  - `src/infrastructure/i18n/ParameterSyntaxResourceAdapter.ts`: restore original
+    `@resource/i18n/parameter` import. These three sources return to their exact
+    HEAD bytes; only this work's seven rewrites are undone. Do not convert other
+    existing relative imports. Restored paths may leave the final product diff
+    but remain part of scope/identity inspection.
+- Solution Shape: the desktop suite bootstrap owns temporary test-process alias
+  registration and cleanup through the established library; application/domain/
+  parser/resource ownership and production public contracts stay unchanged.
+  TypeScript and webpack retain their existing alias configuration; no production
+  loader or dependency is added. The library isolates Node test resolution at
+  the test boundary. This concrete CommonJS alias gap earns registration lifecycle
+  responsibility, not a new repository abstraction, port, adapter, application
+  factory or homemade loader. Platform differences stay with the official SDK;
+  no OS branch/native executable fallback is proposed.
+- Acceptance: both compiled alias prefixes resolve to the identical generated
+  and resource modules, normal packages resolve normally, and all seven source
+  imports are restored. Parser, localization/report fallback, telemetry and all
+  existing assertions remain unchanged. Resolver/global descriptors return to
+  pre-run state on success and every failure path; failed registration/init/load/
+  assertions/cleanup never silently pass. Architecture strings and compiled
+  fixture content remain untouched. SDK/Node/CI/contributor approvals remain fixed.
+- Validation: normal lock generation and Node-22 frozen install, both TypeScript
+  checks, desktop preparation and actual full suite including the new alias
+  boundary, parser/NLS/resource/report/wiring and architecture suites. Retain
+  actual nonzero inventory/counts/results. Existing disposable suite-load failure
+  and global-restoration probes additionally check resolver cleanup on success,
+  loading/assertion/init/registration failure and ordinary package resolution;
+  identify probe-only inputs and restore untouched final suite before PASS and
+  qlty scans. No new checked-in probe framework/export is permitted.
+  Run existing web preparation/smoke and both builds; web continues using webpack
+  aliases and does not bundle desktop registration. Verify production Node/SDK/
+  tsconfig-paths imports remain absent. Alias inventories classify expected real
+  requires resolved by registered mappings, erased types and fixture strings;
+  absence of alias text is no longer acceptance. Full qlty baseline/final and
+  stable final aggregate remain required under existing comparison policy;
+  original S1-commit baseline stays fixed with truthful original dependencies.
+- Preservation/invalidation: all prior actual approval/commit evidence remains
+  historical proof; S1 completion and S3 scope/dependency stay unchanged. All
+  22 held product paths remain unchanged during planning. The withdrawn report
+  proposal's review/readiness no longer authorizes a next gate. Changed dependency,
+  bootstrap, boundary-test and restored-import inputs require affected final
+  validation and two independent implementation reviews. Matching baseline or
+  SDK facts may be reused; prior wrapper-only S1 host coverage stays unestablished.
+  Future outside paths, new abstractions or unrelated failures return to Main.
+- Independent plan review: Ready for approval, no Findings; reviewed identity
+  `77a2930dab9f959001d9cacf1534c9bd3fba084af0c59c6b302cc196ea6c5916`.
+  Review record:
+  `/private/tmp/domain-model-readonly-s2-test-alias-replan-approval/review.json`.
+- Gate: PLAN_APPROVED; current direct human instruction authorizes this exact
+  reviewed boundary and its prerequisite focused planning commit.
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-08
+- Approved scope: exact seven-path test-side alias resolution/restoration plan
+  at the reviewed identity above; only the three selected feature documents
+  may enter its planning commit. Completion Approval remains separate.
+- Approval metadata evidence:
+  `/private/tmp/domain-model-readonly-s2-test-alias-replan-approval/evidence.json`.
+- Exact proposed planning commit paths: selected `SPECS.md`, `TASKS.md` and
+  `TRACEABILITY.md` only, including separately validated Main gate metadata.
+  All runtime/test/dependency/contributor/workflow paths remain unstaged here.
+- Documentation evidence:
+  `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
 
 ## Discovery and impact
 
@@ -488,38 +595,23 @@ paths or failed-check disposition returns through Main for Replanning.
 ### S2: Readonly normalized document and unit graph
 
 - Lifecycle state: PLAN_APPROVED
+- Current execution: SDK 3.1.0 with Node 22.22.0 launches the actual stable
+  VS Code host and propagates exit 1, but loading stops at the unapproved
+  `src/presentation/semantic-diff/report/semanticDiffReportText.ts:1` import
+  `@resource/i18n/message`. No tests ran; this path is outside the approved
+  S2 boundaries. Raw outputs and exact four-path identities:
+  `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`.
+  Returned to Main for Replanning; no out-of-scope source edit was made.
 - Value: prevent hierarchy, identity, flags and nested collection mutation;
   permit readonly consumer inputs while preserving every existing read operation.
 - Dependency: S1 committed.
 - Exact runtime path: `src/domain/models/ajs/AjsDocument.ts`; all `AjsDocument`
   and `AjsUnit` properties readonly, nested collections readonly, and helper
   collection inputs readonly. Fresh helper output collections remain mutable.
-- Added validation repair paths and exact changes:
-  - `src/infrastructure/parser/AntlrRawAjsParser.ts`: replace only the two
-    runtime lexer/parser `@generate` imports with
-    `../../generate/parser/AjsLexer` and `../../generate/parser/AjsParser`.
-    Keep parsing, listeners, errors and DEVELOPMENT behavior unchanged.
-  - `src/domain/services/i18n/nls.ts`: replace only four runtime `@resource`
-    imports with `../../../resource/i18n/message`, `ty`, `parameter` and
-    `ajscolumn` at that same directory. Keep localization/functions unchanged.
-  - `src/infrastructure/i18n/ParameterSyntaxResourceAdapter.ts`: replace only
-    its runtime resource import with `../../resource/i18n/parameter`.
-    Keep syntax lookup/fallback and port implementation unchanged.
-  - `src/test/runTest.ts`: remove CLI-resolver import/variable and pass the
-    actual `downloadAndUnzipVSCode()` executable to existing `runTests`.
-    Keep project launch code platform-neutral; the proposed official SDK
-    upgrade below owns executable discovery. No project OS branch or resolver.
-  - `src/test/suite/index.ts`: initialize test-only `DEVELOPMENT = true` and
-    `CONNECTION_STRING = ""` before Mocha loads any test files, using standard
-    `globalThis`/Reflect operations. Capture original property descriptors and
-    restore them (or delete newly added properties) in finally after all test
-    loading/execution, on success or failure. Failed initialization must reject,
-    never silently continue. Preserve existing glob selection, TDD interface,
-    Mocha failure rejection and test assertions; no exported helper/framework.
-- Proposed SDK prerequisite paths: `package.json`, `pnpm-lock.yaml`,
-  `.github/workflows/verify.yml` and `CONTRIBUTING.md`, only the exact SDK/Node-22
-  changes and generated closure specified above. They are coupled to this slice
-  because the required current-stable full suite cannot launch without repair.
+- Validation repair scope: preserve the approved platform-neutral `runTest.ts`
+  actual executable launcher and suite-global behavior. Apply the exact test-side
+  alias dependency/registration/new boundary-test and seven-import restoration
+  scope above; existing SDK/Node/CI/contributor changes retain approval.
 - Exact test paths under `src/test/suite/`:
   `AjsReadonlyContracts.test.ts`, new `AjsDocumentModel.test.ts`,
   `AjsDocumentIndex.test.ts`,
@@ -539,7 +631,8 @@ paths or failed-check disposition returns through Main for Replanning.
   deletion. DTO fixture mutation needs no adaptation.
 - Exclusions: index publication (S3), helper result ownership, runtime algorithms,
   raw model/evaluator/grammar/generated edits, other production paths beyond
-  the five validation paths, DTO/SemanticDiff/
+  the approved launcher and proposed three-source alias restoration above,
+  DTO/SemanticDiff/
   schedule output-wide readonly changes, configuration beyond the proposed
   package/lock and Verify Node prerequisite, generated/fixture files,
   all harness changes outside the exact launcher/suite initialization above,
@@ -556,8 +649,9 @@ paths or failed-check disposition returns through Main for Replanning.
   occurrence traversal retains occurrences and its existing cycle failure.
   Proposed tooling minimum transitions development/CI from Node 20 to 22;
   extension runtime/VS Code minimum remain fixed. Validation repair additionally
-  resolves the same runtime modules under
-  CommonJS and desktop/web webpack; real desktop suites load/execute, produce
+  resolves the same runtime modules through existing aliases under
+  CommonJS through test-side registration and desktop/web webpack; real desktop
+  suites load/execute, produce
   nonzero test counts/actual totals and propagate loading/assertion failure
   as nonzero wrapper exit. Test globals match development true/empty telemetry
   settings, are isolated/restored, and leave production flags/privacy unchanged.
@@ -601,7 +695,7 @@ paths or failed-check disposition returns through Main for Replanning.
   below. The pre-replan host diagnostic showed discovery stopping with
   `Cannot find module '@generate/parser/AjsLexer'`; the old `runTest.ts` wrapper
   returned 0 and was not accepted as suite coverage.
-- Current desktop-validation replan: the five approved source paths now change
+- Historical desktop-validation discovery: the five approved source paths change
   only runtime import specifiers, the test launcher and suite-global setup. Both
   TypeScript checks and desktop preparation pass. The first actual-path
   host attempt exits 1 before VS Code launches: `@vscode/test-electron@2.5.2`
@@ -609,7 +703,7 @@ paths or failed-check disposition returns through Main for Replanning.
   which is absent; the downloaded app contains `Contents/MacOS/Code`. The same
   layout is present in cached 1.140.0. No desktop tests or architecture checks
   ran, so no suite counts or host PASS are claimed. This helper/bundle
-  compatibility needs Main's replanning decision; no path workaround or version
+  compatibility was resolved by the approved SDK replan; no path workaround or version
   pin was applied. Full desktop coverage, sentinel propagation, final Qlty
   refresh and readiness are not established. Raw outputs, both app-layout
   hashes, five-path patch and current identities:
@@ -619,10 +713,9 @@ paths or failed-check disposition returns through Main for Replanning.
 - Traceability result: the existing S2 mappings in `TRACEABILITY.md` cover the
   model characterization and approved priority-fixture adaptation; this replan
   adds explicit parser/resource/desktop-runner coverage mapping.
-- Implementation handoff: held S2 implementation returned to Main for the
-  desktop executable-path compatibility replan. The refined S2 plan is PLANNED;
-  held implementation cannot resume until new review/approval/replan commit.
-  Completion Approval remains pending truthful host validation.
+- Implementation handoff: alias resolution/restoration plan is PLAN_APPROVED; hold
+  implementation until independent review, Main human gate and planning commit.
+  Completion Approval remains separate and requires truthful full validation.
 - Review/Completion Approval/commit: pending / none / none.
 
 ### S3: Readonly published normalized indexes
@@ -768,13 +861,14 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
 - Desktop-validation replan: complete exact five-path amendment, documentation
   artifact `/private/tmp/domain-model-readonly-s2-host-replan/evidence.json`;
   retains P2 correction and gate history while requiring truthful full coverage.
-- SDK prerequisite refinement: platform-neutral SDK/Node-22 proposal PLANNED;
-  documentation
-  artifact `/private/tmp/domain-model-readonly-s2-sdk-replan/evidence.json`.
-  Prior five-path approval/commit is preserved but does not approve the
-  SDK/Node-22 prerequisite.
-- Blocking decisions: independent plan review Ready; Human Approval received
-  before the focused SDK prerequisite replan commit and implementation resumption.
+- SDK prerequisite: reviewed, Human Approved and committed at `20bb4c7`;
+  implementation install/frozen lock and actual host launch recorded in
+  `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`.
+  Suite discovery fails on the report alias before tests execute.
+- Test-side alias amendment: PLAN_APPROVED; documentation evidence
+  `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
+- Blocking decisions: independent plan review, Main gate recording from direct
+  human instruction and focused planning commit before implementation resumes.
   S3 remains dependent on S2 Completion Approval and commit.
 
 ## S1 review and Completion Approval
