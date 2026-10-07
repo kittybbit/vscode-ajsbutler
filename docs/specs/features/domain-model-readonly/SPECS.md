@@ -76,7 +76,10 @@ construction, aliases, and consumer mutation, preserving existing behavior.
   dependency modernization, or resolution of unrelated inherited failures.
   A narrowly approved S2 validation repair may replace existing runtime alias
   imports with equivalent relative paths and correct desktop test executable/
-  isolated test-global initialization; it adds no loader or framework.
+  isolated test-global initialization; it adds no loader or framework. The
+  proposed official test SDK upgrade keeps project launching platform-neutral
+  and explicitly transitions development/CI from Node 20 to Node >=22; extension
+  runtime and the VS Code minimum remain unchanged.
 - WebAPI beta exit, write operations, or additional host support.
 
 ## Acceptance boundaries
