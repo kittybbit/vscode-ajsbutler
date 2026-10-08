@@ -4,22 +4,22 @@
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
 - Active or approved slice: expanded S2 test organization, physical cleanup,
-  surviving-test repairs and durable policy PLAN_APPROVED, coupled to held readonly/
-  tooling work. S1 is committed; S3 retains approval and dependency.
+  surviving-test repairs and durable policy; DOM bootstrap/hash-decoder
+  refinement PLAN_APPROVED, coupled to held readonly/tooling work. S1 is committed;
+  S3 retains approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
 - Validate: retain S1 acceptance/gates and matching non-host evidence; its
-  desktop full-suite coverage is unestablished: the theme fixture no longer
-  loops, but the current host run stalled in Browser accessibility DOM after
-  many failures and has no final summary. See current S2 evidence below.
+  preserve the prior interrupted host run as discovery only; the approved
+  reorganization requires fresh output and completed retained-suite evidence.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit for the approved all-test
-  organization, then implement cleanup and retained-test repair together.
+- Next decision / blocker: focused planning commit for the approved DOM
+  bootstrap/hash-decoder refinement before resuming complete coupled S2 work.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -714,7 +714,7 @@
   `2641d1150d5ddeb0f6ab1b4bc81b0266ca824d406d58d6826d7b9c4ec31b0c4e`.
   Review record:
   `/private/tmp/domain-model-readonly-test-reorganization-approval/review.json`.
-- Gate: PLAN_APPROVED; direct human instructions authorize the reviewed expanded
+- Gate: PLAN_COMMITTED; direct human instructions authorize the reviewed expanded
   test/policy scope and its prerequisite focused planning commit.
 - Status: Approved
 - Approved at: approved in current conversation on 2026-10-08
@@ -730,6 +730,115 @@
   only; held product and proposed durable-policy bytes remain unchanged here.
 - Documentation evidence:
   /private/tmp/domain-model-readonly-test-reorganization-replan/revision2/evidence.json.
+
+- Planning commit: `2d15b09df97583a73fce36abe8a55d1455372963`; exact three
+  approved planning paths, staged checks and hashes PASS. All 213 held input
+  paths remained unchanged and unstaged. Main commit-state metadata validation:
+  `/private/tmp/domain-model-readonly-test-reorganization-committed/evidence.json`.
+
+## S2 DOM bootstrap and hash-decoder refinement
+
+- Trigger/discovery: the producer's formal BLOCKED handoff is sealed at
+  /private/tmp/domain-model-readonly-test-reorganization-evidence/viewer-handshake-and-input-capability-blocker.json,
+  SHA-256 5b8b9d4dea94f477a8d161d17eefa917d6c74f1ee46c53c4414070e901e7dce9.
+  Focused search input fails even in an isolated HeaderSearchControl: ReactDOM
+  initializes input capability before per-suite JSDOM setup, yielding an empty
+  first Enter query and fallback attachEvent/detachEvent errors. Combined suite
+  cascade failures are not independent product defects. The diagnostic run
+  omitting accessibility (1,122 passes/43 failures) is not canonical full coverage;
+  the canonical accessibility run was interrupted at 130 without final summary.
+- Main design decision:
+  /private/tmp/domain-model-readonly-test-reorganization-main-decisions/decoder-and-dom-replan.json,
+  SHA-256 9c6da734579987f539802220063564ba16b78ba550c489032d119393da412680.
+  The current implementation remains held at planning HEAD
+  2d15b09df97583a73fce36abe8a55d1455372963. Discovery identities are not a new
+  committed baseline; fixed S1 validation predecessor 80533f7 remains unchanged.
+- Exact scope: the prior 210-path implementation manifest and all catalog
+  decisions remain intact. Add only
+  src/domain/services/diagnostics/EventDiagnosticRules.ts, making 211 paths:
+  /private/tmp/domain-model-readonly-dom-decoder-replan/implementation-scope.json.
+  Existing src/test/suite/index.ts owns DOM bootstrap; existing
+  src/test/suite/syntaxDiagnosticStringValidators.test.ts owns decoder regression
+  cases. No additional dependency, export, helper path, loader or framework.
+- Test-bootstrap Solution Shape: the existing test runner owns minimal JSDOM
+  initialization before Mocha loads any test modules, so ReactDOM detects normal
+  DOM input capability once. Use existing JSDOM and standard descriptor APIs.
+  Preserve standard alias registration, normal package resolution, DEVELOPMENT/
+  CONNECTION_STRING isolation and ordinary Mocha discovery/loading/failure exits.
+  Capture every overwritten DOM global descriptor before changing it; restore
+  exact prior descriptors or absence, and close the owned DOM on success, failed
+  assertion/module loading, partial initialization and cleanup failure. Attempt
+  each applicable alias/global/DOM cleanup even if another cleanup throws; reject
+  initialization or cleanup errors rather than hiding them. Existing per-suite
+  DOM lifecycles must restore to this runner-owned environment without leakage.
+  Node capabilities stay in test tooling; no OS branch or production dependency.
+- Decoder Solution Shape: domain diagnostics remains the semantic owner of
+  parseHashEscapedQuotedEventStringContent and its unchanged string-or-undefined
+  API. The concrete gap is two sequential replacements reinterpreting a decoded
+  terminal hash: `"hash##"` produces `hash"` instead of `hash#`.
+  After existing quote/regex validation, decode original content in one pass:
+  consume each hash-plus-quote/hash pair once; a lone original trailing hash
+  retains the existing quote convention. Never interpret an emitted character
+  again. Preserve the accepted regex, malformed-value rejection and all other
+  content. Standard string iteration suffices; no new abstraction, port, adapter,
+  application factory or layer dependency. This is local contract evidence,
+  not an independently verified new JP1 source-language interpretation.
+- Caller impact/compatibility: evaluateEventDiagnosticViolations consumes helper
+  validity and byte length for evusr/evgrp/evwms/evdet/evwfr/evtmc; semanticDiffIdentity
+  uses validity/length/nonempty eligibility for te/sc/prm and evwfr. Its fingerprint
+  continues to use original parameter.value. Prove accepted/invalid eligibility,
+  byte-length boundaries, diagnostics and raw semantic fingerprints remain
+  unchanged while decoded pair/repeated-pair content is corrected. Shared domain
+  remains browser-safe, VS Code minimum ^1.75.0 and approved Node-22/SDK/alias
+  tooling remain unchanged. No diagnostic or semantic-diff change is presumed.
+- Preserved behavior: resource/READY observer repairs must follow the actual
+  viewer resource handshake and document subscription ordering. The depth-128
+  accessibility case still requires 129 rows, one active/tabbable row and deepest
+  aria-level 129. Its stall cause is unresolved. Diagnose retained observers
+  against these contracts; no deletion, stress reduction, increased threshold,
+  assertion weakening or diagnostic exclusion is authorized by this refinement.
+- Focused validation before canonical validation: existing quoted-string tests
+  cover paired/repeated terminal hashes, mixed escaped quotes, original lone
+  trailing hash, malformed/undefined values and meaningful byte-length edges.
+  Run relevant diagnostics and semantic-diff eligibility/fingerprint tests.
+  Verify early ReactDOM input initialization with isolated input plus retained
+  table/flow search/Enter/clear/focus and READY-handshake cases; confirm depth-128
+  contract. Extend existing disposable bootstrap lifecycle/failure probes for DOM
+  creation/global initialization/module loading/assertion/cleanup failures and
+  successful cleanup, exact descriptors/absence, DOM close and alias restoration.
+  Do not add a generic probe framework or persist custom runtime resolution.
+- Final validation retains the organization amendment's fresh-output requirement,
+  compiled discovery/ignored-input hashes and deleted-case reconciliation.
+  Require a completed unchanged canonical desktop selection with actual nonzero
+  count/final summary and zero retained failures, all 29 architecture cases with
+  zero exceptions, both TypeScript checks/preparations/builds, web smoke,
+  openapi:check, docs checks and full official baseline/final qlty plus final
+  aggregate. Focused/omitted/interrupted diagnostic runs cannot substitute.
+  Reuse matching evidence only for unchanged exact inputs and coverage; final
+  affected DOM/decoder/full-suite findings require new evidence, no exclusions.
+- Documentation evaluation: no new user feature, command, workflow or externally
+  observable diagnostic/fingerprint change is intended, so no README/CHANGELOG
+  change beyond the already approved reusable SDD testing policy is proposed.
+  If retained tests demonstrate an observable production contract change or
+  additional path/design need, stop to Main for that decision rather than
+  silently broadening this internal decoder correction.
+- Preservation/renewal: the committed all-test plan and all previous approvals
+  prove their historical identities; they do not approve this additional decoder
+  path or changed bootstrap design. Affected S2 plan review/approval and final
+  evidence require renewal. S1 completion/commit, S3 approval/dependency, all
+  eight physical deletion/two simplification decisions, full architecture catalog,
+  common-test/necessary-host split policy and one coupled completion gate remain.
+- Lifecycle state: PLAN_APPROVED. Independent review: Ready for approval;
+  reviewed identity b709092210fb13ee13e29345283c3c97448431576456645ef6b6c111019bbba2.
+  Review and Main metadata: /private/tmp/domain-model-readonly-dom-decoder-ready/evidence.json.
+  Human Approval: Approved at approved in current conversation; exact reviewed
+  211-path refinement scope, early DOM bootstrap and single-pass decoder repair.
+  Approval evidence: /private/tmp/domain-model-readonly-dom-decoder-approved/evidence.json.
+  Focused planning commit precedes changed implementation. Completion/Closure
+  gates remain separate.
+- Planning paths: selected SPECS.md, TASKS.md and TRACEABILITY.md only.
+  Held-input and documentation evidence:
+  /private/tmp/domain-model-readonly-dom-decoder-replan/evidence.json.
 
 ## Discovery and impact
 
@@ -876,13 +985,15 @@ paths or failed-check disposition returns through Main for Replanning.
 - Value: publish the recursive readonly contract and establish useful, maintainable
   passing tests organized by use cases, architecture and component contracts.
 - Dependency: S1 commit and independently reviewed/authorized focused replan commit.
-- Scope/order/acceptance: the exact 210-path catalog and coupled organization
-  amendment above replace prior per-fixture S2 editing/assertion constraints.
+- Scope/order/acceptance: the exact 210-path catalog plus the sole decoder path
+  in the 211-path refinement manifest and coupled organization amendment above
+  replace prior per-fixture S2 editing/assertion constraints.
   Preserve original AjsDocument/AjsUnit readonly fields/collections and helper
   readonly inputs with fresh mutable output arrays; no index publication until S3.
   Physically delete excess first, repair surviving tests second, validate the
   complete integrated slice and proposed reusable SDD rule before completion.
-- Exclusions: production edits outside AjsDocument, generated production schemas,
+- Exclusions: production edits outside AjsDocument and the exact EventDiagnosticRules
+  decoder correction, generated production schemas,
   runtime behavior changes, new frameworks/abstractions, OS-specific launch code,
   use-case rewrites, architecture exceptions, skipped/excluded assertions,
   roadmap/README/user workflow changes beyond approved tooling and SDD policy.
@@ -1049,10 +1160,12 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
 - Stable-theme fixture amendment: PLAN_COMMITTED; documentation evidence
   `/private/tmp/domain-model-readonly-s2-flow-fixture-replan/revision2/evidence.json`.
-- Global test amendment: PLANNED; complete catalog/proposed edit scope and held
-  identities are in the organization discovery directory above.
-- Blocking decisions: independent plan review and Main authorization recording
-  from the direct all-test/policy request, followed by focused planning commit.
+- Global test amendment: PLAN_COMMITTED at 2d15b09; complete catalog and exact
+  approved organization scope remain in the discovery directory above.
+- DOM bootstrap/hash-decoder refinement: PLAN_APPROVED; new scope/discovery and
+  held identities are in the refinement section above.
+- Blocking decisions: focused refinement planning commit before implementation
+  resumes; matching Human Approval is recorded above.
   S3 remains dependent on S2 Completion Approval and commit.
 
 ## S1 review and Completion Approval

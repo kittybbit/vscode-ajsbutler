@@ -93,6 +93,8 @@ construction, aliases, and consumer mutation, preserving existing behavior.
   unrelated dependency modernization or production behavior changes. The
   directly requested all-test organization and retained-test repairs are now
   included; their exact boundaries and policy update are in the revised S2 plan.
+  The sole additional production repair is the existing quoted event-string
+  decoder contract above; no other production behavior change is in scope.
   The requested S2 validation repair retains production aliases and resolves
   them in desktop test tooling through a standard library, restoring all seven
   import rewrites. Platform-neutral executable launch and isolated/restored test
@@ -126,6 +128,15 @@ construction, aliases, and consumer mutation, preserving existing behavior.
   loading/test failures as nonzero command exits. Wrapper exit 0 alone is not
   host coverage. This repair does not change bundled product parser/resource
   semantics or telemetry collection.
+
+- Test DOM input capability must initialize before component test modules load;
+  restore all owned DOM/global/alias state on every exit. Retain keyboard/search/
+  focus and depth-128 accessibility (129 rows, one active row, aria-level 129).
+- The existing quoted event-string helper may correct repeated hash-pair decoding
+  without reinterpreting decoded output. Preserve accepted syntax/invalid rejection,
+  the original trailing single hash convention, caller validity/length eligibility,
+  diagnostic outcomes and raw semantic fingerprints. This narrow internal helper
+  repair does not introduce a new JP1 grammar or parameter interpretation.
 
 ## Open questions
 

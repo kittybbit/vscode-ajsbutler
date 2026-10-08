@@ -23,5 +23,7 @@
 | R6: complete useful-test inventory, physical excess deletion, surviving repair | S2 | Full catalog: 203 files/192 suites/1,189 cases; exact KEEP/SIMPLIFY/PHYSICAL_DELETE ledger, retained contract coverage and dead test-only helper removal; completed retained full suite |
 | R7: common behavior once; necessary desktop/web boundary separation | S2 | Per-file host flags/reasons, shared unit/use-case cases, actual desktop/Web capability smoke and both builds |
 | R8: reusable SDD testing rule and no deletion-based regression masking | S2 | docs/specs/README.md proposed Testing Policy, immutable use-case/privacy/component oracles, 29 architecture cases, failure repair/production stop disposition, two independent reviews |
+| R3/R4: quoted event-string decoder and consumer compatibility | S2 | syntaxDiagnosticStringValidators pair/repeated-pair/mixed-quote/invalid/trailing-hash regressions; diagnostics byte-length boundaries and semantic-diff eligibility/raw fingerprint contracts |
+| R5/R6: early DOM input capability and exact bootstrap restoration | S2 | Existing suite index minimal JSDOM before module load; input/Enter/clear/focus and resource/READY tests; descriptor/DOM-close/alias success/failure lifecycle probes; retained depth-128 129-row/one-active/aria-129 contract; fresh canonical full suite |
 
 <!-- markdownlint-enable MD013 MD060 -->
