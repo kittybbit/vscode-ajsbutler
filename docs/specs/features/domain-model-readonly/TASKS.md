@@ -3,23 +3,23 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: S2 stable-theme fixture amendment PLAN_APPROVED; held
-  implementation awaits independent review, new Human Approval and focused
-  planning commit. S1 is committed; S3 retains approval and dependency.
+- Active or approved slice: expanded S2 test organization, physical cleanup,
+  surviving-test repairs and durable policy PLAN_APPROVED, coupled to held readonly/
+  tooling work. S1 is committed; S3 retains approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
 - Validate: retain S1 acceptance/gates and matching non-host evidence; its
-  desktop full-suite coverage is unestablished until repaired shared validation
-  supplies actual results. S2 test-side alias work is blocked at an unrelated
-  Flow Viewer Controller test loop; see its current evidence below.
+  desktop full-suite coverage is unestablished: the theme fixture no longer
+  loops, but the current host run stalled in Browser accessibility DOM after
+  many failures and has no final summary. See current S2 evidence below.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: commit the approved fixture amendment plan, then
-  implement and validate; actual full-suite completion remains unestablished.
+- Next decision / blocker: focused planning commit for the approved all-test
+  organization, then implement cleanup and retained-test repair together.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -526,7 +526,7 @@
   Prior stale-current-evidence P2 resolved. Review and gate metadata:
   `/private/tmp/domain-model-readonly-s2-flow-fixture-replan-ready/review.json`
   and `/private/tmp/domain-model-readonly-s2-flow-fixture-replan-ready/evidence.json`.
-- Gate: PLAN_APPROVED; explicit Human Approval received for the added fixture.
+- Gate: PLAN_COMMITTED; explicit Human Approval received for the added fixture.
 - Status: Approved
 - Approved at: approved in current conversation on 2026-10-08
 - Approved scope: exact reviewed stable-theme fixture amendment at identity
@@ -541,6 +541,195 @@
   are unchanged. Product/test/dependency/workflow/contributor paths stay unstaged.
 - Documentation artifact:
   `/private/tmp/domain-model-readonly-s2-flow-fixture-replan/revision2/evidence.json`.
+
+- Planning commit: `354faf2cea4504c22fc90087aa4d74a9ba267e0a`; exact two
+  approved planning paths, staged checks and hashes PASS. All 23 held product
+  paths remained unchanged and unstaged. Main commit-state metadata validation:
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-replan-committed/evidence.json`.
+
+- Implementation attempt: only `src/test/suite/flowViewerController.test.ts` was
+  changed. A single test-owned theme instance now remains stable across
+  `ControllerFixture` renders; its fixture, event bridge, contract and assertions
+  are unchanged. The focused test through the approved suite bootstrap stops
+  the prior update-depth loop but fails the existing selected-node assertion at
+  `out/test/suite/flowViewerController.test.js:253` (`[]`, expected the nested
+  leaf). A separate narrowed diagnostic also exposes an existing
+  `out/test/suite/normalizeAjsDocument.test.js:99` relation assertion
+  (`[]`, expected `seq` and `con`). Neither test or production behavior was
+  edited to address these failures.
+- Full desktop attempt: the unchanged full command printed 1,064 success and 69
+  failure markers, including the Flow controller assertion and failures across
+  unrelated UI, parser/model, telemetry and diagnostics suites. It reached
+  Browser accessibility DOM, where the extension host became unresponsive; it
+  was interrupted with tool status 130 before a final Mocha summary. The
+  architecture dependency suite completed 29 cases with no visible failures.
+  These partial markers are not final suite counts or a PASS. Complete raw logs,
+  all observed failure names/source mappings, targeted stack traces and
+  interruption facts are retained at
+  `/private/tmp/domain-model-readonly-s2-flow-fixture-evidence/blocked-evidence.json`.
+  Full desktop readiness and final web/build/qlty validation remain pending Main's
+  scope decision; no out-of-boundary repair or waiver is made.
+
+## S2 all-test organization amendment
+
+- Input scope/direction: Main record
+  /private/tmp/domain-model-readonly-global-test-direction/evidence.json.
+  The direct request covers all tests, physical deletion of excess, subsequent
+  retained-test repair, necessary-only desktop/web separation and reusable SDD
+  testing rules. No new feature/branch or product behavior is proposed.
+- Trigger: actual full host showed 69 failure markers and 1,064 success markers,
+  then stalled in Browser accessibility DOM and was interrupted with exit 130,
+  without final summary. All 29 architecture cases completed within that
+  incomplete run. This is discovery, not full-suite PASS or a deletion criterion.
+  Immutable producer artifact:
+  /private/tmp/domain-model-readonly-s2-flow-fixture-evidence/blocked-evidence.json,
+  SHA-256 e14889fd15f5c28aedce23c7ccd87361e976682ca01c7d05614ccfdda780cc3a.
+- Complete inspected catalog: 203 src/test files, 192 literal suite groups and
+  1,189 test declarations; shared supports/generated fixtures/runners included.
+  38 related config/script/sample/requirement inputs are cataloged separately.
+  Full cases, line ranges, body/import observations, purpose/oracle/semantic owner,
+  KEEP/SIMPLIFY/PHYSICAL_DELETE decisions and common/host-boundary flags:
+  /private/tmp/domain-model-readonly-test-reorganization-discovery/catalog.json
+  and related-inputs.json in the same directory. MERGE has no selected cases:
+  no distinct public behavior is silently folded away merely to reduce counts.
+- Exact proposed excess: physically delete
+  src/test/suite/webapiImportBoundary.test.ts (both source-substring checks).
+  The full architecture catalog remains; real WebAPI use-case/adapter/credential
+  behavior remains in the import, command and adapter suites. Remove individual
+  cases listed in the ledger: viewerBundle's private Explorer-constant absence
+  and navigator.platform bundle-text scan; packageManifest's incidental codicon
+  alignment; webapiOpenApiGeneratedArtifacts' Prism server startup/sample
+  preferences, generated path suffix, and self-constructed request-key checks.
+  There are eight deleted test declarations in total, without a deletion quota.
+  Do not skip/comment/exclude these cases; physically remove their bodies and
+  newly unused imports/local setup. No other deletion is authorized by this
+  ledger; a newly identified distinct deletion decision returns to Main.
+- Dead dedicated support: remove Prism server interface/start/port/poll/stop
+  helpers, their child_process/net/path imports and unused Prism path export
+  from generated jp1Ajs3WebApiMock.generated.ts and only the corresponding
+  renderMockFixture output template in scripts/generate-webapi-openapi-artifacts.mjs.
+  Keep operation/response fixture data. Keep openapi:mock, its Prism dependency,
+  YAML fixture and all developer commands. Generator production API/schema
+  output must remain byte-identical; only test mock output changes. Regenerate
+  test assets normally and require openapi:check; no handwritten generated code.
+- Selected simplifications: normalizeUnitBuilder's whole-object mirror becomes
+  semantic field/child/relation/parameter-content assertions, retaining explicit
+  source-location coverage in normalization suites. extensionSubscriptions
+  removes incidental fixed subscription-count assertion while retaining required
+  registration, uniqueness, ownership and disposal behavior. Remaining 1,179
+  cases are KEEP for their named use-case/component/architecture contracts.
+  Large/deep/cycle/duplicate inputs are retained where they protect documented
+  large-input or traversal/identity/error boundaries; no stress removal by size
+  alone. Existing DOM shell keyboard/search/focus behavior is retained because
+  the use cases explicitly require it; fixtures may be repaired, not discarded.
+- Physical organization: keep the existing discoverable test layout and catalog
+  each case by behavioral/use-case, architecture, or general component owner.
+  Do not create a new test framework or move paths purely for taxonomy. Necessary
+  host boundary tests carry an explicit reason in the catalog; common component
+  and application tests are not duplicated for desktop/web.
+- Exact coupled implementation path set:
+  /private/tmp/domain-model-readonly-test-reorganization-discovery/implementation-scope.json.
+  It lists all 203 inspected src/test paths plus the existing AjsDocument readonly
+  model, package/lock, Verify workflow and CONTRIBUTING approved changes,
+  test-only generator template and docs/specs/README.md (210 paths total).
+  KEEP files are readable scope for retained-case fixture/observer/expectation
+  repairs; no unconstrained new test path, exported harness or production change.
+  Unchanged samples/config/requirement docs stay outside edit scope. Restored
+  parser/NLS/resource production aliases remain unchanged and inspected.
+- Repair order in S2: apply physical deletions/simplifications first; then run
+  retained suites and diagnose/fix remaining tests using unchanged use-case,
+  domain-rule, privacy and public-component contracts. Correct fixture grammar,
+  normalization-owner access, source-metadata expectations, stable React inputs,
+  DOM lifecycle/order and event observers only when supported by those contracts.
+  The 69 retained failure records are repair inputs, not preset new expected
+  values. In particular, relation assertions must use their normalized parent
+  owner instead of collecting unrelated child relations; selection assertions
+  must observe the defined committed/effect transition instead of an initial
+  empty render. Confirm these contrasts against the unchanged contracts; they
+  are diagnosis guidance, not permission to erase relation/selection checks.
+  Retain useful errors/edge/privacy/host/parser/CSV/list/flow/adapter/type
+  boundaries. A real production contract mismatch stops to Main for design;
+  never rewrite a use case or weaken a meaningful assertion to fit actual output.
+- One completion boundary: cleanup and surviving-test repair cannot be committed
+  separately while held readonly tests depend on uncommitted AjsDocument types.
+  This expanded S2 includes all already approved partial readonly/tooling/alias/
+  fixture work plus organization/repairs/policy. There is no failing interim
+  cleanup Completion gate. S2 commits only after complete validation/two reviews.
+- Solution Shape: test owners remain their existing use-case/component/architecture
+  boundaries; standard Mocha, Testing Library/JSDOM and test alias library supply
+  existing capabilities. Test cleanup removes implementation mirrors and unused
+  vendor-server lifecycle code, not production capabilities. No new port/adapter/
+  application factory, homemade loader, framework or production layer direction.
+  The SDD README owns reusable testing rules; semantic judgments and architecture
+  catalog execution are separate evidence.
+- Durable Documentation Gate: explicitly requested reusable testing policy is
+  owned by docs/specs/README.md; edit only a concise Testing Policy subsection
+  under Risk-Based Validation And Review. Proposed text:
+  - Organize tests around use-case-defined observable behavior, the complete
+    architecture rule catalog, and general component/public contract units.
+  - Keep distinct valid/error/edge/privacy/compatibility coverage. Remove redundant
+    identical assertions, incidental implementation-text mirrors and unjustified
+    synthetic permutations/stress; retain purposeful architecture and declared
+    configuration checks. Remove excess tests and dead dedicated test support
+    physically, with a retained-coverage ledger, rather than skipping them.
+  - Test common behavior once. Split desktop/web tests only for a genuine host
+    capability, different behavior or adapter boundary; keep required host smokes,
+    shared-contract/build compatibility and the zero-exception architecture gate.
+  - After cleanup, repair retained tests against their contracts; failures are
+    not deletion evidence and production mismatches require scope/design review.
+  No duplicate rule update in AGENTS, agent files, use cases or architecture.
+  No durable file is edited during planning.
+- Validation: original S1 commit 80533f7 is the exact S2 baseline with original
+  dependencies; current held-tree manifest is discovery, never a replacement
+  committed baseline. Full qlty version/config/selection comparability rules
+  remain. Capture all deletions/untracked/changed inputs, before/after case
+  inventory, retained-coverage/dead-support/import ledger and cleanup-before-fix
+  identities. After cleanup/repairs and before final preparation, use the existing
+  platform-neutral clean capability in the disposable final snapshot, or create
+  a fresh exact disposable snapshot with no generated test output. Then run the
+  unchanged supported preparation/full-run commands. Do not reuse a stale
+  out/test tree: deleted source tests must not survive as executable JavaScript.
+  Retain the actual compiled discovery inventory and ignored generated-input
+  hashes; reconcile discovered tests/cases with surviving source tests and prove
+  removed files/cases are absent from executable selection. No skiplist, loader
+  or configuration change substitutes for fresh output. Run both TypeScript
+  checks, normal/frozen installation as applicable, both preparations,
+  completed actual retained full desktop suite with nonzero
+  inventory and actual summary, all 29 architecture cases/zero exceptions, alias/
+  global cleanup and nonzero-failure probes, web capability smoke and both builds.
+  Add openapi:check for changed generator/test output; inspect unchanged production
+  generated bytes and retained mock CLI inputs. Selected/doc-policy/CONTRIBUTING
+  lint/links/structure and YAML checks accompany full official baseline/final
+  qlty observations/inventories and stable final aggregate. Full-suite pass cannot
+  be replaced by focused runs or partial markers. Current-head Cloud at Exit stays.
+- Preservation/renewal: S1 completion/commit and S3 readonly-index approval/
+  dependency remain. Historical S2 approvals retain their exact identities but
+  their assertion-preservation constraints are superseded only for this reviewed
+  direct-request ledger. The changed entire S2 test/policy boundary needs another
+  independent plan review and Main authorization recording from the direct user
+  request before plan commit; do not ask again merely because scope is broad.
+  Affected previous S2 validation/reviews need renewal; matching baseline,
+  install/SDK/alias facts remain reusable only with exact inputs/coverage.
+- Independent plan review: Ready for approval, no Findings; reviewed identity
+  `2641d1150d5ddeb0f6ab1b4bc81b0266ca824d406d58d6826d7b9c4ec31b0c4e`.
+  Review record:
+  `/private/tmp/domain-model-readonly-test-reorganization-approval/review.json`.
+- Gate: PLAN_APPROVED; direct human instructions authorize the reviewed expanded
+  test/policy scope and its prerequisite focused planning commit.
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-08
+- Approved scope: exact reviewed coupled S2 organization/physical deletion,
+  surviving-test repair and common SDD policy at the identity above, bounded by
+  the 210-path implementation manifest, eight deletions and two simplifications
+  in the reviewed catalog. Existing readonly/tooling work remains included.
+  Planning commit: selected SPECS, TASKS and TRACEABILITY only. Completion and
+  Closure Approval remain separate.
+- Approval metadata evidence:
+  `/private/tmp/domain-model-readonly-test-reorganization-approval/evidence.json`.
+- Proposed planning commit paths: selected SPECS.md, TASKS.md, TRACEABILITY.md
+  only; held product and proposed durable-policy bytes remain unchanged here.
+- Documentation evidence:
+  /private/tmp/domain-model-readonly-test-reorganization-replan/revision2/evidence.json.
 
 ## Discovery and impact
 
@@ -681,136 +870,30 @@ paths or failed-check disposition returns through Main for Replanning.
 - Review/Completion Approval/commit: two independent Ready verdicts / Approved /
   `80533f721838592b771e51b94ef3cc543bcc6fb2`.
 
-### S2: Readonly normalized document and unit graph
+### S2: Readonly model, purposeful tests and surviving-test repairs
 
 - Lifecycle state: PLAN_APPROVED
-- Current execution: test-side aliases resolve correctly, the new alias boundary
-  and eight bootstrap lifecycle probes pass, and both TypeScript checks,
-  desktop preparation and frozen install pass. The actual stable VS Code desktop
-  suite shows 713 success markers, then stalls at Flow Viewer Controller;
-  interruption exits 130 without a final summary. This is incomplete full-suite
-  evidence, not PASS. Latest raw outputs and identities:
-  `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`.
-  The earlier SDK-stage report-alias failure is historical and resolved by
-  test-side registration; its immutable discovery record remains at
-  `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`.
-  The new fixture path awaits review and Human Approval before edits.
-- Value: prevent hierarchy, identity, flags and nested collection mutation;
-  permit readonly consumer inputs while preserving every existing read operation.
-- Dependency: S1 committed.
-- Exact runtime path: `src/domain/models/ajs/AjsDocument.ts`; all `AjsDocument`
-  and `AjsUnit` properties readonly, nested collections readonly, and helper
-  collection inputs readonly. Fresh helper output collections remain mutable.
-- Validation repair scope: preserve the approved platform-neutral `runTest.ts`
-  actual executable launcher and suite-global behavior. Apply the exact test-side
-  alias dependency/registration/new boundary-test and seven-import restoration
-  scope above; existing SDK/Node/CI/contributor changes retain approval.
-- Proposed additional test path: `src/test/suite/flowViewerController.test.ts`,
-  only stable fixture-theme lifetime as specified above.
-- Exact test paths under `src/test/suite/`:
-  `AjsReadonlyContracts.test.ts`, new `AjsDocumentModel.test.ts`,
-  `AjsDocumentIndex.test.ts`,
-  `semanticDiffScheduleCalendar.test.ts`, `semanticDiffScheduleImpact.test.ts`,
-  `semanticDiffEvidenceRules.test.ts`, `semanticDiffStructuralRules.test.ts`,
-  `semanticDiffContracts.test.ts`, `semanticDiffConditions.test.ts`,
-  `compareSemanticDiff.test.ts`, `semanticDiffFlowHighlights.test.ts`,
-  `unitListViewHelpers.test.ts` (added in this replan, fixture construction only).
-  Only normalized fixture construction and contract/regression assertions change.
-  For the added `unitListViewHelpers.test.ts`, edits are restricted to preparing
-  the existing priority-inheritance fixture; all scenarios/assertions remain.
-- Fixture approach: constructor overrides for changed fields/relations;
-  explicit owned mutable child arrays for shared/cyclic/deep graph preparation.
-  Retain original input identities, malformed/duplicate scenarios and assertions,
-  including deliberate retained-producer alias scenarios. No consumer mutation
-  casts, broad recursive mutable types, shared builder framework, or assertion
-  deletion. DTO fixture mutation needs no adaptation.
-- Exclusions: index publication (S3), helper result ownership, runtime algorithms,
-  raw model/evaluator/grammar/generated edits, other production paths beyond
-  the approved launcher and proposed three-source alias restoration above,
-  DTO/SemanticDiff/
-  schedule output-wide readonly changes, configuration beyond the proposed
-  package/lock and Verify Node prerequisite, generated/fixture files,
-  all harness changes outside the exact launcher/suite initialization above,
-  project OS-specific launch resolution, other dependency upgrades,
-  type-only `AjsEvaluator`/`group10` import edits and unrelated runtime repairs.
-- Acceptance: property reassignment, nested parameter/relation/warning writes,
-  children/root/warning/parameter/relation array writes and mutators reject;
-  optional identity/context fields reject writes. Parser-result, helper-result,
-  schedule interpretation/calendar aliases expose readonly model elements.
-  Readonly collection inputs compile; legitimate owned result-array mutation
-  remains valid. Identity, hierarchy, repeated values, raw/source evidence,
-  normalization warnings, parent/ancestor/root lookup and all consumer results
-  retain their existing meaning/order. Unique traversal remains cycle-aware;
-  occurrence traversal retains occurrences and its existing cycle failure.
-  Proposed tooling minimum transitions development/CI from Node 20 to 22;
-  extension runtime/VS Code minimum remain fixed. Validation repair additionally
-  resolves the same runtime modules through existing aliases under
-  CommonJS through test-side registration and desktop/web webpack; real desktop
-  suites load/execute, produce
-  nonzero test counts/actual totals and propagate loading/assertion failure
-  as nonzero wrapper exit. Test globals match development true/empty telemetry
-  settings, are isolated/restored, and leave production flags/privacy unchanged.
-- Validation: common commands; complete desktop suite covers changed fixture
-  suites, 20,000-level unique traversal, 4,096-child ordering/duplicate buckets,
-  bounded recursive occurrence cases and existing parser/normalizer/list/flow/
-  CSV/definition/diagnostic/hover/navigation/semantic/schedule/WebAPI/telemetry
-  boundaries. `AjsDocumentModel` adds focused parent/ancestor/root-jobnet,
-  first-hit/repeated-parameter, traversal reference/order and fresh-result-array
-  ownership assertions absent from the current helper-specific coverage.
-  The existing `unitListViewHelpers` priority-inheritance suite must pass with
-  unchanged assertions/order/identity after its owned buffer adaptation.
-  Web smoke exercises common host behavior. Existing assertions are
-  preserved; add only missing contract/identity characterization needed here.
-  Full desktop results must include parser/normalization, NLS/syntax adapter,
-  Table Column Definition, extensionDependencies/telemetry and the architecture
-  zero-exception catalog, plus all S1/S2 suites. Record selected compiled test
-  inventory and actual passing/failing/pending counts, not just process status.
-  Prove nonzero failure propagation with a controlled suite-load failure in
-  the approved index path in a separately identified disposable verification
-  snapshot; remove the sentinel afterward and run the untouched full final
-  suite. Retain both identities/raw outputs/status; no sentinel enters the
-  product diff, final PASS snapshot or qlty observations. Verify test-global
-  descriptors restore in both success/failure paths through focused inspection
-  and the same isolated probe. No new checked-in test/harness path is approved.
-- Risks/readiness: losing fixture identity or changing occurrence/unique traversal
-  would alter schedule impact. Do not fix cycles, recursion or inherited golden
-  failures in this migration. A newly discovered consumer requiring another
-  production path is a scope Finding requiring Replanning, not permission to
-  expand this list. No user documentation or changelog change.
-- Initial validation record (before the review correction):
-  `/private/tmp/domain-model-readonly-s2-evidence/final-evidence.json`, SHA-256
-  `36e874fe5484d7c953cc7409ed96e46002f59f1d89669b6430bed55960fcdbe1`.
-  The P2 review finding showed that the relation-comparison fixture in that
-  snapshot did not preserve its initial `seq` relations; its desktop-suite
-  wrapper exit 0 is not accepted as evidence that the full suite passed.
-- P2 review correction: moved the before/after `seq` relation setup into
-  `compares relations after applying unit correspondence` and removed it from
-  the fingerprint-only test. The unchanged-result and removed-`seq`/added-`con`
-  assertions remain; its corrected content is recorded in the revision-2 evidence
-  below. The pre-replan host diagnostic showed discovery stopping with
-  `Cannot find module '@generate/parser/AjsLexer'`; the old `runTest.ts` wrapper
-  returned 0 and was not accepted as suite coverage.
-- Historical desktop-validation discovery: the five approved source paths change
-  only runtime import specifiers, the test launcher and suite-global setup. Both
-  TypeScript checks and desktop preparation pass. The first actual-path
-  host attempt exits 1 before VS Code launches: `@vscode/test-electron@2.5.2`
-  returns `.vscode-test/vscode-darwin-arm64-1.141.0/Visual Studio Code.app/Contents/MacOS/Electron`,
-  which is absent; the downloaded app contains `Contents/MacOS/Code`. The same
-  layout is present in cached 1.140.0. No desktop tests or architecture checks
-  ran, so no suite counts or host PASS are claimed. This helper/bundle
-  compatibility was resolved by the approved SDK replan; no path workaround or version
-  pin was applied. Full desktop coverage, sentinel propagation, final Qlty
-  refresh and readiness are not established. Raw outputs, both app-layout
-  hashes, five-path patch and current identities:
-  `/private/tmp/domain-model-readonly-s2-host-repair-evidence/blocked-evidence.json`.
-  Prior correction-only patch and identities:
-  `/private/tmp/domain-model-readonly-s2-evidence/revision2/revision2-record.json`.
-- Traceability result: the existing S2 mappings in `TRACEABILITY.md` cover the
-  model characterization and approved priority-fixture adaptation; this replan
-  adds explicit parser/resource/desktop-runner coverage mapping.
-- Implementation handoff: full desktop run stalled without final summary; S2
-  stable-theme fixture amendment is PLAN_APPROVED pending its focused planning commit.
-  No partial pass count establishes readiness or Completion Approval.
+- Value: publish the recursive readonly contract and establish useful, maintainable
+  passing tests organized by use cases, architecture and component contracts.
+- Dependency: S1 commit and independently reviewed/authorized focused replan commit.
+- Scope/order/acceptance: the exact 210-path catalog and coupled organization
+  amendment above replace prior per-fixture S2 editing/assertion constraints.
+  Preserve original AjsDocument/AjsUnit readonly fields/collections and helper
+  readonly inputs with fresh mutable output arrays; no index publication until S3.
+  Physically delete excess first, repair surviving tests second, validate the
+  complete integrated slice and proposed reusable SDD rule before completion.
+- Exclusions: production edits outside AjsDocument, generated production schemas,
+  runtime behavior changes, new frameworks/abstractions, OS-specific launch code,
+  use-case rewrites, architecture exceptions, skipped/excluded assertions,
+  roadmap/README/user workflow changes beyond approved tooling and SDD policy.
+- Acceptance: original R1-R5 and revised R6-R8, all meaningful compile-only writes,
+  identity/order/navigation/parameter/consumer behavior and coverage ledger.
+  Required tests complete with actual final summary, zero retained failures and
+  all architecture rules intact; web/build/privacy behavior remains compatible.
+- Risks: misleading deletion-based PASS, stale expected values, masked product
+  regressions, global React/DOM coupling and dead generated helper recreation.
+  The explicit ledger, unchanged oracles, lifecycle probes and two reviews guard
+  these risks; a contract/design gap returns to Main instead of being waived.
 - Review/Completion Approval/commit: pending / none / none.
 
 ### S3: Readonly published normalized indexes
@@ -964,10 +1047,12 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`.
 - Test-side alias amendment: PLAN_COMMITTED; documentation evidence
   `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
-- Stable-theme fixture amendment: PLAN_APPROVED; documentation evidence
+- Stable-theme fixture amendment: PLAN_COMMITTED; documentation evidence
   `/private/tmp/domain-model-readonly-s2-flow-fixture-replan/revision2/evidence.json`.
-- Blocking decisions: independent plan review, explicit Human Approval for the
-  added fixture path and focused planning commit before implementation resumes.
+- Global test amendment: PLANNED; complete catalog/proposed edit scope and held
+  identities are in the organization discovery directory above.
+- Blocking decisions: independent plan review and Main authorization recording
+  from the direct all-test/policy request, followed by focused planning commit.
   S3 remains dependent on S2 Completion Approval and commit.
 
 ## S1 review and Completion Approval

@@ -36,12 +36,29 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 - **R4 — Consumer compatibility:** preserve parser, unit list, base/expanded
   flow, CSV, unit definition, diagnostics, hover, navigation, WebAPI import,
   semantic diff/report, schedule interpretation, and telemetry behavior.
-  Existing malformed, duplicate, cyclic, deep, large, and encoded-input
-  expectations must remain intact where the affected boundary supports them.
+  Preserve meaningful malformed, duplicate, cyclic, large and encoded-input
+  contracts. The reviewed test ledger may replace redundant or excessive test
+  mechanics while retaining their distinct supported behavior coverage.
 - **R5 — Host and architecture compatibility:** retain desktop and web
   support, the VS Code minimum, layer ownership, dependency directions, and
   zero architecture exceptions. Demonstrate compatibility with the affected
   boundary tests, TypeScript checks, and desktop/web builds and tests.
+
+- **R6 — Test organization and physical cleanup:** inventory every checked-in
+  test, case/group, support, fixture and selection/build input. Retain use-case
+  behavior, the full zero-exception architecture catalog, and general component
+  unit/public type contracts. Physically delete excessive cases and dead
+  dedicated test support, with a retained-coverage ledger; failures alone never
+  justify deletion. Cleanup precedes repair of remaining tests in one complete,
+  committable S2 slice with the existing held readonly/tooling work.
+- **R7 — Purposeful host separation:** common behavior has one shared test;
+  desktop/web cases split only for an actual host capability, different behavior
+  or adapter boundary. Preserve necessary actual host smokes and both builds.
+- **R8 — Durable testing policy and surviving failures:** record these reusable
+  test principles in the SDD policy owner, then fix retained tests against use
+  cases and public component contracts. Product behavior, use-case oracles and
+  architecture exceptions do not change. A genuine production mismatch returns
+  to Main, rather than weakening an assertion to accept a regression.
 
 ## Decisions and impact
 
@@ -73,7 +90,9 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 - New model fields, JP1 semantics, schedule coverage, or product behavior.
 - Parser grammar/generated-code changes or a raw-parser model redesign.
 - Blanket readonly conversion, architecture refactoring, test-framework work,
-  dependency modernization, or resolution of unrelated inherited failures.
+  unrelated dependency modernization or production behavior changes. The
+  directly requested all-test organization and retained-test repairs are now
+  included; their exact boundaries and policy update are in the revised S2 plan.
   The requested S2 validation repair retains production aliases and resolves
   them in desktop test tooling through a standard library, restoring all seven
   import rewrites. Platform-neutral executable launch and isolated/restored test
