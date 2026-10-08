@@ -4,9 +4,9 @@
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
 - Active or approved slice: expanded S2 test organization, physical cleanup,
-  surviving-test repairs and durable policy; DOM bootstrap/hash-decoder
-  refinement PLAN_APPROVED, coupled to held readonly/tooling work. S1 is committed;
-  S3 retains approval and dependency.
+  surviving-test repairs and durable policy; depth-browser/traversal refinement
+  PLAN_APPROVED, coupled to held readonly/tooling and approved DOM/decoder work.
+  S1 is committed; S3 retains approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
 - Validate: retain S1 acceptance/gates and matching non-host evidence; its
@@ -18,8 +18,9 @@
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit for the approved DOM
-  bootstrap/hash-decoder refinement before resuming complete coupled S2 work.
+- Next decision / blocker: focused planning commit for the approved depth-browser/
+  traversal refinement before implementation.
+  S2 acceptance and canonical validation remain incomplete.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -828,17 +829,147 @@
   evidence require renewal. S1 completion/commit, S3 approval/dependency, all
   eight physical deletion/two simplification decisions, full architecture catalog,
   common-test/necessary-host split policy and one coupled completion gate remain.
-- Lifecycle state: PLAN_APPROVED. Independent review: Ready for approval;
+- Lifecycle state: PLAN_COMMITTED. Independent review: Ready for approval;
   reviewed identity b709092210fb13ee13e29345283c3c97448431576456645ef6b6c111019bbba2.
   Review and Main metadata: /private/tmp/domain-model-readonly-dom-decoder-ready/evidence.json.
   Human Approval: Approved at approved in current conversation; exact reviewed
   211-path refinement scope, early DOM bootstrap and single-pass decoder repair.
   Approval evidence: /private/tmp/domain-model-readonly-dom-decoder-approved/evidence.json.
-  Focused planning commit precedes changed implementation. Completion/Closure
-  gates remain separate.
+  Focused planning commit: 257d2f82a9a917359c276c35779b2b1eb547c763.
+  Main commit-state metadata: /private/tmp/domain-model-readonly-dom-decoder-committed/evidence.json.
+  Completion/Closure gates remain separate.
 - Planning paths: selected SPECS.md, TASKS.md and TRACEABILITY.md only.
   Held-input and documentation evidence:
   /private/tmp/domain-model-readonly-dom-decoder-replan/evidence.json.
+
+## S2 retained depth-browser and traversal refinement
+
+- Trigger: formal BLOCKED handoff
+  /private/tmp/domain-model-readonly-dom-decoder-evidence/revision3/blocked-evidence-final.json,
+  SHA-256 a4901100052491ec1f9852fe38e2f94fa7f84671803c386dcc897f358c2dc3d7.
+  Reuse its fresh 190-source/190-compiled reconciliation, canonical runner,
+  input hashes and raw checks. The diagnostic excluding exactly the two depth
+  cases completed 1,182 passes/zero failures, including 29 architecture cases;
+  this is matching bounded evidence, not canonical full-suite PASS.
+- Main scope/design decision:
+  /private/tmp/domain-model-readonly-depth-replan-main/evidence.json,
+  SHA-256 44cb66c5d3c2a3703f53add418d15706c982c6c8a87ae156b7a5108a4cdcc60a.
+  HEAD 257d2f82a9a917359c276c35779b2b1eb547c763 and feature comparison base
+  121583496bbf8653a0950ecf16b929aecfadb380 stay fixed. The trigger's scope
+  reference names the historical 210-path catalog; current approved scope is
+  the DOM/decoder 211-path manifest. Preserve both identities. S1 commit
+  80533f721838592b771e51b94ef3cc543bcc6fb2 remains the validation predecessor.
+- Exact proposed scope: existing 211 paths plus webpack.web-test.config.js and
+  src/test/fixtures/accessibilityDeepTreeBrowser.tsx (213 total):
+  /private/tmp/domain-model-readonly-depth-replan/implementation-scope.json.
+  Already scoped accessibilityDom.test.tsx keeps its canonical case/title and
+  depth fixture; AjsDocument.ts changes only flattenAjsUnits implementation;
+  AjsDocumentModel.test.ts supplies meaningful traversal regressions.
+  Existing package.json scripts, Verify workflow and CONTRIBUTING carry only
+  necessary browser-bundle preparation/developer instructions. No new dependency,
+  lockfile change for this refinement, production caller edit or generic support.
+- Browser evidence/owner: the exact depth-128 component/fixture fails in React/
+  JSDOM passive-mount stack recursion but succeeds in Chromium 147 with 129
+  treeitems, deepest aria-level 129, one selected row and one tab stop, no page/
+  console errors. Existing direct Playwright 1.59.1 and webpack/ts-loader/CSS
+  loaders are sufficient. @vscode/test-web's existing smoke remains unchanged;
+  it launches VS Code web, whereas this canonical Mocha case needs the actual
+  browser DOM for a webview component used by both extension hosts. Do not
+  duplicate this component contract by extension host.
+- Browser Solution Shape: one typed, specialized fixture entry mounts actual
+  UnitTreeSelector with ThemeProvider and the existing DTO/options contract.
+  The canonical test constructs its existing root/deepest fixture and passes
+  serialized units/selected id to the bundle, avoiding a second depth fixture.
+  Its test-only exports are mount(rootUnits: FlowGraphUnitDto[], selectedUnitId:
+  string): void and dispose(): void, exposed as window.accessibilityDeepTreeFixture.
+  Construct the id/parent lookup as in renderTree; keep autoScrollSelectedUnit=false.
+  It supplies no fake component, CSS.escape implementation or production export.
+  Canonical Mocha launches ordinary headless Chromium through Playwright, loads
+  the local fixture bundle, waits for actual rendered treeitems, and asserts 129
+  rows, deepest aria-level 129, one selected row and one tab stop. Capture page/
+  console errors as failures. Dispose/unmount and close page/context/browser on
+  success and assertion/load/launch failure; cleanup errors propagate. No OS
+  branch, executable path override, stack tuning, skip or selection filter.
+- Browser preparation: extend existing webpack.web-test.config.js with a named
+  accessibility target derived from existing editor webpack capability (TSX,
+  CSS and resource aliases), preserving its default web-smoke configuration.
+  Emit only out/test/fixtures/accessibilityDeepTree.bundle.js as a window library,
+  outside *.test.js discovery. Add package script test:prepare:browser:bundle:
+  webpack --config webpack.web-test.config.js --env target=accessibility
+  --mode production. Include it after compile in test:prepare and
+  test:prepare:desktop; add the same preparation before desktop tests in Verify.
+  Existing official pnpm exec playwright install chromium-headless-shell and
+  CI --with-deps installation/cache already cover this browser. CONTRIBUTING
+  explains that canonical desktop tests now include this browser DOM boundary
+  and use that portable install command. No additional browser framework/server,
+  esbuild dependency, homemade resolver or product bundle configuration change.
+- Browser timeout boundary: change this formerly synchronous depth case to async
+  with a finite 30-second Mocha timeout for browser process launch, bundle load
+  and cleanup. Depth and all semantic assertions stay unchanged. This distinct
+  host startup boundary justifies the execution allowance; it is not a larger
+  rendering-depth/stress threshold or permission to accept page errors.
+- Traversal discovery: toUnitListDocumentDto calls buildUnitDefinitions and
+  buildUnitListProjection. The latter flattens for rows/metadata; every linked
+  row resolves findParentAjsUnit -> findAjsUnitById -> flattenAjsUnits, and priority
+  helpers also use parent lookup. Thus recursive output copying can recur across
+  list conversion. Measured projection 0.818ms/validation 5.461ms versus list
+  message 12,966ms is stage evidence, not an exclusive flatten profile. Caller
+  lookup/priority behavior stays unchanged; do not presume linear whole-list cost.
+- Traversal Solution Shape: existing normalized-model domain owner and
+  flattenAjsUnits(readonly AjsUnit[]): AjsUnit[] API remain. Use a local iterative
+  preorder traversal with array/index frames and one caller-owned output array.
+  Append original unit references once per occurrence, retaining root/sibling
+  order and duplicates/shared subtrees on separate ancestry branches. Track only
+  current ancestor references, remove them on branch exit, and throw RangeError
+  on an ancestor cycle; no global deduplication or tolerant cycle output.
+  Preserve reduce's sparse-array behavior by skipping absent indices, not explicit
+  undefined/null entries. Empty arrays return a fresh mutable empty array;
+  malformed entries/children still fail rather than silently being accepted.
+  Do not mutate input/children, add memoized document state, change find helpers/
+  callers, publish S3 indexes, or add imports/exports/ports/adapters/factories.
+- Focused acceptance: existing AjsDocumentModel/readonly helper contracts plus
+  meaningful empty/sparse roots and children, multi-root/sibling preorder,
+  duplicate/shared occurrence reference identity, input isolation, ancestor cycle
+  RangeError and malformed input failures. Retain the original depth-1500
+  flow/list/plain-JSON test, all 1,501 index/row and deepest path/depth assertions,
+  and its 10-second timeout. Run that actual test to prove the local traversal
+  candidate resolves the failure; a microbenchmark or bounded diagnostic is not
+  acceptance. If it still fails or needs caller changes, stop to Main.
+- Validation/evidence: focused real-browser canonical case, browser failure/
+  lifecycle checks, traversal and existing list/priority/definition/diagnostics/
+  semantic-diff boundaries precede the full final checks. Fresh generated output
+  and supported preparations must include the browser bundle; hash its source/
+  config/bundle and browser version/executable, reconcile all source/compiled
+  tests/deletions, and retain canonical unfiltered full desktop counts/summary
+  including both formerly blocked cases. All 29 architecture cases/zero exceptions,
+  both TypeScript checks, web preparation/Chromium smoke, both builds,
+  openapi:check, docs/CONTRIBUTING lint/links/YAML and official full baseline/final
+  qlty with stable final aggregate remain required. No exclusions, reduced-depth
+  PASS, stale diagnostic totals or alternative runner replace canonical coverage.
+- Compatibility/documentation: shared domain remains browser-safe with unchanged
+  identities/order, DTOs, diagnostic/fingerprint outcomes and extension engine
+  ^1.75.0. Node-22/SDK/alias behavior stays approved. CONTRIBUTING update satisfies
+  the Durable Documentation Gate as reusable current browser preparation, not
+  branch history. Product README/use cases/SDD testing rule need no new content.
+  This internal traversal optimization preserves observable results and exposes
+  no new extension behavior, so no CHANGELOG entry is proposed; an actual
+  externally observable contract change or uncertain release-note impact returns
+  to Main for a human decision before completion.
+- Preservation/renewal: S1 completion and S3 approval/dependency, all historical
+  approvals, catalog/eight deletions/two simplifications, architecture catalog,
+  common-test/necessary-host split policy and one coupled S2 completion remain.
+  Prior approval does not authorize the added fixture/config or traversal design.
+  Renew affected S2 plan review/Human Approval and final evidence; reuse only
+  unchanged input/coverage facts. No failing intermediate completion commit.
+- Lifecycle: PLAN_APPROVED. Independent review: Ready for approval;
+  reviewed identity 2251861847d1e4a79cd56147536e85f90dbf2c2e747aaf155c019df2ab48a7fa.
+  Review/Main metadata: /private/tmp/domain-model-readonly-depth-ready/evidence.json.
+  Human Approval: Approved at approved in current conversation; exact reviewed
+  213-path depth-browser/traversal scope and its preparation/timeout boundaries.
+  Approval evidence: /private/tmp/domain-model-readonly-depth-approved/evidence.json.
+  Focused planning commit precedes implementation; Completion/Closure separate.
+- Planning commit paths: selected SPECS.md, TASKS.md and TRACEABILITY.md only.
+  Document/held-input checks: /private/tmp/domain-model-readonly-depth-replan/evidence.json.
 
 ## Discovery and impact
 
@@ -985,9 +1116,9 @@ paths or failed-check disposition returns through Main for Replanning.
 - Value: publish the recursive readonly contract and establish useful, maintainable
   passing tests organized by use cases, architecture and component contracts.
 - Dependency: S1 commit and independently reviewed/authorized focused replan commit.
-- Scope/order/acceptance: the exact 210-path catalog plus the sole decoder path
-  in the 211-path refinement manifest and coupled organization amendment above
-  replace prior per-fixture S2 editing/assertion constraints.
+- Scope/order/acceptance: the exact original catalog, approved 211-path DOM/decoder
+  scope and proposed 213-path depth refinement manifest above define coupled S2.
+  Earlier per-fixture assertion constraints remain superseded only by the ledger.
   Preserve original AjsDocument/AjsUnit readonly fields/collections and helper
   readonly inputs with fresh mutable output arrays; no index publication until S3.
   Physically delete excess first, repair surviving tests second, validate the
@@ -1006,6 +1137,16 @@ paths or failed-check disposition returns through Main for Replanning.
   The explicit ledger, unchanged oracles, lifecycle probes and two reviews guard
   these risks; a contract/design gap returns to Main instead of being waived.
 - Review/Completion Approval/commit: pending / none / none.
+- Implementation handoff: blocked pending Main Replanning. The stabilized
+  bounded desktop diagnostic passed 1182 cases, including all 29 architecture
+  cases, after excluding only the retained depth-128 browser-rendering case and
+  depth-1500 Flow Graph projection case. Both TypeScript checks, desktop
+  preparation, and diff check pass; canonical desktop, web, build, and final
+  qlty acceptance remain incomplete. Current snapshot and raw outputs:
+  `/private/tmp/domain-model-readonly-dom-decoder-evidence/revision3/blocked-evidence-final.json`
+  (SHA-256 `a4901100052491ec1f9852fe38e2f94fa7f84671803c386dcc897f358c2dc3d7`).
+  Existing R5/R6 traceability rows already name the retained depth behavior and
+  required canonical full suite; no acceptance result is marked complete.
 
 ### S3: Readonly published normalized indexes
 
@@ -1162,10 +1303,12 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   `/private/tmp/domain-model-readonly-s2-flow-fixture-replan/revision2/evidence.json`.
 - Global test amendment: PLAN_COMMITTED at 2d15b09; complete catalog and exact
   approved organization scope remain in the discovery directory above.
-- DOM bootstrap/hash-decoder refinement: PLAN_APPROVED; new scope/discovery and
-  held identities are in the refinement section above.
-- Blocking decisions: focused refinement planning commit before implementation
-  resumes; matching Human Approval is recorded above.
+- DOM bootstrap/hash-decoder refinement: PLAN_COMMITTED at 257d2f82; new scope/
+  discovery and held identities are in the refinement section above.
+- Retained depth-browser/traversal refinement: PLAN_APPROVED; new exact scope and
+  discovery/validation boundaries are in its section above.
+- Blocking decisions: focused depth-refinement planning commit; matching Human
+  Approval recorded above. Then complete coupled S2 validation.
   S3 remains dependent on S2 Completion Approval and commit.
 
 ## S1 review and Completion Approval

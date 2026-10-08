@@ -93,8 +93,9 @@ construction, aliases, and consumer mutation, preserving existing behavior.
   unrelated dependency modernization or production behavior changes. The
   directly requested all-test organization and retained-test repairs are now
   included; their exact boundaries and policy update are in the revised S2 plan.
-  The sole additional production repair is the existing quoted event-string
-  decoder contract above; no other production behavior change is in scope.
+  Additional production work is confined to the existing quoted event-string
+  decoder and flatten helper contracts above; no other production behavior
+  change is in scope.
   The requested S2 validation repair retains production aliases and resolves
   them in desktop test tooling through a standard library, restoring all seven
   import rewrites. Platform-neutral executable launch and isolated/restored test
@@ -131,7 +132,13 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 
 - Test DOM input capability must initialize before component test modules load;
   restore all owned DOM/global/alias state on every exit. Retain keyboard/search/
-  focus and depth-128 accessibility (129 rows, one active row, aria-level 129).
+  focus and depth-128 accessibility (129 rows, one active/selected row, aria-level
+  129) in the canonical suite using actual browser DOM where JSDOM cannot execute
+  this retained contract. Shared component behavior is tested once across hosts.
+- The existing flatten helper may use iterative preorder without changing fresh
+  mutable result ownership, original references, root/sibling/duplicate occurrence
+  order or sparse-array behavior. Ancestor cycles still fail; malformed inputs
+  are not newly accepted. Retain depth-1500 flow/list/JSON assertions and timeout.
 - The existing quoted event-string helper may correct repeated hash-pair decoding
   without reinterpreting decoded output. Preserve accepted syntax/invalid rejection,
   the original trailing single hash convention, caller validity/length eligibility,
