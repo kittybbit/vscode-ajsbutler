@@ -4,8 +4,9 @@
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
 - Active or approved slice: expanded S2 test organization, physical cleanup,
-  surviving-test repairs and durable policy; depth-browser/traversal refinement
-  PLAN_APPROVED, coupled to held readonly/tooling and approved DOM/decoder work.
+  surviving-test repairs and durable policy; successful-parser UTF-16 position
+  refinement PLAN_APPROVED, coupled to held readonly/tooling and
+  DOM/decoder/depth work.
   S1 is committed; S3 retains approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
@@ -18,9 +19,9 @@
 ## Current state
 
 - Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit for the approved depth-browser/
-  traversal refinement before implementation.
-  S2 acceptance and canonical validation remain incomplete.
+- Next decision / blocker: focused planning commit for the approved successful-
+  parser UTF-16 positions before further
+  implementation/final validation. Completion Approval and commit remain absent.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -678,8 +679,8 @@
     shared-contract/build compatibility and the zero-exception architecture gate.
   - After cleanup, repair retained tests against their contracts; failures are
     not deletion evidence and production mismatches require scope/design review.
-  No duplicate rule update in AGENTS, agent files, use cases or architecture.
-  No durable file is edited during planning.
+    No duplicate rule update in AGENTS, agent files, use cases or architecture.
+    No durable file is edited during planning.
 - Validation: original S1 commit 80533f7 is the exact S2 baseline with original
   dependencies; current held-tree manifest is discovery, never a replacement
   committed baseline. Full qlty version/config/selection comparability rules
@@ -894,7 +895,7 @@
   accessibility target derived from existing editor webpack capability (TSX,
   CSS and resource aliases), preserving its default web-smoke configuration.
   Emit only out/test/fixtures/accessibilityDeepTree.bundle.js as a window library,
-  outside *.test.js discovery. Add package script test:prepare:browser:bundle:
+  outside \*.test.js discovery. Add package script test:prepare:browser:bundle:
   webpack --config webpack.web-test.config.js --env target=accessibility
   --mode production. Include it after compile in test:prepare and
   test:prepare:desktop; add the same preparation before desktop tests in Verify.
@@ -961,15 +962,145 @@
   Prior approval does not authorize the added fixture/config or traversal design.
   Renew affected S2 plan review/Human Approval and final evidence; reuse only
   unchanged input/coverage facts. No failing intermediate completion commit.
-- Lifecycle: PLAN_APPROVED. Independent review: Ready for approval;
+- Lifecycle: IMPLEMENTING. Independent review: Ready for approval;
   reviewed identity 2251861847d1e4a79cd56147536e85f90dbf2c2e747aaf155c019df2ab48a7fa.
   Review/Main metadata: /private/tmp/domain-model-readonly-depth-ready/evidence.json.
   Human Approval: Approved at approved in current conversation; exact reviewed
   213-path depth-browser/traversal scope and its preparation/timeout boundaries.
   Approval evidence: /private/tmp/domain-model-readonly-depth-approved/evidence.json.
-  Focused planning commit precedes implementation; Completion/Closure separate.
+  Focused planning commit: f889078e7d64e43e44206ecfa58cc882b4f47457.
+  Main commit-state metadata: /private/tmp/domain-model-readonly-depth-committed/evidence.json.
+  Completion/Closure gates remain separate.
 - Planning commit paths: selected SPECS.md, TASKS.md and TRACEABILITY.md only.
   Document/held-input checks: /private/tmp/domain-model-readonly-depth-replan/evidence.json.
+
+## S2 successful-parser UTF-16 position refinement
+
+- Trigger/Main decision:
+  /private/tmp/domain-model-readonly-utf16-main/evidence.json,
+  SHA-256 fda7adfbc0de3d303b159bfc6348bcc7fc8b8de0698928122119610f3305d183.
+  Two independent implementation reviews returned Findings. The primary Finding
+  rejects weakening AntlrAjsParser's original header end 23 to observed 22:
+  CodePointCharStream token columns were mixed with UTF-16 token/name lengths.
+  The consumer creates vscode.Position directly, so the mixed coordinates can
+  select wrong source and highlight the wrong semantic-diagnostic parameter.
+- Preserve revision7 as historical pre-Finding evidence, not current acceptance:
+  /private/tmp/domain-model-readonly-depth-implementation-evidence/revision7/handoff.json
+  and evidence.json. The secondary actual-array Finding was repaired within
+  approved model/test scope and frozen with four model cases/TypeScript checks:
+  /private/tmp/domain-model-readonly-array-finding/freeze-handoff.json,
+  SHA-256 81af3ef2b02ff2fd41f6a0abae3856754199ad5db09c9feb623eb700f68ed881.
+  Reuse matching mechanical facts; neither artifact proves the future integrated
+  parser/array final snapshot. No Completion Approval or completion commit exists.
+- Exact proposed scope: approved 213 paths plus
+  src/infrastructure/parser/AjsEvaluator.ts,
+  src/infrastructure/parser/AntlrRawAjsParser.ts and CHANGELOG.md (216 total):
+  /private/tmp/domain-model-readonly-utf16-replan/implementation-scope.json.
+  All affected test owners already belong to the prior scope. No normalization,
+  adapter/consumer, application/presentation production, grammar/generated,
+  dependency/lock, model index or new helper-module path is added.
+- Solution Shape/owner: infrastructure parser Ajs3v12Evaluator owns successful
+  raw source-coordinate production. Its sole construction site is AntlrRawAjsParser;
+  pass original content there as a required evaluator constructor argument.
+  Public parser ports/results, normalized models, raw source fields and source
+  index schemas retain their names/shapes. Original content never crosses this
+  internal parser boundary. No new export, port, adapter, factory or dependency.
+- Concrete conversion: retain CharStreams.fromString/CodePointCharStream and
+  lexer token acceptance/text. Scan original content once per evaluator/parse
+  using browser-safe string iteration, recording only supplementary-character
+  code-point columns per affected line. Installed LexerATNSimulator increments
+  line/resets column on LF; CR consumes a column before LF. Mirror that counting,
+  so both LF and CRLF retain existing lines and UTF-16 offsets. A private
+  conversion adds the count of recorded supplementary positions strictly before
+  each token's code-point start column (binary search in the sorted line list).
+  ASCII/BMP-only lines need no supplementary entry or per-character offset table.
+  State remains parse-local and is released with the evaluator after the walk;
+  no cross-parse cache, public index or S3 publication.
+- Apply start conversion before forming ends: header key/value starts and
+  semicolon's start convert first; header end adds existing semicolon.text.length.
+  Name end adds existing UTF-16 nameLength to the converted value start.
+  Parameter key.column converts its start; key.length remains UTF-16 length.
+  Keep raw lines 1-based, columns 0-based and exclusive ends; existing adapter
+  only changes line origin. Do not blindly reconvert already mixed end columns
+  in toRange or presentation, change token/name/key text, or move raw parser data
+  into outer layers. Preserve undefined-source safeguards/parse acceptance.
+- Explicit observable impact: header/name/parameter selections and normalized
+  semantic-diagnostic columns after supplementary characters become correct
+  UTF-16 positions. normalize/unitBuilder preserves that evidence and
+  registerDiagnostics uses it unchanged. Diagnostic decisions/rule IDs/messages/
+  lengths/severity and raw parameter values remain; ASCII/BMP coordinates and
+  source identities/repeated occurrences stay stable. Technical raw syntax-error
+  message/shape/charPositionInLine and existing mapped syntax-error position
+  behavior are outside this successful-source correction and remain unchanged.
+- Meaningful acceptance in existing owners: restore original exact header end
+  23 for unit=😀root,,jp1admin,;. AntlrAjsParser.test.ts covers header/name/key
+  starts/ends before/after multiple supplementary characters on the same line,
+  including a following nested-unit header and following parameter key. Use
+  independent source UTF-16 offsets/substrings as the expected-position oracle.
+  Cover LF/CRLF and unchanged ASCII/BMP positions as representative contracts,
+  not a Unicode permutation catalog. Keep parser malformed/failure tests and
+  no-partial-source-index behavior; preserve bounded-large parsing/ASCII input
+  and existing deep/wide/duplicate/source-index cases.
+- Consumer acceptance: buildSyntaxDiagnostics.test.ts checks a real successful
+  parsed semantic violation whose key follows supplementary text, unchanged
+  message/rule/length and corrected column. registerDiagnostics.test.ts checks
+  its actual vscode.Range key span. semanticDiffExplorerSourceAction.test.ts uses
+  the real enriched parser through the existing capture/action harness and checks
+  returned/revealed vscode.Range and selected substring for unit-name/parameter
+  navigation. No consumer production edit, fake conversion oracle, expected-value
+  weakening or generic test framework; existing privacy/stale-source/failure
+  contracts remain. Add only these distinct observable regressions.
+- Compatibility/performance risks: both shared-host parsers use the same
+  browser-safe conversion; no Node built-in, OS branch or VS Code API change.
+  Engine ^1.75.0 and approved Node-22/official SDK/alias/Chromium tooling stay.
+  Single original-text scan plus sparse supplementary lists avoids repeated
+  prefix slicing or full code-point offset arrays per token. Verify typical
+  ASCII and affected Unicode bounded-large parsing still pass existing limits;
+  do not loosen thresholds. Full quality review must find no new/adverse smell.
+- Durable/user-change record: observable source/semantic-diagnostic correction
+  requires one minimal CHANGELOG.md Unreleased entry:
+  "Corrected UTF-16 source ranges and semantic diagnostic highlights for AJS
+  definitions containing supplementary Unicode characters."
+  This is a current user-facing correction, not feature history or new JP1
+  semantics. README/use-case/architecture/SDD/agent-policy files need no duplicate
+  rule or changed behavior contract. The authorized implementation model exception
+  changes no role file, approval or validation gate.
+- Validation/evidence: after approved implementation, run the focused parser/
+  source-index/navigation/diagnostic boundaries and array rejection cases, both
+  TypeScript checks and fresh supported preparations. Then canonical unfiltered
+  desktop suite including all 29 architecture cases/zero exceptions, retained
+  depth/browser/decoder contracts, web preparation/full smoke, both builds,
+  openapi:check and scoped docs/CHANGELOG checks. Bind final source/compiled/bundle/
+  ignored-input identities and actual suite counts/summary. Reuse exact fixed
+  S1 80533f721838592b771e51b94ef3cc543bcc6fb2 baseline only under unchanged
+  official qlty version/config/full selection; produce affected final observations
+  with all four complete baseline/final SARIF references, native nonzero path
+  inventories, same-identity dispositions and stable final aggregate. Revision7
+  PASS is discovery for its earlier snapshot, not final parser/array acceptance.
+  Require two renewed independent implementation reviews before Completion gate.
+- Preservation/renewal: fixed feature base 121583496bbf8653a0950ecf16b929aecfadb380,
+  HEAD f889078e7d64e43e44206ecfa58cc882b4f47457, S1 completion and S3 approval/
+  dependency remain. All historical approvals, eight physical deletions/two
+  simplifications, complete architecture catalog, common-policy/necessary-host
+  split, model/decoder/depth/tooling contracts stay intact. Prior approval does
+  not authorize the two parser files/CHANGELOG or this changed source-position
+  design. Renew affected S2 plan review/Human Approval and final evidence.
+- Lifecycle: PLAN_APPROVED. Independent plan review: Ready, no Findings. Human
+  Approval: Approved in current conversation for this exact refinement. Main
+  routes the focused plan commit before new implementation.
+  Review record: /private/tmp/domain-model-readonly-utf16-ready/review.json;
+  reviewed document identity
+  `490d5d826612a610b9da6f74c364ba555426416309830f5cd3ebbf4e6234aa64`. A further
+  runtime path, helper boundary or contract need returns to Main.
+- Renewed Human Approval: Status: Approved; Approved at: approved in current
+  conversation. Approved scope: reviewed UTF-16 refinement at document identity
+  `490d5d826612a610b9da6f74c364ba555426416309830f5cd3ebbf4e6234aa64`,
+  exact 216-path manifest in the planning record, with AjsEvaluator.ts,
+  AntlrRawAjsParser.ts and CHANGELOG.md added to the prior 213 paths. Completion
+  and Closure Approval are not granted by this plan approval.
+- Planning commit paths: selected SPECS.md, TASKS.md and TRACEABILITY.md only.
+  Scope supplement, coverage-purpose delta and held-input/document checks:
+  /private/tmp/domain-model-readonly-utf16-replan/evidence.json.
 
 ## Discovery and impact
 
@@ -1116,16 +1247,17 @@ paths or failed-check disposition returns through Main for Replanning.
 - Value: publish the recursive readonly contract and establish useful, maintainable
   passing tests organized by use cases, architecture and component contracts.
 - Dependency: S1 commit and independently reviewed/authorized focused replan commit.
-- Scope/order/acceptance: the exact original catalog, approved 211-path DOM/decoder
-  scope and proposed 213-path depth refinement manifest above define coupled S2.
+- Scope/order/acceptance: the exact original catalog, approved 213-path depth
+  scope and proposed 216-path UTF-16 refinement manifest above define coupled S2.
   Earlier per-fixture assertion constraints remain superseded only by the ledger.
   Preserve original AjsDocument/AjsUnit readonly fields/collections and helper
   readonly inputs with fresh mutable output arrays; no index publication until S3.
   Physically delete excess first, repair surviving tests second, validate the
   complete integrated slice and proposed reusable SDD rule before completion.
-- Exclusions: production edits outside AjsDocument and the exact EventDiagnosticRules
-  decoder correction, generated production schemas,
-  runtime behavior changes, new frameworks/abstractions, OS-specific launch code,
+- Exclusions: production edits outside AjsDocument, the exact EventDiagnosticRules
+  decoder correction and the two successful-position parser owners above;
+  generated production schemas, unrelated runtime behavior changes,
+  new frameworks/abstractions, OS-specific launch code,
   use-case rewrites, architecture exceptions, skipped/excluded assertions,
   roadmap/README/user workflow changes beyond approved tooling and SDD policy.
 - Acceptance: original R1-R5 and revised R6-R8, all meaningful compile-only writes,
@@ -1137,16 +1269,14 @@ paths or failed-check disposition returns through Main for Replanning.
   The explicit ledger, unchanged oracles, lifecycle probes and two reviews guard
   these risks; a contract/design gap returns to Main instead of being waived.
 - Review/Completion Approval/commit: pending / none / none.
-- Implementation handoff: blocked pending Main Replanning. The stabilized
-  bounded desktop diagnostic passed 1182 cases, including all 29 architecture
-  cases, after excluding only the retained depth-128 browser-rendering case and
-  depth-1500 Flow Graph projection case. Both TypeScript checks, desktop
-  preparation, and diff check pass; canonical desktop, web, build, and final
-  qlty acceptance remain incomplete. Current snapshot and raw outputs:
-  `/private/tmp/domain-model-readonly-dom-decoder-evidence/revision3/blocked-evidence-final.json`
-  (SHA-256 `a4901100052491ec1f9852fe38e2f94fa7f84671803c386dcc897f358c2dc3d7`).
-  Existing R5/R6 traceability rows already name the retained depth behavior and
-  required canonical full suite; no acceptance result is marked complete.
+- Historical pre-Finding handoff: producer reported IMPLEMENTED/local acceptance;
+  subsequent reviews returned Findings as recorded above. Its canonical run had
+  1,187 passing and no retained failures, including all 29 architecture cases.
+  Both TypeScript checks, preparations, Chromium web smoke and production builds
+  PASS. Final qlty has no new/adverse finding; aggregate PASS. Exact substantive
+  identity, scope, raw outputs and immutable baseline/final records:
+  `/private/tmp/domain-model-readonly-depth-implementation-evidence/revision7/evidence.json`.
+  Earlier bounded/blocked host runs remain discovery only, never canonical PASS.
 
 ### S3: Readonly published normalized indexes
 
@@ -1280,10 +1410,10 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   Solution Shape result, traceability disposition and review gate are recorded
   above. Reusable validation artifact:
   `/private/tmp/domain-model-readonly-s1-evidence/evidence.json`.
-- Product/architecture/qlty checks: matching S1 non-host evidence is retained;
-  its wrapper-only desktop/architecture coverage is unestablished pending actual
-  repaired shared S2 results. Historical qlty check/aggregate facts remain bound
-  to their exact snapshots; no corrected S2 final refresh yet exists.
+- Product/architecture/qlty checks: completed S2 canonical shared coverage now
+  covers S1/S2 acceptance. Historical S1 wrapper-only host claims remain
+  unestablished; its original snapshot is not relabeled. Final S2 qlty records
+  use the fixed S1 predecessor baseline and stable final substantive snapshot.
 - S2 narrow replan: complete reviewable amendment; documentation evidence at
   `/private/tmp/domain-model-readonly-s2-replan/evidence.json`. Held partial
   TypeScript failures remain discovery, never final PASS. S1 gates/evidence
@@ -1305,11 +1435,78 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   approved organization scope remain in the discovery directory above.
 - DOM bootstrap/hash-decoder refinement: PLAN_COMMITTED at 257d2f82; new scope/
   discovery and held identities are in the refinement section above.
-- Retained depth-browser/traversal refinement: PLAN_APPROVED; new exact scope and
-  discovery/validation boundaries are in its section above.
-- Blocking decisions: focused depth-refinement planning commit; matching Human
-  Approval recorded above. Then complete coupled S2 validation.
-  S3 remains dependent on S2 Completion Approval and commit.
+- Retained depth-browser/traversal refinement: PLAN_COMMITTED at f889078e; new
+  exact scope and discovery/validation boundaries are in its section above.
+- Successful-parser UTF-16 refinement: PLAN_APPROVED; exact scope/design and renewed
+  validation/approval boundary above.
+- Blocking decisions: focused UTF-16 planning commit before implementation/final
+  validation. S3 remains
+  dependent on S2 Completion Approval and commit.
+
+## S2 implementation validation and readiness
+
+- Historical snapshot: the following revision7 producer facts predate both
+  independent Findings. Current acceptance/readiness is suspended; array repair
+  is frozen and the successful-position replan above requires approval/final
+  validation. Preserve these immutable observations, not their former readiness.
+- Validation identity: `domain-model-readonly-expanded-s2-revision7`; artifact
+  `/private/tmp/domain-model-readonly-depth-implementation-evidence/revision7/evidence.json`.
+  One reusable package binds the fixed `80533f7` baseline, final substantive
+  manifest, exact approved/changed paths, all four complete official SARIF files,
+  native analyzed inventories, exits, logs and product-check reuse identities.
+- Acceptance: R1-R5 and revised R6-R8 complete for S2. The approved 203-file
+  catalog retains use-case, architecture and general component purposes;
+  eight excess cases and unused Prism lifecycle support are physically removed,
+  two cases simplified and six meaningful model/resolver cases added.
+  Common behavior runs once; distinct desktop/web capabilities retain actual
+  host checks. All retained contracts complete with zero test failures.
+- Coverage facts: canonical desktop 1,187 PASS; all 29 zero-exception architecture
+  cases PASS. Both TypeScript checks, desktop/web preparations, Chromium web
+  smoke (nine success markers), all production bundles and documentation checks
+  PASS. Original depth-1500 projection assertions/10-second timeout and actual
+  Chromium depth-128 tree (129 rows, aria-level 129, one selected/tab stop) PASS.
+  The immutable canonical manifest records 190 source/190 compiled tests and no
+  deleted-suite output; later production-build cleanup removed compiled tests.
+  Current matching source/config/tool inputs support reuse, not a claim that
+  compiled test output is presently retained in the workspace.
+- Quality facts: full check baseline four findings/final three; only unchanged
+  pre-existing MD041, ParamSymbol-unused and unused-eslint findings remain.
+  Smells retain 151 mapped identities; two existing duplication measurements
+  improve from 17 to 15, with no new/adverse findings. Complete scans retain
+  finding-triggered check exit 1; final aggregate exit 0. All 758 inspected
+  entries stay stable after aggregate; output/cache locations are external.
+- Solution Shape result: domain remains semantic owner of readonly normalized
+  contracts, occurrence preorder and quoted event decoding. Private traversal
+  helpers separate meaningful frame/ancestor steps without a new public boundary.
+  Existing test bootstrap owns early DOM, aliases/globals and exact restoration;
+  the existing webpack test target supplies the actual browser component fixture.
+  TypeScript, standard collections and established host/test libraries suffice.
+  No new production port, adapter, wrapper, factory, layer or custom mechanism.
+  Ownership/boundary value remains an independent-review judgment; architecture
+  tests prove only their complete dependency catalog.
+- Compatibility/readiness: VS Code minimum remains `^1.75.0`; both targets build
+  and execute. Approved test SDK 3.1.0 uses platform-neutral public APIs with
+  Node 22.22.0; seven original production aliases remain restored. No production
+  Node imports, telemetry privacy changes, runtime freezing or DTO-wide migration.
+  Malformed/cyclic failure, ordering/reference identity, decoder validity and
+  downstream use-case assertions remain covered. README/CHANGELOG need no
+  product change; approved CONTRIBUTING/CI development prerequisites are updated.
+- Traceability: R1-R8 and retained helper/decoder/depth/browser boundaries map to
+  the current suites/checks in TRACEABILITY. S3 index publication is still pending.
+- Evidence exceptions: linked artifact retains official web SDK shutdown
+  EPIPE/ECONNRESET/premature-close messages after nine passing markers
+  and exit 0,
+  QLTY log-permission retries, and later generated-test cleanup. These do not
+  waive a failed assertion or change validation/scope. This resumed implementer
+  uses human-authorized GPT-6.1-Sol/medium; model choice changes no SDD gate.
+- Gate metadata: this result/state/evidence annotation is separate from the
+  immutable substantive snapshot inspected by product/qlty checks. Targeted
+  non-mutating Markdown/link/structure/scope/diff validation covers its exact
+  metadata patch; no product or qlty rerun is required solely for annotations.
+- Current next gate: focused approved UTF-16 planning commit,
+  then final integrated validation/two renewed reviews.
+  Completion Approval/commit remain absent; S3 cannot start. Current-head Qlty
+  Cloud remains the Feature Exit gate.
 
 ## S1 review and Completion Approval
 

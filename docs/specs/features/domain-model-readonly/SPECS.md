@@ -93,9 +93,9 @@ construction, aliases, and consumer mutation, preserving existing behavior.
   unrelated dependency modernization or production behavior changes. The
   directly requested all-test organization and retained-test repairs are now
   included; their exact boundaries and policy update are in the revised S2 plan.
-  Additional production work is confined to the existing quoted event-string
-  decoder and flatten helper contracts above; no other production behavior
-  change is in scope.
+  Additional production work is confined to the quoted event-string/flatten
+  helper contracts and successful-parser UTF-16 position correction below;
+  unrelated production behavior changes remain excluded.
   The requested S2 validation repair retains production aliases and resolves
   them in desktop test tooling through a standard library, restoring all seven
   import rewrites. Platform-neutral executable launch and isolated/restored test
@@ -132,9 +132,10 @@ construction, aliases, and consumer mutation, preserving existing behavior.
 
 - Test DOM input capability must initialize before component test modules load;
   restore all owned DOM/global/alias state on every exit. Retain keyboard/search/
-  focus and depth-128 accessibility (129 rows, one active/selected row, aria-level
-  129) in the canonical suite using actual browser DOM where JSDOM cannot execute
-  this retained contract. Shared component behavior is tested once across hosts.
+  focus and depth-128 accessibility (129 rows, one active/selected row,
+  aria-level 129) in the canonical suite using actual browser DOM where JSDOM
+  cannot execute this retained contract. Shared component behavior is tested once
+  across hosts.
 - The existing flatten helper may use iterative preorder without changing fresh
   mutable result ownership, original references, root/sibling/duplicate occurrence
   order or sparse-array behavior. Ancestor cycles still fail; malformed inputs
@@ -144,6 +145,17 @@ construction, aliases, and consumer mutation, preserving existing behavior.
   the original trailing single hash convention, caller validity/length eligibility,
   diagnostic outcomes and raw semantic fingerprints. This narrow internal helper
   repair does not introduce a new JP1 grammar or parameter interpretation.
+
+- Successful unit header/name ranges and normalized parameter-key columns use
+  consistent UTF-16 coordinates, including supplementary characters before
+  subsequent same-line tokens, without changing token text/parse acceptance.
+  Preserve LF/CRLF lines, ASCII/BMP offsets, source identities and bounded-large
+  behavior. Semantic Diff source selections and semantic-diagnostic highlights
+  must select the intended source span. Technical raw syntax-error messages,
+  fields and existing syntax-error coordinate behavior remain unchanged.
+- Record this observable successful-source position correction in CHANGELOG
+  Unreleased. Existing requirements remain the behavior oracle; restore the
+  retained exact UTF-16 assertion instead of weakening it to mixed coordinates.
 
 ## Open questions
 
