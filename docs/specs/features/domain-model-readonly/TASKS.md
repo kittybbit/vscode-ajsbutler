@@ -16,8 +16,9 @@
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused S4 planning commit, then exact approved CI repair.
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: focused approved S4 completion commit and authorized
+  push for actual Ubuntu validation; both independent reviews are Ready.
   PR #329 is published; Verify run 38004546623 fails before desktop tests because
   Ubuntu has no X display. Feature Exit must be renewed after S4 commit and
   current-head Verify and Qlty Cloud pass. Closure Approval remains separate.
@@ -1395,7 +1396,7 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ## S4 corrective CI plan
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Value and trigger: PR #329 Verify run 38004546623 fails before suite loading
   with `Missing X server or $DISPLAY`; Electron exits SIGTRAP. Ubuntu Actions
   requires a virtual X display to execute the existing real desktop suite.
@@ -1434,7 +1435,7 @@ paths or failed-check disposition returns through Main for Replanning.
   desktop command and unchanged Web step; run scoped Markdown/local-link/
   structure checks and `rtk git diff --check`. For implementation configuration,
   record full-repository official baseline/final `qlty check --all --sarif
-  --no-fix` and `qlty smells --all --sarif --no-snippets`, using rtk/pnpm exec,
+--no-fix` and `qlty smells --all --sarif --no-snippets`, using rtk/pnpm exec,
   exact disposable snapshots, nonzero native inventories and complete SARIF;
   compare findings per SDD. Run `rtk pnpm run qlty` only in disposable final.
   Reuse S1-S3 unchanged product checks by matching inputs. Actual Linux display
@@ -1457,6 +1458,37 @@ paths or failed-check disposition returns through Main for Replanning.
   review must be renewed after actual remote checks; Closure remains unapproved.
 - Replan documentation evidence:
   `/private/tmp/domain-model-readonly-ci-xvfb-replan/evidence.json`.
+
+## S4 implementation evidence
+
+- Exact implementation: the Ubuntu `Desktop extension tests` step now runs
+  `xvfb-run -a pnpm run test:desktop:run`. YAML parsing and whole-workflow
+  comparison prove the remaining job, discovery, preparation and web step
+  unchanged. No production, test, script or dependency path changed.
+- Solution Shape: existing workflow owns display provisioning at the Ubuntu
+  CI boundary. Existing Xvfb supplies the capability; no layer, public contract,
+  port, adapter, factory or custom host mechanism changes.
+- Local validation: exact workflow assertions, selected Markdown lint,
+  local-link/structure and diff checks pass. Full-repository official Qlty
+  baseline/final comparisons retain existing findings without new or adverse
+  movement; final disposable aggregate passes. Formatting only the approved
+  TASKS/TRACEABILITY files stabilizes planning metadata before final scans.
+- Evidence: `/private/tmp/domain-model-readonly-s4-implementation/evidence.json`.
+  Immutable snapshots, manifests, official SARIF, native inventories, raw exits,
+  comparison and metadata identities are retained there. Explicit human/model
+  exception permits GPT-6.1-Sol/medium; role TOML and all gates stay fixed.
+- Reuse: 678 product/configuration inputs hash-match S3's validated snapshot.
+  Existing TypeScript, local desktop 1,192 cases (29 architecture), web nine
+  markers, preparation/build and Node-import evidence remain valid for their
+  own unchanged inputs. These establish no Ubuntu display PASS.
+- Remote acceptance: pending the new pushed SHA's actual Ubuntu Verify desktop
+  nonzero full-suite completion and web PASS. Main owns the already-authorized
+  push and current-head Verify/Cloud disposition. A new failure returns to Main;
+  Feature Exit and Closure remain blocked until their separate gates complete.
+- Compatibility/readiness: VS Code `^1.75.0`, shared desktop/web production,
+  JP1/AJS behavior and telemetry privacy unchanged. No README/CHANGELOG update
+  or new test is needed for this one-line CI environment repair. Locally ready
+  for independent reviews; remote acceptance remains explicitly pending.
 
 ## Required implementation validation and evidence
 
@@ -1695,3 +1727,20 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
 - Plan review identity: `1a48f65524f9b77b6f7cb39a7b5722d49e9a7a1715554e8f959fbb00ebf80196`.
 - Approved planning paths: this TASKS and `TRACEABILITY.md` only.
 - Gate evidence: `/private/tmp/domain-model-readonly-ci-xvfb-plan-approved/evidence.json`.
+
+- S4 planning commit: `3b0cbb8d47d398b6f06b3c0ff28b9e876cae3549`;
+  exact two approved planning paths, staged checks PASS, worktree clean.
+  Commit handoff: `/private/tmp/domain-model-readonly-s4-plan-committed.json`.
+
+## S4 completion gate
+
+- Reviews: two independent Ready verdicts; no actionable Findings.
+- Completion Approval: Approved
+- Approved at: approved in current conversation on 2026-10-10.
+- Provenance: explicit user instruction to change and push this exact Xvfb
+  correction authorizes its focused completion commit and push after review.
+  No Closure Approval or broader workflow/runtime change is authorized.
+- Exact completion paths: `.github/workflows/verify.yml`, this TASKS and
+  `TRACEABILITY.md`; same one-line CI repair and its inspected evidence metadata.
+- Review record: `/private/tmp/domain-model-readonly-s4-completion-approved/reviews.json`.
+- Remote desktop/Web acceptance remains pending actual new-SHA Actions run.
