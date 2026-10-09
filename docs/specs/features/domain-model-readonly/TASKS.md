@@ -3,20 +3,24 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: S3 readonly published normalized indexes.
-  S1 and expanded coupled S2 are committed; original S3 approval remains valid.
+- Active slice: S4 Ubuntu CI desktop display provisioning. S1, S2 and S3 are
+  committed; their implementation approvals, reviews and matching evidence remain
+  valid. S4 requires independent plan review and recorded gate authorization.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
-- Validate: S3 type/runtime acceptance and common desktop/web/build/architecture
-  checks; exact S2 predecessor baseline and stable final quality observations.
+- Validate: S4 exact workflow delta, YAML and configuration-quality evidence;
+  actual Ubuntu Verify desktop and web steps after the authorized push. Reuse
+  unchanged product validation instead of repeating local host/build checks.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
-- Lifecycle state: SLICE_APPROVED
-- Next decision / blocker: approved S3 completion commit. Both independent
-  reviews are Ready; Completion Approval is Approved. Closure is separate.
+- Lifecycle state: PLAN_APPROVED
+- Next decision / blocker: focused S4 planning commit, then exact approved CI repair.
+  PR #329 is published; Verify run 38004546623 fails before desktop tests because
+  Ubuntu has no X display. Feature Exit must be renewed after S4 commit and
+  current-head Verify and Qlty Cloud pass. Closure Approval remains separate.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -24,6 +28,26 @@
   received in the current conversation on 2026-10-07. Planning commit
   `2817260eb3338e82185cf1ec9253fa4f1da91553` succeeded.
 - Preserved slices: S1 committed; no inherited approval changed.
+
+## Feature Exit review
+
+- Previous recommendation: Do not close. S1-S3 are committed with independent
+  Ready reviews and explicit Completion Approvals. Their cross-slice acceptance
+  and matching local evidence remain valid. The new S4 CI correction invalidates
+  aggregate exit readiness until its gates and actual Ubuntu validation complete.
+- Aggregate record: `/private/tmp/domain-model-readonly-exit/evidence.json`.
+  Its pre-publication missing-Cloud observation is historical. PR #329 now
+  exists; Verify run 38004546623 reports `Missing X server or $DISPLAY` and
+  VS Code exits SIGTRAP before tests. Main owns current-head remote Verify and
+  Cloud disposition after the authorized corrective push; no Closure Approval
+  is inferred.
+- Durable propagation: architecture records the readonly published TypeScript
+  contract; roadmap removes the completed feature. The S2 testing rule is
+  already durable in `docs/specs/README.md`. README needs no change; the S2
+  CHANGELOG entry already covers the source-position correction.
+- After Cloud passes, Closure Approval must cover exactly
+  `docs/specs/architecture.md`, `docs/specs/roadmap.md`, and removal of the
+  complete `docs/specs/features/domain-model-readonly/` folder.
 
 ## Human Approval
 
@@ -1185,7 +1209,8 @@ independent reviewer judgments, not claims established by that test.
 
 ## Slice order and gates
 
-S1 -> S2 -> S3. Each slice provides a complete compilable contract improvement.
+S1 -> S2 -> S3 -> S4. S1-S3 provide complete compilable contract improvements;
+S4 makes the existing desktop validation executable on the selected Ubuntu CI.
 Its dependent slice starts only after independent implementation review,
 explicit Completion Approval, and the preceding focused completion commit.
 Human Approval covers each exact path/symbol boundary below; it authorizes no
@@ -1304,7 +1329,7 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ### S3: Readonly published normalized indexes
 
-- Lifecycle state: SLICE_APPROVED
+- Lifecycle state: SLICE_COMMITTED
 - Value: close Map/bucket mutation through normalized lookup exposure while
   retaining duplicate matches and efficient local construction.
 - Dependency: S2 committed.
@@ -1335,7 +1360,8 @@ paths or failed-check disposition returns through Main for Replanning.
   hole, so buckets must be readonly too. A readonly Map is the existing Map
   object and retains identity/cost. No user documentation or changelog change.
 - Review/Completion Approval/commit: two independent Ready verdicts / Approved /
-  none. Approved at: approved in current conversation for exact reviewed S3
+  `372ad29ef0c0c095080d295179d21471c02eaa2e`. Approved at: approved in current
+  conversation for exact reviewed S3
   completion; no Closure Approval is inferred. Exact six approved paths:
   `/private/tmp/domain-model-readonly-s3-completion-approved/approved-paths.json`.
   Review record:
@@ -1366,6 +1392,71 @@ paths or failed-check disposition returns through Main for Replanning.
 - Result metadata is validated separately from immutable substantive scans.
   Human-authorized GPT-6.1-Sol/medium changes no gate. Reviews and explicit S3
   Completion Approval/commit remain pending; Feature Exit follows all commits.
+
+## S4 corrective CI plan
+
+- Lifecycle state: PLAN_APPROVED
+- Value and trigger: PR #329 Verify run 38004546623 fails before suite loading
+  with `Missing X server or $DISPLAY`; Electron exits SIGTRAP. Ubuntu Actions
+  requires a virtual X display to execute the existing real desktop suite.
+- Main-selected exact correction: in `.github/workflows/verify.yml`, change only
+  the `Desktop extension tests` step from `pnpm run test:desktop:run` to
+  `xvfb-run -a pnpm run test:desktop:run`. The existing `ubuntu-latest` job owns
+  its display provisioning. The official VS Code
+  [Linux CI guidance](https://code.visualstudio.com/api/working-with-extensions/continuous-integration)
+  prescribes Xvfb; no custom launcher or platform detection is introduced.
+- Dependencies and baseline: S1-S3 retain all committed gates; S3 completion
+  `372ad29ef0c0c095080d295179d21471c02eaa2e` is the exact S4 code/configuration
+  baseline. The feature comparison base remains `121583496bbf8653a0950ecf16b929aecfadb380`.
+- Exact implementation path: `.github/workflows/verify.yml` only, plus selected
+  `TASKS.md` and `TRACEABILITY.md` for S4 evidence/gates. No SPECS change: R5/R7
+  already require actual desktop/web host validation and portable shared code.
+- Exclusions: production/test code, package scripts, dependencies, generated
+  artifacts, OS-specific shared launch code, test skipping, architecture rules,
+  roadmap/durable propagation and closure. Held durable Feature Exit edits in
+  `architecture.md` and `roadmap.md`, and removal of the feature folder, remain
+  outside S4 commits. Preserve their exact bytes separately while committing
+  S4. Separately validated S3 completion and Feature Exit gate annotations in
+  TASKS are allowed in the focused full-TASKS planning commit; they grant no
+  durable-propagation or Closure Approval.
+- Solution Shape: workflow configuration owns Ubuntu display preparation at the
+  outer CI boundary. Existing Xvfb and official VS Code SDK capabilities suffice.
+  No public name/contract, semantic layer, dependency direction, material
+  abstraction, port, adapter or application factory changes. Architecture tests
+  prove their catalog only; reviewers assess this environment-boundary judgment.
+- Acceptance: only the exact desktop run line changes; suite discovery, totals,
+  failure propagation and Web step remain enabled. On the new pushed SHA,
+  Verify must launch VS Code, execute the nonzero full desktop suite and pass
+  desktop and web steps. A different remote failure remains a Finding, never
+  justification to weaken/skip tests or silently expand this scope.
+- Validation: inspect the exact one-line workflow patch; parse workflow YAML
+  with the existing `yaml` dependency and assert the selected Ubuntu job,
+  desktop command and unchanged Web step; run scoped Markdown/local-link/
+  structure checks and `rtk git diff --check`. For implementation configuration,
+  record full-repository official baseline/final `qlty check --all --sarif
+  --no-fix` and `qlty smells --all --sarif --no-snippets`, using rtk/pnpm exec,
+  exact disposable snapshots, nonzero native inventories and complete SARIF;
+  compare findings per SDD. Run `rtk pnpm run qlty` only in disposable final.
+  Reuse S1-S3 unchanged product checks by matching inputs. Actual Linux display
+  acceptance requires the remote Verify run after user-authorized push; macOS
+  local launch cannot prove it. Current-head Qlty Cloud remains an exit gate.
+- Documentation impact: no README/CHANGELOG update; this fixes CI provisioning
+  without altering extension behavior, compatibility or user commands. No new
+  test is needed for this one-line declared environment repair.
+- Risk: Xvfb must be available in the selected Ubuntu runner. Capture the remote
+  command result; any missing tool/new path requires Main disposition and
+  Replanning. Shared test entry points and VS Code minimum remain unchanged.
+- Review/approval boundary: independent plan review must cover S4 before Main
+  records the user's explicit exact correction/commit/push authorization from
+  the current conversation. This planner grants no approval. Original S1-S3
+  approvals and evidence remain intact; they do not authorize S4 by themselves.
+  Two independent implementation reviews and recorded Completion Approval for
+  the same exact correction precede focused commit/push; Main assesses the
+  user's existing authorization without requesting it redundantly. Pending
+  remote host evidence is explicit, not a claimed local PASS. Feature Exit
+  review must be renewed after actual remote checks; Closure remains unapproved.
+- Replan documentation evidence:
+  `/private/tmp/domain-model-readonly-ci-xvfb-replan/evidence.json`.
 
 ## Required implementation validation and evidence
 
@@ -1552,13 +1643,14 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   after passing markers/exit 0 are recorded limitations, not failed assertions.
 - Traceability: current mappings cover restored header end 23, LF/CRLF,
   same-line later name/key, bounded Unicode source and actual parser-to-action/
-  diagnostic ranges. S3 publication remains pending. The linked package retains
+  diagnostic ranges. S3 publication is committed. The linked package retains
   original test-purpose ledger and compact five-case coverage delta.
 - Gate metadata: final result/state/evidence annotations are separate from the
   immutable substantive snapshot. Targeted non-mutating Markdown/link/structure/
   scope/diff checks cover the exact metadata patch; annotations require no
   product or qlty rerun. Human-authorized GPT-6.1-Sol/medium changes no SDD gate.
-- Next gate: approved S3 implementation. Both
+- Next gate: Feature Exit; S3 completion commit
+  `372ad29ef0c0c095080d295179d21471c02eaa2e` is recorded. Both
   independent reviewers returned Ready after the message-assertion correction.
   Review record: /private/tmp/domain-model-readonly-s2-final-ready/reviews.json.
   S2 Completion Approval and commit are recorded; S3 dependency is satisfied.
@@ -1589,3 +1681,17 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   approved paths/hash and staged checks PASS; clean worktree at commit.
 - Main commit-state metadata validation:
   `/private/tmp/domain-model-readonly-s1-committed/evidence.json`.
+
+## S4 exact correction authorization
+
+- Plan review: Ready, both narrow findings resolved; no actionable Findings.
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-10.
+- Approved scope: the exact Xvfb desktop execution line in
+  `.github/workflows/verify.yml`, required S4 planning/evidence metadata,
+  focused commits and push to the existing PR. Explicit user instruction
+  covers this precise repair; no repeated permission is needed for unchanged
+  scope. Completion is recorded after independent reviews. No Closure Approval.
+- Plan review identity: `1a48f65524f9b77b6f7cb39a7b5722d49e9a7a1715554e8f959fbb00ebf80196`.
+- Approved planning paths: this TASKS and `TRACEABILITY.md` only.
+- Gate evidence: `/private/tmp/domain-model-readonly-ci-xvfb-plan-approved/evidence.json`.
