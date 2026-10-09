@@ -90,8 +90,7 @@ export const hasValidExplicitEventSourceIpAddress = (
 };
 
 const hashEscapedContentPattern = /^(?:[^"#]|#["#])*#?$/;
-const hashEscapedContentEscapePattern = /#(["#])/g;
-const hashEscapedTrailingQuotePattern = /#$/;
+const hashEscapedCharacterPattern = /#(["#])|#$/g;
 
 export const parseHashEscapedQuotedEventStringContent = (
   value: string,
@@ -102,9 +101,11 @@ export const parseHashEscapedQuotedEventStringContent = (
 
   const content = value.slice(1, -1);
   return hashEscapedContentPattern.test(content)
-    ? content
-        .replace(hashEscapedContentEscapePattern, "$1")
-        .replace(hashEscapedTrailingQuotePattern, '"')
+    ? content.replace(
+        hashEscapedCharacterPattern,
+        (_match, escapedCharacter: string | undefined) =>
+          escapedCharacter ?? '"',
+      )
     : undefined;
 };
 

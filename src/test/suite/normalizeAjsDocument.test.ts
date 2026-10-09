@@ -69,9 +69,7 @@ suite("Normalize AJS Document", () => {
     });
     assert.strictEqual(root.children[0].children[2].isRecovery, undefined);
     assert.deepStrictEqual(
-      root.children[0].children
-        .flatMap((child) => child.relations)
-        .map((relation) => relation.type),
+      root.children[0].relations.map((relation) => relation.type),
       ["seq", "con"],
     );
   });

@@ -76,10 +76,10 @@ suite("Build Unit List Group 10 View", () => {
     assert.strictEqual(view.exclusiveJobnetName, "exclusive-a");
     assert.deepStrictEqual(view.parentRules, ["2"]);
     assert.deepStrictEqual(view.scheduleDateTypes, ["", "+", "en"]);
-    assert.deepStrictEqual(view.scheduleDateYearMonths, ["2024/03/", "", ""]);
+    assert.deepStrictEqual(view.scheduleDateYearMonths, ["2024/03", "", ""]);
     assert.deepStrictEqual(view.scheduleDateDays, ["05", "10", ""]);
     assert.deepStrictEqual(view.startTimes, ["08:00", "+09:00"]);
-    assert.deepStrictEqual(view.cycles, ["3"]);
+    assert.deepStrictEqual(view.cycles, ["3,d"]);
     assert.deepStrictEqual(view.substitutes, ["be"]);
     assert.deepStrictEqual(view.shiftDays, ["5"]);
     assert.deepStrictEqual(view.scheduleByDaysFromStart, ["be,3"]);

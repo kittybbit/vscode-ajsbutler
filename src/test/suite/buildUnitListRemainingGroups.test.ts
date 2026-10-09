@@ -271,7 +271,7 @@ suite("Build Unit List Remaining Groups", () => {
     assert.strictEqual(rootView.group5.startDeadlineDate, "20240101");
     assert.strictEqual(rootView.group5.maximumDuration, "30");
     assert.strictEqual(rootView.group5.startTimeType, "1");
-    assert.strictEqual(rootView.group5.jobGroupType, "g");
+    assert.strictEqual(rootView.group5.jobGroupType, undefined);
     assert.strictEqual(rootView.group3.hardAttribute, "yes");
 
     assert.strictEqual(jobnetView.group1.name, "jobnet");

@@ -350,14 +350,13 @@ suite("Unit Tree Selector", () => {
       (candidate) => candidate.id === "/enabled",
     );
 
-    assert.deepStrictEqual(
-      resolveUnitTreeNavigationKey(rows, "/enabled", { key: "ArrowUp" }),
-      { suppressDefault: true },
-    );
-    assert.deepStrictEqual(
-      resolveUnitTreeNavigationKey(rows, "/enabled", { key: "ArrowDown" }),
-      { suppressDefault: true },
-    );
+    for (const key of ["ArrowUp", "ArrowDown"]) {
+      const navigation = resolveUnitTreeNavigationKey(rows, "/enabled", {
+        key,
+      });
+      assert.strictEqual(navigation.action, undefined);
+      assert.strictEqual(navigation.suppressDefault, true);
+    }
   });
 
   test("moves between disabled first-level sibling rows without selecting them", () => {

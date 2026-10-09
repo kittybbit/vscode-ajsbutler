@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
+import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import {
   createSemanticDiffCaptureScopeIdAllocator,
   createSemanticDiffSourceHandleIdAllocator,
@@ -21,6 +22,7 @@ import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/s
 type SourceActionTestDeps = SemanticDiffSourceActionDeps & {
   readonly parserCalls: number;
   readonly revealCount: number;
+  readonly revealedRanges: readonly vscode.Range[];
 };
 
 const context = {} as SemanticDiffOutputContext;
@@ -48,13 +50,19 @@ const sourceIndex = (
 const createSourceActionDeps = (
   text: () => string,
   onShow?: () => void,
+  parsedSource?: {
+    readonly text: string;
+    readonly parser: AjsParserWithSourceIndexPort;
+  },
 ): SourceActionTestDeps => {
   const indexIds = createSemanticDiffSourceIndexIdAllocator();
   const handleIds = createSemanticDiffSourceHandleIdAllocator();
   let parserCalls = 0;
   const enrichedParser: AjsParserWithSourceIndexPort = {
-    parseWithSourceIndex: () => {
+    parseWithSourceIndex: (content) => {
       parserCalls += 1;
+      if (parsedSource)
+        return parsedSource.parser.parseWithSourceIndex(content);
       return {
         ok: true,
         document: { rootUnits: [], warnings: [] },
@@ -62,27 +70,29 @@ const createSourceActionDeps = (
       };
     },
   };
+  const beforeText = parsedSource?.text ?? "before";
+  const afterText = parsedSource?.text ?? "after";
   const beforeUri = vscode.Uri.parse("untitled:before.ajs");
   const capture = beginSemanticDiffSourceCapture(
     {
       before: {
         side: "before",
         sourceHandleId: handleIds(),
-        text: "before",
+        text: beforeText,
         version: null,
       },
       after: {
         side: "after",
         sourceHandleId: handleIds(),
-        text: "after",
+        text: afterText,
         version: null,
       },
     },
     enrichedParser,
     createSemanticDiffCaptureScopeIdAllocator(),
   );
-  capture.parser.parse("before");
-  capture.parser.parse("after");
+  capture.parser.parse(beforeText);
+  capture.parser.parse(afterText);
   const binding = capture.bind(context);
   if (!binding.ok) throw new Error("Expected a complete source capture.");
   registerSemanticDiffSourceCaptureScope(binding);
@@ -92,20 +102,21 @@ const createSourceActionDeps = (
     getText: text,
   } as unknown as vscode.TextDocument;
   let revealCount = 0;
+  const revealedRanges: vscode.Range[] = [];
   const entry: SemanticDiffSourceCaptureEntry = {
     binding,
     sources: {
       before: {
         side: "before",
         sourceHandleId: binding.before.sourceHandleId,
-        text: "before",
+        text: beforeText,
         version: null,
         uri: beforeUri,
       },
       after: {
         side: "after",
         sourceHandleId: binding.after.sourceHandleId,
-        text: "after",
+        text: afterText,
         version: null,
         uri: vscode.Uri.parse("untitled:after.ajs"),
       },
@@ -119,8 +130,9 @@ const createSourceActionDeps = (
       onShow?.();
       return {
         document,
-        revealRange: () => {
+        revealRange: (range: vscode.Range) => {
           revealCount += 1;
+          revealedRanges.push(range);
         },
       } as unknown as vscode.TextEditor;
     },
@@ -131,10 +143,64 @@ const createSourceActionDeps = (
     get revealCount() {
       return revealCount;
     },
+    get revealedRanges() {
+      return revealedRanges;
+    },
   };
 };
 
 suite("Semantic Diff Explorer source actions", () => {
+  test("reveals parsed unit-name and parameter UTF-16 spans after supplementary text", async () => {
+    const content =
+      "unit=😀root,,jp1admin,;{ty=g;cm=😀🧭;unit=次🚀,,jp1admin,;{ty=j;cm=😀;jd=cod;}}";
+    const parser = new AntlrAjsParser({
+      sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+    });
+    const deps = createSourceActionDeps(() => content, undefined, {
+      text: content,
+      parser,
+    });
+    try {
+      for (const target of [
+        { kind: "unit" as const, key: null, token: "次🚀" },
+        { kind: "attribute" as const, key: "jd", token: "jd" },
+      ]) {
+        const result = await executeSemanticDiffExplorerSourceAction(
+          {
+            side: "before",
+            targetId: "/😀root/次🚀",
+            targetKind: target.kind,
+            parameterKey: target.key,
+          },
+          deps,
+        );
+        assert.strictEqual(result.ok, true);
+        if (!result.ok)
+          throw new Error("Expected parsed source reveal success.");
+        const start = content.indexOf(target.token);
+        const expected = new vscode.Range(
+          0,
+          start,
+          0,
+          start + target.token.length,
+        );
+        assert.deepStrictEqual(result.range, expected);
+        assert.deepStrictEqual(deps.revealedRanges.at(-1), expected);
+        assert.strictEqual(
+          content.slice(
+            result.range.start.character,
+            result.range.end.character,
+          ),
+          target.token,
+        );
+      }
+      assert.strictEqual(deps.parserCalls, 2);
+      assert.strictEqual(deps.revealCount, 2);
+    } finally {
+      deps.sourceCapture.release();
+    }
+  });
+
   test("reveals the retained exact range without parsing again", async () => {
     const deps = createSourceActionDeps(() => "before");
     const result = await executeSemanticDiffExplorerSourceAction(

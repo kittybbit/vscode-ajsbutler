@@ -66,7 +66,7 @@ suite("Search telemetry", () => {
         result,
         queryLengthBucket: "2_9",
         resultCountBucket: "0",
-        durationBucket: "unknown",
+        ...(action === "cleared" ? {} : { durationBucket: "unknown" }),
         scope: surface === "table" ? "visible_rows" : "current_flow_scope",
       });
     }

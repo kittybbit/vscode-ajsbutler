@@ -11,10 +11,20 @@ suite("Schedule impact calendar accessibility", () => {
       scheduleImpactCalendarItemAccessibleName("2026-01-01 /root", "Added"),
       "2026-01-01 /root; Added",
     );
-    assert.strictEqual(
-      scheduleImpactCalendarFocusSelector('item"1'),
-      '[data-schedule-impact-calendar-item-id="item\\"1"]',
-    );
+    const cssDescriptor = Object.getOwnPropertyDescriptor(globalThis, "CSS");
+    try {
+      Reflect.deleteProperty(globalThis, "CSS");
+      assert.strictEqual(
+        scheduleImpactCalendarFocusSelector('item"1'),
+        '[data-schedule-impact-calendar-item-id="item\\"1"]',
+      );
+    } finally {
+      if (cssDescriptor === undefined) {
+        Reflect.deleteProperty(globalThis, "CSS");
+      } else {
+        Reflect.defineProperty(globalThis, "CSS", cssDescriptor);
+      }
+    }
   });
 
   test("uses semantic timeline context without internal keys", () => {

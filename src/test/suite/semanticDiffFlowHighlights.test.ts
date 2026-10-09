@@ -36,16 +36,6 @@ const unit = (overrides: Partial<AjsUnit>): AjsUnit => ({
   ...overrides,
 });
 
-const relation = (
-  source: AjsUnit,
-  target: AjsUnit,
-  type: AjsRelation["type"] = "seq",
-): AjsRelation => ({
-  sourceUnitId: source.id,
-  targetUnitId: target.id,
-  type,
-});
-
 const unitReference = (item: AjsUnit): SemanticDiffUnitReference => ({
   id: item.id,
   name: item.name,
@@ -102,18 +92,22 @@ suite("Semantic diff flow highlights", () => {
       name: "job-before",
       absolutePath: "/root/jobnet/job-before",
     });
-    const afterJob = unit({
-      id: "/root/jobnet/job-after",
-      name: "job-after",
-      absolutePath: "/root/jobnet/job-after",
-    });
     const afterTail = unit({
       id: "/root/jobnet/tail",
       name: "tail",
       absolutePath: "/root/jobnet/tail",
     });
-    const afterRelation = relation(afterJob, afterTail);
-    afterJob.relations = [afterRelation, { ...afterRelation }];
+    const afterRelation: AjsRelation = {
+      sourceUnitId: "/root/jobnet/job-after",
+      targetUnitId: afterTail.id,
+      type: "seq",
+    };
+    const afterJob = unit({
+      id: "/root/jobnet/job-after",
+      name: "job-after",
+      absolutePath: "/root/jobnet/job-after",
+      relations: [afterRelation, { ...afterRelation }],
+    });
     const afterJobTarget: SemanticDiffTarget = {
       kind: "unit",
       unit: unitReference(afterJob),

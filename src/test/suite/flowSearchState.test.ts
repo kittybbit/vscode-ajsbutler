@@ -101,6 +101,7 @@ suite("Flow Search State", () => {
     assert.deepStrictEqual(replaced, {
       query: "net",
       matchedUnitIds: [],
+      searchedUnitId: undefined,
       focusRequestVersion: 1,
     });
   });
@@ -153,7 +154,7 @@ suite("Flow Search State", () => {
 
     assert.deepStrictEqual(moveFlowSearchResult(staleState, "next"), {
       ...staleState,
-      searchedUnitId: "job-a",
+      searchedUnitId: "job-b",
       focusRequestVersion: 8,
     });
     assert.deepStrictEqual(getFlowSearchResultPosition(staleState), {

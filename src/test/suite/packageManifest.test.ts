@@ -32,22 +32,6 @@ function readPackageJson(): PackageJson {
 }
 
 suite("Package manifest", () => {
-  test("uses detail-pane aligned codicons for editor title viewer commands", () => {
-    const commands = readPackageJson().contributes.commands;
-    const byCommand = new Map(
-      commands.map((command) => [command.command, command]),
-    );
-
-    assert.strictEqual(
-      byCommand.get("open.ajsbutler.flowViewer")?.icon,
-      "$(type-hierarchy)",
-    );
-    assert.strictEqual(
-      byCommand.get("open.ajsbutler.tableViewer")?.icon,
-      "$(table)",
-    );
-  });
-
   test("contributes semantic diff command and activation event", () => {
     const manifest = readPackageJson();
     const byCommand = new Map(

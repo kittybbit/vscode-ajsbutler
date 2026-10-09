@@ -54,6 +54,7 @@ suite("Unit List View helpers", () => {
   });
 
   test("resolves priority from ni, pr precedence, and parent inheritance", () => {
+    const rootChildren: AjsUnit[] = [];
     const root = createUnit({
       id: "root",
       name: "root",
@@ -67,6 +68,7 @@ suite("Unit List View helpers", () => {
         { key: "ni", value: "5", position: 1 },
         { key: "pr", value: "4", position: 2 },
       ],
+      children: rootChildren,
     });
     const child = createUnit({
       id: "child",
@@ -80,7 +82,7 @@ suite("Unit List View helpers", () => {
       unitType: "qj",
       parameters: [{ key: "ni", value: "0", position: 1 }],
     });
-    root.children = [child, qjob];
+    rootChildren.push(child, qjob);
 
     const document: AjsDocument = {
       rootUnits: [root],

@@ -6,6 +6,8 @@ const definition = `
 unit=root,,jp1admin,;
 {
   ty=g;
+  ar=(f=a,t=c);
+  ar=(f=b,t=c);
   unit=a,,jp1admin,;
   {
     ty=n;
@@ -17,8 +19,6 @@ unit=root,,jp1admin,;
   unit=c,,jp1admin,;
   {
     ty=qj;
-    el=a,n,+0+0;
-    el=b,n,+0+0;
   }
 }
 `;
@@ -44,7 +44,7 @@ suite("Build Unit List Linked Units", () => {
     assert.strictEqual(aView.nextUnits.length, 1);
     assert.strictEqual(aView.nextUnits[0].id, cUnit.id);
     assert.strictEqual(aView.nextUnits[0].absolutePath, cUnit.absolutePath);
-    assert.strictEqual(aView.nextUnits[0].relationType, "n");
+    assert.strictEqual(aView.nextUnits[0].relationType, "seq");
 
     assert.deepStrictEqual(
       cView.previousUnits.map((link) => link.id),

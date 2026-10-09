@@ -252,9 +252,6 @@ function renderMockFixture() {
   const firstExample = Object.values(sampleExamples)[0].value;
 
   return `${generatedHeader}
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { createServer } from "node:net";
-import { resolve } from "node:path";
 import type { Jp1Ajs3UnitListResponse } from "../../../../infrastructure/webapi/generated/jp1Ajs3WebApi.generated";
 
 export const jp1Ajs3GetUnitListMockOperation = {
@@ -268,104 +265,6 @@ export const jp1Ajs3DefinitionOnlyUnitListResponse: Jp1Ajs3UnitListResponse = ${
     null,
     2,
   )};
-
-export const jp1Ajs3PrismOpenApiPath = resolve(
-  process.cwd(),
-  "src/test/fixtures/webapi/generated/jp1Ajs3WebApi.prism.generated.yaml",
-);
-
-export interface Jp1Ajs3PrismMockServer {
-  readonly baseUrl: string;
-  readonly process: ChildProcessWithoutNullStreams;
-  stop(): Promise<void>;
-}
-
-export async function startJp1Ajs3PrismMockServer(): Promise<Jp1Ajs3PrismMockServer> {
-  const port = await findAvailablePort();
-  const prismProcess = spawn(
-    "pnpm",
-    [
-      "exec",
-      "prism",
-      "mock",
-      jp1Ajs3PrismOpenApiPath,
-      "--host",
-      "127.0.0.1",
-      "--port",
-      String(port),
-    ],
-    {
-      cwd: process.cwd(),
-    },
-  );
-  const baseUrl = \`http://127.0.0.1:\${port}\`;
-
-  await waitForPrism(baseUrl, prismProcess);
-
-  return {
-    baseUrl,
-    process: prismProcess,
-    stop: () => stopProcess(prismProcess),
-  };
-}
-
-async function findAvailablePort(): Promise<number> {
-  return new Promise((resolvePort, reject) => {
-    const server = createServer();
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      if (address === null || typeof address === "string") {
-        server.close();
-        reject(new Error("Unable to resolve a TCP port for Prism."));
-        return;
-      }
-
-      const port = address.port;
-      server.close((error) => (error ? reject(error) : resolvePort(port)));
-    });
-    server.on("error", reject);
-  });
-}
-
-async function waitForPrism(
-  baseUrl: string,
-  prismProcess: ChildProcessWithoutNullStreams,
-): Promise<void> {
-  const deadline = Date.now() + 10000;
-  const output: string[] = [];
-  prismProcess.stdout.on("data", (chunk) => output.push(String(chunk)));
-  prismProcess.stderr.on("data", (chunk) => output.push(String(chunk)));
-
-  while (Date.now() < deadline) {
-    if (prismProcess.exitCode !== null) {
-      throw new Error(\`Prism exited before startup: \${output.join("")}\`);
-    }
-
-    try {
-      await fetch(\`\${baseUrl}/__health\`);
-      return;
-    } catch {
-      await new Promise((resolveDelay) => setTimeout(resolveDelay, 100));
-    }
-  }
-
-  await stopProcess(prismProcess);
-  throw new Error(\`Timed out waiting for Prism: \${output.join("")}\`);
-}
-
-async function stopProcess(
-  processToStop: ChildProcessWithoutNullStreams,
-): Promise<void> {
-  if (processToStop.exitCode !== null || processToStop.killed) {
-    return;
-  }
-
-  await new Promise<void>((resolveStop) => {
-    processToStop.once("exit", () => resolveStop());
-    processToStop.kill();
-    setTimeout(() => resolveStop(), 1000);
-  });
-}
 `;
 }
 

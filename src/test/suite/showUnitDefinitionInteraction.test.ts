@@ -336,6 +336,11 @@ suite("Show Unit Definition interaction", () => {
 
   test("flow nested toggle action uses the shared click operation", () => {
     const toggled: string[] = [];
+    const messages: unknown[] = [];
+    const previousWindow = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "window",
+    );
     const node = createNode({
       unitId: "/root/jobnet/child-net",
       toggleExpandedUnitId: (unitId) => {
@@ -343,8 +348,25 @@ suite("Show Unit Definition interaction", () => {
       },
     });
 
-    handleClickNestedToggle(node)();
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        vscode: { postMessage: (message: unknown) => messages.push(message) },
+      },
+    });
+    try {
+      handleClickNestedToggle(node)();
+    } finally {
+      if (previousWindow === undefined) {
+        Reflect.deleteProperty(globalThis, "window");
+      } else {
+        Object.defineProperty(globalThis, "window", previousWindow);
+      }
+    }
 
     assert.deepStrictEqual(toggled, ["/root/jobnet/child-net"]);
+    assert.deepStrictEqual(messages, [
+      { type: "operation", data: "flow.nested.toggle" },
+    ]);
   });
 });

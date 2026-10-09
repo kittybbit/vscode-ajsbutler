@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import { JSDOM } from "jsdom";
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import ResultCard from "../../presentation/webview/editor/shared/result/ResultCard";
@@ -11,36 +10,7 @@ import ResultStatusChip from "../../presentation/webview/editor/shared/result/Re
 import { formatLocalizedDateRange } from "../../presentation/webview/editor/shared/result/formatLocalizedDateRange";
 
 suite("Shared result presentation", () => {
-  let dom: JSDOM;
-  let previousDocument: PropertyDescriptor | undefined;
-  let previousWindow: PropertyDescriptor | undefined;
-
-  setup(() => {
-    dom = new JSDOM("<!doctype html><html><body></body></html>", {
-      url: "http://localhost/",
-    });
-    previousDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
-    previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
-    Object.defineProperty(globalThis, "document", {
-      configurable: true,
-      value: dom.window.document,
-    });
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: dom.window,
-    });
-  });
-
-  teardown(() => {
-    cleanup();
-    if (previousDocument)
-      Object.defineProperty(globalThis, "document", previousDocument);
-    else delete (globalThis as Record<string, unknown>).document;
-    if (previousWindow)
-      Object.defineProperty(globalThis, "window", previousWindow);
-    else delete (globalThis as Record<string, unknown>).window;
-    dom.window.close();
-  });
+  teardown(() => cleanup());
 
   test("keeps semantic sections, wrapping metadata, status tones, and empty states", () => {
     const view = render(
@@ -124,11 +94,34 @@ suite("Shared result presentation", () => {
       ),
       ["First label", "First value", "Second label", "Second value"],
     );
-    assert.ok(
-      [...document.querySelectorAll("style")].some((style) =>
-        /@media \(max-width:\s*32rem\)/u.test(style.textContent ?? ""),
-      ),
-    );
+    const narrowRules = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter(
+        (rule) =>
+          "conditionText" in rule &&
+          (rule as CSSMediaRule).conditionText === "(max-width: 32rem)",
+      ) as CSSMediaRule[];
+    assert.ok(narrowRules.length > 0);
+    for (const element of [
+      ...lists,
+      ...lists.flatMap((list) => [
+        ...list.querySelectorAll("[data-result-key-value-row]"),
+      ]),
+    ]) {
+      const className = [...element.classList].find((name) =>
+        name.startsWith("css-"),
+      );
+      assert.ok(className);
+      const rule = narrowRules
+        .flatMap((mediaRule) => [...mediaRule.cssRules])
+        .find(
+          (candidate) =>
+            "selectorText" in candidate &&
+            (candidate as CSSStyleRule).selectorText === `.${className}`,
+        ) as CSSStyleRule | undefined;
+      assert.ok(rule);
+      assert.strictEqual(rule.style.display, "block");
+    }
   });
 
   test("formats localized ranges without changing endpoint order", () => {
@@ -158,17 +151,37 @@ suite("Shared result presentation", () => {
     ) as HTMLElement;
     assert.ok(comparison);
     assert.strictEqual(comparison.getAttribute("aria-label"), "Before / After");
-    assert.ok(
-      [...document.querySelectorAll("style")].some((style) =>
-        style.textContent?.includes("@media (min-width:900px)"),
-      ),
-    );
     const sides = [
       ...comparison.querySelectorAll("[data-result-comparison-side]"),
     ];
     assert.deepStrictEqual(
       sides.map((side) => side.getAttribute("data-result-comparison-side")),
       ["before", "after"],
+    );
+    const comparisonClass = [...comparison.classList].find((name) =>
+      name.startsWith("css-"),
+    );
+    assert.ok(comparisonClass);
+    const wideRules = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter(
+        (rule) =>
+          "conditionText" in rule &&
+          (rule as CSSMediaRule).conditionText === "(min-width:900px)",
+      ) as CSSMediaRule[];
+    assert.ok(wideRules.length > 0);
+    // JSDOM cannot compute CSS Grid tracks; inspect the rendered class rule.
+    assert.ok(
+      wideRules
+        .flatMap((mediaRule) => [...mediaRule.cssRules])
+        .some(
+          (rule) =>
+            "selectorText" in rule &&
+            (rule as CSSStyleRule).selectorText === `.${comparisonClass}` &&
+            (rule as CSSStyleRule).cssText.includes(
+              "grid-template-columns: repeat(2, minmax(0, 1fr))",
+            ),
+        ),
     );
     assert.deepStrictEqual(
       [...comparison.querySelectorAll("h3")].map(

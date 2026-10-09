@@ -40,6 +40,7 @@ unit=root,,jp1admin,;
 const missingTypeDefinition = `
 unit=root,,jp1admin,;
 {
+  ty=g;
   unit=job-a,,jp1admin,;
   {
     cm="hello";

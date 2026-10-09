@@ -134,18 +134,23 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     const shared = jobnet("/shared", {});
     const first = group("/first", [shared]);
     const second = group("/second", [shared]);
-    const cycle = jobnet("/cycle", {});
-    cycle.children.push(cycle);
+    const cycleChildren: AjsUnit[] = [];
+    const cycle = unit({ ...jobnet("/cycle", {}), children: cycleChildren });
+    cycleChildren.push(cycle);
 
     const ordered = collectUnits(document([first, second, cycle, first]));
     assert.deepStrictEqual(ordered, [first, shared, second, cycle]);
     assert.strictEqual(ordered[1], shared);
     assert.strictEqual(ordered[3], cycle);
 
-    const duplicateIdFirst = jobnet("/duplicate", {});
-    const duplicateIdSecond = jobnet("/duplicate", {});
-    duplicateIdFirst.id = "duplicate-id";
-    duplicateIdSecond.id = "duplicate-id";
+    const duplicateIdFirst = unit({
+      ...jobnet("/duplicate", {}),
+      id: "duplicate-id",
+    });
+    const duplicateIdSecond = unit({
+      ...jobnet("/duplicate", {}),
+      id: "duplicate-id",
+    });
     const byId = indexUnits(
       [duplicateIdFirst, duplicateIdSecond],
       (item) => item.id,
@@ -158,13 +163,20 @@ suite("Semantic Diff Schedule Calendar Context", () => {
   });
 
   test("characterizes iterative collection across a deep hierarchy", () => {
-    const root = jobnet("/deep/0", {});
+    const rootChildren: AjsUnit[] = [];
+    const root = unit({ ...jobnet("/deep/0", {}), children: rootChildren });
     let parent = root;
+    let parentChildren = rootChildren;
     const expectedLast = 20_000;
     for (let depth = 1; depth <= expectedLast; depth += 1) {
-      const child = jobnet(`/deep/${depth}`, {}, parent.id);
-      parent.children.push(child);
+      const childChildren: AjsUnit[] = [];
+      const child = unit({
+        ...jobnet(`/deep/${depth}`, {}, parent.id),
+        children: childChildren,
+      });
+      parentChildren.push(child);
       parent = child;
+      parentChildren = childChildren;
     }
 
     const ordered = collectUnits(document([root]));
@@ -775,11 +787,13 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       ],
     );
 
-    const cyclic = jobnet("/root/cyclic", {
-      sd: "2026/04/+01",
-      st: "09:00",
+    const cyclic = unit({
+      ...jobnet("/root/cyclic", {
+        sd: "2026/04/+01",
+        st: "09:00",
+      }),
+      parentId: "/root/cyclic",
     });
-    cyclic.parentId = cyclic.id;
     addCase("hierarchy cycle", cyclic, group("/root", [cyclic]), [
       {
         key: "sd",
@@ -963,8 +977,10 @@ suite("Semantic Diff Schedule Calendar Context", () => {
   });
 
   test("rejects hierarchy cycles and duplicate normalized paths recoverably", () => {
-    const cyclic = jobnet("/root/main", { sd: "2026/04/+01" });
-    cyclic.parentId = cyclic.id;
+    const cyclic = unit({
+      ...jobnet("/root/main", { sd: "2026/04/+01" }),
+      parentId: "/root/main",
+    });
     const cycleContext = resolveScheduleCalendarContext(
       document([cyclic]),
       cyclic,

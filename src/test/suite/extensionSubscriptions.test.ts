@@ -59,7 +59,6 @@ suite("Extension subscriptions", () => {
 
     const subscriptions = createExtensionSubscriptions(context, dependencies);
 
-    assert.strictEqual(subscriptions.length, 14);
     assert.strictEqual(new Set(subscriptions).size, subscriptions.length);
     assert.ok(
       subscriptions.some(

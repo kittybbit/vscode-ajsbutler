@@ -56,7 +56,7 @@ suite("Semantic diff sample coverage", () => {
     );
   });
 
-  test("sample definitions cover implemented semantic diff evaluation categories", () => {
+  test("sample definitions cover their semantic diff evaluation categories", () => {
     const parser = new AntlrAjsParser({
       sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
     });
@@ -110,7 +110,6 @@ suite("Semantic diff sample coverage", () => {
       ].sort(),
       [
         "abnormal-end-control",
-        "end-control",
         "execution-definition",
         "execution-environment",
         "external-integration",
@@ -172,5 +171,37 @@ suite("Semantic diff sample coverage", () => {
     assert.ok(report.includes("## Unsupported Items"));
     assert.ok(report.includes("Rule: "));
     assert.ok(japaneseReport.includes("ルール: "));
+  });
+
+  test("paired end-control values produce the implemented category", () => {
+    const parser = new AntlrAjsParser({
+      sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
+    });
+    const beforeSource = readSample("semantic_diff_before_utf8").replace(
+      "                ab=stop;",
+      "                ej=stop;\n                ab=stop;",
+    );
+    const afterSource = readSample("semantic_diff_after_utf8").replace(
+      "                ab=retry;",
+      "                ej=retry;\n                ab=retry;",
+    );
+    const beforeParse = parser.parse(beforeSource);
+    const afterParse = parser.parse(afterSource);
+
+    assert.strictEqual(beforeParse.ok, true);
+    assert.strictEqual(afterParse.ok, true);
+    if (!beforeParse.ok || !afterParse.ok) return;
+
+    const result = compareSemanticDiff({
+      before: beforeParse.document,
+      after: afterParse.document,
+      options: { jobGroupPath: "/semantic_diff_sample" },
+    });
+
+    assert.ok(
+      result.changes.some(
+        (change) => change.attributeCategory === "end-control",
+      ),
+    );
   });
 });

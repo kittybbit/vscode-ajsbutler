@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Corrected UTF-16 source ranges and semantic diagnostic highlights for AJS
+  definitions containing supplementary Unicode characters.
 - Restored keyboard navigation for Schedule Impact Calendar result rows,
   including nested candidates.
 - Fixed the first Flow opening from Semantic Diff Explorer so validated diff

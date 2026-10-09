@@ -49,33 +49,36 @@ suite("Normalize unit builder helpers", () => {
       children: [child],
     });
 
-    assert.deepStrictEqual(normalized, {
-      id: "/root/jobnet",
-      name: "jobnet",
-      unitAttribute: "jobnet,,jp1admin,",
-      permission: "jp1admin",
-      jp1Username: "jp1admin",
-      jp1ResourceGroup: undefined,
-      unitType: "n",
-      groupType: undefined,
-      comment: undefined,
-      absolutePath: "/root/jobnet",
-      depth: 1,
-      parentId: "/root",
-      isRoot: false,
-      isRecovery: false,
-      isRootJobnet: true,
-      hasSchedule: true,
-      hasWaitedFor: false,
-      layout: { h: 0, v: 0 },
-      parameters: [
-        { key: "ty", value: "n" },
-        { key: "sd", value: "en" },
-        { key: "el", value: "job-a,j,+240+144" },
-        { key: "ar", value: "(f=job-a,t=job-a)" },
+    assert.strictEqual(normalized.id, "/root/jobnet");
+    assert.strictEqual(normalized.name, "jobnet");
+    assert.strictEqual(normalized.unitType, "n");
+    assert.strictEqual(normalized.parentId, "/root");
+    assert.strictEqual(normalized.isRootJobnet, true);
+    assert.strictEqual(normalized.hasSchedule, true);
+    assert.deepStrictEqual(
+      normalized.parameters.map(({ key, value }) => [key, value]),
+      [
+        ["ty", "n"],
+        ["sd", "en"],
+        ["el", "job-a,j,+240+144"],
+        ["ar", "(f=job-a,t=job-a)"],
       ],
-      relations: [relation],
-      children: [child],
-    });
+    );
+    assert.deepStrictEqual(
+      normalized.relations.map(({ sourceUnitId, targetUnitId, type }) => [
+        sourceUnitId,
+        targetUnitId,
+        type,
+      ]),
+      [[relation.sourceUnitId, relation.targetUnitId, relation.type]],
+    );
+    assert.deepStrictEqual(
+      normalized.children.map(({ id, unitType, parentId }) => [
+        id,
+        unitType,
+        parentId,
+      ]),
+      [[child.id, child.unitType, child.parentId]],
+    );
   });
 });

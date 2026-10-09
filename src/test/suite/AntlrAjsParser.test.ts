@@ -77,12 +77,18 @@ unit=root,,jp1admin,;
     const result = parser.parse(`
 unit=root,,jp1admin,;
 {
+  ty=g;
+  el=child,j,+0+0;
+  unit=child,,jp1admin,;
+  {
+    cm="no type";
+  }
 }
 `);
 
     assert.strictEqual(result.ok, true);
     assert.strictEqual(result.document.warnings.length, 1);
-    assert.strictEqual(result.document.warnings[0].unitPath, "/root");
+    assert.strictEqual(result.document.warnings[0].unitPath, "/root/child");
   });
 
   test("keeps encoded parameters plain while normalizing the comment", () => {
@@ -147,7 +153,7 @@ unit=root,,jp1admin,;
     assert.deepStrictEqual(result.document.warnings, []);
   });
 
-  test("returns repository-owned syntax error positions and messages", () => {
+  test("returns repository-owned syntax error positions and a message", () => {
     const result = parser.parse(`
 unit=root,,jp1admin,;
 {
@@ -168,7 +174,10 @@ unit=root,,jp1admin,;
     ]);
     assert.strictEqual(result.errors[0].line, 5);
     assert.strictEqual(result.errors[0].column, 0);
-    assert.strictEqual(result.errors[0].message, "missing ';' at '}'");
+    assert.strictEqual(
+      result.errors[0].message,
+      "mismatched input '}' expecting ';'",
+    );
   });
 
   test("returns a parser error without constructing a partial source index", () => {
@@ -218,6 +227,76 @@ unit=root,,jp1admin,;
       result.sourceIndex.unitEntries[1]?.unitId,
       "/😀root/child",
     );
+  });
+
+  test("indexes source after supplementary text with LF and CRLF line resets", () => {
+    const lines = [
+      "unit=😀root,,jp1admin,;{ty=g;cm=😀🧭;unit=次🚀,,jp1admin,;{ty=j;cm=😀;jd=cod;}}",
+      "unit=plain名前,,jp1admin,;{ty=j;cm=日本語;}",
+    ];
+    const expectedRange = (line: number, token: string) => {
+      const character = lines[line]!.indexOf(token);
+      assert.ok(character >= 0);
+      return {
+        start: { line, character },
+        end: { line, character: character + token.length },
+      };
+    };
+    for (const newline of ["\n", "\r\n"]) {
+      const result = parser.parseWithSourceIndex(lines.join(newline));
+      assert.strictEqual(result.ok, true);
+      if (!result.ok) throw new Error("Expected Unicode source to parse.");
+      const [root, child, plain] = result.sourceIndex.unitEntries;
+      assert.deepStrictEqual(
+        root!.headerRange,
+        expectedRange(0, "unit=😀root,,jp1admin,;"),
+      );
+      assert.deepStrictEqual(root!.nameRange, expectedRange(0, "😀root"));
+      assert.deepStrictEqual(
+        child!.headerRange,
+        expectedRange(0, "unit=次🚀,,jp1admin,;"),
+      );
+      assert.deepStrictEqual(child!.nameRange, expectedRange(0, "次🚀"));
+      const judgment = child!.parameterOccurrences.find(
+        (entry) => entry.parameterKey === "jd",
+      )!;
+      assert.deepStrictEqual(judgment.range, expectedRange(0, "jd"));
+      assert.strictEqual(
+        lines[0]!.slice(
+          judgment.range.start.character,
+          judgment.range.end.character,
+        ),
+        "jd",
+      );
+      assert.deepStrictEqual(
+        plain!.headerRange,
+        expectedRange(1, "unit=plain名前,,jp1admin,;"),
+      );
+      assert.deepStrictEqual(plain!.nameRange, expectedRange(1, "plain名前"));
+      assert.deepStrictEqual(
+        plain!.parameterOccurrences[0]!.range,
+        expectedRange(1, "ty"),
+      );
+    }
+  });
+
+  test("retains source evidence for a bounded-large supplementary definition", () => {
+    const content = buildBoundedLargeDefinition(500).replaceAll(
+      "job-",
+      "😀job-",
+    );
+    const result = parser.parseWithSourceIndex(content);
+    assert.strictEqual(result.ok, true);
+    if (!result.ok) throw new Error("Expected large Unicode source to parse.");
+    assert.strictEqual(result.sourceIndex.unitEntries.length, 501);
+    const last = result.sourceIndex.unitEntries.at(-1)!;
+    const line = content.split("\n").at(-1)!;
+    const column = line.indexOf("ty");
+    assert.strictEqual(last.unitId, "/root/😀job-499");
+    assert.deepStrictEqual(last.parameterOccurrences[0]!.range, {
+      start: { line: 499, character: column },
+      end: { line: 499, character: column + "ty".length },
+    });
   });
 
   test("retains duplicate normalized paths for unavailable lookup", () => {

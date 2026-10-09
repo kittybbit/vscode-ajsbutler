@@ -38,7 +38,7 @@ suite("Performance telemetry", () => {
       {
         operation: "unit_list_build" as const,
         name: "performance.unit_list_build.completed",
-        expectedBucket: { unitCountBucket: "1" },
+        expectedBucket: { unitCountBucket: "1", rowCountBucket: "2_9" },
       },
       {
         operation: "flow_graph_build" as const,

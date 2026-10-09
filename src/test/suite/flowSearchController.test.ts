@@ -212,7 +212,9 @@ const FlowSearchControllerFixture = ({
       {
         "data-testid": "reveal",
         onClick: () =>
-          search.handleRevealUnit({ absolutePath: "/root/jobnet/child-net" }),
+          search.handleRevealUnit({
+            absolutePath: "/root/jobnet/child-net/grand-net",
+          }),
       },
       "reveal",
     ),
@@ -303,7 +305,8 @@ suite("Flow Search Controller", () => {
   test("reveals an available unit in its flow scope and preserves search intent", () => {
     const flowDocument = parseFlowGraphDocumentForTest();
     const scope = findRequiredUnit(flowDocument, "jobnet");
-    const revealedScope = findRequiredUnit(flowDocument, "child-net");
+    const revealedScope = findRequiredUnit(flowDocument, "grand-net");
+    const activeScope = findRequiredUnit(flowDocument, "child-net");
     const view = render(
       React.createElement(FlowSearchControllerFixture, {
         flowDocument,
@@ -313,7 +316,7 @@ suite("Flow Search Controller", () => {
 
     fireEvent.click(view.getByTestId("reveal"));
     assert.deepStrictEqual(readState(view), {
-      currentUnitId: revealedScope.id,
+      currentUnitId: activeScope.id,
       expandedUnitIds: [],
       focusRequestVersion: 1,
       matchedUnitIds: [revealedScope.id],

@@ -646,19 +646,19 @@ suite("Semantic Diff Structured Contracts", () => {
       id: "before-source",
       name: "source",
       absolutePath: "/root/source",
+      relations: [
+        {
+          sourceUnitId: "before-source",
+          targetUnitId: "before-target",
+          type: "seq",
+        },
+      ],
     });
     const beforeTarget = unit({
       id: "before-target",
       name: "target",
       absolutePath: "/root/target",
     });
-    beforeSource.relations = [
-      {
-        sourceUnitId: beforeSource.id,
-        targetUnitId: beforeTarget.id,
-        type: "seq",
-      },
-    ];
     const afterSource = unit({
       id: "after-source",
       name: "source",

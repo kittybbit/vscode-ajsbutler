@@ -1,5 +1,8 @@
 import * as assert from "assert";
-import { parseHashEscapedQuotedEventStringContent } from "../../domain/services/diagnostics/EventDiagnosticRules";
+import {
+  hasValidExplicitEventReceivingQuotedString,
+  parseHashEscapedQuotedEventStringContent,
+} from "../../domain/services/diagnostics/EventDiagnosticRules";
 import {
   hasInvalidExplicitTransferSourcePath,
   hasValidExplicitTransferByteLength,
@@ -23,8 +26,32 @@ suite("Syntax Diagnostic String Validators", () => {
       "hash#",
     );
     assert.strictEqual(
+      parseHashEscapedQuotedEventStringContent('"hash####"'),
+      "hash##",
+    );
+    assert.strictEqual(
+      parseHashEscapedQuotedEventStringContent('"mix###""'),
+      'mix#"',
+    );
+    assert.strictEqual(
+      parseHashEscapedQuotedEventStringContent('"hash###"'),
+      'hash#"',
+    );
+    assert.strictEqual(
       parseHashEscapedQuotedEventStringContent('"trailing#"'),
       'trailing"',
+    );
+  });
+
+  test("measures decoded event content without changing byte limits", () => {
+    const escapedHash = { key: "evdet", value: '"é##"' };
+    assert.strictEqual(
+      hasValidExplicitEventReceivingQuotedString(escapedHash, 3, 3),
+      true,
+    );
+    assert.strictEqual(
+      hasValidExplicitEventReceivingQuotedString(escapedHash, 4, 4),
+      false,
     );
   });
 

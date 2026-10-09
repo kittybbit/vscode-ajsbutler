@@ -5,7 +5,7 @@
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
 - Active or approved slice: expanded S2 test organization, physical cleanup,
   surviving-test repairs and durable policy; successful-parser UTF-16 position
-  refinement PLAN_APPROVED, coupled to held readonly/tooling and
+  refinement IMPLEMENTED, coupled to held readonly/tooling and
   DOM/decoder/depth work.
   S1 is committed; S3 retains approval and dependency.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
@@ -18,10 +18,9 @@
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit for the approved successful-
-  parser UTF-16 positions before further
-  implementation/final validation. Completion Approval and commit remain absent.
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: focused approved S2 completion commit. Both independent
+  reviews are Ready; explicit Completion Approval is recorded below.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -1085,9 +1084,11 @@
   split, model/decoder/depth/tooling contracts stay intact. Prior approval does
   not authorize the two parser files/CHANGELOG or this changed source-position
   design. Renew affected S2 plan review/Human Approval and final evidence.
-- Lifecycle: PLAN_APPROVED. Independent plan review: Ready, no Findings. Human
+- Lifecycle: PLAN_COMMITTED. Independent plan review: Ready, no Findings. Human
   Approval: Approved in current conversation for this exact refinement. Main
-  routes the focused plan commit before new implementation.
+  resumes implementation after the focused plan commit.
+  Planning commit: `14b0cb233746706b8bda1230d8d0542848b1e858`; exact selected
+  three-document paths, staged check PASS, held 762 inputs unchanged.
   Review record: /private/tmp/domain-model-readonly-utf16-ready/review.json;
   reviewed document identity
   `490d5d826612a610b9da6f74c364ba555426416309830f5cd3ebbf4e6234aa64`. A further
@@ -1243,12 +1244,12 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ### S2: Readonly model, purposeful tests and surviving-test repairs
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Value: publish the recursive readonly contract and establish useful, maintainable
   passing tests organized by use cases, architecture and component contracts.
 - Dependency: S1 commit and independently reviewed/authorized focused replan commit.
 - Scope/order/acceptance: the exact original catalog, approved 213-path depth
-  scope and proposed 216-path UTF-16 refinement manifest above define coupled S2.
+  scope and approved 216-path UTF-16 refinement manifest above define coupled S2.
   Earlier per-fixture assertion constraints remain superseded only by the ledger.
   Preserve original AjsDocument/AjsUnit readonly fields/collections and helper
   readonly inputs with fresh mutable output arrays; no index publication until S3.
@@ -1268,7 +1269,8 @@ paths or failed-check disposition returns through Main for Replanning.
   regressions, global React/DOM coupling and dead generated helper recreation.
   The explicit ledger, unchanged oracles, lifecycle probes and two reviews guard
   these risks; a contract/design gap returns to Main instead of being waived.
-- Review/Completion Approval/commit: pending / none / none.
+- Review/Completion Approval/commit: two independent Ready verdicts / Approved /
+  pending.
 - Historical pre-Finding handoff: producer reported IMPLEMENTED/local acceptance;
   subsequent reviews returned Findings as recorded above. Its canonical run had
   1,187 passing and no retained failures, including all 29 architecture cases.
@@ -1277,6 +1279,30 @@ paths or failed-check disposition returns through Main for Replanning.
   identity, scope, raw outputs and immutable baseline/final records:
   `/private/tmp/domain-model-readonly-depth-implementation-evidence/revision7/evidence.json`.
   Earlier bounded/blocked host runs remain discovery only, never canonical PASS.
+
+- Current implementation handoff: IMPLEMENTED, integrated local acceptance
+  complete after both Findings. Canonical desktop 1,192 PASS including all 29
+  architecture cases, both depths and real parser source/diagnostic boundaries;
+  both TypeScript checks, preparations, web nine markers and all builds PASS.
+  Full official qlty comparison has no new/adverse finding; stable aggregate
+  exit 0. Independent review/Completion gates remain pending. One package:
+  `/private/tmp/domain-model-readonly-utf16-implementation/final/evidence.json`.
+
+- Final S2 review gate: SLICE_APPROVED, both reviews Ready, no Findings.
+  Current reviewed evidence:
+  /private/tmp/domain-model-readonly-message-fix/revision1/evidence.json.
+  Exact tracked patch
+  `2c1a4ab4d4d7e2b17455b26e8a254c95496426f4b5d53c65741240c5948fb662`;
+  substantive manifest
+  `6c7759dfb7ca1c11be86f8e9e13c3eed9f375a8ada9b2c534691737885a63ff3`.
+  Review record: /private/tmp/domain-model-readonly-s2-final-ready/reviews.json.
+  Completion Approval: Approved; Approved at: approved in current conversation
+  for the exact reviewed S2 completion. Substantive identity above plus separate
+  ready/approval metadata; no S3 or Closure completion is approved here.
+  Approved completion paths: exact changed-path manifest at
+  /private/tmp/domain-model-readonly-s2-completion-approved/approved-completion-paths.json.
+  The manifest contains 80 paths, with SHA-256
+  `ee1cc1c2a4eee90a5e9d42d37a587a31d676b1c65d54e7140beaa5dd823880f6`.
 
 ### S3: Readonly published normalized indexes
 
@@ -1424,8 +1450,8 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
 - SDK prerequisite: reviewed, Human Approved and committed at `20bb4c7`;
   historical SDK-stage install/host-launch and report-alias failure recorded in
   `/private/tmp/domain-model-readonly-s2-sdk-evidence/blocked-evidence.json`.
-  Alias registration resolves that loading failure. The latest full host run is
-  incomplete after 713 success markers and interruption 130, as recorded in
+  Alias registration resolves that loading failure. Its historical stage run
+  was incomplete after 713 success markers and interruption 130, recorded in
   `/private/tmp/domain-model-readonly-s2-test-alias-evidence/blocked-evidence.json`.
 - Test-side alias amendment: PLAN_COMMITTED; documentation evidence
   `/private/tmp/domain-model-readonly-s2-test-alias-replan/evidence.json`.
@@ -1437,76 +1463,78 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   discovery and held identities are in the refinement section above.
 - Retained depth-browser/traversal refinement: PLAN_COMMITTED at f889078e; new
   exact scope and discovery/validation boundaries are in its section above.
-- Successful-parser UTF-16 refinement: PLAN_APPROVED; exact scope/design and renewed
-  validation/approval boundary above.
-- Blocking decisions: focused UTF-16 planning commit before implementation/final
-  validation. S3 remains
-  dependent on S2 Completion Approval and commit.
+- Successful-parser UTF-16 refinement: planning gate PLAN_COMMITTED at `14b0cb2`;
+  exact scope/design and renewed approval above, current implementation below.
+- Blocking decisions: none for implementation; two renewed independent reviews
+  are next. S3 remains dependent on S2 Completion Approval and commit.
 
 ## S2 implementation validation and readiness
 
-- Historical snapshot: the following revision7 producer facts predate both
-  independent Findings. Current acceptance/readiness is suspended; array repair
-  is frozen and the successful-position replan above requires approval/final
-  validation. Preserve these immutable observations, not their former readiness.
-- Validation identity: `domain-model-readonly-expanded-s2-revision7`; artifact
-  `/private/tmp/domain-model-readonly-depth-implementation-evidence/revision7/evidence.json`.
-  One reusable package binds the fixed `80533f7` baseline, final substantive
-  manifest, exact approved/changed paths, all four complete official SARIF files,
-  native analyzed inventories, exits, logs and product-check reuse identities.
-- Acceptance: R1-R5 and revised R6-R8 complete for S2. The approved 203-file
-  catalog retains use-case, architecture and general component purposes;
-  eight excess cases and unused Prism lifecycle support are physically removed,
-  two cases simplified and six meaningful model/resolver cases added.
-  Common behavior runs once; distinct desktop/web capabilities retain actual
-  host checks. All retained contracts complete with zero test failures.
-- Coverage facts: canonical desktop 1,187 PASS; all 29 zero-exception architecture
-  cases PASS. Both TypeScript checks, desktop/web preparations, Chromium web
-  smoke (nine success markers), all production bundles and documentation checks
-  PASS. Original depth-1500 projection assertions/10-second timeout and actual
-  Chromium depth-128 tree (129 rows, aria-level 129, one selected/tab stop) PASS.
-  The immutable canonical manifest records 190 source/190 compiled tests and no
-  deleted-suite output; later production-build cleanup removed compiled tests.
-  Current matching source/config/tool inputs support reuse, not a claim that
-  compiled test output is presently retained in the workspace.
-- Quality facts: full check baseline four findings/final three; only unchanged
-  pre-existing MD041, ParamSymbol-unused and unused-eslint findings remain.
-  Smells retain 151 mapped identities; two existing duplication measurements
-  improve from 17 to 15, with no new/adverse findings. Complete scans retain
-  finding-triggered check exit 1; final aggregate exit 0. All 758 inspected
-  entries stay stable after aggregate; output/cache locations are external.
-- Solution Shape result: domain remains semantic owner of readonly normalized
-  contracts, occurrence preorder and quoted event decoding. Private traversal
-  helpers separate meaningful frame/ancestor steps without a new public boundary.
-  Existing test bootstrap owns early DOM, aliases/globals and exact restoration;
-  the existing webpack test target supplies the actual browser component fixture.
-  TypeScript, standard collections and established host/test libraries suffice.
-  No new production port, adapter, wrapper, factory, layer or custom mechanism.
-  Ownership/boundary value remains an independent-review judgment; architecture
-  tests prove only their complete dependency catalog.
-- Compatibility/readiness: VS Code minimum remains `^1.75.0`; both targets build
-  and execute. Approved test SDK 3.1.0 uses platform-neutral public APIs with
-  Node 22.22.0; seven original production aliases remain restored. No production
-  Node imports, telemetry privacy changes, runtime freezing or DTO-wide migration.
-  Malformed/cyclic failure, ordering/reference identity, decoder validity and
-  downstream use-case assertions remain covered. README/CHANGELOG need no
-  product change; approved CONTRIBUTING/CI development prerequisites are updated.
-- Traceability: R1-R8 and retained helper/decoder/depth/browser boundaries map to
-  the current suites/checks in TRACEABILITY. S3 index publication is still pending.
-- Evidence exceptions: linked artifact retains official web SDK shutdown
-  EPIPE/ECONNRESET/premature-close messages after nine passing markers
-  and exit 0,
-  QLTY log-permission retries, and later generated-test cleanup. These do not
-  waive a failed assertion or change validation/scope. This resumed implementer
-  uses human-authorized GPT-6.1-Sol/medium; model choice changes no SDD gate.
-- Gate metadata: this result/state/evidence annotation is separate from the
-  immutable substantive snapshot inspected by product/qlty checks. Targeted
-  non-mutating Markdown/link/structure/scope/diff validation covers its exact
-  metadata patch; no product or qlty rerun is required solely for annotations.
-- Current next gate: focused approved UTF-16 planning commit,
-  then final integrated validation/two renewed reviews.
-  Completion Approval/commit remain absent; S3 cannot start. Current-head Qlty
-  Cloud remains the Feature Exit gate.
+- Current validation identity: `domain-model-readonly-s2-message-final`;
+  `/private/tmp/domain-model-readonly-message-fix/revision1/evidence.json`.
+  This delta package links the prior UTF-16 final package and refreshes only
+  the exact parser-error message assertion, test types/preparation/canonical
+  and full final quality observations. Production/web/OpenAPI checks retain
+  matching source, configuration and tool inputs. Fixed-baseline actual message
+  `mismatched input '}' expecting ';'` is preserved exactly at line 5/column 0.
+  This one package links the fixed S1 `80533f7` baseline, exact final substantive
+  manifest/patches, approved 216-path scope, command/tool/config identities,
+  raw outputs, all four complete official SARIF files and native inventories.
+- Historical revision7 facts remain at its linked artifact above; they predate
+  both implementation Findings and do not prove this final candidate. The prior
+  array rejection freeze and renewed UTF-16 planning/review/approval/commit
+  evidence remain in the refinement section. No historical gate is relabeled.
+- Acceptance: required S2 R1-R8 behavior complete; original 203-file catalog,
+  eight physical deletions/two simplifications, six model/resolver additions
+  and common-policy/necessary-host split preserved. Five distinct UTF-16 cases
+  use original source offsets/substrings and real parser consumer boundaries.
+  Arraylike root/children rejection extends the existing malformed case.
+- Mechanical facts: canonical unfiltered desktop 1,192 PASS; all 29 architecture
+  catalog cases PASS, zero exceptions. Both TypeScript checks, desktop/web
+  preparations, nine web smoke markers, all production targets, OpenAPI check
+  and scoped documentation checks PASS. Original depth-1500/10-second contract
+  and actual Chromium depth-128 129-row/aria-129/one-selected/tab-stop contract
+  PASS. Canonical 190 source/190 compiled tests and 1,283 ignored output hashes
+  are retained for this fresh clean desktop preparation; earlier production
+  build/web facts retain their immutable generated-input manifests.
+- Quality facts: complete full check baseline four/final three existing findings;
+  smells retain 151 mapped identities. The exact official record comparison
+  retains only decoder line movement;
+  all smell severities and recorded metrics are unchanged. No new or
+  adverse finding; finding-triggered check exit 1 retained, aggregate exit 0.
+  Native check inventories cover baseline 718/final 720 paths and 152 invocations;
+  each smells phase covers 435 paths. Final aggregate changes no inspected bytes.
+- Solution Shape result: same domain owns readonly/occurrence/array rejection;
+  parser evaluator owns successful UTF-16 source evidence, composed solely by
+  the raw parser. Private helpers separate string scanning, supplementary
+  evidence, line/column progression and binary search within that owner.
+  One browser-safe parse-local scan stores only affected supplementary columns;
+  converted starts precede existing token/name/key lengths. No new module,
+  exported boundary, port, adapter, factory, S3 index or cross-parse cache.
+  Existing framework/library capabilities suffice. These ownership judgments
+  require independent review; architecture tests prove their dependency catalog.
+- Compatibility/readiness: VS Code `^1.75.0`, Node 22, official SDK 3.1.0,
+  platform-neutral launch and restored production aliases remain. Both hosts
+  pass; no production Node import, grammar/ANTLR acceptance, parameter value,
+  parser-error shape, DTO, telemetry/privacy or runtime-freezing change.
+  Successful source/semantic diagnostic columns now fulfill UTF-16 contracts.
+  The approved minimal CHANGELOG correction is present; no duplicate README or
+  use-case rule is needed. Build size advisories and SDK web shutdown messages
+  after passing markers/exit 0 are recorded limitations, not failed assertions.
+- Traceability: current mappings cover restored header end 23, LF/CRLF,
+  same-line later name/key, bounded Unicode source and actual parser-to-action/
+  diagnostic ranges. S3 publication remains pending. The linked package retains
+  original test-purpose ledger and compact five-case coverage delta.
+- Gate metadata: final result/state/evidence annotations are separate from the
+  immutable substantive snapshot. Targeted non-mutating Markdown/link/structure/
+  scope/diff checks cover the exact metadata patch; annotations require no
+  product or qlty rerun. Human-authorized GPT-6.1-Sol/medium changes no SDD gate.
+- Next gate: focused approved S2 completion commit. Both
+  independent reviewers returned Ready after the message-assertion correction.
+  Review record: /private/tmp/domain-model-readonly-s2-final-ready/reviews.json.
+  Completion Approval is recorded; commit is pending. S3 waits for that commit.
+  Current-head Qlty
+  Cloud remains the Feature Exit gate. No blocking scope/design decision.
 
 ## S1 review and Completion Approval
 

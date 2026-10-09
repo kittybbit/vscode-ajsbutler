@@ -83,6 +83,7 @@ suite("Table viewer data", () => {
             unitType: "j",
             absolutePath: `/root/job-${index}`,
             depth: 1,
+            parentId: rootUnit.id,
             isRoot: false,
             isRootJobnet: false,
             parameters: [{ key: "ty", value: "j" }],
