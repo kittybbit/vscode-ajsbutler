@@ -151,15 +151,23 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       ...jobnet("/duplicate", {}),
       id: "duplicate-id",
     });
-    const byId = indexUnits(
-      [duplicateIdFirst, duplicateIdSecond],
-      (item) => item.id,
+    const units: readonly AjsUnit[] = [
+      first,
+      duplicateIdFirst,
+      second,
+      duplicateIdSecond,
+    ];
+    const byId = indexUnits(units, (item) => item.id);
+    assert.deepStrictEqual(
+      [...byId.keys()],
+      [first.id, "duplicate-id", second.id],
     );
-    assert.deepStrictEqual([...byId.keys()], ["duplicate-id"]);
     assert.deepStrictEqual(byId.get("duplicate-id"), [
       duplicateIdFirst,
       duplicateIdSecond,
     ]);
+    assert.strictEqual(byId.get("duplicate-id")?.[0], duplicateIdFirst);
+    assert.strictEqual(byId.get("duplicate-id")?.[1], duplicateIdSecond);
   });
 
   test("characterizes iterative collection across a deep hierarchy", () => {
@@ -944,7 +952,9 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     const root = group("/root", [target], { sdd: "1" });
     const fullDocument = document([root]);
     const index = createScheduleCalendarContextIndex(fullDocument);
-    const snapshotEntries = (values: Map<string, AjsUnit[]>): string[][] =>
+    const snapshotEntries = (
+      values: ReadonlyMap<string, readonly AjsUnit[]>,
+    ): string[][] =>
       [...values.entries()]
         .flatMap(([key, matches]) =>
           matches.map((match) => [key, match.absolutePath]),

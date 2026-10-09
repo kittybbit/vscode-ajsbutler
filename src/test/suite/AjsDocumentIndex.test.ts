@@ -174,6 +174,9 @@ suite("AjsDocumentIndex", () => {
       duplicateSecond,
     ]);
     assert.strictEqual(index.byId.get("duplicate-id")?.[0], duplicateFirst);
+    assert.strictEqual(index.byId.get("duplicate-id")?.[1], duplicateSecond);
+    assert.strictEqual(index.byPath.get("/duplicate")?.[0], duplicateFirst);
+    assert.strictEqual(index.byPath.get("/duplicate")?.[1], duplicateSecond);
   });
 
   test("indexes wide duplicate-heavy graphs in encounter order", () => {

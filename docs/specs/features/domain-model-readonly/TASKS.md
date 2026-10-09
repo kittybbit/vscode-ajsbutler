@@ -3,24 +3,20 @@
 ## Agent Brief
 
 - Purpose: publish readonly normalized AJS contracts without behavior changes.
-- Active or approved slice: expanded S2 test organization, physical cleanup,
-  surviving-test repairs and durable policy; successful-parser UTF-16 position
-  refinement IMPLEMENTED, coupled to held readonly/tooling and
-  DOM/decoder/depth work.
-  S1 is committed; S3 retains approval and dependency.
+- Active or approved slice: S3 readonly published normalized indexes.
+  S1 and expanded coupled S2 are committed; original S3 approval remains valid.
 - Read first: [SPECS](./SPECS.md), [traceability](./TRACEABILITY.md), Solution
   Shape and boundaries below, and the [SDD policy](../../README.md).
-- Validate: retain S1 acceptance/gates and matching non-host evidence; its
-  preserve the prior interrupted host run as discovery only; the approved
-  reorganization requires fresh output and completed retained-suite evidence.
+- Validate: S3 type/runtime acceptance and common desktop/web/build/architecture
+  checks; exact S2 predecessor baseline and stable final quality observations.
 - Prohibitions: no runtime freezing, mutation bypass, DTO/result-wide migration,
   raw/generated parser rewrite, architecture exceptions, or unrelated repairs.
 
 ## Current state
 
 - Lifecycle state: SLICE_APPROVED
-- Next decision / blocker: focused approved S2 completion commit. Both independent
-  reviews are Ready; explicit Completion Approval is recorded below.
+- Next decision / blocker: approved S3 completion commit. Both independent
+  reviews are Ready; Completion Approval is Approved. Closure is separate.
 - Selected feature: `docs/specs/features/domain-model-readonly`.
 - Branch: `codex/domain-model-readonly`.
 - Comparison base: `121583496bbf8653a0950ecf16b929aecfadb380` (fixed).
@@ -1244,7 +1240,7 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ### S2: Readonly model, purposeful tests and surviving-test repairs
 
-- Lifecycle state: SLICE_APPROVED
+- Lifecycle state: SLICE_COMMITTED
 - Value: publish the recursive readonly contract and establish useful, maintainable
   passing tests organized by use cases, architecture and component contracts.
 - Dependency: S1 commit and independently reviewed/authorized focused replan commit.
@@ -1270,7 +1266,7 @@ paths or failed-check disposition returns through Main for Replanning.
   The explicit ledger, unchanged oracles, lifecycle probes and two reviews guard
   these risks; a contract/design gap returns to Main instead of being waived.
 - Review/Completion Approval/commit: two independent Ready verdicts / Approved /
-  pending.
+  `7db1513ba5f5bb8e0fa0d2c8bea25fc27b0356ea`.
 - Historical pre-Finding handoff: producer reported IMPLEMENTED/local acceptance;
   subsequent reviews returned Findings as recorded above. Its canonical run had
   1,187 passing and no retained failures, including all 29 architecture cases.
@@ -1288,7 +1284,9 @@ paths or failed-check disposition returns through Main for Replanning.
   exit 0. Independent review/Completion gates remain pending. One package:
   `/private/tmp/domain-model-readonly-utf16-implementation/final/evidence.json`.
 
-- Final S2 review gate: SLICE_APPROVED, both reviews Ready, no Findings.
+- Final S2 review gate: SLICE_COMMITTED, both reviews Ready, no Findings.
+  Completion commit: `7db1513ba5f5bb8e0fa0d2c8bea25fc27b0356ea`; all 80
+  approved paths/hashes matched, staged check PASS, post-commit worktree clean.
   Current reviewed evidence:
   /private/tmp/domain-model-readonly-message-fix/revision1/evidence.json.
   Exact tracked patch
@@ -1306,7 +1304,7 @@ paths or failed-check disposition returns through Main for Replanning.
 
 ### S3: Readonly published normalized indexes
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Value: close Map/bucket mutation through normalized lookup exposure while
   retaining duplicate matches and efficient local construction.
 - Dependency: S2 committed.
@@ -1336,7 +1334,38 @@ paths or failed-check disposition returns through Main for Replanning.
 - Risks/readiness: mutable Map values under `ReadonlyMap` alone would leave a
   hole, so buckets must be readonly too. A readonly Map is the existing Map
   object and retains identity/cost. No user documentation or changelog change.
-- Review/Completion Approval/commit: pending / none / none.
+- Review/Completion Approval/commit: two independent Ready verdicts / Approved /
+  none. Approved at: approved in current conversation for exact reviewed S3
+  completion; no Closure Approval is inferred. Exact six approved paths:
+  `/private/tmp/domain-model-readonly-s3-completion-approved/approved-paths.json`.
+  Review record:
+  `/private/tmp/domain-model-readonly-s3-final-ready/reviews.json`.
+  Reviewed patch SHA-256:
+  `a60e72f023b45936d2c61145e3f347cd7ded2ac708e35815f0b343b3cb00624b`.
+
+- Validation identity: `domain-model-readonly-s3-final-v1`;
+  `/private/tmp/domain-model-readonly-s3-implementation/revision1/evidence.json`.
+  Exact slice baseline is S2 commit `7db1513`; original S3 Human Approval and
+  the S2 completion-commit linkage are retained in the package.
+- Acceptance result: individual exposed types reject property/Map/bucket/nested
+  writes; mutable builders compile. Existing duplicate-reference/key/encounter
+  order, calendar conflict/cycle/missing-parent and schedule occurrence/last-key
+  contracts PASS. No runtime traversal, freeze, copying or abstraction change.
+- Mechanical result: both TypeScript checks; fresh canonical 1,192 tests and
+  all 29 architecture cases; original depth and parser boundaries; nine web
+  smoke markers and both production targets PASS. Complete official baseline/
+  final quality records agree: three existing check findings and 151 smells,
+  152 native invocations/720 analyzed paths, 435 paths in each smells phase.
+  Stable final aggregate PASS with no inspected content movement.
+- Solution Shape: existing domain model/index/calendar owners and standard
+  TypeScript readonly contracts suffice; local mutable construction is retained.
+  Semantic ownership/coverage judgments remain for independent reviewers.
+- Traceability: existing S3 mappings already cover the changed compile/index/
+  calendar tests; no mapping change. No user-facing documentation/CHANGELOG
+  change is required. Compatibility and S1/S2 acceptance remain preserved.
+- Result metadata is validated separately from immutable substantive scans.
+  Human-authorized GPT-6.1-Sol/medium changes no gate. Reviews and explicit S3
+  Completion Approval/commit remain pending; Feature Exit follows all commits.
 
 ## Required implementation validation and evidence
 
@@ -1529,10 +1558,10 @@ rtk rg -n 'node:|from ["\x27](fs|path|os|crypto|buffer|stream|util)["\x27]' \
   immutable substantive snapshot. Targeted non-mutating Markdown/link/structure/
   scope/diff checks cover the exact metadata patch; annotations require no
   product or qlty rerun. Human-authorized GPT-6.1-Sol/medium changes no SDD gate.
-- Next gate: focused approved S2 completion commit. Both
+- Next gate: approved S3 implementation. Both
   independent reviewers returned Ready after the message-assertion correction.
   Review record: /private/tmp/domain-model-readonly-s2-final-ready/reviews.json.
-  Completion Approval is recorded; commit is pending. S3 waits for that commit.
+  S2 Completion Approval and commit are recorded; S3 dependency is satisfied.
   Current-head Qlty
   Cloud remains the Feature Exit gate. No blocking scope/design decision.
 
