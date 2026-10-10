@@ -10,7 +10,15 @@ import {
   type SemanticDiffScheduleImpactRoot,
 } from "../../application/semantic-diff/semanticDiffScheduleImpact";
 import * as legacyScheduleImpact from "../../application/semantic-diff/semanticDiffScheduleImpact";
-import { buildScheduleProjectionFacts as buildCanonicalScheduleProjectionFacts } from "../../application/semantic-diff/semanticDiffScheduleProjectionFacts";
+import {
+  buildScheduleProjectionFacts as buildCanonicalScheduleProjectionFacts,
+  cloneDetail as cloneCanonicalScheduleDetail,
+  compareIssues as compareCanonicalScheduleIssues,
+} from "../../application/semantic-diff/semanticDiffScheduleProjectionFacts";
+import {
+  cloneDetail as cloneIssueProjectionDetail,
+  compareIssues as compareIssueProjectionIssues,
+} from "../../application/semantic-diff/semanticDiffScheduleIssueProjection";
 import {
   encodeSemanticDiffScheduleImpactId as encodeCanonicalScheduleImpactId,
   encodeScheduleImpactId as encodeCanonicalScheduleId,
@@ -225,6 +233,14 @@ suite("Semantic Diff schedule impact", () => {
       legacyScheduleImpact.encodeScheduleImpactId,
       encodeCanonicalScheduleId,
     );
+    assert.strictEqual(
+      cloneCanonicalScheduleDetail,
+      cloneIssueProjectionDetail,
+    );
+    assert.strictEqual(
+      compareCanonicalScheduleIssues,
+      compareIssueProjectionIssues,
+    );
     assert.deepStrictEqual(typeCompatibility, Array(15).fill(true));
   });
 
@@ -297,10 +313,17 @@ suite("Semantic Diff schedule impact", () => {
       pairEvaluations: [],
     };
 
+    const beforeDocument = document([beforeRoot]);
+    const afterDocument = document([afterRoot]);
+    const sourceSnapshot = JSON.stringify({
+      beforeDocument,
+      afterDocument,
+      evaluation,
+    });
     const facts = buildScheduleProjectionFacts({
       result,
-      before: document([beforeRoot]),
-      after: document([afterRoot]),
+      before: beforeDocument,
+      after: afterDocument,
       scheduleEvaluation: evaluation,
     });
 
@@ -336,6 +359,32 @@ suite("Semantic Diff schedule impact", () => {
     );
     assert.strictEqual(facts.before.rootProjections[0]?.runs.length, 1);
     assert.strictEqual(facts.after.rootProjections[0]?.runs.length, 1);
+    const projectedBefore = facts.before.rootProjections[0]!.runs;
+    const projectedAfter = facts.after.rootProjections[0]!.runs;
+    for (const runs of [projectedBefore, projectedAfter]) {
+      assert.ok(Object.isFrozen(runs));
+      assert.ok(Object.isFrozen(runs[0]));
+      assert.strictEqual(Reflect.set(runs[0]!, "time", "23:00"), false);
+    }
+    assert.strictEqual(
+      JSON.stringify({ beforeDocument, afterDocument, evaluation }),
+      sourceSnapshot,
+    );
+    for (const source of [
+      beforeDocument,
+      afterDocument,
+      evaluation,
+      beforeRun,
+      afterRun,
+    ]) {
+      assert.ok(!Object.isFrozen(source));
+    }
+    beforeRun.time = "23:00";
+    afterRun.unitName = "mutated source";
+    beforeRootChildren.pop();
+    assert.strictEqual(projectedBefore[0]!.time, "09:00");
+    assert.strictEqual(projectedAfter[0]!.unitName, "after task");
+    assert.strictEqual(facts.before.rootProjections.length, 2);
   });
 
   test("resolves candidate roots from the last occurrence for each ID", () => {
@@ -576,10 +625,53 @@ suite("Semantic Diff schedule impact", () => {
       zeroRunCandidatesBySide: { before: [], after: [] },
       pairEvaluations: [],
     };
+    const sourceDetail = {
+      unitPath: root.absolutePath,
+      parameterKey: "jc",
+      relationPair: {
+        canonicalPair: {
+          sourceUnitId: "a",
+          targetUnitId: "b",
+          type: "seq" as const,
+        },
+        before: {
+          sourceUnitPath: "/root/a",
+          sourceUnitId: "a",
+          targetUnitPath: "/root/b",
+          targetUnitId: "b",
+          type: "seq" as const,
+        },
+        after: {
+          sourceUnitPath: "/root/a",
+          sourceUnitId: "a",
+          targetUnitPath: "/root/b",
+          targetUnitId: "b",
+          type: "seq" as const,
+        },
+      },
+      scheduleRule: 1,
+      period: { ...evaluation.period },
+      beforeValues: ["before"],
+      afterValues: ["after"],
+      rawValues: ["same"],
+      removedSources: ["removed"],
+    };
+    const sourceDetailSnapshot = JSON.stringify(sourceDetail);
     const facts = buildScheduleProjectionFacts({
       result: {
         ...result,
         identityDecisions: [identityDecision],
+        unsupportedItems: [
+          {
+            id: "calendar:same",
+            kind: "unsupported",
+            side: "after",
+            reasonCode: "calendar-selection",
+            target: { kind: "jobnet", unit: identityDecision.after[0]! },
+            detail: sourceDetail,
+            warning: null,
+          },
+        ],
       },
       before: document([root]),
       after: document([root]),
@@ -587,6 +679,53 @@ suite("Semantic Diff schedule impact", () => {
     });
     assert.strictEqual(facts.kind, "evaluated");
     if (facts.kind !== "evaluated") return;
+    const clonedDetails = facts.after.issues
+      .filter((issue) => issue.detail.rawValues[0] === "same")
+      .map((issue) => issue.detail);
+    assert.strictEqual(clonedDetails.length, 2);
+    assert.strictEqual(JSON.stringify(sourceDetail), sourceDetailSnapshot);
+    for (const detail of clonedDetails) {
+      assert.deepStrictEqual(detail, sourceDetail);
+      assert.notStrictEqual(detail, sourceDetail);
+      const clonedParts = [
+        detail.relationPair,
+        detail.relationPair!.canonicalPair,
+        detail.relationPair!.before,
+        detail.relationPair!.after,
+        detail.period,
+        detail.beforeValues,
+        detail.afterValues,
+        detail.rawValues,
+        detail.removedSources,
+      ];
+      const sourceParts = [
+        sourceDetail.relationPair,
+        sourceDetail.relationPair.canonicalPair,
+        sourceDetail.relationPair.before,
+        sourceDetail.relationPair.after,
+        sourceDetail.period,
+        sourceDetail.beforeValues,
+        sourceDetail.afterValues,
+        sourceDetail.rawValues,
+        sourceDetail.removedSources,
+      ];
+      clonedParts.forEach((part, index) => {
+        assert.notStrictEqual(part, sourceParts[index]);
+        assert.ok(Object.isFrozen(part));
+        assert.ok(!Object.isFrozen(sourceParts[index]));
+      });
+    }
+    sourceDetail.relationPair.canonicalPair.sourceUnitId = "mutated";
+    sourceDetail.relationPair.before.sourceUnitPath = "/mutated/before";
+    sourceDetail.relationPair.after.targetUnitPath = "/mutated/after";
+    sourceDetail.period.from = "2027-01-01";
+    sourceDetail.beforeValues.push("changed");
+    sourceDetail.afterValues.push("changed");
+    sourceDetail.rawValues.push("changed");
+    sourceDetail.removedSources.push("changed");
+    clonedDetails.forEach((detail) => {
+      assert.strictEqual(JSON.stringify(detail), sourceDetailSnapshot);
+    });
     const sidecar = buildSemanticDiffScheduleImpact({
       result,
       facts,
