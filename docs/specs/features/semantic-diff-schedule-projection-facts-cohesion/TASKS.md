@@ -5,17 +5,17 @@
 - Purpose: isolate Run and Issue projection decisions without changing public
   schedule facts or schedule-impact behavior.
 - Active or approved slice: S3 is human-approved; S1 and S2 are committed.
-  Formatting remediation waits for the focused approved replan commit.
+  S3 implementation and independent review are complete.
 - Read [SPECS](SPECS.md), this plan, [traceability](TRACEABILITY.md),
   [SDD policy](../../README.md), and [Solution Shape](../../architecture.md#solution-shape).
 - Constraints: P1 only; no schedule semantics, forwarding wrappers, host fixes,
   DTO/identity/timeline redesign or architecture exceptions.
-- Next decision / blocker: focused approved S3 replan commit, then S3.
+- Next decision / blocker: focused approved S3 completion commit.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused approved S3 replan commit. PR #332
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: S3 completion commit and PR update. PR #332
   at `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d` has `qlty fmt` Failure;
   Verify, CodeQL and `qlty check` succeeded. Closure remains blocked.
 - Gate evidence: intake and planning documentation records below; independent
@@ -388,7 +388,7 @@ review must assess the ownership and retained coupling separately.
 
 ## Slice S3: exact Run formatting remediation
 
-- Lifecycle state: PLANNED
+- Lifecycle state: SLICE_APPROVED
 - Trigger F3: [Cloud formatter Finding](https://github.com/kittybbit/vscode-ajsbutler/pull/332#discussion_r4237765413),
   `prettier:fmt` on the Run module at published S2 HEAD
   `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d`. Replanning comparison base is
@@ -435,9 +435,61 @@ review must assess the ownership and retained coupling separately.
 - Approved replan commit paths: this feature's `TASKS.md` and `TRACEABILITY.md`
   only; runtime changes belong to the subsequent S3 implementation gate.
 - S3 plan review: `projection_facts_plan_review` returned Ready for approval
-in the current conversation, no Findings; reviewed identity
-`a6e39af4c5b6ea1720ace3a2b6ca007dec819c5671b9857c5a0aac929321a36d`.
-- S3 replan commit: pending; completion commit / implementation evidence: none
+  in the current conversation, no Findings; reviewed identity
+  `a6e39af4c5b6ea1720ace3a2b6ca007dec819c5671b9857c5a0aac929321a36d`.
+- S3 replan commit: `5fa4576e728ce51cab0d495b10d1b99c930b9282`;
+  completion commit: none; implementation evidence: S3-v1 below
+
+### S3 implementation evidence
+
+S3-v1 is [the implementation record](/private/tmp/ajsbutler-projection-facts-s3-20261010/record.json).
+Only the approved Run type-alias wrap and these coordination files changed.
+The resolved Qlty Prettier 3.6.2 explicit path formatter and CLI check pass;
+final scanned and reviewed Run bytes share SHA-256
+`13f6c4ed0b89c19cd89c6274c8dd2ef35c31273200b7ecf05a97ea2374a045df`.
+TypeScript compile, comments-inclusive syntax tokens and emitted JavaScript
+comparison pass; executable output is identical. Architecture catalog: 23
+passing; public-contract/schedule tests: 45 passing. S2 manifests did not match
+current generated bundles/source maps, so original desktop preparation/runner
+and web command were refreshed: 1193 desktop tests and WEB-1–15 pass.
+S2 production build remains historical; no new production build was required.
+
+Official full check improves 6 to 3 records: Run formatting and both selected
+coordination formatting notes are resolved. Retained unchanged findings are
+MD041 in the PR template, unused ParamSymbol in the unit-list builder, and the
+unused eslint-disable directive in the test runner. Smells retains 151 records:
+149 complete records unchanged, and the same two reciprocal similar-code
+records retain the S1 proved measured-instability advisory. Identity, source,
+tool/config, threshold, spans and nominal higher-is-worse direction match;
+actual 17 to 15 is retained with unstable measurement comparability, rather
+than claimed as an improvement. Final aggregate and explicit
+Run check after aggregate pass. First aggregate MD013 failure and preliminary
+scans remain in evidence; only authorized docs were stabilized before final
+observations. Documentation checks and snapshot bindings are recorded there.
+
+Solution Shape, readonly exports, dependencies, ordering, IDs, evaluation,
+freezing, error behavior, JP1/AJS3 v13 and VS Code 1.75 desktop/web compatibility
+are preserved. No API, parser, telemetry, performance or dependency change;
+README/CHANGELOG/durable documentation updates are unnecessary. S1/S2 completed
+gates remain historical and intact. Independent review returned Ready; explicit
+Completion Approval was received in the current conversation. Staged/committed
+bindings and S3-D exact-head Cloud Success remain deferred to the authorized
+committer/Main after completion.
+No stage, commit, push, merge or closure action was performed.
+
+- S3 implementation review: `projection_facts_s3_review` returned Ready in
+  the current conversation, no Findings; reviewed working-tree identity
+  `eaab4d5a728a897fb55c00d272bed64b1b42c27fa460c78ea50e9b3909afb983`,
+  patch SHA256
+  `aa727ec9fbfab2520f5a999b8d59085ce49b95b67e6cb9c21bf13e4715f8df4d`.
+- S3 Completion Approval: Approved;
+  approved at: approved in current conversation.
+- Approved S3 completion scope: reviewed S3 implementation and evidence;
+  PR update after the focused completion commit is explicitly authorized.
+- Approved S3 completion paths:
+  - `src/application/semantic-diff/semanticDiffScheduleRunProjection.ts`
+  - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TASKS.md`
+  - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TRACEABILITY.md`
 
 ### S3 validation and preservation boundaries
 
@@ -718,6 +770,7 @@ Disposition below is intake evidence, not a durable roadmap rewrite.
 - S1/S2 plan and completion reviews/approvals/commits are preserved; only
   affected formatting readiness/binding is invalidated as specified under F3.
 - S3 review: Ready for approval by `projection_facts_plan_review`; actual
-  Human Approval: Approved in the current conversation. Replan commit pending.
-- Next route: approval-committer for the approved replan; no scope, design or
-  validation change has been made after review.
+  Human Approval: Approved in the current conversation. Replan commit:
+  `5fa4576e728ce51cab0d495b10d1b99c930b9282`.
+- Next route: approval-committer for approved S3 completion; no scope, design
+  or validation change has been made after review.

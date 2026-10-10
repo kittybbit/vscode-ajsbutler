@@ -271,7 +271,8 @@ export type ProjectScheduleImpactRunsInput = Readonly<{
   sourceKeyForRun: SourceKeyForRun;
 }>;
 
-export type ProjectedScheduleImpactRuns = readonly SemanticDiffScheduleImpactRun[];
+export type ProjectedScheduleImpactRuns =
+  readonly SemanticDiffScheduleImpactRun[];
 
 export const projectScheduleImpactRuns = (
   input: ProjectScheduleImpactRunsInput,
