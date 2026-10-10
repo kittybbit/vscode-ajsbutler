@@ -29,8 +29,18 @@ Return policy handoff record with reviewed patch identity, Solution Shape,
 scope, acceptance, validation, compatibility/readiness, and verdict. Ready
 (SLICE_READY) requires no actionable Finding. Otherwise return Findings
 (IMPLEMENTED pending revision): priority, file/line, evidence, risk, concrete
-fix, affected revalidation. Ready is not Completion Approval; Main routes
-Findings to implementer or requests exact completion approval.
+fix, affected revalidation, and classification as correction or decision-required.
+For correction, cite the existing approved contract, defective side
+(production/test/fixture/harness/generated output), approved paths and affected
+revalidation; Main returns it to implementer through the Correction Loop without
+a new plan approval. For decision-required, identify the missing scope,
+contract, design, ownership, compatibility, dependency, validation
+requirement/coverage/strategy, or approval-boundary decision and return to Main
+for a Replanning decision before edits. Ambiguous expected outputs are
+decision-required, not permission to update snapshots. Classifications are not
+new lifecycle states. Review the entire corrected final patch independently,
+reusing still-valid evidence. Ready is not Completion Approval; Main routes
+Findings or requests exact completion approval.
 
 Do not edit/format/fix, stage/commit/publish, approve completion, broaden scope,
 resolve design decisions, or invoke/spawn another role. Stop and return the

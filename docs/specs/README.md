@@ -33,15 +33,20 @@ the change as non-trivial and route intake through `feature-author`.
 
 For non-trivial work, use a dedicated feature branch (`docs/...` for docs-only
 work), create or select one feature, plan all implementation slices, and have
-the plan independently reviewed. Findings or a new scope, design, dependency,
-impact, or approval-boundary decision return to `planner` in Replanning Mode.
+the plan independently reviewed. Plan-review Findings return to `planner`.
+Replanning is required for a new scope, contract, design, dependency,
+compatibility, validation requirement/coverage/strategy, material impact, or
+approval-boundary decision. A check failure alone is not such a decision.
 
 Human Approval covers the reviewed plan and exact slice scope. After a plan or
 replan review returns `Ready` and Human Approval is explicit, `approval-committer`
 creates one focused planning commit. Only then may `implementer` work on one
 approved slice. Each completed slice receives an independent
 `implementation-reviewer` review. Findings return through Main to
-`implementer`; a new scope or design decision returns for replanning. After
+`implementer` for correction within the approved boundary; a new decision as
+defined above returns through Main for replanning. Correction applies only to
+slices of an approved, committed plan and does not require a new plan review,
+Human Approval, or planning commit. After
 `Ready`, explicit Completion Approval and that slice's focused commit are
 required before another dependent slice starts. Once all slices are complete
 and committed, `feature-closer` performs Feature Exit. Its `Close` result,
@@ -157,6 +162,11 @@ material alternatives. Do not claim implementation has started or finished
 before approval. Proceed only after the approved boundary is recorded in
 `TASKS.md`.
 
+Corrections that execute or repair existing approved validation and restore
+the approved contract remain within that boundary. Changing validation
+requirements, required coverage, or strategy is a new decision requiring
+Replanning; a failed check or contract-preserving code/test repair alone is not.
+
 ### Approval-Gated Commit Policy
 
 Only `approval-committer` may make plan, completion, and closure workflow
@@ -188,6 +198,63 @@ unchanged checks only because the workflow or reviewer has changed. Intake and
 planning need discovery facts and validation of their documentation changes;
 they do not require implementation baseline/final scans for proposed code.
 
+### Correction Loop For Deterministic Failures
+
+Deterministic check failure is not itself a Replanning trigger. For a slice
+of an approved, committed plan, `implementer` diagnoses the failure against
+the existing approved contract: `SPECS.md`, `TASKS.md`, use cases, acceptance,
+architecture rules, and validation requirements. Preserve the failed command,
+diagnostics, and affected paths; determine whether production, tests, fixtures,
+harness, or generated outputs violate that contract before editing.
+
+Correction is authorized only within explicitly approved product and
+validation-support paths, with unchanged acceptance, external behavior,
+public contracts, JP1/AJS and VS Code compatibility, Solution Shape,
+dependency direction, and required validation coverage. Size, a test-only
+change, or an automated suggestion does not establish authorization.
+
+- Lint, formatting, whitespace, import order, and type/build errors may be
+  corrected when the existing contract uniquely determines the fix.
+- Architecture violations may be corrected when existing rules determine the
+  owner, layer, and dependency direction without a new abstraction decision.
+- Fix production when it violates the approved observable behavior. Fix
+  tests, fixtures, assertions, aliases, mocks, or harness when their expected
+  behavior or configuration violates that contract, retaining meaningful
+  valid, error, edge, privacy, and compatibility coverage.
+- Compare snapshot/golden differences with the approved expected behavior;
+  never automatically accept outputs. Regenerate inconsistent artifacts only
+  using the established procedure with unchanged source, settings, contracts,
+  and approved paths.
+- Classify pre-existing, environment-dependent, and flaky failures with
+  baseline evidence; do not silently count an unavailable or failed required
+  check as passed.
+
+Do not delete or skip tests, remove or weaken assertions, relax coverage, or
+make expected outputs follow incorrect production merely to obtain green
+checks. If the expected behavior is ambiguous, the correct fix needs an
+unapproved path, or scope, contract, ownership, design, dependency,
+compatibility, validation requirements/coverage/strategy, or approval needs a
+new decision, stop before editing and return a decision request to Main.
+Main routes a material decision delta for affected-scope Replanning,
+independent plan review, and new Human Approval.
+
+During correction, rerun the nearest affected check and relevant boundary
+tests; refresh only affected evidence and reuse matching baseline/check
+results under the Evidence Contract. After stabilization, satisfy the
+approved final validation set, including required tests, qlty, architecture,
+and desktop/web checks, and record the final snapshot identity and evidence.
+
+Run this loop within `IMPLEMENTING`, without review, approval, or commit at
+each attempt. The independent `implementation-reviewer` reviews the entire
+final patch and its rationale. Review Findings classified as `correction`
+return through Main to `implementer` in `IMPLEMENTED` pending revision,
+followed by correction, affected validation, and independent re-review.
+`decision-required` Findings return to Main for the missing decision and
+Replanning when required. These classifications are not lifecycle states.
+Completion continues the original sequence: `Ready`, explicit Completion
+Approval, and a focused commit by `approval-committer`, followed by the
+existing Feature Exit gates.
+
 ### Test Organization and Repair
 
 Organize tests around use-case-defined observable behavior, the complete
@@ -202,8 +269,10 @@ Test common behavior once. Split desktop and web suites only when a genuine host
 capability, different behavior, or adapter boundary requires it. Keep necessary
 host smoke checks, shared-contract and build compatibility, and the zero-exception
 architecture gate. After cleanup, repair retained tests against their contracts;
-failures are not deletion evidence. A production contract mismatch returns for
-scope or design review.
+failures are not deletion evidence. A production mismatch with an existing
+approved contract follows the Correction Loop; changing that contract requires
+scope or design review. Test removal or coverage changes require their own
+approved boundary and are not incidental corrections.
 
 - **SDD coordination/specification docs only:** for feature intake, plans,
   replans, `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, and their templates, run
@@ -295,6 +364,10 @@ acceptance, validation, review, approval, and commit references for all
 completed slices until closure; remove superseded narrative, not necessary
 gate proof. Do not build a collector service, custom SARIF parser, or
 comparator.
+
+Correction attempts need only affected checks; stabilization must satisfy the
+approved final coverage. Changed inputs invalidate only dependent results;
+reuse unrelated baseline and check evidence under the rules below.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -409,8 +482,10 @@ when applicable, and affected tests. Semantic navigation tools may help locate
 references; they do not replace manual impact analysis, SDD artifacts,
 approvals, tests, or validation. Stop and replan when the approved semantic
 owner, package or layer, contract, dependency direction, framework/custom
-choice, abstraction, affected surface, risk, validation, or approval boundary
-changes.
+choice, abstraction, affected surface, material risk/impact, validation
+requirements/coverage/strategy, or approval boundary needs a new decision.
+Executing or repairing existing approved validation and restoring the approved
+contract through the Correction Loop do not constitute such a change.
 
 Prefer high-accuracy models for planning, impact, design, architecture,
 specification, and review; medium- or lower-cost models may be used for

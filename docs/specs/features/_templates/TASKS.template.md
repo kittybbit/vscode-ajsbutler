@@ -23,13 +23,21 @@ under the policy's legacy mapping rule; a field never grants approval.
 - Status: Pending | Approved
 - Approved at: {{none or approval result}}
 - Approved scope: {{exact slice boundary}}
-- Approved paths: {{exact paths}}
+- Approved paths: {{explicit product paths and needed validation-support paths}}
 
 Add Completion Approval only after implementation review; add Closure Approval
 only after Feature Exit. Each record contains its status, exact scope and paths,
 review verdict, approval result, and commit status. Keep the active gate near
 the top and compact references for completed slice gates through Feature Exit;
 approval messages and superseded narrative do not belong here.
+
+Enumerate concrete product paths and foreseeable validation-support paths
+(tests, fixtures, snapshot assets, harness/configuration, and approved generated
+outputs) before approval. Do not use unrestricted wildcards, automatically add
+paths during implementation, or include unrelated feature repairs. A required
+unapproved path returns to Main before editing for an approval-boundary decision.
+Ordinary corrections within the approved boundary keep the existing plan and
+approval records; do not add another gate record for each correction attempt.
 
 ## Implementation Slices
 
@@ -42,7 +50,7 @@ approval messages and superseded narrative do not belong here.
 - Validation: {{required checks, results, and evidence link}}
 - Production readiness: {{relevant failure, JP1/AJS, input-size,
   desktop/web/VS Code, and documentation impact}}
-- Approval boundary: {{exact paths and excluded work}}
+- Approval boundary: {{concrete product and validation-support paths; excluded work}}
 
 #### Validation index
 
@@ -62,6 +70,10 @@ artifacts outside inspected inputs, readable and retained through Feature Exit.
 A later role consumes matching evidence without copying details or creating
 another validation package.
 
+For contract-based corrections, retain only decision-relevant exception or
+refresh references in the existing index; do not add mandatory per-attempt
+fields or duplicate evidence identities.
+
 #### Solution Shape (when material)
 
 - Owner and package/layer for decisions, contracts, dependencies, and tests:
@@ -70,7 +82,8 @@ another validation package.
 - Public names, contract, dependency direction, and applicable tests:
 - Automatic architecture evidence versus reviewer judgments:
 - Replan trigger check: owner, contract, capability/custom choice, abstraction,
-  affected surface, risk, validation, or approval boundary:
+  affected surface, material risk, validation requirements/coverage/strategy,
+  or approval boundary requiring a new decision:
 
 Record this only for material abstractions and decisions defined in
 [`architecture.md`](../../architecture.md#solution-shape). Follow qlty evidence

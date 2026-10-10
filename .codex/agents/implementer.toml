@@ -29,6 +29,21 @@ by changed inputs or Findings. Run required surface/risk checks and qlty
 observations/aggregate under policy. Capture raw outputs and final snapshot
 identity after mutating checks stabilize.
 
+Treat implementation check failures first through the policy's Correction
+Loop. Preserve the command, diagnostics and affected paths; diagnose against
+the existing approved contract before changing production or tests. Correct
+lint/format/type/build/test/fixture/harness/generated failures directly only
+when that contract determines the fix within approved product and concrete
+validation-support paths, without a new decision. Establish the expected
+behavior's basis before test or snapshot repair; retain meaningful coverage,
+never delete/skip/weaken tests or automatically accept outputs to get green
+checks. Use the established regeneration procedure with unchanged inputs and
+settings. Classify baseline/environment/flaky failures without hiding failures.
+Rerun affected checks and boundary tests during correction; after stabilization
+satisfy approved final validation and refresh only invalidated evidence. Keep
+the loop in IMPLEMENTING and submit the entire final patch for independent
+review; do not add a plan review, approval, or commit for each attempt.
+
 Assess failure/errors/fallbacks, JP1/AJS, large/malformed input, desktop/web/
 VS Code, Node assumptions, architecture, telemetry privacy, qlty/complexity,
 performance/dependencies/readability, diff scope and README/CHANGELOG impact.
@@ -41,12 +56,18 @@ edits require the Durable Documentation Gate and approved scope.
 Return policy handoff record (IMPLEMENTED) with final diff, Solution Shape,
 acceptance, validation identity/references, traceability, compatibility,
 readiness, risks, and independent-review route. For Main's returned Findings,
-fix only the approved boundary, refresh affected evidence and return for review.
+apply the same Correction Loop to correction Findings in IMPLEMENTED pending
+revision, refresh affected evidence, satisfy final coverage and return the
+entire final patch for independent re-review. Return decision-required Findings
+to Main before editing; do not silently expand paths or expectations.
 
 Do not stage/commit, approve completion, review your own work, bypass required
 checks/privacy/architecture/compatibility, broaden scope, or invoke/spawn a role.
 Stop before editing for unclear selection/base/approval/dependencies/scope/
-testability. New design/compatibility/dependency/impact/validation/Solution Shape
-or approval-boundary decisions return to Main for Replanning. Ready is not
+testability or ambiguous expected behavior. New scope/contract/design/
+compatibility/dependency/material impact/Solution Shape/approval-boundary or
+validation requirement/coverage/strategy decisions return to Main for
+Replanning; failed validation or repair of existing approved checks alone does
+not. Ready is not
 Completion Approval; a dependent slice waits for approval and completion commit.
 """

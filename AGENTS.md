@@ -46,6 +46,8 @@ Production source lives under `src/domain`, `src/application`,
   require a Human Approved implementation slice in the selected feature's
   `TASKS.md`. Route any scope, design, impact, or approval-boundary change to
   Main for Replanning.
+- Deterministic check corrections within existing approval boundaries follow
+  the Correction Loop in `docs/specs/README.md`, without Replanning.
 - Record `Solution Shape` at planning, implementation, and review. Its
   definition and stop conditions are in
   [architecture](docs/specs/architecture.md); the validation and evidence
