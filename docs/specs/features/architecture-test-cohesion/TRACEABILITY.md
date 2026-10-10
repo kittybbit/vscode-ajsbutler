@@ -26,5 +26,11 @@ path approval boundaries, sequencing, and validation are in [TASKS.md](TASKS.md)
 S1 validation mapping: [S1 evidence](/private/tmp/architecture-test-cohesion-s1/evidence.json)
 records the unchanged 29 test bodies and one added formatted-message/order
 regression, exact collector/discovery equality, complete catalog and special
-gates, agent-setting equality, and V1 command results. S2 mapping remains planned;
-its suites have not moved or executed independently yet.
+gates, agent-setting equality, and V1 command results. S2 execution is mapped below.
+
+S2 validation mapping: [S2 evidence](/private/tmp/architecture-test-cohesion-s2/evidence.json)
+records all 30 unchanged title/body mappings into analysis (7), Semantic Diff
+ownership (7), and general gates (16), actual three-suite glob discovery,
+compiled execution, unchanged support-input hashes, and V1 quality/document
+results. Original 29-test coverage and the S1 message/order regression are
+retained exactly once.
