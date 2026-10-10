@@ -12,7 +12,7 @@
 | Build Semantic Diff                             | S1 and S2                                               | Existing `semanticDiffScheduleRules.test.ts` and artifact contracts, half-open periods and explicit unsupported meanings; V1                                                      |
 | Present Schedule Impact                         | S1 and S2                                               | Impact contracts and V3 existing browser WEB-13 artifact equivalence                                                                                                              |
 | Present Semantic Diff Report                    | S1 and S2 preservation                                  | Unchanged comparison DTOs/result and no extra evaluation, direct alias checks; artifact suite and V2/V3 integration                                                               |
-| Quality and compatibility                       | S1 and S2                                               | V5 exact per-slice qlty observations/aggregate; unchanged VS Code 1.75 and JP1/AJS3 v13; V1–V4                                                                                    |
+| Quality and compatibility                       | S1 and S2; S3 formatting                                               | V5 exact per-slice qlty observations/aggregate; unchanged VS Code 1.75 and JP1/AJS3 v13; V1–V4                                                                                    |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -34,3 +34,11 @@ matching S1 measured-instability evidence; S2-v1 is linked in
 [TASKS](TASKS.md#slice-s2-issue-projection-and-final-correspondence-consistency).
 These are validation facts, not independent ownership judgment or
 Completion Approval.
+
+S3 maps R2/R5 preservation and the quality gate to the exact Run type-alias
+formatting delta. S3-A explicit formatter check, S3-B compile/architecture and
+program-equivalence/input matching, S3-C official baseline/final qlty plus
+aggregate and snapshot-to-delivered-source binding, and S3-D exact-head Cloud
+statuses are defined in [TASKS](TASKS.md#s3-validation-and-preservation-boundaries).
+S1/S2 semantic coverage remains preserved; S1 formatter readiness for committed
+Run bytes is invalidated by F3, and S3 has no executed implementation evidence.

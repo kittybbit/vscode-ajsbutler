@@ -4,17 +4,20 @@
 
 - Purpose: isolate Run and Issue projection decisions without changing public
   schedule facts or schedule-impact behavior.
-- Active or approved slice: S2. Approved order: S1, then S2.
+- Active or approved slice: S3 is human-approved; S1 and S2 are committed.
+  Formatting remediation waits for the focused approved replan commit.
 - Read [SPECS](SPECS.md), this plan, [traceability](TRACEABILITY.md),
   [SDD policy](../../README.md), and [Solution Shape](../../architecture.md#solution-shape).
 - Constraints: P1 only; no schedule semantics, forwarding wrappers, host fixes,
   DTO/identity/timeline redesign or architecture exceptions.
-- Next gate: S2 completion commit, then Feature Exit.
+- Next decision / blocker: focused approved S3 replan commit, then S3.
 
 ## Current state
 
-- Lifecycle state: SLICE_APPROVED
-- Next decision / blocker: focused S2 completion commit.
+- Lifecycle state: PLAN_APPROVED
+- Next decision / blocker: focused approved S3 replan commit. PR #332
+  at `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d` has `qlty fmt` Failure;
+  Verify, CodeQL and `qlty check` succeeded. Closure remains blocked.
 - Gate evidence: intake and planning documentation records below; independent
   plan review returned Ready for approval and Human Approval was received.
   Planning commit: `85d3942adc092a41d26ad6e38a74ff15cf36991e`.
@@ -25,8 +28,10 @@
 - Branch: `codex/semantic-diff-schedule-projection-facts-cohesion`.
 - Main renamed the docs branch after the approved planning commit, before
   runtime edits, to satisfy the implementation branch boundary.
-- Completed/preserved slices: S1 committed. Existing WebAPI feature and every roadmap
-  item retain their scope, ownership, approvals and evidence.
+- Completed/preserved slices: S1 and S2 committed with two Ready reviews and
+  actual Completion Approval each. Original plan review/Human Approval and
+  commit remain preserved. Existing WebAPI feature and every roadmap item
+  retain their scope, ownership, approvals and evidence.
 
 ## Human Approval
 
@@ -42,7 +47,8 @@
 
 ## Design and alternatives
 
-Use two implementation slices, each leaving a working public facts builder.
+The approved S1/S2 design uses two implementation slices, each leaving a working
+public facts builder. S3 below adds only formatting remediation.
 S1 separates run collection and stable run projection. S2 separates issue
 classification, evidence and ownership/rekeying. Root correspondence remains
 in `semanticDiffScheduleProjectionFacts.ts`: selection, confirmed/unmatched
@@ -266,7 +272,7 @@ review must assess the ownership and retained coupling separately.
 
 ## Slice S2: Issue Projection and final correspondence consistency
 
-- Lifecycle state: SLICE_APPROVED
+- Lifecycle state: SLICE_COMMITTED
 - Value: one owner for issue classification/evidence/identity while preserving
   Root correspondence's ordered assembly and final consistency.
 - Dependency: S1 independently reviewed, completion-approved and committed.
@@ -378,11 +384,159 @@ review must assess the ownership and retained coupling separately.
   - `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`
   - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TASKS.md`
   - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TRACEABILITY.md`
-- Completion commit: none.
+- Completion commit: `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d`.
+
+## Slice S3: exact Run formatting remediation
+
+- Lifecycle state: PLANNED
+- Trigger F3: [Cloud formatter Finding](https://github.com/kittybbit/vscode-ajsbutler/pull/332#discussion_r4237765413),
+  `prettier:fmt` on the Run module at published S2 HEAD
+  `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d`. Replanning comparison base is
+  this committed S2 head; the original feature selection/base is unchanged.
+- Value: make the delivered Run source match the formatter and restore the
+  exact-head global gate without altering the completed feature's behavior.
+- Dependency: S1 and S2 completed gates preserved; independently reviewed S3
+  replan, explicit Human Approval for S3 and focused approved replan commit.
+- Exact runtime path: `src/application/semantic-diff/semanticDiffScheduleRunProjection.ts`.
+- Exact coordination paths: this feature's `TASKS.md` and `TRACEABILITY.md`.
+  No test/config/package/other runtime/durable-document path is authorized.
+- Change: wrap the existing `ProjectedScheduleImpactRuns` type alias after
+  `=`. Read-only Prettier 3.6.2 and 3.3.3 previews produce the same single
+  line-break delta. Apply only this formatter delta after approval; no cleanup,
+  API spelling/type, import, algorithm or other whitespace change.
+- Acceptance: exact formatter accepts this path; exported readonly signature,
+  collection/projector names, source keys, sort/occurrence/ID behavior and
+  freezing contracts are unchanged. TypeScript syntax/token structure apart
+  from trivia and emitted executable JavaScript remain identical.
+- Solution Shape: existing Run owner remains host-neutral Application in
+  `src/application/semantic-diff`; no responsibility, contract, dependency
+  direction, material abstraction, port, adapter or factory changes. Existing
+  Qlty Prettier capability supplies the formatter; no new package/custom tool.
+- Formatter identity: repository `.qlty/qlty.toml` enables unpinned Prettier.
+  Standalone `pnpm exec prettier` was unavailable during S2; cached Qlty
+  installations now provide 3.6.2 and 3.3.3 CLIs. The preview does not prove
+  Cloud's resolved version. Implementer must record Qlty's actually resolved
+  plugin version/path/hash and config, use explicit-path `qlty fmt` in its
+  disposable final snapshot, and bind output to that identity. Missing tool
+  identity or inability to format/check is a blocker, not a dependency update.
+- Required commands/coverage: S3-A through S3-D below; the previous S1/S2
+  V1–V5 set is not automatically repeated for this new formatting-only scope.
+- Risks: autoformatter selecting only changes relative to origin; formatted
+  snapshot not synchronized to reviewed/committed file; unrelated formatter
+  edits; tool-version drift. Inspect exact changes and hashes. Any additional
+  substantive delta, missing equivalence or changed contract returns to Main
+  for Replanning rather than silently broadening S3.
+- Approval boundary: only the three paths and one formatting delta above.
+  Original Human Approval for S1/S2 and publication approval do not cover S3.
+- S3 Human Approval: Approved; approved at: approved in current conversation.
+- S3 approved scope: exact three paths and single type-alias formatting delta
+  plus S3-A through S3-D validation from reviewed replan identity
+  `a6e39af4c5b6ea1720ace3a2b6ca007dec819c5671b9857c5a0aac929321a36d`.
+- Approved replan commit paths: this feature's `TASKS.md` and `TRACEABILITY.md`
+  only; runtime changes belong to the subsequent S3 implementation gate.
+- S3 plan review: `projection_facts_plan_review` returned Ready for approval
+in the current conversation, no Findings; reviewed identity
+`a6e39af4c5b6ea1720ace3a2b6ca007dec819c5671b9857c5a0aac929321a36d`.
+- S3 replan commit: pending; completion commit / implementation evidence: none
+
+### S3 validation and preservation boundaries
+
+S3-A: use Qlty's resolved Prettier capability to format the explicit Run path
+in the disposable final snapshot (`rtk pnpm exec qlty fmt
+src/application/semantic-diff/semanticDiffScheduleRunProjection.ts`). Before
+execution, retain its CLI/config/tool identity. Planning inspected installed
+`qlty fmt --help`: positional `[PATHS]...` is supported. Do not fall back to
+a default changed-file selection. Validate the exact result with the resolved
+Prettier CLI `--check`
+on this same path, recording version/path/hash. Standalone package installation
+or configuration edits are excluded. Formatting preview sources/commands are
+retained in the [S3 replan evidence](/private/tmp/ajsbutler-projection-facts-replan-s3-20261010/record.json).
+
+S3-B: `rtk pnpm run test:compile`, plus the existing architecture catalog via
+`rtk pnpm exec mocha --ui tdd out/test/suite/architectureDependencyRules.test.js
+out/test/suite/architectureSemanticDiffOwnership.test.js`. Source-inspecting
+architecture inputs changed, so refresh these mechanical checks. Retain a
+TypeScript syntax/token equivalence check and emitted JavaScript comparison
+using the existing TypeScript compiler, baseline S2 Run source and formatted
+Run source under identical compiler settings. A mere whitespace diff is not
+sufficient evidence of program equivalence; exports/readonly type contract,
+comments/directives, imports and emitted executable content must match.
+
+The public-contract/schedule tests and desktop/web executions from S2 remain
+historical passes for the unchanged executable program. Reuse an individual
+execution result only when its actual emitted JS/bundle/resources/fixtures and
+relevant tool/dependency/configuration inputs exactly match its retained input
+manifest after S3 compile/preparation; record the matched coverage. AST
+similarity alone does not establish Evidence Contract freshness. If needed
+inputs cannot be matched, rerun only the affected V1 tests or V2/V3 host command
+from the original command set. Do not claim the old command ran on new source.
+A new production build is not required solely for this type-alias line break:
+no compiled contract, bundling configuration or executable changes. Retain S2
+V4 as historical compatibility coverage, rather than a new-head build pass.
+Any failed compile, emitted mismatch, host dependency/config change or new
+compatibility concern invalidates this narrow plan and returns through Main.
+
+S3-C: new exact full-repository baseline (committed S2 head plus separately
+identified coordination metadata) and final snapshots. Run official
+`rtk pnpm exec qlty check --all --sarif --no-fix` and
+`rtk pnpm exec qlty smells --all --sarif --no-snippets` in both; run
+`rtk pnpm run qlty` only in final. Require the complete four SARIF artifacts,
+nonzero inventories, same tools/config/selection, severity/direction comparison
+and passing stable aggregate per V5/Evidence Contract. Default aggregate
+success alone cannot discharge this explicit-path formatting Finding. Retain
+unrelated unchanged findings; reject every new/reliably mapped adverse finding.
+The existing two-record measured-instability advisory may be reused only if
+its exact identity, unchanged source/config/tool and measured comparability
+facts still match; it is no formatting exemption. No repeat scans unless a
+specific missing/invalidated fact warrants them.
+
+After formatting, synchronize only approved source bytes; verify SHA-256
+matches across authoritative final scan manifest, reviewed working tree,
+staged file and committed artifact. Record the metadata patch separately.
+If formatting or annotations change inspected inputs, refresh only affected
+checks under policy; never bind old scans to different bytes. This binding
+specifically repairs F3's prior snapshot-to-delivered-source gap.
+
+S3-D: targeted Markdown lint/local links/structure/state/approval/scope/
+traceability/diff checks for both coordination paths. After approved S3
+completion commit and authorized push, Main must obtain `qlty check` and
+`qlty fmt` Success at the new exact PR head; earlier S2 check success is not
+that gate. Existing PR remains draft. No push, merge, closure or approval is
+performed/inferred by this plan. Feature Exit resumes only after S3 has its
+review, Completion Approval, focused commit and current-head global gates.
+
+### F3 discovery, evidence invalidation and alternatives
+
+- Reuse [Main Cloud record](/private/tmp/ajsbutler-projection-facts-cloud-20261010/record.json)
+  and exact-head comment/status. The previous Feature Exit report's Cloud
+  unavailability is superseded by publication results, not by a Close verdict.
+- S1 authoritative final Run manifest is formatted SHA-256
+  `13f6c4ed0b89c19cd89c6274c8dd2ef35c31273200b7ecf05a97ea2374a045df`;
+  S1 reviewed/committed Run and S2 baseline/final Run are unformatted SHA-256
+  `f2135afd9e7a9bed6f058465636a307f60b8a8daa7ba0fcb9d3cb60137ae8c41`.
+  Formatter previews show this difference is precisely the type-alias wrap.
+  S1 final check's three results do not establish formatter readiness for its
+  delivered Run bytes. Invalidate this quality-to-committed-Run binding only;
+  preserve the original raw scans, approvals, reviews and semantic evidence.
+- S2 full official check correctly retained four identical records, including
+  this Run `prettier:fmt` note as inherited and outside S2's approved paths.
+  S2 aggregate used default change-relative selection; log checked two files.
+  Its success is valid for its observed selection, not whole-feature Cloud
+  formatting. S3 explicit-path check closes this coverage gap.
+- Original S1/S2 reviewed scope/Completion Approvals remain historical facts;
+  their plan reviews do not cover added S3 scope. New independent plan review
+  and Human Approval are required before remediation; S3 implementation
+  review must assess equivalence and corrected evidence binding. Closure
+  remains Pending, and prior exit readiness requires reevaluation after S3.
+- Reject formatting the entire repository or altering Qlty configuration:
+  unrelated findings and owners remain outside scope. Reject ignoring the
+  note because Cloud check passed: `qlty fmt` is a separate exact-head gate.
+- README/CHANGELOG/durable roadmap/architecture/use cases remain unchanged;
+  no user-visible or reusable design/policy change is introduced.
 
 ## Common exclusions and validation blockers
 
-Both slices exclude product tests outside their exact listed paths, package or
+S1/S2 exclude product tests outside their exact listed paths, package or
 check configuration, generated artifacts, Domain changes, parser/VS Code/UI
 imports, bootstrap, adapters, factories, telemetry, P2–P4, new schedule support
 and all existing roadmap remediation. A newly necessary path/design/command
@@ -491,3 +645,79 @@ Disposition below is intake evidence, not a durable roadmap rewrite.
   planning commit: `85d3942adc092a41d26ad6e38a74ff15cf36991e`.
 - Missing facts: no unresolved product/design choice; required host-check
   failures, if observed, block completion as stated above.
+
+## Prior Feature Exit entry
+
+- Main confirmed both slices have independent Ready reviews, explicit human
+  Completion Approval and focused completion commits.
+- S1: `f33d354377af1e69467db2e7ccab1cb4b7c8e7e4`.
+- S2: `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d`.
+- No unresolved scope or design decision; aggregate checks, durable ownership
+  and current-head global gates remain for feature-closer.
+- Closure Approval: Pending; approved at: none; approved scope: none.
+
+## Prior Feature Exit review
+
+- Original result: Do not close while Cloud evidence was unavailable. This
+  report remains evidence for its inspected head; publication and F3 now
+  supersede its missing-gate reason and feature state. See S3 for the current
+  blocker; it is not a renewed Close recommendation.
+- Slices: S1 `f33d354377af1e69467db2e7ccab1cb4b7c8e7e4` and S2
+  `bbcbe5b3486c97420ddf32ce15a1442e55f6a05d` have focused completion commits,
+  two independent Ready reviews each, and explicit Completion Approval. Their
+  retained validation records are S1-v1 and S2-v1.
+- Aggregate acceptance: R1/R6 ownership boundaries are implemented and
+  independently reviewed; R2 IDs, ordering, aliases, references and duplicate
+  identity; R3 facts states, issue ownership and root consistency; R4 single
+  schedule evaluation and fail-closed references; R5 immutability and host
+  neutrality all remain covered by the existing contract suites. S2-v1's
+  combined final manifest matches the current committed runtime/test files.
+- Validation: reuse S2-v1 for integrated V1–V5 coverage: 68 targeted tests,
+  complete architecture catalog, 1193 desktop tests, web including WEB-13,
+  both production bundles, full-repository qlty observations and passing final
+  aggregate. Qlty records contain no new or adverse mapped finding; the two
+  reciprocal smells measurements retain the reviewed instability advisory.
+  The GitHub check-runs request for current HEAD returned HTTP 422, “No commit
+  found”; the commit-status request returned no statuses, and `git ls-remote`
+  returned no matching branch ref. The repository `Verify` workflow runs only
+  on `pull_request`. On prior PR #331, the exact head commit had successful
+  Qlty `qlty check` and `qlty fmt` statuses with PR-specific target URLs. This
+  history does not establish that a branch push alone produces those Cloud
+  statuses. The evidence-backed next step, if authorized, is to push this
+  branch at S2 HEAD and open a PR to `main`, then verify the Qlty statuses for
+  that exact head. No push or PR was performed.
+  The attempted local qlty help command also failed to initialize its log file
+  under the sandbox; it is an execution exception, not a Cloud result.
+- Traceability: [TRACEABILITY](TRACEABILITY.md) maps R1–R6 and the three use
+  cases to the S1/S2 tests and V1–V5 results; no mapping gap was found.
+- Compatibility and readiness: VS Code `^1.75.0`, JP1/AJS3 v13, desktop/web,
+  output references and behavior are preserved. No feature-specific runtime,
+  quality, or production-readiness risk remains. Existing unrelated roadmap
+  follow-ups keep their recorded maintainers and entry conditions.
+- Durable propagation: no reusable policy, product behavior, or architecture
+  contract changed. README and CHANGELOG need no update. No roadmap work,
+  ordering, entry condition, or product concern changed; retain all existing
+  roadmap items without consolidation. No durable document path needs
+  propagation.
+- Closure paths if the missing gate later passes: remove the complete selected
+  folder `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/`;
+  there are no durable propagation paths. Closure Approval and closure commit
+  remain pending. This folder is not authorized for removal by this review.
+- Documentation validation: this exit update passes feature Markdown lint,
+  local link/anchor and structure checks, lifecycle/traceability inspection,
+  and `git diff --check`; exact commands and outputs are retained in the exit
+  evidence artifact.
+- Evidence: [Feature Exit record](/private/tmp/ajsbutler-projection-facts-exit-20261010/record.json).
+
+## Replanning validation index (S3)
+
+- Replan-S3-v1: changed TASKS/TRACEABILITY scope, dependency and approval
+  boundary; two Markdown paths, links/anchors, preserved S1/S2 gates,
+  planning-stage approval provenance, traceability and diff checks.
+- Evidence: [S3 replan record](/private/tmp/ajsbutler-projection-facts-replan-s3-20261010/record.json).
+- S1/S2 plan and completion reviews/approvals/commits are preserved; only
+  affected formatting readiness/binding is invalidated as specified under F3.
+- S3 review: Ready for approval by `projection_facts_plan_review`; actual
+  Human Approval: Approved in the current conversation. Replan commit pending.
+- Next route: approval-committer for the approved replan; no scope, design or
+  validation change has been made after review.
