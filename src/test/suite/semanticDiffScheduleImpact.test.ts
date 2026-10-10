@@ -297,10 +297,17 @@ suite("Semantic Diff schedule impact", () => {
       pairEvaluations: [],
     };
 
+    const beforeDocument = document([beforeRoot]);
+    const afterDocument = document([afterRoot]);
+    const sourceSnapshot = JSON.stringify({
+      beforeDocument,
+      afterDocument,
+      evaluation,
+    });
     const facts = buildScheduleProjectionFacts({
       result,
-      before: document([beforeRoot]),
-      after: document([afterRoot]),
+      before: beforeDocument,
+      after: afterDocument,
       scheduleEvaluation: evaluation,
     });
 
@@ -336,6 +343,32 @@ suite("Semantic Diff schedule impact", () => {
     );
     assert.strictEqual(facts.before.rootProjections[0]?.runs.length, 1);
     assert.strictEqual(facts.after.rootProjections[0]?.runs.length, 1);
+    const projectedBefore = facts.before.rootProjections[0]!.runs;
+    const projectedAfter = facts.after.rootProjections[0]!.runs;
+    for (const runs of [projectedBefore, projectedAfter]) {
+      assert.ok(Object.isFrozen(runs));
+      assert.ok(Object.isFrozen(runs[0]));
+      assert.strictEqual(Reflect.set(runs[0]!, "time", "23:00"), false);
+    }
+    assert.strictEqual(
+      JSON.stringify({ beforeDocument, afterDocument, evaluation }),
+      sourceSnapshot,
+    );
+    for (const source of [
+      beforeDocument,
+      afterDocument,
+      evaluation,
+      beforeRun,
+      afterRun,
+    ]) {
+      assert.ok(!Object.isFrozen(source));
+    }
+    beforeRun.time = "23:00";
+    afterRun.unitName = "mutated source";
+    beforeRootChildren.pop();
+    assert.strictEqual(projectedBefore[0]!.time, "09:00");
+    assert.strictEqual(projectedAfter[0]!.unitName, "after task");
+    assert.strictEqual(facts.before.rootProjections.length, 2);
   });
 
   test("resolves candidate roots from the last occurrence for each ID", () => {
