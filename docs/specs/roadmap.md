@@ -68,26 +68,6 @@ entry conditions that make planning each item useful.
 
 ## Semantic Diff Roadmap
 
-### Internal Architecture Refactoring Sequence
-
-- Purpose: maintain the verified Clean Architecture and DDD boundaries while
-  reducing internal over-fragmentation, duplication, and responsibility
-  concentration. Prefer existing semantic owners and cohesive modules over new
-  abstractions.
-- Sequencing: treat the items below as separate SDD features with independent
-  plans, reviews, approvals, and completion evidence. Do not create one umbrella
-  implementation feature; this roadmap section is the coordination record.
-
-1. `architecture-test-cohesion`: split the architecture-test implementation
-   only when its size or change pressure justifies the boundary; do not build a
-   speculative static-analysis framework.
-
-- Entry condition for each remaining item: the preceding dependency that affects
-  its semantic owner or public contract is complete, and intake confirms that
-  the item still represents one independently valuable outcome. Unrelated
-  items may be reconsidered or reordered through their own intake when
-  evidence shows no dependency.
-
 ### Deferred Schedule Semantics
 
 - Sequencing: Waves 3 and 4 are complete. Before selectively pursuing these
