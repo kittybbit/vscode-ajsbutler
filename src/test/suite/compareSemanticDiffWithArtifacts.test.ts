@@ -94,13 +94,14 @@ suite("Semantic Diff comparison artifacts", () => {
   });
 
   test("preserves an invalid period as a closed facts state", () => {
+    const requestedPeriod = { from: "2026-04-31", to: "2026-05-01" };
     const artifacts = compareSemanticDiffWithArtifacts({
       before: document([]),
       after: document([
         rootJobnet("/root/after", { sd: "2026/04/01", st: "09:00" }),
       ]),
       options: {
-        scheduleComparisonPeriod: { from: "2026-04-31", to: "2026-05-01" },
+        scheduleComparisonPeriod: requestedPeriod,
       },
     });
 
@@ -112,6 +113,27 @@ suite("Semantic Diff comparison artifacts", () => {
     });
     assert.strictEqual(artifacts.scheduleProjectionFacts.issues.length, 1);
     assert.deepStrictEqual(artifacts.result.scheduleComparison, undefined);
+    const issue = artifacts.scheduleProjectionFacts.issues[0]!;
+    const sourceDetail = artifacts.result.unsupportedItems.find(
+      (item) => item.reasonCode === "invalid-schedule-comparison-period",
+    )!.detail;
+    const detailSnapshot = JSON.stringify(sourceDetail);
+    assert.deepStrictEqual(issue.detail, sourceDetail);
+    assert.notStrictEqual(issue.detail, sourceDetail);
+    assert.notStrictEqual(issue.detail.period, sourceDetail.period);
+    assert.ok(Object.isFrozen(issue.detail));
+    assert.ok(Object.isFrozen(issue.detail.period));
+    assert.ok(Object.isFrozen(issue.detail.rawValues));
+    assert.ok(!Object.isFrozen(sourceDetail));
+    assert.ok(!Object.isFrozen(sourceDetail.period));
+    assert.ok(!Object.isFrozen(requestedPeriod));
+    sourceDetail.period!.from = "2027-01-01";
+    sourceDetail.rawValues.push("changed source");
+    assert.strictEqual(JSON.stringify(issue.detail), detailSnapshot);
+    assert.strictEqual(
+      artifacts.scheduleProjectionFacts.period.from,
+      "2026-04-31",
+    );
   });
 
   test("evaluates one period and retains both root projections", () => {
@@ -480,6 +502,43 @@ suite("Semantic Diff comparison artifacts", () => {
       issues[0]?.detail.rawValues,
       issues[1]?.detail.rawValues,
     );
+    for (const side of ["before", "after"] as const) {
+      const sideFacts = artifacts.scheduleProjectionFacts[side];
+      for (const root of artifacts.scheduleProjectionFacts.correspondence) {
+        const projection = root[side]!;
+        const status = sideFacts.statuses.find(
+          (candidate) => candidate.rootId === root.id,
+        )!;
+        const finalIssues = sideFacts.issues.filter(
+          (issue) => issue.rootId === root.id,
+        );
+        assert.deepStrictEqual(
+          projection.issueIds,
+          finalIssues.map((issue) => issue.id),
+        );
+        assert.deepStrictEqual(status.issueIds, projection.issueIds);
+        assert.strictEqual(status.outcome, projection.outcome);
+        assert.strictEqual(
+          new Set(finalIssues.map((issue) => issue.id)).size,
+          finalIssues.length,
+        );
+        assert.deepStrictEqual(
+          finalIssues.map((issue) => issue.occurrenceOrdinal),
+          [0, 1],
+        );
+      }
+    }
+    const sourceDetail = artifacts.result.unsupportedItems.find(
+      (item) => item.side === "after" && item.detail.rawValues[0] === "2",
+    )!.detail;
+    const projectedDetail = issues[0]!.detail;
+    const detailSnapshot = JSON.stringify(projectedDetail);
+    assert.notStrictEqual(projectedDetail, sourceDetail);
+    assert.ok(Object.isFrozen(projectedDetail.rawValues));
+    assert.ok(!Object.isFrozen(sourceDetail));
+    assert.ok(!Object.isFrozen(sourceDetail.rawValues));
+    sourceDetail.rawValues.push("changed source");
+    assert.strictEqual(JSON.stringify(projectedDetail), detailSnapshot);
   });
 
   test("keeps real duplicate and nested schedule runs source-local", () => {

@@ -24,6 +24,13 @@ R5 now includes populated child-run freezing and producer mutation isolation
 in the existing last-hit/nested fixture. V5 observations/aggregate and its
 measured duplication advisory are retained for independent review. F1 repeats
 on exact unchanged snapshots reproduce 15/17 within both baseline and final;
-only affected smells evidence and coordination validation were refreshed. S2-specific
-issue/detail/final-link extensions remain pending. These are validation facts,
-not independent ownership judgment or Completion Approval.
+only affected smells evidence and coordination validation were refreshed.
+
+S2 extends the existing status/invalid/duplicate fixtures with nested evidence
+isolation, direct callable re-exports and final same-side root/status/issue links.
+S2 V1 has 68 passing tests, V2 has 1193 passing desktop tests, V3 includes WEB-13,
+and V4 builds both bundles. V5 has no new/adverse mapped findings and reuses the
+matching S1 measured-instability evidence; S2-v1 is linked in
+[TASKS](TASKS.md#slice-s2-issue-projection-and-final-correspondence-consistency).
+These are validation facts, not independent ownership judgment or
+Completion Approval.

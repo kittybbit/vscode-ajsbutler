@@ -4,27 +4,28 @@
 
 - Purpose: isolate Run and Issue projection decisions without changing public
   schedule facts or schedule-impact behavior.
-- Active or approved slice: S1. Approved order: S1, then S2.
+- Active or approved slice: S2. Approved order: S1, then S2.
 - Read [SPECS](SPECS.md), this plan, [traceability](TRACEABILITY.md),
   [SDD policy](../../README.md), and [Solution Shape](../../architecture.md#solution-shape).
 - Constraints: P1 only; no schedule semantics, forwarding wrappers, host fixes,
   DTO/identity/timeline redesign or architecture exceptions.
-- Next gate: S1 completion commit; S2 waits for that commit.
+- Next gate: S2 completion commit, then Feature Exit.
 
 ## Current state
 
 - Lifecycle state: SLICE_APPROVED
-- Next decision / blocker: focused S1 completion commit.
+- Next decision / blocker: focused S2 completion commit.
 - Gate evidence: intake and planning documentation records below; independent
   plan review returned Ready for approval and Human Approval was received.
   Planning commit: `85d3942adc092a41d26ad6e38a74ff15cf36991e`.
   S1 diff, validation, Ready reviews and actual Completion Approval are
-  recorded below; completion commit is pending.
+  recorded below; completion commit is
+  `f33d354377af1e69467db2e7ccab1cb4b7c8e7e4`.
 - Selected base: `7713435dc0d4aece4604f88722dbb51d30315104`.
 - Branch: `codex/semantic-diff-schedule-projection-facts-cohesion`.
 - Main renamed the docs branch after the approved planning commit, before
   runtime edits, to satisfy the implementation branch boundary.
-- Completed/preserved slices: none. Existing WebAPI feature and every roadmap
+- Completed/preserved slices: S1 committed. Existing WebAPI feature and every roadmap
   item retain their scope, ownership, approvals and evidence.
 
 ## Human Approval
@@ -170,7 +171,7 @@ review must assess the ownership and retained coupling separately.
 
 ## Slice S1: Run Projection
 
-- Lifecycle state: SLICE_APPROVED
+- Lifecycle state: SLICE_COMMITTED
 - Value: isolate run collection and identity-aware occurrence projection while
   retaining an independently usable, immutable facts builder.
 - Dependency: reviewed, human-approved and committed plan; no prior slice.
@@ -261,11 +262,11 @@ review must assess the ownership and retained coupling separately.
   - `src/test/suite/semanticDiffScheduleImpact.test.ts`
   - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TASKS.md`
   - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TRACEABILITY.md`
-- Completion commit: none.
+- Completion commit: `f33d354377af1e69467db2e7ccab1cb4b7c8e7e4`.
 
 ## Slice S2: Issue Projection and final correspondence consistency
 
-- Lifecycle state: PLANNED
+- Lifecycle state: SLICE_APPROVED
 - Value: one owner for issue classification/evidence/identity while preserving
   Root correspondence's ordered assembly and final consistency.
 - Dependency: S1 independently reviewed, completion-approved and committed.
@@ -300,7 +301,84 @@ review must assess the ownership and retained coupling separately.
   independent implementation review precede Completion Approval/commit.
 - Approval boundary: exact paths above; S1 module, DTOs, identity/timeline,
   downstream impact builder, architecture rules and durable docs excluded.
-- Review / approval / completion commit / evidence: none
+- Implementation acceptance: existing reason/status mapping, evidence matching
+  and fallback, detail cloning, sort keys, occurrence IDs, longest-root
+  ownership and candidate suppression remain unchanged. Final correspondence
+  supplies completed IDs once; remapping preserves details and ordinals, and
+  facts finalizes root/status links after remapping. Invalid issue IDs/details
+  retain their contract while facts owns invalid state and period cloning.
+- Implemented Solution Shape: the approved Issue Application owner exports
+  `buildScheduleIssues`, `findScheduleIssueRoot`, `remapScheduleIssues` and
+  `buildInvalidScheduleIssues`, with explicit readonly boundary types. Facts
+  directly re-exports the same `cloneDetail` / `compareIssues` references.
+  Root selection/assembly/outcomes/final links/state/freezing remain in facts;
+  S1 Run, DTO/identity/timeline and downstream owners are unchanged. Existing
+  Domain/application capabilities suffice; no wrapper, port, adapter, factory,
+  reverse facts import, framework or custom mechanism is introduced.
+- Changed paths: the two approved runtime paths, both approved test paths,
+  this `TASKS.md` and `TRACEABILITY.md`; no outside product/configuration paths.
+- Test-first evidence: extended existing public fixtures before extraction;
+  25 impact/artifact tests pass. Rich duplicated evidence covers nested
+  relationPair/period/all-array cloning, frozen output and mutable unchanged
+  producers; real duplicate decisions cover final same-side root/status/issue
+  links and stable ordinals; invalid-period details remain isolated. Existing
+  cycle details retain their null period. Direct callable re-export assertions
+  were added to the existing contract test after extraction.
+- Validation: S2-v1; final compile and exact isolated V1 pass (68 tests),
+  desktop preparation/runner pass (1193 tests), web passes including WEB-13,
+  and production desktop/web build passes. Architecture catalog results remain
+  separate from independent semantic ownership judgment. VS Code `^1.75.0`,
+  Node assumptions and JP1/AJS3 v13 schedule meanings are unchanged.
+- V5: official full-repository qlty 0.645.0 check has 4 / 4 identical inherited
+  findings: MD041 in the pull-request template, formatting in the unchanged
+  S1 Run owner, unused `ParamSymbol` in unit-list code and an unused eslint
+  suppression in the test runner. All four are unchanged and outside S2's
+  approved implementation scope; preserve them without changing those paths.
+  Smells has 151 / 151, no new finding or adverse mapped movement.
+  Final aggregate passes. The same reciprocal duplication cluster has
+  `actual` 17 -> 15, warning unchanged; matching S1 repeated-snapshot evidence
+  establishes its measured instability, so no improvement is claimed. All
+  other 149 canonical records match; raw measurements and reuse proof remain
+  in the evidence for independent review.
+- Evidence: [S2 validation record](/private/tmp/ajsbutler-projection-facts-s2-20261010/record.json),
+  baseline S1 commit `f33d354377af1e69467db2e7ccab1cb4b7c8e7e4`, substantive
+  final snapshot identity
+  `e1463b603c4c469d3f4deb184783eee3c41733315e24ac6ddaf782a59d9c3ed3`.
+  Later execution/state/evidence/traceability annotations are a separately
+  validated metadata patch. Retained exceptions include corrected test fixture
+  assumptions, unavailable direct formatter, final-clone formatting sync and
+  architecture timeouts during concurrent validation; the exact isolated V1
+  retry passes without configuration or command changes.
+- Compatibility/readiness: required product commands complete; two independent
+  implementation reviews returned Ready with no open Findings. No new
+  dependencies, telemetry data surface or compatibility contract changes;
+  algorithms retain existing error/fallback/malformed/large-input behavior.
+  No durable documentation, README or CHANGELOG update is needed for this
+  behavior-preserving internal extraction. S1 completion evidence is retained;
+  S2 completion and feature closure approval/commits are not inferred.
+- Independent review: Findings F1 (P2) corrected the inherited check count
+  to 4 / 4 with precise unchanged-finding dispositions; F2 (P3) removed a stale
+  lifecycle clause from historical plan evidence. Runtime/Solution Shape and
+  validation evidence remain unchanged. Only coordination metadata validation
+  was refreshed; re-review resolved F1/F2 and returned Ready. A second
+  independent implementation review also returned Ready.
+- Review: `projection_facts_s2_review` and
+  `projection_facts_s2_second_review` returned Ready in the current conversation;
+  reviewed working-tree identity
+  `c379a45e9b62abc91df3969c97efd60f2898793c840da065be52ca043e55a300`,
+  patch SHA256
+  `f973076cb87d380ccd3079b58f5dacae3056ac8e551f206321959eab77e3381a`.
+- Completion Approval: Approved; approved at: approved in current conversation.
+- Approved completion scope: reviewed S2 implementation and evidence only;
+  closure approval is not inferred.
+- Approved completion paths:
+  - `src/application/semantic-diff/semanticDiffScheduleProjectionFacts.ts`
+  - `src/application/semantic-diff/semanticDiffScheduleIssueProjection.ts`
+  - `src/test/suite/semanticDiffScheduleImpact.test.ts`
+  - `src/test/suite/compareSemanticDiffWithArtifacts.test.ts`
+  - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TASKS.md`
+  - `docs/specs/features/semantic-diff-schedule-projection-facts-cohesion/TRACEABILITY.md`
+- Completion commit: none.
 
 ## Common exclusions and validation blockers
 
@@ -397,8 +475,8 @@ Disposition below is intake evidence, not a durable roadmap rewrite.
 - Independent plan review: `Ready for approval`, no Findings, in the current
   conversation by `projection_facts_plan_review`; reviewed planning identity
   `0eb979fe9c25e366d353ed2bdc48f8d2d937d48b85062d37f68897d7206a8e6c`.
-  Main recorded review and actual Human Approval; S1 is now SLICE_APPROVED and
-  S2 remains PLANNED.
+  Main recorded review and actual Human Approval for the reviewed plan.
+  Current slice states and completed gates are recorded in their sections.
 
 - Intake: intake-v1 passed for its own content identity, discovery coverage and
   three Markdown files; unchanged discovery reused, planning documents supersede
@@ -408,7 +486,7 @@ Disposition below is intake evidence, not a durable roadmap rewrite.
 - Evidence artifact: [planning evidence](/private/tmp/ajsbutler-projection-facts-plan-20261010/record.json)
   with discovery input manifest and documentation outputs. Retain with intake
   evidence through review, approval, commit and Feature Exit.
-- Runtime/build/qlty evidence: S1-v1 linked above; S2 V1–V5 pending.
+- Runtime/build/qlty evidence: S1-v1 and S2-v1 linked above.
 - Review: Ready for approval as recorded above; Human Approval: Approved;
   planning commit: `85d3942adc092a41d26ad6e38a74ff15cf36991e`.
 - Missing facts: no unresolved product/design choice; required host-check
