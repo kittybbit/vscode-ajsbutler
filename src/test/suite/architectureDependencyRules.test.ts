@@ -4,21 +4,25 @@ import * as path from "path";
 import * as ts from "typescript";
 import {
   architectureRuleIds,
-  collectFunctionFactoryDefinitionsFromSource,
-  collectImportReferencesFromSource,
-  collectImportedConstructionReferencesFromSource,
-  collectProductionApplicationFactoryDefinitions,
-  collectProductionConstructionReferences,
-  collectProductionImportReferences,
-  collectProductionSourceFiles,
   findArchitectureRuleViolations,
   findCompositionRootViolations,
   findParserPortBoundaryViolations,
   findTelemetryBoundaryViolations,
   formatViolation,
-  resolveImportPath,
   type ArchitectureRuleId,
 } from "../support/architectureDependencyRules";
+import {
+  collectFunctionFactoryDefinitionsFromSource,
+  collectImportReferencesFromSource,
+  collectImportedConstructionReferencesFromSource,
+  resolveImportPath,
+} from "../support/architectureSourceAnalysis";
+import {
+  collectProductionApplicationFactoryDefinitions,
+  collectProductionConstructionReferences,
+  collectProductionImportReferences,
+  collectProductionSourceFiles,
+} from "../support/architectureRepositoryCollection";
 
 const repoRoot = path.resolve(__dirname, "../../..");
 
@@ -802,6 +806,26 @@ suite("Architecture dependency rules", () => {
     );
 
     assert.deepStrictEqual(violations.map(formatViolation), []);
+  });
+
+  test("preserves formatted violation messages and multiple-rule order", () => {
+    const references = collectImportReferencesFromSource(
+      "src/presentation/vscode/example.ts",
+      'import { Adapter } from "../../infrastructure/example/Adapter";',
+    );
+    const violations = findArchitectureRuleViolations(references);
+
+    assert.deepStrictEqual(
+      violations.map(({ ruleId }) => ruleId),
+      [
+        architectureRuleIds.presentationOuterImplementation,
+        architectureRuleIds.concreteInfrastructureOutsideComposition,
+      ],
+    );
+    assert.deepStrictEqual(violations.map(formatViolation), [
+      "src/presentation/vscode/example.ts imports ../../infrastructure/example/Adapter [presentation-outer-implementation] (presentation must not import infrastructure or bootstrap)",
+      "src/presentation/vscode/example.ts imports ../../infrastructure/example/Adapter [concrete-infrastructure-outside-composition] (concrete infrastructure must be referenced only by infrastructure or bootstrap)",
+    ]);
   });
 
   test("keeps the application parser port at the normalized adapter", () => {

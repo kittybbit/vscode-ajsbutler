@@ -9,15 +9,16 @@
   [architecture](../../architecture.md#solution-shape).
 - Validate: coordination-document checks below; no code baseline required
   for intake.
-- Constraints / next decision: focused planning commit, then S1 implementation.
+- Constraints / next decision: focused S1 completion commit, then S2.
   Solution Shape, coverage, and approval boundaries are recorded below. No runtime,
   test, generated, or configuration edits before the implementation gate.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
-- Next decision / blocker: focused planning commit; no missing decision.
-- Gate evidence: renewed plan review Ready and explicit Human Approval; commit pending.
+- Lifecycle state: SLICE_APPROVED
+- Next decision / blocker: focused S1 completion commit;
+  S2 remains unstarted until the commit succeeds.
+- Gate evidence: renewed plan review Ready, Human Approval, and focused plan commit.
 - Selection/base: user-selected `architecture-test-cohesion`, branch
   `codex/architecture-test-cohesion`, base
   `cafc9c219dacdc3924c2ca992dedb9038911448d`.
@@ -70,6 +71,16 @@
   [renewed Main gate record](/private/tmp/architecture-test-cohesion-main/renewed-plan-gate.json).
 - Approval authorizes implementation scope and plan commit, not future
   Completion Approval or Closure Approval.
+
+## Plan commit
+
+- Commit: `afec6acac051cff8c10e1d9e5cb69e0a9731782f`.
+- Message: `docs(sdd): approve architecture test cohesion plan`.
+- Gate: approval-committer confirmed exact three feature Markdown paths and
+  staged diff check passed. Related two-file S1 agent patch remains unstaged.
+- Evidence: [Main commit record](/private/tmp/architecture-test-cohesion-main/plan-commit.json).
+- Post-commit state annotations are separate metadata, not a new substantive
+  planning or product-validation identity.
 
 ## Discovery and impact
 
@@ -178,7 +189,7 @@ are unchanged; this plan changes only how their existing gates are verified.
 
 ## Slice S1: Separate test responsibilities and retain agent setting edits
 
-- Lifecycle state: PLAN_APPROVED; Human Approval: Approved.
+- Lifecycle state: SLICE_APPROVED; Human Approval: Approved.
 - Value: maintainers can change source syntax handling independently of
   repository traversal and architecture policy evaluation.
 - Dependencies: focused reviewed/approved planning commit; no other slice.
@@ -283,7 +294,7 @@ Evidence belongs to the implementer and follows the Evidence Contract.
 
 1. `rtk pnpm run test:compile`.
 2. `rtk pnpm exec mocha --ui tdd --reporter json
-   'out/test/suite/architecture*.test.js'` (one shell command; joined line).
+'out/test/suite/architecture*.test.js'` (one shell command; joined line).
    Save complete JSON/output and exits outside inspected inputs. Require zero
    failures, pending tests, and missing catalog tests; record titles, per-suite
    execution counts, and fixture/assertion preservation separately. Use a
@@ -381,3 +392,78 @@ requires current-head Qlty Cloud under repository policy.
   29-title inventory reused; no implementation baseline scans performed.
 - Original planning evidence and review remain historical and unchanged.
   Revised scope review is pending; Main owns human approval annotations.
+
+## S1 implementation and validation index
+
+- Result: SLICE_APPROVED; two independent reviews Ready and explicit
+  Completion Approval received. Completion commit pending; S2 is unstarted.
+- Changed paths: the four approved S1 test paths, the exact two pre-existing
+  agent setting edits, and this file plus `TRACEABILITY.md`.
+- Solution Shape: source analysis owns syntax and resolution; repository
+  collection owns deterministic discovery/loading; rule evaluation owns the
+  unchanged catalog and messages. Consumers import the owner directly.
+  Existing TypeScript AST, filesystem and Mocha capabilities suffice. No
+  production port, adapter, retained application factory, wrapper or custom
+  mechanism changes.
+- Acceptance: original 29 test bodies/fixtures/assertions retained; one
+  additional focused message/order regression. Baseline 29/29 and final 30/30
+  pass with zero failures/pending. Production file, import, construction,
+  factory and compiled-suite discovery inventories match exactly. Both TOML
+  mappings and procedure strings match after removing only the approved
+  model/effort settings; raw patches contain exactly those replacements.
+- Validation identity, command exits, hashes, inventories, full outputs and
+  official SARIF comparisons: [S1 evidence](/private/tmp/architecture-test-cohesion-s1/evidence.json).
+  Baseline is plan commit `afec6acac051cff8c10e1d9e5cb69e0a9731782f`;
+  final identity is the stabilized manifest in that artifact. Documentation
+  gate metadata is separately identified from product inputs.
+- Required validation: V1 compilation, original/discovered architecture suite,
+  assertion mapping, inventory equality, configuration check, full-repository
+  qlty observations/final aggregate, Markdown/link/structure and diff checks.
+  Raw qlty statuses and finding dispositions remain in evidence; unchanged
+  unrelated findings are not represented as absent.
+- Compatibility/readiness: no production code, dependency, DTO, runner,
+  entry point or product configuration change. Desktop/web bundles and
+  `engines.vscode` (`^1.75.0`) remain unchanged; planned browser-safety gates
+  pass. Test-only Node assumptions and existing AST error/cycle behavior remain
+  unchanged. JP1/AJS, large/malformed definitions, errors/fallbacks, parser,
+  telemetry event/privacy contracts and performance are unaffected by moving
+  identical test functions. No README, CHANGELOG or durable documentation
+  change is needed under the Durable Documentation Gate.
+- Risks/feedback: unchanged pre-existing qlty findings retain their existing
+  owners. Full title/body mapping and direct compiled discovery mitigate lost
+  coverage; matching inventories mitigate resolver/traversal drift. Quality and
+  semantic ownership judgments belong to independent review. Evidence records
+  initial sandbox logging and exit-capture exceptions plus their corrected runs.
+
+## S1 independent review and completion gate
+
+- Reviews: `review_s1` and `review_s1_second`, independent read-only
+  implementation-reviewer agents, both Ready with no Findings.
+- Reviewed base: `afec6acac051cff8c10e1d9e5cb69e0a9731782f`.
+- Reviewed substantive identity:
+  `e73dfb896887b8233c828578083d78c38a1308176004075864dbb6501177a0d8`.
+- Evidence: [Main S1 review record](/private/tmp/architecture-test-cohesion-main/s1-reviews.json).
+  Producer evidence and all matching checks were reused; no reviewer reruns.
+- Solution Shape, exact eight-path scope, acceptance, quality disposition,
+  compatibility, and production readiness were accepted independently.
+- Second review covers the architecture/configuration-sensitive surface.
+- Completion Approval: Approved; approved at: approved in current conversation,
+  2026-10-10 (Asia/Tokyo); scope: exact reviewed S1 completion below.
+- Approved completion scope: exact eight S1 paths and the separately validated
+  feature-record gate metadata. Agent model/effort changes are included.
+- Gate metadata is separate from the immutable producer snapshot. Full qlty
+  evidence remains bound to its recorded substantive manifest; these state and
+  review annotations do not change scope, checks, or acceptance.
+
+## S1 Completion Approval evidence
+
+- Human explicitly approved the presented S1 completion in the current
+  conversation; this authorizes its focused commit, not S2 Completion Approval.
+- Record: [S1 completion approval](/private/tmp/architecture-test-cohesion-main/s1-completion-approval.json).
+- Exact commit paths: `src/test/support/architectureDependencyRules.ts`,
+  `src/test/support/architectureSourceAnalysis.ts`,
+  `src/test/support/architectureRepositoryCollection.ts`,
+  `src/test/suite/architectureDependencyRules.test.ts`,
+  `.codex/agents/implementer.toml`,
+  `.codex/agents/implementation-reviewer.toml`, this `TASKS.md`, and
+  `TRACEABILITY.md` in this feature folder.
