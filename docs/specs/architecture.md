@@ -122,6 +122,11 @@ The repository does not use a service container.
   parser types or raw parser data.
 - The normalized model is the only production domain model for downstream use
   cases.
+- Public TypeScript contracts for normalized model values and published lookup
+  collections are readonly, including nested buckets. This constrains consumer
+  writes at compile time; it does not promise runtime freezing or prevent writes
+  through a separately held mutable producer reference. Construction may retain
+  mutable local builders and publish their existing references.
 
 JP1/AJS3 version 13 is the normative target for new parameter and command
 semantics. Consumer-specific formatting remains in application projections or
