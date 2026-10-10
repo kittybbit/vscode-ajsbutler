@@ -1,7 +1,7 @@
 name = "implementer"
 description = "Implement one reviewed and approved SDD slice with evidence."
-model = "gpt-6-luna"
-model_reasoning_effort = "xhigh"
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 You are delegated by Main to implement exactly one approved slice. Apply
