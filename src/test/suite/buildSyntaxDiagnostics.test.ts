@@ -64,6 +64,28 @@ const buildTransferFileDefinition = (
   ]);
 
 suite("Diagnose AJS Definition", () => {
+  test("locates a parsed semantic violation after supplementary text in UTF-16", () => {
+    const content = "unit=event,,jp1admin,;{ty=evsj;cm=😀🧭;evsid=zz;}";
+    const diagnostics = diagnoseAjsDefinition(content);
+    assert.deepStrictEqual(diagnostics, [
+      {
+        line: 1,
+        column: content.indexOf("evsid"),
+        length: "evsid".length,
+        message:
+          "Event ID (evsid) must be hexadecimal within 00000000-00001FFF or 7FFF8000-7FFFFFFF.",
+        severity: "error",
+        category: syntaxDiagnosticCategories.eventSending,
+        ruleId: diagnosticRuleIds.eventSendIdRange,
+      },
+    ]);
+    const diagnostic = diagnostics[0]!;
+    assert.strictEqual(
+      content.slice(diagnostic.column, diagnostic.column + diagnostic.length),
+      "evsid",
+    );
+  });
+
   test("preserves diagnostic position fallback for normalized parameters", () => {
     assert.deepStrictEqual(
       toDiagnosticSourceRange({ length: undefined }, "evsid".length),
@@ -470,6 +492,10 @@ suite("Diagnose AJS Definition", () => {
         [13, 2, 2],
         "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
       ),
+      expectedSyntaxDiagnostic(
+        [14, 2, 2],
+        "Execution-start date (sd) must use schedule rule numbers 1..144, except sd=0,ud, and its explicit year/day values must stay within the JP1/AJS3 v13 schedule and SCHEDULELIMIT ranges.",
+      ),
     ]);
     assert.ok(
       diagnostics.every(
@@ -489,7 +515,7 @@ suite("Diagnose AJS Definition", () => {
         "  cy=1,(2,w);",
         "  sd=2,*15;",
         "  cy=2,(3,d);",
-        "  sd=3,@su;",
+        "  sd=3,@20;",
         "  cy=4,(1,w);",
         "}",
         "",
@@ -507,7 +533,7 @@ suite("Diagnose AJS Definition", () => {
         "  ty=g;",
         "  sd=1,*15;",
         "  cy=1,(2,w);",
-        "  sd=2,@su;",
+        "  sd=2,@20;",
         "  cy=2,(1,w);",
         "  sd=3,20;",
         "  cy=3,(4,w);",
@@ -589,6 +615,7 @@ suite("Diagnose AJS Definition", () => {
             "tho=-1;",
             "rjs=0;",
             "rje=4294967296;",
+            "abr=y;",
           ],
         },
         {
@@ -625,13 +652,13 @@ suite("Diagnose AJS Definition", () => {
         message: "Retry end code (rje) must be between 1 and 4294967295.",
       },
       {
-        line: 17,
+        line: 19,
         column: 4,
         length: 3,
         message: "Retry count (rec) must be between 1 and 12.",
       },
       {
-        line: 18,
+        line: 20,
         column: 4,
         length: 3,
         message: "Retry interval (rei) must be between 1 and 10.",
@@ -1051,7 +1078,7 @@ suite("Diagnose AJS Definition", () => {
         "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
       ),
       expectedSyntaxDiagnostic(
-        [15, 4, 4],
+        [14, 4, 4],
         "File monitoring condition (flwc) must use c, c:d, c:d:s, or c:d:m.",
       ),
       expectedSyntaxDiagnostic(
@@ -1078,9 +1105,9 @@ suite("Diagnose AJS Definition", () => {
     );
 
     assertSyntaxDiagnostics(diagnostics, [
-      expectedExecutionTimeRangeDiagnostic([14, 4, 4]),
-      expectedStartConditionExecutionTimeDiagnostic([14, 4, 4]),
-      expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
+      expectedExecutionTimeRangeDiagnostic([14, 4, 2]),
+      expectedStartConditionExecutionTimeDiagnostic([14, 4, 2]),
+      expectedStartConditionExecutionTimeDiagnostic([19, 4, 2]),
     ]);
     assert.ok(
       diagnostics.every(
@@ -1260,9 +1287,9 @@ suite("Diagnose AJS Definition", () => {
     );
 
     assertSyntaxDiagnostics(diagnostics, [
-      expectedExecutionTimeRangeDiagnostic([14, 4, 7]),
-      expectedStartConditionExecutionTimeDiagnostic([14, 4, 7]),
-      expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
+      expectedExecutionTimeRangeDiagnostic([14, 4, 2]),
+      expectedStartConditionExecutionTimeDiagnostic([14, 4, 2]),
+      expectedStartConditionExecutionTimeDiagnostic([19, 4, 2]),
     ]);
     assert.ok(
       diagnostics.every(
@@ -1378,7 +1405,8 @@ suite("Diagnose AJS Definition", () => {
   });
 
   test("reports transfer-file byte-length diagnostics for explicit out-of-range values", () => {
-    const tooLongFileName = "a".repeat(512);
+    const tooLongSourcePath = `/${"a".repeat(511)}`;
+    const tooLongDestinationName = "a".repeat(512);
     const diagnostics = diagnoseAjsDefinition(
       [
         "unit=root,,jp1admin,;",
@@ -1389,13 +1417,13 @@ suite("Diagnose AJS Definition", () => {
         "  unit=job1,,jp1admin,;",
         "  {",
         "    ty=j;",
-        `    ts1=${tooLongFileName};`,
+        `    ts1="${tooLongSourcePath}";`,
         "  }",
         "  unit=queue1,,jp1admin,;",
         "  {",
         "    ty=qj;",
-        "    ts1=queue-source;",
-        `    td1=${tooLongFileName};`,
+        '    ts1="/queue-source";',
+        `    td1="${tooLongDestinationName}";`,
         "  }",
         "}",
         "",
@@ -1504,8 +1532,8 @@ suite("Diagnose AJS Definition", () => {
   test("reports transfer-file invalid-combination diagnostics when source files are omitted", () => {
     const diagnostics = diagnoseAjsDefinition(
       buildTransferFileDefinition(
-        ["td1=dest-only;", "top1=del;"],
-        ["td1=queue-dest-only;", "top1=del;"],
+        ['td1="dest-only";', "top1=del;"],
+        ['td1="queue-dest-only";', "top1=del;"],
       ),
     );
 
@@ -1810,23 +1838,23 @@ suite("Diagnose AJS Definition", () => {
 
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
-        [9, 4, 5],
+        [12, 4, 5],
         "Event search condition (evesc) must be no or between 1 and 720.",
       ),
       expectedSyntaxDiagnostic(
-        [14, 4, 5],
+        [17, 4, 5],
         "Event search condition (evesc) must be no or between 1 and 720.",
       ),
       expectedSyntaxDiagnostic(
-        [19, 4, 5],
+        [22, 4, 5],
         "Event search condition (evesc) must be no or between 1 and 720.",
       ),
       expectedSyntaxDiagnostic(
-        [24, 4, 5],
+        [27, 4, 5],
         "Event ID (evwid) must be hexadecimal in 00000000:00000000-FFFFFFFF:FFFFFFFF format.",
       ),
       expectedSyntaxDiagnostic(
-        [29, 4, 5],
+        [32, 4, 5],
         "Event source IP address (evipa) must be a dotted-decimal IPv4 address between 0.0.0.0 and 255.255.255.255.",
       ),
     ]);
@@ -1921,27 +1949,27 @@ suite("Diagnose AJS Definition", () => {
 
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
-        [12, 4, 5],
+        [13, 4, 5],
         "Event issue source user name (evusr) must be a quoted string between 1 and 20 bytes.",
       ),
       expectedSyntaxDiagnostic(
-        [17, 4, 5],
+        [18, 4, 5],
         "Event issue source group name (evgrp) must be a quoted string between 1 and 20 bytes.",
       ),
       expectedSyntaxDiagnostic(
-        [22, 4, 5],
+        [23, 4, 5],
         "Event message filter (evwms) must be a quoted string between 1 and 1024 bytes.",
       ),
       expectedSyntaxDiagnostic(
-        [27, 4, 5],
+        [28, 4, 5],
         "Detailed event information filter (evdet) must be a quoted string between 1 and 1024 bytes.",
       ),
       expectedSyntaxDiagnostic(
-        [32, 4, 5],
+        [33, 4, 5],
         'Optional extended attribute filter (evwfr) must use optional-extended-attribute-name:"value" format.',
       ),
       expectedSyntaxDiagnostic(
-        [37, 4, 5],
+        [38, 4, 5],
         'End judgment condition (evtmc) must be n, a, n:"file-name", a:"file-name", d:"file-name", or b:"file-name" with a file name between 1 and 256 bytes.',
       ),
     ]);
@@ -1988,7 +2016,7 @@ suite("Diagnose AJS Definition", () => {
 
     assertSyntaxDiagnostics(overDiagnostics, [
       expectedSyntaxDiagnostic(
-        [10, 4, 5],
+        [9, 4, 5],
         "Combined optional extended attribute filters (evwfr) must total no more than 2048 bytes in canonical evwfr=<raw-value>; form.",
       ),
     ]);
@@ -2011,7 +2039,7 @@ suite("Diagnose AJS Definition", () => {
     );
 
     assert.strictEqual(multibyteDiagnostics.length, 1);
-    assert.strictEqual(multibyteDiagnostics[0].line, 10);
+    assert.strictEqual(multibyteDiagnostics[0].line, 9);
   });
 
   test("keeps evwfr shape and aggregate diagnostics separate for malformed values", () => {
@@ -2060,15 +2088,15 @@ suite("Diagnose AJS Definition", () => {
 
     assertSyntaxDiagnostics(diagnostics, [
       expectedSyntaxDiagnostic(
-        [9, 4, 5],
+        [10, 4, 5],
         "Event issue source user ID (evuid) must be a signed decimal value between -1 and 9999999999.",
       ),
       expectedSyntaxDiagnostic(
-        [14, 4, 5],
+        [15, 4, 5],
         "Event issue source group ID (evgid) must be a signed decimal value between -1 and 9999999999.",
       ),
       expectedSyntaxDiagnostic(
-        [19, 4, 5],
+        [20, 4, 5],
         "Event issue source process ID (evpid) must be a signed decimal value between -1 and 9999999999.",
       ),
     ]);
@@ -2116,33 +2144,51 @@ suite("Diagnose AJS Definition", () => {
 
     assertSyntaxDiagnostics(diagnostics, [
       {
-        line: 14,
+        line: 16,
         column: 4,
-        length: 5,
+        length: 3,
         message: "Event timeout period (etm) must be between 1 and 1440.",
       },
       {
-        line: 19,
+        line: 16,
         column: 4,
-        length: 5,
+        length: 3,
+        message:
+          "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
+      },
+      {
+        line: 21,
+        column: 4,
+        length: 2,
         message: "Hold attribute (ha) must be y or n.",
       },
       {
-        line: 24,
+        line: 21,
         column: 4,
-        length: 5,
+        length: 2,
+        message:
+          "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
+      },
+      {
+        line: 26,
+        column: 4,
+        length: 3,
         message: "Event timeout action (ets) must be one of kl, nr, wr, or an.",
       },
       expectedSyntaxDiagnostic(
-        [29, 4, 5],
+        [26, 4, 3],
+        "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
+      ),
+      expectedSyntaxDiagnostic(
+        [31, 4, 3],
         "Event timeout period (etm) cannot be specified for jobs defined as start conditions.",
       ),
       expectedSyntaxDiagnostic(
-        [30, 4, 5],
+        [32, 4, 2],
         "Hold attribute (ha) cannot be specified for jobs defined as start conditions.",
       ),
       expectedSyntaxDiagnostic(
-        [31, 4, 5],
+        [33, 4, 3],
         "Event timeout action (ets) cannot be specified for jobs defined as start conditions.",
       ),
     ]);
@@ -2163,9 +2209,9 @@ suite("Diagnose AJS Definition", () => {
     );
 
     assertSyntaxDiagnostics(diagnostics, [
-      expectedExecutionTimeRangeDiagnostic([14, 4, 4]),
-      expectedStartConditionExecutionTimeDiagnostic([14, 4, 4]),
-      expectedStartConditionExecutionTimeDiagnostic([19, 4, 5]),
+      expectedExecutionTimeRangeDiagnostic([14, 4, 2]),
+      expectedStartConditionExecutionTimeDiagnostic([14, 4, 2]),
+      expectedStartConditionExecutionTimeDiagnostic([19, 4, 2]),
     ]);
     assert.ok(
       diagnostics.every(
@@ -2214,25 +2260,25 @@ suite("Diagnose AJS Definition", () => {
 
     assertSyntaxDiagnostics(diagnostics, [
       {
-        line: 9,
+        line: 11,
         column: 4,
         length: 5,
         message: "Event host (evhst) must be between 1 and 255 bytes.",
       },
       {
-        line: 15,
+        line: 17,
         column: 4,
         length: 5,
         message: "Event host (evhst) must be between 1 and 255 bytes.",
       },
       {
-        line: 21,
+        line: 23,
         column: 4,
         length: 5,
         message: "Event host (evhst) must be between 1 and 255 bytes.",
       },
       {
-        line: 26,
+        line: 28,
         column: 4,
         length: 5,
         message: "Event host (evhst) must be between 1 and 255 bytes.",

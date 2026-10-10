@@ -6,7 +6,10 @@ import {
 } from "../../domain/models/ajs/AjsDocumentIndex";
 import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
 
-const unit = (absolutePath: string): AjsUnit => ({
+const unit = (
+  absolutePath: string,
+  overrides: Partial<AjsUnit> = {},
+): AjsUnit => ({
   id: absolutePath,
   name: absolutePath,
   unitAttribute: "jobnet,,jp1admin,",
@@ -21,6 +24,7 @@ const unit = (absolutePath: string): AjsUnit => ({
   parameters: [],
   relations: [],
   children: [],
+  ...overrides,
 });
 
 const document = (rootUnits: AjsUnit[]): AjsDocument => ({
@@ -38,15 +42,25 @@ suite("AjsDocumentIndex", () => {
   });
 
   test("collects unique objects in root-first preorder through cycles", () => {
-    const root = unit("/root");
-    const firstChild = unit("/root/first");
-    const secondChild = unit("/root/second");
+    const rootChildren: AjsUnit[] = [];
+    const root = unit("/root", { children: rootChildren });
+    const firstChildChildren: AjsUnit[] = [];
+    const firstChild = unit("/root/first", {
+      children: firstChildChildren,
+    });
+    const secondChildChildren: AjsUnit[] = [];
+    const secondChild = unit("/root/second", {
+      children: secondChildChildren,
+    });
     const shared = unit("/shared");
-    const secondRoot = unit("/second-root");
-    root.children.push(firstChild, secondChild);
-    firstChild.children.push(shared, root);
-    secondChild.children.push(shared, secondChild);
-    secondRoot.children.push(shared, root);
+    const secondRootChildren: AjsUnit[] = [];
+    const secondRoot = unit("/second-root", {
+      children: secondRootChildren,
+    });
+    rootChildren.push(firstChild, secondChild);
+    firstChildChildren.push(shared, root);
+    secondChildChildren.push(shared, secondChild);
+    secondRootChildren.push(shared, root);
 
     const units = collectUniqueAjsUnits(
       document([root, secondRoot, shared, root]),
@@ -64,11 +78,10 @@ suite("AjsDocumentIndex", () => {
   });
 
   test("collects every occurrence in recursive root-first preorder", () => {
-    const root = unit("/root");
-    const shared = unit("/shared");
-    root.id = "root-id";
-    shared.id = "shared-id";
-    root.children.push(shared);
+    const rootChildren: AjsUnit[] = [];
+    const root = unit("/root", { id: "root-id", children: rootChildren });
+    const shared = unit("/shared", { id: "shared-id" });
+    rootChildren.push(shared);
 
     const occurrences = collectAjsUnitOccurrences(
       document([root, shared, root]),
@@ -89,24 +102,29 @@ suite("AjsDocumentIndex", () => {
   });
 
   test("retains bounded deep and wide occurrence order", () => {
-    const root = unit("/wide");
+    const rootChildren: AjsUnit[] = [];
+    const root = unit("/wide", { children: rootChildren });
     const leaves = Array.from({ length: 4_096 }, (_, position) =>
       unit(`/wide/${position}`),
     );
-    root.children.push(...leaves);
+    rootChildren.push(...leaves);
     const wide = collectAjsUnitOccurrences(document([root]));
 
     assert.strictEqual(wide.length, leaves.length + 1);
     assert.strictEqual(wide[0], root);
     assert.deepStrictEqual(wide.slice(1), leaves);
 
-    const deepRoot = unit("/deep/0");
+    const deepRootChildren: AjsUnit[] = [];
+    const deepRoot = unit("/deep/0", { children: deepRootChildren });
     let parent = deepRoot;
+    let parentChildren = deepRootChildren;
     const deepestLevel = 128;
     for (let depth = 1; depth <= deepestLevel; depth += 1) {
-      const child = unit(`/deep/${depth}`);
-      parent.children.push(child);
+      const childChildren: AjsUnit[] = [];
+      const child = unit(`/deep/${depth}`, { children: childChildren });
+      parentChildren.push(child);
       parent = child;
+      parentChildren = childChildren;
     }
     const deep = collectAjsUnitOccurrences(document([deepRoot]));
 
@@ -116,8 +134,9 @@ suite("AjsDocumentIndex", () => {
   });
 
   test("retains recursive occurrence traversal cycle failure", () => {
-    const selfCycle = unit("/self-cycle");
-    selfCycle.children.push(selfCycle);
+    const cycleChildren: AjsUnit[] = [];
+    const selfCycle = unit("/self-cycle", { children: cycleChildren });
+    cycleChildren.push(selfCycle);
 
     assert.throws(
       () => collectAjsUnitOccurrences(document([selfCycle])),
@@ -127,11 +146,9 @@ suite("AjsDocumentIndex", () => {
 
   test("preserves distinct duplicate matches, key order, and references", () => {
     const first = unit("/first");
-    const duplicateFirst = unit("/duplicate");
+    const duplicateFirst = unit("/duplicate", { id: "duplicate-id" });
     const middle = unit("/middle");
-    const duplicateSecond = unit("/duplicate");
-    duplicateFirst.id = "duplicate-id";
-    duplicateSecond.id = "duplicate-id";
+    const duplicateSecond = unit("/duplicate", { id: "duplicate-id" });
 
     const index = createAjsDocumentIndex([
       first,
@@ -157,19 +174,23 @@ suite("AjsDocumentIndex", () => {
       duplicateSecond,
     ]);
     assert.strictEqual(index.byId.get("duplicate-id")?.[0], duplicateFirst);
+    assert.strictEqual(index.byId.get("duplicate-id")?.[1], duplicateSecond);
+    assert.strictEqual(index.byPath.get("/duplicate")?.[0], duplicateFirst);
+    assert.strictEqual(index.byPath.get("/duplicate")?.[1], duplicateSecond);
   });
 
   test("indexes wide duplicate-heavy graphs in encounter order", () => {
-    const root = unit("/wide-root");
+    const rootChildren: AjsUnit[] = [];
+    const root = unit("/wide-root", { children: rootChildren });
     const duplicateId = "wide-duplicate";
     const duplicatePath = "/wide/duplicate";
     const leaves = Array.from({ length: 4_096 }, (_, position) => {
-      const leaf = unit(duplicatePath);
-      leaf.id = duplicateId;
-      leaf.name = String(position);
-      return leaf;
+      return unit(duplicatePath, {
+        id: duplicateId,
+        name: String(position),
+      });
     });
-    root.children.push(...leaves);
+    rootChildren.push(...leaves);
 
     const ordered = collectUniqueAjsUnits(document([root]));
     const index = createAjsDocumentIndex(ordered);
@@ -182,13 +203,17 @@ suite("AjsDocumentIndex", () => {
   });
 
   test("collects a substantial deep hierarchy without recursion", () => {
-    const root = unit("/deep/0");
+    const rootChildren: AjsUnit[] = [];
+    const root = unit("/deep/0", { children: rootChildren });
     let parent = root;
+    let parentChildren = rootChildren;
     const deepestLevel = 20_000;
     for (let depth = 1; depth <= deepestLevel; depth += 1) {
-      const child = unit(`/deep/${depth}`);
-      parent.children.push(child);
+      const childChildren: AjsUnit[] = [];
+      const child = unit(`/deep/${depth}`, { children: childChildren });
+      parentChildren.push(child);
       parent = child;
+      parentChildren = childChildren;
     }
 
     const ordered = collectUniqueAjsUnits(document([root]));

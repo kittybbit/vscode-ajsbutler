@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { parseAjsDocumentForTest } from "../support/parseAjs";
 import { buildFlowGraphResult } from "../../application/flow-graph/buildFlowGraph";
+import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 import { toFlowGraphDocumentDto } from "../../application/flow-graph/flowGraphDocument";
 
 const validDefinition = `
@@ -47,14 +48,26 @@ suite("Build Flow Graph Use Case", () => {
     if (result.status !== "available") return;
     assert.deepStrictEqual(result.graph.edges, [
       {
+        id: flowGraphEdgeId({
+          source: "/root/jobnet/job-a",
+          target: "/root/jobnet/job-b",
+          type: "seq",
+        }),
         source: "/root/jobnet/job-a",
         target: "/root/jobnet/job-b",
         type: "seq",
+        semanticDiffHighlight: undefined,
       },
       {
+        id: flowGraphEdgeId({
+          source: "/root/jobnet/.CONDITION",
+          target: "/root/jobnet/job-a",
+          type: "con",
+        }),
         source: "/root/jobnet/.CONDITION",
         target: "/root/jobnet/job-a",
         type: "con",
+        semanticDiffHighlight: undefined,
       },
     ]);
     assert.deepStrictEqual(
@@ -182,14 +195,26 @@ suite("Build Flow Graph Use Case", () => {
     if (result.status !== "available") return;
     assert.deepStrictEqual(result.graph.edges, [
       {
+        id: flowGraphEdgeId({
+          source: jobnet.children[0].id,
+          target: jobnet.children[1].id,
+          type: "seq",
+        }),
         source: jobnet.children[0].id,
         target: jobnet.children[1].id,
         type: "seq",
+        semanticDiffHighlight: undefined,
       },
       {
+        id: flowGraphEdgeId({
+          source: jobnet.children[2].id,
+          target: jobnet.children[0].id,
+          type: "con",
+        }),
         source: jobnet.children[2].id,
         target: jobnet.children[0].id,
         type: "con",
+        semanticDiffHighlight: undefined,
       },
     ]);
     assert.deepStrictEqual(

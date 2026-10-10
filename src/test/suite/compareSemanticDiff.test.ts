@@ -245,11 +245,13 @@ suite("Compare Semantic Diff", () => {
       id: "/root/jobnet/job-a",
       name: "job-a",
       absolutePath: "/root/jobnet/job-a",
+      relations: [relation("/root/jobnet/job-a", "/root/jobnet/tail")],
     });
     const afterJob = unit({
       id: "/root/jobnet/job-renamed",
       name: "job-renamed",
       absolutePath: "/root/jobnet/job-renamed",
+      relations: [relation("/root/jobnet/job-renamed", "/root/jobnet/tail")],
     });
     const beforeTail = unit({
       id: "/root/jobnet/tail",
@@ -261,9 +263,6 @@ suite("Compare Semantic Diff", () => {
       name: "tail",
       absolutePath: "/root/jobnet/tail",
     });
-    beforeJob.relations = [relation(beforeJob.id, beforeTail.id)];
-    afterJob.relations = [relation(afterJob.id, afterTail.id)];
-
     const result = compareSemanticDiff({
       before: document([jobnet("jobnet", [beforeJob, beforeTail])]),
       after: document([jobnet("jobnet", [afterJob, afterTail])]),
@@ -549,13 +548,13 @@ suite("Compare Semantic Diff", () => {
       id: "/root/jobnet/source",
       name: "source",
       absolutePath: "/root/jobnet/source",
+      relations: [relation("/root/jobnet/source", "/root/jobnet/target")],
     });
     const beforeTarget = unit({
       id: "/root/jobnet/target",
       name: "target",
       absolutePath: "/root/jobnet/target",
     });
-    beforeSource.relations = [relation(beforeSource.id, beforeTarget.id)];
     const afterSource = unit({
       id: beforeSource.id,
       name: beforeSource.name,
@@ -601,6 +600,9 @@ suite("Compare Semantic Diff", () => {
       name: "source-before",
       absolutePath: "/root/jobnet/source-before",
       parameters: params({ ty: "j", sc: "echo source" }),
+      relations: [
+        relation("/root/jobnet/source-before", "/root/jobnet/target-before"),
+      ],
     });
     const beforeTarget = unit({
       id: "/root/jobnet/target-before",
@@ -620,10 +622,6 @@ suite("Compare Semantic Diff", () => {
       absolutePath: "/root/jobnet/target-after",
       parameters: params({ ty: "j", sc: "echo target" }),
     });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "seq"),
-    ];
-
     const result = compareSemanticDiff({
       before: document([jobnet("jobnet", [beforeSource, beforeTarget])]),
       after: document([jobnet("jobnet", [afterSource, afterTarget])]),
@@ -676,6 +674,9 @@ suite("Compare Semantic Diff", () => {
       id: "/root/jobnet/source",
       name: "source",
       absolutePath: "/root/jobnet/source",
+      relations: [
+        relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+      ],
       parameters: params({ ty: "j", sc: "echo source" }),
     });
     const beforeRemovedTarget = unit({
@@ -697,10 +698,6 @@ suite("Compare Semantic Diff", () => {
       name: "reused-target-id",
       absolutePath: beforeRemovedTarget.absolutePath,
     });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeRemovedTarget.id, "con"),
-    ];
-
     const result = compareSemanticDiff({
       before: document([
         jobnet("jobnet", [
@@ -722,14 +719,16 @@ suite("Compare Semantic Diff", () => {
   });
 
   test("carries normalization warnings into comparison limitations", () => {
-    const before = document([]);
-    before.warnings = [
-      {
-        code: "missing_relation_target",
-        message: "relation target was not found",
-        unitPath: "/root/jobnet/job",
-      },
-    ];
+    const before: AjsDocument = {
+      ...document([]),
+      warnings: [
+        {
+          code: "missing_relation_target",
+          message: "relation target was not found",
+          unitPath: "/root/jobnet/job",
+        },
+      ],
+    };
 
     const result = compareSemanticDiff({
       before,

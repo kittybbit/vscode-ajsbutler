@@ -1,9 +1,24 @@
 import * as assert from "assert";
-import { JSDOM } from "jsdom";
+import * as fs from "fs";
+import * as path from "path";
+import {
+  chromium,
+  type Browser,
+  type BrowserContext,
+  type Page,
+} from "playwright";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import React, { useMemo, useRef, useState } from "react";
+import { VirtuosoMockContext } from "react-virtuoso";
 import axe from "axe-core";
-import { cleanup, fireEvent, render, within } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import type { TableRowView } from "../../presentation/webview/editor/ajsTable/tableViewerData";
@@ -27,99 +42,9 @@ import type {
   HeaderSearchControlLabels,
   HeaderSearchDirection,
 } from "../../presentation/webview/editor/shared/headerSearchControlModel";
-
-type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
-
-const domGlobalKeys = [
-  "window",
-  "document",
-  "navigator",
-  "HTMLElement",
-  "Node",
-  "Element",
-  "Event",
-  "KeyboardEvent",
-  "MouseEvent",
-  "MutationObserver",
-  "ResizeObserver",
-  "getComputedStyle",
-  "requestAnimationFrame",
-  "cancelAnimationFrame",
-  "IS_REACT_ACT_ENVIRONMENT",
-] as const;
-
-const installDomGlobals = (): {
-  dom: JSDOM;
-  previous: GlobalDescriptorMap;
-} => {
-  const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-    url: "http://localhost/",
-  });
-  const previous: GlobalDescriptorMap = new Map();
-  const domWindow = dom.window;
-  const requestAnimationFrame = (callback: FrameRequestCallback): number =>
-    domWindow.setTimeout(() => callback(domWindow.performance.now()), 0);
-  const cancelAnimationFrame = (handle: number): void =>
-    domWindow.clearTimeout(handle);
-  const noOpResizeObserver = class {
-    disconnect(): void {}
-    observe(): void {}
-    unobserve(): void {}
-  };
-  const values: Record<string, unknown> = {
-    window: domWindow,
-    document: domWindow.document,
-    navigator: domWindow.navigator,
-    HTMLElement: domWindow.HTMLElement,
-    Node: domWindow.Node,
-    Element: domWindow.Element,
-    Event: domWindow.Event,
-    KeyboardEvent: domWindow.KeyboardEvent,
-    MouseEvent: domWindow.MouseEvent,
-    MutationObserver: domWindow.MutationObserver,
-    ResizeObserver: noOpResizeObserver,
-    getComputedStyle: domWindow.getComputedStyle.bind(domWindow),
-    requestAnimationFrame,
-    cancelAnimationFrame,
-    IS_REACT_ACT_ENVIRONMENT: true,
-  };
-  Object.defineProperty(domWindow, "matchMedia", {
-    configurable: true,
-    value: () => ({
-      matches: false,
-      media: "",
-      onchange: null,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-      addListener: () => undefined,
-      removeListener: () => undefined,
-      dispatchEvent: () => false,
-    }),
-  });
-  domWindow.HTMLElement.prototype.scrollIntoView = () => undefined;
-  domWindow.scrollTo = () => undefined;
-  for (const key of domGlobalKeys) {
-    previous.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
-    Object.defineProperty(globalThis, key, {
-      configurable: true,
-      writable: true,
-      value: values[key],
-    });
-  }
-  return { dom, previous };
-};
-
-const restoreDomGlobals = (dom: JSDOM, previous: GlobalDescriptorMap): void => {
-  for (const key of domGlobalKeys) {
-    const descriptor = previous.get(key);
-    if (descriptor) {
-      Object.defineProperty(globalThis, key, descriptor);
-    } else {
-      delete (globalThis as Record<string, unknown>)[key];
-    }
-  }
-  dom.window.close();
-};
+import { MyAppContextProvider } from "../../presentation/webview/editor/MyContexts";
+import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
+import { createViewerResourceStateMessage } from "../../presentation/webview/viewerHostMessages";
 
 const createUnit = (
   id: string,
@@ -158,6 +83,15 @@ const createDeepTree = (
   return { deepest, root };
 };
 
+type AccessibilityDeepTreeFixture = {
+  mount: (rootUnits: FlowGraphUnitDto[], selectedUnitId: string) => void;
+  dispose: () => void;
+};
+
+type AccessibilityBrowserWindow = Window & {
+  accessibilityDeepTreeFixture?: AccessibilityDeepTreeFixture;
+};
+
 const createUnitById = (
   units: readonly FlowGraphUnitDto[],
 ): ReadonlyMap<string, Pick<FlowGraphUnitDto, "id" | "parentId">> => {
@@ -171,6 +105,17 @@ const createUnitById = (
   return new Map(entries);
 };
 
+const getTreeItemByUnitId = (
+  container: HTMLElement,
+  unitId: string,
+): HTMLElement => {
+  const row = Array.from(
+    container.querySelectorAll<HTMLElement>('[role="treeitem"]'),
+  ).find((candidate) => candidate.dataset.unitTreeUnitId === unitId);
+  assert.ok(row, `Expected tree item ${unitId}`);
+  return row;
+};
+
 const createTableRow = (index: number): TableRowView =>
   ({
     id: `job-${index}`,
@@ -179,6 +124,22 @@ const createTableRow = (index: number): TableRowView =>
       name: `job-${index}`,
     },
   }) as unknown as TableRowView;
+
+const getGridRowByUnitName = (
+  grid: HTMLElement,
+  unitName: string,
+): HTMLElement => {
+  const row = Array.from(
+    grid.querySelectorAll<HTMLElement>('[role="row"]'),
+  ).find(
+    (candidate) =>
+      candidate
+        .querySelectorAll('[role="gridcell"]')[1]
+        ?.textContent?.trim() === unitName,
+  );
+  assert.ok(row, `Expected a grid row for ${unitName}`);
+  return row;
+};
 
 const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
   const rows = useMemo(
@@ -213,22 +174,26 @@ const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
   });
 
   return (
-    <VirtualizedTable
-      headerGroups={table.getHeaderGroups()}
-      rows={table.getRowModel().rows}
-      rowIndex={rows.findIndex(
-        (row) => row.absolutePath === selectedAbsolutePath,
-      )}
-      columnVisibility={{}}
-      searchQuery="job-1"
-      parameterSearchValuesByPath={new Map()}
-      selectedAbsolutePath={selectedAbsolutePath}
-      selectRow={setSelectedAbsolutePath}
-      focusUnitTree={() => undefined}
-      openDetailPane={() => undefined}
-      restoreFocusRequest={{ revision: 0 }}
-      gridAriaLabel="Units"
-    />
+    <VirtuosoMockContext.Provider
+      value={{ itemHeight: 36, viewportHeight: 480 }}
+    >
+      <VirtualizedTable
+        headerGroups={table.getHeaderGroups()}
+        rows={table.getRowModel().rows}
+        rowIndex={rows.findIndex(
+          (row) => row.absolutePath === selectedAbsolutePath,
+        )}
+        columnVisibility={{}}
+        searchQuery="job-1"
+        parameterSearchValuesByPath={new Map()}
+        selectedAbsolutePath={selectedAbsolutePath}
+        selectRow={setSelectedAbsolutePath}
+        focusUnitTree={() => undefined}
+        openDetailPane={() => undefined}
+        restoreFocusRequest={{ revision: 0 }}
+        gridAriaLabel="Units"
+      />
+    </VirtuosoMockContext.Provider>
   );
 };
 
@@ -298,20 +263,69 @@ const DetailFocusFixture = () => {
 };
 
 suite("Browser accessibility DOM", () => {
-  let dom: JSDOM;
-  let previousGlobals: GlobalDescriptorMap;
+  let previousWindowDescriptors: Map<string, PropertyDescriptor | undefined>;
+  let previousScrollIntoView: PropertyDescriptor | undefined;
 
   suiteSetup(() => {
-    ({ dom, previous: previousGlobals } = installDomGlobals());
+    previousWindowDescriptors = new Map(
+      ["matchMedia", "scrollTo"].map((key) => [
+        key,
+        Object.getOwnPropertyDescriptor(window, key),
+      ]),
+    );
+    previousScrollIntoView = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "scrollIntoView",
+    );
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: () => ({
+        matches: false,
+        media: "",
+        onchange: null,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => false,
+      }),
+    });
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: () => undefined,
+    });
+    Object.defineProperty(window, "scrollTo", {
+      configurable: true,
+      value: () => undefined,
+    });
   });
 
   teardown(() => {
     cleanup();
-    dom.window.document.body.innerHTML = "";
+    delete window.vscode;
+    delete window.EventBridge;
+    document.body.innerHTML = "";
   });
 
   suiteTeardown(() => {
-    restoreDomGlobals(dom, previousGlobals);
+    for (const [key, descriptor] of previousWindowDescriptors) {
+      if (descriptor) {
+        Object.defineProperty(window, key, descriptor);
+      } else {
+        delete (window as unknown as Record<string, unknown>)[key];
+      }
+    }
+    if (previousScrollIntoView) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "scrollIntoView",
+        previousScrollIntoView,
+      );
+    } else {
+      delete (HTMLElement.prototype as unknown as Record<string, unknown>)[
+        "scrollIntoView"
+      ];
+    }
   });
 
   test("keeps one treeitem in the Tab sequence and preserves focus on rerender", () => {
@@ -344,19 +358,21 @@ suite("Browser accessibility DOM", () => {
     assert.strictEqual(document.activeElement, rows[1]);
   });
 
-  test("keeps hidden descendants out of the DOM after collapse and restores focus", () => {
+  test("keeps collapsed descendants out of the accessibility tree and restores focus", async () => {
     const child = createUnit("/root/child", 1, [], "/root");
     const root = createUnit("/root", 0, [child]);
     const view = renderTree([root], {
       currentUnitId: root.id,
       selectedUnitId: root.id,
     });
-    const rootRow = view.getByRole("treeitem", { name: /root/i });
+    const rootRow = getTreeItemByUnitId(view.container, root.id);
 
     rootRow.focus();
     fireEvent.keyDown(rootRow, { key: "ArrowLeft" });
-    assert.strictEqual(view.queryByRole("treeitem", { name: /child/i }), null);
-    assert.strictEqual(document.activeElement, rootRow);
+    await waitFor(() =>
+      assert.ok(!view.queryByRole("treeitem", { name: /child/i })),
+    );
+    assert.ok(document.activeElement === rootRow);
   });
 
   test("does not select a row twice when an expand button is activated", () => {
@@ -367,13 +383,13 @@ suite("Browser accessibility DOM", () => {
       currentUnitId: root.id,
       onSelectUnit: (unitId) => selected.push(unitId),
     });
-    const rootRow = view.getByRole("treeitem", { name: /root/i });
+    const rootRow = getTreeItemByUnitId(view.container, root.id);
     const expandButton = rootRow.querySelector("button");
 
     assert.ok(expandButton);
     fireEvent.click(expandButton);
     assert.deepStrictEqual(selected, []);
-    assert.ok(view.getByRole("treeitem", { name: /child/i }));
+    assert.ok(getTreeItemByUnitId(view.container, child.id));
   });
 
   test("selects and focuses rows while child pointer controls stay isolated", () => {
@@ -386,7 +402,7 @@ suite("Browser accessibility DOM", () => {
       onOpenScope: (unitId) => opened.push(unitId),
       onSelectUnit: (unitId) => selected.push(unitId),
     });
-    const rootRow = view.getByRole("treeitem", { name: /root/i });
+    const rootRow = getTreeItemByUnitId(view.container, root.id);
     const rowFrame = rootRow.querySelector<HTMLElement>(
       '[data-unit-tree-row="true"]',
     );
@@ -426,8 +442,8 @@ suite("Browser accessibility DOM", () => {
       isUnitEnabled: (unit) => unit.id !== child.id,
       onSelectUnit: (unitId) => selected.push(unitId),
     });
-    const rootRow = view.getByRole("treeitem", { name: /^root$/i });
-    const childRow = view.getByRole("treeitem", { name: /disabled/i });
+    const rootRow = getTreeItemByUnitId(view.container, root.id);
+    const childRow = getTreeItemByUnitId(view.container, child.id);
 
     assert.strictEqual(childRow.getAttribute("aria-disabled"), "true");
     assert.strictEqual(childRow.tabIndex, -1);
@@ -452,11 +468,11 @@ suite("Browser accessibility DOM", () => {
       },
       onOpenScope: (unitId) => opened.push(unitId),
     });
-    const childRow = view.getByRole("treeitem", { name: /child/i });
+    const childRow = getTreeItemByUnitId(view.container, child.id);
 
     assert.strictEqual(document.activeElement, childRow);
 
-    const rootRow = view.getByRole("treeitem", { name: /^root$/i });
+    const rootRow = getTreeItemByUnitId(view.container, root.id);
     rootRow.focus();
     fireEvent.keyDown(rootRow, { key: "Enter", altKey: true });
     fireEvent.keyDown(rootRow, { key: "Escape" });
@@ -465,19 +481,167 @@ suite("Browser accessibility DOM", () => {
     assert.strictEqual(escaped, 1);
   });
 
-  test("renders a bounded deep tree with one active row", () => {
+  test("renders a bounded deep tree with one active row", async function () {
+    this.timeout(30_000);
     const { deepest, root } = createDeepTree(128);
-    const view = renderTree([root], { selectedUnitId: deepest.id });
-    const rows = view.getAllByRole("treeitem");
+    const browserErrors: string[] = [];
+    const cleanupErrors: unknown[] = [];
+    let browser: Browser | undefined;
+    let context: BrowserContext | undefined;
+    let page: Page | undefined;
+    let fixtureLoaded = false;
+    let failure: unknown;
+    let failed = false;
+    let browserStep = "launching Chromium";
+    let state:
+      | {
+          rowCount: number;
+          deepestAriaLevel: string | null;
+          selectedRowCount: number;
+          tabStopCount: number;
+        }
+      | undefined;
 
-    assert.strictEqual(rows.length, 129);
-    assert.strictEqual(rows.filter((row) => row.tabIndex === 0).length, 1);
-    assert.strictEqual(
-      view
-        .getByRole("treeitem", { name: /deep-128/i })
-        .getAttribute("aria-level"),
-      "129",
-    );
+    try {
+      browser = await chromium.launch({ timeout: 10_000 });
+      browserStep = "creating browser context";
+      context = await browser.newContext();
+      browserStep = "opening browser page";
+      page = await context.newPage();
+      page.on("console", (message) => {
+        if (message.type() === "error") {
+          browserErrors.push(message.text());
+        }
+      });
+      page.on("pageerror", (error) => browserErrors.push(error.message));
+      browserStep = "loading the browser fixture bundle";
+      const fixtureBundle = fs.readFileSync(
+        path.resolve(__dirname, "../fixtures/accessibilityDeepTree.bundle.js"),
+        "utf8",
+      );
+      await page.setContent(
+        `<!doctype html><html><body><script>${fixtureBundle}</script></body></html>`,
+        { timeout: 7_000 },
+      );
+      fixtureLoaded = true;
+      browserStep = "mounting the deep tree component";
+      const serializedFixture = JSON.stringify({
+        rootUnits: [root],
+        selectedUnitId: deepest.id,
+      });
+      await page.evaluate((payload) => {
+        const { rootUnits, selectedUnitId } = JSON.parse(payload) as {
+          rootUnits: FlowGraphUnitDto[];
+          selectedUnitId: string;
+        };
+        const fixture = (window as AccessibilityBrowserWindow)
+          .accessibilityDeepTreeFixture;
+        if (!fixture) {
+          throw new Error("The accessibility browser fixture did not load.");
+        }
+        fixture.mount(rootUnits, selectedUnitId);
+      }, serializedFixture);
+      browserStep = "waiting for the rendered deep tree";
+      await page.waitForFunction(
+        () => document.querySelectorAll('[role="treeitem"]').length === 129,
+        undefined,
+        { timeout: 8_000 },
+      );
+      browserStep = "reading rendered tree accessibility state";
+      state = await page.evaluate(() => {
+        const rows = Array.from(
+          document.querySelectorAll<HTMLElement>('[role="treeitem"]'),
+        );
+        const deepestRow = rows.find(
+          (row) => row.getAttribute("aria-level") === "129",
+        );
+        return {
+          rowCount: rows.length,
+          deepestAriaLevel: deepestRow?.getAttribute("aria-level") ?? null,
+          selectedRowCount: rows.filter(
+            (row) => row.getAttribute("aria-selected") === "true",
+          ).length,
+          tabStopCount: rows.filter((row) => row.tabIndex === 0).length,
+        };
+      });
+    } catch (error) {
+      failed = true;
+      failure = new Error(
+        `The accessibility browser failed while ${browserStep}.`,
+        { cause: error },
+      );
+    }
+
+    if (page !== undefined && fixtureLoaded) {
+      try {
+        await page.evaluate(() => {
+          const fixture = (window as AccessibilityBrowserWindow)
+            .accessibilityDeepTreeFixture;
+          if (!fixture) {
+            throw new Error("The accessibility browser fixture was lost.");
+          }
+          fixture.dispose();
+        });
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    }
+    if (page !== undefined) {
+      try {
+        await page.close();
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    }
+    if (context !== undefined) {
+      try {
+        await context.close();
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    }
+    if (browser !== undefined) {
+      try {
+        await browser.close();
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    }
+
+    if (browserErrors.length > 0) {
+      const browserError = new Error(
+        `The accessibility browser reported errors: ${browserErrors.join("; ")}`,
+      );
+      failure = failed
+        ? new AggregateError(
+            [failure, browserError],
+            "The accessibility browser case failed and reported browser errors.",
+          )
+        : browserError;
+      failed = true;
+    }
+    if (failed) {
+      if (cleanupErrors.length > 0) {
+        throw new AggregateError(
+          [failure, ...cleanupErrors],
+          "The accessibility browser case failed and cleanup also failed.",
+        );
+      }
+      throw failure;
+    }
+    if (cleanupErrors.length > 0) {
+      throw new AggregateError(
+        cleanupErrors,
+        "The accessibility browser case cleanup failed.",
+      );
+    }
+
+    assert.deepStrictEqual(state, {
+      rowCount: 129,
+      deepestAriaLevel: "129",
+      selectedRowCount: 1,
+      tabStopCount: 1,
+    });
   });
 
   test("separates Enter focus handoff from Space selection", () => {
@@ -488,7 +652,7 @@ suite("Browser accessibility DOM", () => {
       onSelectUnit: (unitId) => selected.push(unitId),
       onEnterUnit: (unitId) => entered.push(unitId),
     });
-    const rootRow = view.getByRole("treeitem", { name: /root/i });
+    const rootRow = getTreeItemByUnitId(view.container, root.id);
 
     rootRow.focus();
     fireEvent.keyDown(rootRow, { key: "Enter" });
@@ -584,11 +748,6 @@ suite("Browser accessibility DOM", () => {
   });
 
   test("keeps the virtualized table grid accessible and keyboard-addressable", () => {
-    const postedMessages: unknown[] = [];
-    window.vscode = {
-      postMessage: (message: unknown) => postedMessages.push(message),
-    } as never;
-
     const view = render(
       <ThemeProvider theme={createTheme()}>
         <TableGridFixture rowCount={128} />
@@ -598,7 +757,7 @@ suite("Browser accessibility DOM", () => {
     const headers = within(grid).getAllByRole("columnheader");
     const cells = within(grid).getAllByRole("gridcell");
 
-    assert.strictEqual(grid.getAttribute("aria-rowcount"), "131");
+    assert.strictEqual(grid.getAttribute("aria-rowcount"), "129");
     assert.strictEqual(grid.getAttribute("aria-colcount"), "3");
     assert.ok(headers.length >= 3);
     assert.ok(cells.length > 0);
@@ -619,8 +778,17 @@ suite("Browser accessibility DOM", () => {
       document.activeElement?.getAttribute("role"),
       "gridcell",
     );
-    assert.ok(postedMessages.length >= 1);
-    delete window.vscode;
+    assert.strictEqual(
+      document.activeElement?.getAttribute("aria-colindex"),
+      "2",
+    );
+    assert.strictEqual(
+      document.activeElement
+        ?.closest('[role="row"]')
+        ?.querySelectorAll('[role="gridcell"]')[1]
+        ?.textContent?.trim(),
+      "job-0",
+    );
   });
 
   test("keeps focused and selected rows distinct during keyboard traversal", () => {
@@ -629,12 +797,13 @@ suite("Browser accessibility DOM", () => {
         <TableGridFixture rowCount={128} />
       </ThemeProvider>,
     );
-    const firstRow = view.getByRole("row", { name: /job-0/i });
+    const grid = view.getByRole("grid", { name: "Units" });
+    const firstRow = getGridRowByUnitName(grid, "job-0");
     const firstCell = within(firstRow).getAllByRole("gridcell")[0];
     firstCell.focus();
     fireEvent.keyDown(firstCell, { key: "ArrowDown" });
 
-    const secondRow = view.getByRole("row", { name: /job-1/i });
+    const secondRow = getGridRowByUnitName(grid, "job-1");
     assert.strictEqual(firstRow.getAttribute("aria-selected"), "true");
     assert.strictEqual(secondRow.getAttribute("aria-selected"), "false");
     assert.strictEqual(
@@ -650,7 +819,7 @@ suite("Browser accessibility DOM", () => {
     assert.strictEqual(secondRow.getAttribute("aria-selected"), "true");
   });
 
-  test("keeps the shared search control localized, focusable, and callback-driven", () => {
+  test("keeps the shared search control localized, focusable, and callback-driven", async () => {
     const submittedQueries: string[] = [];
     const navigatedQueries: Array<[string, HeaderSearchDirection]> = [];
     let clearCount = 0;
@@ -680,11 +849,35 @@ suite("Browser accessibility DOM", () => {
         clearCount += 1;
       },
     };
-    const view = render(
+    const eventBridge = createViewerEventBridge();
+    window.EventBridge = eventBridge;
+    window.vscode = { postMessage: () => undefined } as never;
+    const renderControl = (
+      matchedTargetId = controlProps.matchedTargetId,
+      resultPosition = controlProps.resultPosition,
+    ) => (
       <ThemeProvider theme={createTheme()}>
-        <HeaderSearchControl {...controlProps} />
-      </ThemeProvider>,
+        <MyAppContextProvider>
+          <HeaderSearchControl
+            {...controlProps}
+            matchedTargetId={matchedTargetId}
+            resultPosition={resultPosition}
+          />
+        </MyAppContextProvider>
+      </ThemeProvider>
     );
+    const view = render(renderControl());
+    act(() => {
+      eventBridge.dispatch(
+        new MessageEvent("message", {
+          data: createViewerResourceStateMessage({
+            isDarkMode: false,
+            lang: "ja",
+            scrollType: "table",
+          }),
+        }),
+      );
+    });
     const input = view.getByRole("textbox") as HTMLInputElement;
     const longQuery = `  ${"対象".repeat(128)}  `;
 
@@ -710,10 +903,13 @@ suite("Browser accessibility DOM", () => {
       [longQuery, "previous"],
     ]);
     assert.deepStrictEqual(submittedQueries, [longQuery]);
+    await waitFor(() =>
+      assert.ok(view.getByRole("button", { name: "検索をクリアする。" })),
+    );
 
     const isMacShortcut = input.placeholder.endsWith("(\u2318F)");
     view.getByRole("button", { name: "次の結果" }).focus();
-    const shortcutEvent = new dom.window.KeyboardEvent("keydown", {
+    const shortcutEvent = new KeyboardEvent("keydown", {
       key: "f",
       cancelable: true,
       ctrlKey: !isMacShortcut,
@@ -728,15 +924,7 @@ suite("Browser accessibility DOM", () => {
     assert.strictEqual(input.value, "");
     assert.strictEqual(document.activeElement, input);
 
-    view.rerender(
-      <ThemeProvider theme={createTheme()}>
-        <HeaderSearchControl
-          {...controlProps}
-          matchedTargetId={undefined}
-          resultPosition={{ current: 0, total: 0 }}
-        />
-      </ThemeProvider>,
-    );
+    view.rerender(renderControl(undefined, { current: 0, total: 0 }));
     assert.strictEqual(
       view.getByText("一致する結果はありません。").textContent,
       "一致する結果はありません。",
@@ -758,6 +946,7 @@ suite("Browser accessibility DOM", () => {
         columns: [],
         columnDef: { header: label, enableHiding: true },
         getLeafColumns: () => [column],
+        getCanHide: () => true,
         getIsVisible: () => false,
       };
       return column;
@@ -769,6 +958,7 @@ suite("Browser accessibility DOM", () => {
       columns: [alpha, beta],
       columnDef: { header: "Group columns", enableHiding: true },
       getLeafColumns: () => [alpha, beta],
+      getCanHide: () => true,
       getIsVisible: () => false,
     };
     const visibilityUpdates: unknown[] = [];
@@ -796,7 +986,7 @@ suite("Browser accessibility DOM", () => {
     assert.ok(view.getByText("Alpha"));
     assert.ok(view.getByText("Beta"));
 
-    const leafSwitch = view.getAllByRole("checkbox").at(-1);
+    const leafSwitch = view.getAllByRole("switch").at(-1);
     assert.ok(leafSwitch);
     fireEvent.click(leafSwitch as HTMLElement);
     assert.deepStrictEqual(visibilityUpdates, [{ "group.beta": true }]);

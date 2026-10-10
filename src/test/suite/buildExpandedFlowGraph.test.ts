@@ -10,6 +10,7 @@ import {
 } from "../../application/flow-graph/flowGraphDocument";
 import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
 import { createFlowGraphMetrics } from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
+import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 
 const assertClose = (actual: number, expected: number): void => {
   assert.ok(Math.abs(actual - expected) < 0.000001, `${actual} ~= ${expected}`);
@@ -790,9 +791,15 @@ suite("Build Expanded Flow Graph", () => {
           edge.source === grandNetId && edge.target.endsWith("/nested-job"),
       ),
       {
+        id: flowGraphEdgeId({
+          source: grandNetId,
+          target: `${childNetId}/nested-job`,
+          type: "seq",
+        }),
         source: grandNetId,
         target: `${childNetId}/nested-job`,
         type: "seq",
+        semanticDiffHighlight: undefined,
       },
     );
     const childNetPosition = childExpanded.positionOverrides.get(childNetId);

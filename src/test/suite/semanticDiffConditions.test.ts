@@ -100,11 +100,17 @@ const compareChildren = (before: AjsUnit[], after: AjsUnit[]) =>
 
 suite("Semantic diff condition checks", () => {
   test("requires confirmation when a conditional relation is removed", () => {
-    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+        ],
+      },
+    );
     const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "con"),
-    ];
     const afterSource = typedUnit("source", "j", { sc: "echo source" });
     const afterTarget = typedUnit("target", "j", { sc: "echo target" });
 
@@ -154,11 +160,17 @@ suite("Semantic diff condition checks", () => {
   });
 
   test("does not treat plain predecessor removal as a confirmation-required problem", () => {
-    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "seq"),
+        ],
+      },
+    );
     const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "seq"),
-    ];
     const afterSource = typedUnit("source", "j", { sc: "echo source" });
     const afterTarget = typedUnit("target", "j", { sc: "echo target" });
 
@@ -173,9 +185,17 @@ suite("Semantic diff condition checks", () => {
   test("does not treat an added conditional relation as a confirmation-required problem", () => {
     const beforeSource = typedUnit("source", "j", { sc: "echo source" });
     const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
-    const afterSource = typedUnit("source", "j", { sc: "echo source" });
+    const afterSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+        ],
+      },
+    );
     const afterTarget = typedUnit("target", "j", { sc: "echo target" });
-    afterSource.relations = [relation(afterSource.id, afterTarget.id, "con")];
 
     const result = compareChildren(
       [beforeSource, beforeTarget],
@@ -186,11 +206,17 @@ suite("Semantic diff condition checks", () => {
   });
 
   test("does not treat an endpoint removal as a tightened conditional path", () => {
-    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+        ],
+      },
+    );
     const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "con"),
-    ];
     const afterSource = typedUnit("source", "j", { sc: "echo source" });
 
     const result = compareChildren([beforeSource, beforeTarget], [afterSource]);
@@ -199,15 +225,37 @@ suite("Semantic diff condition checks", () => {
   });
 
   test("does not treat a cycle-only topology change as a confirmation-required problem", () => {
-    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
+    const beforeSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "seq"),
+        ],
+      },
+    );
     const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "seq"),
-    ];
-    const afterSource = typedUnit("source", "j", { sc: "echo source" });
-    const afterTarget = typedUnit("target", "j", { sc: "echo target" });
-    afterSource.relations = [relation(afterSource.id, afterTarget.id, "seq")];
-    afterTarget.relations = [relation(afterTarget.id, afterSource.id, "seq")];
+    const afterSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "seq"),
+        ],
+      },
+    );
+    const afterTarget = typedUnit(
+      "target",
+      "j",
+      { sc: "echo target" },
+      {
+        relations: [
+          relation("/root/jobnet/target", "/root/jobnet/source", "seq"),
+        ],
+      },
+    );
 
     const result = compareChildren(
       [beforeSource, beforeTarget],
@@ -218,19 +266,39 @@ suite("Semantic diff condition checks", () => {
   });
 
   test("does not treat a reachability-only relation rewrite as a confirmation-required problem", () => {
-    const beforeSource = typedUnit("source", "j", { sc: "echo source" });
-    const beforeMiddle = typedUnit("middle", "j", { sc: "echo middle" });
+    const beforeSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/middle", "seq"),
+        ],
+      },
+    );
+    const beforeMiddle = typedUnit(
+      "middle",
+      "j",
+      { sc: "echo middle" },
+      {
+        relations: [
+          relation("/root/jobnet/middle", "/root/jobnet/target", "seq"),
+        ],
+      },
+    );
     const beforeTarget = typedUnit("target", "j", { sc: "echo target" });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeMiddle.id, "seq"),
-    ];
-    beforeMiddle.relations = [
-      relation(beforeMiddle.id, beforeTarget.id, "seq"),
-    ];
-    const afterSource = typedUnit("source", "j", { sc: "echo source" });
+    const afterSource = typedUnit(
+      "source",
+      "j",
+      { sc: "echo source" },
+      {
+        relations: [
+          relation("/root/jobnet/source", "/root/jobnet/target", "seq"),
+        ],
+      },
+    );
     const afterMiddle = typedUnit("middle", "j", { sc: "echo middle" });
     const afterTarget = typedUnit("target", "j", { sc: "echo target" });
-    afterSource.relations = [relation(afterSource.id, afterTarget.id, "seq")];
 
     const result = compareChildren(
       [beforeSource, beforeMiddle, beforeTarget],
@@ -381,10 +449,10 @@ suite("Semantic diff condition checks", () => {
 
     const context = buildSemanticDiffOutputContext(result);
     const audit = renderSemanticDiffAuditMarkdown(context);
-    assert.ok(audit.includes("parameterKey: etm"));
-    assert.ok(audit.includes("parameterKey: fd"));
-    assert.ok(audit.includes("beforeValues: [30]"));
-    assert.ok(audit.includes("afterValues: []"));
+    assert.ok(audit.includes("Parameter key: etm"));
+    assert.ok(audit.includes("Parameter key: fd"));
+    assert.ok(audit.includes("Before values: [30]"));
+    assert.ok(audit.includes("After values: []"));
     assert.ok(audit.includes("runtime-state-not-verified"));
     assert.ok(audit.includes("external-state-not-verified"));
 
@@ -601,8 +669,8 @@ suite("Semantic diff condition checks", () => {
       "ntsrc",
       "permission",
       "qu",
-      "unitAttribute",
       "un",
+      "unitAttribute",
     ]);
     assert.strictEqual(
       result.confirmationRequired.some(
@@ -716,10 +784,10 @@ suite("Semantic diff condition checks", () => {
 
     const context = buildSemanticDiffOutputContext(result);
     const audit = renderSemanticDiffAuditMarkdown(context);
-    assert.ok(audit.includes("parameterKey: eu"));
-    assert.ok(audit.includes("parameterKey: rg"));
-    assert.ok(audit.includes("beforeValues: [group-a]"));
-    assert.ok(audit.includes("afterValues: [group-a]"));
+    assert.ok(audit.includes("Parameter key: eu"));
+    assert.ok(audit.includes("Parameter key: rg"));
+    assert.ok(audit.includes("Before values: [group-a]"));
+    assert.ok(audit.includes("After values: [group-a]"));
     assert.ok(audit.includes("runtime-state-not-verified"));
     assert.ok(audit.includes("external-state-not-verified"));
 
@@ -749,9 +817,13 @@ suite("Semantic diff condition checks", () => {
       {
         unitPath: "/root/jobnet/resource-undefined-empty",
         parameterKey: "rg",
+        relationPair: null,
+        scheduleRule: null,
+        period: null,
         beforeValues: [],
         afterValues: [""],
         rawValues: [],
+        removedSources: [],
       },
     );
     assert.deepStrictEqual(
@@ -759,9 +831,13 @@ suite("Semantic diff condition checks", () => {
       {
         unitPath: "/root/jobnet/recovery-http-default-different",
         parameterKey: "eu",
+        relationPair: null,
+        scheduleRule: null,
+        period: null,
         beforeValues: [],
         afterValues: ["ent"],
         rawValues: [],
+        removedSources: [],
       },
     );
     json.result.confirmationRequired.forEach((item) => {
@@ -879,12 +955,12 @@ suite("Semantic diff condition checks", () => {
 
     const context = buildSemanticDiffOutputContext(result);
     const audit = renderSemanticDiffAuditMarkdown(context);
-    assert.ok(audit.includes("parameterKey: evwid"));
-    assert.ok(audit.includes("beforeValues: [00000001:00000002]"));
-    assert.ok(audit.includes("afterValues: [00000001:00000003]"));
+    assert.ok(audit.includes("Parameter key: evwid"));
+    assert.ok(audit.includes("Before values: [00000001:00000002]"));
+    assert.ok(audit.includes("After values: [00000001:00000003]"));
     assert.ok(audit.includes("external-state-not-verified"));
-    assert.ok(audit.includes('beforeValues: ["/var/before.dat"]'));
-    assert.ok(audit.includes('afterValues: ["/var/after.dat"]'));
+    assert.ok(audit.includes('Before values: ["/var/before.dat"]'));
+    assert.ok(audit.includes('After values: ["/var/after.dat"]'));
 
     const json = JSON.parse(renderSemanticDiffJson(context).content) as {
       result: {
@@ -1034,12 +1110,14 @@ suite("Semantic diff condition checks", () => {
 
     const audit = renderSemanticDiffAuditMarkdown(context);
     targetCases.forEach((targetCase) => {
-      assert.ok(audit.includes(`parameterKey: ${targetCase.parameterKey}`));
+      assert.ok(audit.includes(`Parameter key: ${targetCase.parameterKey}`));
       assert.ok(
-        audit.includes(`beforeValues: [${targetCase.beforeValues.join(", ")}]`),
+        audit.includes(
+          `Before values: [${targetCase.beforeValues.join(", ")}]`,
+        ),
       );
       assert.ok(
-        audit.includes(`afterValues: [${targetCase.afterValues.join(", ")}]`),
+        audit.includes(`After values: [${targetCase.afterValues.join(", ")}]`),
       );
     });
     assert.ok(audit.includes("runtime-state-not-verified"));
@@ -1143,12 +1221,25 @@ suite("Semantic diff condition checks", () => {
   test("preserves duplicate release sources and resolves related targets in the matched job group", () => {
     const beforeRelease = typedUnit("release-a", "j", { sc: "echo release" });
     const afterRelease = typedUnit("release-a", "j", { sc: "echo release" });
-    const beforeWait = typedUnit("wait", "evwj", {
-      eun: "release-z",
-      evwid: "00000001:00000002",
-    });
-    beforeWait.parameters.push({ key: "eun", value: "release-a" });
-    beforeWait.parameters.push({ key: "eun", value: "release-a" });
+    const beforeWait = typedUnit(
+      "wait",
+      "evwj",
+      {
+        eun: "release-z",
+        evwid: "00000001:00000002",
+      },
+      {
+        parameters: [
+          ...params({
+            ty: "evwj",
+            eun: "release-z",
+            evwid: "00000001:00000002",
+          }),
+          { key: "eun", value: "release-a" },
+          { key: "eun", value: "release-a" },
+        ],
+      },
+    );
     const afterWait = typedUnit("wait", "evwj", {
       eun: "release-b",
       evwid: "00000001:00000002",
@@ -1156,12 +1247,18 @@ suite("Semantic diff condition checks", () => {
     const relatedAfterRelease = typedUnit("release-b", "j", {
       sc: "echo release",
     });
-    const unrelatedAfterRelease = typedUnit("release-a", "j", {
-      sc: "echo unrelated release",
-    });
-    unrelatedAfterRelease.id = "/root/other/release-a";
-    unrelatedAfterRelease.absolutePath = "/root/other/release-a";
-    unrelatedAfterRelease.parentId = "/root/other";
+    const unrelatedAfterRelease = typedUnit(
+      "release-a",
+      "j",
+      {
+        sc: "echo unrelated release",
+      },
+      {
+        id: "/root/other/release-a",
+        absolutePath: "/root/other/release-a",
+        parentId: "/root/other",
+      },
+    );
 
     const result = compareChildren(
       [beforeRelease, beforeWait],

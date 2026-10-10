@@ -6,14 +6,50 @@ import {
 } from "@generate/parser/AjsParser";
 import { AjsRawUnit } from "./raw/AjsRawUnit";
 
-const tokenEnd = (token: {
-  line: number;
-  charPositionInLine: number;
-  text?: string;
-}) => ({
-  line: token.line,
-  column: token.charPositionInLine + (token.text?.length ?? 0),
-});
+const recordSupplementaryColumn = (
+  columnsByLine: Map<number, number[]>,
+  line: number,
+  column: number,
+): void => {
+  const columns = columnsByLine.get(line) ?? [];
+  columns.push(column);
+  columnsByLine.set(line, columns);
+};
+
+type SourceScanPosition = { line: number; column: number };
+
+const advanceSourceScanPosition = (
+  position: SourceScanPosition,
+  character: string,
+): void => {
+  position.column += 1;
+  if (character === "\n") {
+    position.line += 1;
+    position.column = 0;
+  }
+};
+
+const recordSourceCharacter = (
+  columnsByLine: Map<number, number[]>,
+  position: SourceScanPosition,
+  character: string,
+): void => {
+  if (character.length === 2) {
+    recordSupplementaryColumn(columnsByLine, position.line, position.column);
+  }
+  advanceSourceScanPosition(position, character);
+};
+
+const collectSupplementaryColumns = (
+  content: string,
+): ReadonlyMap<number, readonly number[]> => {
+  const columnsByLine = new Map<number, number[]>();
+  const position: SourceScanPosition = { line: 1, column: 0 };
+  for (const character of content) {
+    recordSourceCharacter(columnsByLine, position, character);
+  }
+  return columnsByLine;
+};
 
 export class Ajs3v12Evaluator implements AjsParserListener {
   /** parsed definition */
@@ -24,6 +60,27 @@ export class Ajs3v12Evaluator implements AjsParserListener {
 
   /** current unit object */
   #currentUnit?: AjsRawUnit;
+
+  readonly #supplementaryColumns: ReadonlyMap<number, readonly number[]>;
+
+  public constructor(content: string) {
+    this.#supplementaryColumns = collectSupplementaryColumns(content);
+  }
+
+  #utf16Column(line: number, column: number): number {
+    const supplementary = this.#supplementaryColumns.get(line) ?? [];
+    let lower = 0;
+    let upper = supplementary.length;
+    while (lower < upper) {
+      const middle = Math.floor((lower + upper) / 2);
+      if (supplementary[middle]! < column) {
+        lower = middle + 1;
+      } else {
+        upper = middle;
+      }
+    }
+    return column + lower;
+  }
 
   get allUnits() {
     return this.#allUnits;
@@ -50,12 +107,17 @@ export class Ajs3v12Evaluator implements AjsParserListener {
     if (key !== undefined && value !== undefined && semi !== undefined) {
       const headerStart = {
         line: key.line,
-        column: key.charPositionInLine,
+        column: this.#utf16Column(key.line, key.charPositionInLine),
       };
-      const headerEnd = tokenEnd(semi);
+      const headerEnd = {
+        line: semi.line,
+        column:
+          this.#utf16Column(semi.line, semi.charPositionInLine) +
+          (semi.text?.length ?? 0),
+      };
       const valueStart = {
         line: value.line,
-        column: value.charPositionInLine,
+        column: this.#utf16Column(value.line, value.charPositionInLine),
       };
       const valueText = value.text ?? "";
       const nameLength = Math.max(
@@ -92,7 +154,7 @@ export class Ajs3v12Evaluator implements AjsParserListener {
       value,
       position: this.#currentUnit.parameters.length,
       line: ctx._key.line,
-      column: ctx._key.charPositionInLine,
+      column: this.#utf16Column(ctx._key.line, ctx._key.charPositionInLine),
       length: key.length,
     });
   };

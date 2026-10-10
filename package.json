@@ -16,7 +16,7 @@
     "url": "https://github.com/kittybbit/vscode-ajsbutler/issues"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "vscode": "^1.75.0"
   },
   "categories": [
@@ -175,13 +175,14 @@
     "antlr:clean": "rimraf src/generate/parser",
     "antlr:generate": "antlr4ts -o src/generate/parser -Xexact-output-dir src/antlr/*.g4",
     "watch": "webpack -w",
-    "test:prepare": "npm-run-all development test:compile",
-    "test:prepare:desktop": "npm-run-all development:desktop test:compile",
+    "test:prepare": "npm-run-all development test:compile test:prepare:browser:bundle",
+    "test:prepare:desktop": "npm-run-all development:desktop test:compile test:prepare:browser:bundle",
     "test:prepare:web": "npm-run-all development:web test:compile test:prepare:web:bundle",
     "pretest": "pnpm run test:prepare:desktop",
     "pretest:web": "pnpm run test:prepare:web",
     "test:compile": "tsc -p tsconfig.test.json",
     "test:desktop:run": "node ./out/test/runTest.js",
+    "test:prepare:browser:bundle": "webpack --config webpack.web-test.config.js --env target=accessibility --mode production",
     "test:prepare:web:bundle": "webpack --config webpack.web-test.config.js --mode production",
     "test:web:run": "pnpm run test:prepare:web:bundle && node ./out/test/runWebTest.js",
     "test:full": "npm-run-all test:prepare test:desktop:run test:web:run",
@@ -208,7 +209,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/vscode": "^1.75.0",
     "@types/vscode-webview": "^1.57.5",
-    "@vscode/test-electron": "^2.5.2",
+    "@vscode/test-electron": "3.1.0",
     "@vscode/test-web": "^0.0.80",
     "@vscode/vsce": "^3.9.2",
     "antlr4ts-cli": "^0.5.0-alpha.4",
@@ -229,6 +230,7 @@
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.4.0",
     "ts-loader": "^9.5.4",
+    "tsconfig-paths": "4.2.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0",
     "webpack": "^5.106.2",

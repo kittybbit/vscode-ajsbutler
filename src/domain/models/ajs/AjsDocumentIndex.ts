@@ -1,8 +1,8 @@
 import type { AjsDocument, AjsUnit } from "./AjsDocument";
 
 export type AjsDocumentIndex = {
-  byId: Map<string, AjsUnit[]>;
-  byPath: Map<string, AjsUnit[]>;
+  readonly byId: ReadonlyMap<string, readonly AjsUnit[]>;
+  readonly byPath: ReadonlyMap<string, readonly AjsUnit[]>;
 };
 
 const appendChildren = (pending: AjsUnit[], unit: AjsUnit): void => {
@@ -69,7 +69,7 @@ const appendUnit = (
 export const indexAjsUnits = (
   units: readonly AjsUnit[],
   key: (unit: AjsUnit) => string,
-): Map<string, AjsUnit[]> =>
+): ReadonlyMap<string, readonly AjsUnit[]> =>
   units.reduce(
     (index, unit) => appendUnit(index, key(unit), unit),
     new Map<string, AjsUnit[]>(),

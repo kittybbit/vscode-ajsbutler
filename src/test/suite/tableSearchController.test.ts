@@ -98,9 +98,9 @@ suite("Table search controller", () => {
       }),
     );
 
-    act(() => result.current.submitSearch(" Target "));
+    act(() => result.current.submitSearch("TARGET"));
 
-    assert.strictEqual(result.current.searchQuery, " Target ");
+    assert.strictEqual(result.current.searchQuery, "TARGET");
     assert.deepStrictEqual(result.current.searchState, {
       query: "target",
       matchedAbsolutePaths: ["/root/target"],
@@ -147,6 +147,7 @@ suite("Table search controller", () => {
     assert.deepStrictEqual(result.current.searchState, {
       query: "missing",
       matchedAbsolutePaths: [],
+      searchedAbsolutePath: undefined,
     });
     assert.strictEqual(
       (messages[2] as { data: { result: string } }).data.result,

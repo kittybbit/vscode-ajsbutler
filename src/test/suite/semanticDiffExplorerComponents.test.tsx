@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import { JSDOM } from "jsdom";
 import React from "react";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import type {
@@ -12,85 +11,6 @@ import SemanticDiffExplorerContents from "../../presentation/webview/editor/sema
 import { SemanticDiffExplorerApp as CanonicalSemanticDiffExplorerApp } from "../../presentation/webview/editor/semanticDiffExplorer/SemanticDiffExplorerApp";
 import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
 import { createViewerResourceStateMessage } from "../../presentation/webview/viewerHostMessages";
-
-type GlobalValue = {
-  key: string;
-  descriptor: PropertyDescriptor | undefined;
-};
-
-const installDom = (): { dom: JSDOM; globals: GlobalValue[] } => {
-  const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-    url: "http://localhost/",
-  });
-  const globals: GlobalValue[] = [];
-  const resizeObserver = class {
-    disconnect(): void {}
-    observe(): void {}
-    unobserve(): void {}
-  };
-  const values: Record<string, unknown> = {
-    window: dom.window,
-    document: dom.window.document,
-    navigator: dom.window.navigator,
-    HTMLElement: dom.window.HTMLElement,
-    Node: dom.window.Node,
-    Element: dom.window.Element,
-    Event: dom.window.Event,
-    KeyboardEvent: dom.window.KeyboardEvent,
-    MouseEvent: dom.window.MouseEvent,
-    MutationObserver: dom.window.MutationObserver,
-    ResizeObserver: resizeObserver,
-    getComputedStyle: dom.window.getComputedStyle.bind(dom.window),
-    requestAnimationFrame: (callback: FrameRequestCallback): number =>
-      dom.window.setTimeout(() => callback(dom.window.performance.now()), 0),
-    cancelAnimationFrame: (handle: number): void =>
-      dom.window.clearTimeout(handle),
-    IS_REACT_ACT_ENVIRONMENT: true,
-  };
-  Object.entries(values).forEach(([key, value]) => {
-    globals.push({
-      key,
-      descriptor: Object.getOwnPropertyDescriptor(globalThis, key),
-    });
-    Object.defineProperty(globalThis, key, {
-      configurable: true,
-      writable: true,
-      value,
-    });
-  });
-  dom.window.requestAnimationFrame = values.requestAnimationFrame as (
-    callback: FrameRequestCallback,
-  ) => number;
-  dom.window.cancelAnimationFrame = values.cancelAnimationFrame as (
-    handle: number,
-  ) => void;
-  Object.defineProperty(dom.window, "matchMedia", {
-    configurable: true,
-    value: () => ({
-      matches: false,
-      media: "",
-      onchange: null,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-      addListener: () => undefined,
-      removeListener: () => undefined,
-      dispatchEvent: () => false,
-    }),
-  });
-  Object.defineProperty(dom.window, "EventBridge", {
-    configurable: true,
-    value: createViewerEventBridge(),
-  });
-  return { dom, globals };
-};
-
-const restoreDom = (dom: JSDOM, globals: GlobalValue[]): void => {
-  globals.forEach(({ key, descriptor }) => {
-    if (descriptor) Object.defineProperty(globalThis, key, descriptor);
-    else delete (globalThis as Record<string, unknown>)[key];
-  });
-  dom.window.close();
-};
 
 const unavailableActions = (): SemanticDiffExplorerActionSet => ({
   source: {
@@ -177,15 +97,36 @@ const viewModel = (): SemanticDiffExplorerViewModel => ({
 });
 
 suite("Semantic Diff Explorer components", () => {
-  let dom: JSDOM;
-  let globals: GlobalValue[];
+  let eventBridge: ReturnType<typeof createViewerEventBridge>;
+  let previousWindowProperties: Map<string, PropertyDescriptor | undefined>;
+  const testWindow = window as Window & {
+    EventBridge?: ReturnType<typeof createViewerEventBridge>;
+    vscode?: { postMessage: (message: unknown) => void };
+  };
 
   setup(() => {
-    ({ dom, globals } = installDom());
+    previousWindowProperties = new Map(
+      ["EventBridge", "vscode"].map((key) => [
+        key,
+        Object.getOwnPropertyDescriptor(window, key),
+      ]),
+    );
+    document.body.replaceChildren();
+    delete document.body.dataset.semanticDiffSessionId;
+    eventBridge = createViewerEventBridge();
+    testWindow.EventBridge = eventBridge;
   });
   teardown(() => {
     cleanup();
-    restoreDom(dom, globals);
+    for (const [key, descriptor] of previousWindowProperties) {
+      if (descriptor === undefined) {
+        Reflect.deleteProperty(window, key);
+      } else {
+        Reflect.defineProperty(window, key, descriptor);
+      }
+    }
+    document.body.replaceChildren();
+    delete document.body.dataset.semanticDiffSessionId;
   });
 
   test("composes the canonical editor App and MUI boundaries", () => {
@@ -194,16 +135,14 @@ suite("Semantic Diff Explorer components", () => {
       CanonicalSemanticDiffExplorerApp,
     );
     const messages: unknown[] = [];
-    Object.defineProperty(dom.window, "vscode", {
-      configurable: true,
-      value: { postMessage: (message: unknown) => messages.push(message) },
-    });
-    dom.window.document.body.dataset.semanticDiffSessionId =
-      "sde-session-components";
+    testWindow.vscode = {
+      postMessage: (message: unknown) => messages.push(message),
+    };
+    document.body.dataset.semanticDiffSessionId = "sde-session-components";
     const loading = render(<SemanticDiffExplorerApp />);
     assert.strictEqual((messages[0] as { type: string }).type, "resource");
     act(() => {
-      dom.window.EventBridge.dispatch({
+      eventBridge.dispatch({
         data: createViewerResourceStateMessage({
           isDarkMode: false,
           lang: "en",

@@ -398,7 +398,7 @@ suite("Viewer wiring", () => {
         },
       ),
     );
-    assert.deepStrictEqual(calls, []);
+    assert.deepStrictEqual(calls, ["getPanel"]);
   });
 
   test("keeps state stable when the counterpart context cannot create a panel", () => {

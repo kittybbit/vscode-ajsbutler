@@ -134,37 +134,57 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     const shared = jobnet("/shared", {});
     const first = group("/first", [shared]);
     const second = group("/second", [shared]);
-    const cycle = jobnet("/cycle", {});
-    cycle.children.push(cycle);
+    const cycleChildren: AjsUnit[] = [];
+    const cycle = unit({ ...jobnet("/cycle", {}), children: cycleChildren });
+    cycleChildren.push(cycle);
 
     const ordered = collectUnits(document([first, second, cycle, first]));
     assert.deepStrictEqual(ordered, [first, shared, second, cycle]);
     assert.strictEqual(ordered[1], shared);
     assert.strictEqual(ordered[3], cycle);
 
-    const duplicateIdFirst = jobnet("/duplicate", {});
-    const duplicateIdSecond = jobnet("/duplicate", {});
-    duplicateIdFirst.id = "duplicate-id";
-    duplicateIdSecond.id = "duplicate-id";
-    const byId = indexUnits(
-      [duplicateIdFirst, duplicateIdSecond],
-      (item) => item.id,
+    const duplicateIdFirst = unit({
+      ...jobnet("/duplicate", {}),
+      id: "duplicate-id",
+    });
+    const duplicateIdSecond = unit({
+      ...jobnet("/duplicate", {}),
+      id: "duplicate-id",
+    });
+    const units: readonly AjsUnit[] = [
+      first,
+      duplicateIdFirst,
+      second,
+      duplicateIdSecond,
+    ];
+    const byId = indexUnits(units, (item) => item.id);
+    assert.deepStrictEqual(
+      [...byId.keys()],
+      [first.id, "duplicate-id", second.id],
     );
-    assert.deepStrictEqual([...byId.keys()], ["duplicate-id"]);
     assert.deepStrictEqual(byId.get("duplicate-id"), [
       duplicateIdFirst,
       duplicateIdSecond,
     ]);
+    assert.strictEqual(byId.get("duplicate-id")?.[0], duplicateIdFirst);
+    assert.strictEqual(byId.get("duplicate-id")?.[1], duplicateIdSecond);
   });
 
   test("characterizes iterative collection across a deep hierarchy", () => {
-    const root = jobnet("/deep/0", {});
+    const rootChildren: AjsUnit[] = [];
+    const root = unit({ ...jobnet("/deep/0", {}), children: rootChildren });
     let parent = root;
+    let parentChildren = rootChildren;
     const expectedLast = 20_000;
     for (let depth = 1; depth <= expectedLast; depth += 1) {
-      const child = jobnet(`/deep/${depth}`, {}, parent.id);
-      parent.children.push(child);
+      const childChildren: AjsUnit[] = [];
+      const child = unit({
+        ...jobnet(`/deep/${depth}`, {}, parent.id),
+        children: childChildren,
+      });
+      parentChildren.push(child);
       parent = child;
+      parentChildren = childChildren;
     }
 
     const ordered = collectUnits(document([root]));
@@ -775,11 +795,13 @@ suite("Semantic Diff Schedule Calendar Context", () => {
       ],
     );
 
-    const cyclic = jobnet("/root/cyclic", {
-      sd: "2026/04/+01",
-      st: "09:00",
+    const cyclic = unit({
+      ...jobnet("/root/cyclic", {
+        sd: "2026/04/+01",
+        st: "09:00",
+      }),
+      parentId: "/root/cyclic",
     });
-    cyclic.parentId = cyclic.id;
     addCase("hierarchy cycle", cyclic, group("/root", [cyclic]), [
       {
         key: "sd",
@@ -930,7 +952,9 @@ suite("Semantic Diff Schedule Calendar Context", () => {
     const root = group("/root", [target], { sdd: "1" });
     const fullDocument = document([root]);
     const index = createScheduleCalendarContextIndex(fullDocument);
-    const snapshotEntries = (values: Map<string, AjsUnit[]>): string[][] =>
+    const snapshotEntries = (
+      values: ReadonlyMap<string, readonly AjsUnit[]>,
+    ): string[][] =>
       [...values.entries()]
         .flatMap(([key, matches]) =>
           matches.map((match) => [key, match.absolutePath]),
@@ -963,8 +987,10 @@ suite("Semantic Diff Schedule Calendar Context", () => {
   });
 
   test("rejects hierarchy cycles and duplicate normalized paths recoverably", () => {
-    const cyclic = jobnet("/root/main", { sd: "2026/04/+01" });
-    cyclic.parentId = cyclic.id;
+    const cyclic = unit({
+      ...jobnet("/root/main", { sd: "2026/04/+01" }),
+      parentId: "/root/main",
+    });
     const cycleContext = resolveScheduleCalendarContext(
       document([cyclic]),
       cyclic,

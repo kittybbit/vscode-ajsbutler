@@ -6,7 +6,7 @@ This document is the contributor entry point for [JP1/AJS Butler](README.md). Pr
 
 ## Before you start
 
-- Use Node.js 20 or later. The extension declares `node >=20` and the browser test tool currently requires Node.js 20 or later.
+- Use Node.js 22 or later. The extension declares `node >=22`, and the desktop test SDK requires Node.js 22 or later.
 - Use pnpm 10.33.0, as declared by the repository `packageManager` field.
 - Install dependencies with `pnpm install`.
 - Run the relevant check before opening a pull request, and inspect the working tree after commands that format files.
@@ -35,7 +35,7 @@ The scripts in `package.json` are run with pnpm. Some scripts use `npm-run-all` 
 
 ## Desktop, web, and browser checks
 
-The web test runner uses headless Chromium. Install its browser dependency when a clean environment needs it:
+The desktop accessibility boundary and web test runner use headless Chromium. Install its browser dependency when a clean environment needs it:
 
 ```sh
 pnpm exec playwright install chromium-headless-shell
@@ -43,7 +43,7 @@ pnpm exec playwright install chromium-headless-shell
 
 Use `pnpm run test:web` for the web extension smoke suite and `pnpm run test:full` when both hosts need coverage. For manual browser-side debugging, use the `Launch Extension(web)` configuration in the [repository launch configuration](https://github.com/kittybbit/vscode-ajsbutler/blob/main/.vscode/launch.json).
 
-Desktop tests use `pnpm test`. If you need only the prepared runners, the lower-level scripts are `pnpm run test:prepare:desktop`, `pnpm run test:desktop:run`, `pnpm run test:prepare:web`, and `pnpm run test:web:run`.
+Desktop tests use `pnpm test`; preparation also builds the browser fixture used by the deep-tree accessibility test. If you need only the prepared runners, the lower-level scripts are `pnpm run test:prepare:desktop`, `pnpm run test:desktop:run`, `pnpm run test:prepare:web`, and `pnpm run test:web:run`.
 
 ## Parser and ANTLR
 

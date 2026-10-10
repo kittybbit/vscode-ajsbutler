@@ -26,7 +26,7 @@ export class AntlrRawAjsParser {
     DEVELOPMENT && parser.removeErrorListeners();
     parser.addErrorListener(syntaxErrors);
     const tree = parser.unitDefinitionFile();
-    const evaluator = new Ajs3v12Evaluator();
+    const evaluator = new Ajs3v12Evaluator(content);
     ParseTreeWalker.DEFAULT.walk(evaluator, tree);
     return { rootUnits: evaluator.rootUnits, errors: syntaxErrors.errors };
   }

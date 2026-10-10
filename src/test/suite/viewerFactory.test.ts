@@ -16,6 +16,7 @@ import {
   RESOURCE,
   SAVE,
 } from "../../presentation/webview/viewerRequestMessages";
+import { AJS_TABLE_VIEWER_TYPE } from "../../presentation/vscode/webview/constant";
 
 suite("ViewerFactory", () => {
   const createRegisterPanel =
@@ -214,7 +215,7 @@ suite("ViewerFactory", () => {
     } as vscode.TextDocument;
     const panel = {
       title: "sample.ajs",
-      viewType: "ajsbutler.testViewer",
+      viewType: AJS_TABLE_VIEWER_TYPE,
       webview: {
         onDidReceiveMessage(handler: (event: { type: string }) => void) {
           receiveMessageHandler = handler;
@@ -240,7 +241,7 @@ suite("ViewerFactory", () => {
     let storedPanel: vscode.WebviewPanel | undefined;
 
     const factory = new ViewerFactory({
-      viewType: "ajsbutler.testViewer",
+      viewType: AJS_TABLE_VIEWER_TYPE,
       store: {
         removeByUri(uri) {
           removed.push(uri.toString());
@@ -299,7 +300,7 @@ suite("ViewerFactory", () => {
     receiveMessageHandler?.({ type: READY });
 
     assert.deepStrictEqual(calls, [
-      "ready:file:///sample.ajs:ajsbutler.testViewer",
+      `ready:file:///sample.ajs:${AJS_TABLE_VIEWER_TYPE}`,
       "post:resource:table",
       "save:body",
     ]);
@@ -307,7 +308,6 @@ suite("ViewerFactory", () => {
     assert.deepStrictEqual(added, [{ uri: document.uri, panel }]);
     assert.deepStrictEqual(navigated, ["table:/root/unit"]);
     assert.deepStrictEqual(telemetryEvents, [
-      "viewer.table.ready",
       OPERATION,
       "viewer.table.csv_copied",
       "viewer.table.closed",

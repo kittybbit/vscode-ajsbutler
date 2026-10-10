@@ -124,6 +124,8 @@ suite("Flow Search", () => {
         childNetId,
         currentUnit.children[0].children[0].id,
         currentUnit.children[0].children[0].children[0].id,
+        currentUnit.children[0].children[1].id,
+        currentUnit.children[1].id,
       ],
       expandedAncestorUnitIds: [
         childNetId,

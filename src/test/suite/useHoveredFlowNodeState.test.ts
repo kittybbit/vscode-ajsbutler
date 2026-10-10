@@ -9,7 +9,10 @@ suite("Hovered Flow Node State", () => {
       unitId: "unit-a",
     });
 
-    assert.deepStrictEqual(hovered, { source: "graph", unitId: "unit-a" });
+    assert.deepStrictEqual(
+      hovered && { source: hovered.source, unitId: hovered.unitId },
+      { source: "graph", unitId: "unit-a" },
+    );
     assert.strictEqual(
       reduceHoveredFlowNodeState(hovered, {
         type: "leave",
@@ -39,12 +42,16 @@ suite("Hovered Flow Node State", () => {
       { type: "enter", source: "graph", unitId: "unit-b" },
     );
 
+    const latestHovered = reduceHoveredFlowNodeState(hovered, {
+      type: "leave",
+      source: "tree",
+      unitId: "unit-a",
+    });
     assert.deepStrictEqual(
-      reduceHoveredFlowNodeState(hovered, {
-        type: "leave",
-        source: "tree",
-        unitId: "unit-a",
-      }),
+      latestHovered && {
+        source: latestHovered.source,
+        unitId: latestHovered.unitId,
+      },
       { source: "graph", unitId: "unit-b" },
     );
   });

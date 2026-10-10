@@ -347,7 +347,11 @@ suite("Semantic Diff Structural Rules", () => {
       name: "before",
       absolutePath: "before",
     });
-    const after = unit({ id: "after", name: "after", absolutePath: "after" });
+    const after = unit({
+      id: "after",
+      name: "after",
+      absolutePath: "after",
+    });
     const parentMap = unitMap(parent, before, after);
 
     assert.strictEqual(
@@ -437,8 +441,14 @@ suite("Semantic Diff Structural Rules", () => {
       id: "before",
       name: "before",
       absolutePath: "before",
+      relations: [relation("before", "before-tail")],
     });
-    const after = unit({ id: "after", name: "after", absolutePath: "after" });
+    const after = unit({
+      id: "after",
+      name: "after",
+      absolutePath: "after",
+      relations: [relation("after", "after-tail")],
+    });
     const beforeTail = unit({
       id: "before-tail",
       name: "tail",
@@ -449,8 +459,6 @@ suite("Semantic Diff Structural Rules", () => {
       name: "tail",
       absolutePath: "after-tail",
     });
-    before.relations = [relation(before.id, beforeTail.id)];
-    after.relations = [relation(after.id, afterTail.id)];
     const matches: SemanticDiffUnitMatch[] = [
       { before, after, kind: "fingerprint" },
       { before: beforeTail, after: afterTail, kind: "exact" },
@@ -465,13 +473,20 @@ suite("Semantic Diff Structural Rules", () => {
     });
     assert.deepStrictEqual(unchanged, []);
 
-    after.relations = [relation(after.id, afterTail.id, "con")];
+    const changedAfter = unit({
+      ...after,
+      relations: [relation(after.id, afterTail.id, "con")],
+    });
+    const changedMatches: SemanticDiffUnitMatch[] = [
+      { before, after: changedAfter, kind: "fingerprint" },
+      { before: beforeTail, after: afterTail, kind: "exact" },
+    ];
     const changed = compareSemanticDiffRelations({
       beforeUnits: [before, beforeTail],
-      afterUnits: [after, afterTail],
+      afterUnits: [changedAfter, afterTail],
       beforeUnitById: unitMap(before, beforeTail),
-      afterUnitById: unitMap(after, afterTail),
-      matches,
+      afterUnitById: unitMap(changedAfter, afterTail),
+      matches: changedMatches,
     });
     assert.deepStrictEqual(
       changed.map((decision) => [
@@ -705,6 +720,37 @@ suite("Semantic Diff Structural Rules", () => {
       createSemanticDiffIdentityFingerprint(file).fingerprint,
       createSemanticDiffIdentityFingerprint(fileWithDifferentCondition)
         .fingerprint,
+    );
+  });
+
+  test("keeps event identity fingerprints based on original parameter text", () => {
+    const escapedHash = typedUnit("evwj", [
+      ["evwid", "00000000:FFFFFFFF"],
+      ["evwfr", 'attribute:"hash##"'],
+    ]);
+    const escapedQuote = typedUnit("evwj", [
+      ["evwid", "00000000:FFFFFFFF"],
+      ["evwfr", 'attribute:"hash#"'],
+    ]);
+    const evidence = createSemanticDiffIdentityFingerprint(escapedHash);
+
+    assert.strictEqual(
+      semanticDiffUnitIdentityStrategy(escapedHash),
+      "event-reception-v1",
+    );
+    assert.deepStrictEqual(
+      evidence.evidence.fields.find(
+        (identityField) => identityField.key === "evwfr",
+      ),
+      {
+        key: "evwfr",
+        presence: "present",
+        values: ['attribute:"hash##"'],
+      },
+    );
+    assert.notStrictEqual(
+      evidence.fingerprint,
+      createSemanticDiffIdentityFingerprint(escapedQuote).fingerprint,
     );
   });
 

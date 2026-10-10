@@ -188,6 +188,23 @@ unchanged checks only because the workflow or reviewer has changed. Intake and
 planning need discovery facts and validation of their documentation changes;
 they do not require implementation baseline/final scans for proposed code.
 
+### Test Organization and Repair
+
+Organize tests around use-case-defined observable behavior, the complete
+architecture rule catalog, and general component/public-contract behavior.
+Retain distinct valid, error, edge, privacy, and compatibility coverage. Remove
+redundant identical assertions, incidental implementation-text mirrors, and
+unjustified synthetic permutations or stress cases; retain purposeful
+architecture and declared-configuration checks. Physically delete excess tests
+and dedicated test support, recording how retained contracts remain covered.
+
+Test common behavior once. Split desktop and web suites only when a genuine host
+capability, different behavior, or adapter boundary requires it. Keep necessary
+host smoke checks, shared-contract and build compatibility, and the zero-exception
+architecture gate. After cleanup, repair retained tests against their contracts;
+failures are not deletion evidence. A production contract mismatch returns for
+scope or design review.
+
 - **SDD coordination/specification docs only:** for feature intake, plans,
   replans, `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, and their templates, run
   Markdown lint covering every changed Markdown path, validate local links

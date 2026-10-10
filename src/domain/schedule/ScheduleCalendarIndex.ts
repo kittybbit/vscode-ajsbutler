@@ -155,7 +155,9 @@ const sourceFailure = (
   };
 };
 
-const isUniqueCalendarGroup = (matches: AjsUnit[]): matches is [AjsUnit] =>
+const isUniqueCalendarGroup = (
+  matches: readonly AjsUnit[],
+): matches is readonly [AjsUnit] =>
   matches.length === 1 && matches[0].unitType === "g";
 
 const resolveExplicitSource = (

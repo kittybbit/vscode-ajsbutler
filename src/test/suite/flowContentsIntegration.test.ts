@@ -7,6 +7,7 @@ import {
   fireEvent,
   render,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
@@ -57,6 +58,15 @@ unit=root,,jp1admin,;
 }
 `;
 
+const hasViewerReadyRequest = (messages: readonly unknown[]): boolean =>
+  messages.some(
+    (message) =>
+      typeof message === "object" &&
+      message !== null &&
+      "type" in message &&
+      message.type === "ready",
+  );
+
 type GlobalDescriptorMap = Map<string, PropertyDescriptor | undefined>;
 
 const installDomGlobals = (): {
@@ -70,6 +80,10 @@ const installDomGlobals = (): {
   const domWindow = dom.window;
   const requestAnimationFrame = (callback: FrameRequestCallback): number =>
     domWindow.setTimeout(() => callback(domWindow.performance.now()), 0);
+  const cancelAnimationFrame = (handle: number): void =>
+    domWindow.clearTimeout(handle);
+  domWindow.requestAnimationFrame = requestAnimationFrame;
+  domWindow.cancelAnimationFrame = cancelAnimationFrame;
   const values: Record<string, unknown> = {
     window: domWindow,
     document: domWindow.document,
@@ -89,9 +103,7 @@ const installDomGlobals = (): {
     },
     getComputedStyle: domWindow.getComputedStyle.bind(domWindow),
     requestAnimationFrame,
-    cancelAnimationFrame: (handle: number): void =>
-      domWindow.clearTimeout(handle),
-    CSS: { escape: (value: string): string => value },
+    cancelAnimationFrame,
     IS_REACT_ACT_ENVIRONMENT: true,
   };
   Object.defineProperty(domWindow, "matchMedia", {
@@ -174,6 +186,13 @@ suite("Flow Contents integration", () => {
           }),
         }),
       );
+    });
+
+    await waitFor(() => {
+      assert.ok(hasViewerReadyRequest(postedMessages));
+    });
+
+    act(() => {
       eventBridge.dispatch(
         new MessageEvent("message", {
           data: createViewerDocumentChangedMessage(documentDto),
@@ -198,9 +217,10 @@ suite("Flow Contents integration", () => {
     fireEvent.click(currentScopeRow);
     assert.strictEqual(currentScopeRow.getAttribute("aria-selected"), "true");
 
-    const relationshipFocusButton = view.getByRole("button", {
-      name: /focus relationships/i,
-    });
+    const relationshipFocusButton = within(view.getByRole("banner")).getByRole(
+      "button",
+      { name: /focus on selected node relationships/i },
+    );
     fireEvent.click(relationshipFocusButton);
     assert.strictEqual(
       relationshipFocusButton.getAttribute("aria-pressed"),

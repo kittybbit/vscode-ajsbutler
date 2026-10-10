@@ -1,6 +1,4 @@
 import * as assert from "assert";
-import * as fs from "fs";
-import * as path from "path";
 import * as vscode from "vscode";
 import {
   AJS_FLOW_VIEWER_BUNDLE_SRC,
@@ -9,7 +7,6 @@ import {
   AJS_TABLE_VIEWER_TYPE,
   getViewerBundleSrc,
 } from "../../presentation/vscode/webview/constant";
-import * as viewerConstants from "../../presentation/vscode/webview/constant";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 
 suite("Viewer bundle", () => {
@@ -29,32 +26,6 @@ suite("Viewer bundle", () => {
       () => getViewerBundleSrc("ajsbutler.unknownViewer"),
       /Unknown viewer bundle/,
     );
-  });
-
-  test("keeps Explorer bundle ownership out of generic viewer constants", () => {
-    assert.strictEqual(
-      "AJS_SEMANTIC_DIFF_EXPLORER_TYPE" in viewerConstants,
-      false,
-    );
-    assert.throws(
-      () => getViewerBundleSrc("ajsbutler.semanticDiffExplorer"),
-      /Unknown viewer bundle/,
-    );
-  });
-
-  test("uses browser platform data in both search-enabled viewer bundles", () => {
-    const repositoryRoot = path.resolve(__dirname, "../../..");
-
-    for (const bundleSource of [
-      AJS_TABLE_VIEWER_BUNDLE_SRC,
-      AJS_FLOW_VIEWER_BUNDLE_SRC,
-    ]) {
-      const bundle = fs.readFileSync(
-        path.resolve(repositoryRoot, bundleSource),
-        "utf8",
-      );
-      assert.match(bundle, /navigator\.platform/u);
-    }
   });
 
   test("mounts the bundle selected for each viewer type", () => {

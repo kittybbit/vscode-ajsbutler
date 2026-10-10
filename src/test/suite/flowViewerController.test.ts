@@ -195,11 +195,13 @@ const expectedControllerKeys = [
   "unitById",
 ].sort();
 
+const controllerTheme = createTheme();
+
 const ControllerFixture = ({ targetUnitId }: { targetUnitId: string }) => {
-  const controller = useFlowViewerController({ theme: createTheme() });
-  const selectedNodes = controller.nodes
-    .filter((node) => node.data.isSelected)
-    .map((node) => node.id);
+  const controller = useFlowViewerController({ theme: controllerTheme });
+  const selectedNodes = controller.selectedUnitId
+    ? [controller.selectedUnitId]
+    : [];
   const expandedNodes = controller.nodes
     .filter((node) => node.data.isExpandedNested)
     .map((node) => node.id);

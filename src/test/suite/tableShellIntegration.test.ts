@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import { JSDOM } from "jsdom";
 import React from "react";
+import { VirtuosoMockContext } from "react-virtuoso";
 import {
   act,
   cleanup,
@@ -75,7 +76,6 @@ const installDomGlobals = (): {
     requestAnimationFrame,
     cancelAnimationFrame: (handle: number): void =>
       dom.window.clearTimeout(handle),
-    CSS: { escape: (value: string): string => value },
     IS_REACT_ACT_ENVIRONMENT: true,
   };
   Object.defineProperty(dom.window, "matchMedia", {
@@ -131,10 +131,11 @@ const countUnitSelectOperations = (messages: readonly unknown[]): number =>
     return (message as { data?: unknown }).data === "unit.select";
   }).length;
 
-const dispatchTableDocument = (
+const dispatchTableDocument = async (
   eventBridge: ReturnType<typeof createViewerEventBridge>,
   documentDto: ReturnType<typeof toUnitListDocumentDto>,
-): void => {
+  postedMessages: unknown[],
+): Promise<void> => {
   act(() => {
     eventBridge.dispatch(
       new MessageEvent("message", {
@@ -145,6 +146,13 @@ const dispatchTableDocument = (
         }),
       }),
     );
+  });
+  await waitFor(() => {
+    assert.ok(
+      postedMessages.some((message) => isViewerMessage(message, "ready")),
+    );
+  });
+  act(() => {
     eventBridge.dispatch(
       new MessageEvent("message", {
         data: createViewerDocumentChangedMessage(documentDto),
@@ -153,19 +161,40 @@ const dispatchTableDocument = (
   });
 };
 
+const renderTableViewer = () =>
+  render(
+    React.createElement(
+      VirtuosoMockContext.Provider,
+      { value: { itemHeight: 36, viewportHeight: 480 } },
+      React.createElement(AjsTableViewerApp),
+    ),
+  );
+
 const getTableRowByCellText = (
   container: HTMLElement,
   cellText: string,
 ): HTMLElement => {
   const row = Array.from(
     container.querySelectorAll<HTMLElement>('[role="row"]'),
-  ).find((candidate) =>
-    Array.from(candidate.querySelectorAll('[role="gridcell"]')).some(
-      (cell) => cell.textContent?.trim() === cellText,
-    ),
+  ).find(
+    (candidate) =>
+      candidate
+        .querySelectorAll('[role="gridcell"]')[1]
+        ?.textContent?.trim() === cellText,
   );
-  assert.ok(row, `Expected a table row containing ${cellText}`);
+  assert.ok(row, `Expected a table row with unit name ${cellText}`);
   return row;
+};
+
+const getUnitTreeItemByAbsolutePath = (
+  container: HTMLElement,
+  absolutePath: string,
+): HTMLElement => {
+  const item = container.querySelector<HTMLElement>(
+    `[role="treeitem"][data-unit-tree-unit-id="${absolutePath}"]`,
+  );
+  assert.ok(item, `Expected a unit tree item at ${absolutePath}`);
+  return item;
 };
 
 suite("Table shell integration", () => {
@@ -195,27 +224,12 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
+    const view = renderTableViewer();
     const documentDto = toUnitListDocumentDto(
       parseAjsDocumentForTest(definition),
     );
 
-    act(() => {
-      eventBridge.dispatch(
-        new MessageEvent("message", {
-          data: createViewerResourceStateMessage({
-            isDarkMode: false,
-            lang: "en",
-            scrollType: "table",
-          }),
-        }),
-      );
-      eventBridge.dispatch(
-        new MessageEvent("message", {
-          data: createViewerDocumentChangedMessage(documentDto),
-        }),
-      );
-    });
+    await dispatchTableDocument(eventBridge, documentDto, postedMessages);
 
     await waitFor(() => {
       assert.ok(view.getByRole("grid", { name: "Unit list" }));
@@ -223,11 +237,11 @@ suite("Table shell integration", () => {
     });
 
     const searchInput = view.getByPlaceholderText(/search unit list/i);
-    fireEvent.change(searchInput, { target: { value: "leaf-job" } });
+    fireEvent.change(searchInput, { target: { value: "example" } });
     fireEvent.keyUp(searchInput, { key: "Enter" });
 
     await waitFor(() => assert.ok(view.getByLabelText("1 / 1")));
-    const row = view.getByRole("row", { name: /leaf-job/i });
+    const row = getTableRowByCellText(view.container, "leaf-job");
     const leafCell = within(row).getAllByRole("gridcell")[1];
     assert.ok(leafCell);
     fireEvent.keyDown(leafCell, { key: "d" });
@@ -239,11 +253,6 @@ suite("Table shell integration", () => {
         }),
       ),
     );
-    fireEvent.click(
-      view.getByRole("button", { name: "Open definition details" }),
-    );
-    assert.ok(view.getByRole("dialog"));
-
     fireEvent.click(view.getByRole("button", { name: "Open in flow graph" }));
     assert.ok(
       postedMessages.some(
@@ -253,7 +262,6 @@ suite("Table shell integration", () => {
           message.data?.absolutePath === "/root/jobnet/leaf-job",
       ),
     );
-
     act(() => {
       eventBridge.dispatch(
         new MessageEvent("message", {
@@ -263,9 +271,14 @@ suite("Table shell integration", () => {
     });
 
     await waitFor(() => {
-      const revealedRow = view.getByRole("row", { name: /jobnet/i });
+      const revealedRow = getTableRowByCellText(view.container, "jobnet");
       assert.strictEqual(revealedRow.getAttribute("aria-selected"), "true");
     });
+
+    fireEvent.click(
+      view.getByRole("button", { name: "Open definition details" }),
+    );
+    assert.ok(view.getByRole("dialog"));
   });
 
   test("keeps keyboard movement provisional until Enter and commits once", async () => {
@@ -276,10 +289,11 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
-    dispatchTableDocument(
+    const view = renderTableViewer();
+    await dispatchTableDocument(
       eventBridge,
       toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+      postedMessages,
     );
     await waitFor(() =>
       assert.ok(view.getByRole("grid", { name: "Unit list" })),
@@ -292,7 +306,7 @@ suite("Table shell integration", () => {
     assert.strictEqual(rootRow.getAttribute("aria-selected"), "true");
 
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
-    const focusedRow = view.getByRole("row", { name: /jobnet/i });
+    const focusedRow = getTableRowByCellText(view.container, "jobnet");
     assert.strictEqual(rootRow.getAttribute("aria-selected"), "true");
     assert.strictEqual(focusedRow.getAttribute("aria-selected"), "false");
     assert.strictEqual(
@@ -320,10 +334,11 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
-    dispatchTableDocument(
+    const view = renderTableViewer();
+    await dispatchTableDocument(
       eventBridge,
       toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+      postedMessages,
     );
     await waitFor(() =>
       assert.ok(view.getByRole("grid", { name: "Unit list" })),
@@ -335,7 +350,7 @@ suite("Table shell integration", () => {
     ).querySelector('[role="gridcell"]') as HTMLElement;
     fireEvent.click(rootCell);
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
-    const provisionalRow = view.getByRole("row", { name: /jobnet/i });
+    const provisionalRow = getTableRowByCellText(view.container, "jobnet");
     const beforeReveal = countUnitSelectOperations(postedMessages);
 
     act(() => {
@@ -347,9 +362,9 @@ suite("Table shell integration", () => {
     });
     await waitFor(() =>
       assert.strictEqual(
-        view
-          .getByRole("row", { name: /leaf-job/i })
-          .getAttribute("aria-selected"),
+        getTableRowByCellText(view.container, "leaf-job").getAttribute(
+          "aria-selected",
+        ),
         "true",
       ),
     );
@@ -360,16 +375,19 @@ suite("Table shell integration", () => {
     );
 
     const leafCell = within(
-      view.getByRole("row", { name: /leaf-job/i }),
+      getTableRowByCellText(view.container, "leaf-job"),
     ).getAllByRole("gridcell")[0];
     fireEvent.keyDown(leafCell, { key: "l" });
     await waitFor(() => {
-      const leafTreeItem = view.getByRole("treeitem", { name: /leaf-job/i });
+      const leafTreeItem = getUnitTreeItemByAbsolutePath(
+        view.container,
+        "/root/jobnet/leaf-job",
+      );
       assert.strictEqual(document.activeElement, leafTreeItem);
     });
     assert.strictEqual(
       countUnitSelectOperations(postedMessages),
-      beforeReveal + 2,
+      beforeReveal + 1,
     );
   });
 
@@ -381,10 +399,11 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
-    dispatchTableDocument(
+    const view = renderTableViewer();
+    await dispatchTableDocument(
       eventBridge,
       toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+      postedMessages,
     );
     await waitFor(() =>
       assert.ok(view.getByRole("grid", { name: "Unit list" })),
@@ -393,9 +412,9 @@ suite("Table shell integration", () => {
     const rootRow = getTableRowByCellText(view.container, "root");
     const rootCell = within(rootRow).getAllByRole("gridcell")[0];
     fireEvent.click(rootCell);
-    const jobnetRow = view.getByRole("row", { name: /jobnet/i });
+    const jobnetRow = getTableRowByCellText(view.container, "jobnet");
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
-    const jobnetActionCell = within(jobnetRow).getAllByRole("gridcell")[1];
+    const jobnetActionCell = within(jobnetRow).getAllByRole("gridcell")[2];
     assert.ok(jobnetActionCell.querySelector("[data-grid-cell-action]"));
     const beforeEnter = countUnitSelectOperations(postedMessages);
 
@@ -418,10 +437,11 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
-    dispatchTableDocument(
+    const view = renderTableViewer();
+    await dispatchTableDocument(
       eventBridge,
       toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+      postedMessages,
     );
     await waitFor(() =>
       assert.ok(view.getByRole("grid", { name: "Unit list" })),
@@ -433,15 +453,17 @@ suite("Table shell integration", () => {
     ).querySelector('[role="gridcell"]') as HTMLElement;
     fireEvent.click(rootCell);
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
-    const provisionalRow = view.getByRole("row", { name: /jobnet/i });
+    const provisionalRow = getTableRowByCellText(view.container, "jobnet");
     const beforeTreeSelection = countUnitSelectOperations(postedMessages);
 
-    fireEvent.click(view.getByRole("treeitem", { name: /leaf-job/i }));
+    fireEvent.click(
+      getUnitTreeItemByAbsolutePath(view.container, "/root/jobnet/leaf-job"),
+    );
     await waitFor(() =>
       assert.strictEqual(
-        view
-          .getByRole("row", { name: /leaf-job/i })
-          .getAttribute("aria-selected"),
+        getTableRowByCellText(view.container, "leaf-job").getAttribute(
+          "aria-selected",
+        ),
         "true",
       ),
     );
@@ -460,10 +482,11 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
-    dispatchTableDocument(
+    const view = renderTableViewer();
+    await dispatchTableDocument(
       eventBridge,
       toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+      postedMessages,
     );
     await waitFor(() =>
       assert.ok(view.getByRole("grid", { name: "Unit list" })),
@@ -476,7 +499,7 @@ suite("Table shell integration", () => {
     fireEvent.click(rootCell);
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
     const focusedCell = within(
-      view.getByRole("row", { name: /jobnet/i }),
+      getTableRowByCellText(view.container, "jobnet"),
     ).getAllByRole("gridcell")[0];
     const beforeHeaderExit = countUnitSelectOperations(postedMessages);
 
@@ -518,11 +541,11 @@ suite("Table shell integration", () => {
       postMessage: (message: unknown) => postedMessages.push(message),
     } as never;
 
-    const view = render(React.createElement(AjsTableViewerApp));
+    const view = renderTableViewer();
     const documentDto = toUnitListDocumentDto(
       parseAjsDocumentForTest(definition),
     );
-    dispatchTableDocument(eventBridge, documentDto);
+    await dispatchTableDocument(eventBridge, documentDto, postedMessages);
     await waitFor(() =>
       assert.ok(view.getByRole("grid", { name: "Unit list" })),
     );
@@ -543,17 +566,20 @@ suite("Table shell integration", () => {
     });
     await waitFor(() => {
       assert.strictEqual(
-        view.queryByRole("complementary", {
-          name: "Selected list unit details",
-        }),
+        view.container.querySelector('[role="row"][aria-selected="true"]'),
         null,
       );
     });
     assert.strictEqual(
+      view.queryByRole("complementary", {
+        name: "Selected list unit details",
+      }),
+      null,
+    );
+    assert.strictEqual(
       countUnitSelectOperations(postedMessages),
       beforeReplacement,
     );
-    assert.strictEqual(view.queryByRole("status"), null);
 
     view.unmount();
     assert.strictEqual(

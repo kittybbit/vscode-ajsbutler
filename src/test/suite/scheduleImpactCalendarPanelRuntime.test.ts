@@ -85,6 +85,8 @@ const flush = async (): Promise<void> => {
 
 suite("Schedule impact calendar panel runtime", () => {
   test("dispatches shared resources before Calendar validation", async () => {
+    const isDarkMode =
+      vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark;
     const registry = new ScheduleImpactCalendarSessionRegistry();
     const fake = createFakePanel();
     const handle = openScheduleImpactCalendarPanel(
@@ -106,7 +108,7 @@ suite("Schedule impact calendar panel runtime", () => {
       {
         type: "resource",
         data: {
-          isDarkMode: false,
+          isDarkMode,
           lang: "en",
           scrollType: "window",
         },

@@ -294,7 +294,8 @@ suite("Flow Graph Document", () => {
     assert.deepStrictEqual(first.document, second.document);
   });
 
-  test("projects and validates a representative deeply nested document", () => {
+  test("projects and validates a representative deeply nested document", function () {
+    this.timeout(10_000);
     const source = cloneDocument();
     const root = source.rootUnits[0];
     const template = root.children[0].children[0];

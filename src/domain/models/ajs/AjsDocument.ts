@@ -4,65 +4,160 @@ export type AjsUnitType = TySymbol;
 export type AjsGroupType = "n" | "p";
 export type AjsRelationType = "seq" | "con";
 export type AjsParameter = {
-  key: string;
-  value: string;
-  position?: number;
-  line?: number;
-  column?: number;
-  length?: number;
+  readonly key: string;
+  readonly value: string;
+  readonly position?: number;
+  readonly line?: number;
+  readonly column?: number;
+  readonly length?: number;
 };
 
 export type AjsRelation = {
-  sourceUnitId: string;
-  targetUnitId: string;
-  type: AjsRelationType;
+  readonly sourceUnitId: string;
+  readonly targetUnitId: string;
+  readonly type: AjsRelationType;
 };
 
 export type AjsNormalizationWarning = {
-  code: string;
-  message: string;
-  unitPath?: string;
+  readonly code: string;
+  readonly message: string;
+  readonly unitPath?: string;
 };
 
 export type AjsUnitLayout = {
-  h: number;
-  v: number;
+  readonly h: number;
+  readonly v: number;
 };
 
 export type AjsUnit = {
-  id: string;
-  name: string;
-  unitAttribute: string;
-  permission?: string;
-  jp1Username?: string;
-  jp1ResourceGroup?: string;
-  unitType: AjsUnitType;
-  groupType?: AjsGroupType;
-  comment?: string;
-  absolutePath: string;
-  depth: number;
-  parentId?: string;
-  isRoot: boolean;
-  isRecovery?: boolean;
-  isRootJobnet: boolean;
-  hasSchedule: boolean;
-  hasWaitedFor: boolean;
-  layout: AjsUnitLayout;
-  parameters: AjsParameter[];
-  relations: AjsRelation[];
-  children: AjsUnit[];
+  readonly id: string;
+  readonly name: string;
+  readonly unitAttribute: string;
+  readonly permission?: string;
+  readonly jp1Username?: string;
+  readonly jp1ResourceGroup?: string;
+  readonly unitType: AjsUnitType;
+  readonly groupType?: AjsGroupType;
+  readonly comment?: string;
+  readonly absolutePath: string;
+  readonly depth: number;
+  readonly parentId?: string;
+  readonly isRoot: boolean;
+  readonly isRecovery?: boolean;
+  readonly isRootJobnet: boolean;
+  readonly hasSchedule: boolean;
+  readonly hasWaitedFor: boolean;
+  readonly layout: AjsUnitLayout;
+  readonly parameters: readonly AjsParameter[];
+  readonly relations: readonly AjsRelation[];
+  readonly children: readonly AjsUnit[];
 };
 
 export type AjsDocument = {
-  rootUnits: AjsUnit[];
-  warnings: AjsNormalizationWarning[];
+  readonly rootUnits: readonly AjsUnit[];
+  readonly warnings: readonly AjsNormalizationWarning[];
 };
 
-export const flattenAjsUnits = (units: AjsUnit[]): AjsUnit[] =>
-  units.reduce<AjsUnit[]>(
-    (allUnits, unit) => [...allUnits, unit, ...flattenAjsUnits(unit.children)],
-    [],
-  );
+type AjsUnitTraversalFrame = {
+  readonly units: readonly AjsUnit[];
+  index: number;
+  readonly owner?: AjsUnit;
+};
+
+type AjsUnitTraversalState = {
+  readonly flattened: AjsUnit[];
+  readonly ancestors: Set<AjsUnit>;
+  readonly frames: AjsUnitTraversalFrame[];
+};
+
+const skippedAjsUnitTraversalStep = Symbol("skipped AJS unit traversal step");
+
+const assertAjsUnitArray = (units: readonly AjsUnit[]): void => {
+  if (!Array.isArray(units)) {
+    throw new TypeError("AJS unit collection must be an array.");
+  }
+};
+
+const releaseCompletedAjsUnitTraversalFrame = (
+  state: AjsUnitTraversalState,
+): boolean => {
+  const frame = state.frames[state.frames.length - 1]!;
+  if (frame.index < frame.units.length) {
+    return false;
+  }
+
+  state.frames.pop();
+  if (frame.owner !== undefined) {
+    state.ancestors.delete(frame.owner);
+  }
+  return true;
+};
+
+const takeAjsUnitFromTraversalFrame = (
+  frame: AjsUnitTraversalFrame,
+): AjsUnit | typeof skippedAjsUnitTraversalStep => {
+  const index = frame.index;
+  frame.index += 1;
+  return index in frame.units
+    ? frame.units[index]!
+    : skippedAjsUnitTraversalStep;
+};
+
+const assertNoAjsUnitAncestorCycle = (
+  unit: AjsUnit,
+  state: AjsUnitTraversalState,
+): void => {
+  if (state.ancestors.has(unit)) {
+    throw new RangeError("AJS unit tree contains an ancestor cycle.");
+  }
+};
+
+const nextAjsUnitTraversalStep = (
+  state: AjsUnitTraversalState,
+): AjsUnit | typeof skippedAjsUnitTraversalStep => {
+  if (releaseCompletedAjsUnitTraversalFrame(state)) {
+    return skippedAjsUnitTraversalStep;
+  }
+
+  const frame = state.frames[state.frames.length - 1]!;
+  const unit = takeAjsUnitFromTraversalFrame(frame);
+  if (unit !== skippedAjsUnitTraversalStep) {
+    assertNoAjsUnitAncestorCycle(unit, state);
+  }
+  return unit;
+};
+
+const appendAjsUnitTraversalStep = (
+  unit: AjsUnit,
+  state: AjsUnitTraversalState,
+): void => {
+  assertAjsUnitArray(unit.children);
+  state.flattened.push(unit);
+  state.ancestors.add(unit);
+  state.frames.push({ units: unit.children, index: 0, owner: unit });
+};
+
+const advanceAjsUnitTraversal = (state: AjsUnitTraversalState): void => {
+  const step = nextAjsUnitTraversalStep(state);
+  if (step !== skippedAjsUnitTraversalStep) {
+    appendAjsUnitTraversalStep(step, state);
+  }
+};
+
+export const flattenAjsUnits = (units: readonly AjsUnit[]): AjsUnit[] => {
+  assertAjsUnitArray(units);
+  const state: AjsUnitTraversalState = {
+    flattened: [],
+    ancestors: new Set<AjsUnit>(),
+    frames: [{ units, index: 0 }],
+  };
+
+  while (state.frames.length > 0) {
+    advanceAjsUnitTraversal(state);
+  }
+
+  return state.flattened;
+};
 
 export const findAjsUnitById = (
   document: AjsDocument,
@@ -116,11 +211,11 @@ export const findAjsUnitAncestors = (
   return ancestors;
 };
 
-const hasAjsParameters = (parameters: AjsParameter[]): boolean =>
+const hasAjsParameters = (parameters: readonly AjsParameter[]): boolean =>
   parameters.length > 0;
 
 const findFirstAjsUnitParameters = (
-  units: AjsUnit[],
+  units: readonly AjsUnit[],
   key: ParamSymbol,
 ): AjsParameter[] | undefined =>
   units.map((unit) => findAjsUnitParameters(unit, key)).find(hasAjsParameters);

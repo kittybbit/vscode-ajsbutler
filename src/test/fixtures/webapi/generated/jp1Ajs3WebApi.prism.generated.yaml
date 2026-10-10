@@ -284,6 +284,56 @@ paths:
                         release: null
                         unitStatus: null
                     all: true
+                semantic_diff_after_utf8:
+                  summary: Definition-only import response from sample/semantic_diff_after_utf8
+                  value:
+                    statuses:
+                      - definition:
+                          owner: jp1admin
+                          customJobType: ""
+                          registerStatus: YES
+                          rootJobnetName: /semantic_diff_sample
+                          recoveryUnit: false
+                          unitType: GROUP
+                          unitComment: semantic diff coverage after
+                          simpleUnitName: semantic_diff_sample
+                          parameters: sample=semantic_diff_after_utf8
+                          execAgent: ""
+                          execFileName: ""
+                          wait: false
+                          jobnetReleaseUnit: false
+                          jp1ResourceGroup: ""
+                          unitName: /semantic_diff_sample
+                          unitID: 8
+                          x-ajs-butler-sample: sample/semantic_diff_after_utf8
+                        release: null
+                        unitStatus: null
+                    all: true
+                semantic_diff_before_utf8:
+                  summary: Definition-only import response from sample/semantic_diff_before_utf8
+                  value:
+                    statuses:
+                      - definition:
+                          owner: jp1admin
+                          customJobType: ""
+                          registerStatus: YES
+                          rootJobnetName: /semantic_diff_sample
+                          recoveryUnit: false
+                          unitType: GROUP
+                          unitComment: semantic diff coverage before
+                          simpleUnitName: semantic_diff_sample
+                          parameters: sample=semantic_diff_before_utf8
+                          execAgent: ""
+                          execFileName: ""
+                          wait: false
+                          jobnetReleaseUnit: false
+                          jp1ResourceGroup: ""
+                          unitName: /semantic_diff_sample
+                          unitID: 9
+                          x-ajs-butler-sample: sample/semantic_diff_before_utf8
+                        release: null
+                        unitStatus: null
+                    all: true
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":

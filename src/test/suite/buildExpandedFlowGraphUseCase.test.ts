@@ -149,7 +149,7 @@ suite("Build Expanded Flow Graph use case", () => {
 
     assert.deepStrictEqual(
       first.graph.nodes.map((node) => node.id),
-      ["sibling", "child", "scope", "grand", "nested-job", "leaf"],
+      ["sibling", "child", "scope", "nested-job", "grand", "leaf"],
     );
     assert.deepStrictEqual(first.graph.edges, [
       {
@@ -161,6 +161,7 @@ suite("Build Expanded Flow Graph use case", () => {
         source: "grand",
         target: "nested-job",
         type: "seq",
+        semanticDiffHighlight: undefined,
       },
     ]);
     assert.deepStrictEqual(first.constraints.realizedExpandedUnitIds, [

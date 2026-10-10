@@ -6,6 +6,19 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import ViewerFilterSelect from "../../presentation/webview/editor/shared/ViewerFilterSelect";
 import { createViewerTheme } from "../../presentation/webview/shared/viewerTheme";
 
+const emotionStyleDocument = document;
+const getEmotionCssText = (): string =>
+  Array.from(emotionStyleDocument.styleSheets)
+    .flatMap((styleSheet) => {
+      try {
+        return Array.from(styleSheet.cssRules);
+      } catch {
+        return [];
+      }
+    })
+    .map((rule) => rule.cssText)
+    .join("\n");
+
 type GlobalValue = {
   key: string;
   descriptor: PropertyDescriptor | undefined;
@@ -118,7 +131,20 @@ suite("Viewer filter select", () => {
     assert.strictEqual(trigger.id, "viewer-filter");
     assert.strictEqual(trigger.getAttribute("aria-label"), "Filter changes");
     assert.strictEqual(triggerRef.current, trigger);
-    assert.strictEqual(getComputedStyle(trigger).minHeight, "44px");
+    const selectRootClass = trigger.parentElement?.className
+      .split(" ")
+      .find((className) => className.startsWith("css-"));
+    assert.ok(selectRootClass);
+    const injectedStyles = getEmotionCssText();
+    const preservesTargetHeight = injectedStyles
+      .split("\n")
+      .some(
+        (rule) =>
+          rule.includes(`.${selectRootClass}`) &&
+          rule.includes(".MuiSelect-select") &&
+          rule.includes("min-height: 44px"),
+      );
+    assert.strictEqual(preservesTargetHeight, true);
 
     act(() => {
       fireEvent.keyDown(trigger, { key: "ArrowDown" });
@@ -141,11 +167,22 @@ suite("Viewer filter select", () => {
       '[data-value="long"]',
     ) as HTMLElement;
     assert.ok(longOption);
-    const injectedStyles = [...dom.window.document.querySelectorAll("style")]
-      .map((style) => style.textContent ?? "")
-      .join("\n");
-    assert.match(injectedStyles, /white-space:normal/);
-    assert.match(injectedStyles, /overflow-wrap:anywhere/);
+    const menuPaper = longOption.closest(".MuiPaper-root") as HTMLElement;
+    assert.ok(menuPaper);
+    const menuPaperClass = menuPaper.className
+      .split(" ")
+      .find((className) => className.startsWith("css-"));
+    assert.ok(menuPaperClass);
+    const injectedMenuStyles = getEmotionCssText();
+    const preservesWrapping = injectedMenuStyles
+      .split("\n")
+      .some(
+        (rule) =>
+          rule.includes(`.${menuPaperClass} .MuiMenuItem-root`) &&
+          rule.includes("white-space: normal") &&
+          rule.includes("overflow-wrap: anywhere"),
+      );
+    assert.strictEqual(preservesWrapping, true);
 
     act(() => {
       fireEvent.click(longOption);

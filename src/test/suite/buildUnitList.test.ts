@@ -55,8 +55,14 @@ suite("Build Unit List", () => {
         }),
       ),
       [
-        { absolutePath: "/root", parameterSearchValues: ["g"] },
-        { absolutePath: "/root/jobnet", parameterSearchValues: ["n"] },
+        {
+          absolutePath: "/root",
+          parameterSearchValues: ["g", "jobnet,n,+0+0"],
+        },
+        {
+          absolutePath: "/root/jobnet",
+          parameterSearchValues: ["n", "job,j,+0+0"],
+        },
         { absolutePath: "/root/jobnet/job", parameterSearchValues: ["j"] },
       ],
     );
@@ -171,8 +177,8 @@ suite("Build Unit List", () => {
           parameters: [{ key: "ty", value: "n" }],
           relations: [
             {
-              sourceUnitId: "root-id",
-              targetUnitId: "child-id",
+              sourceUnitId: "child-id",
+              targetUnitId: "target-id",
               type: "seq",
             },
           ],
@@ -190,6 +196,23 @@ suite("Build Unit List", () => {
               hasSchedule: false,
               hasWaitedFor: false,
               layout: { h: 3, v: 4 },
+              parameters: [{ key: "ty", value: "j" }],
+              relations: [],
+              children: [],
+            },
+            {
+              id: "target-id",
+              name: "target",
+              unitAttribute: "target,,jp1admin,",
+              unitType: "j",
+              absolutePath: "/root/target",
+              depth: 1,
+              parentId: "root-id",
+              isRoot: false,
+              isRootJobnet: false,
+              hasSchedule: false,
+              hasWaitedFor: false,
+              layout: { h: 5, v: 6 },
               parameters: [{ key: "ty", value: "j" }],
               relations: [],
               children: [],
@@ -222,6 +245,7 @@ suite("Build Unit List", () => {
       [
         { absolutePath: "/root", rawData: "ty=n" },
         { absolutePath: "/root/child", rawData: "ty=j" },
+        { absolutePath: "/root/target", rawData: "ty=j" },
       ],
     );
     assert.deepStrictEqual(restored.rootUnits, document.rootUnits);
@@ -316,8 +340,23 @@ suite("Build Unit List", () => {
     brokenParentage.rootUnits[0].children[0].parentId = undefined;
     assert.strictEqual(toUnitListTableData(brokenParentage), undefined);
 
-    const reorderedTree = cloneDocument();
-    reorderedTree.rootUnits[0].children.reverse();
+    const multipleRoots = buildUnitList(
+      [
+        "unit=first,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "}",
+        "unit=second,,jp1admin,;",
+        "{",
+        "  ty=g;",
+        "}",
+      ].join("\n"),
+    );
+    assert.ok(multipleRoots.document);
+    const reorderedTree = JSON.parse(
+      JSON.stringify(multipleRoots.document),
+    ) as typeof multipleRoots.document;
+    reorderedTree.rootUnits.reverse();
     assert.strictEqual(toUnitListTableData(reorderedTree), undefined);
   });
 

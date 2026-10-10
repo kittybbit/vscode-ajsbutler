@@ -313,7 +313,7 @@ suite("Build Unit List View", () => {
     assert.strictEqual(jobnet?.group1.name, "jobnet");
     assert.strictEqual(jobnet?.group1.parentAbsolutePath, "/root");
     assert.strictEqual(jobnet?.group1.unitType, "n");
-    assert.strictEqual(jobnet?.group1.cty, "custom");
+    assert.strictEqual(jobnet?.group1.cty, '"custom"');
     assert.strictEqual(job?.group1.layoutHv, "+0+0");
     assert.strictEqual(jobnet?.group1.size, "2-times-3");
     assert.strictEqual(jobnet?.group2.comment, "jobnet comment");

@@ -16,13 +16,29 @@ const activateExtension = async () => {
 const waitFor = async (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
+const waitForCondition = async (
+  predicate: () => boolean,
+  timeoutMs = 5_000,
+  timeoutMessage: string | (() => string) = "Condition did not become true.",
+): Promise<void> => {
+  const startedAt = Date.now();
+  while (!predicate()) {
+    assert.ok(
+      Date.now() - startedAt < timeoutMs,
+      typeof timeoutMessage === "function" ? timeoutMessage() : timeoutMessage,
+    );
+    await waitFor(25);
+  }
+};
+
 const findWebviewTab = (viewType: string) =>
   vscode.window.tabGroups.all
     .flatMap((group) => group.tabs)
     .find(
       (tab) =>
         tab.input instanceof vscode.TabInputWebview &&
-        tab.input.viewType === viewType,
+        (tab.input.viewType === viewType ||
+          tab.input.viewType.endsWith(`-${viewType}`)),
     );
 
 suite("Extension Test Suite", () => {
@@ -74,7 +90,8 @@ suite("Extension Test Suite", () => {
     assert.ok(hovers.length > 0);
   });
 
-  test("opens table and flow viewers as webview tabs", async () => {
+  test("opens table and flow viewers as webview tabs", async function () {
+    this.timeout(7_000);
     await activateExtension();
 
     const document = await vscode.workspace.openTextDocument({
@@ -85,7 +102,27 @@ suite("Extension Test Suite", () => {
 
     await vscode.commands.executeCommand("open.ajsbutler.tableViewer");
     await vscode.commands.executeCommand("open.ajsbutler.flowViewer");
-    await waitFor(200);
+    await waitForCondition(
+      () =>
+        findWebviewTab(AJS_TABLE_VIEWER_TYPE) !== undefined &&
+        findWebviewTab(AJS_FLOW_VIEWER_TYPE) !== undefined,
+      5_000,
+      () =>
+        `Webview tabs not found; visible tabs: ${vscode.window.tabGroups.all
+          .flatMap((group) => group.tabs)
+          .map((tab) => {
+            const input = tab.input as {
+              viewType?: unknown;
+              constructor?: { name?: string };
+            };
+            const viewType =
+              typeof input.viewType === "string" ? input.viewType : "n/a";
+            const inputKind = input.constructor?.name ?? "unknown";
+            const inputKeys = Object.keys(input).join("|");
+            return `${tab.label} (${inputKind}; viewType=${viewType}; keys=${inputKeys})`;
+          })
+          .join(", ")}`,
+    );
 
     assert.ok(findWebviewTab(AJS_TABLE_VIEWER_TYPE));
     assert.ok(findWebviewTab(AJS_FLOW_VIEWER_TYPE));

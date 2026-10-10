@@ -35,7 +35,10 @@ const parameters = (
       : [{ key, value }],
   );
 
-const rootJobnet = (path: string): AjsUnit => ({
+const rootJobnet = (
+  path: string,
+  overrides: Partial<AjsUnit> = {},
+): AjsUnit => ({
   id: path,
   name: path.split("/").at(-1) ?? "jobnet",
   unitAttribute: "jobnet,,jp1admin,",
@@ -51,6 +54,7 @@ const rootJobnet = (path: string): AjsUnit => ({
   parameters: parameters({ ty: "n" }),
   relations: [],
   children: [],
+  ...overrides,
 });
 
 const document = (children: AjsUnit[]): AjsDocument => ({
@@ -225,25 +229,36 @@ suite("Semantic Diff schedule impact", () => {
   });
 
   test("preserves side-local last-hit indexes and nested root order", () => {
-    const sourceUnit = (id: string, path: string): AjsUnit => ({
+    const sourceUnit = (
+      id: string,
+      path: string,
+      overrides: Partial<AjsUnit> = {},
+    ): AjsUnit => ({
       ...rootJobnet(path),
       id,
       name: id,
       unitType: "j",
       isRootJobnet: false,
       hasSchedule: false,
+      ...overrides,
     });
-    const beforeRoot = rootJobnet("/root/before");
+    const beforeRootChildren: AjsUnit[] = [];
+    const beforeRoot = rootJobnet("/root/before", {
+      children: beforeRootChildren,
+    });
     const beforeNestedRoot = rootJobnet("/root/before/nested");
     const beforeFirst = sourceUnit("before-first", "/root/before/task");
     const beforeLast = sourceUnit("before-last", "/root/before/task");
-    beforeRoot.children.push(beforeFirst, beforeLast, beforeNestedRoot);
+    beforeRootChildren.push(beforeFirst, beforeLast, beforeNestedRoot);
 
-    const afterRoot = rootJobnet("/root/after");
+    const afterRootChildren: AjsUnit[] = [];
+    const afterRoot = rootJobnet("/root/after", {
+      children: afterRootChildren,
+    });
     const afterNestedRoot = rootJobnet("/root/after/nested");
     const afterFirst = sourceUnit("after-first", "/root/after/task");
     const afterLast = sourceUnit("after-last", "/root/after/task");
-    afterRoot.children.push(afterFirst, afterLast, afterNestedRoot);
+    afterRootChildren.push(afterFirst, afterLast, afterNestedRoot);
 
     const beforeRun = {
       unitPath: "/root/before/task",
@@ -400,11 +415,14 @@ suite("Semantic Diff schedule impact", () => {
       ],
     );
 
-    beforeLast.name = "before updated";
-    beforeLast.absolutePath = "/root/before-updated";
+    const updatedBeforeLast: AjsUnit = {
+      ...beforeLast,
+      name: "before updated",
+      absolutePath: "/root/before-updated",
+    };
     const rebuiltFacts = buildScheduleProjectionFacts({
       result: { ...result, identityDecisions: [identityDecision] },
-      before: document([beforeFirst, beforeLast]),
+      before: document([beforeFirst, updatedBeforeLast]),
       after: document([afterFirst, afterLast]),
       scheduleEvaluation: evaluation,
     });

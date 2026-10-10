@@ -571,18 +571,18 @@ suite("Semantic Diff Evidence Rules", () => {
       id: "/root/jobnet/source",
       name: "source",
       absolutePath: "/root/jobnet/source",
+      relations: [
+        relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+        relation("/root/jobnet/source", "/root/jobnet/target", "seq"),
+      ],
     });
     const beforeTarget = unit({
       id: "/root/jobnet/target",
       name: "target",
       absolutePath: "/root/jobnet/target",
     });
-    const afterSource = unit({ ...beforeSource });
+    const afterSource = unit({ ...beforeSource, relations: [] });
     const afterTarget = unit({ ...beforeTarget });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "con"),
-      relation(beforeSource.id, beforeTarget.id, "seq"),
-    ];
     const matches: SemanticDiffUnitMatch[] = [
       { before: beforeSource, after: afterSource, kind: "exact" },
       { before: beforeTarget, after: afterTarget, kind: "exact" },
@@ -617,16 +617,16 @@ suite("Semantic Diff Evidence Rules", () => {
       id: "/root/jobnet/source",
       name: "source",
       absolutePath: "/root/jobnet/source",
+      relations: [
+        relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+      ],
     });
     const beforeTarget = unit({
       id: "/root/jobnet/target",
       name: "target",
       absolutePath: "/root/jobnet/target",
     });
-    const afterSource = unit({ ...beforeSource });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeTarget.id, "con"),
-    ];
+    const afterSource = unit({ ...beforeSource, relations: [] });
 
     const result = evaluateSemanticDiffEvidence({
       beforeUnits: [beforeSource, beforeTarget],
@@ -644,6 +644,9 @@ suite("Semantic Diff Evidence Rules", () => {
       id: "/root/jobnet/source",
       name: "source",
       absolutePath: "/root/jobnet/source",
+      relations: [
+        relation("/root/jobnet/source", "/root/jobnet/target", "con"),
+      ],
     });
     const beforeRemovedTarget = unit({
       id: "/root/jobnet/target",
@@ -655,16 +658,13 @@ suite("Semantic Diff Evidence Rules", () => {
       name: "other",
       absolutePath: "/root/jobnet/other",
     });
-    const afterSource = unit({ ...beforeSource });
+    const afterSource = unit({ ...beforeSource, relations: [] });
     const afterFingerprintMatch = unit({
       ...beforeFingerprintMatch,
       id: beforeRemovedTarget.id,
       name: "reused-target-id",
       absolutePath: beforeRemovedTarget.absolutePath,
     });
-    beforeSource.relations = [
-      relation(beforeSource.id, beforeRemovedTarget.id, "con"),
-    ];
 
     const result = evaluateSemanticDiffEvidence({
       beforeUnits: [beforeSource, beforeRemovedTarget, beforeFingerprintMatch],
