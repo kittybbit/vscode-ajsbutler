@@ -8,7 +8,7 @@
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, and Bootstrap discovery.
 - Preserve full stable suite, VS Code 1.75, Web and architecture zero exceptions.
 - Do not repair excluded memory, Table Shell, React-loop or Flow-golden issues.
-- Next operation: approval-committer creates the focused S1 completion commit.
+- Next operation: approval-committer creates the approved correction commit.
   Closure remains a separate unapproved gate.
 
 ## Current state and gates
@@ -17,14 +17,18 @@
 - Feature kind: roadmap.
 - Selected base: `c5998c95b21f7ea04f6aa829d693f681673f420f`.
 - Branch: `codex/desktop-test-infrastructure-stabilization`.
-- Next decision: focused S1 completion commit; local acceptance passed
-  and both independent implementation reviews returned Ready, no Findings.
+- Next decision: approved correction commit, then corrected-head Linux Verify.
+  Prior committed gates are retained; old-head Linux Verify
+  failed twice and corrected-head Verify is not yet run.
 - Plan review: Ready, no Findings; see the linked review record.
-- Implementation reviews: first and second Ready, no Findings; see the
-  linked S1 review record. Feature Exit/Closure review is not performed.
+- Implementation reviews: both corrected-patch reviews Ready, no actionable
+  Findings; see CORRECTION-REVIEWS.md below. Prior Feature Exit returned
+  Do not close; corrected-head Verify and renewed Feature Exit remain pending.
 - Planning commit: `ab5c6f54b816d9aec7aed4fd71acd34bbd67807f`; exact selected
   feature documents committed and staged whitespace check passed.
-- Completion/Closure commits: none.
+- S1 completion commit: `d5392f8290ac82e6dc548b44caf784fede2614f7`; exact
+  14 approved paths committed and staged whitespace check passed.
+- Closure commit: none.
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -68,11 +72,39 @@ unapproved gates. Apply
 - Review verdict: both independent implementation reviews Ready, no Findings.
 - Approval provenance: Main received explicit permission to proceed after
   presenting the reviewed S1 completion boundary in this conversation.
-- Commit status: not committed; approval-committer is the next owner.
+- Commit status: committed as `d5392f8290ac82e6dc548b44caf784fede2614f7`.
 - Review and subsequent gate metadata:
   [S1-REVIEWS.md](/tmp/ajsbutler-desktop-test-s1-20261011/S1-REVIEWS.md).
 - Closure Approval: not requested; current-head Verify/Qlty Cloud and Feature
   Exit remain separate gates.
+
+## Correction Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-11 (Asia/Tokyo).
+- Approval provenance: human explicitly approved the presented corrected S1
+  completion boundary after both independent reviews returned Ready.
+- Scope: corrected S1 completion; exact correction commit paths are
+  `src/test/suite/index.ts` and selected Feature `TASKS.md` / `TRACEABILITY.md`.
+  Acceptance, design and validation requirements remain unchanged.
+- Finding: P2 correction, explicit file loading is repeated by Mocha.run;
+  use its existing lazyLoadFiles API after successful explicit loading.
+- Prior Completion Approval and commit above remain valid for their exact
+  reviewed patch; this new completion gate requires corrected-patch review.
+- Review verdict: both independent corrected-patch reviews Ready, no Findings.
+- Reviewed complete patch: `537cc1fda53d1271619dda9acc3d19fc4b828224a27303d8bbe2ddbd63dba9e1`.
+- Reviewed source manifest: `c3c3b32ad7cde6c957d60c28191248c7327e7723fae199c31be04ae46f020429`.
+- Reviews: [CORRECTION-REVIEWS.md](/tmp/ajsbutler-desktop-test-s1-20261011/CORRECTION-REVIEWS.md).
+- Commit status: no correction commit.
+- Evidence: [CORRECTION-REVIEW.md](/tmp/ajsbutler-desktop-test-s1-20261011/CORRECTION-REVIEW.md).
+- Correction: successful explicit loading enables the existing public Mocha
+  lazyLoadFiles API, preserving file order, cases, timeout and cleanup. Installed
+  declarations omit that API; a narrow structural cast preserves dependencies.
+- Affected local checks: compile passed; Mocha 11.7.5 emitted each file event
+  once and retained a failing case's failure count; stable full suite passed
+  all 1200 cases, including alias/define, architecture and accessibility.
+  Corrected-head Linux Verify remains pending; CI timeout causality is unknown.
+- Correction evidence: [CORRECTION-EVIDENCE.md](/tmp/ajsbutler-desktop-test-s1-20261011/CORRECTION-EVIDENCE.md).
 
 ## Evidence and current decisions
 
@@ -246,8 +278,8 @@ sufficiency separately.
   one reviewable commit so no intermediate public command lacks preparation
   or skips CI coverage. No dependent/unrelated implementation slice is added.
 - Acceptance: AC-1 through AC-6 and AC-8 with the coverage below.
-- Readiness: S1 implementation and local validation recorded; both independent
-  reviews Ready and Completion Approval recorded. Completion commit pending.
+- Readiness: S1 implementation, local validation, both independent Ready
+  reviews, Completion Approval and focused completion commit are recorded.
 
 #### Exact proposed implementation paths
 
@@ -422,3 +454,19 @@ maintainers own reporting recurrence to Main for a new scope decision; the
 feature does not claim it repaired memory. Existing
 [OS evidence](/tmp/ajsbutler-desktop-test-plan-20261011/OS-MEMORY-DISCOVERY.md)
 remains available without another forced reproduction.
+
+### Prior Feature Exit review (historical)
+
+- Result: Do not close. For PR #334 at completion commit
+  `d5392f8290ac82e6dc548b44caf784fede2614f7`, Qlty Cloud `qlty check` and
+  `qlty fmt` passed; Verify was in progress at that review. Subsequent Verify
+  failed twice on the same unchanged Table Shell case timeout. Corrected-head
+  Verify and a renewed Feature Exit are required after the correction commit.
+- Aggregate evidence: [FEATURE-EXIT.md](/tmp/ajsbutler-desktop-test-s1-20261011/FEATURE-EXIT.md),
+  SHA256 `f83aabf058c1922a69588c494cb196196125c67829a82ee93c62da33764df002`.
+- Durable outcome: retain the Desktop Test Host Bootstrap roadmap item until
+  current-head Linux Verify passes. CONTRIBUTING already owns reusable command
+  guidance; README and CHANGELOG updates are not required. Closure Approval
+  and the exact roadmap/feature-folder paths remain pending.
+- Prior traceability follow-up: the stale pending-review statement was corrected
+  by its producer; this preserves the original review history.

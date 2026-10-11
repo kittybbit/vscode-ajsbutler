@@ -19,6 +19,10 @@ fixture; only redundant entry/preparation is removed. Implementation evidence
 belongs in [TASKS.md](TASKS.md#evidence-and-current-decisions).
 
 Local S1 checks passed: full suite 1200 cases, minimum 1.75 smoke, real Web,
-type/build and quality. Independent reviews and current-head CI/Cloud gates
-remain pending. Historical prepared execution is discovery only. Memory/OOM
+type/build and quality. Original independent implementation reviews returned Ready.
+S1 was committed as `d5392f8290ac82e6dc548b44caf784fede2614f7`.
+The P2 file-loading lifecycle correction preserves one file-event pass and all
+1200 cases locally; independent re-review and corrected-head CI remain pending.
+Current-head CI/Cloud and Feature Exit results are tracked in TASKS.md.
+Historical prepared execution is discovery only. Memory/OOM
 repair is excluded under the latest user/Main scope decision.

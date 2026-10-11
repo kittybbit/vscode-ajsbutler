@@ -209,6 +209,10 @@ export function run(): Promise<void> {
     try {
       // Mocha exposes synchronous loading at runtime; its declarations mark it protected.
       (mocha as unknown as { loadFiles(): void }).loadFiles();
+      // The public runtime API is absent from the installed type declarations.
+      (
+        mocha as unknown as { lazyLoadFiles(enable: boolean): void }
+      ).lazyLoadFiles(true);
     } catch (error) {
       console.error("[desktop-test] test-file loading failed", error);
       throw error;
