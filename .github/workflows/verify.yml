@@ -109,8 +109,14 @@ jobs:
       - name: Prepare browser accessibility fixture
         run: pnpm run test:prepare:browser:bundle
 
+      - name: Prepare shared host smoke bundle
+        run: pnpm run test:prepare:web:bundle
+
       - name: Desktop extension tests
         run: xvfb-run -a pnpm run test:desktop:run
+
+      - name: Minimum Desktop extension smoke tests
+        run: xvfb-run -a pnpm run test:desktop:min:run
 
       - name: Web extension tests
         run: pnpm run test:web:run

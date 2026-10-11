@@ -127,7 +127,7 @@ The plan selects canonical Web invocation with a retained internal prepared
 path for CI production artifacts, direct smoke bundling without the one-line
 export wrapper, and additional minimum Desktop host reuse of that bundle.
 Browser bundling and SDK runtime entries remain necessary support boundaries;
-Human Approval remains pending for all proposed changes.
+The approved S1 boundary and its implementation evidence are recorded in TASKS.md.
 
 Prior OS memory-pressure causality remains unknown and is outside this
 feature's acceptance. Non-recurrence is not repair proof. If the symptom

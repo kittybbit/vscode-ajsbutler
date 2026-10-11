@@ -115,6 +115,7 @@ export function run(): Promise<void> {
     }
   };
 
+  console.log("[desktop-test] initializing aliases, defines and DOM");
   try {
     ownedDom = new JSDOM("<!doctype html><html><body></body></html>", {
       url: "http://localhost/",
@@ -191,6 +192,7 @@ export function run(): Promise<void> {
       addMatchAll: false,
     });
   } catch (error) {
+    console.error("[desktop-test] initialization failed", error);
     return rejectAfterCleanUp(error);
   }
 
@@ -203,10 +205,20 @@ export function run(): Promise<void> {
     const testsRoot = path.resolve(__dirname, "..");
     const files = await glob("**/**.test.js", { cwd: testsRoot });
     files.forEach((file) => mocha.addFile(path.resolve(testsRoot, file)));
+    console.log(`[desktop-test] loading ${files.length} test files`);
+    try {
+      // Mocha exposes synchronous loading at runtime; its declarations mark it protected.
+      (mocha as unknown as { loadFiles(): void }).loadFiles();
+    } catch (error) {
+      console.error("[desktop-test] test-file loading failed", error);
+      throw error;
+    }
+    console.log("[desktop-test] executing test cases");
 
     await new Promise<void>((resolve, reject) => {
       try {
         mocha.run((failures) => {
+          console.log(`[desktop-test] cases completed: ${failures} failures`);
           if (failures > 0) {
             reject(new Error(`${failures} tests failed.`));
           } else {
@@ -221,7 +233,10 @@ export function run(): Promise<void> {
   };
 
   return runTests().then(
-    () => resolveAfterCleanUp(),
+    () => {
+      resolveAfterCleanUp();
+      console.log("[desktop-test] suite completed and resources restored");
+    },
     (error: unknown) => rejectAfterCleanUp(error),
   );
 }

@@ -8,20 +8,23 @@
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, and Bootstrap discovery.
 - Preserve full stable suite, VS Code 1.75, Web and architecture zero exceptions.
 - Do not repair excluded memory, Table Shell, React-loop or Flow-golden issues.
-- Next operation: approval-committer creates the focused plan commit.
-  Implementation requires that successful commit; later gates remain separate.
+- Next operation: approval-committer creates the focused S1 completion commit.
+  Closure remains a separate unapproved gate.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED.
+- Lifecycle state: SLICE_APPROVED.
 - Feature kind: roadmap.
 - Selected base: `c5998c95b21f7ea04f6aa829d693f681673f420f`.
 - Branch: `codex/desktop-test-infrastructure-stabilization`.
-- Next decision: focused planning commit for the approved S1 boundary; no blocking
-  scope/design decision. No implementation authority is inferred.
-- Plan review: Ready, no Findings; see the linked review record. No
-  implementation/completion/closure review.
-- Workflow commits: none.
+- Next decision: focused S1 completion commit; local acceptance passed
+  and both independent implementation reviews returned Ready, no Findings.
+- Plan review: Ready, no Findings; see the linked review record.
+- Implementation reviews: first and second Ready, no Findings; see the
+  linked S1 review record. Feature Exit/Closure review is not performed.
+- Planning commit: `ab5c6f54b816d9aec7aed4fd71acd34bbd67807f`; exact selected
+  feature documents committed and staged whitespace check passed.
+- Completion/Closure commits: none.
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -54,11 +57,72 @@ unapproved gates. Apply
 [Human Approval](../../README.md#human-approval) and the
 [commit gate](../../README.md#approval-gated-commit-policy).
 
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-11 (Asia/Tokyo).
+- Scope: completed S1 implementation, local acceptance/evidence and gate
+  metadata; exact paths are the 14 listed under Human Approval above.
+- Reviewed patch: `1cb31f23297cf128b4fd14be10b0396e88a37c7c2a568b65d710aeb9f62762ca`.
+- Reviewed source manifest: `4c5438387af3c1a00423e4240d478175e548c88beeede1ad2cce6f97ae5f6d36`.
+- Review verdict: both independent implementation reviews Ready, no Findings.
+- Approval provenance: Main received explicit permission to proceed after
+  presenting the reviewed S1 completion boundary in this conversation.
+- Commit status: not committed; approval-committer is the next owner.
+- Review and subsequent gate metadata:
+  [S1-REVIEWS.md](/tmp/ajsbutler-desktop-test-s1-20261011/S1-REVIEWS.md).
+- Closure Approval: not requested; current-head Verify/Qlty Cloud and Feature
+  Exit remain separate gates.
+
 ## Evidence and current decisions
 
-- Web scope amendment and current documentation validation:
-  [WEB-SCOPE-ADDENDUM.md](/tmp/ajsbutler-desktop-test-intake-20261011/WEB-SCOPE-ADDENDUM.md)
-  and [evidence-v4.json](/tmp/ajsbutler-desktop-test-intake-20261011/evidence-v4.json).
+- S1 implementation evidence: [EVIDENCE.md](/tmp/ajsbutler-desktop-test-s1-20261011/EVIDENCE.md)
+  and [check-results.json](/tmp/ajsbutler-desktop-test-s1-20261011/check-results.json).
+- Immutable substantive patch identity:
+  `a5cc37869711a03a9bcb4788d7d8e1ed401479f5561c8feaee7b85749b1c11e9`;
+  full-repository quality snapshot manifests and final metadata are linked
+  from that evidence. Complete final patch includes the separate gate metadata.
+- Local AC-1 through AC-6 and AC-8: clean/repeat `pnpm test` each 1200 passing;
+  canonical Web and composed full runs passed with one smoke preparation;
+  production build/compile/prepared stable and Web passed. Original 1193 cases
+  remain; seven new boundary/configuration/define cases passed. Architecture's
+  complete zero-exception catalog and Desktop accessibility passed in the suite.
+- Minimum: actual VS Code 1.75.0, Electron 19.1.9, Node 16.14.2 smoke passed
+  with production artifacts and the canonical minimum command. First bounded
+  download invocation was unavailable at 600 seconds; successful later SDK
+  cache execution is a distinct result, with no manual executable settings.
+- Quality: CLI 0.645.0, full baseline/final check 5/4 inherited findings,
+  smells 151/151 inherited findings; no new or mapped adverse finding.
+  Final aggregate passed. Raw statuses, inventories and official SARIF are
+  retained. Targeted document lint/links/structure and diff checks passed.
+- Compatibility/readiness: engines `^1.75.0`, dependencies and production
+  sources unchanged; stable full suite, minimum smoke and real browser coverage
+  remain distinct. Both independent implementation reviews returned Ready.
+  Current-head Linux Verify and Qlty Cloud await an authorized publication and
+  are Feature Exit gates; local production parity is not a CI pass.
+- Remaining risk: network download latency and inherited host/SDK teardown
+  warnings are recorded. The historical macOS memory popup was not repaired;
+  its causality remains excluded and owned by test-harness maintainers.
+
+### Implemented Solution Shape
+
+The implementation preserves the approved owners: the existing Electron SDK
+resolves and launches the host through `runTest.ts`; target selection remains
+pure test configuration. `desktopTestEntry.ts` owns only runner loading and
+retains the original loading cause, while `index.ts` owns aliases, defines,
+DOM, Mocha and cleanup. Explicit synchronous loading uses a narrow runtime
+structural type because Mocha's declarations mark that public runtime method
+protected. No runner replacement or product abstraction was introduced.
+
+The direct smoke entry removes the one-line re-export. The existing browser
+bundle, accessibility fixture, browser SDK entry and prepared CI runners retain
+their distinct runtime responsibilities. Preparation occurs once per canonical
+Web or composed full invocation; CI retains production outputs. All changes
+remain within the approved 14 paths. The mechanical architecture catalog passed;
+semantic Solution Shape/readiness judgment belongs to independent reviewers.
+
+[WEB-SCOPE-ADDENDUM.md](/tmp/ajsbutler-desktop-test-intake-20261011/WEB-SCOPE-ADDENDUM.md)
+and [evidence-v4.json](/tmp/ajsbutler-desktop-test-intake-20261011/evidence-v4.json).
 
 - Original intake: [DISCOVERY.md](/tmp/ajsbutler-desktop-test-intake-20261011/DISCOVERY.md)
   and [evidence.json](/tmp/ajsbutler-desktop-test-intake-20261011/evidence.json).
@@ -173,7 +237,7 @@ sufficiency separately.
 
 ### S1 — Reproducible Desktop and canonical Web execution
 
-- Lifecycle state: PLAN_APPROVED.
+- Lifecycle state: SLICE_APPROVED.
 - Value: one supported launcher, interpretable failure stages, additional
   minimum-host coverage, simplified Web entry/preparation and contributor/CI
   procedures.
@@ -182,8 +246,8 @@ sufficiency separately.
   one reviewable commit so no intermediate public command lacks preparation
   or skips CI coverage. No dependent/unrelated implementation slice is added.
 - Acceptance: AC-1 through AC-6 and AC-8 with the coverage below.
-- Readiness: independently reviewed Ready and Human Approved; implementation
-  prohibited until the focused planning commit succeeds.
+- Readiness: S1 implementation and local validation recorded; both independent
+  reviews Ready and Completion Approval recorded. Completion commit pending.
 
 #### Exact proposed implementation paths
 
@@ -235,8 +299,9 @@ Existing script names below are factual; new names are explicitly proposed:
 - Existing `test` becomes `pnpm run test:desktop:run`; prepared stable script
   remains `node ./out/test/runTest.js` and runs every existing Desktop case.
 - New `test:desktop:min:run`: `node ./out/test/runTest.js --minimum`.
-- New `test:desktop:min`: `pnpm run test:prepare:desktop && pnpm run
-  test:prepare:web:bundle && pnpm run test:desktop:min:run` on one script line.
+- New `test:desktop:min` runs `pnpm run test:prepare:desktop`, then
+  `pnpm run test:prepare:web:bundle`, then `pnpm run test:desktop:min:run`
+  sequentially on one script line.
 - `--minimum` selects SDK version `1.75.0` and compiled
   `out/test/suite/webSmoke.bundle.js`; default selects `stable` and
   `out/test/suite/desktopTestEntry.js`. No manual executable/alias/define input.
@@ -245,8 +310,9 @@ Existing script names below are factual; new names are explicitly proposed:
 - Existing `test:web` becomes `pnpm run test:web:run`; internal `test:web:run`
   becomes `node ./out/test/runWebTest.js` with no preparation. No new Web
   argument/environment switch or duplicate runtime entry is introduced.
-- Existing `test:prepare` becomes `npm-run-all development test:compile
-  test:prepare:browser:bundle test:prepare:web:bundle` on one script line.
+- Existing `test:prepare` uses npm-run-all to sequence `development`,
+  `test:compile`, `test:prepare:browser:bundle` and `test:prepare:web:bundle`
+  on one script line.
   `test:full` remains its existing preparation then prepared Desktop/Web
   sequence; the smoke bundle is no longer built again in the prepared runner.
 - CI keeps `pnpm run build`, `pnpm run test:compile` and the accessibility
@@ -297,9 +363,10 @@ historical facts; its prepared artifacts cannot stand in for final S1 checks.
 - Retain a current-head Verify execution for Linux/Xvfb compatibility when
   publishing the approved changes; local command inspection is not a CI pass.
 - qlty: exact disposable baseline/final snapshots, same full-repository
-  selection/version/configuration, qlty >=0.645.0; non-mutating `check --all
-  --sarif --no-fix` and `smells --all --sarif --no-snippets`, through rtk pnpm
-  exec, complete official SARIF 2.1.0 and nonzero per-command inventories.
+  selection/version/configuration, qlty >=0.645.0; non-mutating
+  `check --all --sarif --no-fix` and `smells --all --sarif --no-snippets`,
+  through rtk pnpm exec, complete official SARIF 2.1.0 and nonzero per-command
+  inventories.
   Any new finding or mapped adverse movement is NG. Run final
   `rtk pnpm run qlty` aggregate in final snapshot only, sync only approved
   formatting changes and refresh affected snapshot evidence until stable.
