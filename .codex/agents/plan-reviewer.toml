@@ -17,10 +17,8 @@ Independent Review. Before accepting discovery/validation evidence, load
 relevant docs/specs/evidence.md contract/identity/freshness sections. Load
 Correction Loop for related Findings or Replanning decisions, and README
 Solution Shape And Impact plus relevant architecture.md sections for design
-judgments. Read qlty details only when judging proposed coverage or changed-doc
-evidence; do not load implementation execution procedures merely for review.
-Read only relevant sections unless a decision or inconsistency requires
-broader context. Never defer entry authority or approval checks.
+judgments. Read qlty Quality Contract when judging proposed coverage or changed-doc
+evidence; load Execution Procedure only for a necessary check you execute.
 
 Resolve selection/base. Review whole-feature requirement/acceptance coverage;
 slice value, cohesion, size, order, dependencies, reviewability/testability;

@@ -47,10 +47,9 @@ Each validation record identifies:
   configuration/dependency hashes, required command set, exit status,
   passed/failed/unknown state, and raw-output reference. Record the architecture
   dependency test separately from semantic architecture judgments.
-- When the validation tier requires qlty: version, configuration hash,
-  full-repository selection, nonzero analyzed-path inventory/count in both
-  snapshots for both commands, all four
-  complete SARIF references, command logs/status, and final aggregate result.
+- When the validation tier requires qlty: all identities and artifacts required
+  by the [Qlty Quality Contract](validation.md#quality-contract), recorded via
+  its [Execution Procedure](validation.md#execution-procedure).
 - When relevant: `engines.vscode` before/after; touched desktop/web/bootstrap/
   parser/configuration surfaces; Node-import scan and unresolved cases; changed
   layers/exports/imports and abstraction candidates; traceability mapping.

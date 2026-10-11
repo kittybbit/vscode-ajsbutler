@@ -33,10 +33,14 @@ diagnostics, and affected paths; determine whether production, tests, fixtures,
 harness, or generated outputs violate that contract before editing.
 
 Correction is authorized only within explicitly approved product and
-validation-support paths, with unchanged acceptance, external behavior,
+validation-support paths, with unchanged approved acceptance, intended
+observable behavior,
 public contracts, JP1/AJS and VS Code compatibility, Solution Shape,
 dependency direction, and required validation coverage. Size, a test-only
 change, or an automated suggestion does not establish authorization.
+Restoring actual implementation behavior to an already-approved observable
+contract is a correction, not a new behavior decision. Changing that approved
+contract requires Replanning.
 
 - Lint, formatting, whitespace, import order, and type/build errors may be
   corrected when the existing contract uniquely determines the fix.
@@ -124,48 +128,54 @@ approved boundary and are not incidental corrections.
   or configuration:** add the relevant desktop or web tests and build
   evidence.
 
-For code slices, qlty must pass. Compare every reliably mapped finding by
-identity, explicit severity ordering, baseline/final severity, measured values,
-and whether higher or lower values are worse. A new finding or mapped adverse
-movement is Finding/NG. Treat identity or direction that cannot be mapped
-reliably as advisory; unchanged unrelated findings stay out of scope. Metric
-movement is a review signal only when no mapped adverse finding exists.
+For code slices, qlty must pass under the [Quality Contract](#quality-contract).
+Treat identity or direction that cannot be mapped reliably as advisory;
+unchanged unrelated findings stay out of scope. Metric movement is a review
+signal only when no mapped adverse finding exists.
 
 ### qlty Evidence Format
 
+#### Quality Contract
+
 The owning producer records mechanical facts under the Evidence Contract;
 those facts neither approve work nor replace semantic review. When the
-validation tier requires qlty, use `0.645.0` or newer with official SARIF
-output for both `check` and `smells`. In exact disposable baseline and final
-snapshots, run these same commands with the same full-repository selection and
-configuration:
+validation tier requires qlty, use `0.645.0` or newer and complete official
+SARIF 2.1.0 output for both `check` and `smells` in baseline and final snapshots.
+Both snapshots require the same full-repository selection, tool version and
+configuration, nonzero analyzed-path inventories/counts for both commands,
+snapshot identities, command logs/status, all four SARIF references, and the
+final aggregate result. Evidence identity and reuse follow
+[the Evidence Contract](evidence.md#identity-and-required-facts).
+
+Match baseline paths against final paths; findings on added final paths are
+new findings. Zero analyzed files, missing/malformed SARIF, incomplete scans,
+version/configuration/selection mismatch, or missing results cannot pass.
+A nonzero `check` exit caused by findings from a completed scan is a
+finding-triggered status: retain the raw status and complete SARIF and evaluate
+the findings. A command that cannot start or complete cannot pass.
+Compare official SARIF records; do not create a repository-specific parser or
+textual-output comparator. Any new SARIF finding is NG regardless of severity.
+Compare reliably mapped findings using explicit severity ordering, measured
+values, and whether higher or lower is worse; any mapped adverse movement is NG.
+The final `rtk pnpm run qlty` aggregate must pass. Current-head Qlty Cloud must
+also pass before Feature Exit.
+
+#### Execution Procedure
+
+In exact disposable baseline and final snapshots, run the same commands:
 
 ```sh
 rtk pnpm exec qlty check --all --sarif --no-fix
 rtk pnpm exec qlty smells --all --sarif --no-snippets
 ```
 
-Save each complete SARIF 2.1.0 file, command output, and exit status. Record
-the version, nonzero analyzed-path inventory and count for each command in
-each snapshot, configuration hash, snapshot revisions, and commands. The
-selection is the full repository in both snapshots; match baseline paths
-against final paths, and treat findings on paths added in the final snapshot
-as new findings. Keep qlty cache and output local to each snapshot. Zero
-analyzed files, missing or malformed SARIF, an incomplete scan, version or
-configuration or selection mismatch, or missing results cannot pass. A
-nonzero `check` exit caused by findings from a completed scan is a
-finding-triggered status, not a command execution failure: retain the raw
-status and complete SARIF and evaluate the findings. A command that cannot
-start or complete is an execution failure and cannot pass. Compare official
-SARIF records; do not create a repository-specific parser or textual-output
-comparator. Any new SARIF finding is NG regardless of severity. Compare
-reliably mapped findings using explicit severity ordering, measured values,
-and whether higher or lower is worse; any mapped adverse movement is NG.
-Run `rtk pnpm run qlty` only in the disposable final snapshot, and require
-that final aggregate to pass. The current-head Qlty Cloud check must also
-pass before Feature Exit. If formatting changes approved content, sync those
-paths, rebuild that snapshot, and repeat both observations and the aggregate
-until stable.
+Save each complete SARIF file, command output and exit status. Record the
+version, analyzed-path inventory/count per command and snapshot, configuration
+hash, snapshot revisions and commands required by the Quality Contract.
+Keep qlty cache and output local to each snapshot. Run `rtk pnpm run qlty` only
+in the disposable final snapshot. If formatting changes approved content,
+sync those paths, rebuild that snapshot, and repeat both observations and the
+aggregate until stable.
 
 ### Independent Review
 
@@ -174,4 +184,5 @@ The plan review is the pre-approval scope gate. The independent
 quality, and production readiness after validation. Add a second independent
 review for the higher-risk surfaces above or when the first review finds a
 concern, reusing the same valid evidence. Feature Exit is the separate aggregate
-review defined below, rather than another per-slice implementation review.
+review defined in the [core policy](README.md#feature-exit-review-output),
+rather than another per-slice implementation review.

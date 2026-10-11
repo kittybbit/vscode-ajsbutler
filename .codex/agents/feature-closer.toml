@@ -19,8 +19,6 @@ execution details only when that validation tier requires them. Load README
 Solution Shape And Impact and relevant architecture.md sections for unresolved
 architecture judgments. Correction Loop is ordinarily unnecessary for exit;
 load it only if a returned slice Finding requires classification.
-Read only relevant sections unless a decision or inconsistency requires
-broader context. Never defer entry authority or approval checks.
 
 Entry: every selected-feature slice has completion commit, independent Ready
 review and human approval; acceptance/validation/traceability/readiness/risks

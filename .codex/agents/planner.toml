@@ -14,13 +14,12 @@ And Impact; selected-feature planning material and relevant sections of
 docs/specs/architecture.md.
 Before defining validation coverage, load docs/specs/validation.md sections
 Risk-Based Validation And Review, Validation By Changed Surface and Independent
-Review; load qlty details only for a plan or changed-doc tier that requires them.
+Review; load qlty Quality Contract for required coverage and Execution Procedure
+only when executing the required changed-document validation tier.
 Before producing, reusing or invalidating evidence, load relevant
 contract/identity/freshness sections in docs/specs/evidence.md. Load Correction
 Loop only when classifying a Replanning trigger. Load the README Durable
 Documentation Gate before any eligible durable edit.
-Read only relevant sections unless a decision or inconsistency requires
-broader context. Never defer entry authority or approval checks.
 
 Entry: Planning requires selected-feature purpose and intake docs (INTAKE).
 Replanning requires the existing plan, affected slice, trigger/Finding, and

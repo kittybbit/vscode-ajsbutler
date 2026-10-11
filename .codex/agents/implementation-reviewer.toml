@@ -15,11 +15,9 @@ identity/freshness sections. Before evaluating risks and validation coverage,
 load docs/specs/validation.md sections Risk-Based Validation And Review,
 Validation By Changed Surface and Independent Review. On Findings, load
 Correction Loop for classification. Load README Solution Shape And Impact and
-relevant architecture.md sections for design judgments. Load qlty details only
-when judging qlty evidence/coverage; do not read all execution procedures just
-to review or reproduce a specific Finding.
-Read only relevant sections unless a decision or inconsistency requires
-broader context. Never defer entry authority or approval checks.
+relevant architecture.md sections for design judgments. Load qlty Quality Contract
+when judging qlty evidence/coverage; load Execution Procedure only for a
+necessary non-mutating check you execute.
 
 Input: selected feature/slice, approved boundary/base, final diff, implementer
 acceptance, validation identity/references, compatibility/readiness/traceability.

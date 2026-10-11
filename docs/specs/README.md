@@ -23,36 +23,23 @@ initial and conditional reading instructions.
 - **Core:** [Lifecycle and approval](#lifecycle-and-approval-gates),
   [handoff](#handoff-record), [feature ownership](#selected-feature-ownership),
   and [document roles](#document-roles).
-- **Validation:** [risk and changed-surface checks](validation.md#risk-based-validation-and-review)
-  when selecting/planning/evaluating validation; [Correction Loop](validation.md#correction-loop-for-deterministic-failures)
-  for failures or related Findings/decisions; [qlty format](validation.md#qlty-evidence-format)
-  only when that tier is required.
-- **Evidence:** [identity](evidence.md#identity-and-required-facts) and
-  [freshness](evidence.md#freshness-and-invalidation) before producing,
-  refreshing, or consuming evidence; [reuse observations](evidence.md#evidence-reuse-observations)
-  for decision-relevant execution exceptions.
+- **Validation:** [risk and changed-surface checks](validation.md#risk-based-validation-and-review),
+  [Correction Loop](validation.md#correction-loop-for-deterministic-failures),
+  and [qlty quality contract and execution procedure](validation.md#qlty-evidence-format).
+- **Evidence:** [identity](evidence.md#identity-and-required-facts),
+  [freshness](evidence.md#freshness-and-invalidation), and
+  [reuse observations](evidence.md#evidence-reuse-observations).
 - **Design:** [Solution Shape and impact](#solution-shape-and-impact) and
-  [architecture](architecture.md#solution-shape) for relevant design decisions.
-- **Exit:** [Definition of Done](#feature-definition-of-done) and
-  [Feature Exit](#feature-exit-review-output) for closure, not ordinary slice
-  correction. Load [Durable Documentation Gate](#durable-documentation-gate)
-  before any durable-document edit, including edits outside Feature Exit.
+  [architecture](architecture.md#solution-shape).
+- **Exit:** [Definition of Done](#feature-definition-of-done),
+  [Feature Exit](#feature-exit-review-output), and
+  [Durable Documentation Gate](#durable-documentation-gate).
 
 ### Role Procedures
 
-<!-- markdownlint-disable MD013 MD060 -->
-
-| Role                  | Initial and conditional loading authority                                   |
-| --------------------- | --------------------------------------------------------------------------- |
-| Intake                | [feature-author](../../.codex/agents/feature-author.toml)                   |
-| Planning / Replanning | [planner](../../.codex/agents/planner.toml)                                 |
-| Plan review           | [plan-reviewer](../../.codex/agents/plan-reviewer.toml)                     |
-| Approved slice        | [implementer](../../.codex/agents/implementer.toml)                         |
-| Implementation review | [implementation-reviewer](../../.codex/agents/implementation-reviewer.toml) |
-| Feature Exit          | [feature-closer](../../.codex/agents/feature-closer.toml)                   |
-| Approved commit       | [approval-committer](../../.codex/agents/approval-committer.toml)           |
-
-<!-- markdownlint-enable MD013 MD060 -->
+Role definitions and loading instructions are owned by
+[`.codex/agents/`](../../.codex/agents). Main routing is owned by
+[AGENTS.md](../../AGENTS.md).
 
 ### Product Context References
 
@@ -159,14 +146,15 @@ state_transition: input -> substantiated output
 result: verdict or completed operation
 evidence_refs: discovery, validation, review, or closure records and identities
 changed_paths: exact paths changed, or none for a read-only role
-blocking_decisions: missing decisions or none
-recommended_next_role: optional exception route to Main
 ```
 
-Omit `recommended_next_role` for the normal next gate in the Lifecycle State
-Contract. Include it with a reason for Findings, blocked work, a required human
-decision, or another departure from that transition. Main still selects the
-next operation and checks its prerequisites.
+Add `blocking_decisions` whenever a missing decision blocks progress; omission
+means no blocking decision. Add `recommended_next_role` with a reason only when
+an exception needs routing outside the normal Lifecycle State Contract.
+Findings and required human decisions must still be reported in the result.
+Main selects the next operation and checks its prerequisites. Existing records
+with explicit `none` remain valid; hosts requiring a fixed schema may retain
+these fields with empty values for normal results.
 
 Main forwards the record and references rather than reconstructing investigation
 or recollecting facts. A reviewer adds its judgment and reviewed patch identity;
@@ -284,17 +272,14 @@ Apply the
 [Correction Loop](validation.md#correction-loop-for-deterministic-failures) for
 contract-preserving repairs under existing approval.
 
-Prefer high-accuracy models for planning, impact, design, architecture,
-specification, and review; medium- or lower-cost models may be used for
-approved-scope implementation and simple fixes. For implementer,
-implementation-reviewer, and feature-closer, Main selects reasoning effort by
-the approved slice's risk within the role's supported settings: `xhigh` for
-parser, shared contracts, bootstrap, web, architecture, or unresolved review
-concerns; `high` for isolated code or documentation; `medium` or `high` for
-mechanical approved fixes. Preserve role model quality and independent
-reviewers. Fixed host/role settings take precedence when overrides are
-unavailable; never change a model merely to reduce cost. Record an effort
-exception only when it affects risk or readiness. If implementation reveals an
+Role model and reasoning effort are controlled by the fixed `model` and
+`model_reasoning_effort` settings in `.codex/agents/*.toml`. These settings
+[override inherited or explicit spawn values in Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents#custom-agents).
+Main must not promise dynamic effort changes through a delegation prompt.
+Change a role setting explicitly when a different configuration is required;
+preserve model quality and independent review. Other hosts must verify their
+supported configuration rather than assume a prompt applies these settings.
+If implementation reveals an
 out-of-scope, specification, or design decision, stop and return for
 investigation and re-approval. Model or agent choice does not change SDD gates
 or approved scope. Check Copilot or other agent suggestions against the

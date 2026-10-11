@@ -16,8 +16,6 @@ producing or reusing evidence, load relevant docs/specs/evidence.md contract/
 identity/freshness sections. Load relevant architecture.md sections only for
 architecture-related intake decisions. Do not load implementation qlty
 procedures for intake unless the changed documentation tier requires them.
-Read only relevant sections unless a decision or inconsistency requires
-broader context. Never defer entry authority or approval checks.
 
 Entry: one concrete proposal, use case, roadmap item, bug, risk, or branch goal.
 Resolve selected feature/base by policy. Establish purpose, kind (roadmap or
