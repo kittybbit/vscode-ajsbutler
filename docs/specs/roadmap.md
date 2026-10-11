@@ -17,17 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
-### Table Shell Host Failures
-
-- Owner: Unit-list/webview test maintainers.
-- Scope: investigate the seven paired Table shell integration failures and the
-  historical full-suite React update-depth loop. The isolated baseline and
-  final runs both fail all seven selected tests; the historical loop was not
-  reproduced in those bounded runs.
-- Done condition: identify and resolve the inherited test failures, then record
-  a successful full desktop suite or a separately reviewed disposition for any
-  remaining failure.
-
 ### Expanded Flow Graph Golden Alignment
 
 - Owner: Flow graph test maintainers.
