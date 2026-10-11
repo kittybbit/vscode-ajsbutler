@@ -17,16 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
-### Desktop Test Host Bootstrap
-
-- Owner: Test-harness maintainers.
-- Scope: make the supported desktop test command resolve its VS Code executable
-  and Electron entry point and load the existing TypeScript aliases and
-  development define consistently.
-- Done condition: the repository's documented desktop test command launches
-  the intended extension host and reports the full suite result without a
-  temporary executable, alias, or define wrapper.
-
 ### Table Shell Host Failures
 
 - Owner: Unit-list/webview test maintainers.
