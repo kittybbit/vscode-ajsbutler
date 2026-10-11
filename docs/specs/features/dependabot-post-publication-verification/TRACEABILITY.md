@@ -16,16 +16,17 @@
 
 <!-- markdownlint-enable MD013 -->
 
-## Slice 1 partial execution
+## Slice 1 implementation evidence
 
-Evidence: `/tmp/ajsbutler-dependabot-slice1-evidence/record.json`.
-R1 evidence: all 1,046 npm identities match; GitHub covers 2,001 of 2,004
-unique lockfile relationships. The three exact alias-edge omissions remain real;
-the proposed bounded published-lock supplement awaits review/approval and
-separates source coverage. Branch identity remained stable across reads.
-R2/R3 collection includes 195 all-state rows over two terminal pages, all known
-17 historical and 15 planning IDs, and retained observed dispositions.
-R6 all-override inventory remains incomplete after the graph prerequisite
-blocker. Affected plan state is PLANNED pending the coverage replan gates;
-no completion or remediation is claimed. Main owns the evidence decision;
-R4/R5/R7 and dependent slices remain pending.
+Evidence: `/tmp/ajsbutler-dependabot-slice1-final-evidence/record.json`.
+R1 is met under the approved exact-alias strategy: 1,046 npm nodes, 58 direct
+manifest edges and 2,001 GitHub npm edges, supplemented by three separately
+proven published-lock alias edges. GitHub omission/ingestion uncertainty remains
+explicitly owned by security/tooling via Main, without a detection guarantee.
+R2/R3 retain all 195 observed rows over two terminal pages, all known 17
+historical and 15 planning IDs, observed dispositions, advisory/fix/time fields
+and raw evidence. R6 inventories all 39 overrides with registry-backed parent
+ranges, resolved paths, risk/candidate/owner and conditional removal decisions.
+Slice 1 is IMPLEMENTED; independent review and Completion Approval remain pending.
+R4 final risk routing, R5 remediation and R7 regression remain dependent work.
+No dependency fix, security-clean result or feature completion is claimed.

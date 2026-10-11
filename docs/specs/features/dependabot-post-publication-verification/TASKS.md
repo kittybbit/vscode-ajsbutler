@@ -4,15 +4,15 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Active/approved slice: Slice 1 collection incomplete; alias-coverage replan
-  has renewed approval after Ready review. Replan commit precedes resumption.
+- Active/approved slice: Slice 1 implemented under the approved alias supplement;
+  independent review is Ready and completion approved; commit is the next gate.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user.
-- Next decision: alias-coverage replan commit before Slice 1 resumes.
+- Next decision: Slice 1 focused completion commit, then Slice 2 execution.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED.
+- Lifecycle state: SLICE_APPROVED.
 - Selected feature/base: `dependabot-post-publication-verification`,
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`;
   this is the fixed comparison base.
@@ -31,13 +31,34 @@
 - Evidence: Slice 1 raw published inputs, graph/alert facts and identities are
   reused where matching. Old changed-document validation and the graph-coverage
   acceptance judgment are superseded; no raw graph omission becomes a pass.
-- Next decision/blocker: commit the approved coverage delta below.
-  Slice 1 collection remains incomplete; its 39-override inventory must still
-  be completed by implementer. Slice 2/3 execution remains dependency-gated.
+- Next decision/blocker: Slice 1 completion commit; review is Ready with no
+  actionable Findings or evidence blocker.
+  Slice 2/3 execution remains dependency-gated.
 - Planning commit: `cdb09c24ecf859fb0209dc23de658a6dd1c34cdc`;
   exact three planning paths and staged whitespace check passed.
 - Plan review: `/tmp/ajsbutler-dependabot-plan-review.json`; reviewed identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
+
+## Slice 1 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-12.
+- Approved completed scope: the published baseline, all-state alert inventory,
+  exact approved alias supplement and all 39 override inventories for Slice 1.
+- Exact completion paths:
+  `docs/specs/features/dependabot-post-publication-verification/TASKS.md`,
+  `docs/specs/features/dependabot-post-publication-verification/TRACEABILITY.md`.
+- Independent implementation review: Ready, no actionable Findings;
+  `/tmp/ajsbutler-dependabot-slice1-review.json`.
+- Reviewed content identity:
+  `826e5987fbb2e3b656f209d932d96bb58833ecbd55f7ec97b81cd9c8578e4004`.
+- Reviewed patch SHA256:
+  `5ec06b650658700e98307096b32cffc2b3844dafeea38a2a71cbaceda9804081`.
+- Ready metadata validation:
+  `/tmp/ajsbutler-dependabot-slice1-ready-metadata/record.json`.
+- Completion approval metadata:
+  `/tmp/ajsbutler-dependabot-slice1-completion-approval/record.json`.
+- Commit: pending; this gate does not approve Slice 2 completion or publication.
 
 ## Alias-coverage Replan Approval
 
@@ -58,7 +79,8 @@
   `65a0da3d866b4b41cae836a81055fab569f3672276ac5d9ebffc7abe2b9ca0f2`.
 - Ready metadata validation:
   `/tmp/ajsbutler-dependabot-alias-ready-metadata/record.json`.
-- Commit: not yet performed; original planning commit remains preserved.
+- Commit: `ea44dca2ef34dbf3f568d73a829ceeb1e3aea22c`;
+  exact three paths and staged check passed; original plan commit is preserved.
 
 ## Human Approval
 
@@ -207,7 +229,7 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
 
 ## Slice 1: Establish published baseline and complete alert/override inventory
 
-- Lifecycle state: PLANNED.
+- Lifecycle state: SLICE_APPROVED.
 - Value: a complete identity-backed baseline and path inventory for remediation
   and later comparison; no dependency edits.
 - Edit paths: only this feature's `TASKS.md`, `TRACEABILITY.md`.
@@ -381,45 +403,62 @@ checks and qlty above. Never collect implementation baseline scans just to plan.
   [Dependabot alerts API](https://docs.github.com/en/rest/dependabot/alerts);
   primary npm registry metadata URLs are indexed in the artifact.
 - Original review/approval/planning commit are preserved for their original scope.
-  Alias-coverage review is Ready; approval is Approved; commit is pending. No dependency,
+  Alias-coverage review is Ready; approval is Approved; replan commit succeeded.
+  No dependency,
   runtime/test/configuration edit has been performed during Replanning.
 - Narrow replan discovery and changed-document validation:
   `/tmp/ajsbutler-dependabot-alias-replan-evidence/record.json`.
 
-## Slice 1 execution evidence and blocker
+## Slice 1 implementation result
 
-- Collection remains incomplete; the affected plan is PLAN_APPROVED pending renewed
-  gates. No IMPLEMENTED or implementation Ready claim is made.
-- Evidence: `/tmp/ajsbutler-dependabot-slice1-evidence/record.json`; raw
-  responses, pinned inputs, graph reconciliation and alert inventory retained there.
-- Published default branch remained `main` at
-  `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2` before/after collection.
-  Dependency/patch SHA256 values are in `published-input-hashes.json`.
-- Authenticated asynchronous GET generation returned 201; export UUID
-  `8590725a-3a14-4846-a14d-67a743af096e` fetched successfully.
-  Generation preceded the first branch observation; fetch/alert reads were
-  bracketed. No exact ingestion commit or atomic-snapshot guarantee is asserted.
-- All-state alert listing returned 195 rows over two pages with terminal
-  no-next-link proof: 170 fixed, 15 open, 10 auto-dismissed, zero dismissed.
-  All 17 known historical IDs and all 15 planning IDs are present. The full
-  observed row/state/advisory/timestamp/disposition union is in
-  `alert-inventory.json`; historical evidence and PR 317 remain retained.
-- SPDX contains 1,046 npm package/version pairs, exactly matching all 1,046
-  lockfile packages, plus five Actions and the repository. Its npm relationships
-  cover 2,001 of 2,004 unique lockfile dependency/optional-dependency edges.
-  Peer-context variants collapse to package/version pairs; metadata ranges,
-  patch contents and build permissions are not represented by SPDX.
-- Missing relationships: `@isaacs/cliui@8.0.2` to `string-width@4.2.3`,
-  `strip-ansi@6.0.1`, `wrap-ansi@7.0.0`, whose lockfile names use `-cjs` aliases.
-  These packages exist in the export, but their edges do not. Complete graph
-  GitHub edge coverage cannot be claimed from export/package matching alone.
-  This factual omission remains unchanged by the proposed supplementary proof.
-- Proposed decision: apply only the exact alias supplement above after review
-  and Human Approval. The all-override parent/registry inventory remains
-  incomplete (39 existing entries); implementer must finish it before Slice 1
-  acceptance and review. Slice 2 remains gated, with unchanged upgrade bounds.
-- Implementation Solution Shape: existing GitHub/pnpm/Git capabilities and
-  security/tooling ownership retained; no product abstraction, source/config,
-  workflow, permissions or dependency edit. Node22/VSCode1.75 contracts unchanged.
-- No product build, host suite, qlty or architecture-test pass is claimed for
-  this coordination-document surface. No changelog or durable edit is needed.
+- Lifecycle state: IMPLEMENTED; independent review and Completion Approval pending.
+- Evidence: `/tmp/ajsbutler-dependabot-slice1-final-evidence/record.json`.
+  Original raw observations are retained under
+  `/tmp/ajsbutler-dependabot-slice1-evidence/` with linked digests.
+- Published `main` remained at
+  `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2` across original reads and resume.
+  Four dependency/patch hashes match; reuse is bound to those pinned inputs.
+  Observation dates/intervals and HTTP provenance remain in retained responses;
+  generation preceded the initial bracket. No exact ingestion SHA is asserted.
+- Complete observed API result: 195 rows on two terminal pages; 170 fixed,
+  15 open, 10 auto-dismissed, zero dismissed. All known 17 historical IDs and
+  all 15 planning IDs are present. Historical source and PR 317 are retained;
+  each row has advisory/range/fix/state/time/disposition and ownership records.
+  Fixed/auto-dismissed observations do not establish causality or accepted risk.
+- GitHub npm nodes cover 1,046/1,046 lock packages, and 58/58 direct manifest
+  dependency/devDependency edges. GitHub npm edges cover 2,001/2,004 unique
+  dependency/optional edges after purl/alias normalization. Five Actions and
+  the repository are separately observed; peer contexts collapse to versions.
+- `alias-supplement.json` records the exact approved three absent alias edges,
+  published-lock SHA256, parent snapshots/alias mappings/target entries and
+  same-export parent/target nodes. GitHub-observed 2,001 edges and the separate
+  three published-lock proofs form the approved 2,004-edge union. No additional
+  missing edge, changed tuple, unresolved target or missing node exists.
+- GitHub relationship/ingestion and detection uncertainty remains owned by
+  security/tooling maintainers via Main. The supplement does not show GitHub
+  observed or Dependabot evaluated these edges. Slice 3 must reconcile the
+  actual published target anew; changed tuples or additional omissions block.
+- `override-inventory.json` covers all 39 workspace entries, 156 same-package
+  parent contexts, lock-root paths, registry declared/peer ranges, resolved
+  versions, observed advisory history, API risks, candidate upstream strategy,
+  owner and conditional retention/removal decisions. 136 commit-version or
+  bounded candidate npm registry records returned HTTP 200 and are retained.
+  Parent contexts are not proof every selector caused every listed resolution.
+- Candidate reduction: elliptic has no published package/path; VSCE 4 removes
+  declared markdown-it/cheerio/form-data/tmp routes. Ordinary compatible ranges
+  permit conditional refresh for several pins. All removals remain conditional
+  on Slice 2 regenerated graph, audits and required regression checks.
+- Special risks: patched postman requires faker 10 despite legacy 5 declaration;
+  uuid, diff, serialize-javascript, legacy js-yaml, exact postman lodash and
+  analyzer ws contexts resolve outside parent ranges. Installed source API
+  observations are retained as discovery hints; no compatibility pass is claimed.
+  Prism sibling pins guard Node22 against Node24-only upgrades. No new dependency
+  version/path/patch permission or acceptance decision is made here.
+- Implementation Solution Shape: security/tooling own exceptions; GitHub owns
+  observed alerts/edges and pnpm/Git own pinned resolution facts. Existing tools
+  suffice; temporary evidence scripts add no production mechanism or abstraction.
+- Checks: Markdown lint, links/anchors/structure, exact-path scope, R1-R7/gate
+  provenance and diff whitespace passed. Dependencies/runtime/tests/workflows
+  and build permissions are unchanged; Node22/VSCode1.75 contracts are preserved.
+  No build, host, architecture-test or qlty result is claimed for this document
+  slice; no user-visible change or durable documentation/changelog edit.
