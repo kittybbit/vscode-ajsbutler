@@ -1,20 +1,65 @@
 # SDD Policy
 
-This is the Single Source of Truth for Specification-Driven Development in
-this repository. It defines when to use SDD, approval and validation gates,
-and document responsibilities. SDD preserves behavior while clarifying use
+This is the core contract and loading index for Specification-Driven
+Development in this repository. Detailed validation and evidence rules have
+one owner each in the linked policies. SDD preserves behavior while clarifying use
 cases and architecture and maintaining desktop and web compatibility.
 Repository routing is in [`AGENTS.md`](../../AGENTS.md); durable architecture
 is in [`architecture.md`](architecture.md).
 
-## Reading Order
+## Policy Loading And Index
 
-1. [Vision](vision.md)
-2. [Glossary](glossary.md)
-3. [Context Map](context-map.md)
-4. [Architecture](architecture.md)
-5. [Roadmap](roadmap.md)
-6. [Requirements Use Cases](../requirements/use-cases/README.md)
+Entry reading is repository guardrails in [AGENTS.md](../../AGENTS.md), this
+index, and the applicable role definition. Before a formal SDD operation,
+load the core lifecycle and approval sections required by that role. Confirm
+authority, approval provenance, exact paths, dependencies, and stop conditions
+before editing, reviewing, or staging; never defer safety prerequisites.
+
+Read only relevant sections unless a decision or inconsistency needs broader
+context. Detailed policy loading is conditional on the operation, not a
+requirement to read every policy file in full. The role definitions own their
+initial and conditional reading instructions.
+
+- **Core:** [Lifecycle and approval](#lifecycle-and-approval-gates),
+  [handoff](#handoff-record), [feature ownership](#selected-feature-ownership),
+  and [document roles](#document-roles).
+- **Validation:** [risk and changed-surface checks](validation.md#risk-based-validation-and-review)
+  when selecting/planning/evaluating validation; [Correction Loop](validation.md#correction-loop-for-deterministic-failures)
+  for failures or related Findings/decisions; [qlty format](validation.md#qlty-evidence-format)
+  only when that tier is required.
+- **Evidence:** [identity](evidence.md#identity-and-required-facts) and
+  [freshness](evidence.md#freshness-and-invalidation) before producing,
+  refreshing, or consuming evidence; [reuse observations](evidence.md#evidence-reuse-observations)
+  for decision-relevant execution exceptions.
+- **Design:** [Solution Shape and impact](#solution-shape-and-impact) and
+  [architecture](architecture.md#solution-shape) for relevant design decisions.
+- **Exit:** [Definition of Done](#feature-definition-of-done) and
+  [Feature Exit](#feature-exit-review-output) for closure, not ordinary slice
+  correction. Load [Durable Documentation Gate](#durable-documentation-gate)
+  before any durable-document edit, including edits outside Feature Exit.
+
+### Role Procedures
+
+<!-- markdownlint-disable MD013 MD060 -->
+
+| Role                  | Initial and conditional loading authority                                   |
+| --------------------- | --------------------------------------------------------------------------- |
+| Intake                | [feature-author](../../.codex/agents/feature-author.toml)                   |
+| Planning / Replanning | [planner](../../.codex/agents/planner.toml)                                 |
+| Plan review           | [plan-reviewer](../../.codex/agents/plan-reviewer.toml)                     |
+| Approved slice        | [implementer](../../.codex/agents/implementer.toml)                         |
+| Implementation review | [implementation-reviewer](../../.codex/agents/implementation-reviewer.toml) |
+| Feature Exit          | [feature-closer](../../.codex/agents/feature-closer.toml)                   |
+| Approved commit       | [approval-committer](../../.codex/agents/approval-committer.toml)           |
+
+<!-- markdownlint-enable MD013 MD060 -->
+
+### Product Context References
+
+Load only references relevant to the operation:
+[Vision](vision.md), [Glossary](glossary.md), [Context Map](context-map.md),
+[Architecture](architecture.md), [Roadmap](roadmap.md), and
+[Requirements Use Cases](../requirements/use-cases/README.md).
 
 ## Trivial Change Criteria
 
@@ -36,15 +81,17 @@ work), create or select one feature, plan all implementation slices, and have
 the plan independently reviewed. Plan-review Findings return to `planner`.
 Replanning is required for a new scope, contract, design, dependency,
 compatibility, validation requirement/coverage/strategy, material impact, or
-approval-boundary decision. A check failure alone is not such a decision.
+approval-boundary decision. A deterministic check failure is not itself a
+Replanning trigger; detailed correction rules belong to
+[validation policy](validation.md#correction-loop-for-deterministic-failures).
 
 Human Approval covers the reviewed plan and exact slice scope. After a plan or
 replan review returns `Ready` and Human Approval is explicit, `approval-committer`
 creates one focused planning commit. Only then may `implementer` work on one
 approved slice. Each completed slice receives an independent
 `implementation-reviewer` review. Findings return through Main under the
-[Correction Loop](#correction-loop-for-deterministic-failures); a new decision
-as defined above returns through Main for replanning. After
+[Correction Loop](validation.md#correction-loop-for-deterministic-failures);
+a new decision as defined above returns through Main for replanning. After
 `Ready`, explicit Completion Approval and that slice's focused commit are
 required before another dependent slice starts. Once all slices are complete
 and committed, `feature-closer` performs Feature Exit. Its `Close` result,
@@ -96,8 +143,9 @@ revision and review, without resetting unrelated gates.
 Existing features may retain their current status vocabulary. Main maps it to
 these states only using recorded review, human provenance, and commit facts;
 migration does not grant approval or require rewriting inherited plans.
-Legacy mentions of the retired evidence Skill mean the Evidence Contract
-below, not an instruction to discover or invoke a Skill.
+Legacy mentions of the retired evidence Skill mean the
+[Evidence Contract](evidence.md#evidence-contract), not an instruction to
+discover or invoke a Skill.
 
 ### Handoff Record
 
@@ -184,7 +232,7 @@ before approval. Proceed only after the approved boundary is recorded in
 `TASKS.md`.
 
 For repairs within an existing approval boundary, apply the
-[Correction Loop](#correction-loop-for-deterministic-failures).
+[Correction Loop](validation.md#correction-loop-for-deterministic-failures).
 
 ### Approval-Gated Commit Policy
 
@@ -209,288 +257,12 @@ approval evidence to manufacture authorization.
 Do not leave failed checks unexplained or defer them without an explicit
 follow-up decision.
 
-## Risk-Based Validation And Review
+## Evidence Reuse Principle
 
-Choose checks for the changed surface, beginning with the nearest useful
-check. Reuse matching evidence under the Evidence Contract. Do not rerun
-unchanged checks only because the workflow or reviewer has changed. Intake and
-planning need discovery facts and validation of their documentation changes;
-they do not require implementation baseline/final scans for proposed code.
-
-Assess only risks relevant to the changed surface: failure modes, errors and
-fallbacks; JP1/AJS semantics and compatibility; large, malformed and edge input;
-desktop/web behavior, VS Code compatibility and Node assumptions; architecture
-and telemetry privacy; qlty/complexity, performance, dependencies and
-readability; user-document and README/CHANGELOG impact. Apply the Solution
-Shape contract for material design decisions. These categories do not require
-unrelated investigation and do not waive any required boundary, compatibility,
-privacy, architecture, or host checks below.
-
-### Correction Loop For Deterministic Failures
-
-Deterministic check failure is not itself a Replanning trigger. For a slice
-of an approved, committed plan, `implementer` diagnoses the failure against
-the existing approved contract: `SPECS.md`, `TASKS.md`, use cases, acceptance,
-architecture rules, and validation requirements. Preserve the failed command,
-diagnostics, and affected paths; determine whether production, tests, fixtures,
-harness, or generated outputs violate that contract before editing.
-
-Correction is authorized only within explicitly approved product and
-validation-support paths, with unchanged acceptance, external behavior,
-public contracts, JP1/AJS and VS Code compatibility, Solution Shape,
-dependency direction, and required validation coverage. Size, a test-only
-change, or an automated suggestion does not establish authorization.
-
-- Lint, formatting, whitespace, import order, and type/build errors may be
-  corrected when the existing contract uniquely determines the fix.
-- Architecture violations may be corrected when existing rules determine the
-  owner, layer, and dependency direction without a new abstraction decision.
-- Fix production when it violates the approved observable behavior. Fix
-  tests, fixtures, assertions, aliases, mocks, or harness when their expected
-  behavior or configuration violates that contract, retaining meaningful
-  valid, error, edge, privacy, and compatibility coverage.
-- Compare snapshot/golden differences with the approved expected behavior;
-  never automatically accept outputs. Regenerate inconsistent artifacts only
-  using the established procedure with unchanged source, settings, contracts,
-  and approved paths.
-- Classify pre-existing, environment-dependent, and flaky failures with
-  baseline evidence; do not silently count an unavailable or failed required
-  check as passed.
-
-Do not delete or skip tests, remove or weaken assertions, relax coverage, or
-make expected outputs follow incorrect production merely to obtain green
-checks. If the expected behavior is ambiguous, the correct fix needs an
-unapproved path, or scope, contract, ownership, design, dependency,
-compatibility, validation requirements/coverage/strategy, or approval needs a
-new decision, stop before editing and return a decision request to Main.
-Main routes a material decision delta for affected-scope Replanning,
-independent plan review, and new Human Approval.
-
-During correction, rerun the nearest affected check and relevant boundary
-tests; refresh only affected evidence and reuse matching baseline/check
-results under the Evidence Contract. After stabilization, satisfy the
-approved final validation set, including required tests, qlty, architecture,
-and desktop/web checks, and record the final snapshot identity and evidence.
-
-Run this loop within `IMPLEMENTING`, without review, approval, or commit at
-each attempt. The independent `implementation-reviewer` reviews the entire
-final patch and its rationale. Review Findings classified as `correction`
-return through Main to `implementer` in `IMPLEMENTED` pending revision,
-followed by correction, affected validation, and independent re-review.
-`decision-required` Findings return to Main for the missing decision and
-Replanning when required. These classifications are not lifecycle states.
-Completion continues the original sequence: `Ready`, explicit Completion
-Approval, and a focused commit by `approval-committer`, followed by the
-existing Feature Exit gates.
-
-### Test Organization and Repair
-
-Organize tests around use-case-defined observable behavior, the complete
-architecture rule catalog, and general component/public-contract behavior.
-Retain distinct valid, error, edge, privacy, and compatibility coverage. Remove
-redundant identical assertions, incidental implementation-text mirrors, and
-unjustified synthetic permutations or stress cases; retain purposeful
-architecture and declared-configuration checks. Physically delete excess tests
-and dedicated test support, recording how retained contracts remain covered.
-
-Test common behavior once. Split desktop and web suites only when a genuine host
-capability, different behavior, or adapter boundary requires it. Keep necessary
-host smoke checks, shared-contract and build compatibility, and the zero-exception
-architecture gate. After cleanup, repair retained tests against their contracts;
-failures are not deletion evidence. A production mismatch with an existing
-approved contract follows the Correction Loop; changing that contract requires
-scope or design review. Test removal or coverage changes require their own
-approved boundary and are not incidental corrections.
-
-- **SDD coordination/specification docs only:** for feature intake, plans,
-  replans, `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, and their templates, run
-  Markdown lint covering every changed Markdown path, validate local links
-  and document structure, and run `rtk git diff --check`. Inspect scope,
-  traceability, state transitions, and approval provenance as applicable.
-  `rtk pnpm run lint:md` covers feature/use-case Markdown; pass other changed
-  paths explicitly to markdownlint-cli2. Full-repository qlty baseline/final
-  scans and the aggregate are not required for this surface.
-- **Repository-wide durable or configuration-sensitive docs:** policy,
-  architecture, agent routing/procedures, and documentation that affects check
-  commands or configuration retain non-mutating qlty check/smells comparisons
-  in exact disposable baseline/final snapshots and the formatting-capable
-  aggregate in the final snapshot only. Add targeted Markdown/link/structure
-  and diff checks. For mixed documentation changes, use this broader tier.
-  Docs-only work needs no product build; the repository `Verify` workflow is
-  not a required local documentation gate.
-- **Isolated code:** run relevant tests and the same qlty observations and final
-  aggregate; build when compilation, bundling, packaging, or final confidence
-  requires it.
-- **Parser, shared contract, extension host, entry point, generated artifact,
-  or configuration:** add the relevant desktop or web tests and build
-  evidence.
-
-For code slices, qlty must pass. Compare every reliably mapped finding by
-identity, explicit severity ordering, baseline/final severity, measured values,
-and whether higher or lower values are worse. A new finding or mapped adverse
-movement is Finding/NG. Treat identity or direction that cannot be mapped
-reliably as advisory; unchanged unrelated findings stay out of scope. Metric
-movement is a review signal only when no mapped adverse finding exists.
-
-### qlty Evidence Format
-
-The owning producer records mechanical facts under the Evidence Contract;
-those facts neither approve work nor replace semantic review. When the
-validation tier requires qlty, use `0.645.0` or newer with official SARIF
-output for both `check` and `smells`. In exact disposable baseline and final
-snapshots, run these same commands with the same full-repository selection and
-configuration:
-
-```sh
-rtk pnpm exec qlty check --all --sarif --no-fix
-rtk pnpm exec qlty smells --all --sarif --no-snippets
-```
-
-Save each complete SARIF 2.1.0 file, command output, and exit status. Record
-the version, nonzero analyzed-path inventory and count for each command in
-each snapshot, configuration hash, snapshot revisions, and commands. The
-selection is the full repository in both snapshots; match baseline paths
-against final paths, and treat findings on paths added in the final snapshot
-as new findings. Keep qlty cache and output local to each snapshot. Zero
-analyzed files, missing or malformed SARIF, an incomplete scan, version or
-configuration or selection mismatch, or missing results cannot pass. A
-nonzero `check` exit caused by findings from a completed scan is a
-finding-triggered status, not a command execution failure: retain the raw
-status and complete SARIF and evaluate the findings. A command that cannot
-start or complete is an execution failure and cannot pass. Compare official
-SARIF records; do not create a repository-specific parser or textual-output
-comparator. Any new SARIF finding is NG regardless of severity. Compare
-reliably mapped findings using explicit severity ordering, measured values,
-and whether higher or lower is worse; any mapped adverse movement is NG.
-Run `rtk pnpm run qlty` only in the disposable final snapshot, and require
-that final aggregate to pass. The current-head Qlty Cloud check must also
-pass before Feature Exit. If formatting changes approved content, sync those
-paths, rebuild that snapshot, and repeat both observations and the aggregate
-until stable.
-
-The plan review is the pre-approval scope gate. The independent
-`implementation-reviewer` makes the integrated review of scope, acceptance,
-quality, and production readiness after validation. Add a second independent
-review for the higher-risk surfaces above or when the first review finds a
-concern, reusing the same valid evidence. Feature Exit is the separate aggregate
-review defined below, rather than another per-slice implementation review.
-
-### Evidence Contract
-
-Evidence is a reusable artifact with one owner, not a separate operation or
-delegation. Keep `TASKS.md` as a decision index: validation identity, result,
-coverage, artifact reference, missing facts or invalidation reason, and gate
-references. Keep mechanical detail in a retained evidence artifact or sidecar
-outside inspected inputs: producer/version, path manifests,
-configuration/dependency/ tool identities, command exits, analyzed-path
-inventories, SARIF references, raw outputs, and execution observations. Link
-that artifact from `TASKS.md`; do not duplicate its manifest in each slice.
-Keep outputs/caches outside inspected inputs. Records must be readable by the
-next role; missing artifacts are unavailable evidence, never a pass. Preserve
-them through review, approval, commit, and Feature Exit. Carry the compact
-acceptance, validation, review, approval, and commit references for all
-completed slices until closure; remove superseded narrative, not necessary
-gate proof. Do not build a collector service, custom SARIF parser, or
-comparator.
-
-<!-- markdownlint-disable MD013 MD060 -->
-
-| Record                   | Producer                                          | Consumers / purpose                                                                                        |
-| ------------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Discovery facts          | Intake/planner for the references actually needed | Planner and plan-reviewer: scope, affected symbols/tests, boundaries and risks                             |
-| Documentation validation | Role changing the documentation                   | Reviewer and next role: validate that changed documentation surface                                        |
-| Slice validation         | Implementer, one baseline/final set per slice     | Implementation-reviewer: semantic review; feature-closer: aggregate completeness                           |
-| Review findings          | Independent reviewer                              | Main and author: verdict, precise Findings, reviewed patch identity, affected revalidation                 |
-| Closure evidence         | Feature-closer                                    | Main and committer: cross-slice completeness, durable ownership, risk ownership, current-head global gates |
-
-<!-- markdownlint-enable MD013 MD060 -->
-
-#### Identity And Required Facts
-
-Each validation record identifies:
-
-- Record version, feature/slice, producer, base revision and exact final
-  revision or working-tree content identity; approved path set; changed paths
-  with rename detection, untracked paths, and out-of-scope or ambiguous paths.
-- Inputs and coverage for each check, command/arguments, tool versions,
-  configuration/dependency hashes, required command set, exit status,
-  passed/failed/unknown state, and raw-output reference. Record the architecture
-  dependency test separately from semantic architecture judgments.
-- When the validation tier requires qlty: version, configuration hash,
-  full-repository selection, nonzero analyzed-path inventory/count in both
-  snapshots for both commands, all four
-  complete SARIF references, command logs/status, and final aggregate result.
-- When relevant: `engines.vscode` before/after; touched desktop/web/bootstrap/
-  parser/configuration surfaces; Node-import scan and unresolved cases; changed
-  layers/exports/imports and abstraction candidates; traceability mapping.
-  These are mechanical signals, not Solution Shape or approval verdicts.
-- Missing/ambiguous facts and execution exceptions. Human approval provenance
-  and review judgments remain separate gate records.
-
-A commit hash alone cannot identify uncommitted validation inputs. For a
-working tree, record a reproducible content manifest/hash covering inspected
-tracked and untracked inputs, deletions and renames, check configuration and
-dependency inputs. For full-repository qlty scans this is the full analyzed
-repository surface, not just approved paths. Identify any unrelated changes
-included in a snapshot; never silently mix another slice into its baseline or
-final evidence. Ignored generated inputs used by a check must also be covered.
-
-Check coverage may differ. Reuse an individual result only when its own inputs,
-configuration, tool version and required command still match; a valid targeted
-test cannot stand in for a required full-repository or host check. Planning
-facts need their reference/base identity and coverage, not a qlty package for
-code that has not been implemented.
-
-#### Freshness And Invalidation
-
-Evidence is stale for the affected facts only when one of these occurs:
-
-1. Inspected content or a relevant dependency/configuration input changes.
-2. The approved path set or required validation commands/coverage change.
-3. The comparison base changes.
-4. A relevant tool version or qlty configuration/selection changes.
-5. A check modifies its inspected snapshot after observations were recorded.
-
-Otherwise matching identity and sufficient facts require reuse. Phase changes,
-new reviewers, returning to Main, human approval, and entering a commit gate
-do not invalidate evidence. Linking a validated content identity to its new
-commit does not require another run. Current-head CI/Cloud gates remain bound
-to their exact commit; a prior commit's status is not a current-head pass.
-
-Treat approval/status/evidence/commit annotations as a separate metadata patch.
-Record its exact diff and run targeted non-mutating documentation validation
-and scope inspection; metadata-only annotations do not start another qlty
-baseline/final cycle. Bind existing scans to the immutable substantive snapshot
-they actually inspected, never claim they scanned later annotations. Metadata
-may be excluded from product-check inputs only when recorded explicitly and
-when it cannot affect that check. Any specification, scope, command, risk or
-acceptance change is substantive, never a metadata exception, and invalidates
-affected facts. Review and human approval cover the exact substantive patch
-plus the separately inspected gate metadata.
-
-Missing facts, an identity mismatch, or a specific Finding requiring
-reproduction are the only reasons for a consumer to request refresh or run an
-affected non-mutating check. Record the reason and coverage; rerun only what
-that reason invalidates. Retain a matching baseline; do not recreate it at each
-review. Writes and formatting belong to the producer, not read-only reviewers.
-An unavailable or failed required check blocks readiness. Committers must not
-rerun product validation: changed scope/evidence returns through Main to the
-producer and reviewer before committing. Staged diff checks remain mandatory.
-
-#### Evidence Reuse Observations
-
-Routine role dispatches, tests/builds, Git inspections, human gates, and commits
-do not need execution counters. Record only unexpected reruns, evidence
-regenerations, and extra reviews, with the reason, affected identity/coverage,
-and result, in the linked evidence artifact. Distinguish a justified refresh
-from duplicate work on matching inputs. Use `none` only when observed and
-`unknown` when unavailable; do not reconstruct historical counts.
-
-Keep a compact exception reference in `TASKS.md` only when it affects the next
-decision. Feature Exit consumes existing observations without a counting or
-collection pass. Existing counter records may be retained as evidence without
-continuing routine counts. These observations never replace required checks,
-independent review, or approval.
+Reuse evidence when identity and coverage match. Role changes, review,
+approval, and commit gates do not invalidate evidence by themselves. Apply
+[evidence identity and freshness](evidence.md#identity-and-required-facts)
+before producing, refreshing, or accepting validation evidence.
 
 ## Solution Shape And Impact
 
@@ -508,7 +280,8 @@ approvals, tests, or validation. Stop and replan when the approved semantic
 owner, package or layer, contract, dependency direction, framework/custom
 choice, abstraction, affected surface, material risk/impact, validation
 requirements/coverage/strategy, or approval boundary needs a new decision.
-Apply the [Correction Loop](#correction-loop-for-deterministic-failures) for
+Apply the
+[Correction Loop](validation.md#correction-loop-for-deterministic-failures) for
 contract-preserving repairs under existing approval.
 
 Prefer high-accuracy models for planning, impact, design, architecture,
@@ -610,7 +383,7 @@ changes are recorded; valuable unfinished work has an owner in `roadmap.md` or
 a new feature folder; and remaining risks are resolved, accepted, or assigned.
 
 For code slices, assess relevant risks under
-[Risk-Based Validation And Review](#risk-based-validation-and-review).
+[Risk-Based Validation And Review](validation.md#risk-based-validation-and-review).
 User docs change only when user-facing behavior changes.
 
 ### Feature Exit Review Output

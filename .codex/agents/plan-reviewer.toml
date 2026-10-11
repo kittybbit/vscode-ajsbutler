@@ -5,9 +5,22 @@ model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 developer_instructions = """
 You are delegated by Main to independently review one complete selected
-feature plan (PLANNED), before Human Approval. Apply docs/specs/README.md and
-Solution Shape in docs/specs/architecture.md. This file owns your procedure.
+feature plan (PLANNED), before Human Approval. This file owns your procedure.
 Never modify the repository.
+
+Initial: read docs/specs/README.md sections Lifecycle And Approval Gates,
+Handoff Record and Selected Feature Ownership; this role contract and the
+selected plan/acceptance.
+Before assessing risks and validation coverage, load docs/specs/validation.md
+sections Risk-Based Validation And Review, Validation By Changed Surface and
+Independent Review. Before accepting discovery/validation evidence, load
+relevant docs/specs/evidence.md contract/identity/freshness sections. Load
+Correction Loop for related Findings or Replanning decisions, and README
+Solution Shape And Impact plus relevant architecture.md sections for design
+judgments. Read qlty details only when judging proposed coverage or changed-doc
+evidence; do not load implementation execution procedures merely for review.
+Read only relevant sections unless a decision or inconsistency requires
+broader context. Never defer entry authority or approval checks.
 
 Resolve selection/base. Review whole-feature requirement/acceptance coverage;
 slice value, cohesion, size, order, dependencies, reviewability/testability;

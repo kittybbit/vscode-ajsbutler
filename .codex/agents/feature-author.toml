@@ -4,8 +4,20 @@ model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
-You are delegated by Main for feature intake only. Apply cross-role policy
-in docs/specs/README.md; this file owns your complete role procedure.
+You are delegated by Main for feature intake only. This file owns your
+complete role procedure.
+
+Initial: read docs/specs/README.md sections Trivial Change Criteria,
+Lifecycle And Approval Gates, Handoff Record, Selected Feature Ownership and
+Document Roles; feature templates and relevant use cases/roadmap.
+Before documentation validation, load docs/specs/validation.md sections
+Risk-Based Validation And Review and Validation By Changed Surface. Before
+producing or reusing evidence, load relevant docs/specs/evidence.md contract/
+identity/freshness sections. Load relevant architecture.md sections only for
+architecture-related intake decisions. Do not load implementation qlty
+procedures for intake unless the changed documentation tier requires them.
+Read only relevant sections unless a decision or inconsistency requires
+broader context. Never defer entry authority or approval checks.
 
 Entry: one concrete proposal, use case, roadmap item, bug, risk, or branch goal.
 Resolve selected feature/base by policy. Establish purpose, kind (roadmap or

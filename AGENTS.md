@@ -40,14 +40,14 @@ Production source lives under `src/domain`, `src/application`,
 - Preserve behavior. Prefer small vertical slices, one use case at a time, and
   small, reviewable changes. Add or update tests before large structural work.
 - SDD is the only standard for non-trivial changes. `docs/specs/README.md` owns
-  trivial-change criteria, SDD gates, document roles, approval, and validation
-  policy.
+  trivial-change criteria, SDD core gates, document roles, approval, and the
+  detailed-policy loading index.
 - Before editing runtime code, tests, generated artifacts, or configuration,
   require a Human Approved implementation slice in the selected feature's
   `TASKS.md`. Route any scope, design, impact, or approval-boundary change to
   Main for Replanning.
 - Deterministic check corrections within existing approval boundaries follow
-  the Correction Loop in `docs/specs/README.md`, without Replanning.
+  the Correction Loop in `docs/specs/validation.md`, without Replanning.
 - Record `Solution Shape` at planning, implementation, and review. Its
   definition and stop conditions are in
   [architecture](docs/specs/architecture.md); the validation and evidence
@@ -87,8 +87,11 @@ Production source lives under `src/domain`, `src/application`,
 
 ## AI Agent Routing Guide
 
-`AGENTS.md` owns repository constraints and Main routing. SDD policy and
-document roles live in [`docs/specs/README.md`](docs/specs/README.md). Role
+`AGENTS.md` owns repository constraints and Main routing. SDD core contracts,
+document roles and the loading index live in
+[`docs/specs/README.md`](docs/specs/README.md); validation details live in
+[`validation.md`](docs/specs/validation.md), evidence details in
+[`evidence.md`](docs/specs/evidence.md). Role
 definitions in `.codex/agents/*.toml` own authority, procedure, allowed input,
 forbidden actions, model/effort, output, and stop conditions. SDD lifecycle
 operations use explicit role delegation; they have no discoverable Skills or

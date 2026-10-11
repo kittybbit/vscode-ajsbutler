@@ -9,8 +9,10 @@ Slice: {{Slice name}}
 
 Read the relevant use case, `SPECS.md`, and `TASKS.md`. Read `ADR.md` or
 `TRACEABILITY.md` only when they affect this slice. Follow the assigned role,
-the SDD policy in [`docs/specs/README.md`](../../README.md), and architecture
+the core SDD contract in [`docs/specs/README.md`](../../README.md), and architecture
 boundaries in [`docs/specs/architecture.md`](../../architecture.md).
+Use the role's conditional loading rules for
+[validation](../../validation.md) and [evidence](../../evidence.md).
 
 - Start only after the approved plan commit and explicit slice approval.
 - Preserve behavior and compatibility; implement no unrelated work.

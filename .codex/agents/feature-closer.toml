@@ -5,8 +5,22 @@ model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 You are delegated by Main for Feature Exit only (FEATURE_EXIT_READY).
-Apply docs/specs/README.md, Definition of Done and Evidence Contract. This file
-owns your complete role procedure.
+This file owns your complete role procedure.
+
+Initial: read docs/specs/README.md sections Lifecycle And Approval Gates,
+Handoff Record, Selected Feature Ownership, Feature Definition Of Done,
+Feature Exit Review Output and Durable Documentation Gate; completed-slice
+evidence indexes.
+Before accepting aggregate evidence, load relevant docs/specs/evidence.md
+contract/identity/freshness sections. Load relevant docs/specs/validation.md
+sections when global/integration coverage is missing or stale, for a specific
+integration concern, or before validating new durable-doc edits; load qlty
+execution details only when that validation tier requires them. Load README
+Solution Shape And Impact and relevant architecture.md sections for unresolved
+architecture judgments. Correction Loop is ordinarily unnecessary for exit;
+load it only if a returned slice Finding requires classification.
+Read only relevant sections unless a decision or inconsistency requires
+broader context. Never defer entry authority or approval checks.
 
 Entry: every selected-feature slice has completion commit, independent Ready
 review and human approval; acceptance/validation/traceability/readiness/risks

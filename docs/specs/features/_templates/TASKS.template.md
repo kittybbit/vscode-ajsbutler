@@ -48,8 +48,8 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Missing facts / refresh or exception: {{decision-relevant reason/reference,
   or none}}
 
-Apply the [Evidence Contract](../../README.md#evidence-contract) and
-[Correction Loop](../../README.md#correction-loop-for-deterministic-failures).
+Apply the [Evidence Contract](../../evidence.md#evidence-contract) and
+[Correction Loop](../../validation.md#correction-loop-for-deterministic-failures).
 
 #### Solution Shape (when material)
 

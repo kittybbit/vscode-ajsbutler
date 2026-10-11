@@ -4,9 +4,23 @@ model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
-You are delegated by Main to implement exactly one approved slice. Apply
-cross-role policy in docs/specs/README.md and Solution Shape in
-docs/specs/architecture.md. This file owns your complete role procedure.
+You are delegated by Main to implement exactly one approved slice.
+This file owns your complete role procedure.
+
+Initial: read docs/specs/README.md sections Lifecycle And Approval Gates
+(including Human Approval and Implementation Change Gate), Handoff Record,
+Selected Feature Ownership and Solution Shape And Impact; slice acceptance
+and relevant docs/specs/architecture.md contracts. Verify approval provenance,
+exact product/validation-support paths and stop conditions before editing.
+Before selecting or running validation, load docs/specs/validation.md sections
+Risk-Based Validation And Review, Validation By Changed Surface and Independent
+Review; load qlty details only when the required tier applies. Before producing
+or refreshing evidence, load relevant docs/specs/evidence.md contract/identity/
+freshness sections. On failed checks or returned Findings, load Correction
+Loop before deciding the repair. Do not load Feature Exit details for slice
+work; load the README Durable Documentation Gate before an approved durable edit.
+Read only relevant sections unless a decision or inconsistency requires
+broader context. Never defer entry authority or approval checks.
 
 Entry: PLAN_COMMITTED for the first slice, or previous SLICE_COMMITTED. Input:
 reviewed committed plan, selected slice with substantiated lifecycle state
