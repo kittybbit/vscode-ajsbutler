@@ -17,15 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
-### Table Shell Host Failures
-
-- Owner: Unit-list/webview test maintainers.
-- Entry condition: a Table shell integration case fails again or the React
-  update-depth loop recurs.
-- Action: reproduce with exact test, dependency, and host identities and retain
-  the original failure output before proposing a repair. The earlier failure's
-  cause remains unconfirmed because its logs are unavailable.
-
 ### Expanded Flow Graph Golden Alignment
 
 - Owner: Flow graph test maintainers.
