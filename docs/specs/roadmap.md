@@ -20,13 +20,11 @@ entry conditions that make planning each item useful.
 ### Table Shell Host Failures
 
 - Owner: Unit-list/webview test maintainers.
-- Scope: investigate the seven paired Table shell integration failures and the
-  historical full-suite React update-depth loop. The isolated baseline and
-  final runs both fail all seven selected tests; the historical loop was not
-  reproduced in those bounded runs.
-- Done condition: identify and resolve the inherited test failures, then record
-  a successful full desktop suite or a separately reviewed disposition for any
-  remaining failure.
+- Entry condition: a Table shell integration case fails again or the React
+  update-depth loop recurs.
+- Action: reproduce with exact test, dependency, and host identities and retain
+  the original failure output before proposing a repair. The earlier failure's
+  cause remains unconfirmed because its logs are unavailable.
 
 ### Expanded Flow Graph Golden Alignment
 
