@@ -4,15 +4,14 @@
 
 - Purpose: establish current shell stability and resolve the historical issue
   disposition while preserving existing behavior.
-- Active slice: V1 proposed; no approved implementation work.
+- Active slice: approved verification-only V1; SLICE_APPROVED.
 - Read: `SPECS.md`, this plan, `TRACEABILITY.md`, linked discovery, and SDD
   validation/evidence policies. No source repair is authorized by this plan.
-- Next gate: independent plan review, then explicit Human Approval and focused
-  planning commit before implementation. No approval is inferred from proceed.
+- Next gate: focused completion commit; Completion Approval recorded.
 
 ## Current state and gate
 
-- Lifecycle state: PLAN_APPROVED.
+- Lifecycle state: SLICE_APPROVED.
 - Selected feature: `table-shell-integration-test-stabilization`.
 - Branch: `docs/table-shell-integration-test-stabilization`.
 - Fixed base: `8989609a325f5047b44294b66452790e228ef5a8`.
@@ -20,7 +19,10 @@
   cases and full Desktop suite pass. Minimal repair is required only for a
   confirmed failure after an evidence-backed revised plan.
 - Review: Ready for approval; no Findings. Human Approval recorded; planning
-  commit pending, no completed slice.
+commit succeeded; V1 validation and independent Ready review recorded.
+- Planning commit: `d17cd969fa23c824da5392f9125caf3b6c481e2f`;
+  staged diff check passed, exact three approved paths, returned by
+  `table_shell_plan_commit` in the current conversation.
 - Reviewed substantive identity:
   `e6f1b1b2520dce23366855373d0c8bcbf454d134f8d2f97d72c044cca628ad79`.
 - Independent reviewer: `table_shell_plan_review`; review returned to Main in
@@ -69,8 +71,8 @@ Apply [Lifecycle gates](../../README.md#lifecycle-and-approval-gates),
   not proposed repository harness changes.
 - Architecture dependency gate passed as part of the full Desktop suite;
   semantic ownership and abstraction judgments require independent review.
-- Web, production build, minimum host and repeated stability evidence remain
-  unrun. Matching current evidence must be reused, not recreated at each gate.
+- V1 now supplies repeated Desktop, Web, production build and minimum host
+  evidence below. Matching preparation and first-launch evidence were reused.
 
 ## Solution Shape and impact
 
@@ -92,7 +94,7 @@ Apply [Lifecycle gates](../../README.md#lifecycle-and-approval-gates),
 
 ## V1 — Confirm stable current behavior and reviewed disposition
 
-- Slice lifecycle state: PLANNED; order: first and only proposed slice.
+- Slice lifecycle state: SLICE_APPROVED; order: first and only approved slice.
 - Value: complete all R1–R7 with a reproducible seven-case ledger, bounded
   stability checks and Desktop/Web/minimum compatibility evidence.
 - Dependencies: reviewed and approved plan, focused planning commit. Reuse
@@ -155,6 +157,43 @@ Quality Contract coverage before approval. Host/shared/config changes also
 require the policy's additional independent review. No change to validation
 coverage is silently inferred from an execution failure.
 
+## V1 result and review handoff
+
+- Result: IMPLEMENTED, verification-only; independent review pending. No runtime,
+  test, configuration, dependency or durable documentation changes.
+- Evidence: `/private/tmp/ajsbutler-table-shell-v1-20261011/evidence.json`;
+  exact final patch/content identity is recorded there after documentation checks.
+- Acceptance R1–R3: all seven named cases passed in three independent full
+  VS Code 1.141.0 launches, each 1200 passing / zero failures / exit 0
+  (19s, 17s, 16s). First launch and Desktop preparation reused after source,
+  generated and installed dependency identity checks. No case deleted or skipped.
+- R4/R6: full suite retained list/search/selection/navigation/focus/accessibility,
+  detail/export and architecture boundaries; no residual assertion failures.
+- R5: update-depth loop absent in all three default-order runs. Ledger records
+  actual reporter order and suite-owned JSDOM setup, per-test cleanup and global
+  restoration; component effect/callback lifetime facts are retained in evidence.
+  Historical cause remains unconfirmed because original failure logs are absent.
+- R7: Web preparation and Chromium Web smoke passed; production Desktop/Web/editor
+  bundles built; established minimum VS Code 1.75.0 smoke passed (host exit 0).
+  Minimum host/Web smoke are narrower than full Desktop shell interaction coverage.
+- Existing React act warnings remained visible (28/28/29 in Desktop logs).
+  Web exit 0 follows successful scenario markers and includes shutdown connection
+  reset/premature-close diagnostics. Build performance warnings remain visible.
+  No warning suppression or speculative remediation occurred.
+- Execution exceptions: cached exact stable host driver avoided known sandbox
+  startup crash; all GUI/browser runs used automatically reviewed escalation.
+  Initial disposable Web copy omitted nested report sources; manifest-based
+  restoration corrected the snapshot and final preparation passed. Raw failed
+  output retained; no repository edit or coverage change. Details in evidence.
+- Compatibility/readiness: `engines.vscode: ^1.75.0` unchanged; immutable production
+  sources prove no new Node imports, contracts, telemetry or layer changes.
+  Architecture automated gate passed separately from semantic review judgments.
+  Existing framework/owners remain; no new abstraction or custom mechanism.
+- Traceability updated with recorded results. Coordination-doc tier requires no
+  qlty scans. No README/CHANGELOG update: observable behavior is unchanged.
+- Next gate: independent implementation review of complete patch and evidence;
+  Completion Approval and completion commit remain pending. No closure performed.
+
 ## Risks, durable impact and exit boundary
 
 - One passing current environment does not prove historical cause or stability;
@@ -176,3 +215,23 @@ coverage is silently inferred from an execution failure.
   reviewed disposition, current-head global gates as applicable, and explicit
   closure path approval. Preserve the separate WebAPI feature and all unrelated
   roadmap concerns.
+
+## V1 completion gate
+
+- Independent review: Ready, no actionable Findings;
+  `table_shell_verify_review`, returned in current conversation.
+- Reviewed patch SHA-256:
+  `6ce5f66275ae4ed6d356cefb186e1db7f46c2268888c56806ba92220480bbaf8`.
+- Reviewed content identity:
+  `1a3bf37eab69e4b6275e320df687998d5ecafab7cb140eaa1e16da37e818f3a1`.
+- Completion Approval: Approved; approved at: approved in current conversation
+  on 2026-10-11; commit: pending.
+- Approved completion scope: verified V1 records and gate metadata only.
+- Approved completion paths:
+  - `docs/specs/features/table-shell-integration-test-stabilization/TASKS.md`
+  - `docs/specs/features/table-shell-integration-test-stabilization/TRACEABILITY.md`
+- No product or configuration edits are approved.
+- Completion-approval metadata evidence:
+  `/private/tmp/ajsbutler-table-shell-v1-20261011/main-completion-approval.json`.
+- Review-gate metadata evidence:
+  `/private/tmp/ajsbutler-table-shell-v1-20261011/main-review-gate.json`.
