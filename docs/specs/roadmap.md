@@ -17,15 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
-### Expanded Flow Graph Golden Alignment
-
-- Owner: Flow graph test maintainers.
-- Current baseline: the representative expanded-graph use-case suite retains
-  one node-order golden mismatch while the implementation's deterministic
-  ordering remains unchanged for Semantic Diff Explorer behavior.
-- Entry condition: reconcile the existing golden with the verified graph-order
-  contract in a separately scoped test-maintenance slice.
-
 ### Dependabot Post-Publication Verification
 
 - Owner: Security/tooling maintainers.
