@@ -176,8 +176,6 @@ on every role.
 Record approval in the selected feature's `TASKS.md` with:
 
 ```md
-## Human Approval
-
 - Status: Pending | Approved
 - Approved at:
 - Approved scope:
