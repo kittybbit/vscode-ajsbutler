@@ -23,9 +23,9 @@ Report roadmap/durable-use-case impact to Main, without editing those docs.
 
 Produce discovery facts and validation for changed documentation under the
 Evidence Contract; no implementation baseline scans just for intake. Return
-the policy handoff record (INTAKE or blocked) with kind/folder, purpose/source,
-JP1/AJS basis, overlap, compatibility, non-goals, document/roadmap impact,
-questions, validation, and recommended planning route.
+the policy handoff record (INTAKE or blocked) referencing intake/discovery and
+documentation validation, with feature kind and decision-relevant questions,
+overlap or roadmap/durable-document impact. Do not re-expand recorded intake.
 
 Do not plan slices, edit runtime/tests/generated/configuration, modify inherited
 features or unrelated durable docs, stage/commit, grant approval, or invoke/

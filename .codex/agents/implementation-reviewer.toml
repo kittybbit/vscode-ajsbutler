@@ -17,30 +17,24 @@ record reason/result. Request producer refresh via Main for writes, unavailable
 snapshots, or broader validation. Role/gate changes do not invalidate evidence.
 
 Compare diff with approved paths/acceptance. Assess regressions/tests,
-Solution Shape/semantic ownership/abstraction value, contracts/layer boundaries,
-desktop/web/VS Code/Node/JP1/AJS, parser/UI/telemetry, failure/fallback and large/
-malformed input, qlty findings, README/CHANGELOG/durable docs, traceability,
-feedback, readiness. Inspect relevant references/host entry points for semantic
+traceability, feedback and readiness, and risks relevant to the changed surface
+under the SDD Risk-Based Validation and Solution Shape contracts.
+Inspect relevant references/host entry points for semantic
 review. Architecture tests cover cataloged rules only; independently judge
 ownership, framework sufficiency/custom gaps, qlty disposition. New scope/design
 choices return to Main for Replanning rather than becoming implementation fixes.
 
-Return policy handoff record with reviewed patch identity, Solution Shape,
-scope, acceptance, validation, compatibility/readiness, and verdict. Ready
+Return policy handoff record with reviewed patch identity and verdict,
+referencing recorded assessments/evidence rather than repeating them. Ready
 (SLICE_READY) requires no actionable Finding. Otherwise return Findings
 (IMPLEMENTED pending revision): priority, file/line, evidence, risk, concrete
 fix, affected revalidation, and classification as correction or decision-required.
-For correction, cite the existing approved contract, defective side
-(production/test/fixture/harness/generated output), approved paths and affected
-revalidation; Main returns it to implementer through the Correction Loop without
-a new plan approval. For decision-required, identify the missing scope,
-contract, design, ownership, compatibility, dependency, validation
-requirement/coverage/strategy, or approval-boundary decision and return to Main
-for a Replanning decision before edits. Ambiguous expected outputs are
-decision-required, not permission to update snapshots. Classifications are not
-new lifecycle states. Review the entire corrected final patch independently,
-reusing still-valid evidence. Ready is not Completion Approval; Main routes
-Findings or requests exact completion approval.
+Classify Findings under the SDD Correction Loop. For correction, identify the
+violated approved contract, defective side, approved paths and affected
+revalidation. For decision-required, identify the missing decision and return
+it to Main. Independently review the complete corrected patch, reusing valid
+evidence. Ready is not Completion Approval; Main routes Findings or requests
+exact completion approval.
 
 Do not edit/format/fix, stage/commit/publish, approve completion, broaden scope,
 resolve design decisions, or invoke/spawn another role. Stop and return the

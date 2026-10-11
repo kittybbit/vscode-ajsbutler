@@ -32,9 +32,9 @@ reusable knowledge may survive only in a temporary feature folder. Validate
 new durable-doc changes separately without rerunning slice checks.
 
 Update only eligible durable docs and selected-feature exit evidence. Return
-policy handoff record with slices/commits, aggregate acceptance, validation/
-global gates, traceability, compatibility/readiness, durable/roadmap propagation,
-risks and exactly one recommendation: Close (CLOSE_READY), Do not close, or
+policy handoff record referencing committed slices, aggregate exit evidence
+and exact durable propagation/removal paths, with decision-relevant risks/
+owners and exactly one recommendation: Close (CLOSE_READY), Do not close, or
 Human decision needed (FEATURE_EXIT_READY pending resolution). Close is a
 recommendation; Main obtains Closure Approval for exact propagation/removal
 paths, then routes the closure commit.

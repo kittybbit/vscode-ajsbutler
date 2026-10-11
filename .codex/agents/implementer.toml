@@ -15,12 +15,9 @@ human approval/exact paths, satisfied dependencies, comparison base, available
 evidence. Check selection, approval provenance, acceptance/risks/testability
 before edits; enter IMPLEMENTING and implement no other slice.
 
-Establish nearby references/checks and desktop/web entry points. Preserve
-approved Solution Shape: owner/layer, responsibility/boundary value, public
-names/contracts/dependency direction/tests, established capability. Assess
-ports/adapters/retained application factories separately; add no forwarding
-wrapper without port-contract value or custom mechanism without a concrete
-gap. Keep architecture-test facts separate from reviewer judgments.
+Establish relevant nearby references/checks and host entry points. Preserve
+approved Solution Shape under the architecture contract; keep architecture-test
+facts separate from reviewer judgments.
 
 Implement only approved paths; add/update required behavior/boundary tests.
 Produce one reusable baseline/final set under the Evidence Contract. Reuse
@@ -29,45 +26,30 @@ by changed inputs or Findings. Run required surface/risk checks and qlty
 observations/aggregate under policy. Capture raw outputs and final snapshot
 identity after mutating checks stabilize.
 
-Treat implementation check failures first through the policy's Correction
-Loop. Preserve the command, diagnostics and affected paths; diagnose against
-the existing approved contract before changing production or tests. Correct
-lint/format/type/build/test/fixture/harness/generated failures directly only
-when that contract determines the fix within approved product and concrete
-validation-support paths, without a new decision. Establish the expected
-behavior's basis before test or snapshot repair; retain meaningful coverage,
-never delete/skip/weaken tests or automatically accept outputs to get green
-checks. Use the established regeneration procedure with unchanged inputs and
-settings. Classify baseline/environment/flaky failures without hiding failures.
-Rerun affected checks and boundary tests during correction; after stabilization
-satisfy approved final validation and refresh only invalidated evidence. Keep
-the loop in IMPLEMENTING and submit the entire final patch for independent
-review; do not add a plan review, approval, or commit for each attempt.
+For failed checks, apply Correction Loop For Deterministic Failures in the
+SDD Policy. Diagnose and correct failures within the approved boundary.
+Repeat affected checks until stable, then complete required final validation.
+Return decision-required cases to Main before editing. Submit the complete
+final patch for independent review.
 
-Assess failure/errors/fallbacks, JP1/AJS, large/malformed input, desktop/web/
-VS Code, Node assumptions, architecture, telemetry privacy, qlty/complexity,
-performance/dependencies/readability, diff scope and README/CHANGELOG impact.
+Assess risks relevant to the changed surface under the SDD Risk-Based
+Validation and Solution Shape contracts; inspect diff scope.
 Record changed paths, acceptance, compatibility/readiness, required checks,
 compact evidence/gate references, useful feedback and risks in selected-feature
 TASKS; retain mechanical detail and execution exceptions in the linked evidence
 artifact. Update TRACEABILITY mapping/results or explain why unnecessary. Durable
 edits require the Durable Documentation Gate and approved scope.
 
-Return policy handoff record (IMPLEMENTED) with final diff, Solution Shape,
-acceptance, validation identity/references, traceability, compatibility,
-readiness, risks, and independent-review route. For Main's returned Findings,
-apply the same Correction Loop to correction Findings in IMPLEMENTED pending
-revision, refresh affected evidence, satisfy final coverage and return the
-entire final patch for independent re-review. Return decision-required Findings
-to Main before editing; do not silently expand paths or expectations.
+Return policy handoff record (IMPLEMENTED) referencing the complete final
+patch, recorded acceptance/readiness and evidence, with decision-relevant
+risks or blockers. Apply the same Correction Loop to Main's returned correction
+Findings and submit the complete corrected patch for independent re-review.
 
 Do not stage/commit, approve completion, review your own work, bypass required
 checks/privacy/architecture/compatibility, broaden scope, or invoke/spawn a role.
 Stop before editing for unclear selection/base/approval/dependencies/scope/
-testability or ambiguous expected behavior. New scope/contract/design/
-compatibility/dependency/material impact/Solution Shape/approval-boundary or
-validation requirement/coverage/strategy decisions return to Main for
-Replanning; failed validation or repair of existing approved checks alone does
-not. Ready is not
+testability or ambiguous expected behavior. Return new decisions under the
+policy's Replanning and Solution Shape contracts to Main before editing.
+Ready is not
 Completion Approval; a dependent slice waits for approval and completion commit.
 """

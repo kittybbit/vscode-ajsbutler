@@ -33,7 +33,6 @@ rules rather than recollecting facts at each gate.
 
 ## Commands And Validation
 
-Run repository commands through `rtk` when available. Choose tests and other
-checks by changed surface using the SDD validation policy; docs-only validation
-includes the disposable-snapshot qlty procedure. Relevant package scripts
+Run repository commands through `rtk` when available. Select validation by
+changed surface under `docs/specs/README.md`. Relevant package scripts
 include `build`, `test`, `test:web`, `lint:md`, and `qlty`.

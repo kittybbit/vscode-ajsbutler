@@ -42,11 +42,9 @@ Human Approval covers the reviewed plan and exact slice scope. After a plan or
 replan review returns `Ready` and Human Approval is explicit, `approval-committer`
 creates one focused planning commit. Only then may `implementer` work on one
 approved slice. Each completed slice receives an independent
-`implementation-reviewer` review. Findings return through Main to
-`implementer` for correction within the approved boundary; a new decision as
-defined above returns through Main for replanning. Correction applies only to
-slices of an approved, committed plan and does not require a new plan review,
-Human Approval, or planning commit. After
+`implementation-reviewer` review. Findings return through Main under the
+[Correction Loop](#correction-loop-for-deterministic-failures); a new decision
+as defined above returns through Main for replanning. After
 `Ready`, explicit Completion Approval and that slice's focused commit are
 required before another dependent slice starts. Once all slices are complete
 and committed, `feature-closer` performs Feature Exit. Its `Close` result,
@@ -103,7 +101,8 @@ below, not an instruction to discover or invoke a Skill.
 
 ### Handoff Record
 
-Every role returns this compact envelope, with role-specific results attached:
+Every role returns this compact envelope, adding only role-specific judgments,
+blocking decisions, and material risks needed for the next decision:
 
 ```yaml
 feature: selected feature folder
@@ -127,6 +126,15 @@ it does not create a second validation package. Main owns state/gate checks,
 human approval provenance, routing, and final integration validation only when
 integration inputs or required coverage differ from recorded evidence.
 
+Reference recorded results, exact patches, Solution Shape, traceability, and
+evidence instead of expanding them again. Raw command output, snapshot
+manifests, and SARIF belong in the retained evidence artifact. References must
+be accessible to the recipient; include necessary facts or report unavailable
+evidence when a reference cannot supply them. A review adds its verdict,
+reviewed patch identity, and actionable Findings; a commit adds its successful
+commit identity and staged-check result. Do not impose identical result lists
+on every role.
+
 ### Human Approval
 
 Record approval in the selected feature's `TASKS.md` with:
@@ -143,6 +151,19 @@ Record approval in the selected feature's `TASKS.md` with:
 conversation`; do not copy the approval message. Implementation requires
 `Status: Approved`, an approval result, and the human-approved slice boundary.
 An SDD field alone does not prove human approval.
+
+Enumerate concrete product paths and foreseeable validation-support paths
+(tests, fixtures, snapshot assets, harness/configuration, and approved generated
+outputs) before approval. Do not use unrestricted wildcards, automatically add
+paths during implementation, or include unrelated feature repairs. A required
+unapproved path returns to Main before editing for an approval-boundary decision.
+
+Add Completion Approval only after implementation review and Closure Approval
+only after Feature Exit. Each record contains status, exact scope and paths,
+review verdict, approval result, and commit status. Keep the active gate near
+the top of `TASKS.md` and compact references for completed gates through Feature
+Exit. Ordinary corrections keep the existing plan and approval records; do not
+add a gate record for each attempt.
 
 ### Implementation Change Gate
 
@@ -162,10 +183,8 @@ material alternatives. Do not claim implementation has started or finished
 before approval. Proceed only after the approved boundary is recorded in
 `TASKS.md`.
 
-Corrections that execute or repair existing approved validation and restore
-the approved contract remain within that boundary. Changing validation
-requirements, required coverage, or strategy is a new decision requiring
-Replanning; a failed check or contract-preserving code/test repair alone is not.
+For repairs within an existing approval boundary, apply the
+[Correction Loop](#correction-loop-for-deterministic-failures).
 
 ### Approval-Gated Commit Policy
 
@@ -197,6 +216,15 @@ check. Reuse matching evidence under the Evidence Contract. Do not rerun
 unchanged checks only because the workflow or reviewer has changed. Intake and
 planning need discovery facts and validation of their documentation changes;
 they do not require implementation baseline/final scans for proposed code.
+
+Assess only risks relevant to the changed surface: failure modes, errors and
+fallbacks; JP1/AJS semantics and compatibility; large, malformed and edge input;
+desktop/web behavior, VS Code compatibility and Node assumptions; architecture
+and telemetry privacy; qlty/complexity, performance, dependencies and
+readability; user-document and README/CHANGELOG impact. Apply the Solution
+Shape contract for material design decisions. These categories do not require
+unrelated investigation and do not waive any required boundary, compatibility,
+privacy, architecture, or host checks below.
 
 ### Correction Loop For Deterministic Failures
 
@@ -365,10 +393,6 @@ completed slices until closure; remove superseded narrative, not necessary
 gate proof. Do not build a collector service, custom SARIF parser, or
 comparator.
 
-Correction attempts need only affected checks; stabilization must satisfy the
-approved final coverage. Changed inputs invalidate only dependent results;
-reuse unrelated baseline and check evidence under the rules below.
-
 <!-- markdownlint-disable MD013 MD060 -->
 
 | Record                   | Producer                                          | Consumers / purpose                                                                                        |
@@ -484,8 +508,8 @@ approvals, tests, or validation. Stop and replan when the approved semantic
 owner, package or layer, contract, dependency direction, framework/custom
 choice, abstraction, affected surface, material risk/impact, validation
 requirements/coverage/strategy, or approval boundary needs a new decision.
-Executing or repairing existing approved validation and restoring the approved
-contract through the Correction Loop do not constitute such a change.
+Apply the [Correction Loop](#correction-loop-for-deterministic-failures) for
+contract-preserving repairs under existing approval.
 
 Prefer high-accuracy models for planning, impact, design, architecture,
 specification, and review; medium- or lower-cost models may be used for
@@ -585,10 +609,9 @@ complete; reusable knowledge is propagated to durable documents; roadmap
 changes are recorded; valuable unfinished work has an owner in `roadmap.md` or
 a new feature folder; and remaining risks are resolved, accepted, or assigned.
 
-For code slices, assess intentional failure modes, understandable errors or
-fallbacks, JP1/AJS compatibility, large/malformed/edge inputs, desktop and web
-behavior, user-document impact, and changelog need. User docs change only when
-user-facing behavior changes.
+For code slices, assess relevant risks under
+[Risk-Based Validation And Review](#risk-based-validation-and-review).
+User docs change only when user-facing behavior changes.
 
 ### Feature Exit Review Output
 

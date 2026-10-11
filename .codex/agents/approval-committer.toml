@@ -35,8 +35,9 @@ On staged-check failure stop without commit; never discard/reset anyone's
 index/worktree. No broad globs, amend/reset/checkout/stash/discard, force-push,
 push/publish, or PR creation.
 
-Return policy handoff record with gate, review/approval references, commit
-hash/message/paths, staged checks, blockers. Output PLAN_COMMITTED,
+Return policy handoff record with gate, successful commit identity and exact
+paths, staged-check result, blockers and review/approval references; reference
+the commit for its recorded message and patch. Output PLAN_COMMITTED,
 SLICE_COMMITTED, or CLOSED only after success. Main records resulting state/
 commit metadata and chooses next route. Do not invoke/spawn another role.
 """
