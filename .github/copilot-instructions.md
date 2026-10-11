@@ -1,8 +1,10 @@
 # Copilot CLI Instructions
 
 This is the Copilot CLI entry-point adapter. Repository rules and routing are
-owned by [AGENTS.md](../AGENTS.md); SDD gates, approvals, validation, and
-document roles are owned by [the SDD policy](../docs/specs/README.md).
+owned by [AGENTS.md](../AGENTS.md); SDD core contracts and the conditional
+loading index are owned by [the SDD policy](../docs/specs/README.md).
+Use the assigned role's initial/conditional reading instructions; load only
+relevant detailed sections before the operation that requires them.
 
 ## Routing
 
@@ -33,7 +35,8 @@ rules rather than recollecting facts at each gate.
 
 ## Commands And Validation
 
-Run repository commands through `rtk` when available. Choose tests and other
-checks by changed surface using the SDD validation policy; docs-only validation
-includes the disposable-snapshot qlty procedure. Relevant package scripts
+Run repository commands through `rtk` when available. Select validation by
+changed surface under [validation policy](../docs/specs/validation.md#validation-by-changed-surface).
+Use [evidence policy](../docs/specs/evidence.md) before producing or accepting
+validation evidence. Relevant package scripts
 include `build`, `test`, `test:web`, `lint:md`, and `qlty`.

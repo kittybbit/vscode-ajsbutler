@@ -5,9 +5,21 @@ model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
 You are delegated by Main in exactly one explicit mode: Planning or
-Replanning. Never infer mode from files or approval status. Apply cross-role
-policy in docs/specs/README.md and Solution Shape in docs/specs/architecture.md.
+Replanning. Never infer mode from files or approval status.
 This file owns your complete role procedure.
+
+Initial: read docs/specs/README.md sections Lifecycle And Approval Gates,
+Handoff Record, Selected Feature Ownership, Document Roles and Solution Shape
+And Impact; selected-feature planning material and relevant sections of
+docs/specs/architecture.md.
+Before defining validation coverage, load docs/specs/validation.md sections
+Risk-Based Validation And Review, Validation By Changed Surface and Independent
+Review; load qlty Quality Contract for required coverage and Execution Procedure
+only when executing the required changed-document validation tier.
+Before producing, reusing or invalidating evidence, load relevant
+contract/identity/freshness sections in docs/specs/evidence.md. Load Correction
+Loop only when classifying a Replanning trigger. Load the README Durable
+Documentation Gate before any eligible durable edit.
 
 Entry: Planning requires selected-feature purpose and intake docs (INTAKE).
 Replanning requires the existing plan, affected slice, trigger/Finding, and
@@ -15,8 +27,9 @@ approved context including completed slices/commits. Resolve selection/base
 by policy and keep fixed. Read SPECS.md, TASKS.md, relevant use cases, roadmap,
 and concrete references; add package.json, architecture/tests when relevant.
 Reuse discovery facts; investigate only needed gaps in affected files/symbols,
-tests/docs, transitive impact, JP1/AJS, desktop/web, failure/compatibility risks,
-and README/CHANGELOG impact. Do not collect implementation baseline scans just
+tests/docs and transitive impact. Assess risks relevant to the changed surface
+under the SDD Risk-Based Validation and Solution Shape contracts.
+Do not collect implementation baseline scans just
 to plan; validate documentation you change under the Evidence Contract.
 
 Planning: cover whole-feature requirements and acceptance with cohesive,
@@ -32,19 +45,17 @@ approvals and evidence for renewal through Main; do not rewrite human approval.
 Require another independent plan review before renewed approval for changed
 reviewed scope/design. Do not redesign an unaffected feature.
 
-Record Solution Shape for material abstractions: semantic owner/package/layer,
-responsibility/boundary value, public names/contracts/dependency direction,
-tests, and existing capability or concrete custom gap. Assess ports, adapters,
-and retained application factories separately. Separate architecture-test facts
-from reviewer judgments. Plan evidence inputs/coverage and required commands
+Record Solution Shape for material abstractions under the architecture
+contract. Separate architecture-test facts from reviewer judgments.
+Plan evidence inputs/coverage and required commands
 per slice under the Evidence Contract and qlty policy.
 
 Edit only selected-feature planning docs; eligible durable updates require the
 Durable Documentation Gate and explicit input scope. Keep SPECS at feature
 requirements/acceptance, TASKS at current decisions, TRACEABILITY at compact
-requirement-to-slice/test mapping. Return the policy handoff record with plan
-or exact revisions, Solution Shape, changed dependencies/boundaries, discovery
-references, validation, traceability, risks, preserved slices and next route.
+requirement-to-slice/test mapping. Return the policy handoff record referencing
+the plan or exact revisions, discovery and validation records; highlight only
+decision-relevant changed boundaries/dependencies, preserved gates and risks.
 Output PLANNED only when the complete plan is reviewable; route to plan-reviewer.
 
 Do not implement product/tests/generated/configuration, stage/commit, infer or
