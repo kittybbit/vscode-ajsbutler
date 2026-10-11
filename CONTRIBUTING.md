@@ -17,19 +17,20 @@ The repository supports desktop and web extension hosts. Keep shared code browse
 
 The scripts in `package.json` are run with pnpm. Some scripts use `npm-run-all` internally to sequence tasks; contributors should invoke the package scripts rather than reproduce those internal commands.
 
-| Command                        | Purpose                                              |
-| ------------------------------ | ---------------------------------------------------- |
-| `pnpm run build`               | Create the production desktop and web bundles.       |
-| `pnpm run development`         | Build development bundles.                           |
-| `pnpm run development:desktop` | Build the desktop development bundle.                |
-| `pnpm run development:web`     | Build the web development bundle.                    |
-| `pnpm run watch`               | Rebuild while source files change.                   |
-| `pnpm test`                    | Prepare and run the desktop extension tests.         |
-| `pnpm run test:web`            | Prepare and run the web extension smoke tests.       |
-| `pnpm run test:full`           | Prepare and run both desktop and web test runners.   |
-| `pnpm run test:compile`        | Compile the test TypeScript project.                 |
-| `pnpm run lint:md`             | Lint the repository's SDD and requirements Markdown. |
-| `pnpm run qlty`                | Format and check the repository with qlty.           |
+| Command                        | Purpose                                               |
+| ------------------------------ | ----------------------------------------------------- |
+| `pnpm run build`               | Create the production desktop and web bundles.        |
+| `pnpm run development`         | Build development bundles.                            |
+| `pnpm run development:desktop` | Build the desktop development bundle.                 |
+| `pnpm run development:web`     | Build the web development bundle.                     |
+| `pnpm run watch`               | Rebuild while source files change.                    |
+| `pnpm test`                    | Prepare and run the desktop extension tests.          |
+| `pnpm run test:desktop:min`    | Prepare and run the VS Code 1.75 Desktop smoke tests. |
+| `pnpm run test:web`            | Prepare and run the web extension smoke tests.        |
+| `pnpm run test:full`           | Prepare and run both desktop and web test runners.    |
+| `pnpm run test:compile`        | Compile the test TypeScript project.                  |
+| `pnpm run lint:md`             | Lint the repository's SDD and requirements Markdown.  |
+| `pnpm run qlty`                | Format and check the repository with qlty.            |
 
 `pnpm run qlty` includes formatting. Review `git status` and `git diff` after it runs so that unrelated documents are not included accidentally.
 
@@ -43,7 +44,13 @@ pnpm exec playwright install chromium-headless-shell
 
 Use `pnpm run test:web` for the web extension smoke suite and `pnpm run test:full` when both hosts need coverage. For manual browser-side debugging, use the `Launch Extension(web)` configuration in the [repository launch configuration](https://github.com/kittybbit/vscode-ajsbutler/blob/main/.vscode/launch.json).
 
-Desktop tests use `pnpm test`; preparation also builds the browser fixture used by the deep-tree accessibility test. If you need only the prepared runners, the lower-level scripts are `pnpm run test:prepare:desktop`, `pnpm run test:desktop:run`, `pnpm run test:prepare:web`, and `pnpm run test:web:run`.
+Desktop tests use `pnpm test`; preparation also builds the browser fixture used by the deep-tree accessibility test. The SDK downloads and launches stable VS Code without a manual executable, alias, or define wrapper. Run `pnpm run test:desktop:min` for additional VS Code 1.75.0 smoke coverage; this does not replace the full stable suite. Desktop hosts need a graphical session (CI uses Xvfb on Linux), and first-time host/browser downloads need network access.
+
+Desktop output marks host launch, suite-runner loading, initialization, test-file loading, case execution, and completion. Loading errors retain their original cause; failed cases and host failures return a nonzero exit. The full suite initializes compiled TypeScript aliases and development defines before loading test files.
+
+`test:web` is the contributor Web entry: its prehook prepares once, then the prepared runner starts the real browser host. Browser bundling remains necessary for browser imports and aliases. The shared test Webpack configuration also builds the Desktop accessibility fixture; the smoke source exports the host entry directly.
+
+CI builds production output, compiles tests, and prepares both test bundles once before running the internal `test:desktop:run`, `test:desktop:min:run`, and `test:web:run` scripts. These prepared runners do not rebuild development output over the production artifacts. `test:full` prepares all development artifacts once and runs the prepared Desktop and Web paths sequentially.
 
 ## Parser and ANTLR
 

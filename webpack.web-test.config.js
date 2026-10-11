@@ -22,7 +22,7 @@ if (!productionEditorConfig) {
 const webSmokeConfig = {
   ...productionWebConfig,
   name: "web-test",
-  entry: "./src/test/suite/webSmokeWebEntry.ts",
+  entry: "./src/test/suite/webSmoke.ts",
   output: {
     ...productionWebConfig.output,
     path: path.join(__dirname, "out/test/suite"),

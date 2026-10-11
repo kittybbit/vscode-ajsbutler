@@ -1,7 +1,16 @@
 import * as assert from "assert";
 import * as path from "path";
 
+const fileLoadDefines = {
+  development: DEVELOPMENT,
+  connectionString: CONNECTION_STRING,
+};
+
 suite("Test runtime alias resolution", () => {
+  test("development defines are available before test files load", () => {
+    assert.strictEqual(fileLoadDefines.development, true);
+    assert.strictEqual(fileLoadDefines.connectionString, "");
+  });
   test("resolves compiled resource and generated parser aliases", () => {
     const outputRoot = path.resolve(__dirname, "../..");
 
