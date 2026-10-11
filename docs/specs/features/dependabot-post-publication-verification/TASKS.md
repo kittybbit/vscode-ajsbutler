@@ -4,10 +4,11 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Active/approved slice: Slice 1 next; all three reviewed slice boundaries approved.
+- Active/approved slice: Slice 1 collection incomplete; alias-coverage replan
+  has renewed approval after Ready review. Replan commit precedes resumption.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user.
-- Next decision: planning commit, then Slice 1 execution.
+- Next decision: alias-coverage replan commit before Slice 1 resumes.
 
 ## Current state and gates
 
@@ -16,21 +17,54 @@
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`;
   this is the fixed comparison base.
 - Branch: `codex/dependabot-post-publication-verification`.
-- Trigger: user requests `package.json` upgrades and minimal workspace/lockfile
-  overrides; Main accepted remediation scope. This is a scope/design change,
-  not a deterministic correction under an existing implementation approval.
-- Preserved gates: no completed slices or commits exist;
-  Human Approval covers the reviewed three-slice plan. Original publication/
-  disposition requirements and inherited WebAPI ownership remain intact.
-- Invalidated evidence: previous substantive two-slice plan and its documentation
-  validation are superseded; matching historical/selection facts remain reusable.
-- Next decision/blocker: planning commit; independent replan review returned
-  Ready for approval with no actionable Findings. Human Approval was recorded
-  in the current conversation; the planning commit precedes Slice 1 execution.
+- Trigger: Slice 1 found three genuine GitHub alias-edge omissions. Existing
+  acceptance allows reporting limitations, but does not authorize accepting
+  missing required coverage through another source. A narrowly supplementary
+  published-lock strategy changes validation coverage and requires Replanning.
+- Preserved gates: original Human Approval and planning commit remain evidence
+  for their exact original scope. Slice 2 package/version/path constraints and
+  all security/compatibility/quality checks are unchanged. No completed slices
+  or Completion Approvals/commits exist; inherited WebAPI ownership is intact.
+- Affected gates: the previous review/approval do not cover the new Slice 1/3
+  alias-coverage strategy. Renew independent plan review and exact approval
+  for this delta; do not rewrite the historical Human Approval below.
+- Evidence: Slice 1 raw published inputs, graph/alert facts and identities are
+  reused where matching. Old changed-document validation and the graph-coverage
+  acceptance judgment are superseded; no raw graph omission becomes a pass.
+- Next decision/blocker: commit the approved coverage delta below.
+  Slice 1 collection remains incomplete; its 39-override inventory must still
+  be completed by implementer. Slice 2/3 execution remains dependency-gated.
+- Planning commit: `cdb09c24ecf859fb0209dc23de658a6dd1c34cdc`;
+  exact three planning paths and staged whitespace check passed.
 - Plan review: `/tmp/ajsbutler-dependabot-plan-review.json`; reviewed identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
 
+## Alias-coverage Replan Approval
+
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-12.
+- Approved scope: only the published-lock supplement for the three exact alias
+  edges and its Slice 1/3 coverage/freshness conditions below; no dependency,
+  runtime, automation, compatibility, path or unrelated check change.
+- Approved replan paths:
+  `docs/specs/features/dependabot-post-publication-verification/SPECS.md`,
+  `docs/specs/features/dependabot-post-publication-verification/TASKS.md`,
+  `docs/specs/features/dependabot-post-publication-verification/TRACEABILITY.md`.
+- Execution paths remain the historical approved Slice 1/3 paths below.
+- Approval metadata: `/tmp/ajsbutler-dependabot-alias-approval/record.json`.
+- Independent replan review: Ready for approval, no actionable Findings;
+  `/tmp/ajsbutler-dependabot-alias-plan-review.json`.
+- Reviewed plan identity:
+  `65a0da3d866b4b41cae836a81055fab569f3672276ac5d9ebffc7abe2b9ca0f2`.
+- Ready metadata validation:
+  `/tmp/ajsbutler-dependabot-alias-ready-metadata/record.json`.
+- Commit: not yet performed; original planning commit remains preserved.
+
 ## Human Approval
+
+The following record is preserved historical approval for the exact original
+plan committed at `cdb09c24ecf859fb0209dc23de658a6dd1c34cdc`.
+It does not approve the alias-coverage changes proposed in this replan.
 
 - Status: Approved
 - Approved at: approved in current conversation on 2026-10-11.
@@ -130,6 +164,47 @@ blanket overrides. Preserve `allowBuilds`, `ignoredBuiltDependencies`, workspace
 membership, `patchedDependencies` and the existing postman patch file. If the
 patch/permissions or additional paths need alteration, stop for Replanning.
 
+## Published graph coverage: three exact alias-edge supplement
+
+Apply this narrow rule to Slice 1 and Slice 3. It is a proposed validation
+strategy, not a claim that GitHub publishes or evaluates the omitted edges.
+
+- Require full npm package/version node coverage and all-state/all-page alert
+  completeness as before. Reconcile every unique dependency/optional edge after
+  alias-name and raw SPDX/purl normalization; retain the actual GitHub missing
+  edge list, supported edges and source identities separately.
+- The only eligible missing edges are `@isaacs/cliui@8.0.2` to
+  `string-width@4.2.3`, `strip-ansi@6.0.1` and `wrap-ansi@7.0.0`, represented
+  by `string-width-cjs`, `strip-ansi-cjs`, `wrap-ansi-cjs` in the pinned published
+  lockfile. Eligibility is the exact parent/target/version/alias tuple, not a
+  general exception for aliases, CJS packages, or any three missing edges.
+- For each eligible edge still present in the target lockfile, retain the
+  default-branch commit-pinned lockfile body/hash and exact parent snapshot,
+  alias mapping, resolved target and target package/version. Confirm those
+  parent/target nodes occur in the same GitHub export and bind both sources
+  to the bracketing remote revision/dependency-input identity and interval.
+  Local installed dependencies or an unmerged lockfile are not substitutes.
+- Separate GitHub-observed edge coverage from published-lock supplementary
+  coverage and its provenance. Completion uses their explicitly identified
+  union for these exact tuples only. Never label supplemented edges as GitHub
+  observed, claim exact ingestion SHA, or infer that Dependabot analyzed them.
+- Record the remaining GitHub relationship/ingestion uncertainty, with
+  security/tooling maintainer ownership and a Main handoff for any follow-up.
+  Complete alert retrieval means complete observed API results, not a guarantee
+  of detection for every lockfile relationship. No security-clean conclusion
+  follows from the supplement or an empty result alone.
+- After remediation, reconcile anew against the actual published target. If
+  these tuples disappear or GitHub includes them, use normal coverage with no
+  supplement. If the exact tuples still require it, refresh pinned proof for
+  that target identity. Additional missing edges, changed tuples, missing
+  nodes, unresolved targets or identity ambiguity block completion and return
+  to Main; do not carry the baseline exception to other omissions.
+
+Solution Shape is unchanged: existing GitHub observations and Git/pnpm lock
+facts have separate owners and provenance; no new production mechanism or
+abstraction. The material risk is partial GitHub edge visibility; the bounded
+supplement exposes that risk rather than establishing complete GitHub ingestion.
+
 ## Slice 1: Establish published baseline and complete alert/override inventory
 
 - Lifecycle state: PLANNED.
@@ -143,6 +218,7 @@ patch/permissions or additional paths need alteration, stop for Replanning.
   A successful export alone does not establish the complete graph. Bracket
   observations with remote/dependency identities, refresh drift and record the
   observation interval; APIs do not guarantee an exact commit ingestion SHA.
+  Apply the three-exact-alias supplement above only when its conditions hold.
 - Obtain authenticated all-state/all-page Dependabot data and reconcile known
   historical 17 IDs (156-164,168-173,175-176), additional historical/current IDs,
   and the 15 planning IDs. Source of the 17-row snapshot is Git
@@ -226,7 +302,9 @@ patch/permissions or additional paths need alteration, stop for Replanning.
   commit reaching a PR branch alone does not satisfy publication. Waiting for
   publication is an external prerequisite, not approval to merge.
 - Acceptance: prove the completed dependency-input identity reached default
-  branch and GitHub graph coverage matches; query all states/pages again and
+  branch and graph coverage reconciles under the exact alias rule above;
+  retain GitHub omissions and supplementary published-lock facts separately.
+  Query all states/pages again and
   reconcile the union of baseline, known, historical, current and additional
   alerts. Individually GET known IDs absent from listing; unknown/access failure
   blocks a complete-result claim. Distinguish successful empty/denied/partial.
@@ -272,7 +350,8 @@ checks and qlty above. Never collect implementation baseline scans just to plan.
 
 ## Risks, invalidation and exit
 
-- Permissions/processing/drift/unsupported SBOM coverage block complete evidence;
+- Permissions/processing/drift/unsupported SBOM coverage beyond the exact
+  approved alias supplement block complete evidence;
   no-success assumption from 403/404, partial pages or selected package matches.
 - Override removal may restore vulnerabilities or cross legacy API behavior;
   do not require zero overrides or solve failed checks by broad coercion.
@@ -301,6 +380,46 @@ checks and qlty above. Never collect implementation baseline scans just to plan.
   [GitHub SBOM API](https://docs.github.com/en/rest/dependency-graph/sboms),
   [Dependabot alerts API](https://docs.github.com/en/rest/dependabot/alerts);
   primary npm registry metadata URLs are indexed in the artifact.
-- Review: Ready for approval; Human Approval: Approved; planning commit: pending.
-  Slice results: not executed. No dependency,
+- Original review/approval/planning commit are preserved for their original scope.
+  Alias-coverage review is Ready; approval is Approved; commit is pending. No dependency,
   runtime/test/configuration edit has been performed during Replanning.
+- Narrow replan discovery and changed-document validation:
+  `/tmp/ajsbutler-dependabot-alias-replan-evidence/record.json`.
+
+## Slice 1 execution evidence and blocker
+
+- Collection remains incomplete; the affected plan is PLAN_APPROVED pending renewed
+  gates. No IMPLEMENTED or implementation Ready claim is made.
+- Evidence: `/tmp/ajsbutler-dependabot-slice1-evidence/record.json`; raw
+  responses, pinned inputs, graph reconciliation and alert inventory retained there.
+- Published default branch remained `main` at
+  `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2` before/after collection.
+  Dependency/patch SHA256 values are in `published-input-hashes.json`.
+- Authenticated asynchronous GET generation returned 201; export UUID
+  `8590725a-3a14-4846-a14d-67a743af096e` fetched successfully.
+  Generation preceded the first branch observation; fetch/alert reads were
+  bracketed. No exact ingestion commit or atomic-snapshot guarantee is asserted.
+- All-state alert listing returned 195 rows over two pages with terminal
+  no-next-link proof: 170 fixed, 15 open, 10 auto-dismissed, zero dismissed.
+  All 17 known historical IDs and all 15 planning IDs are present. The full
+  observed row/state/advisory/timestamp/disposition union is in
+  `alert-inventory.json`; historical evidence and PR 317 remain retained.
+- SPDX contains 1,046 npm package/version pairs, exactly matching all 1,046
+  lockfile packages, plus five Actions and the repository. Its npm relationships
+  cover 2,001 of 2,004 unique lockfile dependency/optional-dependency edges.
+  Peer-context variants collapse to package/version pairs; metadata ranges,
+  patch contents and build permissions are not represented by SPDX.
+- Missing relationships: `@isaacs/cliui@8.0.2` to `string-width@4.2.3`,
+  `strip-ansi@6.0.1`, `wrap-ansi@7.0.0`, whose lockfile names use `-cjs` aliases.
+  These packages exist in the export, but their edges do not. Complete graph
+  GitHub edge coverage cannot be claimed from export/package matching alone.
+  This factual omission remains unchanged by the proposed supplementary proof.
+- Proposed decision: apply only the exact alias supplement above after review
+  and Human Approval. The all-override parent/registry inventory remains
+  incomplete (39 existing entries); implementer must finish it before Slice 1
+  acceptance and review. Slice 2 remains gated, with unchanged upgrade bounds.
+- Implementation Solution Shape: existing GitHub/pnpm/Git capabilities and
+  security/tooling ownership retained; no product abstraction, source/config,
+  workflow, permissions or dependency edit. Node22/VSCode1.75 contracts unchanged.
+- No product build, host suite, qlty or architecture-test pass is claimed for
+  this coordination-document surface. No changelog or durable edit is needed.

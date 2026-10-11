@@ -18,7 +18,11 @@ once the resulting dependency graph reaches the default branch.
 - **R1 Published graph identity:** identify default-branch SHA, dependency-input
   hashes and GitHub graph evidence before baseline and final alert observations.
   Record ingestion/snapshot limitations and refresh drift; local audit alone
-  cannot establish GitHub publication or alert resolution.
+  cannot establish GitHub publication or alert resolution. For the three exact
+  published-lock alias tuples bounded in `TASKS.md`, allow separately identified
+  commit-pinned published-lock coverage alongside honest GitHub edge omissions;
+  additional gaps remain blockers. This does not prove GitHub ingestion or
+  Dependabot evaluation of omitted relationships.
 - **R2 Complete alert coverage:** retain authenticated all-state, all-page
   current/historical results, known prior IDs, additional/new IDs, query
   parameters/times, status and completeness evidence. Successful empty results
