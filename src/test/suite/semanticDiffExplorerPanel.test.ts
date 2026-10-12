@@ -21,9 +21,6 @@ import {
 } from "../../application/semantic-diff/semanticDiffExplorerMessages";
 import { createViewerResourceRequest } from "../../presentation/webview/viewerRequestMessages";
 import { createOpenSemanticDiffExplorer } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
-import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
-import type { SemanticDiffScheduleImpact } from "../../application/semantic-diff/semanticDiffScheduleImpact";
-import type { ScheduleImpactCalendarPanelHandle } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarPanel";
 import {
   SemanticDiffExplorerActionRegistry,
   SemanticDiffExplorerContextRegistry,
@@ -266,6 +263,11 @@ suite("Semantic diff Explorer panel", () => {
     assert.strictEqual(entry?.session.sessionId, handle.sessionId);
 
     const fake = harness.panels[0]!;
+    assert.ok(
+      !fake.panel.webview.html.includes(
+        "data-semantic-diff-calendar-action-id",
+      ),
+    );
     fake.emit(createSemanticDiffExplorerReadyRequest(handle.sessionId, 1));
     await flush();
 
@@ -467,108 +469,6 @@ suite("Semantic diff Explorer panel", () => {
 
     first.dispose();
     second.dispose();
-  });
-
-  test("registers and privately dispatches the available calendar action", async () => {
-    const panels: FakePanel[] = [];
-    const contextRegistry = new SemanticDiffExplorerContextRegistry();
-    const actionRegistry = new SemanticDiffExplorerActionRegistry();
-    const sidecarRegistry = new ScheduleImpactSidecarRegistry();
-    const context = emptyContext();
-    const sidecar = {} as SemanticDiffScheduleImpact;
-    let resolvedContext: ReturnType<typeof emptyContext> | undefined;
-    const opened: Array<{
-      parentSessionId: string;
-      context: ReturnType<typeof emptyContext>;
-      sidecar: SemanticDiffScheduleImpact;
-      displayLanguage?: string;
-    }> = [];
-    let reportActionCalls = 0;
-    const opener = createOpenSemanticDiffExplorer({
-      extensionContext: {
-        extensionUri: vscode.Uri.file("/tmp/ajsbutler-test-extension"),
-      } as vscode.ExtensionContext,
-      createWebviewPanel: (_viewType, title) => {
-        const fake = createFakePanel(title);
-        panels.push(fake);
-        return fake.panel;
-      },
-      showQuickPick: async () => {
-        reportActionCalls += 1;
-        return undefined;
-      },
-      openReport: async () => undefined,
-      contextRegistry,
-      actionRegistry,
-      language: "ja-JP",
-      scheduleImpactSidecarRegistry: {
-        resolve: (candidate) => {
-          resolvedContext = candidate as ReturnType<typeof emptyContext>;
-          return sidecarRegistry.resolve(candidate);
-        },
-      },
-      openScheduleImpactCalendarPanel: (input) => {
-        opened.push(input as (typeof opened)[number]);
-        return {
-          calendarSessionId: "sdc-calendar-test-1",
-          session: {} as never,
-          panel: panels[0]!.panel,
-          reveal: () => undefined,
-          dispose: () => undefined,
-        } as ScheduleImpactCalendarPanelHandle;
-      },
-      ...createPanelAllocatorDeps(),
-    });
-    sidecarRegistry.register(context, sidecar);
-
-    const handle = await opener(context);
-    const fake = panels[0]!;
-    const calendarActionId = (fake.panel.webview.html.match(
-      /data-semantic-diff-calendar-action-id="([^"]+)"/,
-    ) ?? [])[1] as never;
-
-    assert.match(calendarActionId, /^sde-action-/);
-    assert.strictEqual(resolvedContext, context);
-    assert.strictEqual(
-      actionRegistry.has(calendarActionId, handle.sessionId),
-      true,
-    );
-    assert.strictEqual(
-      actionRegistry.metadata(calendarActionId, handle.sessionId)?.kind,
-      "calendar",
-    );
-
-    fake.emit(
-      createSemanticDiffExplorerActionRequest(
-        handle.sessionId,
-        1,
-        calendarActionId,
-      ),
-    );
-    await flush();
-
-    assert.strictEqual(reportActionCalls, 0);
-    assert.strictEqual(opened.length, 1);
-    assert.strictEqual(opened[0]?.parentSessionId, handle.sessionId);
-    assert.strictEqual(opened[0]?.context, context);
-    assert.strictEqual(opened[0]?.sidecar, sidecar);
-    assert.strictEqual(opened[0]?.displayLanguage, "ja-JP");
-    assert.deepStrictEqual(fake.messages[0], {
-      type: "action-result",
-      sessionId: handle.sessionId,
-      requestId: 1,
-      actionId: calendarActionId,
-      ok: true,
-      payload: {
-        kind: "output",
-        status: "completed",
-        side: null,
-        targetId: null,
-      },
-      error: null,
-    });
-
-    handle.dispose();
   });
 
   test("rejects unknown actions with nullable strict correlation", async () => {

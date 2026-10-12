@@ -1,10 +1,7 @@
 import type * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import type { SemanticDiffComparisonPeriod } from "../../../application/semantic-diff/semanticDiffDto";
-import type {
-  BuildSemanticDiffPresentationArtifacts,
-  SemanticDiffPresentationArtifacts,
-} from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import type { BuildSemanticDiffPresentationArtifacts } from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffSourceHandleIdAllocator } from "../../../application/parsing/AjsParserWithSourceIndexPort";
 import type { SemanticDiffSourceCaptureFactory } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import {
@@ -127,9 +124,6 @@ export type SemanticDiffCommandDeps = {
   ) => SemanticDiffOutputContext;
   openExplorer?: (
     context: SemanticDiffOutputContext,
-  ) => Promise<SemanticDiffExplorerSessionHandle>;
-  openScheduleAwareExplorerSession?: (
-    artifacts: SemanticDiffPresentationArtifacts,
   ) => Promise<SemanticDiffExplorerSessionHandle>;
   presentSemanticDiffOutput?: (
     context: SemanticDiffOutputContext,

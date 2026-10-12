@@ -36,13 +36,7 @@ const semanticDiffPresentationFacades = [
   "pickSemanticDiffOutputMode.ts",
   "presentSemanticDiffOutput.ts",
 ] as const;
-const semanticDiffCategories = [
-  "panel",
-  "flow",
-  "report",
-  "source",
-  "calendar",
-] as const;
+const semanticDiffCategories = ["panel", "flow", "report", "source"] as const;
 const movedSemanticDiffModules = [
   "semanticDiffExplorerPanelActions",
   "semanticDiffExplorerPanelHtml",
@@ -59,21 +53,6 @@ const movedSemanticDiffModules = [
   "semanticDiffExplorerSourceAction",
   "semanticDiffExplorerSourceActionRunner",
   "semanticDiffReportDocument",
-] as const;
-const scheduleImpactCalendarHostRoot = path.join(
-  repoRoot,
-  "src/presentation/vscode/semantic-diff/calendar",
-);
-const scheduleImpactCalendarLegacyRoot = path.join(
-  repoRoot,
-  "src/presentation/vscode/webview/scheduleImpactCalendar",
-);
-const scheduleImpactCalendarHostModules = [
-  "scheduleImpactCalendarJson.ts",
-  "scheduleImpactCalendarPanel.ts",
-  "scheduleImpactCalendarPanelRuntime.ts",
-  "scheduleImpactCalendarSessionRegistry.ts",
-  "scheduleImpactCalendarTransport.ts",
 ] as const;
 const semanticDiffExplorerEditorRoot = path.join(
   repoRoot,
@@ -105,7 +84,6 @@ const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerViewState.ts",
 ] as const;
 const semanticDiffBrowserEntries = [
-  "src/presentation/webview/editor/scheduleImpactCalendar.tsx",
   "src/presentation/webview/editor/semanticDiffExplorer.tsx",
 ] as const;
 
@@ -338,15 +316,7 @@ suite("Architecture Semantic Diff ownership", () => {
     assert.deepStrictEqual(imports, []);
   });
 
-  test("keeps Calendar and Explorer browser modules in canonical packages", () => {
-    scheduleImpactCalendarHostModules.forEach((file) => {
-      assert.ok(fs.existsSync(path.join(scheduleImpactCalendarHostRoot, file)));
-    });
-    assert.strictEqual(
-      fs.existsSync(scheduleImpactCalendarLegacyRoot),
-      false,
-      "Calendar host modules must not remain under generic vscode/webview",
-    );
+  test("keeps Explorer browser modules in canonical packages", () => {
     semanticDiffExplorerBrowserModules.forEach((file) => {
       assert.ok(fs.existsSync(path.join(semanticDiffExplorerEditorRoot, file)));
       assert.strictEqual(
@@ -415,7 +385,7 @@ suite("Architecture Semantic Diff ownership", () => {
       webpackSource,
       /semanticDiffExplorer:\s*"\.\/src\/presentation\/webview\/editor\/semanticDiffExplorer\.tsx"/u,
     );
-    assert.match(
+    assert.doesNotMatch(
       webpackSource,
       /scheduleImpactCalendar:\s*"\.\/src\/presentation\/webview\/editor\/scheduleImpactCalendar\.tsx"/u,
     );
@@ -494,32 +464,9 @@ suite("Architecture Semantic Diff ownership", () => {
       .filter(({ resolvedPath }) =>
         resolvedPath?.startsWith(sharedImportPrefix),
       );
-    const calendarImports = sourceFilesUnder(
-      path.join(
-        repoRoot,
-        "src/presentation/webview/editor/scheduleImpactCalendar",
-      ),
-    )
-      .flatMap((filePath) => {
-        const file = path
-          .relative(repoRoot, filePath)
-          .split(path.sep)
-          .join("/");
-        return collectImportReferencesFromSource(
-          file,
-          fs.readFileSync(filePath, "utf8"),
-        );
-      })
-      .filter(({ resolvedPath }) =>
-        resolvedPath?.startsWith(sharedImportPrefix),
-      );
     assert.ok(
       explorerImports.length > 0,
       "Explorer must consume shared result primitives",
-    );
-    assert.ok(
-      calendarImports.length > 0,
-      "Calendar must consume shared result primitives",
     );
   });
 

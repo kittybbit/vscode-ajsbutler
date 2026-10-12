@@ -6,9 +6,9 @@ import type {
 } from "./semanticDiffCommand";
 import type { CommandStep } from "./semanticDiffCommandSteps";
 import {
-  runCalendarCompatibilityWorkflow,
+  runComparisonCompatibilityWorkflow,
   runFileComparisonWorkflow,
-  type CalendarCompatibilityWorkflowDeps,
+  type ComparisonCompatibilityWorkflowDeps,
   type WorkflowExplorerResult,
 } from "./semanticDiffCommandWorkflowArtifacts";
 import {
@@ -20,7 +20,7 @@ export type SemanticDiffCommandExecution = (
   deps: SemanticDiffCommandDeps,
 ) => Promise<SemanticDiffCommandResult>;
 
-type WorkflowRunnerDeps = CalendarCompatibilityWorkflowDeps;
+type WorkflowRunnerDeps = ComparisonCompatibilityWorkflowDeps;
 type ExplorerRunnerDeps = ExplorerCommandDeps;
 type ReportRunnerDeps = Pick<
   SemanticDiffCommandDeps,
@@ -92,37 +92,35 @@ export const executeReportCommand =
   async (deps) =>
     handlers.finalizeReport(deps, await handlers.runReport(deps));
 
-const hasCalendarAdapter = (
+const hasWorkflowAdapter = (
   deps: Pick<
     SemanticDiffCommandDeps,
-    | "buildSemanticDiffPresentationArtifacts"
-    | "openScheduleAwareExplorerSession"
+    "buildSemanticDiffPresentationArtifacts" | "openExplorer"
   >,
 ): boolean =>
   deps.buildSemanticDiffPresentationArtifacts !== undefined &&
-  deps.openScheduleAwareExplorerSession !== undefined;
+  deps.openExplorer !== undefined;
 
-const selectCalendarRunner = (
+const selectWorkflowRunner = (
   deps: Pick<SemanticDiffCommandDeps, "showWorkflowQuickPick" | "showInputBox">,
 ): WorkflowRunner =>
   deps.showWorkflowQuickPick !== undefined || deps.showInputBox !== undefined
     ? runFileComparisonWorkflow
-    : runCalendarCompatibilityWorkflow;
+    : runComparisonCompatibilityWorkflow;
 
 const selectExecutionRunner = (
   deps: Pick<
     SemanticDiffCommandDeps,
     | "buildSemanticDiffPresentationArtifacts"
-    | "openScheduleAwareExplorerSession"
     | "showWorkflowQuickPick"
     | "showInputBox"
     | "openExplorer"
   >,
   handlers: ExecutionHandlers,
 ): SemanticDiffCommandExecution => {
-  if (hasCalendarAdapter(deps)) {
+  if (hasWorkflowAdapter(deps)) {
     return executeWorkflowCommand(
-      selectCalendarRunner(deps),
+      selectWorkflowRunner(deps),
       handlers.finalizeWorkflow,
     );
   }
@@ -135,7 +133,6 @@ export const commandExecution = (
   deps: Pick<
     SemanticDiffCommandDeps,
     | "buildSemanticDiffPresentationArtifacts"
-    | "openScheduleAwareExplorerSession"
     | "showWorkflowQuickPick"
     | "showInputBox"
     | "openExplorer"

@@ -237,7 +237,7 @@ const createWorkflowHarness = (
     unregisterSemanticDiffSourceCapture: (context) => {
       contextRegistry.unregisterSourceCapture(context);
     },
-    openScheduleAwareExplorerSession: async () => handle,
+    openExplorer: async () => handle,
     ...overrides,
   };
   return { deps, beforeUri, afterUri };
@@ -1117,8 +1117,8 @@ suite("Semantic diff command", () => {
       unregisterSemanticDiffSourceCapture: (context) => {
         registry.unregisterSourceCapture(context);
       },
-      openScheduleAwareExplorerSession: async (artifacts) => {
-        assert.strictEqual(artifacts.context, contexts[0]);
+      openExplorer: async (context) => {
+        assert.strictEqual(context, contexts[0]);
         return handle;
       },
     };
@@ -1210,8 +1210,8 @@ suite("Semantic diff command", () => {
       unregisterSemanticDiffSourceCapture: (context) => {
         contextRegistry.unregisterSourceCapture(context);
       },
-      openScheduleAwareExplorerSession: async (artifacts) => {
-        assert.ok(contextRegistry.sourceCapture(artifacts.context));
+      openExplorer: async (context) => {
+        assert.ok(contextRegistry.sourceCapture(context));
         return handle;
       },
       language: "en-US",
@@ -1296,7 +1296,7 @@ suite("Semantic diff command", () => {
         },
       }),
       sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
-      openScheduleAwareExplorerSession: async () => {
+      openExplorer: async () => {
         openCount += 1;
         throw new Error("Explorer must not open after parser failure.");
       },
@@ -1385,7 +1385,7 @@ suite("Semantic diff command", () => {
           throw new Error("capture must not begin");
         },
         sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
-        openScheduleAwareExplorerSession: async () => {
+        openExplorer: async () => {
           throw new Error("Explorer must not open");
         },
       };
@@ -1656,12 +1656,9 @@ suite("Semantic diff command", () => {
       events.push("register");
       registry.registerSourceCapture(context, entry);
     };
-    harness.deps.openScheduleAwareExplorerSession = async (artifacts) => {
+    harness.deps.openExplorer = async (context) => {
       events.push("open");
-      assert.strictEqual(
-        registry.sourceCapture(artifacts.context) !== undefined,
-        true,
-      );
+      assert.strictEqual(registry.sourceCapture(context) !== undefined, true);
       return {
         sessionId: "sde-ordered" as never,
         panel: {} as vscode.WebviewPanel,
@@ -1734,7 +1731,7 @@ suite("Semantic diff command", () => {
       openerRegistry.unregisterSourceCapture(context);
       throw new Error("unregister failed");
     };
-    openerHarness.deps.openScheduleAwareExplorerSession = async () => {
+    openerHarness.deps.openExplorer = async () => {
       openerEvents.push("open");
       throw new Error("opener failed");
     };
@@ -1820,7 +1817,7 @@ suite("Semantic diff command", () => {
     harness.deps.registerSemanticDiffSourceCapture = () => {
       registerCount += 1;
     };
-    harness.deps.openScheduleAwareExplorerSession = async () => {
+    harness.deps.openExplorer = async () => {
       openCount += 1;
       throw new Error("stale capture must not open Explorer");
     };
@@ -1879,7 +1876,7 @@ suite("Semantic diff command", () => {
         throw new Error("capture must not begin");
       },
       sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
-      openScheduleAwareExplorerSession: async () => {
+      openExplorer: async () => {
         openCount += 1;
         throw new Error("Explorer must not open");
       },
@@ -1970,9 +1967,9 @@ suite("Semantic diff command", () => {
           scopedParser,
         );
       },
-      openScheduleAwareExplorerSession: async (artifacts) => {
+      openExplorer: async (context) => {
         openCount += 1;
-        return harness.deps.openScheduleAwareExplorerSession!(artifacts);
+        return harness.deps.openExplorer!(context);
       },
     });
 

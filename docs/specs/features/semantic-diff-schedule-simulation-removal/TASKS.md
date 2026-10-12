@@ -15,16 +15,17 @@
 
 ## Current state and gate
 
-- Lifecycle state: PLAN_APPROVED.
-- Next operation: focused planning commit, then S1 implementation.
+- Lifecycle state: SLICE_APPROVED.
+- Next operation: focused S1 completion commit, then S2 implementation.
 - Selection: `semantic-diff-schedule-simulation-removal`.
 - Branch/base: `codex/semantic-diff-schedule-simulation-removal` / `origin/main`.
 - Fixed base and planning HEAD: `0090b728977d55d4127bdad149f74f598f0b2fd5`.
-- Slice states: S1 and S2 are PLAN_APPROVED; no completed slices.
+- Slice states: S1 is SLICE_APPROVED; S2 is PLAN_APPROVED.
 - Plan review: Ready for approval; no Findings. Reviewed plan identity:
   `d4f41dc4d222a702225db6ac5749486c1bf5f6546579d176c649a91573da8f20`.
   Independent reviewer: `schedule_removal_plan_review` in current conversation.
-- Planning commit: none.
+- Planning commit: `6cbc97b8369f1d6d999e6f8391a5165902d76c60`;
+  exact three approved planning paths, staged diff check passed.
 - Human Approval:
   - Status: Approved
   - Approved at: approved in current conversation, 2026-10-12
@@ -34,7 +35,19 @@
     plus this selected feature's SPECS.md, TASKS.md and TRACEABILITY.md.
   - Approval provenance: human response to Main's reviewed S1/S2 approval request
     in current conversation; review identity above. Completion/Closure are excluded.
-- Completion and Closure Approval: none.
+- S1 Completion Approval:
+  - Status: Approved
+  - Approved at: approved in current conversation, 2026-10-13
+  - Scope/paths: complete reviewed S1 patch, exact 73 paths recorded in
+    `/tmp/ajs-removal-s1/evidence.json`, all within S1 and selected-feature docs.
+  - Review verdict: Ready, no Findings, from `schedule_removal_s1_review` and
+    `schedule_removal_s1_review_second` in current conversation.
+  - Reviewed complete patch SHA256:
+    `f01a37e4da5a722be3a681bbb08e57e0f0ef24e84a04974fa952874757cf3fc2`.
+  - Approval provenance: human response to Main's S1 completion/commit approval
+    request in current conversation; exact reviewed scope above.
+  - Commit status: pending focused completion commit.
+- Closure Approval: none.
 
 Apply [lifecycle](../../README.md#lifecycle-and-approval-gates) and
 [approval](../../README.md#human-approval). Intent to remove the feature is not
@@ -474,7 +487,41 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
   fresh targeted documentation validation only; no code/qlty pass is claimed.
 - Review: `schedule_removal_plan_review` returned Ready for approval with no
   Findings for the substantive manifest above. Main recorded only gate metadata;
-  Human Approval is recorded above; planning commit remains pending.
+  Human Approval and successful planning commit are recorded above.
 - Follow-up: record per-slice evidence/review/completion gates here during work;
   Feature Exit consumes committed slices and current-head global gates before
   closure approval/removal of the selected feature folder.
+
+## S1 implementation record
+
+- Result: SLICE_APPROVED; both independent reviews returned Ready with no Findings.
+  Explicit Completion Approval recorded above; focused completion commit pending.
+- Changed paths: all 42 S1 deletion paths, affected S1 modification paths and
+  selected-feature docs. Exact diff/inventory: `/tmp/ajs-removal-s1/evidence.json`.
+- Acceptance: calendar UI/action, HTML data marker, private action handling,
+  sidecar/child registries, localization, assets, dedicated tests and use case
+  removed. File/Git capture opens ordinary Explorer using the same context;
+  rollback, panel disposal, strict request guards, Source/Flow/Output preserved.
+- Solution Shape: bootstrap composes ordinary Explorer; source/context/Flow
+  owners retain their existing boundaries. Calendar lifecycle owners are deleted;
+  no replacement wrapper, new layer, dependency or host capability. Temporary
+  application prediction/report contracts remain explicitly assigned to S2.
+- Validation: `test:full` passes (1,199 desktop cases and web smoke);
+  `test:desktop:min` passes on VS Code 1.75.0; clean `build` passes for both hosts
+  and retained editor assets, with no calendar bundle. Complete architecture
+  dependency catalog passes at zero violations; semantic ownership needs review.
+- Quality: qlty 0.645.0 full-repository baseline/final SARIF observations complete;
+  final aggregate passes. Three unrelated check findings are unchanged; approved
+  TRACEABILITY formatting fixed. All 151 smells records unchanged.
+- Evidence: `/tmp/ajs-removal-s1/evidence.json`; substantive final identity
+  `22e37ccefeb68949bf8f03e1d776d95eab520f89a11566f7ca5d936d067091b5`.
+  Gate annotations are a separately validated metadata patch. Reuse these
+  checks and baseline; raw outputs and execution exceptions are in the artifact.
+- Compatibility/readiness: `engines.vscode` remains `^1.75.0`; no Node imports
+  introduced. Retained definition comparison, simulation report contracts and
+  telemetry privacy remain unchanged in S1. Intentional calendar removal is
+  announced in Unreleased; related use-case index/link removed.
+- Feedback/risks: unchanged webpack size advisories; web shutdown stream messages
+  follow successful runner exit. Snapshot cache contamination was corrected by
+  refreshing final qlty only in a clean exact snapshot. No missing check or
+  blocking decision remains; S2 waits for S1 Completion Approval and commit.

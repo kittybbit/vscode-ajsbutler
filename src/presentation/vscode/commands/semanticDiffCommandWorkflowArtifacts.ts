@@ -47,7 +47,7 @@ type WorkflowArtifactOpenDeps = Pick<
   SemanticDiffCommandDeps,
   | "registerSemanticDiffSourceCapture"
   | "unregisterSemanticDiffSourceCapture"
-  | "openScheduleAwareExplorerSession"
+  | "openExplorer"
 >;
 type FileComparisonWorkflowDeps = Pick<
   SemanticDiffCommandDeps,
@@ -56,7 +56,7 @@ type FileComparisonWorkflowDeps = Pick<
   WorkflowSourcePreparationDeps &
   WorkflowArtifactBuildDeps &
   WorkflowArtifactOpenDeps;
-export type CalendarCompatibilityWorkflowDeps = FileComparisonWorkflowDeps &
+export type ComparisonCompatibilityWorkflowDeps = FileComparisonWorkflowDeps &
   Pick<SemanticDiffCommandDeps, "scheduleComparisonPeriod">;
 
 export type WorkflowExplorerResult = Readonly<{
@@ -239,7 +239,7 @@ const openRegisteredWorkflowArtifacts = async (
   state: WorkflowArtifactState,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
-  if (deps.openScheduleAwareExplorerSession === undefined) {
+  if (deps.openExplorer === undefined) {
     return workflowOpenFailure({
       deps,
       state,
@@ -248,7 +248,7 @@ const openRegisteredWorkflowArtifacts = async (
     });
   }
   try {
-    const handle = await deps.openScheduleAwareExplorerSession(state.artifacts);
+    const handle = await deps.openExplorer(state.artifacts.context);
     return readyStep({
       handle,
       source: state.source,
@@ -336,20 +336,20 @@ export const runFileComparisonWorkflow = async (
   );
 };
 
-const prepareCalendarCompatibilitySource = async (
+const prepareComparisonCompatibilitySource = async (
   deps: WorkflowSourcePreparationDeps,
   after: import("./semanticDiffCommandWorkflowInput").WorkflowAfterSnapshot,
   localization: SemanticDiffCommandLocalization,
 ): Promise<CommandStep<WorkflowSourceRequest>> =>
   prepareWorkflowSource(deps, after, localization);
 
-export const runCalendarCompatibilityWorkflow = async (
-  deps: CalendarCompatibilityWorkflowDeps,
+export const runComparisonCompatibilityWorkflow = async (
+  deps: ComparisonCompatibilityWorkflowDeps,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
   const localization = getSemanticDiffCommandLocalization(deps.language);
   const afterStep = readWorkflowAfterSnapshot(deps, localization);
   const sourceStep = await continueCommandStep(afterStep, (after) =>
-    prepareCalendarCompatibilitySource(deps, after, localization),
+    prepareComparisonCompatibilitySource(deps, after, localization),
   );
   const selection: WorkflowArtifactSelection =
     deps.scheduleComparisonPeriod === undefined

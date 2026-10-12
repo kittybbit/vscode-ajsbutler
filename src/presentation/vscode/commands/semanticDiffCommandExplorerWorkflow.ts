@@ -63,15 +63,11 @@ type ExplorerContextRegistrationDeps = ExplorerContextDeps &
     SemanticDiffCommandDeps,
     "registerSemanticDiffSourceCapture" | "unregisterSemanticDiffSourceCapture"
   >;
-type ExplorerScheduleOpenDeps = Pick<
-  SemanticDiffCommandDeps,
-  "openScheduleAwareExplorerSession" | "unregisterSemanticDiffSourceCapture"
->;
 type ExplorerDefaultOpenDeps = Pick<
   SemanticDiffCommandDeps,
   "openExplorer" | "unregisterSemanticDiffSourceCapture"
 >;
-type ExplorerOpenDeps = ExplorerScheduleOpenDeps & ExplorerDefaultOpenDeps;
+type ExplorerOpenDeps = ExplorerDefaultOpenDeps;
 export type ExplorerCommandDeps = Pick<
   SemanticDiffCommandDeps,
   | "getActiveEditor"
@@ -251,7 +247,7 @@ const buildPresentationArtifactsStep = (
   if (!adapter) {
     return failedStep(
       "display-failed",
-      "Semantic diff calendar artifacts could not be prepared.",
+      "Semantic diff presentation artifacts could not be prepared.",
       true,
     );
   }
@@ -373,20 +369,6 @@ const failedExplorerOpen = (): CommandFailure =>
     true,
   );
 
-const openScheduleAwareExplorer = async (
-  deps: ExplorerScheduleOpenDeps,
-  request: CommandReadyExplorer,
-): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> => {
-  try {
-    return readyStep(
-      await deps.openScheduleAwareExplorerSession!(request.presentation!),
-    );
-  } catch {
-    cleanupExplorerRequest(deps, request);
-    return failedExplorerOpen();
-  }
-};
-
 const openDefaultExplorer = async (
   deps: ExplorerDefaultOpenDeps,
   request: CommandReadyExplorer,
@@ -402,14 +384,6 @@ const openDefaultExplorer = async (
     return failedExplorerOpen();
   }
 };
-
-const openExplorerStep = async (
-  deps: ExplorerOpenDeps,
-  request: CommandReadyExplorer,
-): Promise<CommandStep<SemanticDiffExplorerSessionHandle>> =>
-  request.presentation && deps.openScheduleAwareExplorerSession
-    ? openScheduleAwareExplorer(deps, request)
-    : openDefaultExplorer(deps, request);
 
 const selectExplorerBefore = async (
   deps: Pick<
@@ -445,8 +419,7 @@ export const runExplorerCommand = async (
     readReportInputStep(request),
   );
   const reportData = await continueCommandStep(reportInput, (request) =>
-    deps.buildSemanticDiffPresentationArtifacts &&
-    deps.openScheduleAwareExplorerSession
+    deps.buildSemanticDiffPresentationArtifacts
       ? buildPresentationArtifactsStep(deps, request)
       : buildReportDataStep(deps, request),
   );
@@ -454,6 +427,6 @@ export const runExplorerCommand = async (
     buildExplorerContextStep(deps, request),
   );
   return continueCommandStep(context, (request) =>
-    openExplorerStep(deps, request),
+    openDefaultExplorer(deps, request),
   );
 };

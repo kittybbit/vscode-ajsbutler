@@ -20,7 +20,6 @@ export type SemanticDiffExplorerViewProps = Readonly<{
   language?: string;
   themeMode?: SemanticDiffExplorerContentsProps["themeMode"];
   outputAction?: (element?: HTMLElement) => void;
-  calendarAction?: (element?: HTMLElement) => void;
   action?: (actionId: string, element?: HTMLElement) => void;
   hostAnnouncement?: string;
   virtualizedScrollToIndex?: (index: number) => void;
@@ -35,7 +34,6 @@ export const SemanticDiffExplorerView = ({
   language = "en",
   themeMode = "light",
   outputAction,
-  calendarAction,
   action,
   hostAnnouncement,
   virtualizedScrollToIndex,
@@ -50,7 +48,6 @@ export const SemanticDiffExplorerView = ({
         language={language}
         themeMode={themeMode}
         outputAction={outputAction}
-        calendarAction={calendarAction}
         action={action}
         hostAnnouncement={hostAnnouncement}
         virtualizedScrollToIndex={virtualizedScrollToIndex}

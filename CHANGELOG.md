@@ -2,27 +2,21 @@
 
 ## Unreleased
 
+- Removed the Semantic Diff Schedule Impact Calendar and its related action.
+
 - Corrected UTF-16 source ranges and semantic diagnostic highlights for AJS
   definitions containing supplementary Unicode characters.
-- Restored keyboard navigation for Schedule Impact Calendar result rows,
-  including nested candidates.
 - Fixed the first Flow opening from Semantic Diff Explorer so validated diff
   marks appear without repeating the action.
-- Unified Semantic Diff Explorer and Schedule Impact Calendar MUI filter menus
+- Unified Semantic Diff Explorer MUI filter menus
   and opaque scrolling surfaces across themes and narrow layouts.
-- Removed internal Calendar identifiers from visible details and accessible
-  announcements while retaining unit names, paths, targets, and occurrences.
 - Added consistent localized date ranges and before/after comparison layouts
-  to Semantic Diff Explorer and Schedule Impact Calendar.
+  to Semantic Diff Explorer.
 - Kept each result label/value fact on its own readable row and simplified
   Explorer detail presentation.
-- Improved Semantic Diff Explorer and Schedule Impact Calendar result
+- Improved Semantic Diff Explorer result
   readability with shared MUI sections, metadata, status, and empty-state
   presentation.
-- Added a read-only, localized Schedule Impact timeline to Semantic Diff
-  Explorer for valid comparison periods, including supported runs, explicit
-  no-run or uncalculated outcomes, identity candidates, independent filters,
-  keyboard accessibility, and bounded large-result rendering.
 - Fixed Semantic Diff false-positive candidate changes when repeated nested
   `g`/`mg` job groups have distinct canonical paths, while preserving
   conservative ambiguity for duplicate paths.

@@ -1,1 +1,0 @@
-export { scheduleImpactCalendarEnglish } from "./scheduleImpactCalendar";

@@ -162,7 +162,6 @@ suite("Semantic Diff Explorer components", () => {
         language="en"
         themeMode="light"
         outputAction={(element) => actions.push({ id: "output", element })}
-        calendarAction={(element) => actions.push({ id: "calendar", element })}
       />,
     );
     const header = view.getByRole("banner");
@@ -188,13 +187,13 @@ suite("Semantic Diff Explorer components", () => {
       assert.strictEqual(row.querySelectorAll("dd").length, 1);
     });
     fireEvent.click(view.getByRole("button", { name: "Output" }));
-    fireEvent.click(view.getByRole("button", { name: "Schedule impact" }));
+    assert.strictEqual(
+      view.queryByRole("button", { name: "Schedule impact" }),
+      null,
+    );
     assert.deepStrictEqual(
       actions.map(({ id, element }) => [id, element?.tagName]),
-      [
-        ["output", "BUTTON"],
-        ["calendar", "BUTTON"],
-      ],
+      [["output", "BUTTON"]],
     );
     assert.ok(view.container.querySelector('[data-row-id="group:jobs"]'));
     assert.ok(view.container.querySelector('[data-record-id="job-a"]'));

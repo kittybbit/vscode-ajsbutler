@@ -32,10 +32,10 @@ const makeArtifacts = (): SemanticDiffPresentationArtifacts => ({
   scheduleImpact: { kind: "unavailable", reason: "not-requested" },
 });
 
-suite("Semantic Diff command calendar adapter", () => {
-  test("invokes the adapter and schedule-aware opener once with one context", async () => {
-    const beforeUri = vscode.Uri.parse("untitled:before-calendar.ajs");
-    const afterUri = vscode.Uri.parse("untitled:after-calendar.ajs");
+suite("Semantic Diff command presentation adapter", () => {
+  test("invokes the adapter and ordinary Explorer opener once with one context", async () => {
+    const beforeUri = vscode.Uri.parse("untitled:before-definition.ajs");
+    const afterUri = vscode.Uri.parse("untitled:after-definition.ajs");
     const period = { from: "2026-04-01", to: "2026-05-01" };
     const observed: {
       inputs: unknown[];
@@ -116,9 +116,9 @@ suite("Semantic Diff command calendar adapter", () => {
         observed.events.push("capture");
         return beginCapture(input);
       },
-      openScheduleAwareExplorerSession: async (receivedArtifacts) => {
+      openExplorer: async (receivedContext) => {
         observed.events.push("open");
-        observed.contexts.push(receivedArtifacts.context);
+        observed.contexts.push(receivedContext);
         return handle;
       },
       registerSemanticDiffSourceCapture: (context, entry) => {

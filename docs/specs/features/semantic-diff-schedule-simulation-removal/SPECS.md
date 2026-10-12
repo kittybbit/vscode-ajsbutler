@@ -21,8 +21,7 @@ component responsibilities.
   comparison base: `origin/main`.
 - Existing contracts: [compare definitions](../../../requirements/use-cases/uc-compare-ajs-definitions.md),
   [build semantic diff](../../../requirements/use-cases/uc-build-semantic-diff.md),
-  [present semantic diff report](../../../requirements/use-cases/uc-present-semantic-diff-report.md),
-  and the retiring [schedule impact](../../../requirements/use-cases/uc-present-schedule-impact.md).
+  [present semantic diff report](../../../requirements/use-cases/uc-present-semantic-diff-report.md).
 - JP1/AJS basis: existing JP1/AJS3 v13 definition semantics and
   [parameter interpretation rules](../../../requirements/domain-rules/interpret-jp1-parameters.md).
   This feature withdraws prediction capability; it introduces no replacement

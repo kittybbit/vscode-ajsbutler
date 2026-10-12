@@ -9,13 +9,6 @@ import { buildSemanticDiffPresentationArtifactsFromComparison } from "../../appl
 import { compareSemanticDiffWithArtifacts } from "../../application/semantic-diff/compareSemanticDiffWithArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
-import { createScheduleAwareExplorerSession } from "../../bootstrap/extension/createScheduleAwareExplorerSession";
-import { ScheduleImpactSidecarRegistry } from "../../bootstrap/extension/scheduleImpactSidecarRegistry";
-import { createScheduleImpactCalendarBridge } from "../../presentation/webview/editor/scheduleImpactCalendar/scheduleImpactCalendarBridge";
-import {
-  createScheduleImpactCalendarFailureMessage,
-  createScheduleImpactCalendarSessionMessage,
-} from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarTransport";
 import { parseSchedulePeriod } from "../../domain/schedule/SchedulePeriod";
 import {
   collectUniqueAjsUnits,
@@ -451,7 +444,7 @@ export async function run(): Promise<void> {
     unregisterSemanticDiffSourceCapture: () => {
       web8Unregistrations += 1;
     },
-    openScheduleAwareExplorerSession: async () => {
+    openExplorer: async () => {
       if (web8OpenShouldFail) throw new Error("WEB-8 open failure");
       web8Opened += 1;
       return {
@@ -501,182 +494,6 @@ export async function run(): Promise<void> {
   }
   reportWebScenario(
     `WEB-8 passed: bindings=${web8Bindings} registrations=${web8Registrations} opened=${web8Opened} rollbacks=${web8Releases}`,
-  );
-
-  const web9Messages: unknown[] = [];
-  const web9Listeners = new Set<(event: MessageEvent) => void>();
-  let web9Adds = 0;
-  let web9Removes = 0;
-  const web9Target = {
-    addEventListener: (
-      _type: "message",
-      listener: (event: MessageEvent) => void,
-    ) => {
-      web9Adds += 1;
-      web9Listeners.add(listener);
-    },
-    removeEventListener: (
-      _type: "message",
-      listener: (event: MessageEvent) => void,
-    ) => {
-      web9Removes += 1;
-      web9Listeners.delete(listener);
-    },
-  };
-  const dispatchWeb9Message = (data: unknown): void => {
-    web9Listeners.forEach((listener) => listener({ data } as MessageEvent));
-  };
-  const web9Bridge = createScheduleImpactCalendarBridge(
-    "web-9-session",
-    { postMessage: (message: unknown) => web9Messages.push(message) },
-    web9Target,
-  );
-  let web9Received = 0;
-  const stopWeb9Listening = web9Bridge.onMessage(() => {
-    web9Received += 1;
-  });
-  const web9ReadyId = web9Bridge.sendReady();
-  const web9RefreshId = web9Bridge.sendRefresh();
-  const web9Session = createScheduleImpactCalendarSessionMessage(
-    "web-9-session",
-    web9ReadyId,
-    {} as never,
-  );
-  dispatchWeb9Message({ type: "malformed" });
-  dispatchWeb9Message({ ...web9Session, sessionId: "other-session" });
-  dispatchWeb9Message(web9Session);
-  dispatchWeb9Message(web9Session);
-  const web9Failure = createScheduleImpactCalendarFailureMessage(
-    "web-9-session",
-    web9RefreshId,
-    { code: "host-disposed", detail: null },
-  );
-  dispatchWeb9Message(web9Failure);
-  dispatchWeb9Message(web9Failure);
-  stopWeb9Listening();
-  dispatchWeb9Message({ ...web9Failure, requestId: web9RefreshId + 1 });
-  web9Bridge.dispose();
-  web9Bridge.dispose();
-  dispatchWeb9Message({ ...web9Failure, requestId: web9RefreshId + 2 });
-  if (
-    web9ReadyId !== 1 ||
-    web9RefreshId !== 2 ||
-    web9Messages.length !== 2 ||
-    web9Received !== 2 ||
-    web9Adds !== 1 ||
-    web9Removes !== 1 ||
-    web9Bridge.sendReady() !== 0 ||
-    web9Bridge.sendRefresh() !== 0
-  ) {
-    throw new Error(
-      `WEB-9 bridge lifecycle failed: ${JSON.stringify({
-        readyId: web9ReadyId,
-        refreshId: web9RefreshId,
-        messages: web9Messages.length,
-        received: web9Received,
-        adds: web9Adds,
-        removes: web9Removes,
-      })}`,
-    );
-  }
-  reportWebScenario(
-    `WEB-9 passed: requests=${web9Messages.length} accepted=${web9Received} adds=${web9Adds} removes=${web9Removes}`,
-  );
-
-  const createWeb10Panel = () => {
-    const listeners = new Set<() => void>();
-    let disposed = false;
-    return {
-      onDidDispose: (listener: () => void): vscode.Disposable => {
-        listeners.add(listener);
-        return { dispose: () => listeners.delete(listener) };
-      },
-      dispose: (): void => {
-        if (disposed) return;
-        disposed = true;
-        listeners.forEach((listener) => listener());
-      },
-    } as unknown as vscode.WebviewPanel;
-  };
-  const web10Context = {} as SemanticDiffOutputContext;
-  const web10Sidecar = {} as never;
-  const web10Artifacts = {
-    context: web10Context,
-    scheduleImpact: { kind: "available", sidecar: web10Sidecar },
-  } as unknown as SemanticDiffPresentationArtifacts;
-  const web10Registry = new ScheduleImpactSidecarRegistry();
-  const web10ParentPanel = createWeb10Panel();
-  let web10RegisteredBeforeOpen = false;
-  let web10Releases = 0;
-  const web10Parent = {
-    sessionId: "web-10-session" as never,
-    panel: web10ParentPanel,
-    dispose: () => web10ParentPanel.dispose(),
-  } as SemanticDiffExplorerSessionHandle;
-  const web10Open = createScheduleAwareExplorerSession({
-    sidecarRegistry: web10Registry,
-    releaseCalendarParent: () => {
-      web10Releases += 1;
-    },
-    openExplorer: async (receivedContext) => {
-      web10RegisteredBeforeOpen =
-        web10Registry.resolve(receivedContext) === web10Sidecar;
-      return web10Parent;
-    },
-  });
-  const web10Result = await web10Open(web10Artifacts);
-  web10ParentPanel.dispose();
-  web10Result.dispose();
-  web10Result.dispose();
-  if (
-    !web10RegisteredBeforeOpen ||
-    web10Registry.size !== 0 ||
-    web10Releases !== 1
-  ) {
-    throw new Error(
-      `WEB-10 successful disposal failed: ${JSON.stringify({
-        registeredBeforeOpen: web10RegisteredBeforeOpen,
-        registrySize: web10Registry.size,
-        releases: web10Releases,
-      })}`,
-    );
-  }
-
-  const web10FailureRegistry = new ScheduleImpactSidecarRegistry();
-  let web10FailureRegistered = false;
-  const web10FailureOpen = createScheduleAwareExplorerSession({
-    sidecarRegistry: web10FailureRegistry,
-    openExplorer: async (receivedContext) => {
-      web10FailureRegistered =
-        web10FailureRegistry.resolve(receivedContext) === web10Sidecar;
-      throw new Error("WEB-10 open failure");
-    },
-  });
-  await Promise.resolve(
-    web10FailureOpen(web10Artifacts).then(
-      () => {
-        throw new Error("WEB-10 failure unexpectedly succeeded");
-      },
-      (error: unknown) => {
-        if (
-          !(error instanceof Error) ||
-          error.message !== "WEB-10 open failure"
-        ) {
-          throw error;
-        }
-      },
-    ),
-  );
-  if (!web10FailureRegistered || web10FailureRegistry.size !== 0) {
-    throw new Error(
-      `WEB-10 rollback failed: ${JSON.stringify({
-        registered: web10FailureRegistered,
-        registrySize: web10FailureRegistry.size,
-      })}`,
-    );
-  }
-  reportWebScenario(
-    `WEB-10 passed: registered=${web10RegisteredBeforeOpen ? 1 : 0} releases=${web10Releases} rollback=${web10FailureRegistry.size === 0 ? 1 : 0}`,
   );
 
   const invalidDocument = await vscode.workspace.openTextDocument({
