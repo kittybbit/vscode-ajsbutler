@@ -17,17 +17,6 @@ entry conditions that make planning each item useful.
 
 ## Verification Follow-ups
 
-### Dependabot Post-Publication Verification
-
-- Owner: Security/tooling maintainers.
-- Scope: re-query GitHub Dependabot after the completed dependency graph is
-  published to the default branch, covering the affected, current, and newly
-  opened alert set.
-- Done condition: record the complete published-graph alert result and its
-  explicit disposition. Route any unresolved or new affected alert to the
-  security owner or Replanning; do not dismiss, waive, or claim an alert was
-  already resolved.
-
 ### WebAPI Generated Fixture Reproducibility
 
 - Owner: Existing WebAPI maintainer.
