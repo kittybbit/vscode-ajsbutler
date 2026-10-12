@@ -4,16 +4,16 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Current plan: PLAN_APPROVED Chromium host-association delta; affected2A paused.
+- Current plan: SLICE_APPROVED Slice2A; focused completion commit next.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user;
   no custom development startup/watcher/wrapper mechanism or security waiver.
-- Next: focused approved host-association plan commit, then resume2A.
+- Next: focused approved Slice2A completion commit.
   Root candidate separate;2R unauthorized; no changed validation approval inferred.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED replan; affected2A Chromium paused;
+- Lifecycle state: SLICE_APPROVED approved2A;
   completed1/N remain SLICE_COMMITTED.
 - Selected feature/base: `dependabot-post-publication-verification`,
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`, fixed
@@ -44,6 +44,30 @@
   `/tmp/ajsbutler-dependabot-plan-review.json`, identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
 
+## Slice2A Completion Approval
+
+- Status: Approved; two distinct independent implementation reviews Ready.
+- Approved at: approved in current conversation on 2026-10-12 after Main’s
+  explicit request for Slice2A completion and focused commit.
+- Approval metadata: `/tmp/ajsbutler-slice2a-completion-approval/record.json`.
+- Commit status: Pending focused completion commit.
+- Approved completion scope: reviewed Slice2A dependency remediation and actual
+  bundled VSIX compatibility only; no security-clean,2R or publication approval.
+- Exact completion paths: package.json, pnpm-workspace.yaml, pnpm-lock.yaml,
+  .vscodeignore, selected TASKS.md and TRACEABILITY.md only.
+- Independent reviews: `/tmp/ajsbutler-dependabot-slice2a-review1.json` and
+  `/tmp/ajsbutler-dependabot-slice2a-review2.json`; no actionable Findings.
+- Reviewed substantive identity:
+  `b760b2a87811f8633345cdcf89ef564f7a450748905ad70367a3bae67f683aac`.
+- Reviewed complete identity:
+  `65d3a6cd592ba2fcab919833ed615f67da1385aa8b5e2df8ac4735c91a9836d4`.
+- Reviewed whole patch SHA256:
+  `d91a7d3b63b63f53baecf17428997d78f76b4fc9ead52c9c9da615c40661e2ea`.
+- Producer: `/tmp/ajsbutler-dependabot-slice2a-evidence/record.json`.
+- Separate Main state metadata: `/tmp/ajsbutler-slice2a-ready-metadata/record.json`.
+- Existing High braces remains owned by blocked2R; six inherited exceptions retain
+  removal conditions. No global nodebrew mutation or merge/publication inferred.
+
 ## Chromium verification-host association delta approval
 
 - Status: Approved; independent review Ready without actionable Findings.
@@ -55,7 +79,11 @@
 - Implementation paths remain package.json, pnpm-workspace.yaml, pnpm-lock.yaml,
   .vscodeignore, selected TASKS.md and TRACEABILITY.md only.
 - Approval metadata: `/tmp/ajsbutler-web-host-association-approval-metadata/record.json`.
-- Focused delta planning commit required before affected validation resumes.
+- Commit: `6189a1803ef8219f08d881e8d86af791bcdc426e`; exact three-path
+  staged patch and cached whitespace checks passed.
+- Resulting-state metadata:
+  `/tmp/ajsbutler-web-host-association-plan-commit-metadata/record.json`.
+- Approved2A implementation and validation may resume.
   Prior exact-one approval/commit and failed execution remain historical.
   Completion,2R implementation,publication and global nodebrew changes excluded.
 - Independent Plan Review: `/tmp/ajsbutler-dependabot-web-host-association-plan-review.json`.
@@ -423,7 +451,7 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
 
 ## Slice 2A: Fix published vulnerable families and prove bundled compatibility
 
-- Lifecycle state: IMPLEMENTING. Value: reduce fixable vulnerability paths and
+- Lifecycle state: SLICE_APPROVED. Value: reduce fixable vulnerability paths and
   forced resolutions, with independently verified actual VSIX compatibility.
 - Dependencies: completed1/N and approved replan commit. Fresh baseline product
   identity is N3984d244; feature comparison base
@@ -440,11 +468,11 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   beside existing webpack.config.js; no other ignore edits or config deletion.
   Unapproved one-line preview, not a product change during Replanning:
 
-  ~~~diff
+  ```diff
    webpack.config.js
   +webpack.web-test.config.js
    pnpm-lock.yaml
-  ~~~
+  ```
 
 - Direct bounds: @vscode/vsce4.0.0, css-loader7.1.5, typescript-eslint8.71.1,
   webpack5.111.1, terser-webpack-plugin5.6.1, original declaration ranges above
@@ -516,7 +544,7 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   resolver/startup launcher, repository path additions or product helper copies.
 - Exact temporary verification manifest (not packaged, not repository input):
 
-  ~~~json
+  ```json
   {
     "name": "ajsbutler-packaged-verification",
     "publisher": "local-evidence",
@@ -526,22 +554,24 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
     "extensionKind": ["workspace"],
     "activationEvents": []
   }
-  ~~~
+  ```
 
   No main, contributions, commands, capabilities/permissions, dependencies or
   extension dependencies. ID local-evidence.ajsbutler-packaged-verification must
   differ from kittybbit.vscode-ajsbutler and every discovered extension identity.
   Explicit test-time activation may activate both; no automatic feature events.
+
 - Exact noop.js has only browser-safe empty standard exports, no import/dependency:
 
-  ~~~js
+  ```js
   exports.activate = function () {};
   exports.deactivate = function () {};
-  ~~~
+  ```
 
   Test entry contains retained compiled smoke plus evidence assertions, exports.run
   only. No source/npm/SDK/node_modules/symlink fallback in container/product child;
   test SDK launch dependencies remain outside container. Retain all helper bytes.
+
 - Invoke standard SDK scanner and require exactly these two development IDs/roots;
   distinguish builtin extensions. Verify test URI nests under verification root
   at /static/devextensions/verification/packaged-web-tests.js, selected registered
@@ -1085,7 +1115,7 @@ is inferred from the user's approved Node24 direction and instruction to proceed
   Registry/installed metadata proves identical runtime dependency ranges. This
   retains the failing collection outcome; no VSIX or packaging pass is inferred.
 - N compatibility/no-regression acceptance met; no N blocking decision. Existing
- 25 audit advisories and actual VSIX/security requirements remain owned blockers
+  25 audit advisories and actual VSIX/security requirements remain owned blockers
   for later Slice2. Main routes two independent reviews of the exact substantive
   patch plus metadata; both Ready and explicit Completion Approval precede commit.
 
@@ -1194,3 +1224,90 @@ is inferred from the user's approved Node24 direction and instruction to proceed
   Loop classification; inherited SDK host-builtin coverage still needs actual
   stable/minimum proof when artifact verification resumes. Completed1/N, approved
   dependency intent, root candidate and separately blocked2R remain preserved.
+
+## Slice2A implementation observations
+
+- State: IMPLEMENTED; validation complete, two independent reviews pending.
+  Approved six paths only; completed1/N, root candidate and blocked2R preserved.
+- Evidence owner: implementer; `/tmp/ajsbutler-dependabot-slice2a-evidence/`.
+  Baseline products match completed N3984d244; fresh Node24.21/pnpm10.33 install
+  and frozen installation pass. Exact five approved direct targets resolve;
+  Prism5.16, Node>=24.18, VSCode^1.75, scripts, patches and permissions unchanged.
+- Override assessment: `override-assessment.json`,36 decisions/142 final parent
+  contexts/70 registry identities, with exact declared ranges, paths, historical
+  API/security purpose, owner and removal conditions.30 redundant selectors removed.
+  Six inherited exceptions remain: faker5 selector preserves the patched postman
+  faker10 API; uuid8 preserves postman's legacy exact request; lodash preserves
+  postman's exact request securely; js-yaml preserves legacy parser3-to4 exception;
+  Mocha diff7-to8 and serialize-javascript6-to7 remain secure inherited API pins.
+  Targets are unchanged from N. Parent range exceptions are explicit, not ordinary
+  compatible resolutions. Removal requires secure upstream parent/API alternatives
+  and matching regression proof; security/tooling maintainers via Main own them.
+- Eight floors: fast-uri3.1.8, morgan1.12.1, brace-expansion1.1.21/5.0.12,
+  postcss-selector-parser7.1.6, source-map-js1.2.2 and shell-quote1.12.0;
+  markdown-it/undici vulnerable paths are eliminated by VSCE4. Direct css-loader,
+  typescript-eslint, webpack and terser upgrades support ordinary secure build/lint
+  resolution and redundant override removal. No transitive direct declaration.
+- Fresh all-severity audit25→1; residual GHSA-vfj7-8cjw-p6xm braces3.0.3 is identical
+  to baseline in all fields and Prism/chokidar path. No new advisory or low/moderate/
+  critical finding. Both moderate audits fail1: this is risk reduction, never a
+  security-clean result or waiver. Separately blocked2R retains ownership.
+- Production build, compilation, both test bundles, OpenAPI and standard Prism
+  sample/auth/validation/CORS/options/watch/reload/error/shutdown checks pass.
+  Desktop1200 includes zero-exception architecture and package manifest checks.
+  Repo Chromium and minimum1.75 smoke pass; original minimum startup failed from
+  > 103-character IPC path. Standard SDK short temporary profile corrects only
+  > environment, with the same child repository and existing selected test entry.
+- Standard VSCE --no-dependencies baseline/final packaging creates CRC-valid
+  actual archives27→26 entries. Sole removed entry is webpack.web-test.config.js;
+  changed entries are package manifest and six attributable production bundles.
+  All other assets/license/localization/grammar/readme bytes match. Baseline
+  tooling cleanliness remains a known negative; final has no tooling/source/tests/
+  node_modules. Normal collector ELSPROBLEMS failures remain historical failures;
+  selected bundled mode is separately approved and supported by closure evidence.
+- Full webpack inventories: desktop vscode plus os/crypto/assert/util/https host
+  builtins; web vscode only; webviews none. No external npm, dynamic context or
+  unresolved-import warnings. HTTPS is unchanged SDK1.5.2 and proven available on
+  actual stable/minimum hosts. Only existing performance warnings remain.
+- Actual baseline/final VSIX stable/minimum hosts pass using exact artifact root.
+  Chromium uses approved standard SDK two-child container: unchanged actual
+  extension and distinct minimal verification extension. Exact two scanned URIs,
+  nested test URI host association, testing worker observation, actual product
+  browser routing/activation and real command/hover/table/flow observations pass.
+  All actual child payload bytes are checked through HTTP-backed VS Code fs and
+  container pre/post inventories match. Product worker token is not invented;
+  injected WEB7–15 cases are separately logged. Both failed earlier layouts stay
+  retained. No production helper, source fallback, resolver or custom server.
+- Solution Shape: existing pnpm/VSCE/webpack/Prism and standard VS Code SDKs own
+  resolution, build, mock and verification. Temporary verification extension is
+  retained evidence only, outside product. No material abstraction, runtime import,
+  ownership, architecture exception or user-visible behavior change. Architecture
+  tests are mechanical evidence; independent reviewers judge semantic readiness.
+- README/CHANGELOG unchanged: dependency/tooling remediation preserves extension
+  commands and compatibility. Final quality/metadata results are recorded below
+  after scans stabilize; no Completion Approval, staging, commit or publication.
+
+### Slice2A final validation metadata
+
+- State transition: PLAN_COMMITTED → IMPLEMENTING → IMPLEMENTED → SLICE_READY
+  → SLICE_APPROVED. Both independent reviews Ready; Completion Approval recorded,
+  focused completion commit pending.
+- Retained complete evidence: `/tmp/ajsbutler-dependabot-slice2a-evidence/record.json`.
+  Substantive full-repository identity:
+  `b760b2a87811f8633345cdcf89ef564f7a450748905ad70367a3bae67f683aac`.
+  Official scans and passed product/artifact checks bind their actual inputs;
+  this state/result annotation is separately validated metadata.
+- Qlty0.645.0: equal full730 check/437 smells path inventories and configuration;
+  official check4→3, zero new records; smells151 records identical ignoring order,
+  no mapped adverse movement. Full check exit1 retains three inherited findings;
+  final aggregate exit0. Only approved TASKS formatting changed; affected full
+  check renewed, unchanged source smells reused. Generated output symlinks are
+  excluded solely in disposable snapshots; original observations stay retained.
+- All Slice2A dependency/override/no-regression/artifact/compatibility acceptance
+  met, including baseline/final actual VSIX stable/minimum/Chromium checks and
+  standard final listing matching production bytes. Standard archive naming and
+  README relative-link rewriting are recorded; baseline/final README bytes match.
+- Compatibility risks: six inherited cross-range exceptions retain their owned
+  removal conditions; no new API/major coercion. Unchanged braces High remains
+  blocked2R, not security-clean or waived. No source/fixture/runtime/test/script/
+  workflow change, global nodebrew mutation, publication, staging or commit.

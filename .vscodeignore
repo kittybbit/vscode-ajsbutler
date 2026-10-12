@@ -49,6 +49,7 @@ eslint.config.mjs
 tsconfig.json
 tsconfig.test.json
 webpack.config.js
+webpack.web-test.config.js
 pnpm-lock.yaml
 *.log
 *.tmp

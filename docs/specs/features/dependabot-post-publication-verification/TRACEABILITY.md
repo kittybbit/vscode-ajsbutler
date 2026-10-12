@@ -135,3 +135,30 @@ Desktop layout, both implementation reviews and all graph/audit/quality/security
 gates unchanged. Prior exact-one approval stays historical; its failure remains
 failed. Baseline/final Chromium renewed after review/approval; unrelated valid
 facts reused by identity. No new product paths or custom development mechanisms.
+
+## Slice2A implementation mapping
+
+- Direct-upgrade/override contracts: five approved declarations and30 redundant
+  override removals; six owned inherited exceptions with explicit ranges/API/
+  security/removal conditions in retained `override-assessment.json`.
+- Eight security families: secure final lock floors or VSCE4 path elimination;
+  fresh25→1 audit retains unchanged braces under2R. No security-clean claim.
+- Compatibility/behavior: unchanged VSCode^1.75 and production boundaries;
+  desktop1200, minimum/Chromium, build/bundles/OpenAPI/standard Prism pass.
+- Artifact contract: actual baseline/final standard VSCE archives and full webpack
+  externals/resource inventories; final removes exactly approved tooling entry.
+  Stable/minimum actual-artifact roots and standard two-extension Chromium prove
+  actual loaded URI/entry/resources/activation/real commands/hover/viewers.
+  Testing-worker observation and injected smoke remain distinct product evidence.
+- Evidence: `/tmp/ajsbutler-dependabot-slice2a-evidence/`; original failures,
+  baseline negative tooling and normal collector outcomes preserved. Final quality,
+  complete identities and independent reviews remain separate gates.
+
+### Slice2A final result metadata
+
+- SLICE_APPROVED; both independent reviews Ready and Completion Approval recorded.
+  Full730/437 Qlty inventories agree; check4→3, smells151 unchanged and aggregate0.
+  Exact six-path patch/evidence identities are retained in Slice2A record.json.
+- Scope acceptance is dependency risk reduction and verified actual bundled VSIX
+  compatibility. Unchanged braces remains blocked2R; overall security/publication
+  gates and Slice3 prerequisites remain intact.
