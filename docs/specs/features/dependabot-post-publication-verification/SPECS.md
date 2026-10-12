@@ -109,10 +109,11 @@ or waive any security gate.
 
 ## Packaged Chromium evidence boundary
 
-Standard test-web may serve an isolated parent containing the unchanged archive
-extension child and manifest-free external verification sibling. Require exactly
-one selected development extension, full artifact hashes before/after and exact
-HTTP-to-artifact manifest/browser/resource bytes. Desktop retains artifact-only
-root. No helper/source/npm fallback in archive or extension child; real runtime
-observations stay distinct from injected cases. Baseline/final Chromium both need
-fresh proof after reviewed approval; prior baseline failure remains negative.
+Standard test-web serves exactly two isolated development-extension children:
+unchanged actual product VSIX and a distinct minimal verification Web extension
+whose nested test URI selects standard browser host routing. Require scanner IDs,
+testing-runtime worker observation, product browser routing/actual activation and
+behavior, full product pre/post archive hashes and HTTP payload/resource matching.
+Desktop remains artifact-only root. No helper/source/npm fallback in product,
+production hooks or invented worker identity; injected cases stay distinct.
+Baseline/final Chromium need new actual proof; both prior failures remain negative.

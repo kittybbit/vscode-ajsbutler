@@ -118,12 +118,20 @@ unexecuted observations unknown. Inherited SDK desktop HTTPS enumeration permits
 no other external. R5/R6/security and completed gates unchanged; reuse valid
 baseline by identity, renew affected final proof and both implementation reviews.
 
-## Pending packaged Chromium layout delta
+## Pending Chromium verification-host association delta
 
-R7 Chromium uses existing test-web0.0.80 standard containing-directory scan/static
-mount: exact unchanged VSIX extension child plus manifest-free verification sibling.
-One selected extension identity, child pre/post inventory/hash and SDK HTTP mount/
-manifest/browser/resource byte mapping prove artifact use. Desktop roots unchanged.
-Renew baseline/final Chromium only and any truly affected proof; matching unrelated
-facts reused. Real activation/commands/hover/viewers/resources and separated injected
-WEB7–15 remain mandatory. No product paths/approval/security changes inferred.
+R7 uses standard test-web0.0.80 scanner/mount plus pinned browser test-
+location host
+selection: exactly product artifact and distinct minimal verification Web
+extension.
+Nested test URI, exact two development IDs/roots, observable testing worker and
+product browser-only routing/actual activation/commands/resources establish
+separate
+proofs; no invented direct production worker token or activation-only
+substitution.
+Product pre/post archive hashes and complete HTTP payload/resource mapping
+required.
+Desktop layout, both implementation reviews and all graph/audit/quality/security
+gates unchanged. Prior exact-one approval stays historical; its failure remains
+failed. Baseline/final Chromium renewed after review/approval; unrelated valid
+facts reused by identity. No new product paths or custom development mechanisms.
