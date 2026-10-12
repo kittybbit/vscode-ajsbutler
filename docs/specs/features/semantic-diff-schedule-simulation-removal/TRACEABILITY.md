@@ -18,7 +18,18 @@
 
 <!-- markdownlint-enable MD013 -->
 
+S2 Registry amendment maps R3/R8 to removal of its obsolete schedule leaf union
+and target/side branches, preserving ordinary and attribute source mapping.
+Existing Registry, Source/Flow/Panel and full host checks retain coverage;
+exact amendment evidence: `/tmp/ajs-removal-s2-registry-replan/evidence.json`.
+
 S1 implementation maps R3, R7, R8 and R9 to the calendar deletion inventory,
 ordinary Explorer source/context integration and retained strict-action tests.
 Validation artifacts: `/tmp/ajs-removal-s1/evidence.json`. S2 requirements
 remain pending their dependent implementation gate.
+
+S2 residual amendment maps R3/R4/R8/R9 to removal of the dead schedule leaf rank
+and README period/prediction/calendar promises. Retained Explorer ordering and
+review actions use existing projection/host tests; README needs explicit Markdown,
+local-link and structure coverage in the unchanged broader durable validation tier.
+Combined amendment evidence: `/tmp/ajs-removal-s2-residual-replan/evidence.json`.

@@ -15,12 +15,14 @@
 
 ## Current state and gate
 
-- Lifecycle state: SLICE_APPROVED.
-- Next operation: focused S1 completion commit, then S2 implementation.
+- Lifecycle state: PLAN_APPROVED.
+- Next operation: focused combined replan commit, then remaining S2 corrections
+  and final validation.
 - Selection: `semantic-diff-schedule-simulation-removal`.
 - Branch/base: `codex/semantic-diff-schedule-simulation-removal` / `origin/main`.
 - Fixed base and planning HEAD: `0090b728977d55d4127bdad149f74f598f0b2fd5`.
-- Slice states: S1 is SLICE_APPROVED; S2 is PLAN_APPROVED.
+- Slice states: S1 is SLICE_COMMITTED; affected S2 plan is PLAN_APPROVED. Existing
+  S2 implementation edits remain under the original approved unchanged scope.
 - Plan review: Ready for approval; no Findings. Reviewed plan identity:
   `d4f41dc4d222a702225db6ac5749486c1bf5f6546579d176c649a91573da8f20`.
   Independent reviewer: `schedule_removal_plan_review` in current conversation.
@@ -46,8 +48,119 @@
     `f01a37e4da5a722be3a681bbb08e57e0f0ef24e84a04974fa952874757cf3fc2`.
   - Approval provenance: human response to Main's S1 completion/commit approval
     request in current conversation; exact reviewed scope above.
-  - Commit status: pending focused completion commit.
+  - Commit status: committed as `618e7ec85b9b8226cc5952d29a883aaf749bf408`;
+    exact 73 approved paths, staged diff check passed.
 - Closure Approval: none.
+
+## S2 Registry approval-boundary amendment
+
+- Trigger: existing S2 leaf-contract removal makes Registry comparisons at
+  lines 171 and 216 fail TS2367 in `/tmp/ajs-removal-s2/compile-2.log`.
+  Registry was an S1 path but was omitted from S2's exact modification list.
+  The Correction Loop cannot authorize a path outside that slice boundary.
+- Delta: add only
+  `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry.ts`
+  to S2 modifications. Remove `"schedule"` from `ActionLeaf`'s Extract union;
+  remove the `leaf.kind === "schedule"` disjunct from `leafTarget`, preserving
+  the limitation null-target rule; replace the schedule-specific side ternary
+  in `actionMetadataForLeaf` with `leaf.targetSide`.
+- Acceptance and Solution Shape: existing presentation-owned session/action
+  metadata owner, layers and contracts stay the same. Preserve ordinary tree
+  traversal, unit/jobnet/attribute targets, attribute `parameterKey`, record
+  occurrence, before/after side, exact-session membership and source/context
+  lifetime. No new capability, type family, wrapper or dependency is added.
+- Transitive coverage: existing Registry session/source snapshot tests and
+  existing Source/Flow/Panel boundary tests remain required through `test:full`;
+  retain ordinary and attribute source mapping and stale/session-mismatch
+  rejection. Use already-approved Panel tests for any necessary assertion
+  adjustments; no additional test path or required command is introduced.
+  Rerun affected compile/host/boundary checks after approved correction, then
+  satisfy the unchanged final S2 validation set including both hosts,
+  minimum VS Code, architecture and qlty.
+- Preserved gates: S1 commit `618e7ec85b9b8226cc5952d29a883aaf749bf408`, both
+  S1 Ready reviews, Completion Approval and matching S1 evidence remain valid.
+  Original S2 reviewed/approved scope and planning commit remain recorded above;
+  this amendment does not rewrite their Human Approval provenance.
+- Renewal required: original plan review and Human Approval do not cover the
+  added S2 path. Amendment review: Ready, no Findings, from
+  `schedule_removal_plan_review` in current conversation; plan identity
+  `b03cc10d9d1b8f34a7428f2e74caec7c39e59775595fb25b53b1cbc52afc784c`,
+  amendment SHA256
+  `02e2bb15ab0e2185e30bb5f5971f954147d3d8e63031c12619fad720cb222582`.
+  Amendment Human Approval: Approved; Approved at: approved in current
+  conversation, 2026-10-13. Approved scope: exact Registry path and three
+  obsolete schedule-leaf removals above, plus TASKS.md/TRACEABILITY.md amendment.
+  Provenance: human response to Main's exact one-file addition approval request.
+  Amendment commit: none; focused replan commit precedes correction.
+  Unchanged S2 scope/decisions need no new product decision.
+- Evidence freshness: preserve matching S2 baseline observations and unchanged
+  per-check results; they do not prove the unedited Registry correction. New
+  path-set binding and post-correction final checks must identify the added
+  path and final content. S2 final review/readiness cannot reuse an old scope
+  identity; no completed S2 review or Completion Approval is claimed.
+- Documentation validation and exact amendment patch:
+  `/tmp/ajs-removal-s2-registry-replan/evidence.json`. Initial plan/intake
+  discovery is reused outside this omission; no product validation is claimed
+  by the planner.
+
+## S2 complete residual-boundary amendment
+
+- Trigger/discovery: reuse the implementer's exhaustive residual inventories,
+  `/tmp/ajs-removal-s2/residual-inventory.txt` and
+  `/tmp/ajs-removal-s2/residual-wide.txt`. Besides the already-reviewed and
+  approved Registry omission, they identify only two additional omitted paths:
+  `src/application/semantic-diff/semanticDiffExplorerProjectionTree.ts` and
+  `README.md`. Other matches are in existing S2 scope, retained schedule
+  interpretation/list/diagnostics/Flow badges/attribute rules, or historical
+  CHANGELOG evidence; no other cleanup path is added.
+- ProjectionTree delta: remove only `["schedule", 4]` from `leafKindOrder`
+  (currently line 154). Keep `change`, `confirmation`, `unsupported` and
+  `limitation` ranks 0 through 3 and existing label, record and stable-value
+  tie-breaks unchanged. Application continues to own deterministic tree
+  projection; there is no new contract, semantic owner or abstraction.
+- README delta: remove only the sentence offering no-period or `YYYY-MM-DD`
+  half-open comparison periods from the Semantic Diff introductory paragraph
+  (currently line 51), and the four prediction/calendar paragraphs beginning
+  `Semantic Diffのスケジュール比較では` through the paragraph ending
+  `スケジュール影響ビューは作成されません。` (currently lines 53 through 76).
+  Preserve file/Git HEAD definition review, captured-source and Flow navigation,
+  read-only Explorer, accessibility, Summary/Full/Audit/JSON and explicit
+  copy/save wording. Do not rewrite unrelated README sections or add replacement
+  execution predictions. No heading or link target is deleted by this cleanup.
+- Durable Documentation Gate: README currently promises removed user behavior;
+  correcting that product overview is reusable current knowledge in its proper
+  owner. Remove only obsolete promises, without duplicating use-case contracts
+  or adding temporary implementation history. The previous S2 claim that README
+  needed no edit was incorrect and is replaced below.
+- Acceptance/coverage: R3/R4/R8/R9 now include absence of the dead leaf rank and
+  README simulation promises while all retained review actions and ordering
+  remain stable. Existing S2-approved Explorer projection/component tests cover
+  ordering and retained leaves; no additional test path is needed. Add README
+  explicitly to targeted Markdown lint (the `lint:md` script does not include
+  it), local links/anchors and heading/structure checks. The existing mixed
+  durable/code qlty snapshots/aggregate, host checks and removal-inventory review
+  already cover the broader validation tier; required product commands and
+  strategy do not otherwise change.
+- Gates: the Registry Ready review and human approval recorded above remain
+  valid for their exact one-file scope. Neither they nor original S2 approval
+  grant these two new paths. Combined amendment review: Ready, no Findings, from
+  `schedule_removal_plan_review` in current conversation; plan identity
+  `a9d3431beedf5e9b002d158f17631b829ecd41be63a3ec58a49d322f87711db5`,
+  amendment SHA256
+  `ea413382736c1bb31f532b24e2d8fb5a9343b9df37074a07abf0127b8e60d501`.
+  Human Approval for ProjectionTree and README: Approved; Approved at: approved
+  in current conversation, 2026-10-13. Approved scope: exact two paths and
+  removals above, plus TASKS.md/TRACEABILITY.md amendment; provenance: human
+  response to Main's exact two-file addition approval request. Combined replan
+  commit: none; a focused combined replan commit precedes implementation. S1 scope,
+  Completion Approval, reviews, commit and evidence remain unchanged.
+- Evidence freshness: refresh affected documentation validation for this plan
+  delta and README once edited. Reuse matching S2 baseline observations;
+  post-correction final identities must bind all three added paths. Previous
+  Registry discovery/review/approval remains scoped evidence, not a review of
+  this combined amendment. No product-check pass is claimed by planning.
+- Exact delta, combined plan identity and documentation validation:
+  `/tmp/ajs-removal-s2-residual-replan/evidence.json`.
 
 Apply [lifecycle](../../README.md#lifecycle-and-approval-gates) and
 [approval](../../README.md#human-approval). Intent to remove the feature is not
@@ -318,8 +431,9 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
   consumers. Remove the entire Deferred Schedule Semantics roadmap subsection
   and empty Semantic Diff Roadmap heading. Do this in S2, before closure.
   CHANGELOG describes removed period/simulation and schema 2 breaking output.
-  README has no simulation instructions at this base and needs no edit;
-  architecture policy already describes correct general owners and needs none.
+  README removes the obsolete period-selection sentence and prediction/calendar
+  paragraphs under the residual amendment above; retained review workflow stays.
+  Architecture policy already describes correct general owners and needs none.
 - Acceptance: file and Git HEAD comparison proceed directly to definition review
   without date input; schedule attributes still compare without period.
   Unchanged/empty comparisons, identities/candidates, relations, waits,
@@ -398,6 +512,7 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
 ### S2 exact modification paths
 
 - `CHANGELOG.md`
+- `README.md`
 - `docs/requirements/domain-rules/interpret-jp1-parameters.md`
 - `docs/requirements/use-cases/uc-build-semantic-diff.md`
 - `docs/requirements/use-cases/uc-compare-ajs-definitions.md`
@@ -414,6 +529,7 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
 - `src/application/semantic-diff/semanticDiffExplorerProjectionLeaves.ts`
 - `src/application/semantic-diff/semanticDiffExplorerProjectionPaths.ts`
 - `src/application/semantic-diff/semanticDiffExplorerProjectionSupport.ts`
+- `src/application/semantic-diff/semanticDiffExplorerProjectionTree.ts`
 - `src/application/semantic-diff/semanticDiffExplorerRecordGuards.ts`
 - `src/application/semantic-diff/semanticDiffExplorerViewGuards.ts`
 - `src/application/semantic-diff/semanticDiffStructuredFacts.ts`
@@ -443,6 +559,7 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
 - `src/presentation/vscode/commands/semanticDiffCommandWorkflowInput.ts`
 - `src/presentation/vscode/commands/semanticDiffCommandWorkflowSelection.ts`
 - `src/presentation/vscode/commands/semanticDiffCommandWorkflowSource.ts`
+- `src/presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry.ts`
 - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerDetails.ts`
 - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerLocalization.ts`
 - `src/presentation/webview/editor/semanticDiffExplorer/semanticDiffExplorerTree.tsx`
@@ -494,8 +611,8 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
 
 ## S1 implementation record
 
-- Result: SLICE_APPROVED; both independent reviews returned Ready with no Findings.
-  Explicit Completion Approval recorded above; focused completion commit pending.
+- Result: SLICE_COMMITTED; independent Ready reviews, explicit Completion Approval
+  and successful focused completion commit are recorded above.
 - Changed paths: all 42 S1 deletion paths, affected S1 modification paths and
   selected-feature docs. Exact diff/inventory: `/tmp/ajs-removal-s1/evidence.json`.
 - Acceptance: calendar UI/action, HTML data marker, private action handling,
