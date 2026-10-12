@@ -4,20 +4,23 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Current plan: PLAN_APPROVED replan, focused planning commit pending. Slice1 is
-  preserved; standalone Slice N corrects Node support before blocked Slice2.
+- Current plan: isolated Slice N is SLICE_APPROVED; completion commit is next.
+  Slice1 is preserved; standalone Slice N corrects Node support before blocked Slice2.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user;
   no custom development startup/watcher/wrapper mechanism or security waiver.
-- Next: Main routes the focused planning commit, then isolated Slice N execution.
+- Next: route the approved focused Slice N completion commit; blocked Slice2
+  remains separate.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED; Slice2 candidate remains IMPLEMENTING blocked.
+- Lifecycle state: SLICE_APPROVED (Slice N); Slice2 remains IMPLEMENTING blocked.
 - Selected feature/base: `dependabot-post-publication-verification`,
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`, fixed
   comparison base.
 - Branch: `codex/dependabot-post-publication-verification`.
+- Execution checkout: `/Users/jconee/.codex/worktrees/dependabot-node24/vscode-ajsbutler`;
+  branch `codex/dependabot-node24-compatibility`, rooted at the replan commit.
 - Trigger/design decision: user permits Node24 and says proceed; Main separates
   independently valuable supported development tooling from later security and
   publication gates. Sequence: completed Slice1 → Slice N → Slice2 → Slice3.
@@ -65,7 +68,8 @@
   `/tmp/ajsbutler-dependabot-node24-review-correction-evidence/record.json`.
 - Separate gate metadata:
   `/tmp/ajsbutler-node24-plan-approval-metadata/record.json`.
-- Commit: pending. This approval does not resume Slice2, waive security/package
+- Commit: `13a0287091b7bca701b11555a84e908ffe745eaf`; focused three-path staged
+  whitespace/scope checks passed. This approval does not resume Slice2, waive security/package
   gates, approve N completion, publish, or persistently switch global nodebrew.
 
 ## Node24 Direction Approval
@@ -613,7 +617,8 @@ is inferred from the user's approved Node24 direction and instruction to proceed
 
 ## Slice N: Correct development Node24 compatibility independently
 
-- Lifecycle state: PLANNED; independent Plan Review Pending. Value: declared and
+- Lifecycle state: SLICE_APPROVED; both independent reviews Ready; Completion
+  Approval Approved. Value: declared and
   CI development Node support match the actual standard Prism CLI requirement,
   with maintainable parent resolution and conditional redundant pin removal.
 - Dependencies: completed Slice1 commit and approved replan commit. N completion
@@ -735,3 +740,109 @@ is inferred from the user's approved Node24 direction and instruction to proceed
 - Preliminary `/tmp/ajsbutler-node24-investigation/record.json` proves only
   isolated24.21.0 build/compile/OpenAPI with installed deps; not fresh install,
   full hosts, package/security readiness. Global nodebrew unchanged.
+
+## Slice N implementation evidence
+
+- Evidence owner: implementer; `/tmp/ajsbutler-dependabot-sliceN-evidence/record.json`.
+  Fresh baseline product/config bytes match completed Slice1 `4ec4f8add4fa16dd25aa2efaac8ec06d0e228564`.
+  Original root candidate and old evidence remain excluded and preserved.
+- Exact change: Node>=24.18.0, CI24.x, CONTRIBUTING prerequisite, Prism CLI5.16.0;
+  only its three redundant sibling overrides removed. All siblings resolve5.16.0
+  under their ^5.16.0 parent ranges; other36 overrides, five later security-upgrade
+  keys, pnpm10.33.0, scripts, patch/build permissions and VSCode^1.75.0 unchanged.
+- Process-local Node24.21.0/pnpm10.33.0 fresh baseline/final installation and engine
+  checks cover all631 declared lock engine ranges with zero unsupported packages;
+  installed peers reconcile with zero incompatible/missing required peers.
+  CLI upgrade adds development-only Scarf/proxy internals; Scarf install script
+  remains automatically ignored by unchanged pnpm policy, with no permission edit.
+- Baseline/final all-severity audit finding records are identical, including all
+  25 advisory/range/severity/scope/path records: low3, moderate11, high10, critical1.
+  Both moderate audits exit1. This is a no-regression observation, not a security
+  pass or accepted vulnerability risk. Braces/security readiness remains Slice2.
+- Fresh baseline/final build, compilation, both test bundles and OpenAPI checks
+  pass. Both actual Node24 desktop runs pass1,200 cases including architecture and
+  package manifest boundaries; minimum VSCode1.75 and Chromium each pass WEB-7–15.
+  Cache reuse covers host binaries only, never old product candidate inputs.
+- Standard unchanged Prism command passes exact static fixture response, default
+  127.0.0.1:4010, CORS, missing-auth401, invalid-query400, unknown-route404,
+  --errors, host/port forwarding, default watch/reload and invalid-document startup.
+  Baseline/final semantic responses match; processes terminate and ports close.
+  Temporary fixture copies/manual harness stay outside product; environment/harness
+  corrections and original diagnostics are retained in the artifact.
+- Normal VSCE ls/package both baseline/final fail the inherited npm-list
+  ELSPROBLEMS collection. No VSIX is produced or certified, and no bypass flag is
+  used. Fresh logs retain the exact command/error and unchanged failure category;
+  later packaging/security gates remain blocked under Main ownership.
+- Full Qlty baseline/final observations, inventories, final aggregate and exact
+  documentation/scope checks are completed before implementation handoff; final
+  metadata records statuses and immutable substantive snapshot identity separately.
+- Solution Shape: existing standard Prism CLI remains the owner of mock/watch/
+  validation; Node/pnpm/Actions own execution. No new abstraction, source import,
+  layer boundary, telemetry API or architecture exception. Architecture test
+  results are mechanical facts; independent reviewers assess semantic ownership.
+- Compatibility risk: development Node minimum changes; extension VSCode minimum
+  and desktop/web behavior remain unchanged. Durable edit replaces the existing
+  CONTRIBUTING prerequisite; no duplicate setup policy or user-visible change
+  requiring README/CHANGELOG. Main owns later candidate integration/revalidation.
+
+### Slice N final validation metadata
+
+- State transition: PLAN_COMMITTED → IMPLEMENTING → IMPLEMENTED. Exact approved
+  seven-path patch ready for both independent reviews; no completion approval,
+  staging, commit, candidate integration, publication or global Node change.
+- Retained reusable evidence: `/tmp/ajsbutler-dependabot-sliceN-evidence/record.json`.
+  Immutable substantive snapshot identity:
+  `e9aa2130303a91b00d7e69c33039f7746e5c6b4d4c2f4d9dca11f01bd722e288`.
+  Subsequent state/result annotations are a separate targeted-validated metadata
+  patch; full scans are bound to their actual substantive inputs.
+- Qlty0.645.0 official SARIF2.1: same full730 check/437 smells inventories,
+  check4→3 records, smells151 identical, zero new/adverse records; full-check
+  finding-triggered exit1 retained. Final aggregate exit0. Feature lint30 files,
+  explicit CONTRIBUTING lint, five local links, workflow/engine/pnpm contracts,
+  seven-path/no-untracked/no-staged scope and diff whitespace pass.
+- Normal VSCE missing diagnostics increase4739→4768 only for29 upstream AJV8.20
+  development requirements; invalid110/extraneous14 and ELSPROBLEMS exit1 unchanged.
+  Registry/installed metadata proves identical runtime dependency ranges. This
+  retains the failing collection outcome; no VSIX or packaging pass is inferred.
+- N compatibility/no-regression acceptance met; no N blocking decision. Existing
+ 25 audit advisories and actual VSIX/security requirements remain owned blockers
+  for later Slice2. Main routes two independent reviews of the exact substantive
+  patch plus metadata; both Ready and explicit Completion Approval precede commit.
+
+### Slice N independent review gate metadata
+
+- State transition: IMPLEMENTED → SLICE_READY; both independent reviewers return
+  Ready with no actionable Findings. Completion Approval remains pending.
+- First reviewer: `/root/review_slice1`; retained handoff:
+  `/tmp/ajsbutler-dependabot-sliceN-review1.json`.
+- Second reviewer: `/root/review_node24_second`; retained handoff:
+  `/tmp/ajsbutler-dependabot-sliceN-review2.json`.
+- Both reviewed substantive identity:
+  `e9aa2130303a91b00d7e69c33039f7746e5c6b4d4c2f4d9dca11f01bd722e288`;
+  complete implementation identity:
+  `d9e99226644dbea19bf492ee2f05b93b059588b15d81a9c134198c768b3f6723`.
+- Both inspected seven-path scope and retained immutable validation evidence.
+  Review gate annotations are a separate metadata patch; no product change,
+  security waiver, VSIX certification, root integration or publication follows.
+- Main gate metadata record: `/tmp/ajsbutler-sliceN-ready-metadata/record.json`.
+
+### Slice N Completion Approval
+
+- Status: Approved; lifecycle SLICE_READY → SLICE_APPROVED.
+- Provenance: human reply `承認します。` to Main’s explicit request for this
+  reviewed Node24 slice completion commit, recorded 2026-10-12.
+- Gate/scope: one focused Slice N completion commit, exactly the approved seven
+  paths; Node>=24.18, CI24.x, Prism5.16 and three redundant sibling-pin removals.
+- Independent implementation reviews: both Ready with no actionable Findings;
+  `/tmp/ajsbutler-dependabot-sliceN-review1.json` and
+  `/tmp/ajsbutler-dependabot-sliceN-review2.json`.
+- Reviewed substantive identity:
+  `e9aa2130303a91b00d7e69c33039f7746e5c6b4d4c2f4d9dca11f01bd722e288`.
+  Reviewed complete implementation identity:
+  `d9e99226644dbea19bf492ee2f05b93b059588b15d81a9c134198c768b3f6723`.
+- Separate Ready gate metadata: `/tmp/ajsbutler-sliceN-ready-metadata/record.json`.
+  Approval metadata: `/tmp/ajsbutler-sliceN-completion-approval/record.json`;
+  targeted documentation/scope validation covers these annotations separately.
+- Existing audit and actual-VSIX blockers remain later Slice2 responsibilities;
+  no broader slice, security waiver, global nodebrew change or publication is
+  authorized by this completion gate. No commit has yet occurred.
