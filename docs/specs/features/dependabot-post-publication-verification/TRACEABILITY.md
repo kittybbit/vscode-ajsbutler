@@ -117,3 +117,13 @@ Baseline/final closure/resources/current/minimum/web artifact checks still requi
 unexecuted observations unknown. Inherited SDK desktop HTTPS enumeration permits
 no other external. R5/R6/security and completed gates unchanged; reuse valid
 baseline by identity, renew affected final proof and both implementation reviews.
+
+## Pending packaged Chromium layout delta
+
+R7 Chromium uses existing test-web0.0.80 standard containing-directory scan/static
+mount: exact unchanged VSIX extension child plus manifest-free verification sibling.
+One selected extension identity, child pre/post inventory/hash and SDK HTTP mount/
+manifest/browser/resource byte mapping prove artifact use. Desktop roots unchanged.
+Renew baseline/final Chromium only and any truly affected proof; matching unrelated
+facts reused. Real activation/commands/hover/viewers/resources and separated injected
+WEB7–15 remain mandatory. No product paths/approval/security changes inferred.

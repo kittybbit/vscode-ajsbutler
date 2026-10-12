@@ -4,16 +4,16 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Current plan: PLAN_APPROVED packaging-ignore delta; prior2A paused;1/N preserved.
+- Current plan: PLAN_APPROVED packaged-Chromium layout delta;2A paused;1/N preserved.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user;
   no custom development startup/watcher/wrapper mechanism or security waiver.
-- Next: focused approved planning commit, then resume only approved Slice2A.
-  Root candidate separate;2R unauthorized.
+- Next: focused approved layout-delta planning commit, then resume2A.
+  Root candidate separate;2R unauthorized; no changed validation approval inferred.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED replan; Slice2A awaits delta commit to resume;
+- Lifecycle state: PLAN_APPROVED replan; affected2A Chromium validation paused;
   completed1/N remain SLICE_COMMITTED.
 - Selected feature/base: `dependabot-post-publication-verification`,
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`, fixed
@@ -44,9 +44,35 @@
   `/tmp/ajsbutler-dependabot-plan-review.json`, identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
 
+## Packaged Chromium layout delta approval
+
+- Status: Approved; independent plan review Ready with no actionable Findings.
+- Approved at: approved in current conversation on 2026-10-12 after Main’s
+  explicit request for this reviewed Web validation layout change.
+- Approved scope: Chromium standard SDK containing-directory layout only,
+  with exact-one extracted extension and manifest-free verification sibling;
+  all artifact/host/security/quality/completion boundaries below remain intact.
+- Approved planning paths: selected SPECS.md, TASKS.md and TRACEABILITY.md.
+- Implementation paths remain package.json, pnpm-workspace.yaml, pnpm-lock.yaml,
+  .vscodeignore, selected TASKS.md and TRACEABILITY.md only.
+- Approval metadata: `/tmp/ajsbutler-packaged-web-layout-approval-metadata/record.json`.
+- Focused delta planning commit required before affected validation resumes.
+- Independent Plan Review: Ready;
+  `/tmp/ajsbutler-dependabot-packaged-web-layout-plan-review.json`.
+- Reviewed substantive identity:
+  `c28cd52166b0accec7ac892e33979ebac7fb82623547c16f2e7590fc5f2a2320`.
+- Reviewed patch SHA256:
+  `f8cfbaf5b653937fe5a11b384cc031b77f6288394b8e071940a0cab0c9bae9fd`.
+- Separate Main state metadata:
+  `/tmp/ajsbutler-packaged-web-layout-ready-metadata/record.json`.
+- Standard test-web0.0.80 mounts tests only under development root; prior external
+  sibling runner/artifact-only root failed. Negative baseline log remains failed.
+- Proposed containing-directory scan below changes only Chromium evidence layout;
+  desktop and all product/security/artifact/quality/two-review boundaries intact.
+
 ## Packaging-ignore delta approval
 
-- Status: Approved; focused delta planning commit required before resumption.
+- Status: Approved; focused delta planning commit succeeded.
 - Approved at: approved in current conversation; human explicitly approved
   Main’s request for this reviewed one-line exclusion delta.
 - Independent Plan Review: Ready, no actionable Findings;
@@ -66,7 +92,11 @@
 - Completed1/N and security/36override/fiveversion/two-review bounds unchanged.
 
 - Approval metadata: `/tmp/ajsbutler-packaging-ignore-approval-metadata/record.json`.
-- Commit: pending. Completion,2R implementation and publication remain excluded.
+- Commit: `1d91908a3232e185d329f0cde9572c88a70bb190`; exact three-path
+  staged scope/patch and cached whitespace checks passed.
+- Resulting-state metadata:
+  `/tmp/ajsbutler-packaging-ignore-plan-commit-metadata/record.json`.
+- Completion,2R implementation and publication remain excluded.
 
 ## Slice2A Replan Approval
 
@@ -445,15 +475,38 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   closure/resources/isolated hosts remain mandatory. Final entry diff removes only
   extension/webpack.web-test.config.js plus attributable dependency-update bundle
   differences; unexpected entries fail to Main. Inventory/cleanup both artifacts.
-- Isolated packaged hosts on BOTH baseline/final: unpack actual VSIX; standard
-  @vscode/test-electron and @vscode/test-web runTests explicitly point
-  extensionDevelopmentPath to artifact-only root and extensionTestsPath outside
-  repo/package. Preserve existing webSmoke.bundle.js in temporary evidence
-  BEFORE
-  package prepublish cleans it. Existing repository runners hard-code repo root;
-  their results cannot count as artifact tests. Test SDK dependencies stay
-  outside
-  artifact, without NODE_PATH/mock/resolver source fallback satisfying imports.
+- Isolated packaged hosts on BOTH baseline/final: unpack unchanged actual VSIX.
+  Desktop stable/minimum standard @vscode/test-electron keeps artifact-only root
+  as extensionDevelopmentPath and outside artifact extensionTestsPath.
+  Chromium standard @vscode/test-web0.0.80 uses its supported parent-directory
+  extension scan/static test mount: isolated evidence-only parent contains exactly
+  extension/ (unchanged actual archive extension child) and verification/ sibling
+  holding retained compiled smoke/test runner. extensionDevelopmentPath=parent,
+  extensionTestsPath=parent/verification/packaged-web-tests.js. No custom server/
+  resolver/launcher or repository path additions. Preserve webSmoke.bundle.js
+  before package prepublish cleanup; existing repo runners do not prove artifacts.
+- Verification sibling has no package.json/extension manifest, node_modules/src,
+  SDK dependencies or symlinked/copied repository fallback. Nothing is added to
+  archive/extracted extension. Standard scanner must discover exactly one selected
+  development extension kittybbit.vscode-ajsbutler, the artifact child; inventory
+  parent contents and SDK discovered roots separately from standard builtin hosts.
+- Prove full extension-child inventory/bytes/hashes equal actual VSIX before/after
+  both Chromium runs; record loaded extension identity and URI. Web extensionUri
+  may be /static/devextensions/extension HTTP URL only with retained exact SDK
+  mount-to-disk-child mapping, manifest/main/browser/resource HTTP bytes compared
+  against archive hashes. No other source/npm/mock/NODE_PATH/resource resolver
+  fallback; missing/extra extension/byte mismatch/resource failure blocks to Main.
+- SDK source provenance, test URL mapping and failed baseline:
+  /tmp/ajsbutler-dependabot-slice2a-evidence/packaged-web-sdk-boundary.json.
+  Renew baseline AND final Chromium proof with this exact standard layout; prior
+  failed baseline is never pass. Reuse unrelated valid baseline/final facts only
+  where their inputs/config/tool/coverage match. No full scan/host run to replan.
+- Solution Shape: standard SDK owns scanning/static mount, VSCE owns unchanged
+  artifact, temporary evidence runner owns assertions only. Risk: test sibling
+  mistaken for extension, wrong served root or source fallback; exact one-extension
+  scan, child pre/post hashes and HTTP-byte/loaded-identity proof address it.
+  This is test evidence layout only, not a development startup mechanism,
+  repository abstraction, architecture exception or expanded import allowance.
 - Packaged stable desktop, minimum1.75 and Chromium web must prove actual loaded
   root/entry/manifest hashes, activation, commands and meaningful existing real
   hover/tableViewer/flowViewer resource observations. Separate real extension

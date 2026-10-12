@@ -106,3 +106,13 @@ developer/source/test dependencies. Both actual baseline/final integrity,
 production-resource closure and isolated-host checks remain mandatory. The narrow
 one-line ignore/path renewal in TASKS does not relabel baseline failure as pass
 or waive any security gate.
+
+## Packaged Chromium evidence boundary
+
+Standard test-web may serve an isolated parent containing the unchanged archive
+extension child and manifest-free external verification sibling. Require exactly
+one selected development extension, full artifact hashes before/after and exact
+HTTP-to-artifact manifest/browser/resource bytes. Desktop retains artifact-only
+root. No helper/source/npm fallback in archive or extension child; real runtime
+observations stay distinct from injected cases. Baseline/final Chromium both need
+fresh proof after reviewed approval; prior baseline failure remains negative.
