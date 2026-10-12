@@ -4,28 +4,25 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Current plan: isolated Slice N is SLICE_APPROVED; completion commit is next.
-  Slice1 is preserved; standalone Slice N corrects Node support before blocked Slice2.
+- Current plan: PLAN_APPROVED Slice2A replan; completed1/N preserved;2R blocked.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user;
   no custom development startup/watcher/wrapper mechanism or security waiver.
-- Next: route the approved focused Slice N completion commit; blocked Slice2
-  remains separate.
+- Next: focused approved planning commit, then implement only Slice2A;
+  root candidate stays separate. Slice2R has no implementation authorization.
 
 ## Current state and gates
 
-- Lifecycle state: SLICE_APPROVED (Slice N); Slice2 remains IMPLEMENTING blocked.
+- Lifecycle state: PLAN_APPROVED replan; completed1/N remain SLICE_COMMITTED.
 - Selected feature/base: `dependabot-post-publication-verification`,
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`, fixed
   comparison base.
 - Branch: `codex/dependabot-post-publication-verification`.
 - Execution checkout: `/Users/jconee/.codex/worktrees/dependabot-node24/vscode-ajsbutler`;
   branch `codex/dependabot-node24-compatibility`, rooted at the replan commit.
-- Trigger/design decision: user permits Node24 and says proceed; Main separates
-  independently valuable supported development tooling from later security and
-  publication gates. Sequence: completed Slice1 → Slice N → Slice2 → Slice3.
-  N retains baseline vulnerabilities under a no-regression criterion; Slice2
-  and feature acceptance still require no High/moderate, without audit waivers.
+- Trigger/Main decision: unreleased braces fix must not block independently useful
+  fixable updates. Sequence completed1 → completedN →2A →blocked2R →3. The overall
+  no High/moderate and complete published verification acceptance remains intact.
 - Historical original/alias approvals and completed Slice1 review, Completion
   Approval and commit `4ec4f8add4fa16dd25aa2efaac8ec06d0e228564` remain unchanged.
   Slice1 coverage/all39 override inventory and exact alias supplement stay valid.
@@ -37,12 +34,40 @@
   assertion that braces prevents a standalone reviewable Node correction plan.
   Independent review and exact replan approval/commit remain required; no redundant
   Node choice question is necessary, and no broader approval is inferred.
-- Pending future Slice2 prerequisites: supported standard-tool braces repair and
-  reviewed/approved packaging strategy. Until resolved through Main/Replanning,
-  no further Slice2 implementation or completion; existing candidate is retained.
+- Original uncompleted2 scope is decomposed into2A and blocked2R; proposed standard
+  bundled VSCE validation changes affected scope/check approval, now Approved.
+  Original/alias/completed1/N gates and matching evidence remain preserved.
+- Completed N:3984d244503831e888e1b9e80eea632c89f2d4de, both reviews Ready and
+  Completion Approved; existing Main postcommit annotations remain unchanged.
 - Original plan commit `cdb09c24ecf859fb0209dc23de658a6dd1c34cdc`; original review
   `/tmp/ajsbutler-dependabot-plan-review.json`, identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
+
+## Slice2A Replan Approval
+
+- Status: Approved.
+- Approved at: approved in current conversation on 2026-10-12, following
+  Main’s explicit request for this reviewed replan and Slice2A implementation.
+- Approved scope: Slice2A only, as bounded below; exact five direct versions,
+  reassessment of the remaining36 overrides, pnpm-generated lock and standard
+  bundled VSIX validation. Slice2R has no implementation authorization.
+- Planning paths: selected `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`.
+- Implementation paths: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`,
+  selected `TASKS.md` and `TRACEABILITY.md` only.
+- Independent Plan Review: Ready; 2R-STATE-1 resolved; no actionable Findings.
+  `/tmp/ajsbutler-dependabot-slice2a-plan-rereview.json`.
+- Reviewed substantive identity:
+  `5712db02bf4ef5116fc637e78002833bc9c8ec0a9e00e2eadd702c2023af7787`.
+- Reviewed substantive patch SHA256:
+  `f5a6c49ba04603d8a1e802c529d437564b91380eacd643ccef2b6e3917e63dad`.
+- Producer: `/tmp/ajsbutler-dependabot-slice2r-state-correction-evidence/record.json`.
+- Separate review/state metadata:
+  `/tmp/ajsbutler-slice2a-plan-ready-metadata/record.json`.
+- Approval metadata: `/tmp/ajsbutler-slice2a-plan-approval-metadata/record.json`.
+- Commit: pending; implementation starts only after the approved planning commit.
+- Historical gates remain preserved. Completion,2R implementation, publication
+  and global nodebrew mutation are not authorized by this plan gate. Overall
+  security acceptance and separately blocked2R/publication gates remain.
 
 ## Slice N Replan Approval
 
@@ -308,72 +333,148 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   to Main, not an assumed empty baseline.
 - Readiness: independently reviewable baseline package; does not certify fixes.
 
-## Slice 2: Upgrade direct tooling and minimize exceptional resolutions atomically
+## Slice 2A: Fix published vulnerable families and prove bundled compatibility
 
-- Lifecycle state: IMPLEMENTING.
-- Value: supported security-clean relevant dependency graph with fewer forced
-  resolutions and clear necessary exceptions.
-- Edit paths exactly: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`,
-  this feature's `TASKS.md`, `TRACEABILITY.md`. Runtime/tests/generated files,
-  workflow/configuration beyond these paths and patch contents are excluded.
-- Dependencies: Slice 1 and Slice N reviewed/approved completion commits; Main
-  also resolves the supported braces repair and packaging validation prerequisite
-  through separately reviewed/approved Replanning before resuming Slice2.
-- Scope: candidate direct keys/versions and all-existing-override assessment above;
-  regenerate lockfile with pnpm 10.33.0, retaining only attributable resolution,
-  peer/integrity and patch consequences. One atomic graph slice avoids knowingly
-  leaving a coupled security/compatibility acceptance gate broken.
-- Acceptance: selected eight-family floors hold or their vulnerable paths are
-  eliminated; `pnpm audit --json` reconciles every finding and
-  `pnpm audit --audit-level moderate` passes with no high/moderate findings.
-  Preserve all-severity records and prove no new lower-severity regression.
-  New incompatible or out-of-boundary fixes return to Main before edits.
-- Each retained override has a concrete parent/advisory/compatibility reason,
-  owner and removal condition. Each removal is proven safe against regenerated
-  paths, security checks and regression coverage. Demonstrate an actual reduction
-  of redundant overrides; if no safe reduction/direct upgrade is possible, return
-  that outcome as a decision blocker rather than silently abandoning R5/R6.
-- Preserve current desktop/browser/package behavior and completed Slice N
-  Node>=24.18.0/VSCode1.75 contracts;
-  no browser Node-built-in additions, layer exceptions, parser regeneration,
-  fixture acceptance, further engine increase, telemetry change or unapproved adapters.
-- Required validation: Node24 (record exact patch/platform), pnpm10.33.0,
-  frozen installation, affected `pnpm why`/registry/lock reconciliation and audit;
-  full build, test compilation, browser accessibility/shared smoke bundles,
-  desktop suite, minimum desktop smoke and web suite, OpenAPI reproducibility
-  and existing Prism sample-backed response/startup/cleanup test; normal VSCE
-  list/package and temporary VSIX integrity/content/manifest checks with cleanup.
-  Do not substitute packaging flags that bypass a failed required check without
-  a new Main decision. Do not authenticate/publish or mutate keychain state.
-- Execute `rtk pnpm install --frozen-lockfile`, `rtk pnpm audit --json`,
-  `rtk pnpm audit --audit-level moderate`, `rtk pnpm run build`,
-  `rtk pnpm run test:compile`, `rtk pnpm run test:prepare:browser:bundle`,
-  `rtk pnpm run test:prepare:web:bundle`, `rtk pnpm run test:desktop:run`,
-  `rtk pnpm run test:desktop:min:run`, `rtk pnpm run test:web:run`,
-  `rtk pnpm run openapi:check`, `rtk pnpm exec vsce ls` and
-  `rtk pnpm exec vsce package --out <temporary-VSIX>`; inspect archive/cleanup.
-  Prepare Playwright as required by existing CI without changing its version.
-  Existing suites include architectureDependencyRules, packageManifest and
-  webapiOpenApiGeneratedArtifacts tests. Reuse those meaningful boundary tests;
-  no mirror-of-manifest new tests or test repairs are implicitly authorized.
-- Qlty: exact disposable baseline/final snapshots under the Evidence Contract;
-  qlty >=0.645.0, full-repository selection, official complete SARIF2.1.0 for
-  `rtk pnpm exec qlty check --all --sarif --no-fix` and
-  `rtk pnpm exec qlty smells --all --sarif --no-snippets` in both snapshots;
-  inventories, tool/config identities, raw statuses, new/adverse findings
-  comparison, and final-only `rtk pnpm run qlty` pass. New/mapped adverse findings
-  are NG; review semantic quality separately. No planning implementation scans.
-- Readiness: no acceptance bypass for pre-existing/environment failures. Preserve
-  failed evidence and classify using matching baseline; missing checks or new
-  repair paths return to Main. A second independent implementation review is
-  required for this configuration/shared dependency surface, reusing evidence.
+- Lifecycle state: PLAN_APPROVED. Value: reduce fixable vulnerability paths and
+  forced resolutions, with independently verified actual VSIX compatibility.
+- Dependencies: completed1/N and approved replan commit. Fresh baseline product
+  identity is N3984d244; feature comparison base
+  remains27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2.
+- Exact implementation paths: package.json, pnpm-workspace.yaml, pnpm-lock.yaml,
+  selected TASKS.md and TRACEABILITY.md only. Preserve Node>=24.18/Prism5.16/
+  VSCode^1.75/pnpm10.33, source/tests/generated/patches/scripts/build
+  permissions/
+  workflow/CONTRIBUTING. No custom startup/watch/wrapper mechanism or unused
+  direct
+  transitive packages. Repository tests/code changes require Main Replanning.
+- Direct bounds: @vscode/vsce4.0.0, css-loader7.1.5, typescript-eslint8.71.1,
+  webpack5.111.1, terser-webpack-plugin5.6.1, original declaration ranges above
+  and exact resolved targets only; actual security/exception benefit required.
+- Root candidate/evidence preserved, not copied wholesale. Recreate intent on N,
+  resolve manifest collisions explicitly and pnpm-regenerate lock. Reevaluate
+  all36 remaining overrides using original39 inventory plus completed N
+  removals.
+  Six retained exceptions are a candidate count only: parent-range/API/graph/
+  security evidence determines each removal/retention with owner/removal
+  condition.
+  No broad coercion, later direct versions or manual lock resolution.
+- Acceptance: eight-family floors above met/eliminated; fresh N baseline/final
+  audit advisory/package/version/range/severity/scope/count/path/new-ID records
+  allow only matched existing GHSA-vfj7-8cjw-p6xm braces<=3.0.3 dev
+  Prism/chokidar
+  route among High/moderate. No new/expanded exposure or lower-severity
+  regression.
+  Any other High/moderate blocks2A. Store failing moderate status honestly;
+  matched
+  braces remains blocked2R, never audit/security pass or risk waiver. Old25→1
+  candidate result is discovery only, not current N-based graph acceptance.
+- Required graph checks: pnpm generation, fresh/frozen installation, all
+  resolved
+  engines/peers, registry/why/parent-range reconciliation and36 override
+  decisions.
+  Commands: rtk pnpm install --frozen-lockfile, rtk pnpm audit --json and
+  rtk pnpm audit --audit-level moderate with raw statuses/path comparison.
+- Full regression: rtk pnpm run build, test:compile,
+  test:prepare:browser:bundle,
+  test:prepare:web:bundle, test:desktop:run, test:desktop:min:run,
+  test:web:run and
+  openapi:check (each via rtk pnpm run). Existing desktop1200/boundary
+  architecture,
+  packageManifest/OpenAPI, browser accessibility and shared smoke coverage
+  remain.
+  Standard Prism sample/auth/validation/CORS/watch/options/startup/shutdown/port
+  cleanup checks preserve actual behavior. Prepare unchanged Playwright as
+  needed.
+- Standard packaging on BOTH clean baseline and final: rtk pnpm exec vsce ls
+  --no-dependencies and rtk pnpm exec vsce package --no-dependencies --out
+  `temporary-VSIX`. Existing extension is bundled; no
+  authentication/publication/
+  keychain mutation. Retain normal npm-list ELSPROBLEMS failures as failures;
+  this chosen standard mode needs stronger replacement closure/artifact proof.
+- Bundle closure: inventory emitted production modules desktop/web/webviews,
+  externals, dynamic require/import, workers and resource/asset reads. Desktop
+  external set only vscode/hostbuiltins(os,crypto,assert,util), web only vscode.
+  No external npm or unresolved dynamic/resource dependency; ambiguity fails
+  closed to Main/Replanning. node_modules ignore alone is insufficient proof.
+- BOTH actual VSIX artifacts: hash/archive integrity, manifest and main/browser
+  entry hashes, all production bundles, webview/resources/grammars/localization/
+  license/readme/manifest referenced paths match production output bytes.
+  Inspect
+  differences. No packed node_modules/dev/source/tests/tooling or helper copies
+  hiding closure gaps. Inventory extracted files and cleanup artifacts/profiles.
+- Isolated packaged hosts on BOTH baseline/final: unpack actual VSIX; standard
+  @vscode/test-electron and @vscode/test-web runTests explicitly point
+  extensionDevelopmentPath to artifact-only root and extensionTestsPath outside
+  repo/package. Preserve existing webSmoke.bundle.js in temporary evidence
+  BEFORE
+  package prepublish cleans it. Existing repository runners hard-code repo root;
+  their results cannot count as artifact tests. Test SDK dependencies stay
+  outside
+  artifact, without NODE_PATH/mock/resolver source fallback satisfying imports.
+- Packaged stable desktop, minimum1.75 and Chromium web must prove actual loaded
+  root/entry/manifest hashes, activation, commands and meaningful existing real
+  hover/tableViewer/flowViewer resource observations. Separate real extension
+  observations from injected WEB7–15 cases; repo1200 or activation alone is not
+  packaged behavior proof. Temporary evidence-only verification runners use
+  existing SDKs/smoke, not development launchers or new repo mechanisms. Missing
+  coverage requiring repo code/test changes stops for Main Replanning.
+- Qlty: fresh N-baseline/final disposable snapshots, qlty>=0.645.0 official
+  complete
+  SARIF2.1.0 full-repository identities/inventories/config/tool versions, rtk
+  pnpm
+  exec qlty check --all --sarif --no-fix and rtk pnpm exec qlty smells --all
+  --sarif
+  --no-snippets in both; no new/adverse mapped finding, final-only rtk pnpm
+  run qlty
+  pass. Changed docs lint/links/structure/scope/diff checks. No planning full
+  scans.
+- Solution Shape: pnpm resolves, webpack/VSCE bundle/package, existing SDKs
+  verify
+  hosts, security/tooling own exceptions/residual, Main owns boundaries. No new
+  abstraction or layer exception. Mechanical architecture/closure test facts
+  differ
+  from independent semantic review. Risks: legacy override API drift,
+  build/minifier/
+  browser changes, VSCE4 native keyring and false artifact confidence from
+  source
+  helpers; fresh graph/full regression/closure/isolated tests must address them.
+- Ready requires all2A acceptance/artifact/host/qlty gates plus explicit
+  residual
+  ownership. Two independent implementation reviews reuse valid evidence; BOTH
+  Ready precede explicit Completion Approval/commit. No security-clean/feature/
+  publication claim. README/CHANGELOG excluded: extension behavior unchanged.
+
+## Slice 2R: Resolve blocked residual security before final publication
+
+- Lifecycle state: INTAKE.
+- Planning blocked: select a supported official repair or standard-tool replacement,
+  then concrete reviewed Replanning and renewed Human Approval before implementation.
+  No implementation authorization exists for this residual slice.
+- Value: final supported security-clean graph. Depends on completed2A and
+  concrete
+  official upstream fix or separately approved established standard-tool
+  replacement
+  with exact versions/paths/mock semantics/tests via reviewed Replanning.
+- Prism5.16 still chokidar^3.5.2; braceslatest3.0.3 affected, patchedNone.
+  Upstream
+  PR2776 open is not released fix. Scalar400→422/CLI semantics differ; not
+  adopted.
+- No speculative version, forced chokidar-major override, custom solution, audit
+  exemption or risk waiver. No future implementation paths approved here.
+- Future readiness: supported generated graph, no High/moderate, all-
+  severity/path
+  evidence/no regression, appropriate full build/hosts/actual VSIX/qlty,
+  independent
+  review/approval/commit; exact scope defined when supported fix exists. This
+  gate
+  blocks feature outcome, not independently useful2A completion.
 
 ## Slice 3: Verify the remediated graph after publication and route residuals
 
 - Lifecycle state: PLANNED.
 - Value: complete published result and explicit security/tooling ownership.
 - Edit paths: only this feature's `TASKS.md`, `TRACEABILITY.md`.
-- Dependencies: Slice 2 review Ready, Completion Approval, commit and publication
+- Dependencies: Slice2A/2R reviews Ready, Completion Approvals, commits and publication
   to `main` by a separately authorized Main/human action. The implementation
   commit reaching a PR branch alone does not satisfy publication. Waiting for
   publication is an external prerequisite, not approval to merge.
@@ -421,7 +522,7 @@ with hashes/manifests/versions/commands/exits and exact identity per
 For all changed feature documents, run `rtk pnpm run lint:md`,
 `rtk git diff --check` and inspect local links/anchors, document structure,
 untracked whitespace/scope, R1-R7 traceability and gate provenance. Replan and
-Slices 1/3 use the coordination-document tier; Slices N/2 use full configuration
+Slices 1/3 use the coordination-document tier; Slices N/2A use full configuration
 checks and qlty above. Never collect implementation baseline scans just to plan.
 
 ## Risks, invalidation and exit
@@ -439,7 +540,7 @@ checks and qlty above. Never collect implementation baseline scans just to plan.
 - Scope/design/target version/path/validation-strategy changes return to Main for
   Replanning, independent review and renewed Human Approval. Ordinary uniquely
   determined corrections remain within approved exact paths only.
-- Feature Exit requires all four committed slices, current-head CI/Cloud gates where
+- Feature Exit requires all five committed slices, current-head CI/Cloud gates where
   required and R1-R7 evidence. Closure propagation/removal has separate gates;
   preserve inherited WebAPI and explicitly owned residuals.
 
@@ -617,8 +718,8 @@ is inferred from the user's approved Node24 direction and instruction to proceed
 
 ## Slice N: Correct development Node24 compatibility independently
 
-- Lifecycle state: SLICE_APPROVED; both independent reviews Ready; Completion
-  Approval Approved. Value: declared and
+- Lifecycle state: SLICE_COMMITTED; both independent reviews Ready; Completion
+  Approval Approved and focused commit succeeded. Value: declared and
   CI development Node support match the actual standard Prism CLI requirement,
   with maintainable parent resolution and conditional redundant pin removal.
 - Dependencies: completed Slice1 commit and approved replan commit. N completion
@@ -721,25 +822,18 @@ is inferred from the user's approved Node24 direction and instruction to proceed
 
 ## Future security and publication readiness
 
-- Slice2 remains blocked before further implementation: braces has no patched
-  examined release; CLI5.16.0 still chokidar^3.5.2. Main must supply an official
-  upstream fix or separately approved established standard-tool replacement with
-  fixture/mock behavior evidence, via bounded Replanning. No speculative version,
-  custom workaround, risk acceptance or audit exemption is authorized.
-- Slice2 existing five direct versions/eight-family floors and all39 override
-  review stay preserved. Integrate only after N completion and resolved/reviewed/
-  approved security and packaging prerequisites. Its final audit must meet no
-  High/moderate; no-regression acceptance is limited to N's compatibility outcome.
-- Standard bundled VSCE validation remains separate unapproved investigation;
-  eventual approved packaging must prove actual VSIX archive/bundle/external/
-  entry/resource/integrity/host coverage. No nonexistent artifact/check pass.
-- Slice3 requires completed Slice2 and separately authorized main publication,
-  complete alert/graph evidence and explicit residual routing. Feature exit still
-  requires all four committed slices and unchanged R1-R7 security/compatibility
-  acceptance; N completion alone does not fulfill remediation or feature purpose.
-- Preliminary `/tmp/ajsbutler-node24-investigation/record.json` proves only
-  isolated24.21.0 build/compile/OpenAPI with installed deps; not fresh install,
-  full hosts, package/security readiness. Global nodebrew unchanged.
+- Completed1/N preserved;2A →blocked2R →3 retains no High/moderate and full published
+  graph/alert acceptance.2A is risk reduction/artifact compatibility only.
+- Slice3 waits for completed2A/2R graph and separately authorized main publication;
+  no replan/completion gate authorizes merge/release/publication.
+- Original five direct bounds/eight floors/all39 inventory preserved; fresh N-based
+  all36 decisions and graph/audit/build/packaged/qlty observations required. Old
+  root candidate/evidence stay historical; no stale final-result reuse after graph
+  or packaging strategy changes. Completed1/N approvals/evidence unaffected.
+- Discovery: /tmp/ajsbutler-slice2-next-investigation/record.json and retained
+  /tmp/ajsbutler-preserved-slice2-candidate/record.json, completed N evidence and
+  /tmp/ajsbutler-sliceN-completion-commit/record.json. No implementation baseline/
+  qlty/packaging was executed to plan. Normal collector failures remain failures.
 
 ## Slice N implementation evidence
 
@@ -846,3 +940,18 @@ is inferred from the user's approved Node24 direction and instruction to proceed
 - Existing audit and actual-VSIX blockers remain later Slice2 responsibilities;
   no broader slice, security waiver, global nodebrew change or publication is
   authorized by this completion gate. No commit has yet occurred.
+
+### Slice N completion commit metadata
+
+- State transition: SLICE_APPROVED → SLICE_COMMITTED.
+- Commit: `3984d244503831e888e1b9e80eea632c89f2d4de`; exact seven approved
+  paths committed on `codex/dependabot-node24-compatibility`.
+- Approval-committer confirmed staged scope/patch identity and cached whitespace
+  check passed; checkout was clean immediately after the commit.
+- Both Ready review records and explicit human Completion Approval are retained
+  in `/tmp/ajsbutler-sliceN-completion-approval/record.json`.
+- This resulting-state annotation is separate post-commit metadata, recorded by
+  Main in `/tmp/ajsbutler-sliceN-completion-commit/record.json`; unchanged product
+  facts remain bound to the reviewed substantive identity and this commit.
+- No root candidate integration, push, publication, global nodebrew mutation,
+  security-clean result or certified VSIX. Slice2 blockers and Slice3 gates remain.
