@@ -6,7 +6,7 @@ This document is the contributor entry point for [JP1/AJS Butler](README.md). Pr
 
 ## Before you start
 
-- Use Node.js 22 or later. The extension declares `node >=22`, and the desktop test SDK requires Node.js 22 or later.
+- Use Node.js 24.18.0 or later. The extension declares `node >=24.18.0` to meet the Prism CLI requirement.
 - Use pnpm 10.33.0, as declared by the repository `packageManager` field.
 - Install dependencies with `pnpm install`.
 - Run the relevant check before opening a pull request, and inspect the working tree after commands that format files.

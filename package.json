@@ -16,7 +16,7 @@
     "url": "https://github.com/kittybbit/vscode-ajsbutler/issues"
   },
   "engines": {
-    "node": ">=22",
+    "node": ">=24.18.0",
     "vscode": "^1.75.0"
   },
   "categories": [
@@ -201,7 +201,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@stoplight/prism-cli": "5.15.10",
+    "@stoplight/prism-cli": "5.16.0",
     "@testing-library/dom": "10.4.0",
     "@testing-library/react": "16.3.0",
     "@types/jsdom": "21.1.7",
@@ -213,10 +213,10 @@
     "@types/vscode-webview": "^1.57.5",
     "@vscode/test-electron": "3.1.0",
     "@vscode/test-web": "^0.0.80",
-    "@vscode/vsce": "^3.9.2",
+    "@vscode/vsce": "^4.0.0",
     "antlr4ts-cli": "^0.5.0-alpha.4",
     "axe-core": "4.11.0",
-    "css-loader": "^7.1.4",
+    "css-loader": "^7.1.5",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",
@@ -230,12 +230,12 @@
     "process": "^0.11.10",
     "rimraf": "^6.1.2",
     "style-loader": "^4.0.0",
-    "terser-webpack-plugin": "^5.4.0",
+    "terser-webpack-plugin": "^5.6.1",
     "ts-loader": "^9.5.4",
     "tsconfig-paths": "4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.47.0",
-    "webpack": "^5.106.2",
+    "typescript-eslint": "^8.71.1",
+    "webpack": "^5.111.1",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1",
     "yaml": "1.10.3"
