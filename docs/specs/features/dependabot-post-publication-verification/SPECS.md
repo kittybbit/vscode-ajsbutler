@@ -46,7 +46,9 @@ once the resulting dependency graph reaches the default branch.
   and narrowing necessary exceptions. Retained exceptions need their parent
   path, advisory/compatibility reason, removal condition and security/tooling
   owner. Regenerate `pnpm-lock.yaml` with pnpm; never hand-edit resolutions.
-- **R7 Compatibility and readiness:** retain Node `>=22`, pnpm `10.33.0`, VS Code
+- **R7 Compatibility and readiness:** preserve the historical approved Node
+  `>=22` execution boundary until a complete renewed replan is approved. The
+  pending development/CI Node24 proposal below retains pnpm `10.33.0`, VS Code
   `^1.75.0`, desktop/web/parser/CSV/list/flow/WebAPI/diff/telemetry contracts,
   existing build permissions and patch behavior. Relevant builds, boundary
   tests, architecture, packaging, qlty and security checks must pass or expose
@@ -54,19 +56,40 @@ once the resulting dependency graph reaches the default branch.
 
 ## Decisions and non-goals
 
-The feature includes one atomic dependency-remediation slice between baseline
-and final verification. Exact package/version bounds and edit paths are in
+The feature includes an independently valuable development Node24 correction
+slice, followed by the atomic dependency-remediation slice and final published
+verification. Node correction requires no new/adverse audit findings against its
+exact baseline; retained baseline vulnerabilities remain explicit blockers for
+remediation and the unchanged feature no High/moderate gate. Exact
+package/version bounds and edit paths are in
 `TASKS.md`; incompatible upgrades, product adapters or new edit paths require
 Replanning and renewed approval. Existing production packages are not upgraded
 speculatively. Necessary security exceptions may remain; zero overrides is not
 an acceptance shortcut that permits a vulnerable or incompatible graph.
 
-No GitHub Actions/Dependabot automation, auto-merge, alert mutation, release,
+No GitHub Actions/Dependabot remediation automation, auto-merge, alert mutation,
+release,
 authentication/keychain mutation, generated parser/fixture update, runtime
 redesign, VS Code minimum increase or inherited WebAPI feature change.
 README/CHANGELOG/use-case/architecture edits are excluded: dependency work
 preserves externally observable extension behavior. Feature Exit assesses the
 roadmap done condition and durable ownership separately.
+
+## Standard-tool constraint
+
+Custom mechanisms such as development startup scripts, wrappers or native
+watchers are prohibited in principle by the user. The unapproved custom Prism
+launcher proposal is withdrawn. Investigate existing standard CLI/tool solutions
+only; preserve the mock workflow contract and unchanged no High/moderate gate.
+The user permits Node24 as a planning option. Main proposes development/CI
+Node `>=24.18.0` with standard Prism CLI `5.16.0`, permitting supported sibling
+resolution and conditional removal of three Prism pins. This proposal changes
+only development prerequisites/CI, preserving VS Code `^1.75.0` and browser
+contracts. Exact paths, validation and renewed approval gates are in `TASKS.md`.
+Neither Node24 nor this CLI upgrade resolves the unpatched braces route. The
+separate Node correction slice preserves this finding; dependency-remediation
+readiness and feature exit require its resolution. No security exception is
+inferred. Exact replan review, approval and commit gates precede execution.
 
 ## Evidence limits
 

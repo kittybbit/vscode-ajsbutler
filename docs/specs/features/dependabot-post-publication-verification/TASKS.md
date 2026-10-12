@@ -4,40 +4,85 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Active/approved slice: Slice 1 implemented under the approved alias supplement;
-  independent review is Ready and completion approved; commit is the next gate.
+- Current plan: PLAN_APPROVED replan, focused planning commit pending. Slice1 is
+  preserved; standalone Slice N corrects Node support before blocked Slice2.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
-- Constraints: exact paths/versions below; automation belongs to the user.
-- Next decision: Slice 1 focused completion commit, then Slice 2 execution.
+- Constraints: exact paths/versions below; automation belongs to the user;
+  no custom development startup/watcher/wrapper mechanism or security waiver.
+- Next: Main routes the focused planning commit, then isolated Slice N execution.
 
 ## Current state and gates
 
-- Lifecycle state: SLICE_APPROVED.
+- Lifecycle state: PLAN_APPROVED; Slice2 candidate remains IMPLEMENTING blocked.
 - Selected feature/base: `dependabot-post-publication-verification`,
-  `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`;
-  this is the fixed comparison base.
+  `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`, fixed
+  comparison base.
 - Branch: `codex/dependabot-post-publication-verification`.
-- Trigger: Slice 1 found three genuine GitHub alias-edge omissions. Existing
-  acceptance allows reporting limitations, but does not authorize accepting
-  missing required coverage through another source. A narrowly supplementary
-  published-lock strategy changes validation coverage and requires Replanning.
-- Preserved gates: original Human Approval and planning commit remain evidence
-  for their exact original scope. Slice 2 package/version/path constraints and
-  all security/compatibility/quality checks are unchanged. No completed slices
-  or Completion Approvals/commits exist; inherited WebAPI ownership is intact.
-- Affected gates: the previous review/approval do not cover the new Slice 1/3
-  alias-coverage strategy. Renew independent plan review and exact approval
-  for this delta; do not rewrite the historical Human Approval below.
-- Evidence: Slice 1 raw published inputs, graph/alert facts and identities are
-  reused where matching. Old changed-document validation and the graph-coverage
-  acceptance judgment are superseded; no raw graph omission becomes a pass.
-- Next decision/blocker: Slice 1 completion commit; review is Ready with no
-  actionable Findings or evidence blocker.
-  Slice 2/3 execution remains dependency-gated.
-- Planning commit: `cdb09c24ecf859fb0209dc23de658a6dd1c34cdc`;
-  exact three planning paths and staged whitespace check passed.
-- Plan review: `/tmp/ajsbutler-dependabot-plan-review.json`; reviewed identity
+- Trigger/design decision: user permits Node24 and says proceed; Main separates
+  independently valuable supported development tooling from later security and
+  publication gates. Sequence: completed Slice1 → Slice N → Slice2 → Slice3.
+  N retains baseline vulnerabilities under a no-regression criterion; Slice2
+  and feature acceptance still require no High/moderate, without audit waivers.
+- Historical original/alias approvals and completed Slice1 review, Completion
+  Approval and commit `4ec4f8add4fa16dd25aa2efaac8ec06d0e228564` remain unchanged.
+  Slice1 coverage/all39 override inventory and exact alias supplement stay valid.
+- Preserve root five-upgrade/39-to-9 override candidate and retained immutable
+  patch/check evidence. No Slice2 Ready/completion or candidate integration is
+  implied by N. Isolation/integration boundaries are in Slice N below.
+- Direction approval below is preserved verbatim, including its then-current
+  blockers. The later Main separation decision supersedes only that draft's
+  assertion that braces prevents a standalone reviewable Node correction plan.
+  Independent review and exact replan approval/commit remain required; no redundant
+  Node choice question is necessary, and no broader approval is inferred.
+- Pending future Slice2 prerequisites: supported standard-tool braces repair and
+  reviewed/approved packaging strategy. Until resolved through Main/Replanning,
+  no further Slice2 implementation or completion; existing candidate is retained.
+- Original plan commit `cdb09c24ecf859fb0209dc23de658a6dd1c34cdc`; original review
+  `/tmp/ajsbutler-dependabot-plan-review.json`, identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
+
+## Slice N Replan Approval
+
+- Status: Approved.
+- Approved at: approved in current conversation on 2026-10-12; the user's Node24
+  proposal approval and subsequent instruction to proceed authorize this bounded
+  migration. Main applies that authorization after the independent Ready verdict.
+- Approved scope: only Slice N and its isolation/validation boundaries below;
+  Node >=24.18.0, exact Prism CLI5.16.0, CI24.x, developer prerequisites and
+  conditional removal of the three existing Prism sibling overrides. Preserve
+  the existing mock command, VSCode1.75/browser contracts and root candidate.
+- Approved planning paths: this feature's `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`.
+- Approved implementation paths: `package.json`, `pnpm-workspace.yaml`,
+  `pnpm-lock.yaml`, `.github/workflows/verify.yml`, `CONTRIBUTING.md`, this
+  feature's `TASKS.md` and `TRACEABILITY.md` in the isolated checkout.
+- Independent Plan Review: Ready, no actionable Findings;
+  `/tmp/ajsbutler-dependabot-node24-plan-rereview.json`.
+- Reviewed substantive identity:
+  `320f94f6580407e9468e895ea7487234e151c16ae6bfd804fd7521abe34df625`.
+- Reviewed substantive patch SHA256:
+  `3379bb2f1907276bf4096e73fdd7031385ae656bd80dcd622d90eb7bbea8515f`.
+- Producer evidence:
+  `/tmp/ajsbutler-dependabot-node24-review-correction-evidence/record.json`.
+- Separate gate metadata:
+  `/tmp/ajsbutler-node24-plan-approval-metadata/record.json`.
+- Commit: pending. This approval does not resume Slice2, waive security/package
+  gates, approve N completion, publish, or persistently switch global nodebrew.
+
+## Node24 Direction Approval
+
+- Decision status: Approved.
+- Approved at: approved in current conversation on 2026-10-12.
+- Approved scope: the proposed development/CI Node24 direction, Prism CLI
+  5.16.0 and conditional removal of its three sibling overrides, preserving
+  VSCode1.75/browser compatibility and the standard-tool-only constraint.
+- Referenced boundary: `Pending Node24 development/CI delta` below; its exact
+  proposed paths and required checks remain the planning inputs.
+- This records the user's approval of that proposal. It does not approve a
+  security exception, claim independent Plan Review, or authorize completion,
+  publication or a persistent global nodebrew switch.
+- Replan review and planning commit remain pending. The unresolved braces route
+  and packaging validation decision prevent the complete replan from reaching
+  PLANNED; retain this approval evidence without inventing those missing gates.
 
 ## Slice 1 Completion Approval
 
@@ -58,7 +103,8 @@
   `/tmp/ajsbutler-dependabot-slice1-ready-metadata/record.json`.
 - Completion approval metadata:
   `/tmp/ajsbutler-dependabot-slice1-completion-approval/record.json`.
-- Commit: pending; this gate does not approve Slice 2 completion or publication.
+- Commit: `4ec4f8add4fa16dd25aa2efaac8ec06d0e228564`; exact two paths and
+  staged check passed. This gate does not approve Slice 2 completion/publication.
 
 ## Alias-coverage Replan Approval
 
@@ -140,35 +186,36 @@ an all-state final verification. Record source identities/times in the artifact.
 
 <!-- markdownlint-disable MD013 -->
 
-| Family | Alert numbers | Minimum security floor | Current direct-owner paths |
-| --- | --- | --- | --- |
-| fast-uri | 194, 196 | 3.1.7 | Prism/VSCE/webpack/Ajv |
-| morgan | 197 | 1.12.1 | test-web → koa-morgan |
-| markdown-it | 198 | 14.3.1 or eliminate vulnerable path | VSCE |
-| undici | 200-203, 206-207 | 7.29.1 or eliminate vulnerable path | VSCE → cheerio |
-| brace-expansion | 212, 213 | 5.0.12; 1.1.21 | ESLint/typescript-eslint/glob/Mocha/npm-run-all/minimatch |
-| postcss-selector-parser | 216 | 7.1.6 | css-loader → postcss modules |
-| source-map-js | 217 | 1.2.2 | css-loader → PostCSS |
-| shell-quote | 218 | 1.11.0 | npm-run-all |
+| Family                  | Alert numbers    | Minimum security floor              | Current direct-owner paths                                |
+| ----------------------- | ---------------- | ----------------------------------- | --------------------------------------------------------- |
+| fast-uri                | 194, 196         | 3.1.7                               | Prism/VSCE/webpack/Ajv                                    |
+| morgan                  | 197              | 1.12.1                              | test-web → koa-morgan                                     |
+| markdown-it             | 198              | 14.3.1 or eliminate vulnerable path | VSCE                                                      |
+| undici                  | 200-203, 206-207 | 7.29.1 or eliminate vulnerable path | VSCE → cheerio                                            |
+| brace-expansion         | 212, 213         | 5.0.12; 1.1.21                      | ESLint/typescript-eslint/glob/Mocha/npm-run-all/minimatch |
+| postcss-selector-parser | 216              | 7.1.6                               | css-loader → postcss modules                              |
+| source-map-js           | 217              | 1.2.2                               | css-loader → PostCSS                                      |
+| shell-quote             | 218              | 1.11.0                              | npm-run-all                                               |
 
-| Approved proposal candidate | Existing declaration | Proposed declaration/version boundary | Reason/support constraint |
-| --- | --- | --- | --- |
-| @vscode/vsce | ^3.9.2 | ^4.0.0, resolve 4.0.0 | Removes markdown-it/cheerio chain; Node >=22; CLI/package/keyring regression gate |
-| css-loader | ^7.1.4 | ^7.1.5, resolve 7.1.5 | Supported Node22 same-major CSS graph upgrade |
-| typescript-eslint | ^8.47.0 | ^8.71.1, resolve 8.71.1 | Current minimatch/lint graph; retains ESLint9 and TypeScript5.9 support |
-| webpack | ^5.106.2 | ^5.111.1, resolve 5.111.1 | Supported same-major schema-utils/build graph upgrade |
-| terser-webpack-plugin | ^5.4.0 | ^5.6.1, resolve 5.6.1 | Coupled supported same-major build/minifier graph |
+| Approved proposal candidate | Existing declaration | Proposed declaration/version boundary | Reason/support constraint                                                         |
+| --------------------------- | -------------------- | ------------------------------------- | --------------------------------------------------------------------------------- |
+| @vscode/vsce                | ^3.9.2               | ^4.0.0, resolve 4.0.0                 | Removes markdown-it/cheerio chain; Node >=22; CLI/package/keyring regression gate |
+| css-loader                  | ^7.1.4               | ^7.1.5, resolve 7.1.5                 | Supported Node22 same-major CSS graph upgrade                                     |
+| typescript-eslint           | ^8.47.0              | ^8.71.1, resolve 8.71.1               | Current minimatch/lint graph; retains ESLint9 and TypeScript5.9 support           |
+| webpack                     | ^5.106.2             | ^5.111.1, resolve 5.111.1             | Supported same-major schema-utils/build graph upgrade                             |
+| terser-webpack-plugin       | ^5.4.0               | ^5.6.1, resolve 5.6.1                 | Coupled supported same-major build/minifier graph                                 |
 
 <!-- markdownlint-enable MD013 -->
 
-These are the only direct dependency keys proposed for edits; implementation
+These are the historically approved direct dependency keys; implementation
 must justify each candidate by the actual generated path/security or redundant
 exception benefit. Do not change unrelated packages or adopt later versions
 silently. A candidate with no demonstrated benefit can remain unchanged with
 recorded evidence. No direct production declarations, engines, packageManager,
 scripts, extension metadata or contributed behavior may change.
 
-Keep Prism 5.15.10: 5.16.0 requires Node >=24.18.0. Keep test-web 0.0.80 and
+Historical approval retains Prism 5.15.10; the pending Node24 delta separately
+proposes exact CLI 5.16.0 and Node >=24.18.0. Keep test-web 0.0.80 and
 Playwright 1.59.1: test-web 0.0.81 introduces Playwright >=1.61 and would broaden
 harness/cache decisions. npm-run-all remains 4.1.5; compatible shell-quote and
 morgan resolution is preferred to a replacement script runner or unused direct
@@ -229,7 +276,7 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
 
 ## Slice 1: Establish published baseline and complete alert/override inventory
 
-- Lifecycle state: SLICE_APPROVED.
+- Lifecycle state: SLICE_COMMITTED.
 - Value: a complete identity-backed baseline and path inventory for remediation
   and later comparison; no dependency edits.
 - Edit paths: only this feature's `TASKS.md`, `TRACEABILITY.md`.
@@ -259,13 +306,15 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
 
 ## Slice 2: Upgrade direct tooling and minimize exceptional resolutions atomically
 
-- Lifecycle state: PLANNED.
+- Lifecycle state: IMPLEMENTING.
 - Value: supported security-clean relevant dependency graph with fewer forced
   resolutions and clear necessary exceptions.
 - Edit paths exactly: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`,
   this feature's `TASKS.md`, `TRACEABILITY.md`. Runtime/tests/generated files,
   workflow/configuration beyond these paths and patch contents are excluded.
-- Dependencies: Slice 1 review Ready, Completion Approval and commit.
+- Dependencies: Slice 1 and Slice N reviewed/approved completion commits; Main
+  also resolves the supported braces repair and packaging validation prerequisite
+  through separately reviewed/approved Replanning before resuming Slice2.
 - Scope: candidate direct keys/versions and all-existing-override assessment above;
   regenerate lockfile with pnpm 10.33.0, retaining only attributable resolution,
   peer/integrity and patch consequences. One atomic graph slice avoids knowingly
@@ -280,10 +329,11 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   paths, security checks and regression coverage. Demonstrate an actual reduction
   of redundant overrides; if no safe reduction/direct upgrade is possible, return
   that outcome as a decision blocker rather than silently abandoning R5/R6.
-- Preserve current desktop/browser/package behavior and Node22/VSCode1.75;
+- Preserve current desktop/browser/package behavior and completed Slice N
+  Node>=24.18.0/VSCode1.75 contracts;
   no browser Node-built-in additions, layer exceptions, parser regeneration,
-  fixture acceptance, engine increase, telemetry change or unapproved adapters.
-- Required validation: Node22 (record exact patch/platform), pnpm10.33.0,
+  fixture acceptance, further engine increase, telemetry change or unapproved adapters.
+- Required validation: Node24 (record exact patch/platform), pnpm10.33.0,
   frozen installation, affected `pnpm why`/registry/lock reconciliation and audit;
   full build, test compilation, browser accessibility/shared smoke bundles,
   desktop suite, minimum desktop smoke and web suite, OpenAPI reproducibility
@@ -367,7 +417,7 @@ with hashes/manifests/versions/commands/exits and exact identity per
 For all changed feature documents, run `rtk pnpm run lint:md`,
 `rtk git diff --check` and inspect local links/anchors, document structure,
 untracked whitespace/scope, R1-R7 traceability and gate provenance. Replan and
-Slices 1/3 use the coordination-document tier; Slice 2 uses full configuration
+Slices 1/3 use the coordination-document tier; Slices N/2 use full configuration
 checks and qlty above. Never collect implementation baseline scans just to plan.
 
 ## Risks, invalidation and exit
@@ -379,12 +429,13 @@ checks and qlty above. Never collect implementation baseline scans just to plan.
   do not require zero overrides or solve failed checks by broad coercion.
 - VSCE4 packaging/native-keyring changes may reveal platform/tooling incompatibility;
   preserve build permissions and stop for a supported alternative/new decision.
-- Node24-only Prism and Playwright/harness upgrades are excluded. Minimum VSCode,
+- The pending Node24/Prism proposal is outside historical approval until renewed.
+  Playwright/harness upgrades remain excluded. Minimum VSCode,
   bundled Node safety, patched postman behavior and existing tests are contracts.
 - Scope/design/target version/path/validation-strategy changes return to Main for
   Replanning, independent review and renewed Human Approval. Ordinary uniquely
   determined corrections remain within approved exact paths only.
-- Feature Exit requires all committed slices, current-head CI/Cloud gates where
+- Feature Exit requires all four committed slices, current-head CI/Cloud gates where
   required and R1-R7 evidence. Closure propagation/removal has separate gates;
   preserve inherited WebAPI and explicitly owned residuals.
 
@@ -462,3 +513,225 @@ checks and qlty above. Never collect implementation baseline scans just to plan.
   and build permissions are unchanged; Node22/VSCode1.75 contracts are preserved.
   No build, host, architecture-test or qlty result is claimed for this document
   slice; no user-visible change or durable documentation/changelog edit.
+
+## Slice 2 candidate evidence and decision blockers
+
+- State remains IMPLEMENTING; required acceptance is not met. No IMPLEMENTED,
+  Ready, Completion Approval or commit is claimed.
+- Evidence: `/tmp/ajsbutler-dependabot-slice2-evidence/record.json`; complete
+  candidate patch and immutable baseline/final manifests are retained there.
+- Direct candidates resolved exactly: VSCE 4.0.0, css-loader 7.1.5,
+  typescript-eslint 8.71.1, webpack 5.111.1 and terser-webpack-plugin 5.6.1.
+  Generated peer-context changes follow webpack; other direct declarations are
+  unchanged. Ordinary pnpm resolution and targeted compatible refresh removed
+  30 overrides (39 to 9); no new blanket override or manual lock resolution.
+- Eight-family results: fast-uri 3.1.8, morgan 1.12.1, brace-expansion 1.1.21
+  and 5.0.12, selector-parser 7.1.6, source-map-js 1.2.2, shell-quote 1.12.0;
+  markdown-it/cheerio/undici paths disappeared through VSCE 4.
+- Retained nine entries protect Prism sibling selection and inherited faker,
+  uuid, js-yaml, diff, lodash and serialize-javascript compatibility/security
+  constraints. `final-override-dispositions.json` records all 39 decisions,
+  generated final parents/ranges, owner and removal conditions.
+- Audit baseline: 25 advisory findings (1 critical, 10 high, 11 moderate, 3 low).
+  Candidate: one pre-existing high braces advisory and zero other severities.
+  All required eight-family floors hold; no new advisory or lower-severity
+  regression appears. `audit --audit-level moderate` still fails (exit 1).
+- Security blocker: GHSA-vfj7-8cjw-p6xm affects braces through 3.0.3 with no
+  patched release. Retained path: Prism CLI 5.15.10 to chokidar 3.6.0 to
+  braces 3.0.3. Official advisory agrees with npm baseline/final audit.
+  Production-only dependency query has no braces path; no complete production
+  VSIX exposure assurance is claimed while packaging is blocked. Main/security
+  must decide a supported upstream path or approved risk/acceptance change.
+- Packaging blocker: both baseline VSCE 3.9.2 and candidate VSCE 4.0.0 normal
+  dependency collection fail npm list with ELSPROBLEMS (exit 1). Candidate
+  normal package also fails after its prepublish build; no VSIX exists, so
+  archive/content/manifest checks are unavailable. No bypass flag was used.
+  Main must route any bundled-package validation alternative through Replanning.
+- Support blocker: baseline/candidate installed Prism CLI 5.15.10 and current
+  official registry declare Node >=24.14.0, conflicting with planned Node22
+  support. Node22 execution passes, but execution is not engine support evidence.
+  No Node engine increase or unapproved Prism change was made.
+- Passed: frozen install, full production build, test compilation, accessibility
+  and shared smoke bundles, OpenAPI reproducibility, desktop suite (1,200 cases),
+  VSCode 1.75 smoke (nine checks), real Chromium web smoke (nine checks), and
+  Prism mock HTTP 200 sample response with process/port cleanup. Architecture
+  and package-manifest boundary tests ran in the desktop suite.
+- Qlty 0.645.0 full observations: check 730 target files per snapshot, findings
+  5 to 4 with no new/adverse record; smells 437 files, 151 unchanged findings.
+  Official SARIF 2.1.0 and invocation inventories retained; final aggregate
+  passed. Four unchanged baseline warnings/notes remain independently visible.
+- Execution exceptions: package prepublish cleaned earlier test output; affected
+  preparation was regenerated before meaningful host tests. OS sandbox blocked
+  initial GUI/browser launches; authorized normal-permission retries passed.
+  Cached Playwright 1.59.1 browser passed real web tests; idle macOS installer
+  was bounded/terminated and is not marked passed. Prism temporary check used
+  the repository YAML parser after Python YAML 1.1 coerced YES incorrectly.
+- Implementation Solution Shape: pnpm/approved direct tooling own resolution;
+  security/tooling own retained exceptions. No production abstraction, layer,
+  parser generation, runtime/test/script/workflow/patch/permission or production
+  declaration change. Desktop/web behavior checks passed; engine support and
+  security/package readiness remain the explicit blockers above.
+
+## Standard-tool-only constraint and unresolved alternatives
+
+- User constraint: no custom development startup script, custom watcher, wrapper
+  or custom schema/mock mechanism. Withdraw the public-API launcher/test proposal;
+  no added script/test/fixture override or other implementation path is approved.
+- Node support correction: CLI 5.15.10 declares Node >=24.14.0; latest CLI 5.16.0
+  declares >=24.18.0. The bounded Node24 proposal follows. Node22-supported older
+  CLI 5.14.x declares >=18.20.1 but still includes chokidar3/braces.
+- Security blocker remains separate: all these investigated standard Prism CLI
+  releases retain chokidar ^3.5.2 and unpatched braces GHSA-vfj7-8cjw-p6xm. Neither
+  CLI version choice nor Node24 alone meets the unchanged no High/moderate gate.
+- Bounded routes for Main: a standard upstream CLI release that removes the
+  vulnerable route or contains an official fix (none found in examined releases);
+  or a separately selected established replacement mock CLI with supported
+  engines and proven existing fixture/static/auth/validation/reload semantics.
+  No replacement product/version is inferred from incomplete evidence. Waiting
+  for an upstream fix preserves a blocker, not feature completion.
+- Running Prism through npx/Docker or disabling watch would move/disable runtime
+  behavior without proving removal of the vulnerable dependency; these are not
+  security-resolution substitutes. No risk acceptance or audit waiver is chosen.
+- Bundled VSCE proposal uses an existing standard capability: ls/package with
+  `--no-dependencies`, production module/external proof, archive integrity, both
+  entries/resources/localization/license/manifest/content matching, no packed
+  node_modules/dev tooling, matching desktop/minimum/web checks and cleanup.
+  Normal baseline/candidate npm-list ELSPROBLEMS failures remain failed. A future
+  complete reviewed/approved validation delta is required before this option
+  can replace normal collection acceptance.
+- Withdrawn-draft and version/API observations remain retained for provenance at
+  `/tmp/ajsbutler-dependabot-launcher-replan-evidence/`; they confer no approval.
+  Constraint synchronization/document validation is indexed at
+  `/tmp/ajsbutler-dependabot-standard-tools-evidence/record.json`.
+
+## Pending Node24 development/CI delta
+
+The direction approval above refers to this retained heading. The complete
+reviewable boundary is now the standalone Slice N below; independent review and
+exact replan approval/commit precede implementation. No security/package approval
+is inferred from the user's approved Node24 direction and instruction to proceed.
+
+## Slice N: Correct development Node24 compatibility independently
+
+- Lifecycle state: PLANNED; independent Plan Review Pending. Value: declared and
+  CI development Node support match the actual standard Prism CLI requirement,
+  with maintainable parent resolution and conditional redundant pin removal.
+- Dependencies: completed Slice1 commit and approved replan commit. N completion
+  requires independent implementation review, explicit Completion Approval and
+  focused commit before Slice2 integration/resumption. Existing security findings
+  do not prevent this distinct compatibility outcome, and remain visible blockers.
+- Implementation review: this higher-risk configuration/dependency surface
+  requires two independent implementation reviews using the same valid exact-input
+  evidence. Both reviews must return Ready before Completion Approval and commit;
+  a Finding routes Main for correction/review renewal without duplicate valid checks.
+- Exact execution paths: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`,
+  `.github/workflows/verify.yml`, `CONTRIBUTING.md`, this feature's `TASKS.md` and
+  `TRACEABILITY.md`. No runtime/test/generated/fixture/patch/build-permission,
+  packageManager, script, extension metadata or production dependency edits.
+- Direct changes only: set engine Node `>=24.18.0`, set existing development
+  `@stoplight/prism-cli` to exact `5.16.0`; retain pnpm10.33.0. Keep five original
+  security-upgrade keys at Slice1 versions in N. CI setup-node@v4 selects `24.x`,
+  resolving latest supported patch (observed24.21.0); keep pnpm setup@v4/action
+  versions unchanged. No remediation automation, global nodebrew change or files.
+- CLI5.16.0 declares Node>=24.18.0 and sibling ranges ^5.16.0, giving this direct
+  upgrade a parent-resolution benefit. Conditionally remove only three existing
+  Prism sibling5.15.10 overrides after graph/engine/peer/security/mock proof;
+  retain a necessary pin with owner/range/removal rationale if removal fails.
+  No blanket version updates, later CLI, unused direct transitive declarations
+  or manual lock resolution. Regenerate with pnpm; only attributable Prism graph,
+  peer/integrity and metadata consequences are eligible in N.
+- Isolation: Main preserves root candidate/evidence, selects a clean checkout
+  rooted at Slice1 `4ec4f8add4fa16dd25aa2efaac8ec06d0e228564`, carrying only the
+  approved replan documentation commit before N execution. Implementer proves
+  starting manifest/dependency hashes match Slice1, then recreates only N delta;
+  never copy the root candidate package/workspace/lock wholesale. Exact focus
+  diff excludes the five security upgrades and unrelated 30 override removals.
+- Integration: Main owns checkout/branch choice and later combines N with the
+  retained Slice2 intent. Regenerate Slice2 lock on completed N parent, reconcile
+  any collided package/override decisions, and renew final graph/check evidence;
+  neither cherry-picking conflicting whole files nor stale candidate tests proves
+  integration. Additional package/version/path decisions require Replanning.
+- Acceptance: fresh Node24 installation supports all resolved package engines
+  (including all Prism siblings), compatible peers and usable pnpm10.33.0; exact
+  engine/CI/developer docs agree. No new/adverse audit finding relative to freshly
+  measured Slice1 baseline: reconcile advisory/package/range/severity/scope/path,
+  including count/path changes. Existing vulnerabilities, including braces, remain
+  explicitly tracked; any new vulnerability/severity or expanded exposure
+  blocks N.
+  Store all-severity `audit --json` and actual failing moderate-level status;
+  baseline failure may be expected evidence here, never called a security pass.
+- Preserve existing standard `openapi:mock` command and fixed fixture behavior:
+  default127.0.0.1:4010, static sample/auth/validation/error/CORS semantics, default
+  watch/reload, host/port forwarding, startup/error/shutdown/port cleanup. Existing
+  CLI provides these capabilities; no launcher, native watcher or schema engine.
+  Meaningful temporary manual process checks may copy fixture trees and exercise
+  existing CLI options without adding product flags, scripts or test paths.
+- Required checks on exact clean baseline/final identities: process-local Node24
+  versions/executable paths; pnpm generation then fresh install and
+  `rtk pnpm install --frozen-lockfile`; registry/why/lock engine/peer reconciliation;
+  `rtk pnpm audit --json`, `rtk pnpm audit --audit-level moderate` with honest
+  statuses/no-regression comparison; `rtk pnpm run build`, `test:compile`,
+  `test:prepare:browser:bundle`, `test:prepare:web:bundle`, `test:desktop:run`,
+  `test:desktop:min:run`, `test:web:run`, `openapi:check` and existing Prism CLI
+  process checks. Prepare unchanged Playwright as needed by existing workflow.
+  Desktop suite includes zero-exception architectureDependencyRules and
+  packageManifest; preserve VSCode^1.75/browser contracts, no host Node increase.
+- Packaging boundary: normal `rtk pnpm exec vsce ls` and normal package attempt
+  classify baseline/final tooling behavior with logs and cleanup. A newly failing
+  or materially worsened outcome blocks N. Matching inherited npm-list collection
+  failure does not certify VSIX contents and remains a required Slice2 packaging
+  blocker; N makes no package-ready or security-ready claim. No bypass flag is
+  selected or authorized in N; eventual Slice2 requires actual validated VSIX.
+- Qlty: same full-repository official baseline/final SARIF, inventories/config/
+  tool identities, no new/adverse mapped finding and final aggregate required by
+  Slice2 Quality Contract above, now on N's isolated baseline/final snapshots.
+  Run qlty>=0.645.0 check/smells commands under Node24 in both snapshots; do not
+  substitute old combined-candidate final evidence. Run final `rtk pnpm run qlty`.
+  Lint changed CONTRIBUTING explicitly as well as feature docs; local links,
+  workflow engine/pnpm consistency, exact-path focus and diff whitespace required.
+- Durable Documentation Gate: replace existing Node22 prerequisite in
+  CONTRIBUTING with Node>=24.18.0; existing developer-setup owner, no duplicated
+  setup how-to. README/CHANGELOG evaluation: extension-visible compatibility,
+  commands and behavior remain unchanged; developer prerequisite is recorded in
+  CONTRIBUTING. No user-facing extension release/change record is proposed.
+- Nodebrew: use temporary process-local Node24 first; current22.22.0 and global
+  pnpm share current/bin, so prove actual pnpm10.33 availability. Persistent
+  selection/install is separate Main/user action; retain old installed Node for
+  rollback and never assume global pnpm follows a nodebrew version switch.
+- Solution Shape: existing CLI owns mocking; Node/pnpm/Actions own execution.
+  No material abstraction, product dependency-direction change or architecture
+  exception. Tooling/security own override reasons, Main owns isolation/integration.
+  Architecture tests are mechanical facts; semantic ownership and safe reuse are
+  independent reviewer judgments. Risks: dependency semver drift/engine closure,
+  changed watch behavior, host/bundle incompatibility and unintended candidate
+  inclusion; the checks and isolation above must establish the specific outcome.
+- Evidence freshness: retain completed Slice1 and candidate observations for
+  their exact old inputs; N introduces its own baseline/final identities. Prior
+  Node22/combined-candidate checks cannot satisfy N. Slice2 integration invalidates
+  affected final install/audit/Prism/build/host/VSIX/qlty evidence; matching baseline
+  facts remain reusable. Original/alias/Slice1 approvals stay historical intact.
+- Replan scope/sequence and affected Slice2 review/approval boundary require
+  independent review and exact Main approval evidence before replan commit; no
+  N implementation/completion approval is created by this planner.
+
+## Future security and publication readiness
+
+- Slice2 remains blocked before further implementation: braces has no patched
+  examined release; CLI5.16.0 still chokidar^3.5.2. Main must supply an official
+  upstream fix or separately approved established standard-tool replacement with
+  fixture/mock behavior evidence, via bounded Replanning. No speculative version,
+  custom workaround, risk acceptance or audit exemption is authorized.
+- Slice2 existing five direct versions/eight-family floors and all39 override
+  review stay preserved. Integrate only after N completion and resolved/reviewed/
+  approved security and packaging prerequisites. Its final audit must meet no
+  High/moderate; no-regression acceptance is limited to N's compatibility outcome.
+- Standard bundled VSCE validation remains separate unapproved investigation;
+  eventual approved packaging must prove actual VSIX archive/bundle/external/
+  entry/resource/integrity/host coverage. No nonexistent artifact/check pass.
+- Slice3 requires completed Slice2 and separately authorized main publication,
+  complete alert/graph evidence and explicit residual routing. Feature exit still
+  requires all four committed slices and unchanged R1-R7 security/compatibility
+  acceptance; N completion alone does not fulfill remediation or feature purpose.
+- Preliminary `/tmp/ajsbutler-node24-investigation/record.json` proves only
+  isolated24.21.0 build/compile/OpenAPI with installed deps; not fresh install,
+  full hosts, package/security readiness. Global nodebrew unchanged.
