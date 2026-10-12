@@ -86,3 +86,34 @@ is Approved for its focused seven-path commit; retained Main approval record:
 `/tmp/ajsbutler-sliceN-completion-approval/record.json`. These separately validated
 gate annotations
 do not alter R5/R6/security/actual-VSIX/publication gates in later slices.
+
+## Slice2A baseline closure observation
+
+R7 artifact verification remains unfulfilled: fresh actual webpack statistics
+show inherited desktop HTTPS automatic externalization through the unchanged
+telemetry SDK, beyond the plan's explicitly listed desktop host external set.
+Slice2A remains IMPLEMENTING before dependency edits; Main owns the closure
+coverage decision. Raw provenance and entry bytes are in
+`/tmp/ajsbutler-dependabot-slice2a-evidence/record.json`. No VSIX/host/security
+acceptance or feature completion follows from baseline installation/build.
+
+HTTPS enumeration now follows Main's documented Correction Loop classification
+for the unchanged desktop SDK builtin; R7 still requires actual complete closure
+and artifact-host proof. No product import, security or compatibility gate changes.
+
+Actual baseline VSIX verification now blocks R7 before dependency edits: the
+CRC-valid27-entry archive includes existing webpack.web-test.config.js tooling.
+The no-packed-tooling gate needs a focused `.vscodeignore` scope decision through
+Main; current five approved paths cannot correct that exclusion. HTTPS coverage
+has its separate resolved classification. No packaged-host/closure pass is claimed.
+
+## Pending packaging-ignore delta
+
+R7 retains baseline CRC-valid27entries and one known inherited test-config
+inclusion as failed cleanliness. Final must be tooling-clean; proposed .vscodeignore
+adds only webpack.web-test.config.js exclusion after renewed review/approval.
+Exact removed entry plus attributable bundle updates must explain final diff.
+Baseline/final closure/resources/current/minimum/web artifact checks still required;
+unexecuted observations unknown. Inherited SDK desktop HTTPS enumeration permits
+no other external. R5/R6/security and completed gates unchanged; reuse valid
+baseline by identity, renew affected final proof and both implementation reviews.

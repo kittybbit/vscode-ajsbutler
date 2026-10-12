@@ -4,16 +4,17 @@
 
 - Purpose: remediate vulnerable dependencies through suitable direct upgrades,
   reduce exceptional overrides, then verify the complete published GitHub result.
-- Current plan: PLAN_APPROVED Slice2A replan; completed1/N preserved;2R blocked.
+- Current plan: PLAN_APPROVED packaging-ignore delta; prior2A paused;1/N preserved.
 - Read first: `SPECS.md`, this file, `TRACEABILITY.md`, evidence/validation policy.
 - Constraints: exact paths/versions below; automation belongs to the user;
   no custom development startup/watcher/wrapper mechanism or security waiver.
-- Next: focused approved planning commit, then implement only Slice2A;
-  root candidate stays separate. Slice2R has no implementation authorization.
+- Next: focused approved planning commit, then resume only approved Slice2A.
+  Root candidate separate;2R unauthorized.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED replan; completed1/N remain SLICE_COMMITTED.
+- Lifecycle state: PLAN_APPROVED replan; Slice2A awaits delta commit to resume;
+  completed1/N remain SLICE_COMMITTED.
 - Selected feature/base: `dependabot-post-publication-verification`,
   `origin/main` at `27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2`, fixed
   comparison base.
@@ -43,6 +44,30 @@
   `/tmp/ajsbutler-dependabot-plan-review.json`, identity
   `65fc1d07024b2a0035d63ceb47a2227d9cd65b59c26ccbd8cbbfcce1c56d159c`.
 
+## Packaging-ignore delta approval
+
+- Status: Approved; focused delta planning commit required before resumption.
+- Approved at: approved in current conversation; human explicitly approved
+  Main’s request for this reviewed one-line exclusion delta.
+- Independent Plan Review: Ready, no actionable Findings;
+  `/tmp/ajsbutler-dependabot-packaging-ignore-plan-review.json`.
+- Reviewed substantive identity:
+  `cafc38118f10ff150cbb50258242a2606a2278ffa804e5c047e8eb10d018bc1c`.
+- Reviewed patch SHA256:
+  `b6a7fd113285ef40d8d06b9c2ce9f06344a7820e13bc02a9585248be1cf5a7d4`.
+- Producer: `/tmp/ajsbutler-dependabot-packaging-ignore-replan-evidence/record.json`.
+- Separate gate metadata: `/tmp/ajsbutler-packaging-ignore-ready-metadata/record.json`.
+- Approved planning paths: selected SPECS.md, TASKS.md, TRACEABILITY.md.
+- Approved implementation paths: package.json, pnpm-workspace.yaml, pnpm-lock.yaml,
+  .vscodeignore, selected TASKS.md and TRACEABILITY.md only.
+- Main decision: add only webpack.web-test.config.js exclusion in .vscodeignore.
+  Prior approved2A gate below is preserved historical scope; it does not approve
+  this extra path or amended baseline/final cleanliness comparison.
+- Completed1/N and security/36override/fiveversion/two-review bounds unchanged.
+
+- Approval metadata: `/tmp/ajsbutler-packaging-ignore-approval-metadata/record.json`.
+- Commit: pending. Completion,2R implementation and publication remain excluded.
+
 ## Slice2A Replan Approval
 
 - Status: Approved.
@@ -64,7 +89,9 @@
 - Separate review/state metadata:
   `/tmp/ajsbutler-slice2a-plan-ready-metadata/record.json`.
 - Approval metadata: `/tmp/ajsbutler-slice2a-plan-approval-metadata/record.json`.
-- Commit: pending; implementation starts only after the approved planning commit.
+- Commit: `f1d36fe985c99a355fc8aa61006d70ead1cac450`; exact three-path
+  staged scope/patch and cached whitespace checks passed.
+- Resulting-state metadata: `/tmp/ajsbutler-slice2a-plan-commit-metadata/record.json`.
 - Historical gates remain preserved. Completion,2R implementation, publication
   and global nodebrew mutation are not authorized by this plan gate. Overall
   security acceptance and separately blocked2R/publication gates remain.
@@ -335,18 +362,29 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
 
 ## Slice 2A: Fix published vulnerable families and prove bundled compatibility
 
-- Lifecycle state: PLAN_APPROVED. Value: reduce fixable vulnerability paths and
+- Lifecycle state: IMPLEMENTING. Value: reduce fixable vulnerability paths and
   forced resolutions, with independently verified actual VSIX compatibility.
 - Dependencies: completed1/N and approved replan commit. Fresh baseline product
   identity is N3984d244; feature comparison base
   remains27d2c1f5a1029cd73a1f0504bd4aa00419b0aef2.
 - Exact implementation paths: package.json, pnpm-workspace.yaml, pnpm-lock.yaml,
-  selected TASKS.md and TRACEABILITY.md only. Preserve Node>=24.18/Prism5.16/
+  .vscodeignore, selected TASKS.md and TRACEABILITY.md after delta approval.
+  Preserve Node>=24.18/Prism5.16/
   VSCode^1.75/pnpm10.33, source/tests/generated/patches/scripts/build
   permissions/
   workflow/CONTRIBUTING. No custom startup/watch/wrapper mechanism or unused
   direct
   transitive packages. Repository tests/code changes require Main Replanning.
+- Proposed .vscodeignore edit: add exactly one webpack.web-test.config.js line
+  beside existing webpack.config.js; no other ignore edits or config deletion.
+  Unapproved one-line preview, not a product change during Replanning:
+
+  ~~~diff
+   webpack.config.js
+  +webpack.web-test.config.js
+   pnpm-lock.yaml
+  ~~~
+
 - Direct bounds: @vscode/vsce4.0.0, css-loader7.1.5, typescript-eslint8.71.1,
   webpack5.111.1, terser-webpack-plugin5.6.1, original declaration ranges above
   and exact resolved targets only; actual security/exception benefit required.
@@ -393,15 +431,20 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   this chosen standard mode needs stronger replacement closure/artifact proof.
 - Bundle closure: inventory emitted production modules desktop/web/webviews,
   externals, dynamic require/import, workers and resource/asset reads. Desktop
-  external set only vscode/hostbuiltins(os,crypto,assert,util), web only vscode.
+  external set only vscode/hostbuiltins(os,crypto,assert,util,https), web only vscode.
   No external npm or unresolved dynamic/resource dependency; ambiguity fails
   closed to Main/Replanning. node_modules ignore alone is insufficient proof.
 - BOTH actual VSIX artifacts: hash/archive integrity, manifest and main/browser
   entry hashes, all production bundles, webview/resources/grammars/localization/
   license/readme/manifest referenced paths match production output bytes.
   Inspect
-  differences. No packed node_modules/dev/source/tests/tooling or helper copies
-  hiding closure gaps. Inventory extracted files and cleanup artifacts/profiles.
+  differences. Final must exclude node_modules/dev/source/tests/tooling and
+  helpers hiding closure gaps. Unmodified N baseline retains its CRC-valid27-entry
+  archive and one inherited tooling-negative observation; never call baseline
+  cleanliness passed or repackage it to hide the failure. All baseline integrity,
+  closure/resources/isolated hosts remain mandatory. Final entry diff removes only
+  extension/webpack.web-test.config.js plus attributable dependency-update bundle
+  differences; unexpected entries fail to Main. Inventory/cleanup both artifacts.
 - Isolated packaged hosts on BOTH baseline/final: unpack actual VSIX; standard
   @vscode/test-electron and @vscode/test-web runTests explicitly point
   extensionDevelopmentPath to artifact-only root and extensionTestsPath outside
@@ -443,6 +486,30 @@ supplement exposes that risk rather than establishing complete GitHub ingestion.
   ownership. Two independent implementation reviews reuse valid evidence; BOTH
   Ready precede explicit Completion Approval/commit. No security-clean/feature/
   publication claim. README/CHANGELOG excluded: extension behavior unchanged.
+
+### Packaging delta shape and evidence renewal
+
+- Standard VSCE ignore excludes one uniquely identified nonproduction test-tool
+  file; webpack/VSCE/SDK ownership and architecture unchanged, no custom mechanism.
+  README/CHANGELOG excluded: extension behavior/production payload invariant.
+- Exact inherited https (or equivalent node:https) belongs only to unchanged
+  @vscode/extension-telemetry1.5.2 desktop SDK automatic node-commonjs external.
+  Prove current/minimum1.75 host availability; web only vscode. Other new external,
+  npm external, unresolved dynamic import/resource fails Main; no generic allowance.
+  Formal classification: /tmp/ajsbutler-slice2a-https-correction-classification.json.
+- Retain measured baseline install/build/audit25/Qlty/stats/CRC27-entry actual
+  archive with matching input/config/tool/coverage identities; added final ignore
+  never changes unmodified N baseline. Do not rerun valid baseline observations
+  solely for Replanning/review. Unexecuted baseline host/complete closure proof
+  remains unknown and required, not pass. Renew affected final artifact/host/diff/
+  graph/build/qlty evidence on new inputs, never old candidate final proof.
+- Changed Qlty doc/config inputs follow evidence freshness policy: reuse matching
+  baseline analyzed facts, renew affected final identities/selection/inventories
+  and required final aggregate. Existing full quality coverage and BOTH independent
+  implementationReady gates remain required, now including .vscodeignore scope.
+- Source /tmp/ajsbutler-dependabot-slice2a-evidence/record.json and
+  baseline-packed-tooling-blocker.json retain baseline negative facts; no final/
+  packaged-host/security-clean claim. All2A residual and2R noHigh gates unchanged.
 
 ## Slice 2R: Resolve blocked residual security before final publication
 
@@ -955,3 +1022,56 @@ is inferred from the user's approved Node24 direction and instruction to proceed
   facts remain bound to the reviewed substantive identity and this commit.
 - No root candidate integration, push, publication, global nodebrew mutation,
   security-clean result or certified VSIX. Slice2 blockers and Slice3 gates remain.
+
+## Slice2A baseline closure blocker
+
+- Lifecycle state remains IMPLEMENTING; no dependency/product edit performed.
+  Exact entry product/config bytes match completed N3984d244; fresh isolated
+  baseline frozen install/build and full Qlty/audit observations are retained.
+- Evidence: `/tmp/ajsbutler-dependabot-slice2a-evidence/record.json`, raw full
+  `baseline-webpack-stats.json` and `baseline-bundle-closure-inventory.json`.
+- Actual emitted desktop external set includes HTTPS in addition to the plan's
+  exact vscode/os/crypto/assert/util set. Web contains only vscode, webviews none.
+  HTTPS is automatically externalized as a Node host builtin by unchanged
+  @vscode/extension-telemetry1.5.2 desktop telemetryReporter, with active import
+  reasons at4:0–31 and29:28–41; emitted extension.js contains the literal require.
+- Decision required: Main must classify/route the exact desktop closure coverage
+  discrepancy before proceeding. No external npm dependency is inferred, no
+  bundled/packaged closure pass or implicit extension/source change is claimed.
+  Heavy final/artifact/host checks pause at this concrete approved-boundary gap;
+  approved dependency intent and completed1/N/root candidate remain preserved.
+
+### HTTPS baseline coverage correction
+
+- Main classified the inherited HTTPS enumeration omission as a uniquely
+  determined Correction Loop correction within the approved complete bundle
+  inventory/host builtin contract; no new product behavior, import, dependency,
+  path, owner or validation strategy. Original observations stay retained above.
+- Classification: `/tmp/ajsbutler-slice2a-https-correction-classification.json`.
+  Only unchanged SDK1.5.2 desktop Node HTTPS (including node:https spelling) is
+  added to expected host inventory; no arbitrary externals or external npm are
+  allowed. Current/minimum host availability and web absence remain required.
+- Slice2A remains IMPLEMENTING and resumes the original approved checks. The
+  baseline discrepancy is resolved as coverage correction, not closure/artifact
+  acceptance; dynamic/resource ambiguity still returns to Main before edits.
+
+## Slice2A actual baseline VSIX blocker
+
+- Lifecycle state remains IMPLEMENTING before dependency edits. Approved standard
+  baseline VSCE ls/package --no-dependencies both exit0 and produce a CRC-valid
+  VSIX with27 entries. Existing copied smoke stays outside the actual package.
+- The actual archive includes `extension/webpack.web-test.config.js`, existing
+  repository testing/build tooling. This violates the approved no-packed-tooling
+  artifact gate; `.vscodeignore` excludes webpack.config.js but omits this file.
+- Evidence: `/tmp/ajsbutler-dependabot-slice2a-evidence/record.json`,
+  `baseline.vsix`, `baseline-archive-manifest.json` and both baseline VSCE logs.
+  The archive entry bytes match the existing repository configuration; no helper
+  or fallback was added to the package, and no artifact acceptance is claimed.
+- New decision required: Main must approve a focused packaging exclusion boundary
+  including `.vscodeignore`, or select a reviewed supported strategy. That path
+  is outside current exact five implementation paths; implementer must not edit
+  it or silently waive the gate. Heavier packaged-host/final checks stop here.
+- Earlier HTTPS coverage discrepancy is resolved under Main's exact Correction
+  Loop classification; inherited SDK host-builtin coverage still needs actual
+  stable/minimum proof when artifact verification resumes. Completed1/N, approved
+  dependency intent, root candidate and separately blocked2R remain preserved.

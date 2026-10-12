@@ -97,3 +97,12 @@ Historical 17-alert identities are recoverable from Git history. Planning's
 live open-alert observation establishes concrete security floors, not final
 publication/closure. Registry metadata establishes candidate support constraints,
 not proof that installation, generated resolution or regression checks succeed.
+
+## Packaging comparison
+
+Unmodified N baseline keeps its observed single inherited test-tooling inclusion
+as a negative result; final VSIX must exclude that exact tooling entry and all
+developer/source/test dependencies. Both actual baseline/final integrity,
+production-resource closure and isolated-host checks remain mandatory. The narrow
+one-line ignore/path renewal in TASKS does not relabel baseline failure as pass
+or waive any security gate.
