@@ -69,7 +69,6 @@ const sharedResultFiles = [
   "ResultSection.tsx",
   "ResultStatusChip.tsx",
   "ResultComparison.tsx",
-  "formatLocalizedDateRange.ts",
 ] as const;
 const semanticDiffExplorerBrowserModules = [
   "semanticDiffExplorerFocus.ts",
@@ -355,13 +354,9 @@ suite("Architecture Semantic Diff ownership", () => {
         ).filter(
           ({ specifier }) =>
             specifier.includes("webview/semantic-diff/semanticDiffExplorer") ||
-            specifier.includes("webview/editor/scheduleImpactCalendarBridge") ||
             specifier.includes("/semantic-diff/semanticDiffExplorerFlow") ||
             specifier.includes("/semantic-diff/semanticDiffExplorerPanel") ||
-            specifier.includes("/semantic-diff/semanticDiffExplorerRegistry") ||
-            /webview\/scheduleImpactCalendar(?:Json|Panel|PanelRuntime|SessionRegistry|Transport)/u.test(
-              specifier,
-            ),
+            specifier.includes("/semantic-diff/semanticDiffExplorerRegistry"),
         );
       },
     );
@@ -384,10 +379,6 @@ suite("Architecture Semantic Diff ownership", () => {
     assert.match(
       webpackSource,
       /semanticDiffExplorer:\s*"\.\/src\/presentation\/webview\/editor\/semanticDiffExplorer\.tsx"/u,
-    );
-    assert.doesNotMatch(
-      webpackSource,
-      /scheduleImpactCalendar:\s*"\.\/src\/presentation\/webview\/editor\/scheduleImpactCalendar\.tsx"/u,
     );
 
     const browserImports = [

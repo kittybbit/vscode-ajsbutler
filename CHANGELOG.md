@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Removed the Semantic Diff Schedule Impact Calendar and its related action.
+- Removed Semantic Diff execution-date simulation, comparison periods, and
+  Schedule Impact Calendar. Definition attributes remain comparable. JSON
+  output uses schema version 2 without simulation fields.
 
 - Corrected UTF-16 source ranges and semantic diagnostic highlights for AJS
   definitions containing supplementary Unicode characters.
@@ -10,8 +12,7 @@
   marks appear without repeating the action.
 - Unified Semantic Diff Explorer MUI filter menus
   and opaque scrolling surfaces across themes and narrow layouts.
-- Added consistent localized date ranges and before/after comparison layouts
-  to Semantic Diff Explorer.
+- Added consistent before/after comparison layouts to Semantic Diff Explorer.
 - Kept each result label/value fact on its own readable row and simplified
   Explorer detail presentation.
 - Improved Semantic Diff Explorer result
@@ -21,8 +22,8 @@
   `g`/`mg` job groups have distinct canonical paths, while preserving
   conservative ambiguity for duplicate paths.
 - Improved Semantic Diff with the `Compare Definition` workflow: choose a
-  definition file or an optional Git `HEAD` source, carry an optional schedule
-  period, and open one reusable Explorer context. Git access is feature
+  definition file or an optional Git `HEAD` source and open one reusable
+  Explorer context. Git access is feature
   detected, uses the captured commit and decoded provider output, and degrades
   safely when the Git API or repository is unavailable; no Git executable,
   direct `.git` access, or implicit report copy is used.
@@ -37,28 +38,11 @@
 - Added Summary, Full, Audit, and deterministic JSON Semantic Diff outputs,
   with Full as the default human-readable mode and explicit Markdown copy and
   output save actions.
-- Expanded Semantic Diff schedule comparison to calculate fully qualified
-  Gregorian month-end (`YYYY/MM/b`, `YYYY/MM/b-DD`) and absolute weekday
-  (`YYYY/MM/{weekday}`, `:n`, `:b`) forms while preserving existing
-  omitted-component and calendar-dependent limitations.
-- Expanded schedule comparison for fully qualified relative dates by resolving
-  `jc` or containing-group context, closest `sdd`/`md`/`stt` values, and the
-  documented defaults without consulting host or external calendars. Missing
-  or invalid definition context remains explicit.
-- Expanded schedule comparison for fully qualified open-day and closed-day
-  forms by using complete definition-backed `op`/`cl` classifications, with
-  exact-date precedence, bounded operational-month counting, and no host or
-  external calendar fallback.
-- Expanded schedule comparison with deterministic closed-day substitution for
-  `sh=be`, `sh=af`, and `sh=ca`, including rule-associated `shd`, the v13
-  default of two days, and a bounded 31-day lookaround. Invalid or incomplete
-  definitions, `sh=no`, and `cy`/`cftd` interactions remain explicit rather
-  than being resolved from external service state.
 - Improved Semantic Diff Markdown reports so English and Japanese output
   explains typed identity rules, strategies, canonical fields, and all
   ambiguous candidates while preserving raw JP1/AJS values safely.
 - Added evidence-based Semantic Diff review recommendations for supported
-  start-condition, calculated-schedule-run, external-wait-target,
+  start-condition, external-wait-target,
   execution-user-type, and JP1 resource-group changes; unsupported runtime,
   account, permission, authorization, and contention facts remain explicit as
   unverified.

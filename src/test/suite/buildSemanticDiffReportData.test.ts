@@ -83,6 +83,10 @@ suite("Build Semantic Diff Report Data", () => {
       "unit=after,,jp1admin,;",
     ]);
     assert.strictEqual(observations.comparedInputs.length, 1);
+    assert.deepStrictEqual(Object.keys(observations.comparedInputs[0]), [
+      "before",
+      "after",
+    ]);
     assert.deepStrictEqual(result, {
       ok: true,
       result: {
@@ -120,5 +124,32 @@ suite("Build Semantic Diff Report Data", () => {
     ]);
     assert.strictEqual(result.errors.after.length, 0);
     assert.deepStrictEqual(observations.comparedInputs, []);
+  });
+  test("uses the capture-scoped parser once per side and keeps errors separate", () => {
+    const { observations, build } = createHarness();
+    const calls: string[] = [];
+    const scopedParser: AjsParserPort = {
+      parse: (content) => {
+        calls.push(content);
+        return {
+          ok: false,
+          errors: [{ line: 2, column: 3, message: content }],
+        };
+      },
+    };
+    const result = build(
+      { beforeContent: "before error", afterContent: "after error" },
+      scopedParser,
+    );
+    assert.deepStrictEqual(calls, ["before error", "after error"]);
+    assert.deepStrictEqual(observations.parsedContents, []);
+    assert.deepStrictEqual(observations.comparedInputs, []);
+    assert.deepStrictEqual(result, {
+      ok: false,
+      errors: {
+        before: [{ line: 2, column: 3, message: "before error" }],
+        after: [{ line: 2, column: 3, message: "after error" }],
+      },
+    });
   });
 });

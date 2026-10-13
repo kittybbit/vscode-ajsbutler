@@ -54,10 +54,9 @@ const view = (): SemanticDiffExplorerViewModel => ({
     {
       id: "unsupported",
       count: 0,
-      counts: { unsupported: 0, uninterpretable: 0, uncalculated: 0 },
+      counts: { unsupported: 0, uninterpretable: 0 },
     },
     { id: "limitations", count: 0, counts: { total: 0 } },
-    { id: "schedule-run-changes", count: 0, counts: { total: 0 } },
   ],
   tree: {
     id: "root",
@@ -99,8 +98,6 @@ const detail = () => ({
     },
     after: null,
   },
-  scheduleRule: null,
-  period: { from: "2026-01-01", to: "2026-01-02" },
   beforeValues: ["before"],
   afterValues: ["after"],
   rawValues: [],
@@ -118,7 +115,11 @@ const validConfirmationView = (): SemanticDiffExplorerViewModel => {
     relatedTargets: [],
     detail: detail(),
     constraints: [
-      { code: "comparison-period" as const, detail: detail(), warning: null },
+      {
+        code: "runtime-state-not-verified" as const,
+        detail: detail(),
+        warning: null,
+      },
     ],
     warning: { code: "warning", detail: detail(), fallbackText: null },
     actions: {
@@ -364,7 +365,7 @@ suite("Semantic Diff Explorer messages", () => {
       id: "unsupported:one:0",
       recordId: "one",
       unsupportedKind: "unsupported" as const,
-      reasonCode: "cycle-schedule",
+      reasonCode: "uninterpretable-file-monitoring-condition",
       targetSide: "after" as const,
       target: { side: "after" as const, value: unitTarget },
       detail: detail(),
@@ -388,7 +389,7 @@ suite("Semantic Diff Explorer messages", () => {
     );
   });
 
-  test("enforces card, tree, filter, and schedule invariants", () => {
+  test("enforces card, tree, and filter invariants", () => {
     const valid = validSessionMessage();
     const malformed = (payload: unknown) =>
       parseSemanticDiffExplorerHostMessage({ ...valid, payload });
@@ -448,58 +449,6 @@ suite("Semantic Diff Explorer messages", () => {
     const sparseChildren = cloneMutable(valid.payload);
     sparseChildren.tree.children = new Array(1);
     assert.strictEqual(malformed(sparseChildren), undefined);
-
-    const invalidSchedule = cloneMutable(valid.payload);
-    const scheduleLeaf = {
-      kind: "schedule" as const,
-      id: "schedule:one:0",
-      recordId: "one",
-      change: {
-        id: "one",
-        kind: "added" as const,
-        unitPath: "/group/unit",
-        date: "2026-01-01",
-        before: null,
-        after: {
-          unitPath: "/group/unit",
-          unitName: "Unit",
-          rule: 1,
-          date: "2026-01-01",
-          time: "01:00",
-        },
-      },
-      targetSide: null,
-      target: { side: null, value: null },
-      actions: {
-        source: {
-          available: false,
-          actionId: null,
-          unavailableReason: "missing-target-side" as const,
-        },
-        flow: {
-          available: false,
-          actionId: null,
-          unavailableReason: "missing-target-side" as const,
-        },
-      },
-    };
-    invalidSchedule.tree.children[0].leaves = [scheduleLeaf];
-    invalidSchedule.cards = invalidSchedule.cards.map((card) =>
-      card.id === "schedule-run-changes"
-        ? { ...card, count: 1, counts: { total: 1 } }
-        : card.id === "confirmation-required"
-          ? { ...card, count: 0, counts: { required: 0 } }
-          : card,
-    );
-    invalidSchedule.leafCount = 1;
-    invalidSchedule.status = "findings";
-    assert.ok(malformed(invalidSchedule));
-    (
-      invalidSchedule.tree.children[0].leaves[0] as {
-        change: { before: unknown };
-      }
-    ).change.before = {};
-    assert.strictEqual(malformed(invalidSchedule), undefined);
   });
 
   test("validates host session, failure, close, and the fixed 8 MiB boundary", () => {

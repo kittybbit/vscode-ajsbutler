@@ -83,12 +83,9 @@ const summaryWithEveryBucket = (): SemanticDiffSummary => ({
   unsupportedCountsByKind: {
     unsupported: 19,
     uninterpretable: 20,
-    uncalculated: 21,
   },
   confirmationRequiredCount: 22,
   limitationCount: 23,
-  scheduleRunChangeCount: 24,
-  hasUncalculated: true,
   hasFindings: true,
 });
 
@@ -162,8 +159,6 @@ const allReasonCodes: SemanticDiffConfirmationRequiredItem["reasonCode"][] = [
   "timeout-removed",
   "condition-judgment-changed",
   "wait-target-changed",
-  "no-calculated-schedule-run",
-  "calculated-schedule-run-removed",
   "execution-user-type-changed",
   "jp1-resource-group-changed",
 ];
@@ -175,7 +170,6 @@ const confirmation = (
   const detail = createSemanticDiffDetail({
     unitPath: "/root/after-unit",
     parameterKey: reasonCode === "jp1-resource-group-changed" ? "rg" : "cond",
-    period: { from: "2026-04-01", to: "2026-05-01" },
     beforeValues: [`before-${index}*`],
     afterValues: [`after-${index}_[x]`],
     rawValues: [`raw-${index}`],
@@ -195,7 +189,9 @@ const confirmation = (
     constraints: [
       {
         code:
-          index % 2 === 0 ? "runtime-state-not-verified" : "comparison-period",
+          index % 2 === 0
+            ? "runtime-state-not-verified"
+            : "runtime-state-not-verified",
         detail,
         warning: null,
       },
@@ -208,7 +204,6 @@ const auditResult = (): SemanticDiffResult => {
   const detail = createSemanticDiffDetail({
     unitPath: "/root/after-unit",
     parameterKey: "flwc",
-    period: { from: "2026-04-01", to: "2026-05-01" },
     rawValues: ["raw*_[x]"],
     relationPair,
   });
@@ -219,16 +214,16 @@ const auditResult = (): SemanticDiffResult => {
   });
   const unsupported: SemanticDiffUnsupportedItem = {
     id: "unsupported:audit",
-    kind: "uncalculated",
+    kind: "uninterpretable",
     side: "after",
-    reasonCode: "invalid-schedule-comparison-period",
+    reasonCode: "uninterpretable-file-monitoring-condition",
     target: { kind: "unit", unit: reference("after-unit") },
     detail,
     warning,
   };
   const limitation: SemanticDiffLimitation = {
-    code: "invalid_schedule_comparison_period",
-    kind: "uncalculated",
+    code: "normalization-warning",
+    kind: "uninterpretable",
     side: null,
     unitPath: null,
     detail,
@@ -240,31 +235,6 @@ const auditResult = (): SemanticDiffResult => {
     confirmationRequired: allReasonCodes.map(confirmation),
     unsupportedItems: [unsupported],
     limitations: [limitation],
-    scheduleComparison: {
-      period: { from: "2026-04-01", to: "2026-05-01" },
-      runChanges: [
-        {
-          id: "schedule:changed-time:/root/after-unit:2026-04-01",
-          kind: "changed-time",
-          unitPath: "/root/after-unit",
-          date: "2026-04-01",
-          before: {
-            unitPath: "/root/after-unit",
-            unitName: "after-unit",
-            rule: 1,
-            date: "2026-04-01",
-            time: "09:00",
-          },
-          after: {
-            unitPath: "/root/after-unit",
-            unitName: "after-unit",
-            rule: 1,
-            date: "2026-04-01",
-            time: "10:00",
-          },
-        },
-      ],
-    },
   });
 };
 
@@ -276,14 +246,14 @@ const markdownBaselineSnapshots = {
   empty: {
     summary: {
       english: {
-        bytes: 649,
+        bytes: 608,
         digest:
-          "a07671a307b3a7808e99961eda54749c31cf33be90bd2b5b0df1c0f19616d418",
+          "ecf124ab1b46057bf8030264255a9f76036998869e335aaecc9c6d9e288b827a",
       },
       japanese: {
-        bytes: 697,
+        bytes: 659,
         digest:
-          "949e14e6393f6458878c7d9e9855160633feeb348ab38a629f2a72ac0d60db2e",
+          "4aeb88c8cf694ae7f196a9c53dfd8e5e1f3c93c5c041a4dba4824baeb441089c",
       },
     },
     full: {
@@ -300,52 +270,52 @@ const markdownBaselineSnapshots = {
     },
     audit: {
       english: {
-        bytes: 637,
+        bytes: 589,
         digest:
-          "e91e36bfedcb169ecc203e512467bbd1d326f7680a41d4da2f860a3b6af15db2",
+          "b4ad8640103bfdca5d511ecd268771aebd39fc084058adc12a9330664105c492",
       },
       japanese: {
-        bytes: 755,
+        bytes: 685,
         digest:
-          "aef6a111b16cdb8f032374b19461c4a69dccad9a458801b43e1d2bab5b1b701f",
+          "da8cb0d9d40ae526427d36ec61d1e377b5930f17f99db3a0bd0451eab79c0f9d",
       },
     },
   },
   populated: {
     summary: {
       english: {
-        bytes: 744,
+        bytes: 609,
         digest:
-          "9a880a196428d4dc34a50c9cc8dacfc688d8ea2d40407594d78e63742b2ebad2",
+          "b1e8c7255d955cb5c1d864572d85571a578a35c0e770aa86e7484a3b4d3add1a",
       },
       japanese: {
-        bytes: 821,
+        bytes: 659,
         digest:
-          "058153443afad7987d50cdafd6a4c41ad7d0b88d26450b1f670b331ea565cabc",
+          "da3b46c1d1f5c7412f6d0e2ba1491c65d7e8e9ab7e151a41a02fabe7f750b70c",
       },
     },
     full: {
       english: {
-        bytes: 3610,
+        bytes: 2702,
         digest:
-          "48458048dac57949170aa715b62e39d807196945fee44dea808ac1cc5eec959c",
+          "302a21b0f53860d6454187c964574f69b5988a48be90f30e17c4e42d5df7683a",
       },
       japanese: {
-        bytes: 3612,
+        bytes: 2645,
         digest:
-          "d1c4d9b68e7cfdd217d43e68523793364f84222c249452561f0f543f0b63f965",
+          "3aa1828317e7fad94cce900c43f65db30aeb73070b7f240cbb6f2ab7ee5e4f5e",
       },
     },
     audit: {
       english: {
-        bytes: 16605,
+        bytes: 11765,
         digest:
-          "0a9cdf05bbea7f7ed2165e98d30f1a3083e139d015caed0048a6ef4cdaa3ab51",
+          "89f9468129b879209e377d0fefd82a79ca139491df2815f32dc0c4d067cc3657",
       },
       japanese: {
-        bytes: 18259,
+        bytes: 12731,
         digest:
-          "dbe6723717dae15e60deec05c72c4a81deb6e27f2fad61787253b3cce162213c",
+          "fbbc4cacd122d55b121f4ea62e69957d6bba9632f0a0a0ef8068fda1d43ff811",
       },
     },
   },
@@ -393,12 +363,7 @@ const populatedMarkdownContext = (): SemanticDiffOutputContext => {
 
 suite("Semantic Diff Markdown Projections", () => {
   test("formats the supplied summary without aggregating result records", () => {
-    const result = emptyResult({
-      scheduleComparison: {
-        period: { from: "2026-04-01", to: "2026-05-01" },
-        runChanges: [],
-      },
-    });
+    const result = emptyResult({});
     const context: SemanticDiffOutputContext = Object.freeze({
       result,
       summary: summaryWithEveryBucket(),
@@ -409,23 +374,15 @@ suite("Semantic Diff Markdown Projections", () => {
     assert.ok(report.includes("- added: 1"));
     assert.ok(report.includes("- relation: 9"));
     assert.ok(report.includes("- Schedule: 18"));
-    assert.ok(report.includes("- uncalculated: 21"));
     assert.ok(report.includes("- Confirmation-required count: 22"));
     assert.ok(report.includes("- Limitation count: 23"));
-    assert.ok(report.includes("## Schedule run-change count\n\n- 24"));
-    assert.ok(report.includes("- Uncalculated: present"));
     assert.ok(report.includes("- Findings: present"));
     assert.strictEqual(report.includes("change:unit"), false);
     assert.strictEqual(report.includes("raw*_[x]"), false);
   });
 
-  test("localizes Summary while preserving raw scopes and periods", () => {
-    const result = emptyResult({
-      scheduleComparison: {
-        period: { from: "2026-04-01", to: "2026-05-01" },
-        runChanges: [],
-      },
-    });
+  test("localizes Summary while preserving raw scopes", () => {
+    const result = emptyResult({});
     const context = Object.freeze({
       result,
       summary: summaryWithEveryBucket(),
@@ -435,33 +392,17 @@ suite("Semantic Diff Markdown Projections", () => {
     assert.ok(report.includes("# 意味差分サマリー"));
     assert.ok(report.includes("## 変更種別ごとの変更"));
     assert.ok(report.includes("/before"));
-    assert.ok(report.includes("2026-04-01"));
-    assert.ok(report.includes("未計算: あり"));
     assert.ok(report.includes("所見: あり"));
   });
 
-  test("uses zero-inclusive summary buckets and distinguishes missing from zero-run schedules", () => {
-    const absent = renderSemanticDiffSummaryMarkdown(
+  test("uses zero-inclusive summary buckets for empty definition results", () => {
+    const report = renderSemanticDiffSummaryMarkdown(
       buildSemanticDiffOutputContext(emptyResult()),
     );
-    const zeroRun = renderSemanticDiffSummaryMarkdown(
-      buildSemanticDiffOutputContext(
-        emptyResult({
-          scheduleComparison: {
-            period: { from: "2026-04-01", to: "2026-05-01" },
-            runChanges: [],
-          },
-        }),
-      ),
-    );
-
-    assert.ok(absent.includes("- added: 0"));
-    assert.ok(absent.includes("- attribute: 0"));
-    assert.ok(absent.includes("- uncalculated: 0"));
-    assert.strictEqual(absent.includes("Schedule run-change count"), false);
-    assert.ok(zeroRun.includes("## Schedule run-change count\n\n- 0"));
-    assert.ok(zeroRun.includes("Comparison period: 2026-04-01 to 2026-05-01"));
-    assert.ok(zeroRun.includes("- Findings: absent"));
+    assert.ok(report.includes("- added: 0"));
+    assert.ok(report.includes("- attribute: 0"));
+    assert.ok(report.includes("- uninterpretable: 0"));
+    assert.ok(report.includes("- Findings: absent"));
   });
 
   test("renders Full and Audit from the same context without rebuilding facts", () => {
@@ -485,67 +426,6 @@ suite("Semantic Diff Markdown Projections", () => {
       audit.includes(
         "Definition-derived evidence; runtime and external state were not verified.",
       ),
-    );
-  });
-
-  test("renders calculated schedule removal from typed before values in Full", () => {
-    const result = auditResult();
-    const removedDetail = createSemanticDiffDetail({
-      unitPath: "/root/schedule-job",
-      scheduleRule: 1,
-      period: { from: "2026-04-01", to: "2026-05-01" },
-      beforeValues: ["date=2026-04-11", "time=10:00"],
-      rawValues: [],
-    });
-    result.confirmationRequired = result.confirmationRequired.map((item) =>
-      item.reasonCode === "calculated-schedule-run-removed"
-        ? {
-            ...item,
-            target: {
-              kind: "jobnet",
-              unit: reference("schedule-job", "/root/schedule-job"),
-            },
-            detail: removedDetail,
-            constraints: item.constraints.map((constraint) => ({
-              ...constraint,
-              detail: removedDetail,
-            })),
-            warning: null,
-          }
-        : item,
-    );
-
-    const context = buildSemanticDiffOutputContext(result);
-    const full = renderSemanticDiffFullMarkdown(context);
-    assert.ok(
-      full.includes(
-        "- schedule-job calculated schedule run 2026-04-11 10:00 removed\n",
-      ),
-    );
-    assert.strictEqual(
-      full.includes("schedule-job calculated schedule run removed"),
-      false,
-    );
-
-    const audit = renderSemanticDiffAuditMarkdown(
-      buildSemanticDiffOutputContext(result),
-    );
-    assert.ok(audit.includes("Before values: [date=2026-04-11, time=10:00]"));
-    assert.ok(audit.includes("Raw values: []"));
-    const removedConfirmation = result.confirmationRequired.find(
-      (item) => item.reasonCode === "calculated-schedule-run-removed",
-    );
-    assert.deepStrictEqual(removedConfirmation?.detail.beforeValues, [
-      "date=2026-04-11",
-      "time=10:00",
-    ]);
-    assert.deepStrictEqual(removedConfirmation?.detail.rawValues, []);
-
-    const japanese = renderSemanticDiffFullMarkdown(context, "ja-JP");
-    assert.ok(japanese.includes("変更内容を確認してください"));
-    assert.strictEqual(
-      japanese.includes("calculated schedule run 2026-04-11 10:00"),
-      false,
     );
   });
 
@@ -585,7 +465,7 @@ suite("Semantic Diff Markdown Projections", () => {
     });
   });
 
-  test("Audit includes identity, all nine reasons, details, warnings, limitations, and schedule facts", () => {
+  test("Audit includes identity, all seven reasons, details, warnings, limitations, and definition facts", () => {
     const context = buildSemanticDiffOutputContext(auditResult());
     const report = renderSemanticDiffAuditMarkdown(context);
 
@@ -599,12 +479,10 @@ suite("Semantic Diff Markdown Projections", () => {
     assert.ok(report.includes("command-text-v1"));
     assert.ok(report.includes("echo \\*\\_\\[x\\]"));
     assert.ok(report.includes("runtime-state-not-verified"));
-    assert.ok(report.includes("comparison-period"));
+    assert.ok(report.includes("runtime-state-not-verified"));
     assert.ok(report.includes("unsupported-warning"));
     assert.ok(report.includes("fallback \\*\\_\\[x\\]"));
-    assert.ok(report.includes("invalid-schedule-comparison-period"));
-    assert.ok(report.includes("invalid\\_schedule\\_comparison\\_period"));
-    assert.ok(report.includes("2026-04-01 -> 2026-05-01"));
+    assert.ok(report.includes("uninterpretable-file-monitoring-condition"));
     assert.ok(report.includes("raw-0"));
     assert.ok(report.includes("release-a"));
     assert.ok(report.includes("source-unit->target-unit (con)"));

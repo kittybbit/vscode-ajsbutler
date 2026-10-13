@@ -3,7 +3,6 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffLimitation,
   SemanticDiffOutputContext,
-  SemanticDiffScheduleRunChange,
   SemanticDiffUnsupportedItem,
 } from "./semanticDiffDto";
 import type {
@@ -22,7 +21,6 @@ import {
   confirmationLeaf,
   freeze,
   limitationLeaf,
-  scheduleLeaf,
   unsupportedLeaf,
 } from "./semanticDiffExplorerProjectionSupport";
 
@@ -91,15 +89,6 @@ const limitationLeaves = (
   );
 };
 
-const scheduleLeaves = (
-  records: readonly SemanticDiffScheduleRunChange[],
-): SemanticDiffExplorerLeaf[] => {
-  const nextOccurrence = occurrenceCounter();
-  return sortedRecords(records, (item) => item.id).map((item) =>
-    scheduleLeaf(item, nextOccurrence(`schedule:${item.id}`)),
-  );
-};
-
 export const createLeaves = (
   context: SemanticDiffOutputContext,
   actionIdAllocator: SemanticDiffExplorerActionIdAllocator,
@@ -112,7 +101,6 @@ export const createLeaves = (
     ),
     ...unsupportedLeaves(context.result.unsupportedItems, actionIdAllocator),
     ...limitationLeaves(context.result.limitations),
-    ...scheduleLeaves(context.result.scheduleComparison?.runChanges ?? []),
   ]);
 
 const total = (counts: Readonly<Record<string, number>>): number =>
@@ -155,9 +143,6 @@ export const buildCards = (
     ),
     card("limitations", summary.limitationCount, {
       total: summary.limitationCount,
-    }),
-    card("schedule-run-changes", summary.scheduleRunChangeCount, {
-      total: summary.scheduleRunChangeCount,
     }),
   ]);
 };

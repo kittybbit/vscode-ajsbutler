@@ -111,19 +111,11 @@ const buildLimitationFacts: LeafFactBuilder<"limitation"> = (leaf, labels) => {
     reason: labels.state(leaf.code),
   };
 };
-const buildScheduleFacts: LeafFactBuilder<"schedule"> = (leaf, labels) => ({
-  changeKind: null,
-  state: labels.state(leaf.change.kind),
-  unsupportedKind: null,
-  reason: null,
-});
-
 const leafFactBuilders = {
   change: buildChangeFacts,
   confirmation: buildConfirmationFacts,
   unsupported: buildUnsupportedFacts,
   limitation: buildLimitationFacts,
-  schedule: buildScheduleFacts,
 };
 
 const leafFacts = ({
@@ -141,9 +133,7 @@ const leafFacts = ({
 const leafTarget = (
   leaf: SemanticDiffExplorerLeaf,
 ): SemanticDiffTarget | null =>
-  leaf.kind === "limitation" || leaf.kind === "schedule"
-    ? null
-    : leaf.target.value;
+  leaf.kind === "limitation" ? null : leaf.target.value;
 
 const leafLabel = ({
   leaf,
@@ -297,7 +287,6 @@ const ExplorerRowView = ({
   row,
   selected,
   labels,
-  language,
   onSelect,
   onToggle,
   onAction,
@@ -328,7 +317,6 @@ const ExplorerRowView = ({
       row={row}
       selected={selected}
       labels={labels}
-      language={language}
       onSelect={onSelect}
       onAction={onAction}
       rowRef={rowRef}
@@ -340,7 +328,6 @@ const ExplorerLeafRow = ({
   row,
   selected,
   labels,
-  language,
   onSelect,
   onAction,
   rowRef,
@@ -348,7 +335,6 @@ const ExplorerLeafRow = ({
   row: ExplorerRow;
   selected: boolean;
   labels: SemanticDiffExplorerLabels;
-  language: string;
   onSelect: () => void;
   onAction?: (id: string, element?: HTMLElement) => void;
   rowRef: (element: HTMLElement | null) => void;
@@ -389,7 +375,6 @@ const ExplorerLeafRow = ({
         facts={facts}
         labels={labels}
         leaf={leaf}
-        language={language}
         rowId={row.id}
       />
       <ExplorerLeafActions leaf={leaf} labels={labels} onAction={onAction} />
@@ -401,16 +386,14 @@ const ExplorerLeafFacts = ({
   facts,
   labels,
   leaf,
-  language,
   rowId,
 }: Readonly<{
   facts: LeafFacts;
   labels: SemanticDiffExplorerLabels;
   leaf: SemanticDiffExplorerLeaf;
-  language: string;
   rowId: string;
 }>): React.ReactElement => {
-  const details = buildExplorerLeafDetails({ leaf, labels, language });
+  const details = buildExplorerLeafDetails({ leaf, labels });
   const target = targetLabel({ target: leafTarget(leaf), labels });
   return (
     <>

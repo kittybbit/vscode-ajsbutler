@@ -1,8 +1,15 @@
+import {
+  buildSemanticDiffOutputContext,
+  type SemanticDiffOutputContext,
+} from "../../../application/semantic-diff/buildSemanticDiffOutputContext";
+import {
+  openWorkflowContext,
+  type WorkflowContextOpenDeps,
+} from "./semanticDiffCommandExplorerWorkflow";
 import type {
-  BuildSemanticDiffPresentationArtifactsInput,
-  BuildSemanticDiffPresentationArtifactsResult,
-  SemanticDiffPresentationArtifacts,
-} from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+  BuildSemanticDiffReportDataInput,
+  BuildSemanticDiffReportDataResult,
+} from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import { isSemanticDiffSourceCaptureError } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import {
   continueCommandStep,
@@ -22,117 +29,74 @@ import {
   type WorkflowSourceDescriptor,
   type WorkflowSourceRequest,
 } from "./semanticDiffCommandWorkflowSource";
-import {
-  selectWorkflowPeriodStep,
-  type WorkflowPeriodSelection,
-} from "./semanticDiffCommandWorkflowPeriod";
 import { parseFailureMessage } from "./semanticDiffCommandWorkflowInput";
 import { readWorkflowAfterSnapshot } from "./semanticDiffCommandWorkflowInput";
-import {
-  bindWorkflowCapture,
-  createSourceCaptureRelease,
-  registerWorkflowSource,
-  unregisterAndReleaseWorkflowCapture,
-  type SourceBinding,
-} from "./semanticDiffCommandSourceBinding";
+import { createSourceCaptureRelease } from "./semanticDiffCommandSourceBinding";
 import type { SemanticDiffExplorerSessionHandle } from "../semantic-diff/panel/semanticDiffExplorerPanel";
 
-type WorkflowArtifactBuildDeps = Pick<
+type WorkflowContextBuildDeps = Pick<
   SemanticDiffCommandDeps,
   | "sourceHandleIdAllocator"
   | "beginSemanticDiffSourceCapture"
-  | "buildSemanticDiffPresentationArtifacts"
+  | "buildSemanticDiffReportData"
+  | "buildSemanticDiffOutputContext"
 >;
-type WorkflowArtifactOpenDeps = Pick<
-  SemanticDiffCommandDeps,
-  | "registerSemanticDiffSourceCapture"
-  | "unregisterSemanticDiffSourceCapture"
-  | "openExplorer"
->;
+
 type FileComparisonWorkflowDeps = Pick<
   SemanticDiffCommandDeps,
-  "getActiveEditor" | "showInputBox" | "language"
+  "getActiveEditor" | "language"
 > &
   WorkflowSourcePreparationDeps &
-  WorkflowArtifactBuildDeps &
-  WorkflowArtifactOpenDeps;
-export type ComparisonCompatibilityWorkflowDeps = FileComparisonWorkflowDeps &
-  Pick<SemanticDiffCommandDeps, "scheduleComparisonPeriod">;
+  WorkflowContextBuildDeps &
+  WorkflowContextOpenDeps;
 
 export type WorkflowExplorerResult = Readonly<{
   handle: SemanticDiffExplorerSessionHandle;
   source: "file" | "git-head";
-  period: "not-requested" | "evaluated";
 }>;
 
-export type WorkflowArtifactState = Readonly<{
-  artifacts: SemanticDiffPresentationArtifacts;
+export type WorkflowContextState = Readonly<{
+  context: SemanticDiffOutputContext;
   capture: WorkflowCaptureState["capture"];
   sources: {
     before: WorkflowSourceDescriptor;
     after: WorkflowSourceDescriptor;
   };
   source: "file" | "git-head";
-  period: "not-requested" | "evaluated";
   release: () => void;
 }>;
 
-type WorkflowArtifactSelection = Extract<
-  WorkflowPeriodSelection,
-  { kind: "not-requested" | "evaluated" }
->;
-
-export type WorkflowArtifactBuildOptions = Readonly<{
-  deps: WorkflowArtifactBuildDeps;
+export type WorkflowContextBuildOptions = Readonly<{
+  deps: WorkflowContextBuildDeps;
   source: WorkflowSourceRequest;
-  selection: WorkflowArtifactSelection;
   localization: SemanticDiffCommandLocalization;
 }>;
 
-type WorkflowArtifactResultContext = Readonly<{
-  result: BuildSemanticDiffPresentationArtifactsResult;
+type WorkflowContextResultContext = Readonly<{
+  deps: WorkflowContextBuildDeps;
+  result: Extract<BuildSemanticDiffReportDataResult, { ok: true }>;
   capture: WorkflowCaptureState;
   source: WorkflowSourceRequest;
-  selection: WorkflowArtifactSelection;
   localization: SemanticDiffCommandLocalization;
   release: () => void;
 }>;
 
-const isWorkflowParseFailure = (
-  result: BuildSemanticDiffPresentationArtifactsResult,
-): result is Extract<
-  BuildSemanticDiffPresentationArtifactsResult,
-  { ok: false }
-> => "ok" in result && result.ok === false;
-
-const buildWorkflowArtifactState = ({
+const buildWorkflowContextState = ({
+  deps,
   result,
   capture,
   source,
-  selection,
   release,
-}: WorkflowArtifactResultContext): CommandStep<WorkflowArtifactState> =>
+}: WorkflowContextResultContext): CommandStep<WorkflowContextState> =>
   readyStep({
-    artifacts: result as SemanticDiffPresentationArtifacts,
+    context: (
+      deps.buildSemanticDiffOutputContext ?? buildSemanticDiffOutputContext
+    )(result.result),
     capture: capture.capture,
     sources: { before: capture.before, after: capture.after },
     source: source.source,
-    period: selection.kind === "evaluated" ? "evaluated" : "not-requested",
     release,
   });
-
-const workflowArtifactResult = (
-  context: WorkflowArtifactResultContext,
-): CommandStep<WorkflowArtifactState> => {
-  if (isWorkflowParseFailure(context.result)) {
-    context.release();
-    return failedStep(
-      "parse-failed",
-      parseFailureMessage(context.result, context.localization),
-    );
-  }
-  return buildWorkflowArtifactState(context);
-};
 
 const createWorkflowRelease = (
   releaseSourceCapture: () => void,
@@ -142,57 +106,73 @@ const createWorkflowRelease = (
   return (): void => {
     if (released) return;
     released = true;
-    releaseSourceCapture();
-    providerReservation?.release();
+    try {
+      releaseSourceCapture();
+    } finally {
+      providerReservation?.release();
+    }
   };
 };
 
-const createWorkflowArtifactInput = (
+const createWorkflowContextInput = (
   source: WorkflowSourceRequest,
   after: WorkflowSourceDescriptor,
-  selection: WorkflowArtifactSelection,
-): BuildSemanticDiffPresentationArtifactsInput => ({
+): BuildSemanticDiffReportDataInput => ({
   beforeContent: source.before.text,
   afterContent: after.text,
-  ...(selection.kind === "evaluated"
-    ? { options: { scheduleComparisonPeriod: selection.period } }
-    : {}),
 });
 
-export const buildWorkflowArtifacts = (
-  options: WorkflowArtifactBuildOptions,
-): CommandStep<WorkflowArtifactState> => {
-  const { deps, source, selection, localization } = options;
-  const captureStep = beginWorkflowCapture(deps, source, localization);
-  if (captureStep.kind === "failed") return captureStep;
-  const releaseSourceCapture = createSourceCaptureRelease(
-    captureStep.value.capture,
-  );
+const buildCapturedWorkflowContext = (
+  options: WorkflowContextBuildOptions,
+  capture: WorkflowCaptureState,
+): CommandStep<WorkflowContextState> => {
+  const { deps, source, localization } = options;
+  const releaseSourceCapture = createSourceCaptureRelease(capture.capture);
   const release = createWorkflowRelease(
     releaseSourceCapture,
     source.providerReservation,
   );
   try {
-    const adapter = deps.buildSemanticDiffPresentationArtifacts!;
+    const adapter = deps.buildSemanticDiffReportData!;
     const result = adapter(
-      createWorkflowArtifactInput(source, captureStep.value.after, selection),
-      captureStep.value.capture.parser,
+      createWorkflowContextInput(source, capture.after),
+      capture.capture.parser,
     );
-    return workflowArtifactResult({
+    if (result.ok === false) {
+      release();
+      return failedStep(
+        "parse-failed",
+        parseFailureMessage(result, localization),
+      );
+    }
+    return buildWorkflowContextState({
+      deps,
       result,
-      capture: captureStep.value,
+      capture,
       source,
-      selection,
       localization,
       release,
     });
   } catch (error: unknown) {
     release();
-    return workflowArtifactError(error, localization);
+    return workflowContextError(error, localization);
   }
 };
 
-const workflowArtifactError = (
+export const buildWorkflowContext = (
+  options: WorkflowContextBuildOptions,
+): CommandStep<WorkflowContextState> => {
+  const capture = beginWorkflowCapture(
+    options.deps,
+    options.source,
+    options.localization,
+  );
+  return capture.kind === "failed"
+    ? capture
+    : buildCapturedWorkflowContext(options, capture.value);
+};
+
+const workflowContextError = (
   error: unknown,
   localization: SemanticDiffCommandLocalization,
 ): CommandFailure => {
@@ -205,117 +185,7 @@ const workflowArtifactError = (
   );
 };
 
-type WorkflowOpenFailureContext = Readonly<{
-  deps: Pick<SemanticDiffCommandDeps, "unregisterSemanticDiffSourceCapture">;
-  state: WorkflowArtifactState;
-  localization: SemanticDiffCommandLocalization;
-  code: "source-capture-failed" | "explorer-open-failed";
-}>;
-
-const selectWorkflowFailureMessage = ({
-  localization,
-  code,
-}: Pick<WorkflowOpenFailureContext, "localization" | "code">): string =>
-  code === "source-capture-failed"
-    ? localization.sourceCaptureFailed
-    : localization.explorerOpenFailed;
-
-const workflowOpenFailure = ({
-  deps,
-  state,
-  localization,
-  code,
-}: WorkflowOpenFailureContext): CommandFailure => {
-  unregisterAndReleaseWorkflowCapture(
-    deps,
-    state.artifacts.context,
-    state.release,
-  );
-  return failedStep(code, selectWorkflowFailureMessage({ localization, code }));
-};
-
-const openRegisteredWorkflowArtifacts = async (
-  deps: WorkflowArtifactOpenDeps,
-  state: WorkflowArtifactState,
-  localization: SemanticDiffCommandLocalization,
-): Promise<CommandStep<WorkflowExplorerResult>> => {
-  if (deps.openExplorer === undefined) {
-    return workflowOpenFailure({
-      deps,
-      state,
-      localization,
-      code: "explorer-open-failed",
-    });
-  }
-  try {
-    const handle = await deps.openExplorer(state.artifacts.context);
-    return readyStep({
-      handle,
-      source: state.source,
-      period: state.period,
-    });
-  } catch {
-    return workflowOpenFailure({
-      deps,
-      state,
-      localization,
-      code: "explorer-open-failed",
-    });
-  }
-};
-
-type OpenRegisteredWorkflowCaptureContext = Readonly<{
-  deps: WorkflowArtifactOpenDeps;
-  state: WorkflowArtifactState;
-  binding: SourceBinding;
-  localization: SemanticDiffCommandLocalization;
-}>;
-
-const openRegisteredWorkflowCapture = async ({
-  deps,
-  state,
-  binding,
-  localization,
-}: OpenRegisteredWorkflowCaptureContext): Promise<
-  CommandStep<WorkflowExplorerResult>
-> => {
-  const registration = registerWorkflowSource(deps, state, binding);
-  if (registration === "missing") {
-    state.release();
-    return failedStep(
-      "source-capture-failed",
-      localization.sourceCaptureFailed,
-    );
-  }
-  return registration === "registered"
-    ? openRegisteredWorkflowArtifacts(deps, state, localization)
-    : workflowOpenFailure({
-        deps,
-        state,
-        localization,
-        code: "source-capture-failed",
-      });
-};
-
-const openWorkflowArtifacts = async (
-  deps: WorkflowArtifactOpenDeps,
-  state: WorkflowArtifactState,
-  localization: SemanticDiffCommandLocalization,
-): Promise<CommandStep<WorkflowExplorerResult>> => {
-  const binding = bindWorkflowCapture(state, localization);
-  if (binding.kind === "failed") {
-    state.release();
-    return binding;
-  }
-  return openRegisteredWorkflowCapture({
-    deps,
-    state,
-    binding: binding.value,
-    localization,
-  });
-};
-
-export const runFileComparisonWorkflow = async (
+export const runDefinitionComparisonWorkflow = async (
   deps: FileComparisonWorkflowDeps,
 ): Promise<CommandStep<WorkflowExplorerResult>> => {
   const localization = getSemanticDiffCommandLocalization(deps.language);
@@ -323,42 +193,10 @@ export const runFileComparisonWorkflow = async (
   const sourceStep = await continueCommandStep(afterStep, (after) =>
     prepareWorkflowSource(deps, after, localization),
   );
-  const periodStep = await continueCommandStep(sourceStep, (source) =>
-    selectWorkflowPeriodStep(deps, source, localization),
+  const contextStep = await continueCommandStep(sourceStep, (source) =>
+    buildWorkflowContext({ deps, source, localization }),
   );
-  const artifactStep = await continueCommandStep(
-    periodStep,
-    ({ source, selection }) =>
-      buildWorkflowArtifacts({ deps, source, selection, localization }),
-  );
-  return continueCommandStep(artifactStep, (state) =>
-    openWorkflowArtifacts(deps, state, localization),
-  );
-};
-
-const prepareComparisonCompatibilitySource = async (
-  deps: WorkflowSourcePreparationDeps,
-  after: import("./semanticDiffCommandWorkflowInput").WorkflowAfterSnapshot,
-  localization: SemanticDiffCommandLocalization,
-): Promise<CommandStep<WorkflowSourceRequest>> =>
-  prepareWorkflowSource(deps, after, localization);
-
-export const runComparisonCompatibilityWorkflow = async (
-  deps: ComparisonCompatibilityWorkflowDeps,
-): Promise<CommandStep<WorkflowExplorerResult>> => {
-  const localization = getSemanticDiffCommandLocalization(deps.language);
-  const afterStep = readWorkflowAfterSnapshot(deps, localization);
-  const sourceStep = await continueCommandStep(afterStep, (after) =>
-    prepareComparisonCompatibilitySource(deps, after, localization),
-  );
-  const selection: WorkflowArtifactSelection =
-    deps.scheduleComparisonPeriod === undefined
-      ? { kind: "not-requested" }
-      : { kind: "evaluated", period: deps.scheduleComparisonPeriod };
-  const artifactStep = await continueCommandStep(sourceStep, (source) =>
-    buildWorkflowArtifacts({ deps, source, selection, localization }),
-  );
-  return continueCommandStep(artifactStep, (state) =>
-    openWorkflowArtifacts(deps, state, localization),
+  return continueCommandStep(contextStep, (state) =>
+    openWorkflowContext(deps, state, localization),
   );
 };

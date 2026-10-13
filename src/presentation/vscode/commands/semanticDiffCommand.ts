@@ -1,7 +1,5 @@
 import type * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../../application/semantic-diff/buildSemanticDiffReportData";
-import type { SemanticDiffComparisonPeriod } from "../../../application/semantic-diff/semanticDiffDto";
-import type { BuildSemanticDiffPresentationArtifacts } from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import type { SemanticDiffSourceHandleIdAllocator } from "../../../application/parsing/AjsParserWithSourceIndexPort";
 import type { SemanticDiffSourceCaptureFactory } from "../../../application/semantic-diff/semanticDiffSourceCapture";
 import {
@@ -62,7 +60,7 @@ export const COMPARE_SEMANTIC_DIFF_COMMAND = "ajsbutler.compareSemanticDiff";
 export { MAX_SEMANTIC_DIFF_SOURCE_BYTES } from "./semanticDiffCommandWorkflowInput";
 
 export type SemanticDiffWorkflowQuickPickItem = Readonly<{
-  workflowKind: "file" | "git-head" | "no-period" | "specify-period";
+  workflowKind: "file" | "git-head";
   label: string;
   description?: string;
 }>;
@@ -75,7 +73,6 @@ export type SemanticDiffCommandResult =
       sessionId: SemanticDiffExplorerSessionId;
       action: "explorer-opened";
       source: "file" | "git-head";
-      period: "not-requested" | "evaluated";
     }
   | {
       ok: true;
@@ -94,9 +91,6 @@ export type SemanticDiffCommandDeps = {
     items: readonly SemanticDiffWorkflowQuickPickItem[],
     options?: vscode.QuickPickOptions,
   ) => Thenable<SemanticDiffWorkflowQuickPickItem | undefined>;
-  showInputBox?: (
-    options?: vscode.InputBoxOptions,
-  ) => Thenable<string | undefined>;
   showOpenDialog: (
     options: vscode.OpenDialogOptions,
   ) => Thenable<vscode.Uri[] | undefined>;
@@ -106,10 +100,8 @@ export type SemanticDiffCommandDeps = {
   openReport: (document: SemanticDiffOutputDocument) => Thenable<unknown>;
   language?: string;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
-  buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
   readGitHeadDefinition?: import("../../../application/semantic-diff/GitHeadDefinitionSourcePort").ReadGitHeadDefinition;
   gitHeadSnapshotProvider?: SemanticDiffGitHeadSnapshotProvider;
-  scheduleComparisonPeriod?: SemanticDiffComparisonPeriod;
   beginSemanticDiffSourceCapture?: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   registerSemanticDiffSourceCapture?: (
@@ -247,20 +239,6 @@ const finalizeSemanticDiffCommand = async (
     ? finalizeCommandFailure(deps, step.error)
     : { ok: true, report: step.value.content, action: "displayed" };
 
-const finalizeExplorerCommand = async (
-  deps: CommandFinalizationDeps,
-  step: CommandStep<SemanticDiffExplorerSessionHandle>,
-): Promise<SemanticDiffCommandResult> =>
-  step.kind === "failed"
-    ? finalizeCommandFailure(deps, step.error)
-    : {
-        ok: true,
-        action: "explorer-opened",
-        sessionId: step.value.sessionId,
-        source: "file",
-        period: "not-requested",
-      };
-
 const finalizeWorkflowExplorerCommand = async (
   deps: SemanticDiffCommandDeps,
   step: CommandStep<WorkflowExplorerResult>,
@@ -272,7 +250,6 @@ const finalizeWorkflowExplorerCommand = async (
         action: "explorer-opened",
         sessionId: step.value.handle.sessionId,
         source: step.value.source,
-        period: step.value.period,
       };
 
 export const executeCompareSemanticDiffCommand = async (
@@ -280,7 +257,6 @@ export const executeCompareSemanticDiffCommand = async (
 ): Promise<SemanticDiffCommandResult> =>
   commandExecution(deps, {
     finalizeWorkflow: finalizeWorkflowExplorerCommand,
-    finalizeExplorer: finalizeExplorerCommand,
     finalizeReport: finalizeSemanticDiffCommand,
     runReport: runSemanticDiffCommand,
   })(deps);

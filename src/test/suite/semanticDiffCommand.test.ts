@@ -3,10 +3,6 @@ import * as vscode from "vscode";
 import { createBuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import type { BuildSemanticDiffReportDataInput } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import {
-  createBuildSemanticDiffPresentationArtifacts,
-  type SemanticDiffPresentationArtifacts,
-} from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
-import {
   createSemanticDiffCaptureScopeIdAllocator,
   createSemanticDiffSourceHandleIdAllocator,
   createSemanticDiffSourceIndexIdAllocator,
@@ -168,6 +164,41 @@ class SemanticDiffCommandHarness {
     };
   }
 
+  workflowDeps(): SemanticDiffCommandDeps {
+    const beginCapture = createTestCaptureFactory(createTestParser());
+    return {
+      ...this.deps,
+      getActiveEditor: () => {
+        const editor = this.deps.getActiveEditor();
+        if (!editor) return editor;
+        return {
+          ...editor,
+          document: {
+            ...editor.document,
+            uri: editor.document.uri ?? vscode.Uri.parse("untitled:after.ajs"),
+            version: editor.document.version ?? 1,
+            getText: () => editor.document.getText(),
+          },
+        } as unknown as vscode.TextEditor;
+      },
+      openTextDocument: async (uri) =>
+        ({
+          uri,
+          version: 1,
+          getText: () => this.beforeContent,
+        }) as unknown as vscode.TextDocument,
+      showWorkflowQuickPick: async (items) => items[0],
+      beginSemanticDiffSourceCapture: beginCapture,
+      registerSemanticDiffSourceCapture: () => undefined,
+      unregisterSemanticDiffSourceCapture: () => undefined,
+      buildSemanticDiffReportData: (input, parser) => {
+        parser?.parse(input.beforeContent);
+        parser?.parse(input.afterContent);
+        return this.deps.buildSemanticDiffReportData(input, parser);
+      },
+    };
+  }
+
   private buildSemanticDiffReportData(input: BuildSemanticDiffReportDataInput) {
     this.observed.reportSteps.push("build-data");
     this.observed.reportInputs.push(input);
@@ -203,7 +234,7 @@ const createWorkflowHarness = (
     dispose: () => undefined,
   };
   const beginCapture = createTestCaptureFactory(parser);
-  const artifactsBuilder = createBuildSemanticDiffPresentationArtifacts(parser);
+  const reportBuilder = createBuildSemanticDiffReportData(parser);
   const contextRegistry = new SemanticDiffExplorerContextRegistry();
   const deps: SemanticDiffCommandDeps = {
     getActiveEditor: () =>
@@ -226,9 +257,8 @@ const createWorkflowHarness = (
     readFile: async () => new TextEncoder().encode("unused"),
     showErrorMessage: async () => undefined,
     openReport: async () => undefined,
-    buildSemanticDiffReportData: () => ({ ok: true, result: emptyResult() }),
-    buildSemanticDiffPresentationArtifacts: (input, scopedParser) =>
-      artifactsBuilder(input, scopedParser),
+    buildSemanticDiffReportData: (input, scopedParser) =>
+      reportBuilder(input, scopedParser),
     beginSemanticDiffSourceCapture: (input) => beginCapture(input),
     sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
     registerSemanticDiffSourceCapture: (context, entry) => {
@@ -289,10 +319,6 @@ suite("Semantic diff command", () => {
       result: emptyResult(),
       summary: {} as never,
     };
-    const artifacts: SemanticDiffPresentationArtifacts = {
-      context,
-      scheduleImpact: { kind: "unavailable", reason: "not-requested" },
-    };
     const capture = createTestCaptureFactory(createTestParser())({
       before: {
         side: before.side,
@@ -314,7 +340,7 @@ suite("Semantic diff command", () => {
 
     const registered: unknown[] = [];
     const state: WorkflowBindingState = {
-      artifacts,
+      context,
       capture,
       sources: { before, after },
       release: () => undefined,
@@ -384,7 +410,7 @@ suite("Semantic diff command", () => {
     };
 
     const result = await executeCompareSemanticDiffCommand({
-      ...harness.deps,
+      ...harness.workflowDeps(),
       openExplorer: async (context) => {
         contexts.push(context);
         return handle;
@@ -396,7 +422,6 @@ suite("Semantic diff command", () => {
       sessionId: "sde-session-700",
       action: "explorer-opened",
       source: "file",
-      period: "not-requested",
     });
     assert.deepStrictEqual(contexts, harness.observed.builtContexts);
     assert.deepStrictEqual(harness.observed.selectedModes, []);
@@ -442,7 +467,7 @@ suite("Semantic diff command", () => {
     };
 
     const result = await executeCompareSemanticDiffCommand({
-      ...harness.deps,
+      ...harness.workflowDeps(),
       beginSemanticDiffSourceCapture: (input) => {
         captureInputs.push(input);
         return concreteBegin(input);
@@ -469,7 +494,6 @@ suite("Semantic diff command", () => {
       sessionId: "sde-session-concrete",
       action: "explorer-opened",
       source: "file",
-      period: "not-requested",
     });
     assert.strictEqual(captureInputs.length, 1);
     const captureInput = captureInputs[0] as {
@@ -526,7 +550,7 @@ suite("Semantic diff command", () => {
     let openExplorerCount = 0;
 
     const result = await executeCompareSemanticDiffCommand({
-      ...harness.deps,
+      ...harness.workflowDeps(),
       beginSemanticDiffSourceCapture: () => {
         throw new Error("capture setup failed");
       },
@@ -539,7 +563,7 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(result, {
       ok: false,
       error: {
-        code: "display-failed",
+        code: "source-capture-failed",
         message: "Semantic diff source capture could not be established.",
       },
     });
@@ -567,7 +591,7 @@ suite("Semantic diff command", () => {
     let releaseCount = 0;
 
     const result = await executeCompareSemanticDiffCommand({
-      ...harness.deps,
+      ...harness.workflowDeps(),
       beginSemanticDiffSourceCapture: (input) => {
         const capture = concreteBegin(input);
         return {
@@ -589,13 +613,12 @@ suite("Semantic diff command", () => {
       ok: false,
       error: {
         code: "parse-failed",
-        message:
-          "Semantic diff could not parse one or both JP1/AJS definitions.",
+        message: "The before definition could not be parsed.",
       },
     });
     assert.strictEqual(releaseCount, 1);
     assert.deepStrictEqual(harness.observed.errorMessages, [
-      "Semantic diff could not parse one or both JP1/AJS definitions.",
+      "The before definition could not be parsed.",
     ]);
   });
 
@@ -807,7 +830,7 @@ suite("Semantic diff command", () => {
     const beginCapture = createTestCaptureFactory(enrichedParser);
 
     const result = await executeCompareSemanticDiffCommand({
-      ...harness.deps,
+      ...harness.workflowDeps(),
       getActiveEditor: () =>
         ({
           document: {
@@ -837,7 +860,7 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(result, {
       ok: false,
       error: {
-        code: "display-failed",
+        code: "source-capture-failed",
         message: "Semantic diff source capture could not be established.",
       },
     });
@@ -875,7 +898,7 @@ suite("Semantic diff command", () => {
     const beginCapture = createTestCaptureFactory(enrichedParser);
 
     const result = await executeCompareSemanticDiffCommand({
-      ...harness.deps,
+      ...harness.workflowDeps(),
       getActiveEditor: () =>
         ({
           document: {
@@ -919,8 +942,8 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(result, {
       ok: false,
       error: {
-        code: "display-failed",
-        message: "Semantic diff source targets could not be registered.",
+        code: "source-capture-failed",
+        message: "Semantic diff source capture could not be established.",
       },
     });
     assert.strictEqual(releaseCount, 1);
@@ -938,12 +961,14 @@ suite("Semantic diff command", () => {
       },
     });
 
-    const result = await executeCompareSemanticDiffCommand(harness.deps);
+    const result = await executeCompareSemanticDiffCommand(
+      harness.workflowDeps(),
+    );
 
     assert.deepStrictEqual(result, {
       ok: false,
       error: {
-        code: "display-failed",
+        code: "explorer-open-failed",
         message: "Semantic diff Explorer could not be opened.",
       },
     });
@@ -1062,8 +1087,7 @@ suite("Semantic diff command", () => {
     const registry = new SemanticDiffExplorerContextRegistry();
     const parser = createTestParser();
     const beginCapture = createTestCaptureFactory(parser);
-    const artifactsBuilder =
-      createBuildSemanticDiffPresentationArtifacts(parser);
+    const reportBuilder = createBuildSemanticDiffReportData(parser);
     const handle = {
       sessionId: "sde-workflow-file" as never,
       panel: {} as vscode.WebviewPanel,
@@ -1098,15 +1122,11 @@ suite("Semantic diff command", () => {
         }) as unknown as vscode.TextDocument,
       readFile: async () => new TextEncoder().encode("unused"),
       showErrorMessage: async () => undefined,
-      showInputBox: async () => undefined,
       openReport: async () => undefined,
-      buildSemanticDiffReportData: () => {
-        throw new Error("legacy report builder must not run");
-      },
-      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+      buildSemanticDiffReportData: (input, scopedParser) => {
         callbackCount += 1;
         callbackParser = scopedParser;
-        return artifactsBuilder(input, scopedParser);
+        return reportBuilder(input, scopedParser);
       },
       beginSemanticDiffSourceCapture: (input) => beginCapture(input),
       sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
@@ -1130,111 +1150,15 @@ suite("Semantic diff command", () => {
       action: "explorer-opened",
       sessionId: "sde-workflow-file",
       source: "file",
-      period: "not-requested",
     });
-    assert.deepStrictEqual(quickPicks, [
-      "Select Definition File|Git HEAD",
-      "No schedule period|Specify schedule period",
-    ]);
-    assert.deepStrictEqual(quickPickTitles, [
-      "Compare Definition",
-      "Compare Definition",
-    ]);
+    assert.deepStrictEqual(quickPicks, ["Select Definition File|Git HEAD"]);
+    assert.deepStrictEqual(quickPickTitles, ["Compare Definition"]);
     assert.strictEqual(afterTextReads, 1);
     assert.strictEqual(beforeTextReads, 1);
     assert.strictEqual(callbackCount, 1);
     assert.ok(callbackParser);
     assert.ok(contexts[0]);
     assert.ok(registry.sourceCapture(contexts[0] as SemanticDiffOutputContext));
-  });
-
-  test("forwards the exact selected half-open period and keeps date prompts localized", async () => {
-    const beforeUri = vscode.Uri.parse("file:///before-period.ajs");
-    const afterUri = vscode.Uri.parse("file:///after-period.ajs");
-    const periodInputs: string[] = [];
-    const periodTitles: string[] = [];
-    const artifactInputs: unknown[] = [];
-    const parser = createTestParser();
-    const beginCapture = createTestCaptureFactory(parser);
-    const artifactsBuilder =
-      createBuildSemanticDiffPresentationArtifacts(parser);
-    const contextRegistry = new SemanticDiffExplorerContextRegistry();
-    const handle = {
-      sessionId: "sde-workflow-period" as never,
-      panel: {} as vscode.WebviewPanel,
-      dispose: () => undefined,
-    };
-    const deps: SemanticDiffCommandDeps = {
-      getActiveEditor: () =>
-        ({
-          document: {
-            uri: afterUri,
-            version: 1,
-            getText: () => "unit=after,,jp1admin,;{ty=g;}",
-          },
-        }) as unknown as vscode.TextEditor,
-      showQuickPick: async () => undefined,
-      showWorkflowQuickPick: async (items) =>
-        items.find(
-          (item) =>
-            item.workflowKind === "specify-period" &&
-            item.label === "Specify schedule period",
-        ) ?? items[0],
-      showOpenDialog: async () => [beforeUri],
-      openTextDocument: async () =>
-        ({
-          uri: beforeUri,
-          version: 1,
-          getText: () => "unit=before,,jp1admin,;{ty=g;}",
-        }) as unknown as vscode.TextDocument,
-      readFile: async () => new TextEncoder().encode("unused"),
-      showErrorMessage: async () => undefined,
-      showInputBox: async (options) => {
-        periodTitles.push(options.title ?? "");
-        periodInputs.push(options.prompt ?? "");
-        return periodInputs.length === 1 ? "2024-02-29" : "2024-03-01";
-      },
-      openReport: async () => undefined,
-      buildSemanticDiffReportData: () => {
-        throw new Error("legacy report builder must not run");
-      },
-      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
-        artifactInputs.push(input);
-        return artifactsBuilder(input, scopedParser);
-      },
-      beginSemanticDiffSourceCapture: (input) => beginCapture(input),
-      sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
-      registerSemanticDiffSourceCapture: (context, entry) => {
-        contextRegistry.registerSourceCapture(context, entry);
-      },
-      unregisterSemanticDiffSourceCapture: (context) => {
-        contextRegistry.unregisterSourceCapture(context);
-      },
-      openExplorer: async (context) => {
-        assert.ok(contextRegistry.sourceCapture(context));
-        return handle;
-      },
-      language: "en-US",
-    };
-
-    const result = await executeCompareSemanticDiffCommand(deps);
-
-    assert.strictEqual(result.ok, true);
-    assert.deepStrictEqual(periodInputs, [
-      "From date (YYYY-MM-DD)",
-      "To date (YYYY-MM-DD)",
-    ]);
-    assert.deepStrictEqual(periodTitles, [
-      "Compare Definition",
-      "Compare Definition",
-    ]);
-    assert.deepStrictEqual(artifactInputs[0], {
-      beforeContent: "unit=before,,jp1admin,;{ty=g;}",
-      afterContent: "unit=after,,jp1admin,;{ty=g;}",
-      options: {
-        scheduleComparisonPeriod: { from: "2024-02-29", to: "2024-03-01" },
-      },
-    });
   });
 
   test("identifies the affected side for workflow parser failures", async () => {
@@ -1280,8 +1204,7 @@ suite("Semantic diff command", () => {
       readFile: async () => new TextEncoder().encode("unused"),
       showErrorMessage: async () => undefined,
       openReport: async () => undefined,
-      buildSemanticDiffReportData: () => ({ ok: true, result: emptyResult() }),
-      buildSemanticDiffPresentationArtifacts: () => ({
+      buildSemanticDiffReportData: () => ({
         ok: false,
         errors: {
           before: [{ line: 1, column: 1, message: "invalid before" }],
@@ -1325,7 +1248,7 @@ suite("Semantic diff command", () => {
       "定義を比較",
     );
     assert.strictEqual(
-      getSemanticDiffCommandLocalization("ja-JP").fromDateTitle,
+      getSemanticDiffCommandLocalization("ja-JP").sourcePickerTitle,
       "定義を比較",
     );
     assert.strictEqual(
@@ -1373,11 +1296,7 @@ suite("Semantic diff command", () => {
         readFile: async () => new TextEncoder().encode("unused"),
         showErrorMessage: async () => undefined,
         openReport: async () => undefined,
-        buildSemanticDiffReportData: () => ({
-          ok: true,
-          result: emptyResult(),
-        }),
-        buildSemanticDiffPresentationArtifacts: () => {
+        buildSemanticDiffReportData: () => {
           callbackCount += 1;
           throw new Error("artifact callback must not run");
         },
@@ -1509,7 +1428,7 @@ suite("Semantic diff command", () => {
     }
   });
 
-  test("maps source and period host picker exceptions to comparison failure", async () => {
+  test("maps source host picker exceptions to comparison failure", async () => {
     const sourceErrorMessages: string[] = [];
     const sourceHarness = createWorkflowHarness({
       showWorkflowQuickPick: async () => {
@@ -1533,112 +1452,13 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(sourceErrorMessages, [
       "Semantic diff comparison could not be completed.",
     ]);
-
-    let pickerCall = 0;
-    const periodHarness = createWorkflowHarness({
-      showWorkflowQuickPick: async (items) => {
-        pickerCall += 1;
-        if (pickerCall === 1) return items[0];
-        throw new Error("period picker failed");
-      },
-    });
-    const periodResult = await executeCompareSemanticDiffCommand(
-      periodHarness.deps,
-    );
-    assert.deepStrictEqual(periodResult, {
-      ok: false,
-      error: {
-        code: "comparison-failed",
-        message: "Semantic diff comparison could not be completed.",
-      },
-    });
-
-    let inputPickerCall = 0;
-    const inputHarness = createWorkflowHarness({
-      showWorkflowQuickPick: async (items) => {
-        inputPickerCall += 1;
-        return inputPickerCall === 1 ? items[0] : items[1];
-      },
-      showInputBox: async () => {
-        throw new Error("date input failed");
-      },
-    });
-    const inputResult = await executeCompareSemanticDiffCommand(
-      inputHarness.deps,
-    );
-    assert.deepStrictEqual(inputResult, {
-      ok: false,
-      error: {
-        code: "comparison-failed",
-        message: "Semantic diff comparison could not be completed.",
-      },
-    });
-  });
-
-  test("validates dates in place and cancels without starting capture", async () => {
-    const validationMessages: string[] = [];
-    let pickerCall = 0;
-    const harness = createWorkflowHarness({
-      showWorkflowQuickPick: async (items) => {
-        pickerCall += 1;
-        return pickerCall === 1 ? items[0] : items[1];
-      },
-      showInputBox: async (options) => {
-        if (options.validateInput) {
-          const validation = options.validateInput(
-            validationMessages.length === 0 ? "2024-02-30" : "2024-02-28",
-          );
-          validationMessages.push(
-            typeof validation === "string"
-              ? validation
-              : validation &&
-                  typeof validation === "object" &&
-                  "message" in validation
-                ? String(validation.message)
-                : "valid",
-          );
-        }
-        return validationMessages.length === 1 ? "2024-02-29" : "2024-03-01";
-      },
-    });
-    const result = await executeCompareSemanticDiffCommand(harness.deps);
-    assert.strictEqual(result.ok, true);
-    assert.deepStrictEqual(validationMessages, [
-      "Enter a real date in YYYY-MM-DD format.",
-      "The end date must be after the start date.",
-    ]);
-
-    let captureCount = 0;
-    let cancelPickerCall = 0;
-    const cancelled = createWorkflowHarness({
-      showWorkflowQuickPick: async (items) => {
-        cancelPickerCall += 1;
-        return cancelPickerCall === 1 ? items[0] : items[1];
-      },
-      showInputBox: async () => undefined,
-      beginSemanticDiffSourceCapture: () => {
-        captureCount += 1;
-        throw new Error("capture must not begin");
-      },
-    });
-    const cancelledResult = await executeCompareSemanticDiffCommand(
-      cancelled.deps,
-    );
-    assert.deepStrictEqual(cancelledResult, {
-      ok: false,
-      error: {
-        code: "cancelled",
-        message: "Semantic diff was cancelled.",
-      },
-    });
-    assert.strictEqual(captureCount, 0);
   });
 
   test("captures before callback, binds exact args, and opens once", async () => {
     const events: string[] = [];
     const harness = createWorkflowHarness();
     const baseBegin = harness.deps.beginSemanticDiffSourceCapture!;
-    const baseBuild = harness.deps.buildSemanticDiffPresentationArtifacts!;
+    const baseBuild = harness.deps.buildSemanticDiffReportData!;
     const registry = new SemanticDiffExplorerContextRegistry();
     let captureParser: unknown;
     harness.deps.beginSemanticDiffSourceCapture = (input) => {
@@ -1647,7 +1467,7 @@ suite("Semantic diff command", () => {
       captureParser = capture.parser;
       return capture;
     };
-    harness.deps.buildSemanticDiffPresentationArtifacts = (input, parser) => {
+    harness.deps.buildSemanticDiffReportData = (input, parser) => {
       events.push("callback");
       assert.strictEqual(parser, captureParser);
       return baseBuild(input, parser);
@@ -1836,72 +1656,6 @@ suite("Semantic diff command", () => {
     assert.strictEqual(openCount, 0);
   });
 
-  test("cancelling period selection performs no capture or downstream work", async () => {
-    const beforeUri = vscode.Uri.parse("file:///before-cancel.ajs");
-    let captureCount = 0;
-    let callbackCount = 0;
-    let openCount = 0;
-    const deps: SemanticDiffCommandDeps = {
-      getActiveEditor: () =>
-        ({
-          document: {
-            uri: vscode.Uri.parse("file:///after-cancel.ajs"),
-            version: 1,
-            getText: () => "unit=after,,jp1admin,;{ty=g;}",
-          },
-        }) as unknown as vscode.TextEditor,
-      showQuickPick: async () => undefined,
-      showWorkflowQuickPick: async (items) =>
-        items[0]?.workflowKind === "file" ? items[0] : undefined,
-      showOpenDialog: async () => [beforeUri],
-      openTextDocument: async () =>
-        ({
-          uri: beforeUri,
-          version: 1,
-          getText: () => "unit=before,,jp1admin,;{ty=g;}",
-        }) as unknown as vscode.TextDocument,
-      readFile: async () => new TextEncoder().encode("unused"),
-      showErrorMessage: async () => undefined,
-      openReport: async () => undefined,
-      buildSemanticDiffReportData: () => ({ ok: true, result: emptyResult() }),
-      buildSemanticDiffPresentationArtifacts: () => {
-        callbackCount += 1;
-        return {
-          context: { result: emptyResult(), summary: {} as never },
-          scheduleImpact: { kind: "unavailable", reason: "not-requested" },
-        } as SemanticDiffPresentationArtifacts;
-      },
-      beginSemanticDiffSourceCapture: () => {
-        captureCount += 1;
-        throw new Error("capture must not begin");
-      },
-      sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
-      openExplorer: async () => {
-        openCount += 1;
-        throw new Error("Explorer must not open");
-      },
-      language: "ja-JP",
-    };
-    let quickPickCall = 0;
-    deps.showWorkflowQuickPick = async (items) => {
-      quickPickCall += 1;
-      return quickPickCall === 1 ? items[0] : undefined;
-    };
-
-    const result = await executeCompareSemanticDiffCommand(deps);
-
-    assert.deepStrictEqual(result, {
-      ok: false,
-      error: {
-        code: "cancelled",
-        message: "セマンティック差分をキャンセルしました。",
-      },
-    });
-    assert.strictEqual(captureCount, 0);
-    assert.strictEqual(callbackCount, 0);
-    assert.strictEqual(openCount, 0);
-  });
-
   test("compares Git HEAD through an opaque provider snapshot", async () => {
     const harness = createWorkflowHarness();
     const provider = new VscodeGitHeadContentProvider();
@@ -1920,9 +1674,9 @@ suite("Semantic diff command", () => {
         ref: "HEAD" as const,
       }),
       gitHeadSnapshotProvider: provider,
-      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+      buildSemanticDiffReportData: (input, scopedParser) => {
         callbackInput = input;
-        return createBuildSemanticDiffPresentationArtifacts(createTestParser())(
+        return createBuildSemanticDiffReportData(createTestParser())(
           input,
           scopedParser,
         );
@@ -1938,7 +1692,6 @@ suite("Semantic diff command", () => {
       action: "explorer-opened",
       sessionId: "sde-workflow-harness",
       source: "git-head",
-      period: "not-requested",
     });
     assert.strictEqual(callbackInput?.beforeContent, headContent);
     assert.strictEqual(receivedBeforeUri?.scheme, "ajsbutler-git-head");
@@ -1960,9 +1713,9 @@ suite("Semantic diff command", () => {
         kind: "unavailable" as const,
         reason: "extension-missing" as const,
       }),
-      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+      buildSemanticDiffReportData: (input, scopedParser) => {
         callbackCount += 1;
-        return createBuildSemanticDiffPresentationArtifacts(createTestParser())(
+        return createBuildSemanticDiffReportData(createTestParser())(
           input,
           scopedParser,
         );
@@ -1978,7 +1731,6 @@ suite("Semantic diff command", () => {
       action: "explorer-opened",
       sessionId: "sde-workflow-harness",
       source: "file",
-      period: "not-requested",
     });
     assert.strictEqual(callbackCount, 1);
     assert.strictEqual(openCount, 1);
@@ -1998,7 +1750,7 @@ suite("Semantic diff command", () => {
         reason: "head-source-missing" as const,
       }),
       gitHeadSnapshotProvider: provider,
-      buildSemanticDiffPresentationArtifacts: () => {
+      buildSemanticDiffReportData: () => {
         callbackCount += 1;
         throw new Error("must not build after Git failure");
       },

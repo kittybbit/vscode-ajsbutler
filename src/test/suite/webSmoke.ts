@@ -4,18 +4,13 @@ import {
   type SemanticDiffCommandDeps,
 } from "../../presentation/vscode/commands/semanticDiffCommand";
 import type { SemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
-import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
-import { buildSemanticDiffPresentationArtifactsFromComparison } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
-import { compareSemanticDiffWithArtifacts } from "../../application/semantic-diff/compareSemanticDiffWithArtifacts";
 import type { SemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffExplorerSessionHandle } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerPanel";
-import { parseSchedulePeriod } from "../../domain/schedule/SchedulePeriod";
 import {
   collectUniqueAjsUnits,
   createAjsDocumentIndex,
 } from "../../domain/models/ajs/AjsDocumentIndex";
 import type { AjsDocument, AjsUnit } from "../../domain/models/ajs/AjsDocument";
-import { createScheduleCalendarContextIndex } from "../../domain/schedule/ScheduleCalendar";
 import { createSemanticDiffFlowSourceHost } from "../../presentation/vscode/semantic-diff/flow/semanticDiffFlowSourceHost";
 import type { SemanticDiffSourceCaptureEntry } from "../../presentation/vscode/semantic-diff/source/semanticDiffExplorerSourceTypes";
 import type { SemanticDiffFlowPanel } from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
@@ -56,19 +51,6 @@ const waitForCondition = async (
 export async function run(): Promise<void> {
   await activateExtension();
 
-  const browserPeriod = parseSchedulePeriod({
-    from: "2000-02-28",
-    to: "2000-03-01",
-  });
-  if (
-    browserPeriod.kind !== "valid" ||
-    browserPeriod.fromDate.toISOString() !== "2000-02-28T00:00:00.000Z" ||
-    browserPeriod.toDate.toISOString() !== "2000-03-01T00:00:00.000Z"
-  ) {
-    throw new Error("WEB-11 canonical schedule period failed in the browser");
-  }
-  reportWebScenario("WEB-11 passed: browser canonical schedule period");
-
   const web12Jobnet: AjsUnit = {
     id: "/web12/jobnet",
     name: "jobnet",
@@ -107,121 +89,16 @@ export async function run(): Promise<void> {
   };
   const web12Units = collectUniqueAjsUnits(web12Document);
   const web12Index = createAjsDocumentIndex(web12Units);
-  const web12CalendarIndex = createScheduleCalendarContextIndex(web12Document);
   if (
     web12Units.length !== 2 ||
     web12Units[0] !== web12Group ||
     web12Units[1] !== web12Jobnet ||
     web12Index.byId.get("/web12/jobnet")?.[0] !== web12Jobnet ||
-    web12CalendarIndex.byPath.get("/web12")?.[0] !== web12Group ||
-    web12CalendarIndex.duplicatePath
+    web12Index.byPath.get("/web12")?.[0] !== web12Group
   ) {
-    throw new Error("WEB-12 normalized calendar document index failed");
+    throw new Error("WEB-12 normalized document index failed");
   }
-  reportWebScenario(
-    "WEB-12 passed: browser normalized calendar document index",
-  );
-
-  const web13Document = (time: string): AjsDocument => {
-    const jobnet: AjsUnit = {
-      ...web12Jobnet,
-      id: "/web13/main",
-      name: "main",
-      absolutePath: "/web13/main",
-      parentId: "/web13",
-      parameters: [
-        { key: "ty", value: "n" },
-        { key: "sd", value: "2026/04/10" },
-        { key: "st", value: time },
-      ],
-    };
-    const group: AjsUnit = {
-      ...jobnet,
-      id: "/web13",
-      name: "web13",
-      unitAttribute: "group,,jp1admin,",
-      unitType: "g",
-      absolutePath: "/web13",
-      depth: 0,
-      parentId: undefined,
-      isRoot: true,
-      isRootJobnet: false,
-      hasSchedule: false,
-      parameters: [{ key: "ty", value: "g" }],
-      children: [jobnet],
-    };
-    return { rootUnits: [group], warnings: [] };
-  };
-  const web13Artifacts = compareSemanticDiffWithArtifacts({
-    before: web13Document("09:00"),
-    after: web13Document("10:00"),
-    options: {
-      scheduleComparisonPeriod: {
-        from: "2026-04-01",
-        to: "2026-05-01",
-      },
-    },
-  });
-  const web13Presentation =
-    buildSemanticDiffPresentationArtifactsFromComparison({
-      result: web13Artifacts.result,
-      scheduleProjectionFacts: web13Artifacts.scheduleProjectionFacts,
-    });
-  const web13Changes =
-    web13Artifacts.result.scheduleComparison?.runChanges.map((change) => [
-      change.id,
-      change.kind,
-      change.unitPath,
-      change.date,
-      change.before?.time ?? null,
-      change.after?.time ?? null,
-    ]) ?? [];
-  const web13Timeline =
-    web13Presentation.scheduleImpact.kind === "available"
-      ? web13Presentation.scheduleImpact.sidecar.timelineItems.map((item) => [
-          item.state,
-          item.before?.unitPath ?? item.after?.unitPath,
-          item.before?.time ?? null,
-          item.after?.time ?? null,
-          item.sourceChangeRef?.id ?? null,
-          item.sourceChangeRef?.occurrenceOrdinal ?? null,
-        ])
-      : [];
-  if (
-    web13Artifacts.scheduleProjectionFacts.kind !== "evaluated" ||
-    web13Changes.length !== 1 ||
-    JSON.stringify(web13Changes[0]) !==
-      JSON.stringify([
-        "schedule:changed-time:/web13/main:2026-04-10",
-        "changed-time",
-        "/web13/main",
-        "2026-04-10",
-        "09:00",
-        "10:00",
-      ]) ||
-    JSON.stringify(web13Timeline) !==
-      JSON.stringify([
-        [
-          "changed-time",
-          "/web13/main",
-          "09:00",
-          "10:00",
-          "schedule:changed-time:/web13/main:2026-04-10",
-          0,
-        ],
-      ])
-  ) {
-    throw new Error(
-      `WEB-13 browser comparison/artifact equivalence failed: ${JSON.stringify({
-        kind: web13Artifacts.scheduleProjectionFacts.kind,
-        changes: web13Changes,
-        timeline: web13Timeline,
-      })}`,
-    );
-  }
-  reportWebScenario(
-    "WEB-13 passed: browser comparison and schedule-impact artifact equivalence",
-  );
+  reportWebScenario("WEB-12 passed: browser normalized document index");
 
   const web14Uri = vscode.Uri.parse("untitled:web-14-source");
   const web14Context = {} as SemanticDiffOutputContext;
@@ -383,12 +260,18 @@ export async function run(): Promise<void> {
   const web8AfterDocument = web8Document(web8AfterUri, "ty=g;\n");
   const web8BeforeDocument = web8Document(web8BeforeUri, "ty=g;\n");
   const web8Context = {
-    result: {},
+    result: {
+      inputs: {
+        before: { side: "before", unitIds: [], relations: [] },
+        after: { side: "after", unitIds: [], relations: [] },
+      },
+      changes: [],
+      identityDecisions: [],
+      confirmationRequired: [],
+      unsupportedItems: [],
+      limitations: [],
+    },
   } as unknown as SemanticDiffOutputContext;
-  const web8Artifacts = {
-    context: web8Context,
-    scheduleImpact: { kind: "unavailable", reason: "not-requested" },
-  } as unknown as SemanticDiffPresentationArtifacts;
   let web8Bindings = 0;
   let web8Registrations = 0;
   let web8Unregistrations = 0;
@@ -420,19 +303,17 @@ export async function run(): Promise<void> {
     getActiveEditor: () =>
       ({ document: web8AfterDocument }) as unknown as vscode.TextEditor,
     showQuickPick: async () => undefined,
-    showWorkflowQuickPick: async (items) =>
-      items.some((item) => item.workflowKind === "file")
-        ? { workflowKind: "file", label: "file" }
-        : { workflowKind: "no-period", label: "no period" },
+    showWorkflowQuickPick: async (items) => items[0],
     showOpenDialog: async () => [web8BeforeUri],
     showErrorMessage: async () => undefined,
     readFile: async () => new Uint8Array(),
     openTextDocument: async () => web8BeforeDocument,
     openReport: async () => undefined,
-    buildSemanticDiffReportData: () => {
-      throw new Error("WEB-8 report path must not run");
-    },
-    buildSemanticDiffPresentationArtifacts: () => web8Artifacts,
+    buildSemanticDiffReportData: () => ({
+      ok: true,
+      result: web8Context.result,
+    }),
+    buildSemanticDiffOutputContext: () => web8Context,
     beginSemanticDiffSourceCapture: () => web8Capture(),
     sourceHandleIdAllocator: (() => {
       let next = 0;
@@ -458,8 +339,7 @@ export async function run(): Promise<void> {
       "ok" in web8Result &&
       web8Result.ok &&
       web8Result.action === "explorer-opened" &&
-      web8Result.source === "file" &&
-      web8Result.period === "not-requested"
+      web8Result.source === "file"
     ) ||
     web8Bindings !== 1 ||
     web8Registrations !== 1 ||

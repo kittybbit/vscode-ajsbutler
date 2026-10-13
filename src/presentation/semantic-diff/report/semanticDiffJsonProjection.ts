@@ -1,6 +1,5 @@
 import type {
   SemanticDiffChange,
-  SemanticDiffComparisonPeriod,
   SemanticDiffConfirmationReason,
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffConstraint,
@@ -13,8 +12,6 @@ import type {
   SemanticDiffRelationPair,
   SemanticDiffRelationReference,
   SemanticDiffResult,
-  SemanticDiffScheduleRun,
-  SemanticDiffScheduleRunChange,
   SemanticDiffScope,
   SemanticDiffTarget,
   SemanticDiffUnitReference,
@@ -32,14 +29,10 @@ import {
   type SemanticDiffJsonIdentityField,
   type SemanticDiffJsonInputPair,
   type SemanticDiffJsonLimitation,
-  type SemanticDiffJsonPeriod,
   type SemanticDiffJsonRelationEndpoint,
   type SemanticDiffJsonRelationPair,
   type SemanticDiffJsonRelationReference,
   type SemanticDiffJsonResult,
-  type SemanticDiffJsonRun,
-  type SemanticDiffJsonRunChange,
-  type SemanticDiffJsonSchedule,
   type SemanticDiffJsonScope,
   type SemanticDiffJsonSummary,
   type SemanticDiffJsonTarget,
@@ -56,7 +49,6 @@ import {
   compareIdentityDecisions,
   compareLimitations,
   compareRelationReferences,
-  compareRunChanges,
   compareTargets,
   compareUnsupported,
   compareUnitReferences,
@@ -70,13 +62,6 @@ import {
   requiredNullable,
   requiredValue,
 } from "./semanticDiffJsonValidation";
-
-export const projectPeriod = (
-  value: SemanticDiffComparisonPeriod,
-): SemanticDiffJsonPeriod => ({
-  from: requiredValue(value.from, "comparison period.from"),
-  to: requiredValue(value.to, "comparison period.to"),
-});
 
 export const projectUnitReference = (
   reference: SemanticDiffUnitReference,
@@ -213,17 +198,6 @@ export const projectDetail = (
   relationPair: projectRelationPair(
     requiredNullable(detail.relationPair, "detail.relationPair"),
   ),
-  scheduleRule:
-    detail.scheduleRule === null
-      ? null
-      : finiteNumber(
-          requiredValue(detail.scheduleRule, "detail.scheduleRule"),
-          "schedule rule",
-        ),
-  period:
-    detail.period === null
-      ? null
-      : projectPeriod(requiredValue(detail.period, "detail.period")),
   beforeValues: sortedStrings(
     requiredValue(detail.beforeValues, "detail.beforeValues"),
   ),
@@ -416,48 +390,6 @@ export const projectLimitation = (
   warning: projectWarning(limitation.warning),
 });
 
-export const projectRun = (
-  run: SemanticDiffScheduleRun,
-): SemanticDiffJsonRun => ({
-  unitPath: run.unitPath,
-  unitName: run.unitName,
-  rule: finiteNumber(run.rule, "schedule rule"),
-  date: run.date,
-  time: run.time,
-});
-
-const projectOptionalRun = (
-  run: SemanticDiffScheduleRun | null,
-  field: string,
-): SemanticDiffJsonRun | null => {
-  const requiredRun = requiredNullable(run, field);
-  if (requiredRun === null) return null;
-  return projectRun(requiredRun);
-};
-
-export const projectRunChange = (
-  change: SemanticDiffScheduleRunChange,
-): SemanticDiffJsonRunChange => ({
-  id: change.id,
-  kind: change.kind,
-  unitPath: change.unitPath,
-  date: change.date,
-  before: projectOptionalRun(change.before, "schedule run-change.before"),
-  after: projectOptionalRun(change.after, "schedule run-change.after"),
-});
-
-export const projectSchedule = (
-  result: SemanticDiffResult,
-): SemanticDiffJsonSchedule | null =>
-  result.scheduleComparison === undefined
-    ? null
-    : {
-        period: projectPeriod(result.scheduleComparison.period),
-        runChanges: result.scheduleComparison.runChanges
-          .map(projectRunChange)
-          .sort(compareRunChanges),
-      };
-
 const projectCountMap = <T extends string>(
   source: Readonly<Record<T, number>>,
   keys: readonly T[],
@@ -493,11 +425,6 @@ export const projectSummary = (
     "confirmation-required count",
   ),
   limitationCount: finiteNumber(summary.limitationCount, "limitation count"),
-  scheduleRunChangeCount: finiteNumber(
-    summary.scheduleRunChangeCount,
-    "schedule run-change count",
-  ),
-  hasUncalculated: summary.hasUncalculated,
   hasFindings: summary.hasFindings,
 });
 
@@ -518,5 +445,4 @@ export const projectResult = (
   limitations: result.limitations
     .map(projectLimitation)
     .sort(compareLimitations),
-  schedule: projectSchedule(result),
 });

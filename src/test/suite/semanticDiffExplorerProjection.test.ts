@@ -63,12 +63,9 @@ const summary = {
   unsupportedCountsByKind: {
     unsupported: 1,
     uninterpretable: 0,
-    uncalculated: 0,
   },
   confirmationRequiredCount: 2,
   limitationCount: 1,
-  scheduleRunChangeCount: 1,
-  hasUncalculated: false,
   hasFindings: true,
 };
 
@@ -132,8 +129,6 @@ const confirmationReasons: readonly SemanticDiffConfirmationReason[] = [
   "timeout-removed",
   "condition-judgment-changed",
   "wait-target-changed",
-  "no-calculated-schedule-run",
-  "calculated-schedule-run-removed",
   "execution-user-type-changed",
   "jp1-resource-group-changed",
 ];
@@ -247,12 +242,9 @@ const confirmationSummary = (count: number) => ({
   unsupportedCountsByKind: {
     unsupported: 0,
     uninterpretable: 0,
-    uncalculated: 0,
   },
   confirmationRequiredCount: count,
   limitationCount: 0,
-  scheduleRunChangeCount: 0,
-  hasUncalculated: false,
   hasFindings: count > 0,
 });
 
@@ -307,7 +299,7 @@ const result = (): SemanticDiffResult => ({
       id: "unsupported",
       kind: "unsupported",
       side: "after",
-      reasonCode: "cycle-schedule",
+      reasonCode: "uninterpretable-file-monitoring-condition",
       target: target("unsupported", "/root/f/unsupported"),
       detail: createSemanticDiffDetail(),
       warning: null,
@@ -323,31 +315,6 @@ const result = (): SemanticDiffResult => ({
       warning: null,
     },
   ],
-  scheduleComparison: {
-    period: { from: "2026-01-01", to: "2026-01-02" },
-    runChanges: [
-      {
-        id: "run",
-        kind: "changed-time",
-        unitPath: "/root/g/scheduled",
-        date: "2026-01-01",
-        before: {
-          unitPath: "/root/g/scheduled",
-          unitName: "scheduled",
-          rule: 1,
-          date: "2026-01-01",
-          time: "01:00",
-        },
-        after: {
-          unitPath: "/root/g/scheduled",
-          unitName: "scheduled",
-          rule: 1,
-          date: "2026-01-01",
-          time: "02:00",
-        },
-      },
-    ],
-  },
 });
 
 suite("Semantic Diff Explorer projection", () => {
@@ -356,9 +323,9 @@ suite("Semantic Diff Explorer projection", () => {
     const view = buildSemanticDiffExplorerViewModel(context, {
       actionIdAllocator: createSemanticDiffExplorerActionIdAllocator(),
     });
-    assert.strictEqual(view.cards.length, 7);
+    assert.strictEqual(view.cards.length, 6);
     assert.strictEqual(view.cards[0].count, 5);
-    assert.strictEqual(view.leafCount, 9);
+    assert.strictEqual(view.leafCount, 8);
     assert.strictEqual(view.status, "findings");
     assert.ok(isSemanticDiffExplorerViewModel(view));
     assert.strictEqual(
@@ -380,7 +347,6 @@ suite("Semantic Diff Explorer projection", () => {
       "moved",
       "removed",
       "renamed",
-      "run",
       "unsupported",
     ]);
     assert.strictEqual(
@@ -413,15 +379,11 @@ suite("Semantic Diff Explorer projection", () => {
       "timeout-removed",
       "condition-judgment-changed",
       "wait-target-changed",
-      "no-calculated-schedule-run",
-      "calculated-schedule-run-removed",
       "execution-user-type-changed",
       "jp1-resource-group-changed",
     ] as const;
     assert.deepStrictEqual(reasons.map(semanticDiffConfirmationTargetSide), [
       "before",
-      "after",
-      "after",
       "after",
       "after",
       "after",
@@ -532,12 +494,9 @@ suite("Semantic Diff Explorer projection", () => {
         unsupportedCountsByKind: {
           unsupported: 0,
           uninterpretable: 0,
-          uncalculated: 0,
         },
         confirmationRequiredCount: 0,
         limitationCount: 0,
-        scheduleRunChangeCount: 0,
-        hasUncalculated: false,
         hasFindings: false,
       },
     });
@@ -546,7 +505,7 @@ suite("Semantic Diff Explorer projection", () => {
     });
     assert.strictEqual(view.leafCount, 0);
     assert.strictEqual(view.status, "empty");
-    assert.strictEqual(view.cards.length, 7);
+    assert.strictEqual(view.cards.length, 6);
     assert.strictEqual(
       filterSemanticDiffExplorerViewModel(view, "confirmation-required").status,
       "filter-empty",
@@ -673,7 +632,7 @@ suite("Semantic Diff Explorer projection", () => {
     ]);
   });
 
-  test("retains candidate changes and uncalculated unsupported findings", () => {
+  test("retains candidate changes outside confirmation filtering", () => {
     const candidateChange: SemanticDiffChange = {
       id: "candidate",
       kind: "changed",
@@ -731,52 +690,6 @@ suite("Semantic Diff Explorer projection", () => {
       ).status,
       "filter-empty",
     );
-
-    const uncalculatedResult = {
-      ...confirmationsResult([]),
-      unsupportedItems: [
-        {
-          id: "uncalculated",
-          kind: "uncalculated" as const,
-          side: null,
-          reasonCode: "invalid-start-time" as const,
-          target: null,
-          detail: createSemanticDiffDetail(),
-          warning: null,
-        },
-      ],
-    };
-    const uncalculatedView = buildSemanticDiffExplorerViewModel(
-      Object.freeze({
-        result: uncalculatedResult,
-        summary: {
-          ...confirmationSummary(0),
-          unsupportedCountsByKind: {
-            unsupported: 0,
-            uninterpretable: 0,
-            uncalculated: 1,
-          },
-          hasUncalculated: true,
-          hasFindings: true,
-        },
-      }),
-      { actionIdAllocator: createSemanticDiffExplorerActionIdAllocator() },
-    );
-    const uncalculatedLeaf = leavesInTree(uncalculatedView.tree).find(
-      (leaf) => leaf.recordId === "uncalculated",
-    );
-    assert.strictEqual(uncalculatedLeaf?.kind, "unsupported");
-    assert.strictEqual(
-      uncalculatedLeaf?.kind === "unsupported"
-        ? uncalculatedLeaf.unsupportedKind
-        : undefined,
-      "uncalculated",
-    );
-    assert.strictEqual(
-      uncalculatedLeaf?.actions.flow.unavailableReason,
-      "missing-target-side",
-    );
-    assert.ok(isSemanticDiffExplorerViewModel(uncalculatedView));
   });
 
   test("orders hierarchy labels by UTF-16 code units", () => {

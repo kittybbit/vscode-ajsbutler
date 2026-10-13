@@ -9,7 +9,6 @@ import type {
   SemanticDiffOutputContext,
   SemanticDiffConfirmationReason,
   SemanticDiffRelationPair,
-  SemanticDiffScheduleRunChange,
   SemanticDiffSide,
   SemanticDiffTarget,
   SemanticDiffUnsupportedKind,
@@ -120,8 +119,7 @@ export type SemanticDiffExplorerCardId =
   | "attributes"
   | "confirmation-required"
   | "unsupported"
-  | "limitations"
-  | "schedule-run-changes";
+  | "limitations";
 
 export type SemanticDiffExplorerCard = Readonly<{
   id: SemanticDiffExplorerCardId;
@@ -133,8 +131,7 @@ export type SemanticDiffExplorerRecordKind =
   | "change"
   | "confirmation"
   | "unsupported"
-  | "limitation"
-  | "schedule";
+  | "limitation";
 
 export type SemanticDiffExplorerChangeLeaf = Readonly<{
   kind: "change";
@@ -199,22 +196,11 @@ export type SemanticDiffExplorerLimitationLeaf = Readonly<{
   actions: SemanticDiffExplorerActionSet;
 }>;
 
-export type SemanticDiffExplorerScheduleLeaf = Readonly<{
-  kind: "schedule";
-  id: string;
-  recordId: string;
-  change: SemanticDiffScheduleRunChange;
-  targetSide: null;
-  target: SemanticDiffExplorerTarget;
-  actions: SemanticDiffExplorerActionSet;
-}>;
-
 export type SemanticDiffExplorerLeaf =
   | SemanticDiffExplorerChangeLeaf
   | SemanticDiffExplorerConfirmationLeaf
   | SemanticDiffExplorerUnsupportedLeaf
-  | SemanticDiffExplorerLimitationLeaf
-  | SemanticDiffExplorerScheduleLeaf;
+  | SemanticDiffExplorerLimitationLeaf;
 
 export type SemanticDiffExplorerTreeNode = Readonly<{
   id: string;

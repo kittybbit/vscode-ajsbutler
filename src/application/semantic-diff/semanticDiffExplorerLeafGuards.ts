@@ -8,7 +8,6 @@ import {
 } from "./semanticDiffExplorerMessagePrimitives";
 import {
   isRelationPair,
-  isScheduleRunChange,
   isSemanticDiffConstraint,
   isSemanticDiffDetail,
   isSemanticDiffExplorerActionSet,
@@ -47,37 +46,18 @@ const confirmationReasons = new Set([
   "timeout-removed",
   "condition-judgment-changed",
   "wait-target-changed",
-  "no-calculated-schedule-run",
-  "calculated-schedule-run-removed",
   "execution-user-type-changed",
   "jp1-resource-group-changed",
 ]);
-const unsupportedKinds = new Set([
-  "unsupported",
-  "uninterpretable",
-  "uncalculated",
-]);
+const unsupportedKinds = new Set(["unsupported", "uninterpretable"]);
 const unsupportedReasons = new Set([
   "uninterpretable-file-monitoring-condition",
-  "cycle-schedule",
-  "closed-day-substitution",
-  "shift-days",
-  "calendar-selection",
-  "inherited-parent-rule",
-  "days-from-start",
-  "invalid-start-time",
-  "unpaired-start-time",
-  "unsupported-schedule-date",
-  "missing-start-time",
-  "invalid-calendar-day",
-  "invalid-schedule-comparison-period",
 ]);
 const limitationKinds = new Set([
   "parse",
   "normalization",
   "unsupported",
   "uninterpretable",
-  "uncalculated",
 ]);
 
 const isLeafIdentity = (record: Record<string, unknown>): boolean =>
@@ -231,25 +211,6 @@ const isLimitationLeaf = (record: Record<string, unknown>): boolean =>
     record.warning === null || isSemanticDiffWarning(record.warning),
   ]);
 
-const isScheduleLeaf = (record: Record<string, unknown>): boolean => {
-  const target = asPlainRecord(record.target);
-  return all([
-    hasExactKeys(record, [
-      "kind",
-      "id",
-      "recordId",
-      "change",
-      "targetSide",
-      "target",
-      "actions",
-    ]),
-    isScheduleRunChange(record.change),
-    record.targetSide === null,
-    targetProjectionMatchesSide(record.target, null),
-    target !== null && target.value === null,
-  ]);
-};
-
 const leafChecks = new Map<
   string,
   (record: Record<string, unknown>) => boolean
@@ -258,7 +219,6 @@ const leafChecks = new Map<
   ["confirmation", isConfirmationLeaf],
   ["unsupported", isUnsupportedLeaf],
   ["limitation", isLimitationLeaf],
-  ["schedule", isScheduleLeaf],
 ]);
 
 const leafKinds = new Set(leafChecks.keys());

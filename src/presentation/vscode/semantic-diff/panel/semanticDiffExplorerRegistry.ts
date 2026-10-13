@@ -163,14 +163,12 @@ type ActionEntry = Readonly<{
 type ActionLeaf = Extract<
   SemanticDiffExplorerLeaf,
   {
-    kind: "change" | "confirmation" | "unsupported" | "limitation" | "schedule";
+    kind: "change" | "confirmation" | "unsupported" | "limitation";
   }
 >;
 
 const leafTarget = (leaf: ActionLeaf): SemanticDiffTarget | null =>
-  leaf.kind === "limitation" || leaf.kind === "schedule"
-    ? null
-    : leaf.target.value;
+  leaf.kind === "limitation" ? null : leaf.target.value;
 
 const leafTargetKind = (
   target: SemanticDiffTarget | null,
@@ -213,7 +211,7 @@ const actionMetadataForLeaf = (
   sessionId: SemanticDiffExplorerSessionId,
 ): ActionEntry => {
   const target = leafTarget(leaf);
-  const side = leaf.kind === "schedule" ? null : leaf.targetSide;
+  const side = leaf.targetSide;
   return {
     sessionId,
     metadata: {

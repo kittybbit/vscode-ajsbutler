@@ -64,9 +64,7 @@ export type WorkflowSourcePreparationDeps = WorkflowSourceSelectionDeps &
   WorkflowGitHeadDeps;
 type WorkflowCaptureDeps = Pick<
   SemanticDiffCommandDeps,
-  | "sourceHandleIdAllocator"
-  | "beginSemanticDiffSourceCapture"
-  | "buildSemanticDiffPresentationArtifacts"
+  "sourceHandleIdAllocator" | "beginSemanticDiffSourceCapture"
 >;
 
 export type WorkflowSourceDescriptor = ImmutableSourceDescriptor & {
@@ -369,9 +367,7 @@ const createWorkflowCaptureInput = (
 
 const workflowCaptureDependenciesAvailable = (
   deps: WorkflowCaptureDeps,
-): boolean =>
-  deps.beginSemanticDiffSourceCapture !== undefined &&
-  deps.buildSemanticDiffPresentationArtifacts !== undefined;
+): boolean => deps.beginSemanticDiffSourceCapture !== undefined;
 
 export const beginWorkflowCapture = (
   deps: WorkflowCaptureDeps,

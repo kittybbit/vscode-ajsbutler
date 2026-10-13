@@ -7,7 +7,6 @@ import type {
   SemanticDiffLimitation,
   SemanticDiffUnsupportedItem,
 } from "../../../application/semantic-diff/semanticDiffDto";
-import { semanticDiffReportText } from "./semanticDiffReportText";
 import {
   bulletLine,
   describeTarget,
@@ -18,7 +17,6 @@ import {
   renderAttributeChanges,
   renderChangeDetails,
   renderConfirmationRequiredItem,
-  renderScheduleRunChange,
   renderSummary,
 } from "./semanticDiffMarkdownLocalization";
 import type { SemanticDiffMarkdownRenderer } from "./semanticDiffMarkdownTypes";
@@ -130,33 +128,6 @@ const renderLimitations = (
     language,
   );
 
-const renderScheduleComparison = (
-  result: SemanticDiffResult,
-  language?: string,
-): string[] => {
-  if (!result.scheduleComparison) {
-    return [];
-  }
-
-  return [
-    `## ${label("Schedule Changes", language)}`,
-    "",
-    bulletLine(
-      semanticDiffReportText("generated.period", language, {
-        from: escapeMarkdown(result.scheduleComparison.period.from),
-        to: escapeMarkdown(result.scheduleComparison.period.to),
-      }),
-    ),
-    ...sectionOrNone(
-      [...result.scheduleComparison.runChanges]
-        .sort((left, right) => compareStrings(left.id, right.id))
-        .flatMap((change) => renderScheduleRunChange(change, language)),
-      language,
-    ),
-    "",
-  ];
-};
-
 type SemanticDiffMarkdownInput = SemanticDiffResult | SemanticDiffOutputContext;
 
 const resultFromMarkdownInput = (
@@ -189,7 +160,6 @@ export const renderSemanticDiffMarkdown = (
     "",
     ...renderAttributeChanges(result.changes, language, identityDecisions),
     "",
-    ...renderScheduleComparison(result, language),
     `## ${label("Confirmation Required", language)}`,
     "",
     ...renderConfirmationRequired(result.confirmationRequired, language),

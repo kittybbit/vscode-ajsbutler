@@ -1,11 +1,8 @@
 import type {
-  SemanticDiffComparisonPeriod,
   SemanticDiffConstraint,
   SemanticDiffDetail,
   SemanticDiffRelationEndpoint,
   SemanticDiffRelationPair,
-  SemanticDiffScheduleRun,
-  SemanticDiffScheduleRunChange,
   SemanticDiffTarget,
   SemanticDiffWarning,
 } from "./semanticDiffDto";
@@ -43,7 +40,6 @@ const constraintCodes = new Set([
   "jp1-ajs3-v13-rule-basis",
   "runtime-state-not-verified",
   "external-state-not-verified",
-  "comparison-period",
 ]);
 const actionKinds = new Set(["source", "flow", "output"]);
 const errorCodes = new Set([
@@ -195,27 +191,10 @@ const isRelationPairRecord = (record: Record<string, unknown>): boolean => {
   ]);
 };
 
-export const isComparisonPeriod = (
-  value: unknown,
-): value is SemanticDiffComparisonPeriod => {
-  const record = asPlainRecord(value);
-  if (record === null) return false;
-  return all([
-    hasExactKeys(record, ["from", "to"]),
-    typeof record.from === "string",
-    typeof record.to === "string",
-  ]);
-};
-
-const isFiniteNumber = (value: unknown): value is number =>
-  typeof value === "number" && Number.isFinite(value);
-
 const detailKeys = [
   "unitPath",
   "parameterKey",
   "relationPair",
-  "scheduleRule",
-  "period",
   "beforeValues",
   "afterValues",
   "rawValues",
@@ -227,8 +206,6 @@ const hasDetailScalars = (record: Record<string, unknown>): boolean =>
     isNullableString(record.unitPath),
     isNullableString(record.parameterKey),
     record.relationPair === null || isRelationPair(record.relationPair),
-    record.scheduleRule === null || isFiniteNumber(record.scheduleRule),
-    record.period === null || isComparisonPeriod(record.period),
   ]);
 
 const hasDetailArrays = (record: Record<string, unknown>): boolean =>
@@ -389,68 +366,6 @@ export const targetProjectionMatchesSide = (
 ): boolean => {
   const record = asPlainRecord(value);
   return record !== null && isTargetProjection(record) && record.side === side;
-};
-
-export const isScheduleRun = (
-  value: unknown,
-): value is SemanticDiffScheduleRun => {
-  const record = asPlainRecord(value);
-  return (
-    record !== null &&
-    all([
-      hasExactKeys(record, ["unitPath", "unitName", "rule", "date", "time"]),
-      typeof record.unitPath === "string",
-      typeof record.unitName === "string",
-      isFiniteNumber(record.rule),
-      typeof record.date === "string",
-      typeof record.time === "string",
-    ])
-  );
-};
-
-const isScheduleKind = (value: unknown): boolean =>
-  value === "added" || value === "removed" || value === "changed-time";
-
-const addedSides = (record: Record<string, unknown>): boolean =>
-  record.before === null && record.after !== null;
-const removedSides = (record: Record<string, unknown>): boolean =>
-  record.before !== null && record.after === null;
-const changedSides = (record: Record<string, unknown>): boolean =>
-  record.before !== null && record.after !== null;
-
-const scheduleSideChecks = new Map<
-  string,
-  (record: Record<string, unknown>) => boolean
->([
-  ["added", addedSides],
-  ["removed", removedSides],
-  ["changed-time", changedSides],
-]);
-
-const scheduleSidesMatch = (record: Record<string, unknown>): boolean =>
-  scheduleSideChecks.get(record.kind as string)?.(record) ?? false;
-
-export const isScheduleRunChange = (
-  value: unknown,
-): value is SemanticDiffScheduleRunChange => {
-  const record = asPlainRecord(value);
-  if (
-    record === null ||
-    !hasExactKeys(record, ["id", "kind", "unitPath", "date", "before", "after"])
-  ) {
-    return false;
-  }
-  const beforeValid = record.before === null || isScheduleRun(record.before);
-  const afterValid = record.after === null || isScheduleRun(record.after);
-  return all([
-    typeof record.id === "string",
-    isScheduleKind(record.kind),
-    typeof record.unitPath === "string",
-    typeof record.date === "string",
-    beforeValid,
-    afterValid,
-    scheduleSidesMatch(record),
-  ]);
 };
 
 export const isSemanticDiffExplorerActionOutcome = (

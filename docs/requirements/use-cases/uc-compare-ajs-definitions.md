@@ -14,7 +14,6 @@ read-only Semantic Diff Explorer session.
 
 - the active editor buffer as the after definition, including unsaved changes
 - either a selected definition file or the current definition at Git `HEAD`
-- an optional half-open schedule comparison period entered as `YYYY-MM-DD`
 
 ## Outputs
 
@@ -34,7 +33,7 @@ read-only Semantic Diff Explorer session.
   is untracked
 - Git `Repository.show` supplies the decoded/textconv before snapshot; binary,
   unsupported, missing, and oversized sources remain explicit failures
-- source and period selection are per-run values and are not persisted
+- source selection is a per-run value and are not persisted
 - a new Semantic Diff Flow action uses a captured source only while the same
   source identity and URI still resolve to an open document with matching
   text; a captured non-null document version must also match, while a null
@@ -55,7 +54,7 @@ Feature: Compare JP1/AJS definitions
 
 Scenario: File comparison opens Explorer
   Given a JP1/AJS definition is active
-  When the reviewer selects a definition file and no schedule period
+  When the reviewer selects a definition file
   Then one comparison opens in Semantic Diff Explorer
   And the before and after snapshots remain available for source navigation
 
@@ -72,10 +71,6 @@ Scenario: Git is unavailable
   Then the command reports a localized unavailable result
   And file comparison remains available on a subsequent run
 
-Scenario: Period is carried to the comparison
-  Given the reviewer chooses a schedule period and enters valid dates
-  When comparison succeeds
-  Then the half-open period is retained in the Explorer context
 ```
 
 ## Acceptance Notes

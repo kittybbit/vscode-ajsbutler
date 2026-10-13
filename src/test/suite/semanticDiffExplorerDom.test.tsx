@@ -116,8 +116,6 @@ const createLeaf = (
     unitPath: `/group/${id}`,
     parameterKey: "timeout",
     relationPair: null,
-    scheduleRule: null,
-    period: null,
     beforeValues: ["10"],
     afterValues: ["20"],
     rawValues: [],
@@ -158,7 +156,6 @@ const createViewModel = (leafCount = 2): SemanticDiffExplorerViewModel => {
       card("confirmation-required", leafCount > 1 ? 1 : 0),
       card("unsupported", 0),
       card("limitations", 0),
-      card("schedule-run-changes", 0),
     ],
     tree: {
       id: "root",
@@ -567,7 +564,6 @@ suite("Semantic diff Explorer DOM", () => {
     assert.strictEqual(labels.state("candidate"), "候補");
     assert.strictEqual(labels.state("unsupported"), "未対応");
     assert.strictEqual(labels.state("uninterpretable"), "解釈不能");
-    assert.strictEqual(labels.state("uncalculated"), "未計算");
     assert.strictEqual(labels.state("parse"), "解析の制約");
     assert.strictEqual(labels.state("normalization"), "正規化の制約");
     assert.notStrictEqual(

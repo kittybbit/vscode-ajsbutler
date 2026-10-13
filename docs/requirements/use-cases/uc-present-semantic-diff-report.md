@@ -16,8 +16,8 @@ explicitly.
 
 - one immutable host-neutral semantic comparison result and its canonical
   summary
-- identity decisions, confirmation-required items, unsupported or
-  uncalculated information, and comparison constraints from that result
+- identity decisions, confirmation-required items, unsupported
+  information, and comparison constraints from that result
 - report language derived from the host display language
 - the selected output mode: Summary, Full, Audit, or JSON
 
@@ -39,7 +39,7 @@ explicitly.
   localized rule and strategy together with the raw strategy ID, unit type,
   canonical field presence/values, and deterministic field order; candidates
   show every before/after reference without selecting a target
-- report headings, labels, summaries, rationale, schedule sections,
+- report headings, labels, summaries, rationale,
   confirmation wording, limitation notes, and empty states use the selected
   report language
 - semantic identifiers, paths, parameter keys, and raw JP1/AJS values are not
@@ -51,15 +51,14 @@ explicitly.
   and identity evidence is not logged or sent through telemetry
 - unsupported report languages fall back to English
 - Summary is a compact overview with zero-inclusive change and unsupported
-  counts, confirmation and limitation counts, schedule-run count, and status;
+  counts, confirmation and limitation counts and status;
   it does not enumerate every detail
 - Full is the default human-readable mode and preserves the detailed Markdown
-  report, including empty, unsupported, uncalculated, limitation, and schedule
-  states
+  report, including empty, unsupported, and limitation states
 - Audit includes the available structured evidence, reason codes, constraints,
   raw values, and limitations, and does not claim unavailable runtime or
   external-state evidence was verified
-- JSON uses an explicit versioned schema, stable codes and raw values,
+- JSON uses schema version 2, stable codes and raw values,
   explicit null/empty fields, and deterministic ordering independent of
   language, host, or source insertion order
 - all modes consume the same immutable comparison result and canonical summary;
@@ -70,8 +69,6 @@ explicitly.
 - the Explorer's filter, tree, and Output actions remain keyboard-operable;
   confirmation-required filtering preserves the session and announces an
   explicit empty result when no matching item remains
-- the report includes the schedule comparison period when schedule comparison
-  was requested
 - report presentation does not change semantic comparison meaning
 - completing comparison displays the report before any copy action
 - completion never overwrites the clipboard implicitly
@@ -104,8 +101,7 @@ Scenario: Explorer output preserves the comparison session
   And the report opens without an implicit clipboard write
 
 Scenario: Summary provides a compact review overview
-  Given a comparison contains changes, confirmation items, and an uncalculated
-    schedule
+  Given a comparison contains changes, confirmation items, and limitations
   When Summary output is selected
   Then counts and status are displayed without enumerating every detail
 
@@ -132,7 +128,7 @@ Scenario: Japanese display language produces a Japanese report
   Given the host display language is Japanese
   When the semantic diff report is generated
   Then headings, labels, changes, rationale, limitations, confirmation items,
-    schedule wording, and empty states are in Japanese
+    and empty states are in Japanese
   And identifiers, paths, parameter keys, and raw JP1/AJS values are unchanged
 
 Scenario: Unsupported report language falls back to English
@@ -140,8 +136,8 @@ Scenario: Unsupported report language falls back to English
   When the semantic diff report is generated
   Then report wording uses English
 
-Scenario: Unsupported and uncalculated areas remain visible
-  Given semantic diff results contain unsupported or uncalculated information
+Scenario: Unsupported areas remain visible
+  Given semantic diff results contain unsupported information
   When the report is generated
   Then each affected area and its reason are included
 

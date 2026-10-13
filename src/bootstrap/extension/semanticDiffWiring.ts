@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
-import type { BuildSemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -38,7 +37,6 @@ import {
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
-  buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
   beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
@@ -131,7 +129,6 @@ const createCompareCommand = ({
       vscode.window.showQuickPick(items, options),
     showWorkflowQuickPick: (items, options) =>
       vscode.window.showQuickPick(items, options),
-    showInputBox: (options) => vscode.window.showInputBox(options),
     showOpenDialog: (options) => vscode.window.showOpenDialog(options),
     showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     readFile: (uri) => vscode.workspace.fs.readFile(uri),
@@ -152,10 +149,6 @@ const createCompareCommand = ({
     unregisterSemanticDiffSourceCapture: (context) =>
       contextRegistry.unregisterSourceCapture(context),
   };
-  if (deps.buildSemanticDiffPresentationArtifacts) {
-    commandDeps.buildSemanticDiffPresentationArtifacts =
-      deps.buildSemanticDiffPresentationArtifacts;
-  }
   return vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
     executeCompareSemanticDiffCommand(commandDeps),
   );

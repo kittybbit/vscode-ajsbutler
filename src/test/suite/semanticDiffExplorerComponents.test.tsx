@@ -54,8 +54,6 @@ const explorerLeaf = (id: string): SemanticDiffExplorerLeaf => ({
     unitPath: `/jobs/${id}`,
     parameterKey: "timeout",
     relationPair: null,
-    scheduleRule: null,
-    period: null,
     beforeValues: ["10"],
     afterValues: ["20"],
     rawValues: [],
@@ -187,10 +185,6 @@ suite("Semantic Diff Explorer components", () => {
       assert.strictEqual(row.querySelectorAll("dd").length, 1);
     });
     fireEvent.click(view.getByRole("button", { name: "Output" }));
-    assert.strictEqual(
-      view.queryByRole("button", { name: "Schedule impact" }),
-      null,
-    );
     assert.deepStrictEqual(
       actions.map(({ id, element }) => [id, element?.tagName]),
       [["output", "BUTTON"]],

@@ -4,8 +4,8 @@
 
 - Purpose: remove execution-date simulation and specialize Semantic Diff in
   definition-change review, with consequential responsibility cleanup.
-- Active or approved slice: S1 and S2 are Human Approved; begin S1 after
-  the focused planning commit. S2 waits for S1 completion approval and commit.
+- Active or approved slice: S1 is committed; S2 implementation is complete
+  under the committed original plan and approved combined residual amendment.
 - Read first: `SPECS.md`, this plan, `TRACEABILITY.md` and discovery references.
 - Validate: selected-feature docs now; per-slice host, boundary, quality and
   compatibility coverage below during implementation.
@@ -15,14 +15,13 @@
 
 ## Current state and gate
 
-- Lifecycle state: PLAN_APPROVED.
-- Next operation: focused combined replan commit, then remaining S2 corrections
-  and final validation.
+- Lifecycle state: SLICE_APPROVED.
+- Next operation: focused S2 completion commit, then Feature Exit entry check.
 - Selection: `semantic-diff-schedule-simulation-removal`.
 - Branch/base: `codex/semantic-diff-schedule-simulation-removal` / `origin/main`.
 - Fixed base and planning HEAD: `0090b728977d55d4127bdad149f74f598f0b2fd5`.
-- Slice states: S1 is SLICE_COMMITTED; affected S2 plan is PLAN_APPROVED. Existing
-  S2 implementation edits remain under the original approved unchanged scope.
+- Slice states: S1 is SLICE_COMMITTED; S2 is SLICE_APPROVED under the committed
+  original plan and combined exact-path amendment.
 - Plan review: Ready for approval; no Findings. Reviewed plan identity:
   `d4f41dc4d222a702225db6ac5749486c1bf5f6546579d176c649a91573da8f20`.
   Independent reviewer: `schedule_removal_plan_review` in current conversation.
@@ -50,6 +49,20 @@
     request in current conversation; exact reviewed scope above.
   - Commit status: committed as `618e7ec85b9b8226cc5952d29a883aaf749bf408`;
     exact 73 approved paths, staged diff check passed.
+- S2 Completion Approval:
+  - Status: Approved
+  - Approved at: approved in current conversation, 2026-10-14
+  - Scope/paths: complete corrected S2 patch, exact 104 approved paths in
+    `/tmp/ajs-removal-s2/correction/evidence.json`, including selected-feature docs.
+  - Review verdict: Ready, no Findings, from `schedule_removal_s1_review` and
+    `schedule_removal_s1_review_second` for the complete corrected patch.
+  - Reviewed complete patch SHA256:
+    `b0110cb7584bc06f4ee9d889486310e82ca5e673beb86ff65ed61e4a23b515d4`.
+  - Reviewed content identity:
+    `faa4f107a7efbafccb833b15e2d8bacf1c1e24fd251fc99ecf8a0598ed68bf5c`.
+  - Approval provenance: human response to Main's S2 completion/commit approval
+    request after both corrected-patch reviews returned Ready.
+  - Commit status: pending focused completion commit.
 - Closure Approval: none.
 
 ## S2 Registry approval-boundary amendment
@@ -91,7 +104,8 @@
   conversation, 2026-10-13. Approved scope: exact Registry path and three
   obsolete schedule-leaf removals above, plus TASKS.md/TRACEABILITY.md amendment.
   Provenance: human response to Main's exact one-file addition approval request.
-  Amendment commit: none; focused replan commit precedes correction.
+  Amendment commit: included in combined replan
+  `0efd27fec1d38557757906e18ef2bd7183afa78c`; staged diff check passed.
   Unchanged S2 scope/decisions need no new product decision.
 - Evidence freshness: preserve matching S2 baseline observations and unchanged
   per-check results; they do not prove the unedited Registry correction. New
@@ -152,7 +166,8 @@
   in current conversation, 2026-10-13. Approved scope: exact two paths and
   removals above, plus TASKS.md/TRACEABILITY.md amendment; provenance: human
   response to Main's exact two-file addition approval request. Combined replan
-  commit: none; a focused combined replan commit precedes implementation. S1 scope,
+  commit: `0efd27fec1d38557757906e18ef2bd7183afa78c`; exact TASKS.md and
+  TRACEABILITY.md only, staged diff check passed. S1 scope,
   Completion Approval, reviews, commit and evidence remain unchanged.
 - Evidence freshness: refresh affected documentation validation for this plan
   delta and README once edited. Reuse matching S2 baseline observations;
@@ -642,3 +657,56 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
   follow successful runner exit. Snapshot cache contamination was corrected by
   refreshing final qlty only in a clean exact snapshot. No missing check or
   blocking decision remains; S2 waits for S1 Completion Approval and commit.
+
+## S2 implementation handoff
+
+- State: SLICE_APPROVED; both independent reviewers returned Ready on the complete
+  corrected S2 patch. Original and combined approvals remain the exact boundary.
+- Acceptance: prediction/calendar/period computation, DTOs, reports and exclusive
+  tests are deleted. File/Git comparison proceeds directly to definition review;
+  schedule attributes, list formatting and malformed-input diagnostics remain.
+  JSON emits schemaVersion 2 with no v1 or empty prediction shells. Roadmap,
+  mixed use cases, parameter rules and README lose obsolete simulation promises.
+- Solution Shape: existing report-data use case owns parsing/comparison; one
+  immutable output context feeds Explorer and reports. Existing command workflow
+  owns capture/bind/register/open rollback and release. No new owner, port,
+  dependency exception or production file was introduced.
+- Checks: final test:full passed (desktop 1032 tests and web smoke); minimum
+  VS Code 1.75.0 passed; clean production build passed. Zero-exception architecture
+  dependency and Semantic Diff ownership suites passed as part of desktop tests.
+  Changed Markdown, local links and structure passed for 10 documents.
+- Quality: official baseline/final full checks each report 3 unchanged unrelated
+  findings; full smells each report 151 identical observations. Final aggregate
+  passed with no new changed-file findings or smells. Dispositions, exact scan
+  inventories, corrections and raw outputs are in the reusable evidence artifact.
+- Compatibility/readiness: engines.vscode and dependency/config contracts are
+  unchanged. JSON v2 is the explicitly approved breaking output migration.
+  Desktop/web source, Flow, Output, strict messages and error/privacy regressions
+  passed. Both independent semantic architecture reviews returned Ready.
+- Evidence: `/tmp/ajs-removal-s2/evidence.json`; substantive manifest and the
+  separately validated gate-metadata patch are linked there. No Completion
+  Approval, completion commit or self-review verdict is claimed.
+
+## S2 independent-review correction handoff
+
+- Trigger: both independent reviews returned two P2 findings on the same complete
+  patch. Main routed the deterministic Correction Loop within the existing
+  approved paths; no contract or Solution Shape change was required.
+- Correction: removed the unused legacy source bind/register/cleanup chain,
+  its exclusive private helpers and imports from the existing source-binding
+  module. Active workflow capture, registration, rollback and idempotent release
+  remain. Removed prediction-only changed-time labels from Explorer and the
+  aligned English/Japanese message catalogs.
+- Acceptance: R3/R4/R8 exclusive-removal and responsibility-consolidation gaps
+  are corrected. No new production file, owner, port or dependency was added.
+- Validation: corrected full desktop 1032 tests and web smoke pass; minimum
+  VS Code 1.75.0 passes. Full Qlty check retains only the 3 unchanged unrelated
+  findings; full smells retain 151 identical observations; aggregate passes.
+  Exact final build, document checks and content identities are in the evidence.
+- State: IMPLEMENTED for fresh independent reviews of the complete corrected
+  patch. Both independent re-reviews returned Ready with no Findings for the
+  corrected complete patch; exact review identity above. Completion Approval
+  is explicitly recorded above; focused completion commit is pending.
+- Evidence: `/tmp/ajs-removal-s2/correction/evidence.json`, reusing the original
+  exact S2 baseline. This record is gate metadata, separately validated from
+  the immutable corrected substantive snapshot.

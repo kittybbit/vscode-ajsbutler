@@ -6,7 +6,7 @@ import {
   createSemanticDiffSourceIndexIdAllocator,
 } from "../../application/parsing/AjsParserWithSourceIndexPort";
 import { createBeginSemanticDiffSourceCapture } from "../../application/semantic-diff/semanticDiffSourceCapture";
-import type { SemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import { buildSemanticDiffOutputContext } from "../../application/semantic-diff/buildSemanticDiffOutputContext";
 import type { SemanticDiffResult } from "../../application/semantic-diff/semanticDiffDto";
 import { AntlrAjsParser } from "../../infrastructure/parser/AntlrAjsParser";
 import { SemanticDiffExplorerContextRegistry } from "../../presentation/vscode/semantic-diff/panel/semanticDiffExplorerRegistry";
@@ -27,32 +27,24 @@ const result = (): SemanticDiffResult => ({
   limitations: [],
 });
 
-const makeArtifacts = (): SemanticDiffPresentationArtifacts => ({
-  context: { result: result(), summary: {} as never },
-  scheduleImpact: { kind: "unavailable", reason: "not-requested" },
-});
-
-suite("Semantic Diff command presentation adapter", () => {
-  test("invokes the adapter and ordinary Explorer opener once with one context", async () => {
+suite("Semantic Diff command report pipeline", () => {
+  test("invokes the report builder and ordinary Explorer opener once with one context", async () => {
     const beforeUri = vscode.Uri.parse("untitled:before-definition.ajs");
     const afterUri = vscode.Uri.parse("untitled:after-definition.ajs");
-    const period = { from: "2026-04-01", to: "2026-05-01" };
     const observed: {
       inputs: unknown[];
       contexts: unknown[];
-      legacyBuilds: number;
       sourceSelections: number;
       fileDialogs: number;
       events: string[];
     } = {
       inputs: [],
       contexts: [],
-      legacyBuilds: 0,
       sourceSelections: 0,
       fileDialogs: 0,
       events: [],
     };
-    const artifacts = makeArtifacts();
+    const context = buildSemanticDiffOutputContext(result());
     const parser = new AntlrAjsParser({
       sourceIndexIdAllocator: createSemanticDiffSourceIndexIdAllocator(),
     });
@@ -100,18 +92,15 @@ suite("Semantic Diff command presentation adapter", () => {
       },
       showErrorMessage: async () => undefined,
       openReport: async () => undefined,
-      buildSemanticDiffReportData: () => {
-        observed.legacyBuilds += 1;
-        throw new Error("legacy builder must not run");
-      },
-      buildSemanticDiffPresentationArtifacts: (input, scopedParser) => {
+      buildSemanticDiffReportData: (input, scopedParser) => {
         observed.events.push("callback");
         observed.inputs.push(input);
         assert.ok(scopedParser);
         scopedParser.parse(input.beforeContent);
         scopedParser.parse(input.afterContent);
-        return artifacts;
+        return { ok: true, result: context.result };
       },
+      buildSemanticDiffOutputContext: () => context,
       beginSemanticDiffSourceCapture: (input) => {
         observed.events.push("capture");
         return beginCapture(input);
@@ -127,7 +116,6 @@ suite("Semantic Diff command presentation adapter", () => {
       },
       unregisterSemanticDiffSourceCapture: (context) =>
         contextRegistry.unregisterSourceCapture(context),
-      scheduleComparisonPeriod: period,
       sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
     };
 
@@ -137,17 +125,10 @@ suite("Semantic Diff command presentation adapter", () => {
       action: "explorer-opened",
       sessionId: "sde-session-1",
       source: "file",
-      period: "evaluated",
     });
     assert.strictEqual(observed.inputs.length, 1);
-    assert.strictEqual(
-      (observed.inputs[0] as { options: { scheduleComparisonPeriod: unknown } })
-        .options.scheduleComparisonPeriod,
-      period,
-    );
     assert.strictEqual(observed.contexts.length, 1);
-    assert.strictEqual(observed.contexts[0], artifacts.context);
-    assert.strictEqual(observed.legacyBuilds, 0);
+    assert.strictEqual(observed.contexts[0], context);
     assert.strictEqual(observed.sourceSelections, 1);
     assert.strictEqual(observed.fileDialogs, 1);
     assert.deepStrictEqual(observed.events, [

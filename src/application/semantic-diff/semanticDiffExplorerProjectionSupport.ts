@@ -6,7 +6,6 @@ import type {
   SemanticDiffLimitation,
   SemanticDiffRelationEndpoint,
   SemanticDiffRelationPair,
-  SemanticDiffScheduleRunChange,
   SemanticDiffSide,
   SemanticDiffTarget,
   SemanticDiffUnsupportedItem,
@@ -19,7 +18,6 @@ import type {
   SemanticDiffExplorerChangeLeaf,
   SemanticDiffExplorerConfirmationLeaf,
   SemanticDiffExplorerLimitationLeaf,
-  SemanticDiffExplorerScheduleLeaf,
   SemanticDiffExplorerTarget,
   SemanticDiffExplorerUnsupportedLeaf,
 } from "./semanticDiffExplorerDto";
@@ -44,8 +42,6 @@ export const cloneDetail = (detail: SemanticDiffDetail): SemanticDiffDetail =>
     unitPath: detail.unitPath,
     parameterKey: detail.parameterKey,
     relationPair: cloneRelationPair(detail.relationPair),
-    scheduleRule: detail.scheduleRule,
-    period: detail.period === null ? null : freeze({ ...detail.period }),
     beforeValues: freezeArray(detail.beforeValues),
     afterValues: freezeArray(detail.afterValues),
     rawValues: freezeArray(detail.rawValues),
@@ -166,8 +162,6 @@ export const semanticDiffConfirmationTargetSide = (
     ["timeout-removed", "after"],
     ["condition-judgment-changed", "after"],
     ["wait-target-changed", "after"],
-    ["no-calculated-schedule-run", "after"],
-    ["calculated-schedule-run-removed", "after"],
     ["execution-user-type-changed", "after"],
     ["jp1-resource-group-changed", "after"],
   ]);
@@ -412,25 +406,4 @@ export const limitationLeaf = (
     detail: cloneDetail(item.detail),
     warning: cloneWarning(item.warning),
     actions: unavailableActionSet(),
-  });
-
-export const scheduleLeaf = (
-  change: SemanticDiffScheduleRunChange,
-  occurrence: number,
-): SemanticDiffExplorerScheduleLeaf =>
-  freeze({
-    kind: "schedule",
-    id: `schedule:${change.id}:${occurrence}`,
-    recordId: change.id,
-    change: freeze({
-      ...change,
-      before: change.before === null ? null : freeze({ ...change.before }),
-      after: change.after === null ? null : freeze({ ...change.after }),
-    }),
-    targetSide: null,
-    target: explorerTarget(null, null),
-    actions: freeze({
-      source: unavailableAction("missing-target-side"),
-      flow: unavailableAction("missing-target-side"),
-    }),
   });

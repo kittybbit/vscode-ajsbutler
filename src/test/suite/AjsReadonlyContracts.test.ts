@@ -20,11 +20,6 @@ import {
   indexAjsUnits,
   type AjsDocumentIndex,
 } from "../../domain/models/ajs/AjsDocumentIndex";
-import {
-  createScheduleCalendarContextIndex,
-  type ScheduleCalendarContextIndex,
-} from "../../domain/schedule/ScheduleCalendar";
-import { indexUnits } from "../../domain/schedule/ScheduleCalendarIndex";
 
 const parameterProducer: AjsParameter = {
   key: "job-name",
@@ -262,61 +257,34 @@ export const compileReadonlyIndexProducerContracts = (
   return {
     published,
     model: createAjsDocumentIndex(units),
-    calendar: createScheduleCalendarContextIndex(document),
     keyed: indexAjsUnits(units, (item) => item.id),
-    reexported: indexUnits(units, (item) => item.absolutePath),
   };
 };
 
 export const compileReadonlyIndexAssignmentErrors = (
   index: AjsDocumentIndex,
-  calendar: ScheduleCalendarContextIndex,
   unit: AjsUnit,
 ): void => {
   // @ts-expect-error published index properties cannot be replaced
   index.byId = new Map();
   // @ts-expect-error published path index cannot be replaced
   index.byPath = new Map();
-  // @ts-expect-error schedule index retains readonly identity lookup
-  calendar.byId = new Map();
-  // @ts-expect-error schedule index retains readonly path lookup
-  calendar.byPath = new Map();
 
   const keyed = indexAjsUnits([unit], (item) => item.id);
-  const reexported = indexUnits([unit], (item) => item.absolutePath);
   // Check each exposed type before their common readonly type is inferred.
   // @ts-expect-error model identity lookup cannot insert buckets
   index.byId.set(unit.id, [unit]);
   // @ts-expect-error model path lookup cannot insert buckets
   index.byPath.set(unit.absolutePath, [unit]);
-  // @ts-expect-error calendar identity lookup cannot insert buckets
-  calendar.byId.set(unit.id, [unit]);
-  // @ts-expect-error calendar path lookup cannot insert buckets
-  calendar.byPath.set(unit.absolutePath, [unit]);
   // @ts-expect-error direct index function publishes a readonly Map
   keyed.set(unit.id, [unit]);
-  // @ts-expect-error calendar re-export publishes a readonly Map
-  reexported.set(unit.absolutePath, [unit]);
   // @ts-expect-error model identity lookup publishes readonly buckets
   index.byId.get(unit.id)?.push(unit);
   // @ts-expect-error model path lookup publishes readonly buckets
   index.byPath.get(unit.absolutePath)?.push(unit);
-  // @ts-expect-error calendar identity lookup publishes readonly buckets
-  calendar.byId.get(unit.id)?.push(unit);
-  // @ts-expect-error calendar path lookup publishes readonly buckets
-  calendar.byPath.get(unit.absolutePath)?.push(unit);
   // @ts-expect-error direct index function publishes readonly buckets
   keyed.get(unit.id)?.push(unit);
-  // @ts-expect-error calendar re-export publishes readonly buckets
-  reexported.get(unit.absolutePath)?.push(unit);
-  for (const lookup of [
-    index.byId,
-    index.byPath,
-    calendar.byId,
-    calendar.byPath,
-    keyed,
-    reexported,
-  ]) {
+  for (const lookup of [index.byId, index.byPath, keyed]) {
     // @ts-expect-error published Maps cannot insert or replace buckets
     lookup.set(unit.id, [unit]);
     // @ts-expect-error published Maps cannot remove buckets

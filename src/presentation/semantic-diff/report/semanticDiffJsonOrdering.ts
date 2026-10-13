@@ -15,12 +15,9 @@ import type {
   SemanticDiffJsonIdentityEvidence,
   SemanticDiffJsonIdentityField,
   SemanticDiffJsonLimitation,
-  SemanticDiffJsonPeriod,
   SemanticDiffJsonRelationEndpoint,
   SemanticDiffJsonRelationPair,
   SemanticDiffJsonRelationReference,
-  SemanticDiffJsonRun,
-  SemanticDiffJsonRunChange,
   SemanticDiffJsonTarget,
   SemanticDiffJsonUnitReference,
   SemanticDiffJsonUnsupported,
@@ -57,7 +54,6 @@ export const attributeCategoryOrder = [
 export const unsupportedKindOrder: readonly UnsupportedKind[] = [
   "unsupported",
   "uninterpretable",
-  "uncalculated",
 ];
 
 export const confirmationReasonCodes: readonly SemanticDiffConfirmationReason[] =
@@ -67,8 +63,6 @@ export const confirmationReasonCodes: readonly SemanticDiffConfirmationReason[] 
     "timeout-removed",
     "condition-judgment-changed",
     "wait-target-changed",
-    "no-calculated-schedule-run",
-    "calculated-schedule-run-removed",
     "execution-user-type-changed",
     "jp1-resource-group-changed",
   ];
@@ -140,15 +134,6 @@ export const compareStringArrays = (
 
 export const sortedStrings = (values: readonly string[]): string[] =>
   [...values].sort(compareOrdinal);
-
-export const comparePeriods = (
-  left: SemanticDiffJsonPeriod,
-  right: SemanticDiffJsonPeriod,
-): number =>
-  firstDifference([
-    compareOrdinal(left.from, right.from),
-    compareOrdinal(left.to, right.to),
-  ]);
 
 export const compareUnitReferences = (
   left: SemanticDiffJsonUnitReference,
@@ -296,8 +281,6 @@ export const compareDetails = (
       right.relationPair,
       compareRelationPairs,
     ),
-    compareNullable(left.scheduleRule, right.scheduleRule, compareNumber),
-    compareNullable(left.period, right.period, comparePeriods),
     compareStringArrays(left.beforeValues, right.beforeValues),
     compareStringArrays(left.afterValues, right.afterValues),
     compareStringArrays(left.rawValues, right.rawValues),
@@ -626,29 +609,4 @@ export const compareLimitations = (
     compareNullable(left.unitPath, right.unitPath, compareOrdinal),
     compareDetails(left.detail, right.detail),
     compareNullable(left.warning, right.warning, compareWarnings),
-  ]);
-
-export const compareRuns = (
-  left: SemanticDiffJsonRun,
-  right: SemanticDiffJsonRun,
-): number =>
-  firstDifference([
-    compareOrdinal(left.unitPath, right.unitPath),
-    compareOrdinal(left.unitName, right.unitName),
-    compareNumber(left.rule, right.rule),
-    compareOrdinal(left.date, right.date),
-    compareOrdinal(left.time, right.time),
-  ]);
-
-export const compareRunChanges = (
-  left: SemanticDiffJsonRunChange,
-  right: SemanticDiffJsonRunChange,
-): number =>
-  firstDifference([
-    compareOrdinal(left.id, right.id),
-    compareOrdinal(left.kind, right.kind),
-    compareOrdinal(left.unitPath, right.unitPath),
-    compareOrdinal(left.date, right.date),
-    compareNullable(left.before, right.before, compareRuns),
-    compareNullable(left.after, right.after, compareRuns),
   ]);
