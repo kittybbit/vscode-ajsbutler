@@ -20,7 +20,6 @@ import type {
   SemanticDiffDetail,
   SemanticDiffLimitation,
   SemanticDiffResult,
-  SemanticDiffScheduleRunChange,
   SemanticDiffUnsupportedItem,
 } from "../../application/semantic-diff/semanticDiffDto";
 
@@ -35,8 +34,6 @@ const confirmationReasonCodes: SemanticDiffConfirmationRequiredItem["reasonCode"
     "timeout-removed",
     "condition-judgment-changed",
     "wait-target-changed",
-    "no-calculated-schedule-run",
-    "calculated-schedule-run-removed",
     "execution-user-type-changed",
     "jp1-resource-group-changed",
   ];
@@ -224,27 +221,6 @@ suite("Semantic Diff Structured Contracts", () => {
       detail,
       warning: null,
     };
-    const scheduleRunChange: SemanticDiffScheduleRunChange = {
-      id: "schedule:changed-time:/root/job:2026-04-01",
-      kind: "changed-time",
-      unitPath: "/root/job",
-      date: "2026-04-01",
-      before: {
-        unitPath: "/root/job",
-        unitName: "job",
-        rule: 1,
-        date: "2026-04-01",
-        time: "09:00",
-      },
-      after: {
-        unitPath: "/root/job",
-        unitName: "job",
-        rule: 1,
-        date: "2026-04-01",
-        time: "10:00",
-      },
-    };
-
     assert.deepStrictEqual(
       {
         change: {
@@ -268,11 +244,6 @@ suite("Semantic Diff Structured Contracts", () => {
           code: limitation.code,
           detail: limitation.detail,
           warning: limitation.warning,
-        },
-        schedule: {
-          kind: scheduleRunChange.kind,
-          before: scheduleRunChange.before,
-          after: scheduleRunChange.after,
         },
       },
       {
@@ -298,24 +269,15 @@ suite("Semantic Diff Structured Contracts", () => {
           detail,
           warning: null,
         },
-        schedule: {
-          kind: "changed-time",
-          before: scheduleRunChange.before,
-          after: scheduleRunChange.after,
-        },
       },
     );
-    [
-      relationChange,
-      confirmationItem,
-      unsupported,
-      limitation,
-      scheduleRunChange,
-    ].forEach((record) => {
-      ["summary", "rationale", "changeContent", "message"].forEach((key) =>
-        assert.strictEqual(key in record, false),
-      );
-    });
+    [relationChange, confirmationItem, unsupported, limitation].forEach(
+      (record) => {
+        ["summary", "rationale", "changeContent", "message"].forEach((key) =>
+          assert.strictEqual(key in record, false),
+        );
+      },
+    );
   });
 
   test("retains warning-present and warning-absent states across records", () => {
@@ -333,7 +295,7 @@ suite("Semantic Diff Structured Contracts", () => {
       id: "unsupported:no-warning",
       kind: "unsupported",
       side: null,
-      reasonCode: "invalid-schedule-comparison-period",
+      reasonCode: "uninterpretable-file-monitoring-condition",
       target: null,
       detail,
       warning: null,
@@ -371,8 +333,6 @@ suite("Semantic Diff Structured Contracts", () => {
       "unitPath",
       "parameterKey",
       "relationPair",
-      "scheduleRule",
-      "period",
       "beforeValues",
       "afterValues",
       "rawValues",
@@ -419,16 +379,6 @@ suite("Semantic Diff Structured Contracts", () => {
             beforeValues: ["before-target"],
             afterValues: ["after-target"],
           });
-        case "no-calculated-schedule-run":
-          return createSemanticDiffDetail({
-            scheduleRule: 1,
-            period: { from: "2026-04-01", to: "2026-05-01" },
-          });
-        case "calculated-schedule-run-removed":
-          return createSemanticDiffDetail({
-            period: { from: "2026-04-01", to: "2026-05-01" },
-            rawValues: ["2026-04-01", "09:00"],
-          });
         case "execution-user-type-changed":
           return createSemanticDiffDetail({
             parameterKey: "eu",
@@ -465,7 +415,7 @@ suite("Semantic Diff Structured Contracts", () => {
               "jp1-ajs3-v13-rule-basis",
               "runtime-state-not-verified",
               "external-state-not-verified",
-              "comparison-period",
+              "runtime-state-not-verified",
             ][index % 4] as SemanticDiffConstraint["code"],
             detail,
             warning: null,
@@ -483,8 +433,6 @@ suite("Semantic Diff Structured Contracts", () => {
       "unitPath",
       "parameterKey",
       "relationPair",
-      "scheduleRule",
-      "period",
       "beforeValues",
       "afterValues",
       "rawValues",
@@ -492,11 +440,11 @@ suite("Semantic Diff Structured Contracts", () => {
     ]);
     assert.deepStrictEqual(items[0].detail.relationPair, relationPair);
     assert.deepStrictEqual(items[1].detail.removedSources, ["release-before"]);
-    assert.deepStrictEqual(items[6].detail.rawValues, ["2026-04-01", "09:00"]);
-    assert.deepStrictEqual(items[7].detail.beforeValues, ["ent"]);
-    assert.deepStrictEqual(items[7].detail.afterValues, ["def"]);
-    assert.deepStrictEqual(items[8].detail.beforeValues, ["group-before"]);
-    assert.deepStrictEqual(items[8].detail.afterValues, ["group-after"]);
+    assert.deepStrictEqual(items[5].detail.beforeValues, ["ent"]);
+    assert.deepStrictEqual(items[5].detail.beforeValues, ["ent"]);
+    assert.deepStrictEqual(items[5].detail.afterValues, ["def"]);
+    assert.deepStrictEqual(items[6].detail.beforeValues, ["group-before"]);
+    assert.deepStrictEqual(items[6].detail.afterValues, ["group-after"]);
     assert.ok(
       items.every((item, index) =>
         index % 2 === 0
@@ -519,9 +467,9 @@ suite("Semantic Diff Structured Contracts", () => {
       unsupportedItems: [
         {
           id: "u",
-          kind: "uncalculated",
+          kind: "uninterpretable",
           side: null,
-          reasonCode: "invalid-schedule-comparison-period",
+          reasonCode: "uninterpretable-file-monitoring-condition",
           target: null,
           detail: createSemanticDiffDetail(),
           warning: null,
@@ -538,57 +486,15 @@ suite("Semantic Diff Structured Contracts", () => {
       "unsupportedCountsByKind",
       "confirmationRequiredCount",
       "limitationCount",
-      "scheduleRunChangeCount",
-      "hasUncalculated",
       "hasFindings",
     ]);
     assert.strictEqual(summary.changeCountsByKind.changed, 3);
     assert.strictEqual(summary.changeCountsByElementKind.attribute, 3);
     assert.strictEqual(summary.confirmationRequiredCount, 3);
-    assert.strictEqual(summary.unsupportedCountsByKind.uncalculated, 1);
-    assert.strictEqual(summary.hasUncalculated, true);
+    assert.strictEqual(summary.unsupportedCountsByKind.uninterpretable, 1);
     assert.strictEqual(summary.hasFindings, true);
     assert.strictEqual(summary.changeCountsByKind.added, 0);
     assert.strictEqual(summary.unsupportedCountsByKind.unsupported, 0);
-  });
-
-  test("summary distinguishes absent, empty, and changed schedule runs", () => {
-    const schedule = {
-      period: { from: "2026-04-01", to: "2026-05-01" },
-      runChanges: [
-        {
-          id: "schedule:added:/root/jobnet:2026-04-01",
-          kind: "added" as const,
-          unitPath: "/root/jobnet",
-          date: "2026-04-01",
-          before: null,
-          after: {
-            unitPath: "/root/jobnet",
-            unitName: "jobnet",
-            rule: 1,
-            date: "2026-04-01",
-            time: "09:00",
-          },
-        },
-      ],
-    };
-    const changedSummary = buildSemanticDiffSummary(
-      emptyResult({ scheduleComparison: schedule }),
-    );
-    assert.strictEqual(changedSummary.scheduleRunChangeCount, 1);
-    assert.strictEqual(changedSummary.hasFindings, true);
-
-    const emptyScheduleSummary = buildSemanticDiffSummary(
-      emptyResult({
-        scheduleComparison: { ...schedule, runChanges: [] },
-      }),
-    );
-    assert.strictEqual(emptyScheduleSummary.scheduleRunChangeCount, 0);
-    assert.strictEqual(emptyScheduleSummary.hasFindings, false);
-
-    const absentScheduleSummary = buildSemanticDiffSummary(emptyResult());
-    assert.strictEqual(absentScheduleSummary.scheduleRunChangeCount, 0);
-    assert.strictEqual(absentScheduleSummary.hasFindings, false);
   });
 
   test("identity-only and empty results remain non-findings", () => {
@@ -613,7 +519,6 @@ suite("Semantic Diff Structured Contracts", () => {
     });
     const summary = buildSemanticDiffSummary(result);
     assert.strictEqual(summary.hasFindings, false);
-    assert.strictEqual(summary.hasUncalculated, false);
   });
 
   test("output context retains the supplied result and freezes its pair", () => {

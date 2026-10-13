@@ -29,9 +29,8 @@ const cardKeys = new Map<string, readonly string[]>([
     ],
   ],
   ["confirmation-required", ["required"]],
-  ["unsupported", ["unsupported", "uninterpretable", "uncalculated"]],
+  ["unsupported", ["unsupported", "uninterpretable"]],
   ["limitations", ["total"]],
-  ["schedule-run-changes", ["total"]],
 ]);
 
 const cardOrder: readonly SemanticDiffExplorerCard["id"][] = [
@@ -41,7 +40,6 @@ const cardOrder: readonly SemanticDiffExplorerCard["id"][] = [
   "confirmation-required",
   "unsupported",
   "limitations",
-  "schedule-run-changes",
 ];
 
 const isNonNegativeInteger = (value: unknown): value is number =>

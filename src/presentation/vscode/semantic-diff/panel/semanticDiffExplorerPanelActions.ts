@@ -42,15 +42,6 @@ type PanelActionOptions = Readonly<{
     expectedEpoch: number,
   ): Promise<void>;
   isCurrent(epoch: number): boolean;
-  calendarActionId?: import("../../../../application/semantic-diff/semanticDiffExplorer").SemanticDiffExplorerActionId;
-  openScheduleImpactCalendarPanel?: (
-    input: Readonly<{
-      parentSessionId: string;
-      context: SemanticDiffOutputContext;
-      sidecar: import("../../../../application/semantic-diff/semanticDiffScheduleImpact").SemanticDiffScheduleImpact;
-      displayLanguage?: string;
-    }>,
-  ) => import("../calendar/scheduleImpactCalendarPanel").ScheduleImpactCalendarPanelHandle;
 }>;
 
 type ActionExecution = Readonly<{

@@ -149,8 +149,3 @@ export type SemanticDiffIdentityDecision =
       rule: "unmatched-after";
       evidence: SemanticDiffIdentityFingerprintEvidence;
     });
-
-export type SemanticDiffComparisonPeriod = {
-  from: string;
-  to: string;
-};

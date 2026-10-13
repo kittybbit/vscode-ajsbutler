@@ -74,9 +74,6 @@ export const disposeSemanticDiffExplorerPanel = (
   options.contextRegistry.unregister(options.context, options.entry);
   options.contextRegistry.unregisterSourceCapture(options.context);
   options.actionRegistry.remove(options.session.sessionId);
-  options.deps.calendarSessionRegistry?.releaseParent(
-    options.session.sessionId,
-  );
   disposeFlowSession(options.deps, options.session.sessionId);
   releaseSource(options.sourceEntry, options.releaseSourceLifetime);
   disposeDisposable(options.receiveMessageDisposable);

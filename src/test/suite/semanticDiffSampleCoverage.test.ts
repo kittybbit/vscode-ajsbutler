@@ -71,10 +71,6 @@ suite("Semantic diff sample coverage", () => {
       after: afterParse.document,
       options: {
         jobGroupPath: "/semantic_diff_sample",
-        scheduleComparisonPeriod: {
-          from: "2026-04-01",
-          to: "2026-05-01",
-        },
       },
     });
     const report = renderSemanticDiffMarkdown(result);
@@ -82,7 +78,6 @@ suite("Semantic diff sample coverage", () => {
 
     assert.ok(report.includes("# Semantic Diff Report"));
     assert.ok(japaneseReport.includes("# 意味差分レポート"));
-    assert.ok(japaneseReport.includes("## スケジュール変更"));
     assert.ok(result.changes.some((change) => change.kind === "added"));
     assert.ok(result.changes.some((change) => change.kind === "removed"));
     assert.ok(result.changes.some((change) => change.kind === "renamed"));
@@ -154,23 +149,7 @@ suite("Semantic diff sample coverage", () => {
       result.unsupportedItems.some((item) => item.kind === "uninterpretable"),
     );
 
-    assert.ok(
-      result.scheduleComparison?.runChanges.some(
-        (change) => change.kind === "changed-time",
-      ),
-    );
-    assert.ok(
-      result.confirmationRequired.some(
-        (item) => item.reasonCode === "no-calculated-schedule-run",
-      ),
-    );
-    assert.ok(
-      result.unsupportedItems.some((item) => item.kind === "uncalculated"),
-    );
-    assert.ok(report.includes("## Schedule Changes"));
     assert.ok(report.includes("## Unsupported Items"));
-    assert.ok(report.includes("Rule: "));
-    assert.ok(japaneseReport.includes("ルール: "));
   });
 
   test("paired end-control values produce the implemented category", () => {

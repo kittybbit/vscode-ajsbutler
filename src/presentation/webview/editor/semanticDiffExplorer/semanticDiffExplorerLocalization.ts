@@ -81,10 +81,8 @@ const states: LocaleTable = {
   unsupported: ["Unsupported", "未対応"],
   limitation: ["Limitation", "制約"],
   uninterpretable: ["Uninterpretable", "解釈不能"],
-  uncalculated: ["Uncalculated", "未計算"],
   parse: ["Parse limitation", "解析の制約"],
   normalization: ["Normalization limitation", "正規化の制約"],
-  "changed-time": ["Time changed", "時刻変更"],
   "jp1-ajs3-v13-rule-basis": [
     "JP1/AJS3 v13 rule basis",
     "JP1/AJS3 v13ルール基準",
@@ -97,7 +95,6 @@ const states: LocaleTable = {
     "External state not verified",
     "外部状態を確認していません",
   ],
-  "comparison-period": ["Comparison period", "比較期間"],
 };
 
 const reasons: LocaleTable = {
@@ -115,14 +112,6 @@ const reasons: LocaleTable = {
     "条件判定の変更",
   ],
   "wait-target-changed": ["Wait target changed", "待ち合わせ対象の変更"],
-  "no-calculated-schedule-run": [
-    "Schedule run not calculated",
-    "スケジュール実行未計算",
-  ],
-  "calculated-schedule-run-removed": [
-    "Calculated schedule run removed",
-    "計算済みスケジュール実行の削除",
-  ],
   "execution-user-type-changed": [
     "Execution user type changed",
     "実行ユーザー種別の変更",
@@ -134,42 +123,6 @@ const reasons: LocaleTable = {
   "uninterpretable-file-monitoring-condition": [
     "File monitoring condition cannot be interpreted",
     "ファイル監視条件を解釈できません",
-  ],
-  "cycle-schedule": [
-    "Cycle schedule is unsupported",
-    "サイクルスケジュールは未対応です",
-  ],
-  "closed-day-substitution": [
-    "Closed-day substitution is unsupported",
-    "休日時振替は未対応です",
-  ],
-  "shift-days": ["Shift days are unsupported", "シフト日は未対応です"],
-  "calendar-selection": [
-    "Calendar selection is unsupported",
-    "カレンダー選択は未対応です",
-  ],
-  "inherited-parent-rule": [
-    "Inherited parent rule is unsupported",
-    "親ルールの継承は未対応です",
-  ],
-  "days-from-start": [
-    "Days-from-start rule is unsupported",
-    "開始日からの日数指定は未対応です",
-  ],
-  "invalid-start-time": ["Invalid start time", "開始時刻が不正です"],
-  "unpaired-start-time": [
-    "Unpaired start time",
-    "開始時刻に対応する値がありません",
-  ],
-  "unsupported-schedule-date": [
-    "Unsupported schedule date",
-    "未対応のスケジュール日付です",
-  ],
-  "missing-start-time": ["Missing start time", "開始時刻がありません"],
-  "invalid-calendar-day": ["Invalid calendar day", "カレンダー日が不正です"],
-  "invalid-schedule-comparison-period": [
-    "Invalid schedule comparison period",
-    "スケジュール比較期間が不正です",
   ],
   "missing-target-side": ["Target side is missing", "対象側がありません"],
   "missing-target": ["Target is missing", "対象がありません"],
@@ -183,7 +136,6 @@ const details: LocaleTable = {
   after: ["After", "変更後"],
   raw: ["Raw", "元の値"],
   removed: ["Removed", "削除済み"],
-  period: ["Period", "期間"],
   "jp1-ajs3-v13-rule-basis": [
     "JP1/AJS3 v13 rule basis",
     "JP1/AJS3 v13ルール基準",
@@ -196,7 +148,6 @@ const details: LocaleTable = {
     "External state not verified",
     "外部状態を確認していません",
   ],
-  "comparison-period": ["Comparison period", "比較期間"],
 };
 
 const values: LocaleTable = {
@@ -281,7 +232,6 @@ const cards: LocaleTable = {
   "confirmation-required": ["Confirmation required", "確認が必要"],
   unsupported: ["Unsupported", "未対応"],
   limitations: ["Limitations", "制約"],
-  "schedule-run-changes": ["Schedule run changes", "スケジュール実行の変更"],
 };
 
 const groups: LocaleTable = {

@@ -10,11 +10,6 @@ import type { SemanticDiffExplorerLabels } from "./semanticDiffExplorerLocalizat
 import ViewerFilterSelect from "../shared/ViewerFilterSelect";
 import { viewerFocusSx, viewerOpaqueSurfaceSx } from "../../shared/viewerTheme";
 
-const calendarActionLabel = (language: string): string =>
-  language.toLowerCase().startsWith("ja")
-    ? "スケジュール影響"
-    : "Schedule impact";
-
 export type SemanticDiffExplorerHeaderProps = Readonly<{
   labels: SemanticDiffExplorerLabels;
   language: string;
@@ -22,7 +17,6 @@ export type SemanticDiffExplorerHeaderProps = Readonly<{
   setFilter: (value: SemanticDiffExplorerViewModel["filter"]) => void;
   setAnnouncement: (value: string) => void;
   outputAction?: (element?: HTMLElement) => void;
-  calendarAction?: (element?: HTMLElement) => void;
 }>;
 
 export const SemanticDiffExplorerHeader = ({
@@ -31,8 +25,6 @@ export const SemanticDiffExplorerHeader = ({
   setFilter,
   setAnnouncement,
   outputAction,
-  calendarAction,
-  language,
 }: SemanticDiffExplorerHeaderProps): React.ReactElement => {
   const filterRef = useRef<HTMLDivElement>(null);
   const handleFilterChange = (value: string): void => {
@@ -88,16 +80,6 @@ export const SemanticDiffExplorerHeader = ({
           >
             {labels.output}
           </Button>
-          {calendarAction && (
-            <Button
-              type="button"
-              variant="outlined"
-              onClick={(event) => calendarAction(event.currentTarget)}
-              sx={viewerFocusSx}
-            >
-              {calendarActionLabel(language)}
-            </Button>
-          )}
           <ViewerFilterSelect
             id="semantic-diff-explorer-filter"
             label={labels.filter}

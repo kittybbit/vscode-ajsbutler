@@ -7,18 +7,6 @@ export type SemanticDiffCommandLocalization = Readonly<{
   sourcePickerTitle: string;
   selectDefinitionFile: string;
   gitHead: string;
-  periodPicker: string;
-  periodPickerTitle: string;
-  noSchedulePeriod: string;
-  specifySchedulePeriod: string;
-  fromDateTitle: string;
-  fromDatePrompt: string;
-  toDateTitle: string;
-  toDatePrompt: string;
-  datePlaceholder: string;
-  invalidFromDate: string;
-  invalidToDate: string;
-  nonIncreasingPeriod: string;
   activeEditorFailed: string;
   afterNonText: string;
   afterTooLarge: string;
@@ -72,33 +60,6 @@ const LOCALIZED_TEXT: Readonly<
     ja: "定義ファイルを選択",
   },
   gitHead: { en: "Git HEAD", ja: "Git HEAD" },
-  periodPicker: {
-    en: "Select schedule comparison period",
-    ja: "スケジュール比較期間を選択",
-  },
-  periodPickerTitle: { en: "Compare Definition", ja: "定義を比較" },
-  noSchedulePeriod: { en: "No schedule period", ja: "スケジュール期間なし" },
-  specifySchedulePeriod: {
-    en: "Specify schedule period",
-    ja: "スケジュール比較期間を指定",
-  },
-  fromDateTitle: { en: "Compare Definition", ja: "定義を比較" },
-  fromDatePrompt: { en: "From date (YYYY-MM-DD)", ja: "開始日 (YYYY-MM-DD)" },
-  toDateTitle: { en: "Compare Definition", ja: "定義を比較" },
-  toDatePrompt: { en: "To date (YYYY-MM-DD)", ja: "終了日 (YYYY-MM-DD)" },
-  datePlaceholder: { en: "YYYY-MM-DD", ja: "YYYY-MM-DD" },
-  invalidFromDate: {
-    en: "Enter a real date in YYYY-MM-DD format.",
-    ja: "実在する日付を YYYY-MM-DD 形式で入力してください。",
-  },
-  invalidToDate: {
-    en: "Enter a real date in YYYY-MM-DD format.",
-    ja: "実在する日付を YYYY-MM-DD 形式で入力してください。",
-  },
-  nonIncreasingPeriod: {
-    en: "The end date must be after the start date.",
-    ja: "終了日は開始日より後にしてください。",
-  },
   activeEditorFailed: {
     en: "The active JP1/AJS definition could not be accessed.",
     ja: "アクティブな JP1/AJS 定義にアクセスできません。",

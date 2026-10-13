@@ -1,7 +1,6 @@
 import type {
   SemanticDiffLimitation,
   SemanticDiffRelationPair,
-  SemanticDiffScheduleRunChange,
   SemanticDiffSide,
   SemanticDiffTarget,
 } from "./semanticDiffDto";
@@ -145,11 +144,6 @@ export const placementForLimitation = (
     ? null
     : pathPlacement(item.unitPath, "unit");
 
-export const placementForSchedule = (
-  item: SemanticDiffScheduleRunChange,
-): PathPlacement | null =>
-  item.unitPath.length === 0 ? null : pathPlacement(item.unitPath, "unit");
-
 const leafPlacements = new Map<
   string,
   (leaf: SemanticDiffExplorerLeaf) => PathPlacement | null
@@ -191,11 +185,6 @@ const leafPlacements = new Map<
     "limitation",
     (leaf) =>
       leaf.kind === "limitation" ? placementForLimitation(leaf) : null,
-  ],
-  [
-    "schedule",
-    (leaf) =>
-      leaf.kind === "schedule" ? placementForSchedule(leaf.change) : null,
   ],
 ]);
 

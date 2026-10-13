@@ -73,7 +73,6 @@ const ExplorerLoadedView = ({
   state,
   language,
   outputActionId,
-  calendarActionId,
   sendAction,
   announcement,
   themeMode,
@@ -81,7 +80,6 @@ const ExplorerLoadedView = ({
   state: ExplorerHostState;
   language: string;
   outputActionId: string | undefined;
-  calendarActionId: string | undefined;
   sendAction: (actionId: string, element?: HTMLElement) => void;
   announcement: string;
   themeMode: SemanticDiffExplorerThemeMode;
@@ -89,16 +87,12 @@ const ExplorerLoadedView = ({
   const outputAction = outputActionId
     ? (element?: HTMLElement): void => sendAction(outputActionId, element)
     : undefined;
-  const calendarAction = calendarActionId
-    ? (element?: HTMLElement): void => sendAction(calendarActionId, element)
-    : undefined;
   return (
     <SemanticDiffExplorerContents
       viewModel={state.viewModel}
       language={language}
       themeMode={themeMode}
       outputAction={outputAction}
-      calendarAction={calendarAction}
       action={sendAction}
       hostAnnouncement={announcement}
     />
@@ -117,7 +111,6 @@ const SemanticDiffExplorerInnerApp = (): React.ReactElement => {
           state={bridge.state}
           language={lang}
           outputActionId={bridge.outputActionId}
-          calendarActionId={bridge.calendarActionId}
           sendAction={bridge.sendAction}
           announcement={bridge.hostAnnouncement}
           themeMode={themeMode}

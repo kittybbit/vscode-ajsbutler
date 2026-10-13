@@ -17,7 +17,6 @@ type PanelInstallOptions = Readonly<{
   entry: SemanticDiffExplorerContextEntry;
   session: SemanticDiffExplorerSession;
   outputActionId: SemanticDiffExplorerActionId;
-  calendarActionId: SemanticDiffExplorerActionId | undefined;
   panel: vscode.WebviewPanel;
   deps: SemanticDiffExplorerPanelDeps;
   contextRegistry: SemanticDiffExplorerContextRegistry;
@@ -33,11 +32,7 @@ export const installSemanticDiffExplorerPanel = (
 ): void => {
   try {
     options.contextRegistry.register(options.entry);
-    options.actionRegistry.register(
-      options.session,
-      options.outputActionId,
-      options.calendarActionId,
-    );
+    options.actionRegistry.register(options.session, options.outputActionId);
     options.panel.webview.options = {
       enableScripts: true,
       localResourceRoots: [options.deps.extensionContext.extensionUri],
@@ -58,7 +53,6 @@ export const installSemanticDiffExplorerPanel = (
       panel: options.panel,
       sessionId: options.session.sessionId,
       outputActionId: options.outputActionId,
-      calendarActionId: options.calendarActionId,
     });
   } catch (error) {
     options.disposeEntry(true);

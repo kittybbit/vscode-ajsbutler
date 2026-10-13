@@ -7,7 +7,6 @@ import ResultEmptyState from "../../presentation/webview/editor/shared/result/Re
 import ResultKeyValueList from "../../presentation/webview/editor/shared/result/ResultKeyValueList";
 import ResultSection from "../../presentation/webview/editor/shared/result/ResultSection";
 import ResultStatusChip from "../../presentation/webview/editor/shared/result/ResultStatusChip";
-import { formatLocalizedDateRange } from "../../presentation/webview/editor/shared/result/formatLocalizedDateRange";
 
 suite("Shared result presentation", () => {
   teardown(() => cleanup());
@@ -122,17 +121,6 @@ suite("Shared result presentation", () => {
       assert.ok(rule);
       assert.strictEqual(rule.style.display, "block");
     }
-  });
-
-  test("formats localized ranges without changing endpoint order", () => {
-    assert.strictEqual(
-      formatLocalizedDateRange("2026-01-01", "2026-01-04", "en-US"),
-      "2026-01-01 – 2026-01-04",
-    );
-    assert.strictEqual(
-      formatLocalizedDateRange("2026-01-01", "2026-01-04", "ja-JP"),
-      "2026-01-01〜2026-01-04",
-    );
   });
 
   test("keeps comparison sides semantic, ordered, and responsive", () => {

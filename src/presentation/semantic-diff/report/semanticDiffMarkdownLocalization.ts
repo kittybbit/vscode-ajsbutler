@@ -10,7 +10,6 @@ import type {
   SemanticDiffOutputContext,
   SemanticDiffRelationEndpoint,
   SemanticDiffRelationReference,
-  SemanticDiffScheduleRunChange,
   SemanticDiffResult,
   SemanticDiffSummary,
   SemanticDiffTarget,
@@ -24,7 +23,6 @@ const labelKeys: Record<string, string> = {
   Summary: "summary",
   "Structural Changes": "structuralChanges",
   "Attribute Changes": "attributeChanges",
-  "Schedule Changes": "scheduleChanges",
   "Confirmation Required": "confirmationRequired",
   "Unsupported Items": "unsupportedItems",
   Limitations: "limitations",
@@ -48,7 +46,6 @@ const labelKeys: Record<string, string> = {
   "confirmation-required item": "confirmationRequiredItem",
   "unsupported item": "unsupportedItem",
   limitation: "limitation",
-  "schedule run change": "scheduleRunChange",
   "Result: semantic differences or review notes are present.": "resultFindings",
   "Result: no semantic changes detected.": "resultNone",
 };
@@ -788,12 +785,6 @@ const confirmationTextContext = (
   };
 };
 
-const scheduleRunValue = (
-  beforeValues: string[],
-  prefix: "date=" | "time=",
-): string | undefined =>
-  beforeValues.find((value) => value.startsWith(prefix))?.slice(prefix.length);
-
 const englishConfirmationContent: Record<
   SemanticDiffConfirmationReasonCode,
   (context: ConfirmationTextContext) => string
@@ -808,16 +799,6 @@ const englishConfirmationContent: Record<
     `${unitName ?? "unit"} ${parameterKey} condition or judgment changed`,
   "wait-target-changed": ({ unitName, parameterKey }) =>
     `${unitName ?? "unit"} wait target ${parameterKey} changed`,
-  "no-calculated-schedule-run": ({ unitName }) =>
-    `${unitName ?? "unit"} has no calculated runs in the schedule comparison period`,
-  "calculated-schedule-run-removed": ({ unitName, beforeValues }) => {
-    const date = scheduleRunValue(beforeValues, "date=");
-    const time = scheduleRunValue(beforeValues, "time=");
-    const runValues = [date, time]
-      .filter((value): value is string => value !== undefined && value !== "")
-      .join(" ");
-    return `${unitName ?? "unit"} calculated schedule run${runValues ? ` ${runValues}` : ""} removed`;
-  },
   "execution-user-type-changed": ({ unitName }) =>
     `${unitName ?? "unit"} execution user type changed`,
   "jp1-resource-group-changed": ({ unitName }) =>
@@ -838,10 +819,6 @@ const englishConfirmationRationale: Record<
     "a previously established start, end, or branch path may no longer be available",
   "wait-target-changed":
     "the compared definition now waits for a different file, event, or event filter",
-  "no-calculated-schedule-run":
-    "a schedule-defined jobnet may no longer have an execution opportunity in the compared period",
-  "calculated-schedule-run-removed":
-    "a previously calculated execution opportunity is absent in the compared period",
   "execution-user-type-changed":
     "execution prerequisites may differ after the definition change",
   "jp1-resource-group-changed":
@@ -925,71 +902,6 @@ export const renderConfirmationRequiredItem = (
   ];
 };
 
-const scheduleSummaryKeys: Record<
-  SemanticDiffScheduleRunChange["kind"],
-  | "generated.scheduleChanged"
-  | "generated.scheduleAdded"
-  | "generated.scheduleRemoved"
-> = {
-  "changed-time": "generated.scheduleChanged",
-  added: "generated.scheduleAdded",
-  removed: "generated.scheduleRemoved",
-};
-
-const localizedScheduleRunSummary = (
-  change: SemanticDiffScheduleRunChange,
-  language?: string,
-): string =>
-  selectLanguageValue(
-    language,
-    scheduleRunSummary(change),
-    semanticDiffReportText(scheduleSummaryKeys[change.kind], language, {
-      path: change.unitPath,
-      date: change.date,
-    }),
-  );
-
-const scheduleRunSides = (
-  change: SemanticDiffScheduleRunChange,
-): readonly [
-  ChangeSide,
-  NonNullable<SemanticDiffScheduleRunChange["before"]> | null,
-][] => [
-  ["Before", change.before],
-  ["After", change.after],
-];
-
-const renderScheduleRunSide = (
-  side: ChangeSide,
-  run: NonNullable<SemanticDiffScheduleRunChange["before"]> | null,
-  language?: string,
-): string[] =>
-  run
-    ? [
-        indentedLine(
-          `${label(side, language)}: ${escapeMarkdown(`${run.date} ${run.time} ${label("rule", language)} ${run.rule}`)}`,
-        ),
-      ]
-    : [];
-
-const renderScheduleRunSides = (
-  change: SemanticDiffScheduleRunChange,
-  language?: string,
-): string[] =>
-  scheduleRunSides(change).flatMap(([side, run]) =>
-    renderScheduleRunSide(side, run, language),
-  );
-
-export const renderScheduleRunChange = (
-  change: SemanticDiffScheduleRunChange,
-  language?: string,
-): string[] => [
-  bulletLine(
-    `[${localizedKind(change.kind, language)}] ${escapeMarkdown(localizedScheduleRunSummary(change, language))}`,
-  ),
-  ...renderScheduleRunSides(change, language),
-];
-
 type SemanticDiffConstraint =
   SemanticDiffConfirmationRequiredItem["constraints"][number];
 type SemanticDiffConstraintCode = SemanticDiffConstraint["code"];
@@ -998,48 +910,16 @@ const constraintTextByCode: Record<
   SemanticDiffConstraintCode,
   (constraint: SemanticDiffConstraint) => string
 > = {
-  "jp1-ajs3-v13-rule-basis": (constraint) =>
-    constraint.detail.period
-      ? "Rule basis: JP1/AJS3 v13 unit definition schedule parameters sd and st for explicit directly defined jobnet schedules."
-      : "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.",
+  "jp1-ajs3-v13-rule-basis": () =>
+    "Rule basis: JP1/AJS3 v13 unit definition parameters for relations, wait units, event receiving, file monitoring, and job end judgment.",
   "runtime-state-not-verified": () =>
     "Runtime history and external conditions are not verified by this comparison.",
   "external-state-not-verified": () =>
     "External files, events, hosts, users, permissions, and resource groups are not verified.",
-  "comparison-period": (constraint) =>
-    constraint.detail.period
-      ? `Comparison period: ${constraint.detail.period.from} to ${constraint.detail.period.to} (exclusive)`
-      : "Comparison period",
 };
 
 const localizedConstraint = (constraint: SemanticDiffConstraint): string =>
   constraintTextByCode[constraint.code](constraint);
-
-type ScheduleRunSummaryRenderer = (
-  change: SemanticDiffScheduleRunChange,
-) => string;
-
-const changedTimeScheduleRunSummary: ScheduleRunSummaryRenderer = (change) =>
-  `${change.unitPath} run on ${change.date} changed from ${change.before?.time ?? ""} to ${change.after?.time ?? ""}`;
-
-const singleScheduleRunSummary = (
-  change: SemanticDiffScheduleRunChange,
-): string => {
-  const run = change.kind === "removed" ? change.before : change.after;
-  return `${change.unitPath} run on ${change.date} ${run?.time ?? ""} ${change.kind}`.trim();
-};
-
-const scheduleRunSummaryRenderers: Record<
-  SemanticDiffScheduleRunChange["kind"],
-  ScheduleRunSummaryRenderer
-> = {
-  "changed-time": changedTimeScheduleRunSummary,
-  added: singleScheduleRunSummary,
-  removed: singleScheduleRunSummary,
-};
-
-const scheduleRunSummary = (change: SemanticDiffScheduleRunChange): string =>
-  scheduleRunSummaryRenderers[change.kind](change);
 
 const hasFindings = (result: SemanticDiffResult): boolean =>
   [
@@ -1047,7 +927,6 @@ const hasFindings = (result: SemanticDiffResult): boolean =>
     result.confirmationRequired.length,
     result.unsupportedItems.length,
     result.limitations.length,
-    result.scheduleComparison?.runChanges.length ?? 0,
   ].some((count) => count > 0);
 
 type SummaryRenderInput = {
@@ -1061,14 +940,6 @@ const summaryRenderInput = (
   "summary" in input
     ? { result: input.result, summary: input.summary }
     : { result: input, summary: undefined };
-
-const summaryChangeCount = (
-  summary: SemanticDiffSummary | undefined,
-  result: SemanticDiffResult,
-): number =>
-  summary?.scheduleRunChangeCount ??
-  result.scheduleComparison?.runChanges.length ??
-  0;
 
 const summaryScopeLines = (
   result: SemanticDiffResult,
@@ -1089,29 +960,6 @@ const summaryScopeLines = (
     ),
     ...counts.map(([count, countLabel]) =>
       bulletLine(pluralize(count, label(countLabel, language), language)),
-    ),
-  ];
-};
-
-const summaryScheduleLines = (
-  result: SemanticDiffResult,
-  summary: SemanticDiffSummary | undefined,
-  language?: string,
-): string[] => {
-  if (!result.scheduleComparison) return [];
-  return [
-    bulletLine(
-      semanticDiffReportText("generated.period", language, {
-        from: escapeMarkdown(result.scheduleComparison.period.from),
-        to: escapeMarkdown(result.scheduleComparison.period.to),
-      }),
-    ),
-    bulletLine(
-      pluralize(
-        summaryChangeCount(summary, result),
-        label("schedule run change", language),
-        language,
-      ),
     ),
   ];
 };
@@ -1137,7 +985,6 @@ export const renderSummary = (
   const { result, summary } = summaryRenderInput(input);
   const lines = [
     ...summaryScopeLines(result, language),
-    ...summaryScheduleLines(result, summary, language),
     summaryResultLine(result, summary, language),
   ];
   return lines;

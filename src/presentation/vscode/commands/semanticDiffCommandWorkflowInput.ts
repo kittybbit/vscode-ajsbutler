@@ -1,5 +1,5 @@
 import type * as vscode from "vscode";
-import type { BuildSemanticDiffPresentationArtifactsResult } from "../../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
+import type { BuildSemanticDiffReportDataResult } from "../../../application/semantic-diff/buildSemanticDiffReportData";
 import type { SemanticDiffCommandLocalization } from "./semanticDiffCommandLocalization";
 import {
   failedStep,
@@ -73,7 +73,7 @@ export const sourceTextFailure = (
 type ParseFailureKind = "before" | "after" | "both" | "none";
 
 const parseFailureKind = (
-  result: Extract<BuildSemanticDiffPresentationArtifactsResult, { ok: false }>,
+  result: Extract<BuildSemanticDiffReportDataResult, { ok: false }>,
 ): ParseFailureKind => {
   const failedSides =
     Number(result.errors.before.length > 0) +
@@ -84,7 +84,7 @@ const parseFailureKind = (
 };
 
 export const parseFailureMessage = (
-  result: Extract<BuildSemanticDiffPresentationArtifactsResult, { ok: false }>,
+  result: Extract<BuildSemanticDiffReportDataResult, { ok: false }>,
   localization: SemanticDiffCommandLocalization,
 ): string => {
   const messages: Record<ParseFailureKind, string> = {

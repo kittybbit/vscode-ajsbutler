@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
-import type { BuildSemanticDiffPresentationArtifacts } from "../../application/semantic-diff/buildSemanticDiffPresentationArtifacts";
 import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
@@ -29,9 +28,6 @@ import {
   SemanticDiffFlowOverlayRegistry,
 } from "../../presentation/vscode/semantic-diff/flow/semanticDiffExplorerFlow";
 import { createSemanticDiffFlowSourceHost } from "../../presentation/vscode/semantic-diff/flow/semanticDiffFlowSourceHost";
-import { createScheduleAwareExplorerSession } from "./createScheduleAwareExplorerSession";
-import { ScheduleImpactSidecarRegistry } from "./scheduleImpactSidecarRegistry";
-import { ScheduleImpactCalendarSessionRegistry } from "../../presentation/vscode/semantic-diff/calendar/scheduleImpactCalendarSessionRegistry";
 import type { ReadGitHeadDefinition } from "../../application/semantic-diff/GitHeadDefinitionSourcePort";
 import {
   GIT_HEAD_CONTENT_SCHEME,
@@ -41,7 +37,6 @@ import {
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
-  buildSemanticDiffPresentationArtifacts?: BuildSemanticDiffPresentationArtifacts;
   beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
   sessionIdAllocator: SemanticDiffExplorerSessionIdAllocator;
@@ -83,16 +78,12 @@ const createOpenExplorer = ({
   contextRegistry,
   flowOverlayRegistry,
   flowSourceHost,
-  sidecarRegistry,
-  calendarSessionRegistry,
 }: Readonly<{
   deps: SemanticDiffWiringDeps;
   reportDocuments: SemanticDiffReportDocumentProvider;
   contextRegistry: SemanticDiffExplorerContextRegistry;
   flowOverlayRegistry: SemanticDiffFlowOverlayRegistry;
   flowSourceHost: ReturnType<typeof createSemanticDiffFlowSourceHost>;
-  sidecarRegistry: ScheduleImpactSidecarRegistry;
-  calendarSessionRegistry: ScheduleImpactCalendarSessionRegistry;
 }>) =>
   createOpenSemanticDiffExplorer({
     extensionContext: deps.extensionContext,
@@ -105,8 +96,7 @@ const createOpenExplorer = ({
     showTextDocument: (document, options) =>
       vscode.window.showTextDocument(document, options),
     contextRegistry,
-    scheduleImpactSidecarRegistry: sidecarRegistry,
-    calendarSessionRegistry,
+
     sessionIdAllocator: deps.sessionIdAllocator,
     actionIdAllocator: deps.actionIdAllocator,
     flowAction: deps.flowBridge
@@ -123,16 +113,13 @@ const createCompareCommand = ({
   deps,
   reportDocuments,
   openExplorer,
-  openScheduleAwareExplorerSession,
+
   contextRegistry,
   gitHeadContentProvider,
 }: Readonly<{
   deps: SemanticDiffWiringDeps;
   reportDocuments: SemanticDiffReportDocumentProvider;
   openExplorer: ReturnType<typeof createOpenExplorer>;
-  openScheduleAwareExplorerSession: ReturnType<
-    typeof createScheduleAwareExplorerSession
-  >;
   contextRegistry: SemanticDiffExplorerContextRegistry;
   gitHeadContentProvider: VscodeGitHeadContentProvider;
 }>): vscode.Disposable => {
@@ -142,7 +129,6 @@ const createCompareCommand = ({
       vscode.window.showQuickPick(items, options),
     showWorkflowQuickPick: (items, options) =>
       vscode.window.showQuickPick(items, options),
-    showInputBox: (options) => vscode.window.showInputBox(options),
     showOpenDialog: (options) => vscode.window.showOpenDialog(options),
     showErrorMessage: (message) => vscode.window.showErrorMessage(message),
     readFile: (uri) => vscode.workspace.fs.readFile(uri),
@@ -153,7 +139,7 @@ const createCompareCommand = ({
     buildSemanticDiffOutputContext,
     presentSemanticDiffOutput,
     openExplorer,
-    openScheduleAwareExplorerSession,
+
     beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
     sourceHandleIdAllocator: deps.sourceHandleIdAllocator,
     readGitHeadDefinition: deps.readGitHeadDefinition,
@@ -163,10 +149,6 @@ const createCompareCommand = ({
     unregisterSemanticDiffSourceCapture: (context) =>
       contextRegistry.unregisterSourceCapture(context),
   };
-  if (deps.buildSemanticDiffPresentationArtifacts) {
-    commandDeps.buildSemanticDiffPresentationArtifacts =
-      deps.buildSemanticDiffPresentationArtifacts;
-  }
   return vscode.commands.registerCommand(COMPARE_SEMANTIC_DIFF_COMMAND, () =>
     executeCompareSemanticDiffCommand(commandDeps),
   );
@@ -187,24 +169,14 @@ export const createSemanticDiffSubscriptions = (
         : Promise.reject(new Error("Flow viewer is not registered.")),
   });
   const reportDocuments = createReportDocuments();
-  const sidecarRegistry = new ScheduleImpactSidecarRegistry();
-  const calendarSessionRegistry = new ScheduleImpactCalendarSessionRegistry();
   const openExplorer = createOpenExplorer({
     deps,
     reportDocuments,
     contextRegistry,
     flowOverlayRegistry,
     flowSourceHost,
-    sidecarRegistry,
-    calendarSessionRegistry,
   });
   const gitHeadContentProvider = new VscodeGitHeadContentProvider();
-  const openScheduleAwareExplorerSession = createScheduleAwareExplorerSession({
-    openExplorer,
-    sidecarRegistry,
-    releaseCalendarParent: (parentSessionId) =>
-      calendarSessionRegistry.releaseParent(parentSessionId),
-  });
 
   return [
     gitHeadContentProvider,
@@ -220,7 +192,7 @@ export const createSemanticDiffSubscriptions = (
       deps,
       reportDocuments,
       openExplorer,
-      openScheduleAwareExplorerSession,
+
       contextRegistry,
       gitHeadContentProvider,
     }),

@@ -2,10 +2,8 @@ import type {
   SemanticDiffConfirmationRequiredItem,
   SemanticDiffDetail,
   SemanticDiffIdentityDecision,
-  SemanticDiffOutputContext,
   SemanticDiffRelationEndpoint,
   SemanticDiffRelationPair,
-  SemanticDiffScheduleRun,
   SemanticDiffUnsupportedItem,
   SemanticDiffLimitation,
   SemanticDiffWarning,
@@ -50,11 +48,6 @@ const relationPair = (
   ];
 };
 
-const period = (value: { from: string; to: string } | null): string =>
-  value
-    ? `${escapeMarkdown(value.from)} -> ${escapeMarkdown(value.to)}`
-    : "null";
-
 const renderAuditDetail = (
   detail: SemanticDiffDetail,
   indent: number,
@@ -74,14 +67,6 @@ const renderAuditDetail = (
   lines.push(
     ...relationPair(detail.relationPair, language).map((line) =>
       auditBullet(indent + 2, line),
-    ),
-    auditBullet(
-      indent,
-      `${auditText("scheduleRule", language)}: ${scalar(detail.scheduleRule)}`,
-    ),
-    auditBullet(
-      indent,
-      `${auditText("period", language)}: ${period(detail.period)}`,
     ),
     auditBullet(
       indent,
@@ -244,63 +229,6 @@ const renderAuditLimitation = (
   ...renderWarning(limitation.warning, 2, language),
 ];
 
-const renderScheduleRun = (
-  run: SemanticDiffScheduleRun | null,
-  indent: number,
-  language?: string,
-): string[] => {
-  if (!run) return [auditBullet(indent, "null")];
-  return [
-    auditBullet(
-      indent,
-      `${escapeMarkdown(run.unitPath)} (${escapeMarkdown(run.unitName)})`,
-    ),
-    auditBullet(
-      indent + 2,
-      `${auditText("scheduleRule", language)}: ${run.rule}`,
-    ),
-    auditBullet(
-      indent + 2,
-      `${auditText("period", language)}: ${escapeMarkdown(run.date)} ${escapeMarkdown(run.time)}`,
-    ),
-  ];
-};
-
-const renderAuditSchedule = (
-  context: SemanticDiffOutputContext,
-  language?: string,
-): string[] => {
-  const schedule = context.result.scheduleComparison;
-  if (!schedule) {
-    return [auditBullet(0, `${auditText("scheduleDetails", language)}: null`)];
-  }
-  return [
-    auditBullet(
-      0,
-      `${auditText("period", language)}: ${period(schedule.period)}`,
-    ),
-    ...schedule.runChanges.flatMap((change) => [
-      auditBullet(0, escapeMarkdown(change.id)),
-      auditBullet(
-        2,
-        `${auditText("code", language)}: ${escapeMarkdown(change.kind)}`,
-      ),
-      auditBullet(
-        2,
-        `${auditText("unitPath", language)}: ${escapeMarkdown(change.unitPath)}`,
-      ),
-      auditBullet(
-        2,
-        `${auditText("period", language)}: ${escapeMarkdown(change.date)}`,
-      ),
-      auditBullet(2, `${auditText("before", language)}:`),
-      ...renderScheduleRun(change.before, 4, language),
-      auditBullet(2, `${auditText("after", language)}:`),
-      ...renderScheduleRun(change.after, 4, language),
-    ]),
-  ];
-};
-
 type AuditSection<T> = {
   titleKey: string;
   items: readonly T[];
@@ -370,9 +298,6 @@ export const renderSemanticDiffAuditMarkdown: SemanticDiffMarkdownRenderer = (
       render: renderAuditLimitation,
       language,
     }),
-    `### ${auditText("scheduleDetails", language)}`,
-    "",
-    ...renderAuditSchedule(context, language),
   ];
   return lines
     .join("\n")

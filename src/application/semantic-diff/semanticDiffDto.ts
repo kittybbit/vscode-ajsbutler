@@ -44,10 +44,7 @@ export type SemanticDiffConfirmationLevel =
   | "confirmation-required"
   | "unsupported";
 
-export type SemanticDiffUnsupportedKind =
-  | "unsupported"
-  | "uninterpretable"
-  | "uncalculated";
+export type SemanticDiffUnsupportedKind = "unsupported" | "uninterpretable";
 
 export type SemanticDiffLimitationKind =
   | "parse"
@@ -145,8 +142,6 @@ export type SemanticDiffDetail = {
   unitPath: string | null;
   parameterKey: string | null;
   relationPair: SemanticDiffRelationPair | null;
-  scheduleRule: number | null;
-  period: SemanticDiffComparisonPeriod | null;
   beforeValues: string[];
   afterValues: string[];
   rawValues: string[];
@@ -162,8 +157,7 @@ export type SemanticDiffWarning = {
 export type SemanticDiffConstraintCode =
   | "jp1-ajs3-v13-rule-basis"
   | "runtime-state-not-verified"
-  | "external-state-not-verified"
-  | "comparison-period";
+  | "external-state-not-verified";
 
 export type SemanticDiffConstraint = {
   code: SemanticDiffConstraintCode;
@@ -177,26 +171,12 @@ export type SemanticDiffConfirmationReason =
   | "timeout-removed"
   | "condition-judgment-changed"
   | "wait-target-changed"
-  | "no-calculated-schedule-run"
-  | "calculated-schedule-run-removed"
   | "execution-user-type-changed"
   | "jp1-resource-group-changed";
 export type SemanticDiffConfirmationReasonCode = SemanticDiffConfirmationReason;
 
 export type SemanticDiffUnsupportedReason =
-  | "uninterpretable-file-monitoring-condition"
-  | "cycle-schedule"
-  | "closed-day-substitution"
-  | "shift-days"
-  | "calendar-selection"
-  | "inherited-parent-rule"
-  | "days-from-start"
-  | "invalid-start-time"
-  | "unpaired-start-time"
-  | "unsupported-schedule-date"
-  | "missing-start-time"
-  | "invalid-calendar-day"
-  | "invalid-schedule-comparison-period";
+  "uninterpretable-file-monitoring-condition";
 export type SemanticDiffUnsupportedReasonCode = SemanticDiffUnsupportedReason;
 
 type SemanticDiffIdentityChange = {
@@ -269,38 +249,6 @@ export type SemanticDiffLimitation = {
   warning: SemanticDiffWarning | null;
 };
 
-export type SemanticDiffComparisonPeriod = {
-  from: string;
-  to: string;
-};
-
-export type SemanticDiffScheduleRun = {
-  unitPath: string;
-  unitName: string;
-  rule: number;
-  date: string;
-  time: string;
-};
-
-export type SemanticDiffScheduleRunChangeKind =
-  | "added"
-  | "removed"
-  | "changed-time";
-
-export type SemanticDiffScheduleRunChange = {
-  id: string;
-  kind: SemanticDiffScheduleRunChangeKind;
-  unitPath: string;
-  date: string;
-  before: SemanticDiffScheduleRun | null;
-  after: SemanticDiffScheduleRun | null;
-};
-
-export type SemanticDiffScheduleComparison = {
-  period: SemanticDiffComparisonPeriod;
-  runChanges: SemanticDiffScheduleRunChange[];
-};
-
 export type SemanticDiffResult = {
   inputs: SemanticDiffInputPair;
   changes: SemanticDiffChange[];
@@ -308,7 +256,6 @@ export type SemanticDiffResult = {
   confirmationRequired: SemanticDiffConfirmationRequiredItem[];
   unsupportedItems: SemanticDiffUnsupportedItem[];
   limitations: SemanticDiffLimitation[];
-  scheduleComparison?: SemanticDiffScheduleComparison;
 };
 
 export type SemanticDiffSummary = {
@@ -321,8 +268,6 @@ export type SemanticDiffSummary = {
   unsupportedCountsByKind: Record<SemanticDiffUnsupportedKind, number>;
   confirmationRequiredCount: number;
   limitationCount: number;
-  scheduleRunChangeCount: number;
-  hasUncalculated: boolean;
   hasFindings: boolean;
 };
 

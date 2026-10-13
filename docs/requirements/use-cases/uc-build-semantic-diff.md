@@ -3,7 +3,7 @@
 ## Goal
 
 Compare two JP1/AJS3 job-group definitions by JP1/AJS meaning so consumers can
-review structural, execution-condition, wait-condition, and schedule-impact
+review structural, execution-condition, wait-condition, and schedule-definition
 changes without relying on raw text differences. Return one host-neutral,
 structured result that presentation adapters can project without changing the
 comparison meaning.
@@ -17,8 +17,6 @@ comparison meaning.
 
 - before and after JP1/AJS3 job-group definitions
 - normalized jobnet, unit, relation, parameter, and schedule data
-- comparison options, including a comparison period when schedule comparison
-  is requested
 
 ## Outputs
 
@@ -28,11 +26,11 @@ comparison meaning.
   decision evidence and rationale
 - confirmation-required items with target, change, typed reason/detail,
   related elements, and analysis constraints
-- unsupported attributes, uninterpretable conditions, uncalculated schedules,
-  and their typed reasons/details
+- unsupported attributes, uninterpretable conditions, and their typed
+  reasons/details
 - one host-neutral result containing the comparison facts, identity evidence,
-  and optional schedule comparison; localized wording and report sections are
-  not part of its meaning
+  and definition changes; localized wording and report sections are not part
+  of its meaning
 
 ## Rules
 
@@ -80,8 +78,7 @@ comparison meaning.
   approved feature introduces manual correspondence
 - confirmation-required items are limited to changes that may prevent an
   expected start, remove or tighten a previously available condition, leave a
-  wait unresolved, remove a timeout, change an established branch path, or
-  remove a supported calculated schedule opportunity in the requested period
+  wait unresolved, remove a timeout, or change an established branch path
 - supported file or event wait-target changes, valid execution-user-type
   changes on applicable units, and raw JP1 resource-group changes are
   definition evidence for human review; they do not establish external
@@ -90,19 +87,14 @@ comparison meaning.
   jobnet-start parallelism are not problems by themselves
 - external files, events, host permissions, users, resource groups, resource
   contention, and execution history are not verified
-- unsupported and uncalculated portions remain explicit in the result
+- unsupported portions remain explicit in the result
 - parse failure remains distinct from a successful result and cannot be
   presented as an empty comparison
 - the successful result is presentation-agnostic and can be projected into
   summary, full, audit, or locale-neutral structured output without rerunning
-  comparison, identity matching, schedule evaluation, or risk evaluation
+  comparison, identity matching, or risk evaluation
 - relation cycles, cyclic waits, and terminal-reachability-only judgments are
   outside the supported comparison boundary
-- schedule comparison displays its period and distinguishes supported,
-  unsupported, and uncalculated elements
-- a removed calculated schedule run is review-recommended only when supported
-  before/after schedule-pair evidence exists; unsupported or uncalculated
-  evidence remains explicit and does not become a no-run conclusion
 - JP1/AJS3 version 13 is normative unless an approved feature records a narrower
   reference-backed scope
 
@@ -147,15 +139,6 @@ Scenario: Removed timeout requires confirmation
   When semantic diff is built
   Then possible unbounded wait is confirmation-required
 
-Scenario: Supported calculated schedule opportunity loss requires review
-  Given schedule comparison is requested for a period
-  And a supported before projection contains a calculated execution run
-  And the supported after projection no longer contains that run
-  When semantic diff is built
-  Then the result includes a confirmation-required schedule item for the
-    removed calculated run
-  And unsupported or uncalculated evidence is not treated as a no-run failure
-
 Scenario: External wait target changes require review without a runtime claim
   Given a supported file or event wait target changes
   When semantic diff is built
@@ -170,99 +153,6 @@ Scenario: Execution-environment changes are not asserted as failures
   Then the execution-environment change is included
   And account, user mapping, target-host facts, authorization, and resource
     contention are stated as unverified
-
-Scenario: Schedule comparison reports no calculated runs
-  Given schedule comparison is requested for a period
-  And a schedule-defined jobnet has no calculated run in that period
-  When semantic diff is built
-  Then the result includes a confirmation-required schedule item
-  And the comparison period is included
-
-Scenario: Schedule comparison distinguishes complete no-runs from unresolved evidence
-  Given schedule comparison is requested for a period
-  And a schedule-defined jobnet has a complete supported projection with no run
-  When semantic diff is built
-  Then the existing zero-run confirmation is included exactly once
-  But an unsupported-only, partial, or missing-context projection does not
-    become a zero-run conclusion
-
-Scenario: Schedule comparison calculates fully qualified Gregorian dates
-  Given schedule comparison is requested for a period
-  And a jobnet contains a fully qualified month-end or absolute weekday `sd`
-    value with a matching normal `st` value
-  When semantic diff is built
-  Then month-end uses the Gregorian last day and zero-based `b-DD` offset
-  And an absolute weekday uses its first, nth, or last occurrence in that month
-  And the existing schedule comparison run shape and half-open period are used
-  And no operational calendar or host locale is consulted
-
-Scenario: Calendar-independent schedule forms remain explicit when unsupported
-  Given schedule comparison is requested for a period
-  And a jobnet uses an omitted-component or relative calendar-dependent date
-  When semantic diff is built
-  Then the existing uncalculated schedule item is returned
-  And it is not treated as a valid no-runs conclusion
-
-Scenario: Calendar-relative schedule forms use normalized definition context
-  Given schedule comparison is requested for a period
-  And a jobnet uses a fully qualified relative `sd` value
-  And its selected `jc` or containing group provides normalized `sdd`, `md`,
-    and `stt` context
-  When semantic diff is built
-  Then the operational month and relative date are calculated from that
-    definition context
-  And a missing, invalid, or ambiguous context remains an explicit
-    `calendar-selection` item
-  And units outside the comparison scope are not added to the result
-
-Scenario: Definition-backed open and closed schedule forms use explicit classifications
-  Given schedule comparison is requested for a period
-  And a jobnet uses a fully qualified open-day or closed-day `sd` value
-  And its selected `jc` or containing group provides normalized `op` and `cl`
-    calendar data
-  When semantic diff is built
-  Then `*DD` and `@DD` count qualifying days from the operational-month start
-  And `*b[-DD]` and `@b[-DD]` count qualifying days backward from its end
-  And exact-date classifications take precedence over weekday classifications
-  And duplicate values are idempotent while contradictory values remain an
-    explicit `calendar-selection` item
-  And every inspected date must be classified without host or external
-    calendar fallback
-  And units outside the comparison scope are not added to the result
-
-Scenario: Closed-day substitution uses bounded definition-backed calendar data
-  Given schedule comparison is requested for a period
-  And a jobnet uses a fully qualified `sd` value with `sh=be`, `sh=af`, or
-    `sh=ca` for the same schedule rule
-  And its selected `jc` or containing group provides complete normalized
-    `op` and `cl` calendar data
-  When semantic diff is built
-  Then `be` and `af` select the nearest open day within effective `shd`
-  And omitted `shd` uses two days while explicit `shd` is limited to 31 days
-  And `ca` suppresses a closed base date while preserving an open base date
-  And a shift across the requested-period boundary is filtered to the
-    half-open comparison period after at most 31 days of lookaround
-  And invalid, conflicting, or unpaired values remain existing uncalculated
-    items with their raw parameter evidence
-  And `sh=no`, incomplete calendar data, and rules containing `cy` or `cftd`
-    are not resolved from host or external service state
-
-Scenario: A missing fifth weekday occurrence is a valid no-runs schedule
-  Given schedule comparison is requested for a period
-  And a fully qualified weekday rule has no fifth matching weekday in its month
-  When semantic diff is built
-  Then the complete supported projection has no calculated runs
-  And the existing zero-run confirmation is included exactly once
-
-Scenario: Rule-zero undefined schedule is a complete no-runs result
-  Given schedule comparison is requested for a period
-  And a jobnet contains `sd=0,ud`
-  When semantic diff is built
-  Then the existing zero-run confirmation is included exactly once
-  And raw ineffective schedule parameters remain domain evidence
-  And a supported before-side run changed to after-side `0,ud` retains the
-    existing removed-run fact alongside that one confirmation
-  And review-risk and Flow policy are unchanged
 
 Scenario: One result supports multiple report projections
   Given a successful semantic comparison has produced structured facts
@@ -282,8 +172,6 @@ Scenario: One result supports multiple report projections
 
 - fingerprints can over-match or under-match when their fields lack enough
   JP1/AJS evidence
-- broad schedule semantics require a deliberately narrow, reference-backed
-  supported set
 - large job groups can expose avoidable repeated-scan performance risks
 - user-facing consumers must not turn definition-only evidence into assertions
   about runtime failure

@@ -38,7 +38,6 @@ const attributeCategories: SemanticDiffAttributeCategory[] = [
 const unsupportedKinds: SemanticDiffUnsupportedKind[] = [
   "unsupported",
   "uninterpretable",
-  "uncalculated",
 ];
 
 const zeroCounts = <T extends string>(keys: readonly T[]): Record<T, number> =>
@@ -113,83 +112,29 @@ const countUnsupportedItems = (
   return counts;
 };
 
-const hasUncalculatedItems = <T extends { kind: string }>(
-  items: T[],
-): boolean => items.some((item) => item.kind === "uncalculated");
-
 const hasSummaryFindings = (counts: number[]): boolean =>
   counts.some((count) => count > 0);
 
-type SemanticDiffSummaryFacts = {
-  changeCounts: SemanticDiffSummaryCounts;
-  unsupportedCountsByKind: Record<SemanticDiffUnsupportedKind, number>;
-  scheduleRunChangeCount: number;
-  hasUncalculated: boolean;
-  hasFindings: boolean;
-};
-
-const scheduleRunChangeCount = (result: SemanticDiffResult): number =>
-  result.scheduleComparison?.runChanges.length ?? 0;
-
-const summaryFindingCounts = (
-  result: SemanticDiffResult,
-  scheduleChanges: number,
-): number[] => [
-  result.changes.length,
-  result.confirmationRequired.length,
-  result.unsupportedItems.length,
-  result.limitations.length,
-  scheduleChanges,
-];
-
-const hasUncalculatedSummaryItems = (result: SemanticDiffResult): boolean =>
-  hasUncalculatedItems(result.unsupportedItems) ||
-  hasUncalculatedItems(result.limitations);
-
-const hasSummaryFindingsForResult = (
-  result: SemanticDiffResult,
-  scheduleChanges: number,
-): boolean => hasSummaryFindings(summaryFindingCounts(result, scheduleChanges));
-
-const deriveSummaryFacts = (
-  result: SemanticDiffResult,
-): SemanticDiffSummaryFacts => {
-  const changeCounts = countChanges(result.changes);
-  const unsupportedCountsByKind = countUnsupportedItems(
-    result.unsupportedItems,
-  );
-  const scheduleChanges = scheduleRunChangeCount(result);
-
-  return {
-    changeCounts,
-    unsupportedCountsByKind,
-    scheduleRunChangeCount: scheduleChanges,
-    hasUncalculated: hasUncalculatedSummaryItems(result),
-    hasFindings: hasSummaryFindingsForResult(result, scheduleChanges),
-  };
-};
-
-const projectSummary = (
-  result: SemanticDiffResult,
-  facts: SemanticDiffSummaryFacts,
-): SemanticDiffSummary => ({
-  changeCountsByKind: facts.changeCounts.changeCountsByKind,
-  changeCountsByElementKind: facts.changeCounts.changeCountsByElementKind,
-  changeCountsByAttributeCategory:
-    facts.changeCounts.changeCountsByAttributeCategory,
-  unsupportedCountsByKind: facts.unsupportedCountsByKind,
-  confirmationRequiredCount:
-    result.confirmationRequired.length +
-    facts.changeCounts.confirmationRequiredCount,
-  limitationCount: result.limitations.length,
-  scheduleRunChangeCount: facts.scheduleRunChangeCount,
-  hasUncalculated: facts.hasUncalculated,
-  hasFindings: facts.hasFindings,
-});
-
 export const buildSemanticDiffSummary = (
   result: SemanticDiffResult,
-): SemanticDiffSummary => projectSummary(result, deriveSummaryFacts(result));
+): SemanticDiffSummary => {
+  const counts = countChanges(result.changes);
+  return {
+    changeCountsByKind: counts.changeCountsByKind,
+    changeCountsByElementKind: counts.changeCountsByElementKind,
+    changeCountsByAttributeCategory: counts.changeCountsByAttributeCategory,
+    unsupportedCountsByKind: countUnsupportedItems(result.unsupportedItems),
+    confirmationRequiredCount:
+      counts.confirmationRequiredCount + result.confirmationRequired.length,
+    limitationCount: result.limitations.length,
+    hasFindings: hasSummaryFindings([
+      result.changes.length,
+      result.confirmationRequired.length,
+      result.unsupportedItems.length,
+      result.limitations.length,
+    ]),
+  };
+};
 
 export const buildSemanticDiffOutputContext = (
   result: SemanticDiffResult,

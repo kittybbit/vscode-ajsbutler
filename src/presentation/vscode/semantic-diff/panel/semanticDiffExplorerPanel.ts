@@ -14,8 +14,6 @@ import { installSemanticDiffExplorerPanel } from "./semanticDiffExplorerPanelIns
 import { postSemanticDiffExplorerMessage } from "./semanticDiffExplorerPanelTransport";
 import { disposeSemanticDiffExplorerPanel } from "./semanticDiffExplorerPanelLifecycle";
 import { SEMANTIC_DIFF_EXPLORER_VIEW_TYPE } from "./semanticDiffExplorerConstants";
-import { createScheduleImpactCalendarPanel } from "../calendar/scheduleImpactCalendarPanel";
-import type { ScheduleImpactCalendarPanelHandle } from "../calendar/scheduleImpactCalendarPanel";
 import type {
   SemanticDiffExplorerPanelDeps,
   SemanticDiffExplorerSessionHandle,
@@ -30,18 +28,15 @@ type PanelEntry = {
   session: SemanticDiffExplorerSession;
   panel: vscode.WebviewPanel;
   outputActionId: SemanticDiffExplorerActionId;
-  calendarActionId: SemanticDiffExplorerActionId | undefined;
   dispose: () => void;
 };
 
 const hostActionIds = (
   session: SemanticDiffExplorerSession,
   outputActionId: SemanticDiffExplorerActionId,
-  calendarActionId?: SemanticDiffExplorerActionId,
 ) => {
   const ids = new Set(session.actionIds.toArray());
   ids.add(outputActionId);
-  if (calendarActionId !== undefined) ids.add(calendarActionId);
   return {
     size: ids.size,
     has: (value: unknown): value is SemanticDiffExplorerActionId =>
@@ -76,14 +71,6 @@ type ExplorerOpenerResources = Readonly<{
   contextRegistry: SemanticDiffExplorerContextRegistry;
   actionRegistry: SemanticDiffExplorerActionRegistry;
   releaseSourceLifetime: () => void;
-  openScheduleImpactCalendarPanel?: (
-    input: Readonly<{
-      parentSessionId: string;
-      context: SemanticDiffOutputContext;
-      sidecar: import("../../../../application/semantic-diff/semanticDiffScheduleImpact").SemanticDiffScheduleImpact;
-      displayLanguage?: string;
-    }>,
-  ) => ScheduleImpactCalendarPanelHandle;
 }>;
 
 const createExplorerOpenerResources = (
@@ -97,16 +84,6 @@ const createExplorerOpenerResources = (
   actionRegistry:
     deps.actionRegistry ?? new SemanticDiffExplorerActionRegistry(),
   releaseSourceLifetime: deps.sourceLifetimeRelease ?? (() => undefined),
-  openScheduleImpactCalendarPanel:
-    deps.openScheduleImpactCalendarPanel ??
-    (deps.calendarSessionRegistry
-      ? createScheduleImpactCalendarPanel({
-          extensionContext: deps.extensionContext,
-          createWebviewPanel: deps.createWebviewPanel,
-          language: deps.language,
-          sessionRegistry: deps.calendarSessionRegistry,
-        })
-      : undefined),
 });
 
 const createExplorerPanel = (
@@ -136,7 +113,6 @@ type ExplorerPanelRuntimeOptions = Readonly<{
   context: SemanticDiffOutputContext;
   session: SemanticDiffExplorerSession;
   outputActionId: SemanticDiffExplorerActionId;
-  calendarActionId: SemanticDiffExplorerActionId | undefined;
   panel: vscode.WebviewPanel;
 }>;
 
@@ -144,13 +120,11 @@ const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
   const { resources, context, session, outputActionId, panel } = options;
   const { deps, contextRegistry, actionRegistry, releaseSourceLifetime } =
     resources;
-  const { calendarActionId } = options;
   const entry: PanelEntry = {
     context,
     session,
     panel,
     outputActionId,
-    calendarActionId,
     dispose: () => undefined,
   };
   let disposed = false;
@@ -158,11 +132,7 @@ const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
   let latestRequestId = 0;
   let receiveMessageDisposable: vscode.Disposable | undefined;
   let panelDisposeDisposable: vscode.Disposable | undefined;
-  const registeredActionIds = hostActionIds(
-    session,
-    outputActionId,
-    calendarActionId,
-  );
+  const registeredActionIds = hostActionIds(session, outputActionId);
   const sourceCapture = contextRegistry.sourceCapture(context);
   const post = (
     message: Parameters<typeof postSemanticDiffExplorerMessage>[0],
@@ -212,8 +182,6 @@ const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
     deps,
     post,
     isCurrent: (epoch: number) => !disposed && epoch === disposeEpoch,
-    calendarActionId,
-    openScheduleImpactCalendarPanel: resources.openScheduleImpactCalendarPanel,
   };
   const requestOptions = {
     panel,
@@ -234,7 +202,6 @@ const createExplorerPanelRuntime = (options: ExplorerPanelRuntimeOptions) => {
       entry: entry as SemanticDiffExplorerContextEntry,
       session,
       outputActionId,
-      calendarActionId,
       panel,
       deps,
       contextRegistry,
@@ -266,19 +233,12 @@ const openExplorerSession = async (
     actionIdAllocator: resources.deps.actionIdAllocator,
   });
   const outputActionId = resources.deps.actionIdAllocator();
-  const sidecar =
-    resources.deps.scheduleImpactSidecarRegistry?.resolve(context);
-  const calendarActionId =
-    sidecar && resources.openScheduleImpactCalendarPanel
-      ? resources.deps.actionIdAllocator()
-      : undefined;
   const panel = createExplorerPanel(resources, context, language);
   const runtime = createExplorerPanelRuntime({
     resources,
     context,
     session,
     outputActionId,
-    calendarActionId,
     panel,
   });
   runtime.install();

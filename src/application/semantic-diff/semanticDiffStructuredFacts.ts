@@ -1,5 +1,4 @@
 import type {
-  SemanticDiffComparisonPeriod,
   SemanticDiffDetail,
   SemanticDiffRelationPair,
   SemanticDiffWarning,
@@ -9,8 +8,6 @@ export type SemanticDiffDetailOverrides = {
   unitPath?: string | null;
   parameterKey?: string | null;
   relationPair?: SemanticDiffRelationPair | null;
-  scheduleRule?: number | null;
-  period?: SemanticDiffComparisonPeriod | null;
   beforeValues?: string[];
   afterValues?: string[];
   rawValues?: string[];
@@ -24,8 +21,6 @@ export const createSemanticDiffDetail = (
   unitPath: overrides.unitPath ?? null,
   parameterKey: overrides.parameterKey ?? null,
   relationPair: overrides.relationPair ?? null,
-  scheduleRule: overrides.scheduleRule ?? null,
-  period: overrides.period ?? null,
   beforeValues: [...(overrides.beforeValues ?? [])],
   afterValues: [...(overrides.afterValues ?? [])],
   rawValues: [...(overrides.rawValues ?? [])],

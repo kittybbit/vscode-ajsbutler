@@ -49,12 +49,9 @@ const emptyContext = (): SemanticDiffOutputContext => ({
     unsupportedCountsByKind: {
       unsupported: 0,
       uninterpretable: 0,
-      uncalculated: 0,
     },
     confirmationRequiredCount: 0,
     limitationCount: 0,
-    scheduleRunChangeCount: 0,
-    hasUncalculated: false,
     hasFindings: false,
   },
 });

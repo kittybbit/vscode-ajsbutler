@@ -1,7 +1,6 @@
 import type {
   SemanticDiffAttributeCategory,
   SemanticDiffChangeKind,
-  SemanticDiffComparisonPeriod,
   SemanticDiffConfirmationLevel,
   SemanticDiffConfirmationReason,
   SemanticDiffConstraintCode,
@@ -78,14 +77,10 @@ export type SemanticDiffJsonRelationPair = {
   after: SemanticDiffJsonRelationEndpoint | null;
 };
 
-export type SemanticDiffJsonPeriod = SemanticDiffComparisonPeriod;
-
 export type SemanticDiffJsonDetail = {
   unitPath: string | null;
   parameterKey: string | null;
   relationPair: SemanticDiffJsonRelationPair | null;
-  scheduleRule: number | null;
-  period: SemanticDiffJsonPeriod | null;
   beforeValues: string[];
   afterValues: string[];
   rawValues: string[];
@@ -184,28 +179,6 @@ export type SemanticDiffJsonLimitation = {
   warning: SemanticDiffJsonWarning | null;
 };
 
-export type SemanticDiffJsonRun = {
-  unitPath: string;
-  unitName: string;
-  rule: number;
-  date: string;
-  time: string;
-};
-
-export type SemanticDiffJsonRunChange = {
-  id: string;
-  kind: "added" | "removed" | "changed-time";
-  unitPath: string;
-  date: string;
-  before: SemanticDiffJsonRun | null;
-  after: SemanticDiffJsonRun | null;
-};
-
-export type SemanticDiffJsonSchedule = {
-  period: SemanticDiffJsonPeriod;
-  runChanges: SemanticDiffJsonRunChange[];
-};
-
 export type SemanticDiffJsonSummary = {
   changeCountsByKind: Record<SemanticDiffChangeKind, number>;
   changeCountsByElementKind: Record<SemanticDiffElementKind, number>;
@@ -216,8 +189,6 @@ export type SemanticDiffJsonSummary = {
   unsupportedCountsByKind: Record<SemanticDiffUnsupportedKind, number>;
   confirmationRequiredCount: number;
   limitationCount: number;
-  scheduleRunChangeCount: number;
-  hasUncalculated: boolean;
   hasFindings: boolean;
 };
 
@@ -228,12 +199,11 @@ export type SemanticDiffJsonResult = {
   confirmationRequired: SemanticDiffJsonConfirmation[];
   unsupportedItems: SemanticDiffJsonUnsupported[];
   limitations: SemanticDiffJsonLimitation[];
-  schedule: SemanticDiffJsonSchedule | null;
 };
 
-export type SemanticDiffJsonV1 = {
+export type SemanticDiffJsonV2 = {
   schema: "ajsbutler.semantic-diff";
-  schemaVersion: 1;
+  schemaVersion: 2;
   summary: SemanticDiffJsonSummary;
   result: SemanticDiffJsonResult;
 };

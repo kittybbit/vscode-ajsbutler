@@ -151,7 +151,6 @@ const leafKindOrder = new Map<string, number>([
   ["confirmation", 1],
   ["unsupported", 2],
   ["limitation", 3],
-  ["schedule", 4],
 ]);
 
 const leafSortKey = (leaf: SemanticDiffExplorerLeaf): string => leaf.recordId;

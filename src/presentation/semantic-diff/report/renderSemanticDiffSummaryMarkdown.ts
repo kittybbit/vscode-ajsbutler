@@ -51,7 +51,7 @@ const statusText = (present: boolean, language?: string): string =>
 
 /**
  * Render the compact Summary projection without re-counting the result.
- * Scope and period are context facts; all counts and predicates come from
+ * Scope is a context fact; all counts and predicates come from
  * the already-built summary.
  */
 export const renderSemanticDiffSummaryMarkdown: SemanticDiffMarkdownRenderer = (
@@ -72,26 +72,12 @@ export const renderSemanticDiffSummaryMarkdown: SemanticDiffMarkdownRenderer = (
     ),
   ];
 
-  if (result.scheduleComparison) {
-    lines.push(
-      bulletLine(
-        semanticDiffReportText("generated.period", language, {
-          from: escapeMarkdown(result.scheduleComparison.period.from),
-          to: escapeMarkdown(result.scheduleComparison.period.to),
-        }),
-      ),
-    );
-  }
-
   lines.push(
     bulletLine(
       `${summaryText("confirmationCount", language)}: ${summary.confirmationRequiredCount}`,
     ),
     bulletLine(
       `${summaryText("limitationCount", language)}: ${summary.limitationCount}`,
-    ),
-    bulletLine(
-      `${summaryText("uncalculated", language)}: ${statusText(summary.hasUncalculated, language)}`,
     ),
     bulletLine(
       `${summaryText("findings", language)}: ${statusText(summary.hasFindings, language)}`,
@@ -125,15 +111,6 @@ export const renderSemanticDiffSummaryMarkdown: SemanticDiffMarkdownRenderer = (
       language,
     ),
   );
-
-  if (result.scheduleComparison) {
-    lines.push(
-      "",
-      `## ${summaryText("scheduleRunChangeCount", language)}`,
-      "",
-      bulletLine(String(summary.scheduleRunChangeCount)),
-    );
-  }
 
   return lines
     .join("\n")

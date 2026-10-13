@@ -207,8 +207,6 @@ const editorConfig = (env, argv) => {
             flowViewer: "./src/presentation/webview/editor/flowViewer.tsx",
             semanticDiffExplorer:
                 "./src/presentation/webview/editor/semanticDiffExplorer.tsx",
-            scheduleImpactCalendar:
-                "./src/presentation/webview/editor/scheduleImpactCalendar.tsx",
         },
         libraryType: "umd",
         externals: {

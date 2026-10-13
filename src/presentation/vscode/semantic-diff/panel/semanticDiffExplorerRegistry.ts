@@ -21,7 +21,7 @@ import {
 } from "../../../../application/semantic-diff/semanticDiffSourceCapture";
 
 export type SemanticDiffExplorerActionMetadata = Readonly<{
-  kind: "source" | "flow" | "output" | "calendar";
+  kind: "source" | "flow" | "output";
   side: "before" | "after" | null;
   targetId: string | null;
   recordId: string | null;
@@ -163,14 +163,12 @@ type ActionEntry = Readonly<{
 type ActionLeaf = Extract<
   SemanticDiffExplorerLeaf,
   {
-    kind: "change" | "confirmation" | "unsupported" | "limitation" | "schedule";
+    kind: "change" | "confirmation" | "unsupported" | "limitation";
   }
 >;
 
 const leafTarget = (leaf: ActionLeaf): SemanticDiffTarget | null =>
-  leaf.kind === "limitation" || leaf.kind === "schedule"
-    ? null
-    : leaf.target.value;
+  leaf.kind === "limitation" ? null : leaf.target.value;
 
 const leafTargetKind = (
   target: SemanticDiffTarget | null,
@@ -213,7 +211,7 @@ const actionMetadataForLeaf = (
   sessionId: SemanticDiffExplorerSessionId,
 ): ActionEntry => {
   const target = leafTarget(leaf);
-  const side = leaf.kind === "schedule" ? null : leaf.targetSide;
+  const side = leaf.targetSide;
   return {
     sessionId,
     metadata: {
@@ -240,7 +238,6 @@ export class SemanticDiffExplorerActionRegistry {
   public register(
     session: SemanticDiffExplorerSession,
     outputActionId: SemanticDiffExplorerActionId,
-    calendarActionId?: SemanticDiffExplorerActionId,
   ): void {
     this.walkLeaves(session.viewModel.tree, session.sessionId);
     this.walkLeaves(session.allViewModel.tree, session.sessionId);
@@ -248,42 +245,6 @@ export class SemanticDiffExplorerActionRegistry {
       sessionId: session.sessionId,
       metadata: {
         kind: "output",
-        side: null,
-        targetId: null,
-        recordId: null,
-        recordKind: null,
-        recordOccurrence: null,
-        recordTarget: null,
-        targetKind: null,
-        parameterKey: null,
-      },
-    });
-    if (calendarActionId !== undefined) {
-      this.actions.set(calendarActionId, {
-        sessionId: session.sessionId,
-        metadata: {
-          kind: "calendar",
-          side: null,
-          targetId: null,
-          recordId: null,
-          recordKind: null,
-          recordOccurrence: null,
-          recordTarget: null,
-          targetKind: null,
-          parameterKey: null,
-        },
-      });
-    }
-  }
-
-  public registerCalendar(
-    sessionId: SemanticDiffExplorerSessionId,
-    calendarActionId: SemanticDiffExplorerActionId,
-  ): void {
-    this.actions.set(calendarActionId, {
-      sessionId,
-      metadata: {
-        kind: "calendar",
         side: null,
         targetId: null,
         recordId: null,

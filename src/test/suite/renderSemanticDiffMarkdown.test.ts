@@ -564,8 +564,6 @@ suite("Render Semantic Diff Markdown", () => {
               unitPath: null,
               parameterKey: null,
               relationPair: null,
-              scheduleRule: null,
-              period: null,
               beforeValues: [],
               afterValues: [],
               rawValues: [],
@@ -577,8 +575,6 @@ suite("Render Semantic Diff Markdown", () => {
                 unitPath: null,
                 parameterKey: null,
                 relationPair: null,
-                scheduleRule: null,
-                period: null,
                 beforeValues: [],
                 afterValues: [],
                 rawValues: [],
@@ -730,8 +726,6 @@ suite("Render Semantic Diff Markdown", () => {
                 unitPath: afterJob.absolutePath,
                 parameterKey: "cond",
                 relationPair: null,
-                scheduleRule: null,
-                period: null,
                 beforeValues: [],
                 afterValues: [],
                 rawValues: [],
@@ -744,8 +738,6 @@ suite("Render Semantic Diff Markdown", () => {
             unitPath: afterJob.absolutePath,
             parameterKey: "cond",
             relationPair: null,
-            scheduleRule: null,
-            period: null,
             beforeValues: [],
             afterValues: [],
             rawValues: [],
@@ -765,8 +757,6 @@ suite("Render Semantic Diff Markdown", () => {
             unitPath: afterJob.absolutePath,
             parameterKey: "flwc",
             relationPair: null,
-            scheduleRule: null,
-            period: null,
             beforeValues: [],
             afterValues: [],
             rawValues: [],
@@ -778,8 +768,6 @@ suite("Render Semantic Diff Markdown", () => {
               unitPath: afterJob.absolutePath,
               parameterKey: "flwc",
               relationPair: null,
-              scheduleRule: null,
-              period: null,
               beforeValues: [],
               afterValues: [],
               rawValues: [],
@@ -799,8 +787,6 @@ suite("Render Semantic Diff Markdown", () => {
             unitPath: "/root/jobnet/job-a",
             parameterKey: null,
             relationPair: null,
-            scheduleRule: null,
-            period: null,
             beforeValues: [],
             afterValues: [],
             rawValues: [],
@@ -812,8 +798,6 @@ suite("Render Semantic Diff Markdown", () => {
               unitPath: "/root/jobnet/job-a",
               parameterKey: null,
               relationPair: null,
-              scheduleRule: null,
-              period: null,
               beforeValues: [],
               afterValues: [],
               rawValues: [],
@@ -1016,53 +1000,5 @@ suite("Render Semantic Diff Markdown", () => {
     );
     assert.ok(japanese.includes("イベント受信 (event-reception-v1)"));
     assert.ok(japanese.includes("/root/jobnet/removed"));
-  });
-
-  test("renders schedule comparison period and run changes when present", () => {
-    const result = renderSemanticDiffMarkdown(
-      buildResult({
-        scheduleComparison: {
-          period: {
-            from: "2026-04-01",
-            to: "2026-05-01",
-          },
-          runChanges: [
-            {
-              id: "schedule:changed-time:/root/jobnet:2026-04-10",
-              kind: "changed-time",
-              unitPath: "/root/jobnet",
-              date: "2026-04-10",
-              before: {
-                unitPath: "/root/jobnet",
-                unitName: "jobnet",
-                rule: 1,
-                date: "2026-04-10",
-                time: "09:00",
-              },
-              after: {
-                unitPath: "/root/jobnet",
-                unitName: "jobnet",
-                rule: 1,
-                date: "2026-04-10",
-                time: "10:00",
-              },
-            },
-          ],
-        },
-      }),
-    );
-
-    assert.ok(
-      result.includes(
-        "- Comparison period: 2026-04-01 to 2026-05-01 (exclusive)",
-      ),
-    );
-    assert.ok(result.includes("- 1 schedule run change"));
-    assert.ok(result.includes("## Schedule Changes"));
-    assert.ok(
-      result.includes(
-        "- [changed-time] /root/jobnet run on 2026-04-10 changed from 09:00 to 10:00",
-      ),
-    );
   });
 });

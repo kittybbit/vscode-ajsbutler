@@ -1,6 +1,5 @@
 import type * as vscode from "vscode";
 import {
-  createSemanticDiffExplorerActionResultMessage,
   createSemanticDiffExplorerFailureMessage,
   createSemanticDiffExplorerSessionMessage,
   createSemanticDiffExplorerError,
@@ -40,122 +39,6 @@ const processCommonResourceRequest = (
   if (request?.type !== "resource") return false;
   postResourceMessage(request.data, options.panel);
   return true;
-};
-
-const postUnknownCalendarAction = (
-  request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-  epoch: number,
-  options: PanelRequestOptions,
-): Promise<void> =>
-  options.post(
-    createSemanticDiffExplorerFailureMessage(
-      options.session.sessionId,
-      request.requestId,
-      request.actionId,
-      createSemanticDiffExplorerError("unknown-action"),
-    ),
-    epoch,
-  );
-
-const postCalendarActionOutputFailure = (
-  request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-  epoch: number,
-  options: PanelRequestOptions,
-): Promise<void> =>
-  options.post(
-    createSemanticDiffExplorerActionResultMessage(
-      options.session.sessionId,
-      request.requestId,
-      request.actionId,
-      null,
-      createSemanticDiffExplorerError("output-failed"),
-    ),
-    epoch,
-  );
-
-const postCalendarActionCompleted = (
-  request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-  epoch: number,
-  options: PanelRequestOptions,
-): Promise<void> =>
-  options.post(
-    createSemanticDiffExplorerActionResultMessage(
-      options.session.sessionId,
-      request.requestId,
-      request.actionId,
-      {
-        kind: "output",
-        status: "completed",
-        side: null,
-        targetId: null,
-      },
-    ),
-    epoch,
-  );
-
-const processCalendarAction = async (
-  request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-  epoch: number,
-  options: PanelRequestOptions,
-): Promise<void> => {
-  const { actionOptions } = options;
-  const calendarActionId = actionOptions.calendarActionId;
-  if (calendarActionId === undefined || request.actionId !== calendarActionId) {
-    return;
-  }
-  const outcome = openCalendarAction(request, options);
-  await calendarActionResponses[outcome](request, epoch, options);
-};
-
-const calendarActionResponses: Readonly<
-  Record<
-    "completed" | "unknown" | "failed",
-    (
-      request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-      epoch: number,
-      options: PanelRequestOptions,
-    ) => Promise<void>
-  >
-> = {
-  completed: postCalendarActionCompleted,
-  unknown: postUnknownCalendarAction,
-  failed: postCalendarActionOutputFailure,
-};
-
-const openCalendarAction = (
-  request: Extract<SemanticDiffExplorerRequest, { type: "action" }>,
-  options: PanelRequestOptions,
-): "completed" | "unknown" | "failed" => {
-  const { actionOptions } = options;
-  const sidecar = actionOptions.deps.scheduleImpactSidecarRegistry?.resolve(
-    actionOptions.context,
-  );
-  if (!sidecar || !actionOptions.openScheduleImpactCalendarPanel)
-    return "unknown";
-  return invokeCalendarAction(options, sidecar);
-};
-
-const invokeCalendarAction = (
-  options: PanelRequestOptions,
-  sidecar: NonNullable<
-    ReturnType<
-      NonNullable<
-        PanelRequestOptions["actionOptions"]["deps"]["scheduleImpactSidecarRegistry"]
-      >["resolve"]
-    >
-  >,
-): "completed" | "failed" => {
-  try {
-    options.actionOptions.openScheduleImpactCalendarPanel!({
-      parentSessionId: options.session.sessionId,
-      context: options.actionOptions.context,
-      sidecar,
-      displayLanguage: options.session.displayLanguage,
-    });
-    return "completed";
-  } catch {
-    return "failed";
-  }
 };
 
 const invalidRequestMessage = (
@@ -224,10 +107,6 @@ const processActionRequest = async (
   epoch: number,
   options: PanelRequestOptions,
 ): Promise<void> => {
-  if (options.actionOptions.calendarActionId === request.actionId) {
-    await processCalendarAction(request, epoch, options);
-    return;
-  }
   await processSemanticDiffExplorerAction(
     request,
     epoch,

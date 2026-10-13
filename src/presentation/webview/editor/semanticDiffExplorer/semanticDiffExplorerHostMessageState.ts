@@ -23,7 +23,6 @@ type HostMessageRefs = Readonly<{
   initialSessionId: MutableRefObject<SemanticDiffExplorerSessionId | undefined>;
   closedSessionId: MutableRefObject<SemanticDiffExplorerSessionId | undefined>;
   outputActionId: MutableRefObject<SemanticDiffExplorerActionId | undefined>;
-  calendarActionId: MutableRefObject<SemanticDiffExplorerActionId | undefined>;
   readySent: MutableRefObject<boolean>;
   requestId: MutableRefObject<number>;
   pendingActions: MutableRefObject<Map<number, HTMLElement>>;
@@ -217,8 +216,6 @@ export const useExplorerHostMessageListener = (
   useEffect(() => {
     refs.outputActionId.current = document.body.dataset
       .semanticDiffOutputActionId as SemanticDiffExplorerActionId | undefined;
-    refs.calendarActionId.current = document.body.dataset
-      .semanticDiffCalendarActionId as SemanticDiffExplorerActionId | undefined;
     refs.initialSessionId.current = document.body.dataset
       .semanticDiffSessionId as SemanticDiffExplorerSessionId | undefined;
     const onMessage = createMessageHandler(refs, setters, labels);
