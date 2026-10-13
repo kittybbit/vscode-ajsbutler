@@ -15,12 +15,14 @@
 
 ## Current state and gate
 
-- Lifecycle state: SLICE_APPROVED.
-- Next operation: focused S2 completion commit, then Feature Exit entry check.
+- Lifecycle state: FEATURE_EXIT_READY.
+- Next operation: Feature Exit aggregate review; all slices have Ready reviews,
+  explicit Completion Approval and focused commits, with no pending scope/design
+  decision.
 - Selection: `semantic-diff-schedule-simulation-removal`.
 - Branch/base: `codex/semantic-diff-schedule-simulation-removal` / `origin/main`.
 - Fixed base and planning HEAD: `0090b728977d55d4127bdad149f74f598f0b2fd5`.
-- Slice states: S1 is SLICE_COMMITTED; S2 is SLICE_APPROVED under the committed
+- Slice states: S1 and S2 are SLICE_COMMITTED under the committed
   original plan and combined exact-path amendment.
 - Plan review: Ready for approval; no Findings. Reviewed plan identity:
   `d4f41dc4d222a702225db6ac5749486c1bf5f6546579d176c649a91573da8f20`.
@@ -62,7 +64,8 @@
     `faa4f107a7efbafccb833b15e2d8bacf1c1e24fd251fc99ecf8a0598ed68bf5c`.
   - Approval provenance: human response to Main's S2 completion/commit approval
     request after both corrected-patch reviews returned Ready.
-  - Commit status: pending focused completion commit.
+  - Commit status: committed as `6f074003b41f6022aaf7c34fdb5adb0e21ee9ab6`;
+    exact 104 approved paths, staged diff check passed.
 - Closure Approval: none.
 
 ## S2 Registry approval-boundary amendment
@@ -111,7 +114,8 @@
   per-check results; they do not prove the unedited Registry correction. New
   path-set binding and post-correction final checks must identify the added
   path and final content. S2 final review/readiness cannot reuse an old scope
-  identity; no completed S2 review or Completion Approval is claimed.
+  identity. Final corrected S2 reviews, Completion Approval and commit are
+  recorded in the current gate above.
 - Documentation validation and exact amendment patch:
   `/tmp/ajs-removal-s2-registry-replan/evidence.json`. Initial plan/intake
   discovery is reused outside this omission; no product validation is claimed
@@ -641,7 +645,8 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
 - Validation: `test:full` passes (1,199 desktop cases and web smoke);
   `test:desktop:min` passes on VS Code 1.75.0; clean `build` passes for both hosts
   and retained editor assets, with no calendar bundle. Complete architecture
-  dependency catalog passes at zero violations; semantic ownership needs review.
+  dependency catalog passes at zero violations; both independent semantic
+  ownership reviews returned Ready.
 - Quality: qlty 0.645.0 full-repository baseline/final SARIF observations complete;
   final aggregate passes. Three unrelated check findings are unchanged; approved
   TRACEABILITY formatting fixed. All 151 smells records unchanged.
@@ -656,11 +661,12 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
 - Feedback/risks: unchanged webpack size advisories; web shutdown stream messages
   follow successful runner exit. Snapshot cache contamination was corrected by
   refreshing final qlty only in a clean exact snapshot. No missing check or
-  blocking decision remains; S2 waits for S1 Completion Approval and commit.
+  blocking decision remains; S1 and S2 Completion Approvals and commits are
+  recorded in the current gate above.
 
 ## S2 implementation handoff
 
-- State: SLICE_APPROVED; both independent reviewers returned Ready on the complete
+- State: SLICE_COMMITTED; both independent reviewers returned Ready on the complete
   corrected S2 patch. Original and combined approvals remain the exact boundary.
 - Acceptance: prediction/calendar/period computation, DTOs, reports and exclusive
   tests are deleted. File/Git comparison proceeds directly to definition review;
@@ -683,9 +689,9 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
   unchanged. JSON v2 is the explicitly approved breaking output migration.
   Desktop/web source, Flow, Output, strict messages and error/privacy regressions
   passed. Both independent semantic architecture reviews returned Ready.
-- Evidence: `/tmp/ajs-removal-s2/evidence.json`; substantive manifest and the
-  separately validated gate-metadata patch are linked there. No Completion
-  Approval, completion commit or self-review verdict is claimed.
+- Evidence: `/tmp/ajs-removal-s2/evidence.json`; final corrected product facts
+  are in `/tmp/ajs-removal-s2/correction/evidence.json`. Both Ready reviews,
+  Completion Approval and commit are recorded above; no self-review is claimed.
 
 ## S2 independent-review correction handoff
 
@@ -703,10 +709,10 @@ same evidence. Current-head CI and Qlty Cloud remain Feature Exit gates.
   VS Code 1.75.0 passes. Full Qlty check retains only the 3 unchanged unrelated
   findings; full smells retain 151 identical observations; aggregate passes.
   Exact final build, document checks and content identities are in the evidence.
-- State: IMPLEMENTED for fresh independent reviews of the complete corrected
-  patch. Both independent re-reviews returned Ready with no Findings for the
+- State: SLICE_COMMITTED. Both independent re-reviews returned Ready with
+  no Findings for the
   corrected complete patch; exact review identity above. Completion Approval
-  is explicitly recorded above; focused completion commit is pending.
+  and successful completion commit are explicitly recorded above.
 - Evidence: `/tmp/ajs-removal-s2/correction/evidence.json`, reusing the original
   exact S2 baseline. This record is gate metadata, separately validated from
   the immutable corrected substantive snapshot.

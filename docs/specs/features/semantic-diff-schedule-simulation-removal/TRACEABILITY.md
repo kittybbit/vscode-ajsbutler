@@ -26,7 +26,8 @@ exact amendment evidence: `/tmp/ajs-removal-s2-registry-replan/evidence.json`.
 S1 implementation maps R3, R7, R8 and R9 to the calendar deletion inventory,
 ordinary Explorer source/context integration and retained strict-action tests.
 Validation artifacts: `/tmp/ajs-removal-s1/evidence.json`. S2 requirements
-are implemented below and await independent review.
+are implemented below; both independent reviews returned Ready and both
+slices are committed as recorded in TASKS.md.
 
 S2 residual amendment maps R3/R4/R8/R9 to removal of the dead schedule leaf rank
 and README period/prediction/calendar promises. Retained Explorer ordering and
@@ -42,12 +43,14 @@ leaf branches. Final desktop 1032 tests, web smoke, minimum VS Code 1.75.0,
 production build, zero-exception architecture suites and changed-doc checks pass.
 Full baseline/final quality observations have no new findings or smells; the
 aggregate passes. Exact paths, inventories, identities and raw validation records:
-`/tmp/ajs-removal-s2/evidence.json`. Independent S2 review is pending.
-
+`/tmp/ajs-removal-s2/evidence.json`. Final corrected validation and Ready
+reviews are linked below; S2 is committed.
 
 The S2 review Correction Loop closes the R8 obsolete source-binding chain and
 R3/R4 prediction-only changed-time label findings in four existing approved
 production files. Active workflow source/Git rollback, release, Registry/Flow,
 Explorer and localization boundaries pass in corrected desktop/web coverage.
 Complete corrected patch and exact reusable facts:
-`/tmp/ajs-removal-s2/correction/evidence.json`. Fresh independent review is pending.
+`/tmp/ajs-removal-s2/correction/evidence.json`. Both independent re-reviews
+returned Ready with no Findings. S2 received Completion Approval and was committed
+as `6f074003b41f6022aaf7c34fdb5adb0e21ee9ab6` on 2026-10-14.
