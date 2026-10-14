@@ -1,30 +1,16 @@
 # Create Repository-Native SDD Documents
 
-Main: route intake to `feature-author`, then route the returned intake to
-`planner` in explicit Planning Mode. Each role returns to Main before the next
-delegation. Use `.codex/agents/*.toml` directly; no lifecycle Skill invocation.
-Create concise, reviewable SDD documents for this goal.
-
 Feature: {{Feature name}}
 Goal: {{Feature goal}}
 Source use case: {{Use-case path, if any}}
+Selected feature: `docs/specs/features/{{feature-slug}}/`
 
-Use the roadmap, relevant use case, and templates in this folder. Create the
-feature under `docs/specs/features/{{feature-slug}}/`.
+Required result: concise, reviewable requirements, acceptance, compatibility,
+boundaries, material decisions and a current slice plan for this goal.
+Document ownership and lifecycle gates belong to
+[SDD policy](../../README.md#document-roles); use the templates in this folder.
+Main routes formal intake and planning under repository routing; role-specific
+inputs and results belong to `.codex/agents/*.toml`.
 
-- Put purpose, requirements, acceptance, compatibility, boundaries, and
-  unresolved decisions in `SPECS.md`.
-- Put the current plan, slice status, approval state, validation, risks, and
-  readiness in `TASKS.md`.
-- Add `ADR.md` only for a material decision and `TRACEABILITY.md` only when a
-  requirement-to-slice validation map is useful.
-- Update a use case only when the durable behavior contract changes; use its
-  existing template. Use Gherkin only when it clarifies observable behavior.
-- Apply DDD and Clean Architecture, preserve `package.json`
-  `engines.vscode` compatibility when relevant, and prefer evolutionary
-  changes.
-- Follow the SDD roles and approval gates in
-  [`docs/specs/README.md`](../../README.md).
-
-Return the policy handoff record with created or changed paths, key decisions,
-discovery/validation references, and unresolved questions.
+Return the [standard handoff](../../README.md#handoff-record) with created or
+changed paths, decision/evidence references and unresolved questions.

@@ -7,7 +7,9 @@ and reuse belong to the [Evidence Contract](evidence.md#evidence-contract).
 
 ## Risk-Based Validation And Review
 
-Checks cover the changed surface and its material risks. Intake and
+Purpose: demonstrate that the actual product and analysis impact is covered,
+without unrelated full-product checks or duplicate evaluation. Tier selection
+depends on impact, not filenames alone. Checks cover material risks. Intake and
 planning need discovery facts and validation of their documentation changes;
 they do not require implementation baseline/final scans for proposed code.
 
@@ -105,22 +107,21 @@ approved boundary and are not incidental corrections.
 
 - **SDD coordination/specification docs only:** for feature intake, plans,
   replans, `SPECS.md`, `TASKS.md`, `TRACEABILITY.md`, and their templates, run
-  Markdown lint covering every changed Markdown path, validate local links
+  Markdown lint covering every changed Markdown path, including paths outside
+  package-script defaults; validate local links
   and document structure, and run `rtk git diff --check`. Inspect scope,
   traceability, state transitions, and approval provenance as applicable.
-  `rtk pnpm run lint:md` covers feature/use-case Markdown; pass other changed
-  paths explicitly to markdownlint-cli2. Full-repository qlty baseline/final
-  scans and the aggregate are not required for this surface.
+  Full-repository qlty baseline/final scans and the aggregate are not required
+  for this surface.
 - **SDD policy, agent instructions and PR operating documents only:** lint
   every changed Markdown path; parse changed TOML/configuration syntax; validate
   relative links, anchors and document structure; inspect Role Authority,
   routing, lifecycle, approval, stop conditions, Correction Loop and Stack
   Merge through representative static scenarios; run `rtk git diff --check`.
-  For stack rules, cover order/layer diffs, reviews, protection, CI, merge and
-  closure, checking actual repository settings when accessible. Unknown or
-  inaccessible required settings block stack readiness, not documentation
-  validation of an explicit stop rule. Full product-repository qlty
-  baseline/final comparisons and aggregate are not required when product code,
+  Stack rules need consistent slice/review boundaries, human merge scope,
+  GitHub gates and pending/partial/completed results. Unexercised native
+  operations alone require no additional operational validation. Full product
+  qlty baseline/final comparisons and aggregate are not required when product code,
   analyzed inputs, qlty configuration, dependencies and product build/test
   execution conditions are unaffected. No local product build is required.
 - **CI/analysis configuration, commands, coverage or dependencies:** validate
@@ -136,8 +137,10 @@ approved boundary and are not incidental corrections.
   or configuration:** add the relevant desktop or web tests and build
   evidence.
 
-Combine requirements for mixed surfaces. Record omitted checks with the changed
-surface and a short non-applicability reason; unrun checks are not Pass. Apply
+Combine requirements for mixed surfaces. Each check is Pass only with valid
+successful evidence, Not Applicable only with a changed-impact reason, Missing
+when required evidence is unavailable, or Failed when it failed. Missing/Failed
+required checks block readiness; neither is Not Applicable. Apply
 this selection before validation without an extra review or completed cost
 measurement as a prerequisite. Ordinary independent reviews and human gates
 remain required. GitHub Required Checks, code scanning and branch rules are
@@ -209,17 +212,14 @@ semantic concern; record the reason and reuse the same valid evidence. Minor
 formatting or deterministic Findings alone do not require another reviewer.
 Independent re-review of the complete corrected final patch remains mandatory.
 For native stacks, review the layer diff using the exact predecessor base and
-layer head, preserving lower-layer review records. After cascading rebase,
-inspect changed diff identities and GitHub review validity; repeat semantic
-review only for changed layers or a specific integration concern. Apply
-[evidence freshness](evidence.md#freshness-and-invalidation) to checks; require
-current-head GitHub CI for every layer under that contract. A local content
-match never substitutes a previous SHA's CI for current-head checks; base or
-configuration changes also invalidate the affected local comparisons.
-GitHub's native rebase may retain approvals when the layer diff is unchanged;
-actual rules and review status determine validity. Feature Exit is an aggregate
-review of current-head global gates (including Qlty Cloud) and missing/stale
-cross-slice coverage, not another per-slice review. A concrete integration
+layer head, preserving lower-layer review records. Changed semantic layer diffs
+or concrete integration concerns need affected independent review. Unchanged
+layers retain valid review under actual GitHub rules/status. Check identity
+and CI validity belong to
+[evidence freshness](evidence.md#freshness-and-invalidation).
+Feature Exit is an aggregate review of current-head global gates (including
+Qlty Cloud) and missing/stale cross-slice coverage, not another per-slice
+review. A concrete integration
 concern may require a targeted check with its reason recorded. New durable-doc
 changes need their own changed-surface validation. Exit output and closure
 patch requirements belong to the [core policy](README.md#feature-exit-review-output).

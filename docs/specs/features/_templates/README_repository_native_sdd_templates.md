@@ -15,15 +15,6 @@ Keep repository-level behavior contracts in
 The SDD policy, role ownership, approval gates, and commit procedure are owned
 by [`docs/specs/README.md`](../../README.md).
 
-## Use
-
-1. Start from a roadmap item or concrete feature goal; keep one feature
-   selected for the work.
-2. Update a use case only when its durable behavior contract changes.
-3. Create only the feature documents needed to make its requirements and
-   current implementation plan reviewable.
-4. At Feature Exit, propagate reusable knowledge and close the selected
-   feature only under the SDD policy.
-
-Keep feature documents concise and decision-focused. Do not copy lifecycle
-policy into them.
+Templates describe reviewable outcomes, not a second lifecycle procedure.
+Keep policy and role rules with their owners; only feature-specific scope,
+approval and evidence references belong in generated feature documents.

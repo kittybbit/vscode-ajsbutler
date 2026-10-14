@@ -1,7 +1,8 @@
 # SDD Evidence Policy
 
-This file owns evidence production, consumption, identity, freshness, and
-reuse. Lifecycle/approval gates belong to the
+Purpose: retain authentic, traceable evidence once and reuse it while its
+inputs and coverage remain valid. This file owns evidence production,
+consumption, identity, freshness and reuse. Lifecycle/approval gates belong to the
 [core SDD contract](README.md#lifecycle-and-approval-gates); required check
 coverage and qlty format belong to [validation policy](validation.md).
 
@@ -47,7 +48,8 @@ Each validation record identifies:
   with rename detection, untracked paths, and out-of-scope or ambiguous paths.
 - Inputs and coverage for each check, command/arguments, tool versions,
   configuration/dependency hashes, required command set, exit status,
-  passed/failed/unknown state, and raw-output reference. Record the architecture
+  Pass/Not Applicable/Missing/Failed state under validation policy, and
+  raw-output reference. Record the architecture
   dependency test separately from semantic architecture judgments.
 - When the validation tier requires qlty: all identities and artifacts required
   by the [Qlty Quality Contract](validation.md#quality-contract), recorded via
@@ -103,9 +105,8 @@ match completely. A changed SHA alone does not invalidate such local results;
 changed base identity invalidates base-dependent results, including full qlty
 baseline/final comparisons. Required GitHub checks must belong to the current
 head (and required merge-group revision when queued); old-SHA CI is never a pass
-for the new head. Review retention follows actual GitHub rules/status and the
-Independent Review contract; changed semantic layer diffs or concrete integration
-risks require affected independent review, not automatic review of every layer.
+for the new head. Semantic review validity belongs to
+[Independent Review](validation.md#independent-review).
 Feature Exit reuses valid slice records and preserves current-head global gates;
 required integration coverage belongs to validation policy.
 
@@ -131,30 +132,15 @@ producer and reviewer before committing. Staged diff checks remain mandatory.
 
 ### Evidence Reuse Observations
 
-Routine role dispatches, tests/builds, Git inspections, human gates, and commits
-do not need execution counters. Record only unexpected reruns, evidence
-regenerations, and extra reviews, with the reason, affected identity/coverage,
-and result, in the linked evidence artifact. Distinguish a justified refresh
-from duplicate work on matching inputs. Use `none` only when observed and
-`unknown` when unavailable; do not reconstruct historical counts.
+Purpose: expose unnecessary dispatch, context and validation cost without a
+measurement workflow. Existing logs/handoffs may substantiate cost comparisons;
+use comparable scope, risk and configuration and distinguish measured effects
+from design counts. Unavailable facts are `unknown`, never invented reductions.
+No collector or measurement agent is permitted; measurement completion is not
+an implementation or validation-tier prerequisite.
 
-Keep a compact exception reference in `TASKS.md` only when it affects the next
-decision. Feature Exit consumes existing observations without a counting or
-collection pass. Existing counter records may be retained as evidence without
-continuing routine counts. These observations never replace required checks,
-independent review, or approval.
-
-For a requested cost evaluation, use available execution logs and handoffs in
-that same artifact, without a measurement agent or collector. Compare matched
-slice risk, scope and configuration for: a small lint correction, an
-implementation/fixture contract mismatch, a high-risk parser/shared-contract
-slice, and lower-PR correction with upper rebase through Feature Exit. Record
-Main plus child input/output/reasoning tokens and available cache facts;
-dispatches by role/reason; policy/artifact/handoff/log context volume; duplicate
-checks on identical content/tool/configuration/coverage; full qlty baseline,
-final and aggregate runs/reasons; independent/repeated/extra reviews; and
-missed Findings, unauthorized changes, mistaken replanning and CI failures.
-Use `unknown` for unavailable measurements or unobserved outcomes. Distinguish
-statically removed dispatch requirements from measured executions; never invent
-reduction percentages or compare unlike cases. Measurement completion does not
-block changed-surface tier selection or mandatory gates.
+Record unexpected reruns, evidence refreshes and extra reviews with the affected
+identity/coverage, reason and result in the existing artifact. Main and all
+child work count toward any reported cost. Routine operations require no new
+counters or collection pass. Feature Exit consumes existing observations;
+measurement never replaces checks, independent review or approval.

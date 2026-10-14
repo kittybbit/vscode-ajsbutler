@@ -18,14 +18,10 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
 ## Native Stack References
 
-- Trunk / method: `main` / {{allowed method; squash for linear-history rules}}
-- Environment / gate evidence: {{native availability, CLI/UI, permissions,
-  trunk rules, reviews/checks/CODEOWNERS/scanning/queue artifact reference}}
-- Top integration head: {{branch and exact identity; complete feature}}
-- Closure / merge evidence: {{external artifact and top PR; final reviewed
-  patch, propagation/removal, closure commit, Human Merge Approval, one official
-  Stack Merge request, queue grouping limitations and each PR's actual merge
-  result/commit identity/current-head checks; pending is not CLOSED}}
+- Feature PRs / target: {{ordered slice PR references and target branch}}
+- Final feature identity: {{complete head and closure patch reference}}
+- Closure / merge evidence: {{retained approval/review/validation references,
+  closure commit and each PR's actual merge result/commit identity}}
 
 Apply [native stacks](../../README.md#github-standard-stacked-pull-requests).
 Keep these as references in the existing plan, not a separate stack state.
@@ -49,7 +45,7 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Acceptance: {{observable or reviewable result}}
 - Dependencies / risks / stop conditions: {{only material items}}
 - Stack layer: {{order, PR URL, head branch/identity, predecessor base
-  branch/identity; first base is main}}
+  branch/identity}}
 - Validation: {{required checks, results, and evidence link}}
 - Production readiness: {{relevant failure, JP1/AJS, input-size,
   desktop/web/VS Code, and documentation impact}}
@@ -57,7 +53,8 @@ Apply [Human Approval](../../README.md#human-approval) and the
 
 #### Validation index
 
-- Identity / result: {{validated content reference; pass, fail, or unknown}}
+- Identity / result: {{validated content reference; Pass, Not Applicable with
+  reason, Missing, or Failed}}
 - Coverage: {{changed surfaces, required checks and coverage; omitted checks
   with non-applicability reasons, never reported as Pass}}
 - Evidence artifact: {{retained manifest, mechanical detail, and raw outputs}}
