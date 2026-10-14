@@ -2,9 +2,10 @@
 
 ## Agent Brief
 
-- Purpose: {{outcome}}
+- Purpose: {{intended observable result and slice acceptance reference}}
 - Active or approved slice: {{slice and lifecycle state}}
-- Read first: `SPECS.md` and this file; add only needed supporting docs.
+- Decision context: {{relevant SPECS/TASKS sections for the approved scope,
+  behavior contract and reusable evidence; add supporting sections only as needed}}
 - Validate: use the active slice's checks below.
 - Constraints / next decision: {{scope boundary and next gate}}
 
@@ -18,12 +19,10 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
 ## Native Stack References
 
-- Trunk / method: `main` / {{allowed method; squash for linear-history rules}}
-- Environment / gate evidence: {{native availability, CLI/UI, permissions,
-  trunk rules, reviews/checks/CODEOWNERS/scanning/queue artifact reference}}
-- Top integration head: {{branch and exact identity; complete feature}}
-- Closure / merge evidence: {{external artifact and top PR; final reviewed
-  patch, propagation/removal, closure commit, Human Merge Approval and result}}
+- Feature PRs / target: {{ordered slice PR references and target branch}}
+- Final feature identity: {{complete head and closure patch reference}}
+- Closure / merge evidence: {{retained approval/review/validation references,
+  closure commit and each PR's actual merge result/commit identity}}
 
 Apply [native stacks](../../README.md#github-standard-stacked-pull-requests).
 Keep these as references in the existing plan, not a separate stack state.
@@ -47,7 +46,7 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Acceptance: {{observable or reviewable result}}
 - Dependencies / risks / stop conditions: {{only material items}}
 - Stack layer: {{order, PR URL, head branch/identity, predecessor base
-  branch/identity; first base is main}}
+  branch/identity}}
 - Validation: {{required checks, results, and evidence link}}
 - Production readiness: {{relevant failure, JP1/AJS, input-size,
   desktop/web/VS Code, and documentation impact}}
@@ -55,10 +54,13 @@ Apply [Human Approval](../../README.md#human-approval) and the
 
 #### Validation index
 
-- Identity / result: {{validated content reference; pass, fail, or unknown}}
-- Coverage: {{required checks and covered surfaces}}
+- Identity / result: {{validated content reference; Pass, Not Applicable with
+  reason, Missing, or Failed}}
+- Coverage: {{changed surfaces, required checks and coverage; omitted checks
+  with non-applicability reasons, never reported as Pass}}
 - Evidence artifact: {{retained manifest, mechanical detail, and raw outputs}}
-- Review / approval / commit: {{exact patch and gate evidence references}}
+- Review / approval / commit: {{exact patch and gate evidence references;
+  sole commit executor under the core policy}}
 - Missing facts / refresh or exception: {{decision-relevant reason/reference;
   omit when absent}}
 

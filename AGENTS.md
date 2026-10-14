@@ -94,7 +94,8 @@ document roles and the loading index live in
 [`evidence.md`](docs/specs/evidence.md). Role
 definitions in `.codex/agents/*.toml` own authority, procedure, allowed input,
 forbidden actions, model/effort, output, and stop conditions. SDD lifecycle
-operations use explicit role delegation; they have no discoverable Skills or
+semantic operations use explicit role delegation; mechanical commit gates
+belong to Main under the core policy. They have no discoverable Skills or
 Skill invocation adapters. `.agent.md` and `.github/copilot-instructions.md`
 are entry points.
 
@@ -107,7 +108,8 @@ criteria permit. Main owns feature selection, coordination, approval evidence, s
 decisions, integration, final validation, and user communication. It may
 inspect enough state to classify work, request Human Approval, and route
 results. Users may name a role for a safe formal operation; safety, approval
-gates, and role ownership take precedence. Main must not perform a delegated
+gates, and role ownership take precedence. Main directly executes mechanical
+commit gates under the core policy; it must not perform a delegated semantic
 lifecycle procedure, impersonate or internally assume a role, or edit its
 role-owned artifacts. Each child returns the policy's handoff record to Main
 and must not invoke or spawn another role. Main forwards that record
@@ -120,17 +122,17 @@ active workflow requires its next stage; an SDD topic alone is not a trigger.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Operation                                                        | Delegate                                                                                                                         |
+| Operation                                                        | Owner                                                                                                                            |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Feature intake                                                   | `feature-author`                                                                                                                 |
 | Planning or replanning                                           | `planner` in the corresponding mode                                                                                              |
 | Plan review                                                      | Read-only `plan-reviewer`; Main routes Findings to `planner`                                                                     |
-| Approved plan or replan commit                                   | `approval-committer`                                                                                                             |
+| Approved plan or replan commit                                   | Main; `approval-committer` only for an explicitly delegated gate                                                                 |
 | One approved implementation slice                                | `implementer`                                                                                                                    |
 | Implementation review                                            | Read-only `implementation-reviewer`; Main routes Findings to the producer (`implementer`, or `feature-closer` for closure edits) |
-| Completion commit after `Ready` and explicit Completion Approval | `approval-committer`                                                                                                             |
+| Completion commit after `Ready` and explicit Completion Approval | Main; `approval-committer` only for an explicitly delegated gate                                                                 |
 | Feature Exit after all slices are committed                      | `feature-closer`                                                                                                                 |
-| Closure commit after `Close` and explicit Closure Approval       | `approval-committer`                                                                                                             |
+| Closure commit after `Close` and explicit Closure Approval       | Main; `approval-committer` only for an explicitly delegated gate                                                                 |
 
 <!-- markdownlint-enable MD013 MD060 -->
 

@@ -1,7 +1,8 @@
 # SDD Evidence Policy
 
-This file owns evidence production, consumption, identity, freshness, and
-reuse. Lifecycle/approval gates belong to the
+Purpose: retain authentic, traceable evidence once and reuse it while its
+inputs and coverage remain valid. This file owns evidence production,
+consumption, identity, freshness and reuse. Lifecycle/approval gates belong to the
 [core SDD contract](README.md#lifecycle-and-approval-gates); required check
 coverage and qlty format belong to [validation policy](validation.md).
 
@@ -47,7 +48,8 @@ Each validation record identifies:
   with rename detection, untracked paths, and out-of-scope or ambiguous paths.
 - Inputs and coverage for each check, command/arguments, tool versions,
   configuration/dependency hashes, required command set, exit status,
-  passed/failed/unknown state, and raw-output reference. Record the architecture
+  Pass/Not Applicable/Missing/Failed state under validation policy, and
+  raw-output reference. Record the architecture
   dependency test separately from semantic architecture judgments.
 - When the validation tier requires qlty: all identities and artifacts required
   by the [Qlty Quality Contract](validation.md#quality-contract), recorded via
@@ -83,7 +85,8 @@ Evidence is stale for the affected facts only when one of these occurs:
 
 1. Inspected content or a relevant dependency/configuration input changes.
 2. The approved path set or required validation commands/coverage change.
-3. The comparison base changes.
+3. A check's comparison-base content or revision input changes; only results
+   depending on that base are invalidated.
 4. A relevant tool version or qlty configuration/selection changes.
 5. A check modifies its inspected snapshot after observations were recorded.
 
@@ -93,12 +96,19 @@ do not invalidate evidence. Linking a validated content identity to its new
 commit does not require another run. Current-head CI/Cloud gates remain bound
 to their exact commit; a prior commit's status is not a current-head pass.
 
-Lower-layer correction and cascading rebase use the same invalidation conditions:
-a SHA change alone does not invalidate content-bound local results, but changed
-comparison-base identity invalidates base-dependent results. Review retention follows
-GitHub's actual diff/rules state and validation's independent-review contract.
-Feature Exit reuses valid slice records; required integration coverage belongs
-to validation policy.
+Keep Git commit/PR head SHA and GitHub CI status distinct from a local check's
+content identity. Lower-layer correction, cascading rebase and predecessor-base
+changes require inspecting the layer diff, comparison base, inspected content,
+configuration and dependency inputs. Reuse local deterministic results only
+when their content identity, tool, configuration, dependency inputs and coverage
+match completely. A changed SHA alone does not invalidate such local results;
+changed base identity invalidates base-dependent results, including full qlty
+baseline/final comparisons. Required GitHub checks must belong to the current
+head (and required merge-group revision when queued); old-SHA CI is never a pass
+for the new head. Semantic review validity belongs to
+[Independent Review](validation.md#independent-review).
+Feature Exit reuses valid slice records and preserves current-head global gates;
+required integration coverage belongs to validation policy.
 
 Treat approval/status/evidence/commit annotations as a separate metadata patch.
 Record its exact diff and run targeted non-mutating documentation validation
@@ -122,15 +132,15 @@ producer and reviewer before committing. Staged diff checks remain mandatory.
 
 ### Evidence Reuse Observations
 
-Routine role dispatches, tests/builds, Git inspections, human gates, and commits
-do not need execution counters. Record only unexpected reruns, evidence
-regenerations, and extra reviews, with the reason, affected identity/coverage,
-and result, in the linked evidence artifact. Distinguish a justified refresh
-from duplicate work on matching inputs. Use `none` only when observed and
-`unknown` when unavailable; do not reconstruct historical counts.
+Purpose: expose unnecessary dispatch, context and validation cost without a
+measurement workflow. Existing logs/handoffs may substantiate cost comparisons;
+use comparable scope, risk and configuration and distinguish measured effects
+from design counts. Unavailable facts are `unknown`, never invented reductions.
+No collector or measurement agent is permitted; measurement completion is not
+an implementation or validation-tier prerequisite.
 
-Keep a compact exception reference in `TASKS.md` only when it affects the next
-decision. Feature Exit consumes existing observations without a counting or
-collection pass. Existing counter records may be retained as evidence without
-continuing routine counts. These observations never replace required checks,
-independent review, or approval.
+Record unexpected reruns, evidence refreshes and extra reviews with the affected
+identity/coverage, reason and result in the existing artifact. Main and all
+child work count toward any reported cost. Routine operations require no new
+counters or collection pass. Feature Exit consumes existing observations;
+measurement never replaces checks, independent review or approval.
