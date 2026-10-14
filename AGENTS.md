@@ -110,25 +110,27 @@ results. Users may name a role for a safe formal operation; safety, approval
 gates, and role ownership take precedence. Main must not perform a delegated
 lifecycle procedure, impersonate or internally assume a role, or edit its
 role-owned artifacts. Each child returns the policy's handoff record to Main
-and must not invoke or spawn the next lifecycle role. Main forwards that record
+and must not invoke or spawn another role. Main forwards that record
 and its evidence references without recollecting unchanged facts. Main checks
 the state and human gate, selects the next role, and waits for its result before
-delegating again. Delegate when the user requests a formal operation or an
+delegating again. Main coordinates stack publication and merge under the
+core policy's native stack contract. Delegate when the user requests
+a formal operation or an
 active workflow requires its next stage; an SDD topic alone is not a trigger.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Operation                                                        | Delegate                                                                   |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Feature intake                                                   | `feature-author`                                                           |
-| Planning or replanning                                           | `planner` in the corresponding mode                                        |
-| Plan review                                                      | Read-only `plan-reviewer`; Main routes Findings to `planner`               |
-| Approved plan or replan commit                                   | `approval-committer`                                                       |
-| One approved implementation slice                                | `implementer`                                                              |
-| Implementation review                                            | Read-only `implementation-reviewer`; Main routes Findings to `implementer` |
-| Completion commit after `Ready` and explicit Completion Approval | `approval-committer`                                                       |
-| Feature Exit after all slices are committed                      | `feature-closer`                                                           |
-| Closure commit after `Close` and explicit Closure Approval       | `approval-committer`                                                       |
+| Operation                                                        | Delegate                                                                                                                         |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Feature intake                                                   | `feature-author`                                                                                                                 |
+| Planning or replanning                                           | `planner` in the corresponding mode                                                                                              |
+| Plan review                                                      | Read-only `plan-reviewer`; Main routes Findings to `planner`                                                                     |
+| Approved plan or replan commit                                   | `approval-committer`                                                                                                             |
+| One approved implementation slice                                | `implementer`                                                                                                                    |
+| Implementation review                                            | Read-only `implementation-reviewer`; Main routes Findings to the producer (`implementer`, or `feature-closer` for closure edits) |
+| Completion commit after `Ready` and explicit Completion Approval | `approval-committer`                                                                                                             |
+| Feature Exit after all slices are committed                      | `feature-closer`                                                                                                                 |
+| Closure commit after `Close` and explicit Closure Approval       | `approval-committer`                                                                                                             |
 
 <!-- markdownlint-enable MD013 MD060 -->
 

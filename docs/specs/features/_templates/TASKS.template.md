@@ -16,6 +16,18 @@
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
+## Native Stack References
+
+- Trunk / method: `main` / {{allowed method; squash for linear-history rules}}
+- Environment / gate evidence: {{native availability, CLI/UI, permissions,
+  trunk rules, reviews/checks/CODEOWNERS/scanning/queue artifact reference}}
+- Top integration head: {{branch and exact identity; complete feature}}
+- Closure / merge evidence: {{external artifact and top PR; final reviewed
+  patch, propagation/removal, closure commit, Human Merge Approval and result}}
+
+Apply [native stacks](../../README.md#github-standard-stacked-pull-requests).
+Keep these as references in the existing plan, not a separate stack state.
+
 ## Human Approval
 
 - Status: Pending | Approved
@@ -34,6 +46,8 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Scope and value: {{cohesive change and user/domain value}}
 - Acceptance: {{observable or reviewable result}}
 - Dependencies / risks / stop conditions: {{only material items}}
+- Stack layer: {{order, PR URL, head branch/identity, predecessor base
+  branch/identity; first base is main}}
 - Validation: {{required checks, results, and evidence link}}
 - Production readiness: {{relevant failure, JP1/AJS, input-size,
   desktop/web/VS Code, and documentation impact}}
@@ -45,8 +59,8 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Coverage: {{required checks and covered surfaces}}
 - Evidence artifact: {{retained manifest, mechanical detail, and raw outputs}}
 - Review / approval / commit: {{exact patch and gate evidence references}}
-- Missing facts / refresh or exception: {{decision-relevant reason/reference,
-  or none}}
+- Missing facts / refresh or exception: {{decision-relevant reason/reference;
+  omit when absent}}
 
 Apply the [Evidence Contract](../../evidence.md#evidence-contract) and
 [Correction Loop](../../validation.md#correction-loop-for-deterministic-failures).

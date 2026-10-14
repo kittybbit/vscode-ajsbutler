@@ -1,10 +1,9 @@
 # SDD Evidence Policy
 
 This file owns evidence production, consumption, identity, freshness, and
-reuse. Use the [core SDD contract](README.md#lifecycle-and-approval-gates) before
-the operation. Load identity and freshness before producing, refreshing, or
-accepting evidence; use [validation policy](validation.md) for required checks
-and [qlty format](validation.md#qlty-evidence-format) when that tier applies.
+reuse. Lifecycle/approval gates belong to the
+[core SDD contract](README.md#lifecycle-and-approval-gates); required check
+coverage and qlty format belong to [validation policy](validation.md).
 
 ## Evidence Contract
 
@@ -22,7 +21,10 @@ them through review, approval, commit, and Feature Exit. Carry the compact
 acceptance, validation, review, approval, and commit references for all
 completed slices until closure; remove superseded narrative, not necessary
 gate proof. Do not build a collector service, custom SARIF parser, or
-comparator.
+comparator. Agents receive only identity, verdict, failure reason, affected
+paths/diffs, actionable Findings and accessible artifact references. Keep full
+SARIF, logs and manifests as artifacts; consumers open only necessary evidence
+for a missing fact or concrete concern, without injecting entire artifacts.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -54,6 +56,10 @@ Each validation record identifies:
   parser/configuration surfaces; Node-import scan and unresolved cases; changed
   layers/exports/imports and abstraction candidates; traceability mapping.
   These are mechanical signals, not Solution Shape or approval verdicts.
+- For native stacks: PR URL/order, trunk, predecessor base/head commit and
+  content identities, reviewed layer diff, top integration head, closure commit,
+  current-head CI/review/rules references and actual merge result identities.
+  Keep these facts in existing gate/evidence records, not a second stack state.
 - Missing/ambiguous facts and execution exceptions. Human approval provenance
   and review judgments remain separate gate records.
 
@@ -86,6 +92,13 @@ new reviewers, returning to Main, human approval, and entering a commit gate
 do not invalidate evidence. Linking a validated content identity to its new
 commit does not require another run. Current-head CI/Cloud gates remain bound
 to their exact commit; a prior commit's status is not a current-head pass.
+
+Lower-layer correction and cascading rebase use the same invalidation conditions:
+a SHA change alone does not invalidate content-bound local results, but changed
+comparison-base identity invalidates base-dependent results. Review retention follows
+GitHub's actual diff/rules state and validation's independent-review contract.
+Feature Exit reuses valid slice records; required integration coverage belongs
+to validation policy.
 
 Treat approval/status/evidence/commit annotations as a separate metadata patch.
 Record its exact diff and run targeted non-mutating documentation validation
