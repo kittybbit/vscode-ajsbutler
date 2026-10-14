@@ -1,16 +1,13 @@
 # SDD Validation Policy
 
-This file owns validation, Correction Loop, and qlty details. Use the
-[core SDD contract](README.md#lifecycle-and-approval-gates) before the operation
-and the [Evidence Contract](evidence.md#evidence-contract) when producing or
-consuming evidence. Load the sections needed for the changed surface; load
-qlty execution details only when the selected validation tier requires them.
+This file owns validation coverage, Correction Loop, independent review and
+qlty requirements. Approval/state gates belong to the
+[core SDD contract](README.md#lifecycle-and-approval-gates); evidence validity
+and reuse belong to the [Evidence Contract](evidence.md#evidence-contract).
 
 ## Risk-Based Validation And Review
 
-Choose checks for the changed surface, beginning with the nearest useful
-check. Reuse matching evidence under the Evidence Contract. Do not rerun
-unchanged checks only because the workflow or reviewer has changed. Intake and
+Checks cover the changed surface and its material risks. Intake and
 planning need discovery facts and validation of their documentation changes;
 they do not require implementation baseline/final scans for proposed code.
 
@@ -67,9 +64,12 @@ new decision, stop before editing and return a decision request to Main.
 Main routes a material decision delta for affected-scope Replanning,
 independent plan review, and new Human Approval.
 
-During correction, rerun the nearest affected check and relevant boundary
-tests; refresh only affected evidence and reuse matching baseline/check
-results under the Evidence Contract. After stabilization, satisfy the
+Correction continues with the active implementer, without a new role dispatch
+or Replanning for deterministic failure alone. Iteration covers the nearest
+affected check and relevant boundary tests under Evidence Contract freshness.
+Run full qlty/build/required desktop-web
+coverage after the final substantive patch stabilizes, not on each attempt.
+After stabilization, satisfy the
 approved final validation set, including required tests, qlty, architecture,
 and desktop/web checks, and record the final snapshot identity and evidence.
 
@@ -80,9 +80,7 @@ return through Main to `implementer` in `IMPLEMENTED` pending revision,
 followed by correction, affected validation, and independent re-review.
 `decision-required` Findings return to Main for the missing decision and
 Replanning when required. These classifications are not lifecycle states.
-Completion continues the original sequence: `Ready`, explicit Completion
-Approval, and a focused commit by `approval-committer`, followed by the
-existing Feature Exit gates.
+Completion remains subject to the core lifecycle gates.
 
 ### Test Organization and Repair
 
@@ -179,10 +177,26 @@ aggregate until stable.
 
 ### Independent Review
 
+An independent review verdict is Ready only when no actionable Finding remains.
+
 The plan review is the pre-approval scope gate. The independent
 `implementation-reviewer` makes the integrated review of scope, acceptance,
 quality, and production readiness after validation. Add a second independent
-review for the higher-risk surfaces above or when the first review finds a
-concern, reusing the same valid evidence. Feature Exit is the separate aggregate
-review defined in the [core policy](README.md#feature-exit-review-output),
-rather than another per-slice implementation review.
+review only for a relevant high-risk surface (parser, shared contracts, host,
+entry points, generated artifacts or material configuration) or a concrete
+semantic concern; record the reason and reuse the same valid evidence. Minor
+formatting or deterministic Findings alone do not require another reviewer.
+Independent re-review of the complete corrected final patch remains mandatory.
+For native stacks, review the layer diff using the exact predecessor base and
+layer head, preserving lower-layer review records. After cascading rebase,
+inspect changed diff identities and GitHub review validity; repeat semantic
+review only for changed layers or a specific integration concern. Apply
+[evidence freshness](evidence.md#freshness-and-invalidation) to checks; require
+current-head GitHub CI for every layer under that contract.
+GitHub's native rebase may retain approvals when the layer diff is unchanged;
+actual rules and review status determine validity. Feature Exit is an aggregate
+review of current-head global gates (including Qlty Cloud) and missing/stale
+cross-slice coverage, not another per-slice review. A concrete integration
+concern may require a targeted check with its reason recorded. New durable-doc
+changes need their own changed-surface validation. Exit output and closure
+patch requirements belong to the [core policy](README.md#feature-exit-review-output).
