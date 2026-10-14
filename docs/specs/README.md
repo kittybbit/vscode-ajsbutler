@@ -5,11 +5,12 @@ while preserving JP1/AJS behavior, desktop/web compatibility and
 [architecture](architecture.md). This file owns lifecycle and approval;
 validation, evidence and role contracts have the owners linked below.
 
-Model and host guidance comes from current official
-[OpenAI documentation](https://learn.chatgpt.com/guides/best-practices) and
-[GPT-6 family guidance](https://developers.openai.com/api/docs/guides/latest-model).
-This policy defines repository outcomes and safety boundaries, not a copy of
-external guidance or unverified model-specific rules.
+A feature must make its intended JP1/AJS behavior, acceptance, exact approved
+paths and material risks clear enough for independent readiness review.
+The active slice's Agent Brief identifies that outcome and the minimum scope,
+contract and evidence references needed for the next decision. Relevant checks
+must demonstrate acceptance on the reviewed patch; a completed edit or tool
+invocation alone does not establish readiness.
 
 ## Policy Loading And Index
 
@@ -98,11 +99,8 @@ no lifecycle Skills or Skill adapters.
 ### GitHub Standard Stacked Pull Requests
 
 Purpose: retain independently reviewable slices and integrate the complete
-feature through GitHub's native stacked pull requests. GitHub's current
-[stack contract](https://docs.github.com/en/pull-requests/reference/stacked-pull-requests)
-and [merge guidance](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests)
-own service operations; [troubleshooting](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-stacked-pull-requests)
-owns partial-failure handling.
+feature through GitHub's native stacked pull requests. GitHub's native behavior
+and active repository rules govern publication and merge operations.
 
 Each slice PR has an exact layer diff, acceptance, approved scope, independent
 review and evidence. The feature's final head contains every slice and its

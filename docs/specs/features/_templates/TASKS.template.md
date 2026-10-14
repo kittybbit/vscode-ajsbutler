@@ -2,9 +2,10 @@
 
 ## Agent Brief
 
-- Purpose: {{outcome}}
+- Purpose: {{intended observable result and slice acceptance reference}}
 - Active or approved slice: {{slice and lifecycle state}}
-- Read first: `SPECS.md` and this file; add only needed supporting docs.
+- Decision context: {{relevant SPECS/TASKS sections for the approved scope,
+  behavior contract and reusable evidence; add supporting sections only as needed}}
 - Validate: use the active slice's checks below.
 - Constraints / next decision: {{scope boundary and next gate}}
 
