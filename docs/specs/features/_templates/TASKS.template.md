@@ -23,7 +23,9 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   trunk rules, reviews/checks/CODEOWNERS/scanning/queue artifact reference}}
 - Top integration head: {{branch and exact identity; complete feature}}
 - Closure / merge evidence: {{external artifact and top PR; final reviewed
-  patch, propagation/removal, closure commit, Human Merge Approval and result}}
+  patch, propagation/removal, closure commit, Human Merge Approval, one official
+  Stack Merge request, queue grouping limitations and each PR's actual merge
+  result/commit identity/current-head checks; pending is not CLOSED}}
 
 Apply [native stacks](../../README.md#github-standard-stacked-pull-requests).
 Keep these as references in the existing plan, not a separate stack state.
@@ -56,9 +58,11 @@ Apply [Human Approval](../../README.md#human-approval) and the
 #### Validation index
 
 - Identity / result: {{validated content reference; pass, fail, or unknown}}
-- Coverage: {{required checks and covered surfaces}}
+- Coverage: {{changed surfaces, required checks and coverage; omitted checks
+  with non-applicability reasons, never reported as Pass}}
 - Evidence artifact: {{retained manifest, mechanical detail, and raw outputs}}
-- Review / approval / commit: {{exact patch and gate evidence references}}
+- Review / approval / commit: {{exact patch and gate evidence references;
+  sole commit executor under the core policy}}
 - Missing facts / refresh or exception: {{decision-relevant reason/reference;
   omit when absent}}
 

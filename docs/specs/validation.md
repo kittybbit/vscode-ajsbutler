@@ -67,7 +67,7 @@ independent plan review, and new Human Approval.
 Correction continues with the active implementer, without a new role dispatch
 or Replanning for deterministic failure alone. Iteration covers the nearest
 affected check and relevant boundary tests under Evidence Contract freshness.
-Run full qlty/build/required desktop-web
+Run applicable final qlty/build/required desktop-web
 coverage after the final substantive patch stabilizes, not on each attempt.
 After stabilization, satisfy the
 approved final validation set, including required tests, qlty, architecture,
@@ -111,20 +111,41 @@ approved boundary and are not incidental corrections.
   `rtk pnpm run lint:md` covers feature/use-case Markdown; pass other changed
   paths explicitly to markdownlint-cli2. Full-repository qlty baseline/final
   scans and the aggregate are not required for this surface.
-- **Repository-wide durable or configuration-sensitive docs:** policy,
-  architecture, agent routing/procedures, and documentation that affects check
-  commands or configuration retain non-mutating qlty check/smells comparisons
-  in exact disposable baseline/final snapshots and the formatting-capable
-  aggregate in the final snapshot only. Add targeted Markdown/link/structure
-  and diff checks. For mixed documentation changes, use this broader tier.
-  Docs-only work needs no product build; the repository `Verify` workflow is
-  not a required local documentation gate.
+- **SDD policy, agent instructions and PR operating documents only:** lint
+  every changed Markdown path; parse changed TOML/configuration syntax; validate
+  relative links, anchors and document structure; inspect Role Authority,
+  routing, lifecycle, approval, stop conditions, Correction Loop and Stack
+  Merge through representative static scenarios; run `rtk git diff --check`.
+  For stack rules, cover order/layer diffs, reviews, protection, CI, merge and
+  closure, checking actual repository settings when accessible. Unknown or
+  inaccessible required settings block stack readiness, not documentation
+  validation of an explicit stop rule. Full product-repository qlty
+  baseline/final comparisons and aggregate are not required when product code,
+  analyzed inputs, qlty configuration, dependencies and product build/test
+  execution conditions are unaffected. No local product build is required.
+- **CI/analysis configuration, commands, coverage or dependencies:** validate
+  the changed execution conditions and affected product checks. Record old/new
+  comparability, analyzed coverage and effects on existing findings; do not
+  weaken quality gates or omit affected inputs. Material changes to qlty inputs,
+  configuration or selection require its Quality Contract; a documentation-only
+  description cannot hide an execution-condition change.
 - **Isolated code:** run relevant tests and the same qlty observations and final
   aggregate; build when compilation, bundling, packaging, or final confidence
   requires it.
 - **Parser, shared contract, extension host, entry point, generated artifact,
   or configuration:** add the relevant desktop or web tests and build
   evidence.
+
+Combine requirements for mixed surfaces. Record omitted checks with the changed
+surface and a short non-applicability reason; unrun checks are not Pass. Apply
+this selection before validation without an extra review or completed cost
+measurement as a prerequisite. Ordinary independent reviews and human gates
+remain required. GitHub Required Checks, code scanning and branch rules are
+separate current-head gates: a local tier never authorizes bypassing them. The
+repository `Verify` workflow may run product checks for paths outside its
+docs-only allowlist; its classification does not determine local validation.
+Architecture or product-contract documents with material product impact require
+the affected product coverage, even when no code file changes.
 
 For code slices, qlty must pass under the [Quality Contract](#quality-contract).
 Treat identity or direction that cannot be mapped reliably as advisory;
@@ -192,7 +213,9 @@ layer head, preserving lower-layer review records. After cascading rebase,
 inspect changed diff identities and GitHub review validity; repeat semantic
 review only for changed layers or a specific integration concern. Apply
 [evidence freshness](evidence.md#freshness-and-invalidation) to checks; require
-current-head GitHub CI for every layer under that contract.
+current-head GitHub CI for every layer under that contract. A local content
+match never substitutes a previous SHA's CI for current-head checks; base or
+configuration changes also invalidate the affected local comparisons.
 GitHub's native rebase may retain approvals when the layer diff is unchanged;
 actual rules and review status determine validity. Feature Exit is an aggregate
 review of current-head global gates (including Qlty Cloud) and missing/stale

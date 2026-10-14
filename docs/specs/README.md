@@ -35,8 +35,8 @@ Role authority, required inputs, results and stop conditions are owned by
 common contracts rather than repeating their rules or reading sequences.
 
 Lifecycle roles cannot grant human approval, broaden delegated scope or resolve
-unapproved design decisions. Staging and commits are exclusive to
-`approval-committer`; its permitted operations follow the
+unapproved design decisions. Main owns mechanical commit gates by default;
+`approval-committer` executes only an explicitly delegated gate under the
 [Approval-Gated Commit Policy](#approval-gated-commit-policy).
 
 ### Product Context References
@@ -71,9 +71,9 @@ Replanning trigger; detailed correction rules belong to
 [validation policy](validation.md#correction-loop-for-deterministic-failures).
 
 Human Approval covers the reviewed plan and exact slice scope. After a plan or
-replan review returns `Ready` and Human Approval is explicit, `approval-committer`
-creates one focused planning commit. Only then may `implementer` work on one
-approved slice. Each completed slice receives an independent
+replan review returns `Ready` and Human Approval is explicit, Main
+creates one focused planning commit under the commit policy. Only then may
+`implementer` work on one approved slice. Each completed slice receives an independent
 `implementation-reviewer` review. Findings return through Main under the
 [Correction Loop](validation.md#correction-loop-for-deterministic-failures);
 a new decision as defined above returns through Main for replanning. After
@@ -110,7 +110,7 @@ extension. UI-based standard Git/PR operations are the fallback when the
 extension is unavailable and native stack support is confirmed. Do not add
 custom stack tooling/state, a feature integration branch, or a merge-only PR.
 Main owns branch/PR publication and stack coordination; publication is separate
-from the approval-committer's local commit authority.
+from the local commit gate.
 Native cascade pushes may use force-with-lease on the owned stack branches;
 this does not authorize arbitrary force-pushes or bypass the commit gates.
 
@@ -119,37 +119,34 @@ updated by native cascading rebase. Review validity follows
 [Independent Review](validation.md#independent-review); check/CI identity follows
 [evidence freshness](evidence.md#freshness-and-invalidation).
 
-GitHub evaluates each layer against the trunk's reviews, checks, CODEOWNERS
-and code scanning rules. Its trunk-filtered `pull_request` workflows cover
-native stack layers; do not add labels or custom stack CI detection. Auto-merge
-is unsupported. Use the official asynchronous stack merge API if an API is
-needed; never emulate a stack merge by looping the single-PR merge API.
+After Feature Exit and the closure commit, Main verifies the final top head,
+all slice approvals, independent reviews, applicable validation and current
+GitHub gates, then obtains explicit Human Merge Approval. PR approval and
+Closure Approval never authorize merge. Main alone requests one official Stack
+Merge on the top PR for all unmerged feature layers. Do not merge slices
+individually to `main`, loop single-PR merge APIs, enable unsupported auto-merge,
+or bypass protection rules. Use the official UI/CLI or asynchronous stack API
+and an allowed merge method compatible with trunk linear-history rules.
 
-After Feature Exit and closure commit, Main verifies the final top head and
-all layer gates and obtains explicit Human Merge Approval as defined below.
-PR approval and closure commit approval never authorize merge. Main alone may
-perform one merge operation on the top PR to land all unmerged layers
-atomically, bottom first. Never merge slice PRs individually to `main` in this
-workflow. Do not use bypass rules. A stack must have fully linear history
-between branches; choose a method allowed by repository settings and trunk
-rules. Default to squash where linear history is required: one squash commit
-per PR. Rebase replays each commit; merge commit preserves each PR's history
-with one merge commit per PR. Atomic integration means one operation, not one
-commit. Recheck these preview specifications in the actual environment.
+One Stack Merge request is the operation boundary, not a one-commit requirement
+or a guarantee that all results land indivisibly. With a merge queue, inspect
+actual settings and grouping: a stack may span consecutive groups. Do not claim
+single-group atomicity without evidence. Unknown/unavailable stack or queue
+requirements block merge readiness; do not invent custom fallback integration.
+API acceptance or enqueue is pending, never completion. After execution, Main
+verifies every layer's actual Merged result, resulting commit identities and
+required checks before recording `CLOSED`. On partial failure, retain actual
+landed results and block `CLOSED`; recheck remaining gates and obtain renewed
+Human Merge Approval for a retry's changed scope/identities. Preserve gate and
+result references in PRs or a retained artifact after feature-folder removal.
 
-With a merge queue, verify native stack enqueue/group behavior and that the
-whole feature remains one atomic unit before approving the operation. Current
-GitHub guidance keeps a stack together, allowing a group-size buffer and moving
-an oversized stack to the next group as a unit. An enqueue is not a completed
-merge. Main waits for actual results and verifies all layer PRs are Merged and
-records URLs, resulting commit identities and gate evidence before `CLOSED`.
-Do not substitute a custom PR-close operation. Preserve accessible gate/evidence
-references in the PRs or external retained artifact after feature-folder removal.
-
-Specifications: [requirements and merge methods](https://docs.github.com/en/pull-requests/reference/stacked-pull-requests),
-[stack creation](https://docs.github.com/en/pull-requests/tutorials/stack-code-changes-in-pull-requests),
-[layer review](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-stacked-pull-requests),
-and [atomic merge](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests).
+GitHub owns native rebasing, trunk-rule evaluation, CI triggering and merge
+mechanics; do not restate their internal algorithms here. Consult official
+[stack requirements](https://docs.github.com/en/pull-requests/reference/stacked-pull-requests),
+[creation](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-stacked-pull-requests),
+[review](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-stacked-pull-requests),
+[merge](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/merging-stacked-pull-requests)
+and [partial failure/queue troubleshooting](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-stacked-pull-requests).
 
 ### Lifecycle State Contract
 
@@ -161,7 +158,7 @@ verdicts, approvals, and commits are supporting gate evidence, not parallel
 plan or slice status vocabularies. The names below describe gate results, not
 permission inferred from a document field. Main advances a state only from the
 corresponding role result, actual human approval, successful commit, or verified
-GitHub atomic merge.
+GitHub merge results.
 Blocked work retains its last substantiated state and records the missing
 decision.
 
@@ -173,17 +170,17 @@ decision.
 | `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                       |
 | `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner           |
 | `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                         |
-| `PLAN_APPROVED`                                 | Plan commit: `approval-committer`             | `PLAN_COMMITTED`: planning commit on bottom stack branch succeeded     |
+| `PLAN_APPROVED`                                 | Plan commit: Main                             | `PLAN_COMMITTED`: planning commit on bottom stack branch succeeded     |
 | `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded       |
 | `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer                   |
 | `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved                   |
-| `SLICE_APPROVED`                                | Completion commit: `approval-committer`       | `SLICE_COMMITTED`: approved layer committed on its stack branch        |
+| `SLICE_APPROVED`                                | Completion commit: Main                       | `SLICE_COMMITTED`: approved layer committed on its stack branch        |
 | All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision                 |
 | `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                                    |
 | `CLOSE_READY` with a changed top-layer patch    | Independent review: `implementation-reviewer` | `CLOSE_READY`: final closure patch Ready; Findings return to closer    |
 | `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact reviewed propagation/removal paths approved    |
-| `CLOSE_APPROVED`                                | Closure commit: `approval-committer`          | `CLOSE_APPROVED`: final top-head closure commit recorded               |
-| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then atomic merge: Main | `CLOSED`: all layer PRs verified Merged; resulting identities recorded |
+| `CLOSE_APPROVED`                                | Closure commit: Main                          | `CLOSE_APPROVED`: final top-head closure commit recorded               |
+| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; resulting identities recorded |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -297,15 +294,35 @@ For repairs within an existing approval boundary, apply the
 
 ### Approval-Gated Commit Policy
 
-Only `approval-committer` may make plan, completion, and closure workflow
-commits. Before staging, it requires the matching review verdict, explicit
-approval, exact paths, reviewed patch identity, and a clean scope boundary.
-It must stop if any are missing or unrelated work is present; broad staging
-cannot hide it. Make one focused commit per gate. Do not amend, reset,
-force-push, publish, or alter
-approval evidence to manufacture authorization. Keep staged identity checks and
-operation records; Main records returned gate metadata without another dispatch.
-PR publication and merge authority follow the native stack contract.
+Main is the default executor of plan/replan, completion and closure commits.
+This authority applies only to plans explicitly Human Approved under this
+policy; it does not grant approval, adopt inherited plans automatically, or
+replace independent semantic review or Feature Exit. For an inherited plan
+whose approved authority names the committer, retain that executor until the
+human explicitly approves the authority change. Main may instead delegate one
+gate to `approval-committer`, recording the sole executor before staging; Main
+then consumes its handoff rather than repeating its deterministic inspection.
+No other lifecycle role stages or commits. Do not dispatch a committer for a
+normal gate that Main can safely execute.
+
+The sole executor checks the existing gate/handoff references for the matching
+independent verdict, exact Human Approval provenance, gate and approved paths,
+reviewed base/patch identity, and complete non-stale validation. Reuse matching
+evidence rather than reevaluating full logs or rerunning product checks. Missing,
+ambiguous, failed or stale facts stop the gate and return to the producer or
+reviewer through Main. Neither a status field nor a general instruction to
+continue supplies a missing gate-specific approval.
+
+Inspect the existing index and final diff before staging. Stage only exact
+approved paths; reject unrelated/unexpected staged files, another slice,
+broad globs or substantive changes after review. Check the staged path set and
+patch against the reviewed substantive identity plus separately validated gate
+metadata; run `rtk git diff --cached --check`. Any mismatch or failure stops the
+commit. Closure deletion is limited to the approved selected feature folder.
+Make one focused commit per gate and record its identity, executor, staged-check
+result and review/approval/evidence references. Do not amend, reset, discard,
+force-push or alter evidence to manufacture authorization. Publication and
+merge authority follow the native stack contract.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
@@ -437,8 +454,8 @@ decision. Keep status, approvals, active slice, and next decision near the top.
 ## Feature Definition Of Done
 
 A feature is complete when all implementation slices and approval gates have
-focused commits and its native stack has a verified atomic merge; requirements
-and acceptance are met; required validation and
+focused commits and its native stack has verified merge results for every
+layer; requirements and acceptance are met; required validation and
 traceability are complete; quality and production readiness are preserved or
 justified; README/CHANGELOG impact is evaluated and required updates are
 complete; reusable knowledge is propagated to durable documents; roadmap
@@ -471,7 +488,7 @@ top-layer patch requires independent implementation-reviewer Ready before
 Closure Approval; unchanged content retains its valid independent review.
 The external closure artifact binds propagation/removal paths to the exact
 projected final snapshot, including planned deletions, so review, validation
-and the resulting commit cover the same content. The committer alone applies
+and the resulting commit cover the same content. The sole commit executor applies
 the approved removal. Durable knowledge and gate proof must remain accessible
 after removal.
 The final closure head follows the native stack review/merge gates and Evidence

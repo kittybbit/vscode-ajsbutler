@@ -83,7 +83,8 @@ Evidence is stale for the affected facts only when one of these occurs:
 
 1. Inspected content or a relevant dependency/configuration input changes.
 2. The approved path set or required validation commands/coverage change.
-3. The comparison base changes.
+3. A check's comparison-base content or revision input changes; only results
+   depending on that base are invalidated.
 4. A relevant tool version or qlty configuration/selection changes.
 5. A check modifies its inspected snapshot after observations were recorded.
 
@@ -93,12 +94,20 @@ do not invalidate evidence. Linking a validated content identity to its new
 commit does not require another run. Current-head CI/Cloud gates remain bound
 to their exact commit; a prior commit's status is not a current-head pass.
 
-Lower-layer correction and cascading rebase use the same invalidation conditions:
-a SHA change alone does not invalidate content-bound local results, but changed
-comparison-base identity invalidates base-dependent results. Review retention follows
-GitHub's actual diff/rules state and validation's independent-review contract.
-Feature Exit reuses valid slice records; required integration coverage belongs
-to validation policy.
+Keep Git commit/PR head SHA and GitHub CI status distinct from a local check's
+content identity. Lower-layer correction, cascading rebase and predecessor-base
+changes require inspecting the layer diff, comparison base, inspected content,
+configuration and dependency inputs. Reuse local deterministic results only
+when their content identity, tool, configuration, dependency inputs and coverage
+match completely. A changed SHA alone does not invalidate such local results;
+changed base identity invalidates base-dependent results, including full qlty
+baseline/final comparisons. Required GitHub checks must belong to the current
+head (and required merge-group revision when queued); old-SHA CI is never a pass
+for the new head. Review retention follows actual GitHub rules/status and the
+Independent Review contract; changed semantic layer diffs or concrete integration
+risks require affected independent review, not automatic review of every layer.
+Feature Exit reuses valid slice records and preserves current-head global gates;
+required integration coverage belongs to validation policy.
 
 Treat approval/status/evidence/commit annotations as a separate metadata patch.
 Record its exact diff and run targeted non-mutating documentation validation
@@ -134,3 +143,18 @@ decision. Feature Exit consumes existing observations without a counting or
 collection pass. Existing counter records may be retained as evidence without
 continuing routine counts. These observations never replace required checks,
 independent review, or approval.
+
+For a requested cost evaluation, use available execution logs and handoffs in
+that same artifact, without a measurement agent or collector. Compare matched
+slice risk, scope and configuration for: a small lint correction, an
+implementation/fixture contract mismatch, a high-risk parser/shared-contract
+slice, and lower-PR correction with upper rebase through Feature Exit. Record
+Main plus child input/output/reasoning tokens and available cache facts;
+dispatches by role/reason; policy/artifact/handoff/log context volume; duplicate
+checks on identical content/tool/configuration/coverage; full qlty baseline,
+final and aggregate runs/reasons; independent/repeated/extra reviews; and
+missed Findings, unauthorized changes, mistaken replanning and CI failures.
+Use `unknown` for unavailable measurements or unobserved outcomes. Distinguish
+statically removed dispatch requirements from measured executions; never invent
+reduction percentages or compare unlike cases. Measurement completion does not
+block changed-surface tier selection or mandatory gates.

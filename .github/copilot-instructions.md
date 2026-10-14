@@ -13,7 +13,8 @@ Codex for interactive editing, SDD lifecycle work, and parser or webview
 changes. Follow the routing owner when scope or capabilities change.
 
 Main handles discussion, investigation, and informal analysis directly. Formal
-SDD operations must pass through Main to the designated role; Copilot CLI must
+SDD semantic operations must pass through Main to the designated role;
+mechanical commit gates belong to Main under the core policy. Copilot CLI must
 not impersonate a role or execute its lifecycle procedure. A child returns to
 Main and does not start another role.
 
