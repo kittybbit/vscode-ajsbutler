@@ -4,16 +4,16 @@
 
 - Purpose: R1–R6 in [SPECS](SPECS.md#requirements-and-acceptance); Domain owns
   confirmed fingerprint rename/move classification; Application projects it.
-- Active slice: S1, Human Approved; implementation awaits the planning commit.
+- Active slice: S1, implementation and both independent reviews complete (Ready).
 - Read: [selected contract](SPECS.md#value-and-boundaries), S1 below,
   [discovery](#discovery), validation and closure boundaries below.
-- Next gate: planning commit, then S1 implementation.
+- Next gate: Main completion commit, then Feature Exit.
 - Prohibitions: no other responsibility split, schedule restoration, consumer
   migration, generated/configuration changes, stage or commit by planner.
 
 ## Current state and gates
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Mode: Planning, from INTAKE; selected by Main on 2026-10-15.
 - Feature kind: transient branch, internal refactoring.
 - Current branch: `codex/semantic-diff-comparison-cohesion`.
@@ -23,8 +23,11 @@
   Reviewed plan identity:
   `e0aed7041c7b16d69bcd5270102993ddd343c04c0a6cc9b14d133a4086be8371`.
   Review record: `/private/tmp/semantic-diff-comparison-cohesion-plan-review-r1.json`.
-- Planning commit: none. No completion, closure or merge gate is claimed.
-- Next operation: Main commits the approved planning package, then delegates S1.
+- Planning commit: `c2839ed8f33d7240465302f68f27834cb14c3988` (Main).
+  Staged scope and diff checks: Pass; record
+  `/private/tmp/semantic-diff-comparison-cohesion-plan-commit/record.json`.
+  No completion, closure or merge gate is claimed.
+- Next operation: Main commits the approved S1 patch, then routes Feature Exit.
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -51,6 +54,23 @@ work starts only after the planning commit.
 Apply [Human Approval](../../README.md#human-approval) and the
 [approval-gated commit policy](../../README.md#approval-gated-commit-policy).
 
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation on 2026-10-15.
+- Slice: S1; both independent implementation reviews Ready.
+- Approved scope: reviewed patch identity below, plus Main's separately
+  validated review/readiness metadata. Exact commit paths:
+  - `src/domain/services/semantic-diff/semanticDiffStructuralRules.ts`
+  - `src/application/semantic-diff/compareSemanticDiff.ts`
+  - `src/test/suite/semanticDiffStructuralRules.test.ts`
+  - `src/test/suite/compareSemanticDiff.test.ts`
+  - `docs/specs/features/semantic-diff-comparison-cohesion/TASKS.md`
+- Commit: pending; explicit approval authorizes the focused S1 commit.
+  Closure, publication and merge approvals remain separate gates.
+- Main metadata validation record:
+  `/private/tmp/semantic-diff-comparison-cohesion-completion-commit/record.json`.
+
 ## Native Stack References
 
 - Trunk: `main`; one implementation layer S1, no custom stack tooling,
@@ -59,9 +79,9 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Layer PR: not published; URL/number unavailable, never assumed created.
 - Layer predecessor/base commit: `cbad1042ab9d5f44487ea6a2c6b9d272d16eb9b9`.
   There is no preceding slice. Planning package precedes S1 on this layer.
-- Current head commit: base above; working-tree plan identity is retained in
-  the planning validation artifact below. Planned/implementation/closure head
-  identities are pending their respective gates.
+- Current head commit: `c2839ed8f33d7240465302f68f27834cb14c3988` (plan).
+  S1 remains an uncommitted working-tree patch; reviewed identity is below.
+  Completion and closure commit identities are pending their gates.
 - Main records the actual planning commit, S1 reviewed base/head diff,
   completion commit, PR URL/order, final integration head and closure commit
   here as gates occur. One layer is intentionally the complete native stack.
@@ -77,7 +97,7 @@ Apply [native stacks](../../README.md#github-standard-stacked-pull-requests).
 
 ### S1 — Domain-owned fingerprint change classification
 
-- Lifecycle state: PLANNED
+- Lifecycle state: SLICE_APPROVED
 - Value: a confirmed correspondence has one semantic owner for rename/move;
   report projection no longer decides name/ancestry meaning. This is one
   independently valuable, reviewable and committable ownership correction.
@@ -184,7 +204,7 @@ S1 requires the shared-contract tier, after approved implementation:
 
 - Characterization cycle: `rtk pnpm run test:compile`, then
   `rtk pnpm exec mocha --ui tdd out/test/suite/semanticDiffStructuralRules.test.js
-  out/test/suite/compareSemanticDiff.test.js` before and after relocation.
+out/test/suite/compareSemanticDiff.test.js` before and after relocation.
   These two pure suites do not need a VS Code host; retain the before result.
 - Stable final patch: `rtk pnpm run test:full` prepares both targets, compiles
   tests, runs the full desktop suite and web smoke. Desktop suite includes the
@@ -200,9 +220,9 @@ S1 requires the shared-contract tier, after approved implementation:
   Scan the two changed production files for Node built-ins/host imports and
   inspect changed exports/imports; architecture rules cannot prove semantics.
 - qlty: follow [Quality Contract](../../validation.md#quality-contract) and
-  [Execution Procedure](../../validation.md#execution-procedure), version
-  >=0.645.0, identical full-repository selection/config/version in exact
-  disposable baseline and final snapshots. Baseline is the committed plan
+  [Execution Procedure](../../validation.md#execution-procedure), using version
+  0.645.0 or later and identical full-repository selection/config/version in
+  exact disposable baseline and final snapshots. Baseline is the committed plan
   before runtime/test changes; final includes the stable S1 patch. Record each
   repository content identity and dependency/config hashes, nonzero analyzed
   inventories/counts, logs/exits and complete official SARIF 2.1.0 for both
@@ -220,14 +240,12 @@ S1 requires the shared-contract tier, after approved implementation:
   those semantics and inputs are untouched. Required GitHub checks and Qlty
   Cloud are additional exact-head gates; local success cannot replace them.
 
-Every required check is currently Missing for implementation because S1 has not
-started. Missing/Failed required evidence blocks readiness; do not mark an
-unavailable host/download/qlty run Not Applicable. Follow the existing
-Correction Loop inside approved paths, retaining failure and baseline facts.
-All mechanical evidence lives in accessible external artifacts with exact
-feature/S1, base/head or working content manifests, scope, commands/versions,
-inputs, statuses and raw references. Reuse matching results; refresh only
-invalidated coverage. Record any unexpected rerun/review reason in that artifact.
+Implementation check status and raw evidence are recorded under S1 below and in
+the external implementation evidence record. Missing or failed required
+evidence blocks readiness; do not mark an unavailable host/download/qlty run
+Not Applicable. Follow the existing Correction Loop inside approved paths,
+retaining failure and baseline facts. Reuse matching results; refresh only
+invalidated coverage and record unexpected reruns or review advisories.
 
 ## Requirement to validation mapping
 
@@ -243,6 +261,83 @@ No separate TRACEABILITY file is needed for this single outcome:
   ambiguous/changed-fingerprint confirmation expansion.
 - R6 → S1 architecture, import inspection, full desktop/web, minimum host,
   production builds and unchanged engines; qlty protects quality throughout.
+
+## S1 implementation evidence
+
+- Implementation base: reviewed plan commit
+  `c2839ed8f33d7240465302f68f27834cb14c3988`; its sole pre-existing working-tree
+  change was Main's PLAN_COMMITTED gate metadata above, which is retained.
+- Runtime changes: `semanticDiffStructuralRules.ts` now exposes a specialized
+  fingerprint match with ordered `changeKinds`; Domain classifies current-name
+  difference as `renamed` and nearest Jobnet absolute-path difference as
+  `moved`, preserving empty arrays and generic `matches`. The Application now
+  projects those kinds into its existing changes and no longer decides name or
+  ancestry meaning. DTO construction, IDs, targets, identity references and
+  ordering remain in Application.
+- Validation-support changes: the Domain suite asserts rename-only, move-only,
+  both, empty, and rename-before-move contract behavior. The Application suite
+  characterizes unchanged outputs for those combinations, no-ancestor and
+  one-sided missing-ancestor cases, and nearest absolute-path changes including
+  ancestor rename. Existing `matches` expectations remain unchanged.
+- Characterization before relocation: `test:compile` passed and the two
+  approved boundary suites passed, 35 tests. After relocation and Domain
+  contract assertions, `test:compile` passed and the same suites passed, 36
+  tests. Logs and the alias-only temporary test-path mapping are recorded in
+  `/private/tmp/semantic-diff-comparison-cohesion-implementation/`;
+  the repository runner and assertions were not changed for alias resolution.
+- Full desktop/web coverage: the first `test:full` invocation prepared all
+  bundles and compiled successfully, then the VS Code UI launch ended with
+  SIGABRT. The existing desktop and web recovery commands passed with host
+  permission. After the in-scope complexity correction, `test:full` passed
+  again: 1034 desktop tests plus WEB-7/8/12/14/15 smoke checks. The harness was
+  unchanged; initial, recovery and final logs are in the implementation evidence
+  directory.
+- Minimum compatibility: `test:desktop:min` passed on VS Code 1.75.0 with
+  WEB-7/8/12/14/15 smoke checks. Production `build` passed for desktop and web.
+  Logs are `test-desktop-min.log` and `build.log` in the implementation
+  evidence directory. `engines.vscode` remains `^1.75.0`.
+- Qlty 0.645.0 baseline/final check SARIF contains 7/5 issues respectively;
+  the five final issues map to existing baseline findings, while two TASKS
+  formatting findings were cleared by Qlty's formatter. Baseline/final smells
+  each report 151 warning records. A prior final warning for
+  `buildSemanticDiffUnitCorrespondence` (complexity 8, threshold 5) disappeared
+  after extracting the local classifier helper. The final aggregate passed and
+  formatter output was confined to the approved TASKS, Domain source and Domain
+  test paths; `diff -w` showed only wrapping/whitespace changes in those three
+  files. The full-repository smell SARIF has unmatched record churn and changed
+  similar-code metrics in unrelated paths despite equal counts, so this mapping
+  remains an advisory for independent review, not a clean no-new-smell Pass.
+  Qlty's smells logs report 382 files at both the structure and duplication
+  stages. In the same exact snapshots, official `metrics --all --sort name`
+  outputs report parsing and list 382 files per snapshot; these files provide
+  the smells selection inventory (`baseline-metrics-all-inventory.log` and
+  `final-metrics-all-inventory.log`). For `check`, a supplemental `--no-cache`
+  refresh captured the official invocation inventory: each SARIF's 142 unique
+  successful invocation IDs exactly match 142 preserved official
+  `invoke-*.yaml` records, whose `targetPaths` yield 646 distinct repository-
+  relative files per snapshot. The baseline and final inventories are equal.
+  The refreshed SARIF is supplemental inventory evidence and does not replace
+  the required baseline/final findings comparison. The 683-path Git manifests
+  identify snapshot tree contents only, not Qlty's analyzed inputs. Complete
+  logs, SARIF, invocation records, path inventories and snapshot identities are
+  in
+  `/private/tmp/semantic-diff-comparison-cohesion-implementation/record.json`.
+- TRACEABILITY remains unnecessary: R1–R6 still map to S1 and its existing
+  acceptance/tests; this implementation changed ownership within that mapping
+  and did not change a result or requirement relationship.
+- Durable Documentation Gate remains satisfied: the implementation adds no
+  new reusable or user-visible contract beyond the selected feature record.
+  No README, use-case, architecture, roadmap or changelog path changed.
+- Independent implementation reviews: both Ready, no actionable Findings.
+  First review: `/private/tmp/semantic-diff-comparison-cohesion-implementation-review-r2.json`.
+  Second review: `/private/tmp/semantic-diff-comparison-cohesion-second-review.json`.
+  Reviewed full patch SHA-256:
+  `670c89d39442f508250706b14246c54299946ab05f47a3df1c20fa834d5f5895`.
+  Reviewed substantive snapshot SHA-256:
+  `2cf59a17051fe7aaf15e74f29044c43394e17e588a53306640a52bd04e634f87`.
+  Both reviews accept the inventory supplement and retain unrelated smells
+  mapping uncertainty as advisory. These gate annotations do not change the
+  reviewed product, tests, acceptance, paths or validation requirements.
 
 ## Closure propagation and removal plan
 

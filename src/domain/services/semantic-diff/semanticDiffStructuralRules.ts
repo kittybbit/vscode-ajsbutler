@@ -48,6 +48,13 @@ export type SemanticDiffUnitMatch = {
   kind: "exact" | "fingerprint";
 };
 
+export type SemanticDiffFingerprintChangeKind = "renamed" | "moved";
+
+export type SemanticDiffFingerprintMatch = SemanticDiffUnitMatch & {
+  kind: "fingerprint";
+  changeKinds: SemanticDiffFingerprintChangeKind[];
+};
+
 export type SemanticDiffCandidateGroup = {
   fingerprint: string;
   evidence: SemanticDiffIdentityFingerprintEvidence;
@@ -57,7 +64,7 @@ export type SemanticDiffCandidateGroup = {
 
 export type SemanticDiffUnitCorrespondence = {
   matches: SemanticDiffUnitMatch[];
-  fingerprintMatches: SemanticDiffUnitMatch[];
+  fingerprintMatches: SemanticDiffFingerprintMatch[];
   candidates: SemanticDiffCandidateGroup[];
   removedUnits: AjsUnit[];
   addedUnits: AjsUnit[];
@@ -624,6 +631,24 @@ const sortIdentityDecisions = (
       : compareOrdinal(left.id, right.id);
   });
 
+const fingerprintChangeKinds = (
+  match: SemanticDiffUnitMatch,
+  beforeUnitById: Map<string, AjsUnit>,
+  afterUnitById: Map<string, AjsUnit>,
+): SemanticDiffFingerprintChangeKind[] => {
+  const changeKinds: SemanticDiffFingerprintChangeKind[] = [];
+  if (match.before.name !== match.after.name) {
+    changeKinds.push("renamed");
+  }
+  if (
+    semanticDiffParentJobnetPath(match.before, beforeUnitById) !==
+    semanticDiffParentJobnetPath(match.after, afterUnitById)
+  ) {
+    changeKinds.push("moved");
+  }
+  return changeKinds;
+};
+
 export const buildSemanticDiffUnitCorrespondence = ({
   beforeUnits,
   afterUnits,
@@ -661,6 +686,13 @@ export const buildSemanticDiffUnitCorrespondence = ({
     afterUnits.filter((unit) => !exactAfterIds.has(unit.id)),
     { beforeIdentityById, afterIdentityById },
   );
+  const fingerprintMatches: SemanticDiffFingerprintMatch[] =
+    fingerprintResult.matches.map((match) => ({
+      before: match.before,
+      after: match.after,
+      kind: "fingerprint",
+      changeKinds: fingerprintChangeKinds(match, beforeUnitById, afterUnitById),
+    }));
   const matches = [...exactMatches, ...fingerprintResult.matches].sort(
     (left, right) =>
       compareUnits(left.before, right.before) ||
@@ -703,7 +735,7 @@ export const buildSemanticDiffUnitCorrespondence = ({
 
   return {
     matches,
-    fingerprintMatches: fingerprintResult.matches,
+    fingerprintMatches,
     candidates: fingerprintResult.candidates,
     removedUnits: beforeUnits
       .filter(
