@@ -287,6 +287,195 @@ suite("Compare Semantic Diff", () => {
     );
   });
 
+  test("projects fingerprint name and absolute Jobnet path changes consistently", () => {
+    type FingerprintSide = {
+      id: string;
+      name: string;
+      path: string;
+      parent?: { name: string; path: string };
+      unitType?: AjsUnit["unitType"];
+    };
+    type Scenario = {
+      before: FingerprintSide;
+      after: FingerprintSide;
+      expectedKinds: Array<"renamed" | "moved">;
+    };
+    const scenarios: Scenario[] = [
+      {
+        before: {
+          id: "/root/shared/job-before",
+          name: "job-before",
+          path: "/root/shared/job-before",
+          parent: { name: "shared", path: "/root/shared" },
+        },
+        after: {
+          id: "/root/shared/job-after",
+          name: "job-after",
+          path: "/root/shared/job-after",
+          parent: { name: "shared", path: "/root/shared" },
+        },
+        expectedKinds: ["renamed"],
+      },
+      {
+        before: {
+          id: "/root/old-parent/job",
+          name: "job",
+          path: "/root/old-parent/job",
+          parent: { name: "parent", path: "/root/old-parent" },
+        },
+        after: {
+          id: "/root/new-parent/job",
+          name: "job",
+          path: "/root/new-parent/job",
+          parent: { name: "parent", path: "/root/new-parent" },
+        },
+        expectedKinds: ["moved"],
+      },
+      {
+        before: {
+          id: "/root/old-parent/job-before",
+          name: "job-before",
+          path: "/root/old-parent/job-before",
+          parent: { name: "parent", path: "/root/old-parent" },
+        },
+        after: {
+          id: "/root/new-parent/job-after",
+          name: "job-after",
+          path: "/root/new-parent/job-after",
+          parent: { name: "parent", path: "/root/new-parent" },
+        },
+        expectedKinds: ["moved", "renamed"],
+      },
+      {
+        before: {
+          id: "/root/job-before",
+          name: "job-before",
+          path: "/root/job-before",
+        },
+        after: {
+          id: "/root/job-after",
+          name: "job-after",
+          path: "/root/job-after",
+        },
+        expectedKinds: ["renamed"],
+      },
+      {
+        before: {
+          id: "/root/old-parent/job",
+          name: "job",
+          path: "/root/old-parent/job",
+          parent: { name: "parent", path: "/root/old-parent" },
+        },
+        after: {
+          id: "/root/job",
+          name: "job",
+          path: "/root/job",
+        },
+        expectedKinds: ["moved"],
+      },
+      {
+        before: {
+          id: "/root/old-parent/job",
+          name: "job",
+          path: "/root/old-parent/job",
+          parent: { name: "old-parent", path: "/root/old-parent" },
+        },
+        after: {
+          id: "/root/new-parent/job",
+          name: "job",
+          path: "/root/new-parent/job",
+          parent: { name: "new-parent", path: "/root/new-parent" },
+        },
+        expectedKinds: ["moved"],
+      },
+      {
+        before: {
+          id: "/root/shared/old-group",
+          name: "same-group",
+          path: "/root/shared/old-group",
+          parent: { name: "shared", path: "/root/shared" },
+          unitType: "g",
+        },
+        after: {
+          id: "/root/shared/new-group",
+          name: "same-group",
+          path: "/root/shared/new-group",
+          parent: { name: "shared", path: "/root/shared" },
+          unitType: "g",
+        },
+        expectedKinds: [],
+      },
+    ];
+    const makeParent = (side: FingerprintSide): AjsUnit | undefined =>
+      side.parent
+        ? jobnet(side.parent.name, [], {
+            id: side.parent.path,
+            absolutePath: side.parent.path,
+          })
+        : undefined;
+    const makeTarget = (side: FingerprintSide): AjsUnit => {
+      const unitType = side.unitType ?? "j";
+      return unit({
+        id: side.id,
+        name: side.name,
+        absolutePath: side.path,
+        parentId: side.parent ? side.parent.path : undefined,
+        unitType,
+        parameters: params({ ty: unitType, sc: "echo ok" }),
+      });
+    };
+    const reference = (target: AjsUnit) => ({
+      id: target.id,
+      name: target.name,
+      absolutePath: target.absolutePath,
+      unitType: target.unitType,
+    });
+
+    for (const scenario of scenarios) {
+      const beforeParent = makeParent(scenario.before);
+      const afterParent = makeParent(scenario.after);
+      const before = makeTarget(scenario.before);
+      const after = makeTarget(scenario.after);
+      const result = compareSemanticDiff({
+        before: document(
+          beforeParent ? [{ ...beforeParent, children: [before] }] : [before],
+        ),
+        after: document(
+          afterParent ? [{ ...afterParent, children: [after] }] : [after],
+        ),
+        options: { jobGroupPath: "/root" },
+      });
+      const identity = result.identityDecisions.find(
+        (decision) =>
+          decision.before.some((item) => item.id === before.id) &&
+          decision.after.some((item) => item.id === after.id),
+      );
+
+      assert.ok(identity);
+      assert.strictEqual(identity.status, "fingerprint-confirmed");
+      assert.deepStrictEqual(identity.before, [reference(before)]);
+      assert.deepStrictEqual(identity.after, [reference(after)]);
+
+      const changes = result.changes.filter(
+        (change) =>
+          change.before?.kind === "unit" && change.before.unit.id === before.id,
+      );
+      assert.deepStrictEqual(
+        changes,
+        scenario.expectedKinds.map((kind) => ({
+          id: ["unit", kind, before.absolutePath, after.absolutePath].join(":"),
+          kind,
+          elementKind: "unit",
+          confirmationLevel: "confirmed",
+          relationPair: null,
+          identityDecisionId: identity.id,
+          before: { kind: "unit", unit: reference(before) },
+          after: { kind: "unit", unit: reference(after) },
+        })),
+      );
+    }
+  });
+
   test("keeps exact identity precedence when rename paths collide", () => {
     const beforeRenamed = unit({
       id: "/root/jobnet/job-a",

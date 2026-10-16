@@ -286,7 +286,7 @@ suite("Semantic Diff Structural Rules", () => {
       { before, after, kind: "fingerprint" },
     ]);
     assert.deepStrictEqual(result.fingerprintMatches, [
-      { before, after, kind: "fingerprint" },
+      { before, after, kind: "fingerprint", changeKinds: [] },
     ]);
     assert.strictEqual(
       result.identityDecisions[0]?.status,
@@ -295,6 +295,99 @@ suite("Semantic Diff Structural Rules", () => {
     assert.strictEqual(
       result.identityDecisions[0]?.evidence.kind,
       "fingerprint",
+    );
+  });
+
+  test("classifies confirmed fingerprint matches from names and Jobnet paths", () => {
+    const matchFor = ({
+      unitType = "j",
+      beforeName,
+      afterName,
+      beforePath,
+      afterPath,
+      beforeParentPath,
+      afterParentPath,
+    }: {
+      unitType?: AjsUnit["unitType"];
+      beforeName: string;
+      afterName: string;
+      beforePath: string;
+      afterPath: string;
+      beforeParentPath?: string;
+      afterParentPath?: string;
+    }) => {
+      const beforeParent = beforeParentPath
+        ? jobnet(beforeParentPath)
+        : undefined;
+      const afterParent = afterParentPath ? jobnet(afterParentPath) : undefined;
+      const before = typedUnit(unitType, [["sc", "stable.sh"]], {
+        id: beforePath,
+        name: beforeName,
+        absolutePath: beforePath,
+        parentId: beforeParent?.id,
+      });
+      const after = typedUnit(unitType, [["sc", "stable.sh"]], {
+        id: afterPath,
+        name: afterName,
+        absolutePath: afterPath,
+        parentId: afterParent?.id,
+      });
+      return buildSemanticDiffUnitCorrespondence({
+        beforeUnits: [before],
+        afterUnits: [after],
+        beforeUnitById: unitMap(
+          ...(beforeParent ? [beforeParent] : []),
+          before,
+        ),
+        afterUnitById: unitMap(...(afterParent ? [afterParent] : []), after),
+        jobGroupPath: "/root",
+      });
+    };
+
+    assert.deepStrictEqual(
+      matchFor({
+        beforeName: "before",
+        afterName: "after",
+        beforePath: "/root/shared/before",
+        afterPath: "/root/shared/after",
+        beforeParentPath: "/root/shared",
+        afterParentPath: "/root/shared",
+      }).fingerprintMatches[0]?.changeKinds,
+      ["renamed"],
+    );
+    assert.deepStrictEqual(
+      matchFor({
+        beforeName: "job",
+        afterName: "job",
+        beforePath: "/root/old/job",
+        afterPath: "/root/new/job",
+        beforeParentPath: "/root/old",
+        afterParentPath: "/root/new",
+      }).fingerprintMatches[0]?.changeKinds,
+      ["moved"],
+    );
+    assert.deepStrictEqual(
+      matchFor({
+        beforeName: "before",
+        afterName: "after",
+        beforePath: "/root/old/before",
+        afterPath: "/root/new/after",
+        beforeParentPath: "/root/old",
+        afterParentPath: "/root/new",
+      }).fingerprintMatches[0]?.changeKinds,
+      ["renamed", "moved"],
+    );
+    assert.deepStrictEqual(
+      matchFor({
+        unitType: "g",
+        beforeName: "same",
+        afterName: "same",
+        beforePath: "/root/group-before",
+        afterPath: "/root/group-after",
+        beforeParentPath: "/root/shared",
+        afterParentPath: "/root/shared",
+      }).fingerprintMatches[0]?.changeKinds,
+      [],
     );
   });
 

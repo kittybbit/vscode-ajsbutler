@@ -40,8 +40,9 @@ import {
   compareSemanticDiffRelations,
   isSemanticDiffJobnetUnit,
   semanticDiffParameterValuesByKey,
-  semanticDiffParentJobnetPath,
   type SemanticDiffCandidateGroup,
+  type SemanticDiffFingerprintChangeKind,
+  type SemanticDiffFingerprintMatch,
   type SemanticDiffRelationDecision,
   type SemanticDiffUnitMatch,
 } from "../../domain/services/semantic-diff/semanticDiffStructuralRules";
@@ -146,14 +147,6 @@ type SemanticDiffIdentityDecisionIndex = {
   byAfter: Map<string, SemanticDiffIdentityDecisionId>;
 };
 
-type SemanticDiffUnitChangeContext = {
-  beforeUnitById: Map<string, AjsUnit>;
-  afterUnitById: Map<string, AjsUnit>;
-  identityDecisionIndex: SemanticDiffIdentityDecisionIndex;
-};
-
-type FingerprintChangeKind = "renamed" | "moved";
-
 const buildIdentityDecisionIndex = (
   decisions: DomainSemanticDiffIdentityDecision[],
 ): SemanticDiffIdentityDecisionIndex => {
@@ -250,29 +243,9 @@ const createUnitChange = ({
   ...(after ? { after: toUnitTarget(after) } : {}),
 });
 
-const fingerprintMatchChangeKinds = (
-  match: SemanticDiffUnitMatch,
-  context: SemanticDiffUnitChangeContext,
-): FingerprintChangeKind[] => {
-  const beforeParent = semanticDiffParentJobnetPath(
-    match.before,
-    context.beforeUnitById,
-  );
-  const afterParent = semanticDiffParentJobnetPath(
-    match.after,
-    context.afterUnitById,
-  );
-  const renamed = match.before.name !== match.after.name;
-  const moved = beforeParent !== afterParent;
-  return [
-    ...(renamed ? ["renamed" as const] : []),
-    ...(moved ? ["moved" as const] : []),
-  ];
-};
-
 const createFingerprintMatchChange = (
-  match: SemanticDiffUnitMatch,
-  kind: FingerprintChangeKind,
+  match: SemanticDiffFingerprintMatch,
+  kind: SemanticDiffFingerprintChangeKind,
   identityDecisionIndex: SemanticDiffIdentityDecisionIndex,
 ): SemanticDiffChange =>
   createUnitChange({
@@ -286,12 +259,12 @@ const createFingerprintMatchChange = (
   });
 
 const createFingerprintMatchChanges = (
-  matches: SemanticDiffUnitMatch[],
-  context: SemanticDiffUnitChangeContext,
+  matches: SemanticDiffFingerprintMatch[],
+  identityDecisionIndex: SemanticDiffIdentityDecisionIndex,
 ): SemanticDiffChange[] =>
   matches.flatMap((match) =>
-    fingerprintMatchChangeKinds(match, context).map((kind) =>
-      createFingerprintMatchChange(match, kind, context.identityDecisionIndex),
+    match.changeKinds.map((kind) =>
+      createFingerprintMatchChange(match, kind, identityDecisionIndex),
     ),
   );
 
@@ -857,11 +830,10 @@ export const compareSemanticDiff: CompareSemanticDiff = (
     correspondence.matches.map((match) => [match.before.id, match.after.id]),
   );
   const changes = [
-    ...createFingerprintMatchChanges(correspondence.fingerprintMatches, {
-      beforeUnitById,
-      afterUnitById,
+    ...createFingerprintMatchChanges(
+      correspondence.fingerprintMatches,
       identityDecisionIndex,
-    }),
+    ),
     ...createCandidateChanges(correspondence.candidates, identityDecisionIndex),
     ...createAddedRemovedChanges(
       correspondence.removedUnits,
