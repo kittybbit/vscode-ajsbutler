@@ -1,0 +1,23 @@
+# Requirements Traceability: Telemetry simplification
+
+All implementation acceptance belongs to the cohesive S1 layer in
+[TASKS](TASKS.md). Paths below are under `src/test/suite/` unless noted.
+Results remain unclaimed until the approved implementation is validated.
+
+<!-- markdownlint-disable MD013 MD060 -->
+
+| Requirement or source | Slice | Test or validation |
+| --- | --- | --- |
+| R1: seven events, four enum keys, branded port | S1 | `telemetryEvent.test.ts`, `telemetryAdapter.test.ts`; catalog count, invalid name/key/value and sensitive-input rejection; typed-call validation |
+| R2: explicit viewer completion exactly once | S1 | `openPreviewCommand.test.ts`, `viewerWiring.test.ts`, `viewerMessageRouting.test.ts`, `viewerFactory.test.ts`, `semanticDiffExplorerFlow.test.ts`, `tableShellIntegration.test.ts`, `flowContentsIntegration.test.ts`; failed open, initial document commit ack, render/transport failure, overlapping opens, dispose before ack, repeat reveal, duplicate/stale ack, restore/refresh suppression, functional navigation |
+| R3: one committed search, no navigation/clear events | S1 | `viewerSearchTelemetry.test.ts`, `tableSearchController.test.ts`, `flowSearchController.test.ts`, `headerSearchField.test.ts`; Enter/blur grouping, repeated blur, no-match, clear/scope/document reset then re-search, no per-key event; preserve Table recomputation/reset/reveal |
+| R4: CSV copy/save actual success only | S1 | `csvExportTelemetry.test.ts`, `reportWebviewOperation.test.ts`, `viewerMessageRouting.test.ts`, `exportCsvView.test.ts`; clipboard reject, save cancel/write failure, output preservation |
+| R4/R6: Semantic Diff export actual success only | S1 | `semanticDiffReportDocument.test.ts`, `semanticDiffWiring.test.ts`; boolean success, cancellation/failure, format privacy and report lifetime |
+| R5: one import terminal outcome, no details | S1 | `importAjsDefinitionViaWebApiCommand.test.ts`, `webApiImportTelemetry.test.ts`, `webapiImportWiring.test.ts`; success/failure/cancel/unsupported and failed sender |
+| R6: one explicit comparison terminal outcome | S1 | `semanticDiffTelemetry.test.ts`, `semanticDiffCommand.test.ts`, `semanticDiffWiring.test.ts`, `semanticDiffExplorerReportAction.test.ts`; success/failure/cancel, no redisplay/filter/output comparison event |
+| R7: retired events and telemetry-only data removed | S1 | Catalog/import/message reference scan; review current `performanceTelemetry`, `editorFeedbackTelemetry`, bucket/render/operation tests; preserve functional assertions |
+| R8: disabled/failing telemetry preserves features | S1 | `createTelemetry.test.ts`, `telemetryAdapter.test.ts`, `extensionLifecycle.test.ts`, `registerDiagnostics.test.ts`, `registerHoverProvider.test.ts`, affected workflow tests; settings/Noop/privacy/architecture checks |
+| R8: JP1/AJS, desktop/web, VS Code ^1.75.0 | S1 | Existing functional boundary tests, TypeScript/ESLint/build, desktop/web host coverage and minimum-version checks; zero-exception architecture gate |
+| R9: durable specification matches implementation | S1 | Cross-cutting telemetry requirement, README/README.en notices and CHANGELOG Unreleased entry; changed-document validation |
+
+<!-- markdownlint-enable MD013 MD060 -->
