@@ -1,28 +1,30 @@
 import * as vscode from "vscode";
-import type { ValidatedTelemetryEvent } from "../../../application/telemetry/TelemetryPort";
-import {
-  createLegacyViewerOpenedEvent,
-  createViewerOpenStartedEvent,
-} from "../../../application/telemetry/viewerTelemetry";
-import { getTelemetryHost } from "../telemetryHost";
 
 export type PreviewPanelFactory = {
   getPanel(document: vscode.TextDocument): vscode.WebviewPanel;
+  getExistingPanel(
+    document: vscode.TextDocument,
+  ): vscode.WebviewPanel | undefined;
 };
 
 export type OpenPreviewCommandDependencies = {
   getActiveEditor: () => vscode.TextEditor | undefined;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
   mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
-  reportTelemetry: (event: ValidatedTelemetryEvent) => void;
+  revealPanel: (panel: vscode.WebviewPanel) => boolean;
+  onOpenStarted: (panel: vscode.WebviewPanel, viewType: string) => void;
+  onOpenFailed: (viewType: string) => void;
+  onPanelFailed: (panel: vscode.WebviewPanel) => void;
 };
 
-type ViewerOpenFailureCode =
-  | "active_editor_failed"
-  | "no_active_editor"
-  | "open_failed";
-
 type ExecuteOpenPreviewCommandArgs = {
+  viewType: string;
+  panelFactory: PreviewPanelFactory;
+  deps: OpenPreviewCommandDependencies;
+};
+
+type OpenPreviewDocumentArgs = {
+  document: vscode.TextDocument;
   viewType: string;
   panelFactory: PreviewPanelFactory;
   deps: OpenPreviewCommandDependencies;
@@ -33,76 +35,110 @@ export const executeOpenPreviewCommand = ({
   panelFactory,
   deps,
 }: ExecuteOpenPreviewCommandArgs): void => {
-  let activeEditor: vscode.TextEditor | undefined;
+  const document = getActiveDocument(deps, viewType);
+  if (document) {
+    console.log(
+      `invoke open.${viewType}. (${formatDocumentUriForLog(document)})`,
+    );
+    const existingPanel = getExistingPanel({
+      document,
+      panelFactory,
+      deps,
+      viewType,
+    });
+    if (existingPanel !== null) {
+      if (existingPanel) {
+        revealExistingPanel({ panel: existingPanel, viewType, deps });
+      } else {
+        createAndOpenPanel({ document, viewType, panelFactory, deps });
+      }
+    }
+  }
+};
+
+const getActiveDocument = (
+  deps: OpenPreviewCommandDependencies,
+  viewType: string,
+): vscode.TextDocument | undefined => {
   try {
-    activeEditor = deps.getActiveEditor();
+    const activeEditor = deps.getActiveEditor();
+    if (!activeEditor) {
+      failToOpenViewer(deps, viewType, "No active editor found to open.");
+      return undefined;
+    }
+    return activeEditor.document;
   } catch {
-    failToOpenViewer(
-      deps,
-      viewType,
-      "active_editor_failed",
-      "Active editor could not be accessed.",
-    );
-    return;
+    failToOpenViewer(deps, viewType, "Active editor could not be accessed.");
+    return undefined;
   }
+};
 
-  if (!activeEditor) {
-    failToOpenViewer(
-      deps,
-      viewType,
-      "no_active_editor",
-      "No active editor found to open.",
-    );
-    return;
-  }
-
-  let document: vscode.TextDocument;
+const getExistingPanel = ({
+  document,
+  panelFactory,
+  deps,
+  viewType,
+}: OpenPreviewDocumentArgs): vscode.WebviewPanel | undefined | null => {
   try {
-    document = activeEditor.document;
+    return panelFactory.getExistingPanel(document);
   } catch {
-    failToOpenViewer(
-      deps,
-      viewType,
-      "active_editor_failed",
-      "Active editor could not be accessed.",
-    );
-    return;
+    failToOpenViewer(deps, viewType, "Viewer could not be opened.");
+    return null;
   }
+};
 
-  console.log(
-    `invoke open.${viewType}. (${formatDocumentUriForLog(document)})`,
-  );
+const revealExistingPanel = ({
+  panel,
+  viewType,
+  deps,
+}: {
+  panel: vscode.WebviewPanel;
+  viewType: string;
+  deps: OpenPreviewCommandDependencies;
+}): void => {
+  if (deps.revealPanel(panel)) {
+    deps.onOpenStarted(panel, viewType);
+  } else {
+    failToOpenViewer(deps, viewType, "Viewer could not be opened.");
+  }
+};
 
+const mountAndRevealPanel = ({
+  panel,
+  viewType,
+  deps,
+}: {
+  panel: vscode.WebviewPanel;
+  viewType: string;
+  deps: OpenPreviewCommandDependencies;
+}): boolean => {
+  try {
+    deps.mountPanel(panel, viewType);
+    return deps.revealPanel(panel);
+  } catch {
+    return false;
+  }
+};
+
+const createAndOpenPanel = ({
+  document,
+  viewType,
+  panelFactory,
+  deps,
+}: OpenPreviewDocumentArgs): void => {
   let panel: vscode.WebviewPanel;
   try {
     panel = panelFactory.getPanel(document);
   } catch {
-    failToOpenViewer(
-      deps,
-      viewType,
-      "open_failed",
-      "Viewer could not be opened.",
-    );
+    failToOpenViewer(deps, viewType, "Viewer could not be opened.");
     return;
   }
 
-  try {
-    deps.mountPanel(panel, viewType);
-  } catch {
+  deps.onOpenStarted(panel, viewType);
+  if (!mountAndRevealPanel({ panel, viewType, deps })) {
     disposePanelAfterFailedMount(panel);
-    failToOpenViewer(
-      deps,
-      viewType,
-      "open_failed",
-      "Viewer could not be opened.",
-    );
-    return;
-  }
-
-  reportViewerOpenStarted(deps, viewType, "success");
-  const legacyEvent = createLegacyViewerOpenedEvent(viewType);
-  if (legacyEvent) {
-    reportTelemetrySafely(deps, legacyEvent);
+    deps.onPanelFailed(panel);
+    showErrorMessageSafely(deps, "Viewer could not be opened.");
   }
 };
 
@@ -117,10 +153,9 @@ const formatDocumentUriForLog = (document: vscode.TextDocument): string => {
 const failToOpenViewer = (
   deps: OpenPreviewCommandDependencies,
   viewType: string,
-  errorCode: ViewerOpenFailureCode,
   message: string,
 ): void => {
-  reportViewerOpenStarted(deps, viewType, "failed", errorCode);
+  deps.onOpenFailed(viewType);
   showErrorMessageSafely(deps, message);
 };
 
@@ -140,36 +175,5 @@ const disposePanelAfterFailedMount = (panel: vscode.WebviewPanel): void => {
     panel.dispose();
   } catch {
     // A disposal failure must not expose the original host exception.
-  }
-};
-
-const reportViewerOpenStarted = (
-  deps: OpenPreviewCommandDependencies,
-  viewType: string,
-  result: "success" | "failed",
-  errorCode?: string,
-): void => {
-  const event = createViewerOpenStartedEvent({
-    viewType,
-    source: "command",
-    result,
-    host: getTelemetryHost(),
-    errorCode,
-  });
-  if (!event) {
-    return;
-  }
-
-  reportTelemetrySafely(deps, event);
-};
-
-const reportTelemetrySafely = (
-  deps: OpenPreviewCommandDependencies,
-  event: ValidatedTelemetryEvent,
-): void => {
-  try {
-    deps.reportTelemetry(event);
-  } catch {
-    // Telemetry failure must not prevent the viewer from opening.
   }
 };

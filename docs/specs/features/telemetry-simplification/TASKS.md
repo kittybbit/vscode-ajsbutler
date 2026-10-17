@@ -4,23 +4,23 @@
 
 - Purpose: seven fixed events and four enum properties; preserve JP1/AJS,
   viewer/search/export/import/comparison/editor behavior under [SPECS](SPECS.md).
-- Active slice: S1; original 105-path plan reviewed Ready and Human Approved.
-  The one-test-path delta is Human Approved (106 paths). The cleanup delta
-  below adds four paths and changes the import boundary; it is Human Approved.
+- Active slice: S1; reviewed Ready and Human Approved. The original 105 paths,
+  approved interaction-test path, and four approved cleanup/lint support paths
+  establish the 110-path implementation boundary.
 - Read: requirements R1–R9, S1 scope/design/checks below,
   [traceability](TRACEABILITY.md), and the
   [planning discovery](/tmp/ajsbutler-telemetry-plan-20261017/discovery.md).
 - Prohibitions: no implementation before the approved planning commit;
   no identifiers, generic tracker, timeout, dual sending, architecture exception,
   dependency/engine/configuration change or inherited-feature edit.
-- Next operation: commit the approved cleanup replan, then resume implementation.
-  Existing implementation remains incomplete; preserve its current patch.
+- Next operation: Main creates the approved S1 implementation commit, then
+  coordinates publication and Feature Exit. Closure and merge are separate.
 
 ## Current state and gate
 
-- Lifecycle state: APPROVED
+- Lifecycle state: SLICE_READY
 - Feature: `docs/specs/features/telemetry-simplification` (transient branch).
-- Mode: Replanning, direct-builder cleanup delta; predecessor intake identity
+- Mode: Implementation, approved direct-builder cleanup; predecessor intake identity
   `cc4914f191b6921377a4722ac579d72d2aedd84f30633a7dbd3e05813c5a1571`.
 - Branch: `codex/telemetry-simplification`; comparison base `origin/main` =
   `4ef3356dddad932ec514fb949831555b8ea77447`.
@@ -33,15 +33,36 @@
   Approved at: approved in current conversation (2026-10-17).
   Approved scope: reviewed S1 outcomes, Solution Shape and required validation.
   Approved paths: original 105 exact paths in the
-  [approved manifest](/tmp/ajsbutler-telemetry-plan-20261017/proposed-paths.txt);
-  no additional paths. Original approval/provenance remains unchanged.
+  [original approved manifest](/tmp/ajsbutler-telemetry-plan-20261017/proposed-paths.txt),
+  plus the approved interaction-test path and four cleanup/lint support paths.
+  The 110-path boundary is the
+  [cleanup replan manifest](/tmp/ajsbutler-telemetry-replan-builders-20261017/proposed-paths.txt).
+  Original approval/provenance remains unchanged.
 - Approval covers: S1 outcomes, Solution Shape, exact product/support/docs
   paths below and required validation. Closure removal remains a separate gate.
-- S1 runtime implementation exists but is incomplete; no implementation Ready,
-  completion review/approval/commit, Feature Exit, Closure Approval or Human
-  Merge Approval is claimed.
+- S1 implementation and both independent reviews are Ready; no Findings remain.
+  Completion Approval is Approved; implementation commit, Feature Exit,
+  Closure Approval and Human Merge Approval are not yet claimed.
 
 Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
+
+## Completion gate
+
+- Completion Approval: Status: Approved;
+  Approved at: approved in current conversation (2026-10-17).
+- Approved scope: the final reviewed S1 implementation, tests, documentation and
+  outcome metadata on this branch; 89 changed paths within the approved 110.
+- Integrated review: [Ready, no Findings](/tmp/ajsbutler-telemetry-s1-20261017/review-integrated-final.md).
+- Additional lifecycle/transport review: [Ready, no Findings](/tmp/ajsbutler-telemetry-s1-20261017/review-lifecycle-final.md).
+- Reviewed combined identity:
+  `3a0cbeaff16acbb463169a9e928d51911062dac0f188d33302424dda638378dc`.
+  Substantive snapshot and outcome metadata remain separately bound in the
+  [validation index](/tmp/ajsbutler-telemetry-s1-20261017/implementation-evidence.md).
+- Main's review-state/approval-pending annotations are a separate metadata patch
+  in [gate metadata](/tmp/ajsbutler-telemetry-s1-20261017/main-ready-metadata.diff).
+  They do not change product inputs or claim new product checks.
+- Implementation commit: none. Completion Approval does not grant closure or
+  merge approval.
 
 ## Approved direct-builder cleanup delta
 
@@ -90,12 +111,14 @@ Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
   Approved at: approved in current conversation (2026-10-17).
   Approved scope: the reviewed direct-builder cleanup design, five wrapper
   removals, four exact path additions and affected validation described here.
-  Resume after the focused replan commit. Other approvals remain intact.
+  Implementation resumed from the focused replan commit
+  `9b080585a72f79d7d38af94795e4a2741c937d37`. Other approvals remain intact.
 - Evidence: [cleanup discovery](/tmp/ajsbutler-telemetry-replan-builders-20261017/discovery.md),
   [delta validation](/tmp/ajsbutler-telemetry-replan-builders-20261017/validation.json).
   Starting implementation snapshot identity:
   `076bba80d2d3e5045ef3ed320fac0301de876259131fb327cedb4df17d637f72`.
-  Runtime work remains incomplete; no implementation Ready/final pass claimed.
+  The implementation, local validation and both independent reviews are complete.
+  Completion Approval is Approved; final evidence is indexed below.
 
 ## Approved one-path approval delta
 
@@ -103,7 +126,8 @@ Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
   telemetry, but an existing interaction test outside the original boundary
   still expects that retired message. Its path is restored to HEAD.
 - Approved S1 path addition: `src/test/suite/showUnitDefinitionInteraction.test.ts`.
-  Approved S1 boundary total: 106 exact paths (original 105 plus this path).
+  Approved S1 boundary at that replan: 106 exact paths (original 105 plus this
+  path); the later approved cleanup delta establishes the current 110-path set.
 - Exact test delta: preserve the existing functional toggle assertion; change
   the message expectation to `[]` and clarify the test title. No production,
   behavior, Solution Shape, dependency, compatibility, risk tier, validation
@@ -117,11 +141,11 @@ Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
   Approved at: approved in current conversation (2026-10-17).
   Approved scope: this exact one-test-path addition and preserved functional
   assertion with no retired telemetry, as independently reviewed.
-  Resume this test edit after the focused replan commit.
+  The exact test edit resumed after the focused replan commit.
 - Original 105-path Human Approval, review and planning commit remain intact.
   Only affected delta review/approval and scope-dependent evidence need renewal.
   The existing final S1 checks still apply and include this interaction suite;
-  preserve incomplete implementation and do not claim its final checks passed.
+  their current results are recorded in the implementation evidence below.
 - Delta discovery and exact content/check identity:
   [discovery](/tmp/ajsbutler-telemetry-replan-path-20261017/discovery.md),
   [documentation validation](/tmp/ajsbutler-telemetry-replan-path-20261017/validation.json).
@@ -141,8 +165,10 @@ head. Internal work order is not a second slice or approval gate.
 - Layer predecessor/base: `origin/main` at the SHA above. Planning package
   precedes implementation on this branch; approved implementation base is
   `5d28d9f5ce0b9c8c9546962153e1963438e8d090`.
-- Layer head/reviewed diff: not established; record exact base/head commit and
-  content identities, PR URL and acceptance evidence at review/publication.
+- Layer head/reviewed diff: completed uncommitted patch based on
+  `9b080585a72f79d7d38af94795e4a2741c937d37`; its content identity and
+  acceptance evidence are recorded below. This operation creates no PR or
+  implementation commit.
 - Top integration head: S1 head; no integration branch or integration-only PR.
 - Completion: independent Ready, explicit Completion Approval and focused commit.
 - Closure propagation/removal lands in this same top PR after Feature Exit,
@@ -156,7 +182,7 @@ head. Internal work order is not a second slice or approval gate.
 
 ## S1: Complete minimum telemetry contract
 
-- Lifecycle state: PLANNED
+- Lifecycle state: SLICE_READY
 - Value: collect only meaningful aggregate user actions through seven fixed
   event shapes while all existing extension workflows remain functional.
 - Dependencies: complete intake; independently Ready plan; explicit Human
@@ -298,8 +324,8 @@ exception path, configuration or policy/durable-document edit.
 ### Exact production and validation-support paths
 
 The original entries below retain their 105-path approval plus the approved
-one-test-path delta (106). The separately listed cleanup delta proposes 110
-paths and wrapper deletion/import-rule changes; its approval remains Pending.
+one-test-path delta (106). The separately approved cleanup delta establishes
+110 paths and authorizes wrapper deletion/import-rule changes.
 Entries are modify paths unless explicitly marked new or obsolete. Existing
 paths may remain unchanged when unnecessary; need for another path returns to
 Main before edits.
@@ -321,7 +347,7 @@ Main before edits.
 - `src/application/telemetry/performanceTelemetry.ts`
 - `src/application/telemetry/editorFeedbackTelemetry.ts`
 
-Under the pending cleanup delta, delete the five re-export modules listed above
+Under the approved cleanup delta, delete the five re-export modules listed above
 and remove the viewer helper re-export clause; no new family stub is retained.
 Delete obsolete `telemetryBuckets.ts`,
 `viewerOperation.ts`, `searchTelemetryData.ts`,
@@ -446,7 +472,7 @@ contract is retired; preserve or move their functional assertions into the
 listed workflow suites. Catalog and family suites are rewritten for the seven
 events rather than mechanically deleting failed assertions. Tests use existing
 fixtures/harness; no fixture, snapshot, generated output, test-runner or
-other architecture-rule catalog change is planned. The pending cleanup delta
+other architecture-rule catalog change is planned. The approved cleanup delta
 authorizes only the stated telemetry public-symbol boundary and import metadata
 with focused analyzer/boundary tests. All catalog rules remain a zero-exception
 gate with no weakened raw/internal protection.
@@ -474,8 +500,9 @@ so no updates there. No roadmap reordering or beta-exit claim is authorized.
 - `docs/specs/features/telemetry-simplification/TRACEABILITY.md`
 
 Only these feature documents carry current scope, gates and evidence references.
-They do not authorize runtime edits until independent Ready, explicit Human
-Approval and the focused planning commit.
+The recorded independent Ready, explicit Human Approval and focused planning
+commit authorized S1 runtime edits; completed implementation reviews and the
+remaining human gates are recorded above.
 
 ### Exclusions
 
@@ -483,7 +510,7 @@ Approval and the focused planning commit.
 `src/domain`, parser/generated source, fixtures/snapshots/resources, unrelated
 application algorithms, new dependencies, inherited WebAPI feature records,
 AGENTS/agent policies, architecture exceptions and unrelated cleanup are outside
-scope. The pending four-path delta above replaces only the prior exclusion of
+scope. The approved four-path delta above replaces only the prior exclusion of
 architecture-support and unrelated unit-list paths for its exact edits. These
 narrow changes require approval; no other rule/catalog or unit-list
 change is allowed. Preserve `engines.vscode` `^1.75.0` and browser-safe imports.
@@ -550,11 +577,17 @@ and blocks Ready until Main resolves it; it cannot be silently deferred.
   [discovery](/tmp/ajsbutler-telemetry-plan-20261017/discovery.md),
   [validation](/tmp/ajsbutler-telemetry-plan-20261017/validation.json).
   The artifact supplies the exact plan content manifest/identity and check logs.
-- S1 implementation remains incomplete; this replan makes no runtime pass or
-  readiness claim. Preserve exact base/head, approved paths, configuration/
-  dependency/tool hashes, tracked/untracked/deletion manifests and check status
-  in accessible artifacts outside analyzed inputs. No evidence collector or
-  parallel registry is introduced.
+- S1 implementation, required local validation and both independent reviews
+  are complete; Completion Approval is Approved. The implementation base,
+  exact approved and changed-path manifests, content identity,
+  configuration/tool hashes,
+  check statuses and artifacts are indexed in the
+  [implementation evidence](/tmp/ajsbutler-telemetry-s1-20261017/implementation-evidence.md).
+  Its substantive snapshot identity is the 670-file manifest SHA-256
+  `ab6b64b326ce127a9d7bd0b2869576847bfa7b058749b53105f072e610e36da1`.
+  Outcome-only TASKS/TRACEABILITY annotations are recorded as a separate
+  metadata diff there, with its digest and combined patch identity; they do not
+  change the validated product snapshot.
 - Planning product checks/qlty: Not Applicable to this documentation-only patch;
   the S1 product set above is future required coverage, not a claimed pass.
 - Reuse valid evidence per [Evidence Contract](../../evidence.md#evidence-contract).
@@ -573,16 +606,24 @@ imports and the import-only unit-list correction; existing unit-list suites
 continue to cover behavior. Desktop/web/minimum-host/build checks remain S1
 requirements because product import/analysis inputs change.
 
-Earlier desktop 1008/web 7/minimum 1.75/build/type/Markdown results belong to the
-prior snapshot. Reuse only results whose inspected inputs and coverage still
-match; affected product/architecture/host/quality checks need the stabilized
-cleanup snapshot. The docs-only planning commits leave the original product
-qlty baseline reusable; record its exact comparison/content identity. Prior
-final check SARIF had four baseline records, but is not final cleanup evidence.
-Final smells/aggregate and full ESLint success remain required; neither prior
-baseline unused-import failure nor pending output establishes Ready. Preserve
-baseline/final ESLint logs and current quality artifacts in the implementation
-evidence; do not manufacture a pass or change analysis selection/configuration.
+Earlier desktop 1008/web 7/minimum 1.75/build/type/Markdown results belong to a
+prior snapshot. The second review correction restores READY failure notices
+while settling each pending open once and rejecting inherited parser names
+without throwing; boundary tests cover builder and synchronous post failures,
+`__proto__`, `constructor`, `toString`, and a valid request after rejection.
+The corrected patch passed `test:full` (1016 desktop tests and WEB-12/14/15/7/8
+assertions), VS Code 1.75.0 smoke, production builds, TypeScript and ESLint.
+Targeted Markdown/link checks are recorded with the metadata update. Exact
+commands and raw logs are indexed in the implementation evidence. ESLint has
+one unchanged warning in `src/test/suite/index.ts`; no errors. Qlty baseline and
+final used matching full-repository snapshots and unchanged target selections:
+647/633 check targets and 382/372 smell targets. Check SARIF had 6 baseline
+records and 2 unchanged final records, with four baseline-only records
+resolved; smells had 151 baseline and 127 final records, with no new or adverse
+mapped finding. The final disposable-snapshot aggregate exited 0. Preserve
+baseline/final SARIF, inventories and logs at the linked evidence location; do
+not change analysis selection/configuration. Current-head GitHub/Qlty Cloud
+checks remain Feature Exit gates.
 No new durable propagation/removal target, native layer or approval gate beyond
 this affected replan is introduced.
 

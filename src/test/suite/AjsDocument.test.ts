@@ -1,13 +1,11 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryProperties } from "../../application/telemetry/telemetryEvent";
 import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import type { AjsDocument } from "../../domain/models/ajs/AjsDocument";
 import {
   createDebouncedAjsDocumentChange,
   createReadyAjsDocument,
 } from "../../presentation/vscode/webview/ajsDocument";
-import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import { CHANGE_DOCUMENT } from "../../presentation/webview/viewerHostMessages";
 
 suite("ajsDocument", () => {
@@ -43,10 +41,6 @@ suite("ajsDocument", () => {
 
   test("posts the normalized document on ready", () => {
     const posted: Array<{ type: string; data: unknown }> = [];
-    const telemetryEvents: Array<{
-      eventName: string;
-      properties?: TelemetryProperties;
-    }> = [];
     const document = {
       getText() {
         return "";
@@ -57,23 +51,17 @@ suite("ajsDocument", () => {
       webview: {
         postMessage(message: { type: string; data: unknown }) {
           posted.push(message);
+          return Promise.resolve(true);
         },
       },
-    } as vscode.WebviewPanel;
+    } as unknown as vscode.WebviewPanel;
     const buildDocument = () => ({ errors: [], document: documentDto });
 
-    createReadyAjsDocument(buildDocument, {
-      report: (event) => {
-        telemetryEvents.push({
-          eventName: event.name,
-          properties: event.properties,
-        });
-      },
-      dispose() {},
-    })(document, panel);
+    const completion = createReadyAjsDocument(buildDocument)(document, panel);
 
     assert.strictEqual(posted.length, 1);
     assert.strictEqual(posted[0]?.type, CHANGE_DOCUMENT);
+    assert.strictEqual(completion instanceof Promise, true);
     assert.deepStrictEqual(posted[0]?.data, documentDto);
     assert.deepStrictEqual(
       documentDto.unitList.rows.map((row) => row.id),
@@ -87,24 +75,7 @@ suite("ajsDocument", () => {
       JSON.parse(JSON.stringify(posted[0]?.data)),
       documentDto,
     );
-    assert.deepStrictEqual(
-      {
-        ...telemetryEvents[0]?.properties,
-        durationBucket: "<bucket>",
-      },
-      {
-        development: String(DEVELOPMENT),
-        host: getTelemetryHost(),
-        operation: "unit_list_build",
-        result: "success",
-        durationBucket: "<bucket>",
-      },
-    );
-    assert.strictEqual(
-      telemetryEvents[0]?.eventName,
-      "performance.unit_list_build.completed",
-    );
-    assert.ok(telemetryEvents[0]?.properties?.durationBucket);
+    return completion.then((result) => assert.strictEqual(result, "success"));
   });
 
   test("debounces repeated change events for the same document", async () => {

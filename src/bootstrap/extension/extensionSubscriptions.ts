@@ -11,14 +11,8 @@ export const createExtensionSubscriptions = (
   context: vscode.ExtensionContext,
   dependencies: ExtensionDependencies,
 ): vscode.Disposable[] => [
-  registerDiagnostics(
-    dependencies.diagnoseAjsDefinition,
-    dependencies.telemetry,
-  ),
-  registerHoverProvider(
-    dependencies.findParameterHover,
-    dependencies.telemetry,
-  ),
+  registerDiagnostics(dependencies.diagnoseAjsDefinition),
+  registerHoverProvider(dependencies.findParameterHover),
   ...createWebApiImportSubscriptions({
     host: dependencies.host,
     importCapability: dependencies.webApiImport,
@@ -32,6 +26,7 @@ export const createExtensionSubscriptions = (
     return [
       ...createSemanticDiffSubscriptions({
         extensionContext: context,
+        telemetry: dependencies.telemetry,
         ...dependencies.semanticDiff,
         flowBridge,
       }),

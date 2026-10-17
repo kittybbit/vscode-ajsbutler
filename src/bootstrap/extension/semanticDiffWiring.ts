@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
 import type { BuildSemanticDiffReportData } from "../../application/semantic-diff/buildSemanticDiffReportData";
 import {
+  createSemanticDiffCompletedEvent,
+  createSemanticDiffExportedEvent,
+} from "../../application/telemetry/telemetryEvent";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import {
   COMPARE_SEMANTIC_DIFF_COMMAND,
   executeCompareSemanticDiffCommand,
   type SemanticDiffCommandDeps,
@@ -36,6 +41,7 @@ import {
 
 export type SemanticDiffWiringDeps = {
   extensionContext: vscode.ExtensionContext;
+  telemetry: TelemetryPort;
   buildSemanticDiffReportData: BuildSemanticDiffReportData;
   beginSemanticDiffSourceCapture: SemanticDiffSourceCaptureFactory;
   sourceHandleIdAllocator: SemanticDiffSourceHandleIdAllocator;
@@ -57,7 +63,20 @@ export const createSourceCaptureRegistrar =
     contextRegistry.registerSourceCapture(context, entry);
   };
 
-const createReportDocuments = (): SemanticDiffReportDocumentProvider =>
+const reportTelemetrySafely = (
+  telemetry: TelemetryPort,
+  event: Parameters<TelemetryPort["report"]>[0],
+): void => {
+  try {
+    telemetry.report(event);
+  } catch {
+    // Reporting cannot change comparison or export behavior.
+  }
+};
+
+const createReportDocuments = (
+  telemetry: TelemetryPort,
+): SemanticDiffReportDocumentProvider =>
   new SemanticDiffReportDocumentProvider({
     openTextDocument: (uri) => vscode.workspace.openTextDocument(uri),
     showTextDocument: (document, options) =>
@@ -70,6 +89,8 @@ const createReportDocuments = (): SemanticDiffReportDocumentProvider =>
     createUri: (components) => vscode.Uri.from(components),
     showSaveDialog: (options) => vscode.window.showSaveDialog(options),
     writeFile: (uri, content) => vscode.workspace.fs.writeFile(uri, content),
+    onExportCompleted: (method) =>
+      reportTelemetrySafely(telemetry, createSemanticDiffExportedEvent(method)),
   });
 
 const createOpenExplorer = ({
@@ -139,6 +160,11 @@ const createCompareCommand = ({
     buildSemanticDiffOutputContext,
     presentSemanticDiffOutput,
     openExplorer,
+    reportCompleted: (result) =>
+      reportTelemetrySafely(
+        deps.telemetry,
+        createSemanticDiffCompletedEvent(result),
+      ),
 
     beginSemanticDiffSourceCapture: deps.beginSemanticDiffSourceCapture,
     sourceHandleIdAllocator: deps.sourceHandleIdAllocator,
@@ -168,7 +194,7 @@ export const createSemanticDiffSubscriptions = (
         ? flowBridge.open(uri, targetUnitId)
         : Promise.reject(new Error("Flow viewer is not registered.")),
   });
-  const reportDocuments = createReportDocuments();
+  const reportDocuments = createReportDocuments(deps.telemetry);
   const openExplorer = createOpenExplorer({
     deps,
     reportDocuments,

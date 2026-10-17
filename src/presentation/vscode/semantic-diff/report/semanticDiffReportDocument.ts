@@ -58,6 +58,7 @@ export type SemanticDiffReportDocumentDeps = {
     options: vscode.SaveDialogOptions,
   ) => Thenable<vscode.Uri | undefined>;
   writeFile?: (uri: vscode.Uri, content: Uint8Array) => Thenable<void>;
+  onExportCompleted?: (method: "copy" | "save") => void;
 };
 
 const fullMarkdownDocument = (content: string): SemanticDiffOutputDocument => ({
@@ -304,10 +305,11 @@ export class SemanticDiffReportDocumentProvider
       if (!this.isStale(operationEpoch)) {
         await this.deps.writeClipboard(record.document.content);
         if (!this.isStale(operationEpoch)) {
+          copied = true;
+          this.reportExportCompleted("copy");
           await this.notifyInformation(
             "Semantic diff Markdown copied to clipboard.",
           );
-          copied = true;
         }
       }
     } catch {
@@ -341,7 +343,10 @@ export class SemanticDiffReportDocumentProvider
         operationEpoch,
       });
     }
-    if (saved) await this.notifyInformation("Semantic diff output saved.");
+    if (saved) {
+      this.reportExportCompleted("save");
+      await this.notifyInformation("Semantic diff output saved.");
+    }
     return saved;
   }
 
@@ -382,6 +387,14 @@ export class SemanticDiffReportDocumentProvider
 
   private isStale(operationEpoch: number): boolean {
     return this.disposed || operationEpoch !== this.epoch;
+  }
+
+  private reportExportCompleted(method: "copy" | "save"): void {
+    try {
+      this.deps.onExportCompleted?.(method);
+    } catch {
+      // A telemetry failure cannot invalidate a completed export.
+    }
   }
 
   private async drainCommits(): Promise<void> {

@@ -122,6 +122,7 @@ export type SemanticDiffCommandDeps = {
     mode: SemanticDiffOutputMode,
     language?: string,
   ) => SemanticDiffOutputDocument;
+  reportCompleted?: (result: "success" | "failed" | "cancelled") => void;
 };
 
 export type CommandReadyReport = Extract<
@@ -252,11 +253,37 @@ const finalizeWorkflowExplorerCommand = async (
         source: step.value.source,
       };
 
+const resolveCompletedResult = (
+  result: SemanticDiffCommandResult,
+): "success" | "failed" | "cancelled" => {
+  if (!("error" in result)) return "success";
+  return result.error.code === "cancelled" ? "cancelled" : "failed";
+};
+
+const reportCompletedSafely = (
+  deps: SemanticDiffCommandDeps,
+  result: "success" | "failed" | "cancelled",
+): void => {
+  try {
+    deps.reportCompleted?.(result);
+  } catch {
+    // Telemetry must not change comparison results or errors.
+  }
+};
+
 export const executeCompareSemanticDiffCommand = async (
   deps: SemanticDiffCommandDeps,
-): Promise<SemanticDiffCommandResult> =>
-  commandExecution(deps, {
-    finalizeWorkflow: finalizeWorkflowExplorerCommand,
-    finalizeReport: finalizeSemanticDiffCommand,
-    runReport: runSemanticDiffCommand,
-  })(deps);
+): Promise<SemanticDiffCommandResult> => {
+  try {
+    const result = await commandExecution(deps, {
+      finalizeWorkflow: finalizeWorkflowExplorerCommand,
+      finalizeReport: finalizeSemanticDiffCommand,
+      runReport: runSemanticDiffCommand,
+    })(deps);
+    reportCompletedSafely(deps, resolveCompletedResult(result));
+    return result;
+  } catch (error) {
+    reportCompletedSafely(deps, "failed");
+    throw error;
+  }
+};

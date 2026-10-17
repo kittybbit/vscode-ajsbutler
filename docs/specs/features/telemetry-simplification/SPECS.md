@@ -12,11 +12,11 @@ This is one cohesive transient branch feature: `telemetry-simplification`.
 - Human request: Japanese “AJS Butler Telemetry 簡素化 修正指示書”, 2026-10-17,
   supplied in the current conversation. Source identity and complete discovery
   references: [intake
-evidence](/tmp/ajsbutler-telemetry-intake-20261017/discovery.md).
+  evidence](/tmp/ajsbutler-telemetry-intake-20261017/discovery.md).
 - Base: `origin/main` at `4ef3356dddad932ec514fb949831555b8ea77447`;
   branch: `codex/telemetry-simplification`.
 - Existing [telemetry
-requirement](../../../requirements/cross-cutting/telemetry.md),
+  requirement](../../../requirements/cross-cutting/telemetry.md),
   [architecture](../../architecture.md), and observable
   [use cases](../../../requirements/use-cases/README.md) constrain preservation.
 - JP1/AJS basis: this changes extension instrumentation, with no new JP1/AJS
@@ -36,22 +36,22 @@ both typed callers and validation of untrusted webview input.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Event | Required properties | Trigger and frequency |
-| --- | --- | --- |
-| `extension.activated` | `host` | Once after each completed activation |
-| `viewer.open_completed` | `feature`, `host`, `result` | Once at the result of an explicit Table/Flow open, including explicit existing-panel reveal |
-| `search.executed` | `feature` | Once per user search operation |
-| `csv.exported` | `method` | Once after a successful CSV copy/save |
-| `webapi_import.completed` | `result` | Once at termination of an explicit import |
-| `semantic_diff.completed` | `result` | Once at termination of an explicit comparison |
-| `semantic_diff.exported` | `method` | Once after a successful explicit result copy/save |
+| Event                     | Required properties         | Trigger and frequency                                                                       |
+| ------------------------- | --------------------------- | ------------------------------------------------------------------------------------------- |
+| `extension.activated`     | `host`                      | Once after each completed activation                                                        |
+| `viewer.open_completed`   | `feature`, `host`, `result` | Once at the result of an explicit Table/Flow open, including explicit existing-panel reveal |
+| `search.executed`         | `feature`                   | Once per user search operation                                                              |
+| `csv.exported`            | `method`                    | Once after a successful CSV copy/save                                                       |
+| `webapi_import.completed` | `result`                    | Once at termination of an explicit import                                                   |
+| `semantic_diff.completed` | `result`                    | Once at termination of an explicit comparison                                               |
+| `semantic_diff.exported`  | `method`                    | Once after a successful explicit result copy/save                                           |
 
-| Key | Allowed values |
-| --- | --- |
-| `host` | `desktop`, `web` |
-| `feature` | `table`, `flow` |
-| `result` | `success`, `failed`, `cancelled` |
-| `method` | `copy`, `save` |
+| Key       | Allowed values                   |
+| --------- | -------------------------------- |
+| `host`    | `desktop`, `web`                 |
+| `feature` | `table`, `flow`                  |
+| `result`  | `success`, `failed`, `cancelled` |
+| `method`  | `copy`, `save`                   |
 
 <!-- markdownlint-enable MD013 MD060 -->
 

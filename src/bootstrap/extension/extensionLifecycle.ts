@@ -1,29 +1,25 @@
-import {
-  createExtensionLifecycleActivatedEvent,
-  createExtensionLifecycleDeactivatedEvent,
-  createLegacyExtensionActivatedEvent,
-  createLegacyExtensionDeactivatedEvent,
-} from "../../application/telemetry/extensionLifecycleTelemetry";
+import { createExtensionActivatedEvent } from "../../application/telemetry/telemetryEvent";
 import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import { MyExtension } from "./MyExtension";
 
 export const reportExtensionActivated = (myExtension: MyExtension): void => {
-  myExtension.telemetry.report(createLegacyExtensionActivatedEvent());
-  myExtension.telemetry.report(
-    createExtensionLifecycleActivatedEvent(getTelemetryHost()),
-  );
+  try {
+    myExtension.telemetry.report(
+      createExtensionActivatedEvent(getTelemetryHost()),
+    );
+  } catch {
+    // Telemetry must not prevent a successfully constructed extension from activating.
+  }
 };
 
 export const reportAndDisposeExtensionRuntime = (
   myExtension: MyExtension | undefined,
 ): void => {
-  if (!myExtension) {
-    return;
-  }
+  if (!myExtension) return;
 
-  myExtension.telemetry.report(createLegacyExtensionDeactivatedEvent());
-  myExtension.telemetry.report(
-    createExtensionLifecycleDeactivatedEvent(getTelemetryHost()),
-  );
-  myExtension.dispose();
+  try {
+    myExtension.dispose();
+  } catch {
+    // Telemetry disposal must not prevent extension shutdown.
+  }
 };

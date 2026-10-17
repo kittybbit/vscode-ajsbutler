@@ -59,7 +59,10 @@ suite("WebAPI import wiring", () => {
     assert.strictEqual(capability.unavailable?.error.code, "unsupported-host");
     assert.deepStrictEqual(
       await capability.importDefinition({
-        connection: { baseUrl: "https://web-console.example.com:22252" },
+        connection: {
+          baseUrl: "https://web-console.example.com:22252",
+          acceptLanguage: "en",
+        },
         scope: {
           manager: "manager.example.com",
           serviceName: "AJSROOT1",

@@ -1,25 +1,17 @@
 import * as vscode from "vscode";
-import { createPerformanceTelemetryEvent } from "../../../application/telemetry/performanceTelemetry";
-import { createSearchTelemetryEvent } from "../../../application/telemetry/searchTelemetry";
-import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
-import {
-  createLegacyWebviewOperationEvent,
-  createViewerActionEvent,
-} from "../../../application/telemetry/viewerActionTelemetry";
 import {
   createViewerResourceStateMessage,
   type ViewerResourceStateDto,
 } from "../../webview/viewerHostMessages";
-import {
-  type ViewerPerformanceRequest,
-  type ViewerResourceRequestData,
-  type ViewerSearchRequest,
-} from "../../webview/viewerRequestMessages";
-import { getTelemetryHost } from "../telemetryHost";
-import type { ViewerOperationHostRequest } from "./viewerMessageRouting";
+import type { ViewerResourceRequestData } from "../../webview/viewerRequestMessages";
 
 const RESOURCE_ERROR_MESSAGE = "Viewer resources could not be loaded.";
 const SAVE_ERROR_MESSAGE = "The file could not be saved.";
+
+type SaveLocationResult =
+  | { kind: "selected"; uri: vscode.Uri }
+  | { kind: "cancelled" }
+  | { kind: "failed" };
 
 const showErrorMessageSafely = (message: string): void => {
   try {
@@ -44,17 +36,6 @@ const showInformationMessageSafely = (
   }
 };
 
-const reportTelemetrySafely = (
-  telemetry: TelemetryPort,
-  event: Parameters<TelemetryPort["report"]>[0],
-): void => {
-  try {
-    telemetry.report(event);
-  } catch {
-    // Telemetry failure must not block webview message handling.
-  }
-};
-
 export const postResourceMessage = (
   requestedResource: ViewerResourceRequestData,
   panel: vscode.WebviewPanel,
@@ -75,27 +56,46 @@ export const postResourceMessage = (
   }
 };
 
-export const saveText = async (content: string): Promise<void> => {
-  let uri: vscode.Uri | undefined;
+export const saveText = async (content: string): Promise<boolean> => {
+  const location = await selectSaveLocation();
+  switch (location.kind) {
+    case "selected": {
+      const saved = await writeSaveFile(location.uri, content);
+      if (saved) showSaveComplete(location.uri);
+      return saved;
+    }
+    case "cancelled":
+      showErrorMessageSafely("The file has not been saved.");
+      return false;
+    case "failed":
+      return false;
+  }
+};
+
+const selectSaveLocation = async (): Promise<SaveLocationResult> => {
   try {
-    uri = await vscode.window.showSaveDialog();
+    const uri = await vscode.window.showSaveDialog();
+    return uri ? { kind: "selected", uri } : { kind: "cancelled" };
   } catch {
     showErrorMessageSafely(SAVE_ERROR_MESSAGE);
-    return;
+    return { kind: "failed" };
   }
+};
 
-  if (!uri) {
-    showErrorMessageSafely("The file has not been saved.");
-    return;
-  }
-
+const writeSaveFile = async (
+  uri: vscode.Uri,
+  content: string,
+): Promise<boolean> => {
   try {
     await vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(content));
+    return true;
   } catch {
     showErrorMessageSafely(SAVE_ERROR_MESSAGE);
-    return;
+    return false;
   }
+};
 
+const showSaveComplete = (uri: vscode.Uri): void => {
   let detail: string;
   try {
     detail = uri.toString();
@@ -106,56 +106,4 @@ export const saveText = async (content: string): Promise<void> => {
     detail,
     modal: true,
   });
-};
-
-export const reportWebviewOperation = ({
-  document,
-  panel,
-  telemetry,
-  operation,
-}: ViewerOperationHostRequest): void => {
-  let documentUri = "unknown";
-  try {
-    documentUri = document.uri.toString();
-  } catch {
-    // Logging must not prevent the catalogued operation from being reported.
-  }
-  console.log(`post a message of operation. (${documentUri}, ${operation})`);
-  reportTelemetrySafely(
-    telemetry,
-    createLegacyWebviewOperationEvent({
-      viewType: panel.viewType,
-      operation,
-    }),
-  );
-  const event = createViewerActionEvent({
-    viewType: panel.viewType,
-    operation,
-    host: getTelemetryHost(),
-  });
-  if (event) {
-    reportTelemetrySafely(telemetry, event);
-  }
-};
-
-export const reportWebviewSearch = (
-  telemetry: ViewerOperationHostRequest["telemetry"],
-  event: ViewerSearchRequest,
-): void => {
-  const telemetryEvent = createSearchTelemetryEvent({
-    ...event.data,
-    host: getTelemetryHost(),
-  });
-  reportTelemetrySafely(telemetry, telemetryEvent);
-};
-
-export const reportWebviewPerformance = (
-  telemetry: ViewerOperationHostRequest["telemetry"],
-  event: ViewerPerformanceRequest,
-): void => {
-  const telemetryEvent = createPerformanceTelemetryEvent({
-    ...event.data,
-    host: getTelemetryHost(),
-  });
-  reportTelemetrySafely(telemetry, telemetryEvent);
 };

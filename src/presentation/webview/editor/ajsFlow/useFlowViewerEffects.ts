@@ -4,6 +4,7 @@ import {
   SetStateAction,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import {
   type ValidatedFlowGraphDocument,
@@ -11,14 +12,13 @@ import {
 } from "../../../../application/flow-graph/flowGraphDocument";
 import type { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
 import { toUnitDefinitionByPath } from "../../../../application/unit-definition/unitDefinitionDocument";
-import { toDurationBucket } from "../../../../application/telemetry/telemetryBuckets";
 import {
   parseNavigationRequest,
   type NavigationRequestDto,
 } from "../../../../application/navigation/resolveNavigationTarget";
 import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
 import {
-  createViewerPerformanceRequest,
+  createViewerDisplayAcknowledgementRequest,
   createViewerReadyRequest,
 } from "../../viewerRequestMessages";
 
@@ -81,13 +81,50 @@ export const resolveFlowDocumentChange = (
   };
 };
 
+const resolveFlowDisplayResult = (data: unknown): "success" | "failed" =>
+  resolveFlowDocumentChange(data, undefined).flowDocument
+    ? "success"
+    : "failed";
+
+const postFlowDisplayAcknowledgement = (result: "success" | "failed"): void => {
+  try {
+    window.vscode.postMessage(
+      createViewerDisplayAcknowledgementRequest(result),
+    );
+  } catch {
+    // The host resolves an absent acknowledgement at panel disposal.
+  }
+};
+
+/** Acknowledge the first document result only after the React state commits. */
+export const useFlowDisplayAcknowledgement = (): void => {
+  const [displayResult, setDisplayResult] = useState<
+    "success" | "failed" | undefined
+  >();
+  const acknowledgedRef = useRef(false);
+
+  useEffect(() => {
+    const changeDocumentFn = (_type: string, data: unknown) =>
+      setDisplayResult(resolveFlowDisplayResult(data));
+    window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocumentFn);
+    return () => {
+      window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocumentFn);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (displayResult === undefined || acknowledgedRef.current) return;
+    acknowledgedRef.current = true;
+    postFlowDisplayAcknowledgement(displayResult);
+  }, [displayResult]);
+};
+
 export const useFlowDocumentSubscription = ({
   previousUnitIdRef,
   setFlowDocument,
   setCurrentUnitId,
   setUnitDefinitionByPath,
 }: UseFlowDocumentSubscriptionParams) => {
-  const renderReadyStartedAt = useRef(performance.now());
   const readyPosted = useRef(false);
   useEffect(() => {
     const changeDocumentFn = (_type: string, data: unknown) => {
@@ -100,15 +137,6 @@ export const useFlowDocumentSubscription = ({
       setCurrentUnitId(() => nextState.currentUnitId);
     };
     window.EventBridge.addCallback(CHANGE_DOCUMENT, changeDocumentFn);
-    window.vscode.postMessage(
-      createViewerPerformanceRequest({
-        operation: "flow_render",
-        result: "success",
-        durationBucket: toDurationBucket(
-          performance.now() - renderReadyStartedAt.current,
-        ),
-      }),
-    );
     if (!readyPosted.current) {
       readyPosted.current = true;
       window.vscode.postMessage(createViewerReadyRequest());

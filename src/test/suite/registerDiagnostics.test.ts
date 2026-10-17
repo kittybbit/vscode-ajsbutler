@@ -4,13 +4,7 @@ import { createDiagnoseAjsDefinition } from "../../application/editor-feedback/d
 import { testAjsParser } from "../support/parseAjs";
 import { syntaxDiagnosticCategories } from "../../application/editor-feedback/syntaxDiagnosticTypes";
 import { diagnosticRuleIds } from "../../domain/services/diagnostics/DiagnosticRuleId";
-import type {
-  TelemetryPort,
-  ValidatedTelemetryEvent,
-} from "../../application/telemetry/TelemetryPort";
-import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 import { updateDiagnostics } from "../../presentation/vscode/diagnostics/registerDiagnostics";
-import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 
 suite("Register diagnostics", () => {
   test("highlights the actual parsed UTF-16 parameter key after supplementary text", () => {
@@ -51,12 +45,7 @@ suite("Register diagnostics", () => {
     );
   });
 
-  test("reports anonymous diagnostic evaluation and category counts", () => {
-    const trackedEvents: ValidatedTelemetryEvent[] = [];
-    const telemetry: TelemetryPort = {
-      report: (event) => trackedEvents.push(event),
-      dispose() {},
-    };
+  test("maps diagnostic results into VS Code diagnostics", () => {
     const captured: { diagnostics?: vscode.Diagnostic[] } = {};
     const collection = {
       set: (_uri: vscode.Uri, diagnostics: vscode.Diagnostic[]) => {
@@ -90,7 +79,6 @@ suite("Register diagnostics", () => {
       ],
       collection,
       document,
-      telemetry,
     );
 
     assert.strictEqual(captured.diagnostics?.length, 2);
@@ -98,66 +86,5 @@ suite("Register diagnostics", () => {
     assert.strictEqual(captured.diagnostics?.[0].range.start.character, 2);
     assert.strictEqual(captured.diagnostics?.[0].range.end.line, 0);
     assert.strictEqual(captured.diagnostics?.[0].range.end.character, 5);
-    assert.deepStrictEqual(
-      trackedEvents.map((event) => event.name),
-      ["editor.diagnostics.evaluated", "editor.diagnostics.reported"],
-    );
-    assert.deepStrictEqual(
-      {
-        ...trackedEvents[0].properties,
-        durationBucket: "<bucket>",
-      },
-      {
-        development: String(DEVELOPMENT),
-        host: getTelemetryHost(),
-        result: "success",
-        durationBucket: "<bucket>",
-        diagnosticCountBucket: "2_9",
-      },
-    );
-    assert.ok(trackedEvents[0].properties.durationBucket);
-    assert.deepStrictEqual(trackedEvents[1].properties, {
-      development: String(DEVELOPMENT),
-      host: getTelemetryHost(),
-      result: "reported",
-      diagnosticCategory: "event_sending",
-      diagnosticCountBucket: "2_9",
-    });
-  });
-
-  test("keeps diagnostics available when telemetry fails", () => {
-    const collection = {
-      set: (_uri: vscode.Uri, diagnostics: vscode.Diagnostic[]) => {
-        assert.strictEqual(diagnostics.length, 1);
-      },
-    } as unknown as vscode.DiagnosticCollection;
-    const document = {
-      uri: vscode.Uri.parse("untitled:diagnostic-test"),
-      getText: () => "raw definition text",
-    } as vscode.TextDocument;
-    const telemetry = new VscodeTelemetryAdapter("test", () => ({
-      sendTelemetryEvent: () => {
-        throw new Error("telemetry failed");
-      },
-      dispose() {},
-    }));
-
-    assert.doesNotThrow(() => {
-      updateDiagnostics(
-        () => [
-          {
-            line: 1,
-            column: 0,
-            length: 1,
-            message: "diagnostic message",
-            severity: "error",
-            category: syntaxDiagnosticCategories.parserSyntax,
-          },
-        ],
-        collection,
-        document,
-        telemetry,
-      );
-    });
   });
 });

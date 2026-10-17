@@ -1,8 +1,5 @@
 import * as assert from "assert";
-import {
-  createTelemetryEvent,
-  telemetryEvents,
-} from "../../application/telemetry/telemetryEvent";
+import { createExtensionActivatedEvent } from "../../application/telemetry/telemetryEvent";
 import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 
 suite("Telemetry adapter", () => {
@@ -20,26 +17,14 @@ suite("Telemetry adapter", () => {
         dispose() {},
       };
     });
-    const event = createTelemetryEvent(
-      telemetryEvents.extensionLifecycleActivated,
-      {
-        development: false,
-        host: "desktop",
-        result: "success",
-        filePath: "/secret/example.ajs",
-      },
-    );
+    const event = createExtensionActivatedEvent("desktop");
 
     adapter.report(event);
 
     assert.deepStrictEqual(calls, [
       {
-        name: "extension.lifecycle.activated",
-        properties: {
-          development: "false",
-          host: "desktop",
-          result: "success",
-        },
+        name: "extension.activated",
+        properties: { host: "desktop" },
       },
     ]);
   });
@@ -53,10 +38,7 @@ suite("Telemetry adapter", () => {
         throw new Error("dispose failed");
       },
     }));
-    const event = createTelemetryEvent(
-      telemetryEvents.legacyExtensionActivated,
-      { development: false },
-    );
+    const event = createExtensionActivatedEvent("web");
 
     assert.doesNotThrow(() => adapter.report(event));
     assert.doesNotThrow(() => adapter.dispose());

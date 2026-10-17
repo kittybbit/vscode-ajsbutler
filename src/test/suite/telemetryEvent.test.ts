@@ -1,284 +1,106 @@
 import * as assert from "assert";
 import {
-  allowTelemetryProperties,
-  createTelemetryEvent,
-  telemetryEvents,
-  telemetryPropertyKeys,
-  type TelemetryProperties,
-  type TelemetryPropertyKey,
+  createCsvExportedEvent,
+  createExtensionActivatedEvent,
+  createSearchExecutedEvent,
+  createSemanticDiffCompletedEvent,
+  createSemanticDiffExportedEvent,
+  createViewerOpenCompletedEvent,
+  createWebApiImportCompletedEvent,
+  parseTelemetryEvent,
 } from "../../application/telemetry/telemetryEvent";
 import type { ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";
 
-type RawTelemetryEvent = Readonly<{
-  name: string;
-  properties: TelemetryProperties;
-}>;
-
-type RawEventIsValidated = RawTelemetryEvent extends ValidatedTelemetryEvent
-  ? true
-  : false;
-
 suite("Telemetry event schema", () => {
-  test("requires factory validation for telemetry event assignment", () => {
-    const rawEventIsValidated: RawEventIsValidated = false;
-    const mutateValidatedProperties = (
-      event: ValidatedTelemetryEvent,
-    ): void => {
-      // @ts-expect-error Validated properties must remain immutable after filtering.
-      event.properties.filePath = "/secret/example.ajs";
-    };
-
-    assert.strictEqual(rawEventIsValidated, false);
-    assert.strictEqual(typeof mutateValidatedProperties, "function");
-  });
-
-  test("preserves the exact legacy event and property baseline", () => {
+  test("builds only the seven catalogued event shapes", () => {
     const events = [
-      createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
-        development: false,
+      createExtensionActivatedEvent("desktop"),
+      createViewerOpenCompletedEvent({
+        feature: "flow",
+        host: "web",
+        result: "success",
       }),
-      createTelemetryEvent(telemetryEvents.legacyExtensionDeactivated, {
-        development: false,
-      }),
-      createTelemetryEvent(telemetryEvents.legacyTableViewerOpened, {
-        development: false,
-      }),
-      createTelemetryEvent(telemetryEvents.legacyFlowViewerOpened, {
-        development: false,
-      }),
-      createTelemetryEvent(telemetryEvents.legacyWebviewOperation, {
-        development: false,
-        viewType: "ajsbutler.tableViewer",
-        operation: "copy.csv",
-        filePath: "/secret/example.ajs",
-      }),
+      createSearchExecutedEvent("table"),
+      createCsvExportedEvent("copy"),
+      createWebApiImportCompletedEvent("cancelled"),
+      createSemanticDiffCompletedEvent("failed"),
+      createSemanticDiffExportedEvent("save"),
     ];
 
     assert.deepStrictEqual(events, [
-      { name: "ext.activate", properties: { development: "false" } },
-      { name: "ext.deactivate", properties: { development: "false" } },
+      { name: "extension.activated", properties: { host: "desktop" } },
       {
-        name: "ajsbutler.tableViewer",
-        properties: { development: "false" },
+        name: "viewer.open_completed",
+        properties: { feature: "flow", host: "web", result: "success" },
       },
-      {
-        name: "ajsbutler.flowViewer",
-        properties: { development: "false" },
-      },
-      {
-        name: "operation",
-        properties: {
-          development: "false",
-          viewType: "ajsbutler.tableViewer",
-          operation: "copy.csv",
-        },
-      },
+      { name: "search.executed", properties: { feature: "table" } },
+      { name: "csv.exported", properties: { method: "copy" } },
+      { name: "webapi_import.completed", properties: { result: "cancelled" } },
+      { name: "semantic_diff.completed", properties: { result: "failed" } },
+      { name: "semantic_diff.exported", properties: { method: "save" } },
     ]);
-  });
-
-  test("preserves the complete event-name catalog", () => {
     assert.deepStrictEqual(
-      Object.values(telemetryEvents).map(({ name }) => name),
+      events.map(({ name }) => name),
       [
-        "ext.activate",
-        "ext.deactivate",
-        "ajsbutler.tableViewer",
-        "ajsbutler.flowViewer",
-        "operation",
-        "extension.lifecycle.activated",
-        "extension.lifecycle.deactivated",
-        "extension.lifecycle.telemetry_initialized",
-        "viewer.table.open_started",
-        "viewer.table.ready",
-        "viewer.table.closed",
-        "viewer.flow.open_started",
-        "viewer.flow.ready",
-        "viewer.flow.closed",
-        "webapi_import.workflow.started",
-        "webapi_import.workflow.cancelled",
-        "webapi_import.workflow.failed",
-        "webapi_import.workflow.completed",
-        "webapi_import.workflow.unsupported_host",
-        "viewer.table.csv_copied",
-        "viewer.table.csv_saved",
-        "viewer.table.unit_selected",
-        "viewer.table.definition_opened",
-        "viewer.table.navigate_to_flow",
-        "viewer.flow.unit_selected",
-        "viewer.flow.definition_opened",
-        "viewer.flow.scope_opened",
-        "viewer.flow.nested_expansion_toggled",
-        "viewer.flow.relationship_focus_toggled",
-        "viewer.flow.minimap_toggled",
-        "viewer.flow.navigate_to_table",
-        "search.table.submitted",
-        "search.table.navigated",
-        "search.table.cleared",
-        "search.flow.submitted",
-        "search.flow.navigated",
-        "search.flow.cleared",
-        "editor.diagnostics.evaluated",
-        "editor.diagnostics.reported",
-        "editor.hover.requested",
-        "editor.hover.resolved",
-        "performance.unit_list_build.completed",
-        "performance.parse.completed",
-        "performance.flow_graph_build.completed",
-        "performance.table_render.ready",
-        "performance.flow_render.ready",
-        "performance.csv_export.completed",
+        "extension.activated",
+        "viewer.open_completed",
+        "search.executed",
+        "csv.exported",
+        "webapi_import.completed",
+        "semantic_diff.completed",
+        "semantic_diff.exported",
       ],
     );
   });
 
-  test("creates an event with only allowlisted string properties", () => {
-    const event = createTelemetryEvent(
-      telemetryEvents.extensionLifecycleActivated,
-      {
-        development: false,
-        host: "desktop",
-        result: "success",
-        extra: "ignored",
-      },
-    );
-
-    assert.deepStrictEqual(event, {
-      name: "extension.lifecycle.activated",
-      properties: {
-        development: "false",
-        host: "desktop",
-        result: "success",
-      },
-    });
+  test("rejects invalid enums at compile time", () => {
+    // @ts-expect-error Host is a closed enum.
+    createExtensionActivatedEvent("browser");
+    // @ts-expect-error Search accepts a viewer feature only.
+    createSearchExecutedEvent("desktop");
+    // @ts-expect-error Export method is a closed enum.
+    createCsvExportedEvent("download");
+    // @ts-expect-error A raw event object is not factory-validated.
+    const rawEvent: ValidatedTelemetryEvent = {
+      name: "csv.exported",
+      properties: { method: "copy" },
+    };
+    assert.strictEqual(typeof rawEvent, "object");
   });
 
-  test("omits null and undefined properties", () => {
-    const properties = allowTelemetryProperties(
-      [telemetryPropertyKeys.host, telemetryPropertyKeys.errorCode],
-      {
-        host: undefined,
-        errorCode: null,
-      },
-    );
-
-    assert.deepStrictEqual(properties, {});
-  });
-
-  test("omits forbidden content keys even when mixed with approved metadata", () => {
-    const properties = allowTelemetryProperties(
-      [
-        telemetryPropertyKeys.host,
-        telemetryPropertyKeys.result,
-        telemetryPropertyKeys.durationBucket,
-      ],
-      {
-        command: "unit-command",
-        filePath: "/secret/example.ajs",
-        host: "web",
+  test("rebuilds exact safe events from untrusted input", () => {
+    assert.deepStrictEqual(
+      parseTelemetryEvent({
+        name: "viewer.open_completed",
+        properties: { feature: "table", host: "desktop", result: "failed" },
+      }),
+      createViewerOpenCompletedEvent({
+        feature: "table",
+        host: "desktop",
         result: "failed",
-        searchText: "raw query",
-        durationBucket: "100_499ms",
-        unitName: "sensitive-unit",
-      },
+      }),
     );
 
-    assert.deepStrictEqual(properties, {
-      host: "web",
-      result: "failed",
-      durationBucket: "100_499ms",
-    });
-  });
-
-  test("omits forbidden content keys even if a schema accidentally allows them", () => {
-    const properties = allowTelemetryProperties(
-      ["filePath", telemetryPropertyKeys.host] as TelemetryPropertyKey[],
+    for (const value of [
+      null,
+      "csv.exported",
+      { name: "legacy.operation", properties: { operation: "csv.copy" } },
       {
-        filePath: "/secret/example.ajs",
-        host: "desktop",
+        name: "csv.exported",
+        properties: { method: "copy", filePath: "/secret" },
       },
-    );
-
-    assert.deepStrictEqual(properties, {
-      host: "desktop",
-    });
-  });
-
-  test("omits the complete forbidden content, path, identifier, and error set", () => {
-    const properties = allowTelemetryProperties(
-      [
-        "baseUrl",
-        "comment",
-        "command",
-        "credential",
-        "credentialRef",
-        "definition",
-        "definitionContent",
-        "fileName",
-        "filePath",
-        "fileUri",
-        "jobName",
-        "location",
-        "manager",
-        "managerName",
-        "organizationName",
-        "orgName",
-        "password",
-        "path",
-        "prompt",
-        "rawError",
-        "rawResponse",
-        "response",
-        "searchText",
-        "serverName",
-        "service",
-        "serviceName",
-        "stack",
-        "stackTrace",
-        "token",
-        "unitName",
-        "url",
-        "userName",
-        "username",
-        telemetryPropertyKeys.host,
-      ] as TelemetryPropertyKey[],
+      { name: "csv.exported", properties: { method: "download" } },
+      { name: "csv.exported", properties: { method: "copy" }, extra: true },
       {
-        baseUrl: "https://example.invalid",
-        comment: "secret comment",
-        command: "open.command",
-        credential: "secret credential",
-        credentialRef: "secret-ref",
-        definition: "definition content",
-        definitionContent: "definition content",
-        fileName: "example.ajs",
-        filePath: "/secret/example.ajs",
-        fileUri: "file:///secret/example.ajs",
-        jobName: "secret-job",
-        location: "secret-location",
-        manager: "secret-manager",
-        managerName: "secret-manager",
-        organizationName: "secret-org",
-        orgName: "secret-org",
-        password: "secret-password",
-        path: "/secret/example.ajs",
-        prompt: "secret-prompt",
-        rawError: "Error: secret",
-        rawResponse: "secret response",
-        response: "secret response",
-        searchText: "secret query",
-        serverName: "secret-server",
-        service: "secret-service",
-        serviceName: "secret-service",
-        stack: "secret stack",
-        stackTrace: "secret stack",
-        token: "secret-token",
-        unitName: "secret-unit",
-        url: "https://example.invalid/secret",
-        userName: "secret-user",
-        username: "secret-user",
-        host: "desktop",
+        name: "search.executed",
+        properties: { feature: "flow", query: "secret" },
       },
-    );
-
-    assert.deepStrictEqual(properties, { host: "desktop" });
+      Object.assign(Object.create({ inherited: true }), {
+        name: "csv.exported",
+        properties: { method: "copy" },
+      }),
+    ]) {
+      assert.strictEqual(parseTelemetryEvent(value), undefined);
+    }
   });
 });

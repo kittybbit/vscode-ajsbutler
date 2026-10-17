@@ -234,13 +234,16 @@ suite("Flow Contents integration", () => {
     await waitFor(() => {
       assert.ok(view.getByLabelText("1 / 1"));
     });
-    assert.ok(
-      postedMessages.some(
+    assert.deepStrictEqual(
+      postedMessages.filter(
         (message) =>
           typeof message === "object" &&
           message !== null &&
-          JSON.stringify(message).includes("flow.relationship_focus.toggle"),
+          ["search", "operation"].includes(
+            (message as { type?: string }).type ?? "",
+          ),
       ),
+      [{ type: "search", data: { feature: "flow" } }],
     );
   });
 });

@@ -1,52 +1,30 @@
 import * as vscode from "vscode";
-import { createPerformanceTelemetryEvent } from "../../../application/telemetry/performanceTelemetry";
-import { toDurationBucket } from "../../../application/telemetry/telemetryBuckets";
-import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort";
 import type { BuildUnitList } from "../../../application/unit-list/buildUnitList";
 import type { UnitListDocumentDto } from "../../../application/unit-list/unitListDocument";
 import { createViewerDocumentChangedMessage } from "../../webview/viewerHostMessages";
-import { getTelemetryHost } from "../telemetryHost";
 
-const reportUnitListBuildPerformance = (
-  telemetry: TelemetryPort | undefined,
-  durationMs: number,
-  result: "success" | "failed",
-): void => {
-  if (!telemetry) {
-    return;
-  }
+export type AjsDocumentPostResult = "success" | "failed";
 
-  const event = createPerformanceTelemetryEvent({
-    operation: "unit_list_build",
-    result,
-    host: getTelemetryHost(),
-    durationBucket: toDurationBucket(durationMs),
-  });
-  telemetry.report(event);
-};
+type PostedAjsDocument = Readonly<{
+  document: UnitListDocumentDto | null;
+  posted: boolean;
+}>;
 
-const postAjsDocument = ({
+const postAjsDocument = async ({
   buildUnitList,
   document,
   panel,
-  telemetry,
 }: Readonly<{
   buildUnitList: BuildUnitList;
   document: vscode.TextDocument;
   panel: vscode.WebviewPanel;
-  telemetry?: TelemetryPort;
-}>): UnitListDocumentDto | null => {
-  const startedAt = performance.now();
+}>): Promise<PostedAjsDocument> => {
   const result = buildUnitList(document.getText());
-  reportUnitListBuildPerformance(
-    telemetry,
-    performance.now() - startedAt,
-    result.errors.length > 0 ? "failed" : "success",
-  );
-  panel.webview.postMessage(
+  const nextDocument = result.document ?? null;
+  const posted = await panel.webview.postMessage(
     createViewerDocumentChangedMessage(result.document),
   );
-  return result.document ?? null;
+  return { document: nextDocument, posted };
 };
 
 export type AjsDocumentPostedListener = (
@@ -55,10 +33,14 @@ export type AjsDocumentPostedListener = (
 ) => void;
 
 export const createReadyAjsDocument =
-  (buildUnitList: BuildUnitList, telemetry?: TelemetryPort) =>
-  (document: vscode.TextDocument, panel: vscode.WebviewPanel): void => {
+  (buildUnitList: BuildUnitList) =>
+  async (
+    document: vscode.TextDocument,
+    panel: vscode.WebviewPanel,
+  ): Promise<AjsDocumentPostResult> => {
     console.log(`post a message of ready. (${document.uri.toString()})`);
-    postAjsDocument({ buildUnitList, document, panel, telemetry });
+    const result = await postAjsDocument({ buildUnitList, document, panel });
+    return result.document && result.posted ? "success" : "failed";
   };
 
 type PendingChange = {
@@ -70,7 +52,6 @@ type PendingChange = {
 type DebouncedAjsDocumentChangeOptions = Readonly<{
   buildUnitList: BuildUnitList;
   delay: number;
-  telemetry?: TelemetryPort;
   onDocumentPosted?: AjsDocumentPostedListener;
 }>;
 
@@ -172,13 +153,15 @@ class DebouncedAjsDocumentChange {
     this.pendingByDocument.delete(key);
     if (this.disposedPanels.has(pending.panel)) return;
     console.log(`post a message of changeDocument. ${key}`);
-    const nextDocument = postAjsDocument({
+    void postAjsDocument({
       buildUnitList: this.options.buildUnitList,
       document: pending.document,
       panel: pending.panel,
-      telemetry: this.options.telemetry,
-    });
-    this.options.onDocumentPosted?.(nextDocument, pending.panel);
+    })
+      .then(({ document }) => {
+        this.options.onDocumentPosted?.(document, pending.panel);
+      })
+      .catch(() => undefined);
   }
 
   public dispose(): void {
@@ -194,21 +177,14 @@ class DebouncedAjsDocumentChange {
   }
 }
 
-type DebouncedAjsDocumentChangeArgs = readonly [
-  BuildUnitList,
-  (number | undefined)?,
-  (TelemetryPort | undefined)?,
-  (AjsDocumentPostedListener | undefined)?,
-];
-
 export function createDebouncedAjsDocumentChange(
-  ...args: DebouncedAjsDocumentChangeArgs
+  buildUnitList: BuildUnitList,
+  delay = 300,
+  onDocumentPosted?: AjsDocumentPostedListener,
 ) {
-  const [buildUnitList, delay = 300, telemetry, onDocumentPosted] = args;
   const state = new DebouncedAjsDocumentChange({
     buildUnitList,
     delay,
-    telemetry,
     onDocumentPosted,
   });
   return Object.assign(state.onChange, {

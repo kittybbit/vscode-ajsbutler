@@ -1,4 +1,4 @@
-import { Dispatch, useCallback, useRef } from "react";
+import { Dispatch, useCallback } from "react";
 import type {
   FlowGraphUnitDto,
   ValidatedFlowGraphDocument,
@@ -68,7 +68,6 @@ const useSearchSubmitHandler = ({
         return;
       }
 
-      const startedAt = performance.now();
       const submission = resolveFlowSearchSubmission({
         currentUnit,
         query,
@@ -78,17 +77,7 @@ const useSearchSubmitHandler = ({
       if (submission.kind === "current") {
         return;
       }
-      postViewerSearchEvent({
-        action: "submitted",
-        query,
-        resultCount:
-          submission.kind === "matched"
-            ? submission.result.matchedUnitIds.length
-            : 0,
-        durationMs: performance.now() - startedAt,
-        scope: "current_flow_scope",
-        surface: "flow",
-      });
+      postViewerSearchEvent("flow");
       applyFlowSearchSubmission(submission, dispatch);
     },
     [currentUnit, dispatch, searchState, unitById],
@@ -125,37 +114,12 @@ export const useFlowSearchState = ({
   unitById,
 }: UseFlowSearchStateParams) => {
   const { searchState } = interactionState;
-  const searchStateRef = useRef(searchState);
-  searchStateRef.current = searchState;
 
   const resetSearch = useCallback(() => {
-    const currentSearchState = searchStateRef.current;
-    if (currentSearchState.query !== undefined) {
-      postViewerSearchEvent({
-        action: "cleared",
-        query: currentSearchState.query,
-        resultCount: currentSearchState.matchedUnitIds.length,
-        scope: "current_flow_scope",
-        surface: "flow",
-      });
-    }
     dispatch({ type: "searchCleared" });
   }, [dispatch]);
 
   const resetScope = useCallback(() => {
-    const currentSearchState = searchStateRef.current;
-    if (
-      !interactionState.preserveSearchOnNextScopeChange &&
-      currentSearchState.query !== undefined
-    ) {
-      postViewerSearchEvent({
-        action: "cleared",
-        query: currentSearchState.query,
-        resultCount: currentSearchState.matchedUnitIds.length,
-        scope: "current_flow_scope",
-        surface: "flow",
-      });
-    }
     dispatch({ type: "scopeReset" });
   }, [dispatch, interactionState.preserveSearchOnNextScopeChange]);
 
@@ -172,14 +136,6 @@ export const useFlowSearchState = ({
         handleSearchSubmit(query);
         return;
       }
-      postViewerSearchEvent({
-        action: "navigated",
-        query,
-        resultCount: searchState.matchedUnitIds.length,
-        durationMs: 0,
-        scope: "current_flow_scope",
-        surface: "flow",
-      });
       dispatch({ type: "searchNavigated", direction });
     },
     [dispatch, handleSearchSubmit, searchState],

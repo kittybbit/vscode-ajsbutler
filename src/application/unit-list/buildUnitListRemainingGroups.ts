@@ -3,7 +3,6 @@ import {
   findAjsUnitParameterValue,
 } from "../../domain/models/ajs/AjsDocument";
 import { DEFAULTS } from "../../domain/models/parameters/Defaults";
-import type { ParamSymbol } from "../../domain/values/AjsType";
 import type {
   UnitListGroup1View,
   UnitListGroup2View,

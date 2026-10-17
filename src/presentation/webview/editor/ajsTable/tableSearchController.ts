@@ -45,22 +45,10 @@ export const useTableSearchController = ({
   const [searchState, setSearchState] = useState<TableSearchState>(
     createEmptyTableSearchState,
   );
-  const searchQueryRef = useRef(searchQuery);
   const searchStateRef = useRef(searchState);
-  searchQueryRef.current = searchQuery;
   searchStateRef.current = searchState;
 
   const resetSearch = useCallback(() => {
-    const currentSearchState = searchStateRef.current;
-    if (currentSearchState.query !== undefined) {
-      postViewerSearchEvent({
-        action: "cleared",
-        query: searchQueryRef.current,
-        resultCount: currentSearchState.matchedAbsolutePaths.length,
-        scope: "visible_rows",
-        surface: "table",
-      });
-    }
     setSearchQuery("");
     setSearchState(createEmptyTableSearchState());
   }, []);
@@ -73,20 +61,16 @@ export const useTableSearchController = ({
         return;
       }
 
-      const startedAt = performance.now();
+      const isNewSearch = !isActiveTableSearchQuery(
+        searchStateRef.current,
+        query,
+      );
       const matchedAbsolutePaths = findTableSearchMatchingAbsolutePaths(
         rows,
         parameterSearchValuesByPath,
         query,
       );
-      postViewerSearchEvent({
-        action: "submitted",
-        query,
-        resultCount: matchedAbsolutePaths.length,
-        durationMs: performance.now() - startedAt,
-        scope: "visible_rows",
-        surface: "table",
-      });
+      if (isNewSearch) postViewerSearchEvent("table");
       const nextState = createSubmittedTableSearchState(
         query,
         matchedAbsolutePaths,
@@ -105,14 +89,6 @@ export const useTableSearchController = ({
         return;
       }
       const nextState = moveTableSearchResult(searchState, direction);
-      postViewerSearchEvent({
-        action: "navigated",
-        query,
-        resultCount: nextState.matchedAbsolutePaths.length,
-        durationMs: 0,
-        scope: "visible_rows",
-        surface: "table",
-      });
       setSearchState(nextState);
       revealSearchedPath(nextState, revealPath);
     },
