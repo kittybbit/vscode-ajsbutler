@@ -5,21 +5,22 @@
 - Purpose: seven fixed events and four enum properties; preserve JP1/AJS,
   viewer/search/export/import/comparison/editor behavior under [SPECS](SPECS.md).
 - Active slice: S1; original 105-path plan reviewed Ready and Human Approved.
-  The one additional test path below is also Human Approved (106 paths total).
+  The one-test-path delta is Human Approved (106 paths). The cleanup delta
+  below adds four paths and changes the import boundary; it is Human Approved.
 - Read: requirements R1–R9, S1 scope/design/checks below,
   [traceability](TRACEABILITY.md), and the
   [planning discovery](/tmp/ajsbutler-telemetry-plan-20261017/discovery.md).
 - Prohibitions: no implementation before the approved planning commit;
   no identifiers, generic tracker, timeout, dual sending, architecture exception,
   dependency/engine/configuration change or inherited-feature edit.
-- Next operation: Main commits the approved one-path replan, then resumes S1.
-  Existing implementation remains incomplete.
+- Next operation: commit the approved cleanup replan, then resume implementation.
+  Existing implementation remains incomplete; preserve its current patch.
 
 ## Current state and gate
 
 - Lifecycle state: APPROVED
 - Feature: `docs/specs/features/telemetry-simplification` (transient branch).
-- Mode: Replanning, one-path approval-boundary delta; predecessor intake identity
+- Mode: Replanning, direct-builder cleanup delta; predecessor intake identity
   `cc4914f191b6921377a4722ac579d72d2aedd84f30633a7dbd3e05813c5a1571`.
 - Branch: `codex/telemetry-simplification`; comparison base `origin/main` =
   `4ef3356dddad932ec514fb949831555b8ea77447`.
@@ -41,6 +42,60 @@
   Merge Approval is claimed.
 
 Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
+
+## Approved direct-builder cleanup delta
+
+- Trigger: user requests removal of files that only re-export symbols. Main
+  selected direct typed-builder imports with no replacement wrapper. Existing
+  full ESLint also identifies one baseline unused import requiring correction.
+- Prior approved boundary: 106 paths; one-path replan commit
+  `de86f73f86fc1466802bb9f025cce0784090cad8`. Original plan/approval and that
+  delta's approval remain intact; only the design/scope below needs renewal.
+- Delete five pure re-export modules already in S1 scope:
+  `src/application/telemetry/extensionLifecycleTelemetry.ts`,
+  `src/application/telemetry/searchTelemetry.ts`,
+  `src/application/telemetry/viewerActionTelemetry.ts`,
+  `src/application/telemetry/webApiImportTelemetry.ts`,
+  `src/application/telemetry/semanticDiffTelemetry.ts`.
+  The last file is currently untracked: omit it from the final patch rather
+  than committing a new stub. Remove the re-export clause in retained
+  `viewerTelemetry.ts`; retain its actual `resolveViewerTelemetryKind` logic.
+- Affected existing paths: retarget imports in `extensionLifecycle.ts`,
+  `viewerWiring.ts`, `webapiImportWiring.ts`, `semanticDiffWiring.ts` under
+  `src/bootstrap/extension/`, and `viewerMessageRouting.ts` under
+  `src/presentation/vscode/webview/`, and
+  `src/presentation/vscode/telemetryHost.ts`. Retarget imports in existing suites
+  `extensionLifecycle.test.ts`, `searchTelemetry.test.ts`,
+  `viewerActionTelemetry.test.ts`, `webApiImportTelemetry.test.ts`,
+  `semanticDiffTelemetry.test.ts` and `viewerTelemetry.test.ts` under
+  `src/test/suite/`, retaining their meaningful assertions.
+  Existing `src/test/suite/architectureDependencyRules.test.ts` verifies the
+  revised semantic import boundary described in Solution Shape below.
+- Four exact approved additions (S1 total: 110 paths):
+  `src/test/support/architectureSourceAnalysis.ts`,
+  `src/test/support/architectureDependencyRules.ts`,
+  `src/test/suite/architectureSourceAnalysis.test.ts`,
+  `src/application/unit-list/buildUnitListRemainingGroups.ts`.
+  The unit-list file permits only removal of its unused `ParamSymbol` import;
+  unit-list behavior, exports and implementation remain unchanged. The three
+  architecture files permit only the narrow named-import metadata/rule/tests.
+- Proposed outcome: seven builders/public enum types are consumed directly from
+  their substantive owner; no catalog/generic raw access, SDK exposure, new
+  wrapper/analyzer or architecture exception. All R1–R9 behavior remains intact.
+- Delta review: Ready for approval; no Findings.
+  Reviewed plan identity:
+  `365d837529e17ad1de65528ba351835a3f055358ba08e03a4df04b50d5383c17`.
+  Review: [cleanup review](/tmp/ajsbutler-telemetry-replan-builders-20261017/review.md).
+  Delta Human Approval: Status: Approved;
+  Approved at: approved in current conversation (2026-10-17).
+  Approved scope: the reviewed direct-builder cleanup design, five wrapper
+  removals, four exact path additions and affected validation described here.
+  Resume after the focused replan commit. Other approvals remain intact.
+- Evidence: [cleanup discovery](/tmp/ajsbutler-telemetry-replan-builders-20261017/discovery.md),
+  [delta validation](/tmp/ajsbutler-telemetry-replan-builders-20261017/validation.json).
+  Starting implementation snapshot identity:
+  `076bba80d2d3e5045ef3ed320fac0301de876259131fb327cedb4df17d637f72`.
+  Runtime work remains incomplete; no implementation Ready/final pass claimed.
 
 ## Approved one-path approval delta
 
@@ -101,7 +156,7 @@ head. Internal work order is not a second slice or approval gate.
 
 ## S1: Complete minimum telemetry contract
 
-- Lifecycle state: APPROVED
+- Lifecycle state: PLANNED
 - Value: collect only meaningful aggregate user actions through seven fixed
   event shapes while all existing extension workflows remain functional.
 - Dependencies: complete intake; independently Ready plan; explicit Human
@@ -155,6 +210,34 @@ Panel-local pending completion closures plus displayed state belong to viewer
 wiring; they earn no new exported tracker/port/class. Existing panel identity
 is local only and never transmitted. No IDs, history, query store, timing,
 retry/timeout, general event bus or operation manager is introduced.
+
+The direct-builder cleanup makes `telemetryEvent.ts` the substantive owner and
+public entry for exactly `createExtensionActivatedEvent`,
+`createViewerOpenCompletedEvent`, `createSearchExecutedEvent`,
+`createCsvExportedEvent`, `createWebApiImportCompletedEvent`,
+`createSemanticDiffCompletedEvent` and `createSemanticDiffExportedEvent`, plus
+`TelemetryHost`, `ViewerFeature`, `TelemetryResult` and `ExportMethod` type
+aliases. Use named imports; aliases are allowed by original source symbol.
+Catalogs/enum arrays and the generic constructor stay private;
+`parseTelemetryEvent` remains the infrastructure validation seam, forbidden to
+bootstrap/presentation. The branded port remains separate. No pure re-export
+family module or replacement barrel earns a boundary; retain only the real
+viewer-kind translation in `viewerTelemetry.ts`.
+
+Realign the existing zero-exception telemetry architecture rule with this
+public surface, instead of banning its whole module. Extend existing TypeScript
+AST import collection with optional original named-symbol metadata, present only
+for static named-only imports without a default binding. The rule allows only
+nonempty named imports of these seven builders/four types from this module for
+outer callers; any absent/unknown metadata or other symbol fails closed.
+Normalize source-extension spelling when comparing this module's target.
+Reject parser/catalog/generic/raw/unknown symbols even when aliased or type-only;
+reject default (including default plus named), namespace, side-effect, re-export,
+dynamic import, require, import-equals and import-type-query access. Collect
+import-type-query references with the existing AST visitor so they cannot evade
+the rule. Existing SDK/port/raw-reporting/layer gates remain unchanged. This is
+a small extension to current test support, with no new analyzer, dependency,
+exception path, configuration or policy/durable-document edit.
 
 ### Operation boundaries and acceptance examples
 
@@ -214,8 +297,9 @@ retry/timeout, general event bus or operation manager is introduced.
 
 ### Exact production and validation-support paths
 
-The original entries below retain their 105-path approval. The separately
-listed one-path delta proposes a 106-path S1 boundary and remains Pending.
+The original entries below retain their 105-path approval plus the approved
+one-test-path delta (106). The separately listed cleanup delta proposes 110
+paths and wrapper deletion/import-rule changes; its approval remains Pending.
 Entries are modify paths unless explicitly marked new or obsolete. Existing
 paths may remain unchanged when unnecessary; need for another path returns to
 Main before edits.
@@ -237,11 +321,14 @@ Main before edits.
 - `src/application/telemetry/performanceTelemetry.ts`
 - `src/application/telemetry/editorFeedbackTelemetry.ts`
 
-`semanticDiffTelemetry.ts` is new. Delete obsolete `telemetryBuckets.ts`,
+Under the pending cleanup delta, delete the five re-export modules listed above
+and remove the viewer helper re-export clause; no new family stub is retained.
+Delete obsolete `telemetryBuckets.ts`,
 `viewerOperation.ts`, `searchTelemetryData.ts`,
 `viewerPerformanceTelemetryData.ts`, `performanceTelemetry.ts` and
-`editorFeedbackTelemetry.ts` after removing callers. Retained family builders
-own only current events; do not keep compatibility exports.
+`editorFeedbackTelemetry.ts` after removing callers. The event builders
+are the seven direct builders in `telemetryEvent.ts`; do not keep compatibility
+exports or pure family wrappers.
 
 #### Composition and adapters
 
@@ -359,8 +446,10 @@ contract is retired; preserve or move their functional assertions into the
 listed workflow suites. Catalog and family suites are rewritten for the seven
 events rather than mechanically deleting failed assertions. Tests use existing
 fixtures/harness; no fixture, snapshot, generated output, test-runner or
-architecture-rule catalog change is planned. Architecture tests remain a
-zero-exception gate and must not be weakened.
+other architecture-rule catalog change is planned. The pending cleanup delta
+authorizes only the stated telemetry public-symbol boundary and import metadata
+with focused analyzer/boundary tests. All catalog rules remain a zero-exception
+gate with no weakened raw/internal protection.
 
 #### Durable docs in S1
 
@@ -394,7 +483,10 @@ Approval and the focused planning commit.
 `src/domain`, parser/generated source, fixtures/snapshots/resources, unrelated
 application algorithms, new dependencies, inherited WebAPI feature records,
 AGENTS/agent policies, architecture exceptions and unrelated cleanup are outside
-scope. Preserve `engines.vscode` `^1.75.0` and browser-safe shared imports.
+scope. The pending four-path delta above replaces only the prior exclusion of
+architecture-support and unrelated unit-list paths for its exact edits. These
+narrow changes require approval; no other rule/catalog or unit-list
+change is allowed. Preserve `engines.vscode` `^1.75.0` and browser-safe imports.
 
 ### Validation and material risks
 
@@ -467,6 +559,32 @@ and blocks Ready until Main resolves it; it cannot be silently deferred.
   the S1 product set above is future required coverage, not a claimed pass.
 - Reuse valid evidence per [Evidence Contract](../../evidence.md#evidence-contract).
   Only changed inputs/coverage or a concrete missing fact invalidates it.
+
+## Cleanup-delta validation renewal
+
+Reuse original acceptance and required commands; no check is removed or waived.
+Focused tests prove actual named imports, alias source names and type-only
+bindings are collected, builders/types allowed and parser/internal/unsafe forms
+rejected; test representative forms without a synthetic cross-product. Retain
+production-wide zero-exception telemetry/raw-reporting/SDK/layer scans and
+strict catalog/privacy tests. Scan imports for all five retired module paths;
+retain the real viewer-kind translation test. Full TypeScript/ESLint confirms
+imports and the import-only unit-list correction; existing unit-list suites
+continue to cover behavior. Desktop/web/minimum-host/build checks remain S1
+requirements because product import/analysis inputs change.
+
+Earlier desktop 1008/web 7/minimum 1.75/build/type/Markdown results belong to the
+prior snapshot. Reuse only results whose inspected inputs and coverage still
+match; affected product/architecture/host/quality checks need the stabilized
+cleanup snapshot. The docs-only planning commits leave the original product
+qlty baseline reusable; record its exact comparison/content identity. Prior
+final check SARIF had four baseline records, but is not final cleanup evidence.
+Final smells/aggregate and full ESLint success remain required; neither prior
+baseline unused-import failure nor pending output establishes Ready. Preserve
+baseline/final ESLint logs and current quality artifacts in the implementation
+evidence; do not manufacture a pass or change analysis selection/configuration.
+No new durable propagation/removal target, native layer or approval gate beyond
+this affected replan is introduced.
 
 ## Feature Exit and closure plan
 

@@ -147,6 +147,10 @@ telemetry setting and safe Noop fallback; keep SDK ownership in infrastructure.
 Domain has no telemetry dependency; application owns fixed validated events and
 port; presentation detects actions/results; bootstrap assembles dependencies.
 No new framework, compatibility adapter or unnecessary telemetry state manager.
+Consume typed event builders directly from their substantive application owner;
+remove pure re-export family modules. Keep generic construction/catalog private
+and the untrusted parser at the infrastructure validation boundary. Architecture
+checks enforce this public-symbol boundary without exception paths.
 
 ### R9: Validation and documentation
 
