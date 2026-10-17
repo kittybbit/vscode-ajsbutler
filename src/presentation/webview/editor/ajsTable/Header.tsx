@@ -12,18 +12,13 @@ import SaveIcon from "@mui/icons-material/Save";
 import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
 import { Table, VisibilityState } from "@tanstack/table-core";
 import type { TableRowView } from "./tableViewerData";
-import {
-  toCountBucket,
-  toDurationBucket,
-} from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
 import {
   formatUnitInformationMessage,
   unitInformationMessage,
 } from "../unitInformationLocalization";
 import {
-  createViewerOperationRequest,
-  createViewerPerformanceRequest,
+  createViewerCsvExportRequest,
   createViewerSaveRequest,
 } from "../../viewerRequestMessages";
 import { exportCsvView } from "./exportCsvView";
@@ -117,16 +112,13 @@ export const getAjsTableSearchHelperText = (
     getTableHeaderSearchLabels(language).helperText,
   );
 
-export const createCsvExportPerformanceEvent = (
-  durationMs: number,
-  rowCount: number,
-) =>
-  createViewerPerformanceRequest({
-    operation: "csv_export",
-    result: "success",
-    durationBucket: toDurationBucket(durationMs),
-    rowCountBucket: toCountBucket(rowCount),
-  });
+const postCsvExportEventSafely = (): void => {
+  try {
+    window.vscode.postMessage(createViewerCsvExportRequest());
+  } catch {
+    // Telemetry delivery must not hide a successful clipboard copy.
+  }
+};
 
 const HeaderSearchField: FC<HeaderSearchFieldProps> = ({
   searchedAbsolutePath,
@@ -172,31 +164,21 @@ const HeaderCsvActions: FC<HeaderCsvActionsProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  const exportCsvWithPerformanceTelemetry = useCallback(() => {
-    const startedAt = performance.now();
+  const handleCopy = useCallback(async () => {
     const csv = exportCsvView(table);
-    window.vscode.postMessage(
-      createCsvExportPerformanceEvent(
-        performance.now() - startedAt,
-        table.getRowModel().rows.length,
-      ),
-    );
-    return csv;
-  }, [table]);
-
-  const handleCopy = useCallback(() => {
-    const csv = exportCsvWithPerformanceTelemetry();
-    window.vscode.postMessage(createViewerOperationRequest("copy.csv"));
-    navigator.clipboard.writeText(csv);
-    setOpen(true);
-    onCopied?.();
-  }, [exportCsvWithPerformanceTelemetry, onCopied]);
+    try {
+      await navigator.clipboard.writeText(csv);
+      postCsvExportEventSafely();
+      setOpen(true);
+      onCopied?.();
+    } catch {
+      // A rejected clipboard write is not a completed export.
+    }
+  }, [onCopied, table]);
 
   const handleSave = useCallback(() => {
-    const csv = exportCsvWithPerformanceTelemetry();
-    window.vscode.postMessage(createViewerOperationRequest("save.csv"));
-    window.vscode.postMessage(createViewerSaveRequest(csv));
-  }, [exportCsvWithPerformanceTelemetry]);
+    window.vscode.postMessage(createViewerSaveRequest(exportCsvView(table)));
+  }, [table]);
 
   return (
     <>

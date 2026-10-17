@@ -9,18 +9,13 @@ import {
   createImportedAjsDefinitionContent,
   createImportAjsDefinitionError,
 } from "../../application/webapi-import/importAjsDefinitionViaWebApi";
-import type { ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";
-import { VscodeTelemetryAdapter } from "../../infrastructure/telemetry/VscodeTelemetryAdapter";
 
 type ImportAjsDefinitionCommandObservations = {
   prompts: Array<{ prompt: string; value?: string }>;
   requests: ImportAjsDefinitionCommandRequest[];
   informationMessages: string[];
   errorMessages: string[];
-  events: Array<{
-    eventName: string;
-    properties?: Record<string, string>;
-  }>;
+  completions: Array<"success" | "failed" | "cancelled">;
 };
 
 class ImportAjsDefinitionCommandHarness {
@@ -29,7 +24,7 @@ class ImportAjsDefinitionCommandHarness {
     requests: [],
     informationMessages: [],
     errorMessages: [],
-    events: [],
+    completions: [],
   };
 
   readonly deps: ImportAjsDefinitionCommandDeps;
@@ -42,7 +37,6 @@ class ImportAjsDefinitionCommandHarness {
   ) {
     this.answers = [...answers];
     this.deps = {
-      getHost: () => "desktop",
       getLanguage: () => "ja",
       showInputBox: (options) => this.showInputBox(options),
       showInformationMessage: (message) => this.showInformationMessage(message),
@@ -50,8 +44,7 @@ class ImportAjsDefinitionCommandHarness {
       importCapability: {
         importDefinition: (request) => this.importDefinition(request),
       },
-      now: () => 0,
-      reportTelemetry: (event) => this.reportTelemetry(event),
+      reportCompleted: (result) => this.observed.completions.push(result),
       ...overrides,
     };
   }
@@ -90,13 +83,6 @@ class ImportAjsDefinitionCommandHarness {
         [{ unitName: "/JobGroup/Jobnet" }],
       ),
     };
-  }
-
-  private reportTelemetry(event: ValidatedTelemetryEvent): void {
-    this.observed.events.push({
-      eventName: event.name,
-      properties: event.properties,
-    });
   }
 }
 
@@ -169,25 +155,7 @@ suite("Import AJS definition via WebAPI command", () => {
     assert.deepStrictEqual(state.observed.informationMessages, [
       "JP1/AJS WebAPI import beta loaded 1 unit(s).",
     ]);
-    assert.deepStrictEqual(
-      state.observed.events.map((event) => event.eventName),
-      ["webapi_import.workflow.started", "webapi_import.workflow.completed"],
-    );
-    assert.deepStrictEqual(state.observed.events[0].properties, {
-      development: String(DEVELOPMENT),
-      host: "desktop",
-      stage: "started",
-      result: "started",
-    });
-    assert.deepStrictEqual(state.observed.events[1].properties, {
-      development: String(DEVELOPMENT),
-      host: "desktop",
-      stage: "completed",
-      result: "success",
-      durationBucket: "lt100ms",
-      unitCountBucket: "1",
-      all: "true",
-    });
+    assert.deepStrictEqual(state.observed.completions, ["success"]);
   });
 
   test("returns cancelled without invoking the capability", async () => {
@@ -201,18 +169,39 @@ suite("Import AJS definition via WebAPI command", () => {
     }
     assert.strictEqual(result.error.code, "cancelled");
     assert.deepStrictEqual(state.observed.requests, []);
-    assert.deepStrictEqual(
-      state.observed.events.map((event) => event.eventName),
-      ["webapi_import.workflow.started", "webapi_import.workflow.cancelled"],
-    );
-    assert.deepStrictEqual(state.observed.events[1].properties, {
-      development: String(DEVELOPMENT),
-      host: "desktop",
-      stage: "cancelled",
-      result: "cancelled",
-      durationBucket: "lt100ms",
-      inputStep: "manager",
-    });
+    assert.deepStrictEqual(state.observed.completions, ["cancelled"]);
+  });
+
+  test("keeps cancellation silent at every prompt", async () => {
+    for (
+      let promptIndex = 0;
+      promptIndex < successfulAnswers.length;
+      promptIndex += 1
+    ) {
+      const state = createDeps(successfulAnswers.slice(0, promptIndex), {
+        showInformationMessage: async () => {
+          throw new Error("cancellation must not show an information message");
+        },
+        showErrorMessage: async () => {
+          throw new Error("cancellation must not show an error message");
+        },
+      });
+
+      const result = await executeImportAjsDefinitionViaWebApiCommand(
+        state.deps,
+      );
+
+      assert.strictEqual(result.ok, false);
+      if (result.ok) {
+        throw new Error("Expected cancelled result.");
+      }
+      assert.strictEqual(result.error.code, "cancelled");
+      assert.strictEqual(state.observed.prompts.length, promptIndex + 1);
+      assert.deepStrictEqual(state.observed.requests, []);
+      assert.deepStrictEqual(state.observed.informationMessages, []);
+      assert.deepStrictEqual(state.observed.errorMessages, []);
+      assert.deepStrictEqual(state.observed.completions, ["cancelled"]);
+    }
   });
 
   test("falls back to en for unsupported WebAPI languages", async () => {
@@ -228,15 +217,11 @@ suite("Import AJS definition via WebAPI command", () => {
     );
   });
 
-  test("does not let telemetry failures block the import workflow", async () => {
-    const telemetry = new VscodeTelemetryAdapter("test", () => ({
-      sendTelemetryEvent: () => {
+  test("does not let completion reporting failures block the import workflow", async () => {
+    const state = createDeps(successfulAnswers, {
+      reportCompleted: () => {
         throw new Error("telemetry failed");
       },
-      dispose() {},
-    }));
-    const state = createDeps(successfulAnswers, {
-      reportTelemetry: (event) => telemetry.report(event),
     });
 
     const result = await executeImportAjsDefinitionViaWebApiCommand(state.deps);
@@ -245,20 +230,6 @@ suite("Import AJS definition via WebAPI command", () => {
     assert.deepStrictEqual(state.observed.informationMessages, [
       "JP1/AJS WebAPI import beta loaded 1 unit(s).",
     ]);
-  });
-
-  test("does not swallow non-adapter reporting errors", async () => {
-    const expected = new Error("invalid reporting dependency");
-    const state = createDeps(successfulAnswers, {
-      reportTelemetry: () => {
-        throw expected;
-      },
-    });
-
-    await assert.rejects(
-      executeImportAjsDefinitionViaWebApiCommand(state.deps),
-      (error) => error === expected,
-    );
   });
 
   test("reports injected unsupported-host capability before prompting", async () => {
@@ -270,7 +241,6 @@ suite("Import AJS definition via WebAPI command", () => {
       ),
     };
     const state = createDeps([], {
-      getHost: () => "web",
       importCapability: {
         unavailable,
         importDefinition: async () => unavailable,
@@ -284,21 +254,7 @@ suite("Import AJS definition via WebAPI command", () => {
     assert.deepStrictEqual(state.observed.errorMessages, [
       "JP1/AJS WebAPI import beta is available only in the desktop extension host.",
     ]);
-    assert.deepStrictEqual(
-      state.observed.events.map((event) => event.eventName),
-      [
-        "webapi_import.workflow.started",
-        "webapi_import.workflow.unsupported_host",
-      ],
-    );
-    assert.deepStrictEqual(state.observed.events[1].properties, {
-      development: String(DEVELOPMENT),
-      host: "web",
-      stage: "unsupported_host",
-      result: "unsupported_host",
-      durationBucket: "lt100ms",
-      errorCode: "unsupported-host",
-    });
+    assert.deepStrictEqual(state.observed.completions, ["failed"]);
   });
 
   test("preserves capability rejection without reporting a result", async () => {
@@ -315,10 +271,7 @@ suite("Import AJS definition via WebAPI command", () => {
       executeImportAjsDefinitionViaWebApiCommand(state.deps),
       (error) => error === expected,
     );
-    assert.deepStrictEqual(
-      state.observed.events.map((event) => event.eventName),
-      ["webapi_import.workflow.started"],
-    );
+    assert.deepStrictEqual(state.observed.completions, ["failed"]);
     assert.deepStrictEqual(state.observed.informationMessages, []);
     assert.deepStrictEqual(state.observed.errorMessages, []);
   });
@@ -342,14 +295,6 @@ suite("Import AJS definition via WebAPI command", () => {
 
     assert.strictEqual(result.ok, false);
     assert.deepStrictEqual(state.observed.errorMessages, ["Forbidden"]);
-    assert.deepStrictEqual(state.observed.events[1].properties, {
-      development: String(DEVELOPMENT),
-      host: "desktop",
-      stage: "failed",
-      result: "failed",
-      durationBucket: "lt100ms",
-      errorCode: "authorization-failed",
-      httpStatusCategory: "4xx",
-    });
+    assert.deepStrictEqual(state.observed.completions, ["failed"]);
   });
 });

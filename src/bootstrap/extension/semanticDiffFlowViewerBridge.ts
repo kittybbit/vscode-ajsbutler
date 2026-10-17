@@ -38,7 +38,14 @@ const buildReadyDocument = (
 };
 
 export type SemanticDiffFlowViewerBridge = Readonly<{
-  setFactory(factory: ViewerFactory): void;
+  setFactory(
+    factory: ViewerFactory,
+    openCallbacks: Readonly<{
+      onOpenStarted(panel: vscode.WebviewPanel): void;
+      onOpenFailed(): void;
+      onPanelFailed(panel: vscode.WebviewPanel): void;
+    }>,
+  ): void;
   onReady(document: vscode.TextDocument, panel: vscode.WebviewPanel): void;
   onDocumentChanged(
     document: UnitListDocumentDto | null,
@@ -74,30 +81,50 @@ const findOrCreatePanel = (
     : { panel: factory.getPanel(document), created: true };
 };
 
+const disposePanelSafely = (panel: vscode.WebviewPanel): void => {
+  try {
+    panel.dispose();
+  } catch {
+    // Keep the Flow-open failure as the reported error.
+  }
+};
+
 const mountCreatedPanel = (
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
   created: boolean,
 ): void => {
-  if (!created) return;
-  try {
-    mountViewerPanel(context, panel, AJS_FLOW_VIEWER_TYPE);
-  } catch (error) {
-    panel.dispose();
-    throw error;
-  }
+  if (created) mountViewerPanel(context, panel, AJS_FLOW_VIEWER_TYPE);
 };
 
-const revealPanel = (panel: vscode.WebviewPanel): void => {
+const reportPanelOpenFailure = (
+  callbacks: Readonly<{ onOpenFailed(): void }>,
+  panelInfo:
+    | Readonly<{ panel: vscode.WebviewPanel; created: boolean }>
+    | undefined,
+): void => {
+  callbacks.onOpenFailed();
+  if (panelInfo?.created) disposePanelSafely(panelInfo.panel);
+};
+
+const revealPanel = (panel: vscode.WebviewPanel): boolean => {
   try {
     panel.reveal(panel.viewColumn);
+    return true;
   } catch {
-    throw new Error("Flow viewer could not be revealed.");
+    return false;
   }
 };
 
 class FlowViewerBridgeController implements SemanticDiffFlowViewerBridge {
   private factory: ViewerFactory | undefined;
+  private openCallbacks:
+    | Readonly<{
+        onOpenStarted(panel: vscode.WebviewPanel): void;
+        onOpenFailed(): void;
+        onPanelFailed(panel: vscode.WebviewPanel): void;
+      }>
+    | undefined;
   private readonly readyByPanel = new WeakMap<
     vscode.WebviewPanel,
     FlowReadyState
@@ -112,8 +139,16 @@ class FlowViewerBridgeController implements SemanticDiffFlowViewerBridge {
     private readonly context: vscode.ExtensionContext,
   ) {}
 
-  public setFactory(factory: ViewerFactory): void {
+  public setFactory(
+    factory: ViewerFactory,
+    openCallbacks: Readonly<{
+      onOpenStarted(panel: vscode.WebviewPanel): void;
+      onOpenFailed(): void;
+      onPanelFailed(panel: vscode.WebviewPanel): void;
+    }>,
+  ): void {
     this.factory = factory;
+    this.openCallbacks = openCallbacks;
   }
 
   public onReady(
@@ -167,12 +202,26 @@ class FlowViewerBridgeController implements SemanticDiffFlowViewerBridge {
 
   private async openPanel(uri: vscode.Uri): Promise<vscode.WebviewPanel> {
     const factory = this.factory;
-    if (!factory) throw new Error("Flow viewer is not registered.");
-    const document = await vscode.workspace.openTextDocument(uri);
-    const panelInfo = findOrCreatePanel(factory, document);
-    mountCreatedPanel(this.context, panelInfo.panel, panelInfo.created);
-    revealPanel(panelInfo.panel);
-    return panelInfo.panel;
+    const openCallbacks = this.openCallbacks;
+    if (!factory || !openCallbacks) {
+      openCallbacks?.onOpenFailed();
+      throw new Error("Flow viewer is not registered.");
+    }
+    let panelInfo:
+      | Readonly<{ panel: vscode.WebviewPanel; created: boolean }>
+      | undefined;
+    try {
+      const document = await vscode.workspace.openTextDocument(uri);
+      panelInfo = findOrCreatePanel(factory, document);
+      mountCreatedPanel(this.context, panelInfo.panel, panelInfo.created);
+      if (!revealPanel(panelInfo.panel))
+        throw new Error("Flow viewer could not be revealed.");
+      openCallbacks.onOpenStarted(panelInfo.panel);
+      return panelInfo.panel;
+    } catch (error) {
+      reportPanelOpenFailure(openCallbacks, panelInfo);
+      throw error;
+    }
   }
 
   private createFlowPanel(

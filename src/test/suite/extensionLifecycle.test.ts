@@ -1,11 +1,6 @@
 import * as assert from "assert";
-import {
-  createExtensionLifecycleActivatedEvent,
-  createExtensionLifecycleDeactivatedEvent,
-  createLegacyExtensionActivatedEvent,
-  createLegacyExtensionDeactivatedEvent,
-} from "../../application/telemetry/extensionLifecycleTelemetry";
-import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { createExtensionActivatedEvent } from "../../application/telemetry/telemetryEvent";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import { MyExtension } from "../../bootstrap/extension/MyExtension";
 import {
   reportExtensionActivated,
@@ -26,8 +21,7 @@ suite("Extension lifecycle", () => {
     reportExtensionActivated(extension);
 
     assert.deepStrictEqual(events, [
-      createLegacyExtensionActivatedEvent().name,
-      createExtensionLifecycleActivatedEvent("desktop").name,
+      createExtensionActivatedEvent("desktop").name,
     ]);
     extension.dispose();
   });
@@ -47,10 +41,7 @@ suite("Extension lifecycle", () => {
 
     reportAndDisposeExtensionRuntime(extension);
 
-    assert.deepStrictEqual(events, [
-      createLegacyExtensionDeactivatedEvent().name,
-      createExtensionLifecycleDeactivatedEvent("desktop").name,
-    ]);
+    assert.deepStrictEqual(events, []);
     assert.strictEqual(disposeCount, 1);
   });
 

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import { createWebApiImportCompletedEvent } from "../../application/telemetry/telemetryEvent";
 import {
   createImportAjsDefinitionError,
   type ImportAjsDefinitionHostKind,
@@ -17,7 +18,6 @@ export type WebApiImportWiringDeps = {
 };
 
 export const createWebApiImportSubscriptions = ({
-  host,
   importCapability,
   telemetry,
 }: WebApiImportWiringDeps): vscode.Disposable[] => {
@@ -26,7 +26,6 @@ export const createWebApiImportSubscriptions = ({
       IMPORT_AJS_DEFINITION_VIA_WEBAPI_COMMAND,
       () =>
         executeImportAjsDefinitionViaWebApiCommand({
-          getHost: () => host,
           getLanguage: () => vscode.env.language,
           showInputBox: (options) => vscode.window.showInputBox(options),
           showInformationMessage: (message) =>
@@ -34,8 +33,8 @@ export const createWebApiImportSubscriptions = ({
           showErrorMessage: (message) =>
             vscode.window.showErrorMessage(message),
           importCapability,
-          now: () => Date.now(),
-          reportTelemetry: (event) => telemetry.report(event),
+          reportCompleted: (result) =>
+            telemetry.report(createWebApiImportCompletedEvent(result)),
         }),
     ),
   ];

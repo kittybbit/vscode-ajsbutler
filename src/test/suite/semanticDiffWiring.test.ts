@@ -49,6 +49,7 @@ suite("Semantic diff wiring", () => {
     };
     const subscriptions = createSemanticDiffSubscriptions({
       extensionContext: { subscriptions: [] } as vscode.ExtensionContext,
+      telemetry: { report() {}, dispose() {} },
       buildSemanticDiffReportData: buildReport,
       beginSemanticDiffSourceCapture: beginCapture,
       sourceHandleIdAllocator: createSemanticDiffSourceHandleIdAllocator(),
@@ -165,6 +166,7 @@ suite("Semantic diff wiring", () => {
     };
     const subscriptions = createSemanticDiffSubscriptions({
       extensionContext: { subscriptions: [] } as vscode.ExtensionContext,
+      telemetry: { report() {}, dispose() {} },
       buildSemanticDiffReportData: () => ({
         ok: true,
         result: emptyResult(),

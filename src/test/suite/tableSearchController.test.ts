@@ -79,7 +79,7 @@ suite("Table search controller", () => {
     restoreDomGlobals(dom, previousGlobals);
   });
 
-  test("submits normalized searches, reveals the first match, and reports metadata", () => {
+  test("submits a committed search and reveals the first match", () => {
     const messages: unknown[] = [];
     const revealedPaths: string[] = [];
     window.vscode = {
@@ -107,8 +107,39 @@ suite("Table search controller", () => {
       searchedAbsolutePath: "/root/target",
     });
     assert.deepStrictEqual(revealedPaths, ["/root/target"]);
-    assert.strictEqual((messages[0] as { type: string }).type, "search");
-    assert.strictEqual(JSON.stringify(messages[0]).includes("Target"), false);
+    assert.deepStrictEqual(messages, [
+      { type: "search", data: { feature: "table" } },
+    ]);
+  });
+
+  test("keeps search state and reveal when telemetry transport throws", () => {
+    const revealedPaths: string[] = [];
+    let attempted = 0;
+    window.vscode = {
+      postMessage: () => {
+        attempted += 1;
+        throw new Error("webview transport unavailable");
+      },
+    } as never;
+
+    const { result } = renderHook(() =>
+      useTableSearchController({
+        rows: [createRow("/root/target", ["target job"])],
+        parameterSearchValuesByPath: new Map(),
+        revealPath: (absolutePath) => revealedPaths.push(absolutePath),
+      }),
+    );
+
+    act(() => result.current.submitSearch("target"));
+
+    assert.strictEqual(attempted, 1);
+    assert.strictEqual(result.current.searchQuery, "target");
+    assert.deepStrictEqual(result.current.searchState, {
+      query: "target",
+      matchedAbsolutePaths: ["/root/target"],
+      searchedAbsolutePath: "/root/target",
+    });
+    assert.deepStrictEqual(revealedPaths, ["/root/target"]);
   });
 
   test("navigates active results, submits stale queries, and clears safely", () => {
@@ -138,10 +169,9 @@ suite("Table search controller", () => {
       "/root/second",
     );
     assert.deepStrictEqual(revealedPaths, ["/root/first", "/root/second"]);
-    assert.strictEqual(
-      (messages[1] as { data: { action: string } }).data.action,
-      "navigated",
-    );
+    assert.deepStrictEqual(messages, [
+      { type: "search", data: { feature: "table" } },
+    ]);
 
     act(() => result.current.navigateSearch("missing", "next"));
     assert.deepStrictEqual(result.current.searchState, {
@@ -149,19 +179,19 @@ suite("Table search controller", () => {
       matchedAbsolutePaths: [],
       searchedAbsolutePath: undefined,
     });
-    assert.strictEqual(
-      (messages[2] as { data: { result: string } }).data.result,
-      "no_match",
-    );
+    assert.deepStrictEqual(messages, [
+      { type: "search", data: { feature: "table" } },
+      { type: "search", data: { feature: "table" } },
+    ]);
 
     act(() => result.current.resetSearch());
     assert.strictEqual(result.current.searchQuery, "");
     assert.deepStrictEqual(result.current.searchState, {
       matchedAbsolutePaths: [],
     });
-    assert.strictEqual(
-      (messages[3] as { data: { action: string } }).data.action,
-      "cleared",
-    );
+    assert.deepStrictEqual(messages, [
+      { type: "search", data: { feature: "table" } },
+      { type: "search", data: { feature: "table" } },
+    ]);
   });
 });

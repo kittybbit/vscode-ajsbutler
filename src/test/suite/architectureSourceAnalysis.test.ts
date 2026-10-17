@@ -41,6 +41,44 @@ suite("Architecture source analysis", () => {
     );
   });
 
+  test("records original symbols only for named-only imports and type queries separately", () => {
+    const references = collectImportReferencesFromSource(
+      "src/presentation/example.ts",
+      `
+        import { createEvent as build, type TelemetryHost as Host } from "./named";
+        import type { PublicType } from "./typeOnly";
+        import defaultValue, { NamedValue } from "./defaultAndNamed";
+        import * as namespaceValue from "./namespace";
+        import "./sideEffect";
+        type Hidden = import("./typeQuery").InternalType;
+      `,
+    );
+
+    assert.deepStrictEqual(
+      references.map(({ kind, specifier, namedSymbols }) => ({
+        kind,
+        specifier,
+        ...(namedSymbols === undefined ? {} : { namedSymbols }),
+      })),
+      [
+        {
+          kind: "import",
+          specifier: "./named",
+          namedSymbols: ["createEvent", "TelemetryHost"],
+        },
+        {
+          kind: "import-type",
+          specifier: "./typeOnly",
+          namedSymbols: ["PublicType"],
+        },
+        { kind: "import", specifier: "./defaultAndNamed" },
+        { kind: "import", specifier: "./namespace" },
+        { kind: "import", specifier: "./sideEffect" },
+        { kind: "import-type-query", specifier: "./typeQuery" },
+      ],
+    );
+  });
+
   test("resolves relative and repository-alias imports", () => {
     assert.strictEqual(
       resolveImportPath("src/application/example.ts", "../domain/value"),

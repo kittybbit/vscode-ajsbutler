@@ -1,68 +1,55 @@
 import * as assert from "assert";
 import {
+  createCsvExportedEvent,
+  createSearchExecutedEvent,
+} from "../../application/telemetry/telemetryEvent";
+import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
+import {
+  createViewerDisplayAcknowledgementRequest,
   createViewerNavigationRequest,
-  createViewerOperationRequest,
-  createViewerPerformanceRequest,
   createViewerReadyRequest,
   createViewerResourceRequest,
   createViewerSaveRequest,
   createViewerSearchRequest,
-  NAVIGATE,
-  OPERATION,
-  PERFORMANCE,
-  READY,
-  RESOURCE,
-  SAVE,
-  SEARCH,
+  parseViewerRequest,
 } from "../../presentation/webview/viewerRequestMessages";
 import {
   createViewerMessageHandler,
   registerViewerPanel,
-  registerViewerPanelDispose,
 } from "../../presentation/vscode/webview/viewerMessageRouting";
 
-suite("Viewer message routing", () => {
-  test("routes shared webview events through injected handlers", async () => {
-    const calls: string[] = [];
-    const telemetryEvents: Array<{
-      eventName: string;
-      properties?: Record<string, string>;
-    }> = [];
-    const document = {
-      uri: { toString: () => "file:///sample.ajs" },
-    };
-    const panel = {
-      viewType: "ajsbutler.tableViewer",
-    };
+const flushMicrotasks = async (): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+};
 
+suite("Viewer message routing", () => {
+  test("routes functional requests and reports only search and copy success", async () => {
+    const calls: string[] = [];
+    const events: unknown[] = [];
+    const telemetry: TelemetryPort = {
+      report: (event) => events.push(event),
+      dispose() {},
+    };
+    let displayed: string | undefined;
     const handler = createViewerMessageHandler({
-      document: document as never,
-      panel: panel as never,
-      telemetry: {
-        report: (event) => {
-          telemetryEvents.push({
-            eventName: event.name,
-            properties: event.properties,
-          });
-        },
-        dispose() {},
-      },
+      document: {} as never,
+      panel: {} as never,
+      telemetry,
+      isActivePanel: () => true,
       onReady: () => {
         calls.push("ready");
       },
-      onResource: () => {
-        calls.push("resource");
-      },
-      onOperation: ({ operation }) => {
-        calls.push(`operation:${operation}`);
-      },
-      onNavigate: (_document, event) => {
+      onResource: ({ data }) => calls.push(`resource:${data.scrollType}`),
+      onNavigate: (_document, event) =>
         calls.push(
           `navigate:${event.data.targetView}:${event.data.absolutePath}`,
-        );
+        ),
+      onDisplay: (result) => {
+        displayed = result;
       },
       onSave: async (content) => {
         calls.push(`save:${content}`);
+        return true;
       },
       showErrorMessage: async () => undefined,
     });
@@ -70,109 +57,124 @@ suite("Viewer message routing", () => {
     handler(createViewerResourceRequest("table"));
     handler(createViewerReadyRequest());
     handler(createViewerSaveRequest("body"));
-    handler(createViewerOperationRequest("copy.csv"));
     handler(createViewerNavigationRequest("flow", "/root/unit"));
-    handler(
-      createViewerSearchRequest({
-        surface: "table",
-        action: "submitted",
-        result: "no_match",
-        mode: "partial",
-        queryLengthBucket: "2_9",
-        resultCountBucket: "0",
-        durationBucket: "lt100ms",
-        scope: "visible_rows",
-      }),
-    );
-    handler(
-      createViewerPerformanceRequest({
-        operation: "csv_export",
-        result: "success",
-        durationBucket: "lt100ms",
-        rowCountBucket: "2_9",
-      }),
-    );
+    handler(createViewerSearchRequest("table"));
+    handler({ type: "csv_export", data: { method: "copy" } });
+    handler(createViewerDisplayAcknowledgementRequest("success"));
+    await flushMicrotasks();
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
     assert.deepStrictEqual(calls, [
-      "resource",
+      "resource:table",
       "ready",
-      "save:body",
-      "operation:copy.csv",
       "navigate:flow:/root/unit",
+      "save:body",
     ]);
-    assert.deepStrictEqual(telemetryEvents, [
-      {
-        eventName: "search.table.submitted",
-        properties: {
-          development: String(DEVELOPMENT),
-          host: "desktop",
-          surface: "table",
-          mode: "partial",
-          result: "no_match",
-          queryLengthBucket: "2_9",
-          resultCountBucket: "0",
-          durationBucket: "lt100ms",
-          scope: "visible_rows",
-        },
-      },
-      {
-        eventName: "performance.csv_export.completed",
-        properties: {
-          development: String(DEVELOPMENT),
-          host: "desktop",
-          operation: "csv_export",
-          result: "success",
-          durationBucket: "lt100ms",
-          rowCountBucket: "2_9",
-        },
-      },
+    assert.deepStrictEqual(events, [
+      createSearchExecutedEvent("table"),
+      createCsvExportedEvent("copy"),
     ]);
+    assert.strictEqual(displayed, "success");
   });
 
-  test("shows an error when save data is invalid", async () => {
-    const errors: string[] = [];
+  test("rejects retired, malformed, and over-specified analytics requests", () => {
+    const calls: string[] = [];
     const handler = createViewerMessageHandler({
       document: {} as never,
       panel: {} as never,
-      telemetry: {} as never,
-      onReady: () => {},
-      onResource: () => {},
-      onOperation: () => {},
-      onNavigate: () => {},
-      onSave: async () => undefined,
-      showErrorMessage: async (message) => {
-        errors.push(message);
-        return undefined;
+      telemetry: { report: () => calls.push("telemetry"), dispose() {} },
+      isActivePanel: () => true,
+      onReady: () => {
+        calls.push("ready");
       },
+      onResource: () => calls.push("resource"),
+      onNavigate: () => calls.push("navigate"),
+      onDisplay: () => calls.push("display"),
+      showErrorMessage: async () => undefined,
     });
 
-    handler({ type: SAVE, data: 1 as never });
+    const invalidRequests = [
+      { type: "operation", data: { operation: "copy.csv" } },
+      { type: "performance", data: { operation: "render" } },
+      { type: "search", data: { feature: "table", query: "secret" } },
+      { type: "csv_export", data: { method: "save" } },
+      { type: "display", data: { result: "success" } },
+      { type: "ready", data: {} },
+      { type: "unknown", data: {} },
+    ];
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    assert.deepStrictEqual(errors, [
-      "Data is not a string and cannot be saved.",
-    ]);
+    for (const request of invalidRequests) {
+      assert.strictEqual(parseViewerRequest(request), undefined);
+      assert.doesNotThrow(() => handler(request));
+    }
+    assert.deepStrictEqual(calls, []);
   });
 
-  test("maps host operation failures to safe messages", async () => {
+  test("keeps analytics silent for an inactive panel", () => {
+    const events: unknown[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: { report: (event) => events.push(event), dispose() {} },
+      isActivePanel: () => false,
+      onReady: () => {},
+      onResource: () => {},
+      onNavigate: () => {},
+      onDisplay: () => {},
+      showErrorMessage: async () => undefined,
+    });
+
+    handler(createViewerSearchRequest("flow"));
+    handler({ type: "csv_export", data: { method: "copy" } });
+    handler(createViewerDisplayAcknowledgementRequest("failed"));
+    assert.deepStrictEqual(events, []);
+  });
+
+  test("keeps viewer requests functional when telemetry reporting throws", () => {
+    const calls: string[] = [];
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: {
+        report: () => {
+          throw new Error("telemetry transport failed");
+        },
+        dispose() {},
+      },
+      isActivePanel: () => true,
+      onReady: () => {
+        calls.push("ready");
+      },
+      onResource: () => calls.push("resource"),
+      onNavigate: () => calls.push("navigate"),
+      onDisplay: () => calls.push("display"),
+      showErrorMessage: async () => undefined,
+    });
+
+    assert.doesNotThrow(() => handler(createViewerSearchRequest("table")));
+    assert.doesNotThrow(() =>
+      handler({ type: "csv_export", data: { method: "copy" } }),
+    );
+    handler(createViewerReadyRequest());
+    assert.deepStrictEqual(calls, ["ready"]);
+  });
+
+  test("preserves safe errors for invalid save data and host failures", async () => {
     const errors: string[] = [];
     const handler = createViewerMessageHandler({
       document: {} as never,
       panel: {} as never,
-      telemetry: {} as never,
+      telemetry: { report() {}, dispose() {} },
+      isActivePanel: () => true,
       onReady: () => {
         throw new Error("secret refresh failure");
       },
       onResource: () => {
         throw new Error("secret resource failure");
       },
-      onOperation: () => {
-        throw new Error("secret telemetry failure");
-      },
       onNavigate: () => {
         throw new Error("secret navigation failure");
       },
+      onDisplay: () => {},
       onSave: async () => {
         throw new Error("secret save failure");
       },
@@ -182,15 +184,15 @@ suite("Viewer message routing", () => {
       },
     });
 
+    handler({ type: "save", data: 1 });
     handler(createViewerResourceRequest("window"));
     handler(createViewerReadyRequest());
     handler(createViewerSaveRequest("body"));
-    handler(createViewerOperationRequest("copy.csv"));
-    handler(createViewerNavigationRequest("flow", "/root/unit"));
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    handler(createViewerNavigationRequest("table", "/root/unit"));
+    await flushMicrotasks();
 
     assert.deepStrictEqual(errors, [
+      "Data is not a string and cannot be saved.",
       "Viewer resources could not be loaded.",
       "The viewer document could not be refreshed.",
       "Viewer navigation could not be completed.",
@@ -199,50 +201,17 @@ suite("Viewer message routing", () => {
     assert.ok(errors.every((message) => !message.includes("secret")));
   });
 
-  test("reports when a viewer cannot handle a valid save request", async () => {
-    const errors: string[] = [];
-    const handler = createViewerMessageHandler({
-      document: {} as never,
-      panel: {} as never,
-      telemetry: {} as never,
-      onReady: () => {},
-      onResource: () => {},
-      onOperation: () => {},
-      onNavigate: () => {},
-      showErrorMessage: async (message) => {
-        errors.push(message);
-        return undefined;
-      },
-    });
-
-    handler(createViewerSaveRequest("body"));
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    assert.deepStrictEqual(errors, [
-      "Saving is not available for this viewer.",
-    ]);
-  });
-
-  test("registers active-panel routing and disposal as one bridge", () => {
+  test("registers active-panel guards and cleans up on disposal", () => {
     const calls: string[] = [];
-    const telemetryEvents: string[] = [];
-    const removed: string[] = [];
+    const events: unknown[] = [];
     let active = true;
     let receiveMessageHandler: ((value: unknown) => void) | undefined;
     let onDidDispose: (() => void) | undefined;
-    const document = {
-      uri: { toString: () => "file:///sample.ajs" },
-    };
     const panel = {
       webview: {
         onDidReceiveMessage(handler: (value: unknown) => void) {
           receiveMessageHandler = handler;
-          return {
-            dispose() {
-              calls.push("receiver-disposed");
-            },
-          };
+          return { dispose: () => calls.push("receiver-disposed") };
         },
       },
       onDidDispose(callback: () => void) {
@@ -252,136 +221,38 @@ suite("Viewer message routing", () => {
     };
 
     registerViewerPanel({
-      document: document as never,
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
       handlers: {
-        onReady: () => calls.push("ready"),
+        onReady: () => {
+          calls.push("ready");
+        },
         onNavigate: () => {},
+        onDisposed: () => calls.push("disposed"),
       },
       isActivePanel: () => active,
       telemetry: {
-        report: (event) => telemetryEvents.push(event.name),
+        report: (event) => events.push(event),
         dispose() {},
       },
-      store: {
-        removeByUri: (uri) => removed.push(uri.toString()),
-      },
+      store: { removeByUri: () => calls.push("removed") },
       showErrorMessage: async () => undefined,
     });
 
     receiveMessageHandler?.(createViewerReadyRequest());
+    receiveMessageHandler?.(createViewerSearchRequest("flow"));
     active = false;
     receiveMessageHandler?.(createViewerReadyRequest());
+    receiveMessageHandler?.(createViewerSearchRequest("flow"));
     onDidDispose?.();
 
-    assert.deepStrictEqual(calls, ["ready", "receiver-disposed"]);
-    assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
-    assert.deepStrictEqual(telemetryEvents, ["viewer.flow.closed"]);
-  });
-
-  test("ignores invalid navigation payloads without invoking the host adapter", () => {
-    const calls: string[] = [];
-    const handler = createViewerMessageHandler({
-      document: {} as never,
-      panel: {} as never,
-      telemetry: {} as never,
-      onReady: () => {},
-      onResource: () => {},
-      onOperation: () => {},
-      onNavigate: () => calls.push("navigate"),
-      showErrorMessage: async () => undefined,
-    });
-
-    handler({ type: NAVIGATE, data: undefined } as never);
-    handler({
-      type: NAVIGATE,
-      data: { targetView: "unknown", absolutePath: "/root/job" },
-    } as never);
-    handler({
-      type: NAVIGATE,
-      data: { targetView: "flow", absolutePath: "" },
-    } as never);
-
-    assert.deepStrictEqual(calls, []);
-  });
-
-  test("ignores unknown and malformed requests without invoking handlers", () => {
-    const calls: string[] = [];
-    const handler = createViewerMessageHandler({
-      document: {} as never,
-      panel: {} as never,
-      telemetry: { report: () => calls.push("telemetry") } as never,
-      onReady: () => calls.push("ready"),
-      onResource: () => calls.push("resource"),
-      onOperation: () => calls.push("operation"),
-      onNavigate: () => calls.push("navigate"),
-      onSave: async () => {
-        calls.push("save");
-      },
-      showErrorMessage: async () => {
-        calls.push("error");
-        return undefined;
-      },
-    });
-
-    for (const value of [
-      undefined,
-      { type: "unknown", data: {} },
-      { type: READY, data: {} },
-      { type: RESOURCE, data: {} },
-      { type: OPERATION, data: "unknown.operation" },
-      { type: SEARCH, data: {} },
-      { type: PERFORMANCE, data: {} },
-      { type: NAVIGATE, data: { targetView: "flow", absolutePath: "" } },
-    ]) {
-      assert.doesNotThrow(() => handler(value));
-    }
-
-    assert.deepStrictEqual(calls, []);
-  });
-
-  test("cleans up store and message subscription when the panel is disposed", () => {
-    const removed: string[] = [];
-    let receiverDisposed = false;
-    let onDidDispose: (() => void) | undefined;
-    const document = {
-      uri: { toString: () => "file:///sample.ajs" },
-    };
-    const panel = {
-      onDidDispose: (callback: () => void) => {
-        onDidDispose = callback;
-      },
-    };
-
-    registerViewerPanelDispose({
-      uri: document.uri as never,
-      panel: panel as never,
-      viewType: "ajsbutler.flowViewer",
-      telemetry: {
-        report: (event) => {
-          removed.push(`event:${event.name}`);
-        },
-        dispose() {},
-      },
-      store: {
-        removeByUri: (receivedUri) => {
-          removed.push(receivedUri.toString());
-        },
-      },
-      receiveMessageDispose: {
-        dispose: () => {
-          receiverDisposed = true;
-        },
-      },
-    });
-
-    onDidDispose?.();
-
-    assert.deepStrictEqual(removed, [
-      "event:viewer.flow.closed",
-      "file:///sample.ajs",
+    assert.deepStrictEqual(calls, [
+      "ready",
+      "disposed",
+      "removed",
+      "receiver-disposed",
     ]);
-    assert.strictEqual(receiverDisposed, true);
+    assert.deepStrictEqual(events, [createSearchExecutedEvent("flow")]);
   });
 });

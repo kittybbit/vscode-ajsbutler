@@ -7,7 +7,6 @@ import { useMyAppContext } from "../MyContexts";
 import { type Edge, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
-import { createViewerOperationRequest } from "../../viewerRequestMessages";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import Header from "./Header";
 import FlowSelector from "./FlowSelector";
@@ -38,6 +37,7 @@ import {
   type ViewerAnnouncementHostHandle,
 } from "../shared/viewerAnnouncements";
 import { unitInformationMessage } from "../unitInformationLocalization";
+import { useFlowDisplayAcknowledgement } from "./useFlowViewerEffects";
 
 export type { SemanticDiffRelationDuplicateGroup } from "./FlowGraphCanvas";
 
@@ -321,22 +321,15 @@ const useFlowMiniMapColors = (theme: Theme): FlowMiniMapColors =>
     [theme],
   );
 
-const reportFlowOperation = (
-  operation: Parameters<typeof createViewerOperationRequest>[0],
-): void => {
-  window.vscode.postMessage(createViewerOperationRequest(operation));
-};
-
-const openSelectedDefinitionWithTelemetry = (
+const openSelectedDefinition = (
   canOpenDefinition: boolean | undefined,
   openDefinition: () => void,
 ): void => {
   if (!canOpenDefinition) return;
-  reportFlowOperation("definition.open");
   openDefinition();
 };
 
-type FlowTelemetryActionsInput = Readonly<{
+type FlowViewerActionsInput = Readonly<{
   currentUnitIdState: CurrentUnitIdStateType;
   flowDocumentDto: FlowViewerController["flowDocumentDto"];
   openSelectedNodeDefinition: () => void;
@@ -348,7 +341,6 @@ type FlowTelemetryActionsInput = Readonly<{
   selectFlowNode: (unitId: string) => void;
   selectTreeUnit: (unitId: string) => void;
   selectedNodeCanOpenDefinition: boolean | undefined;
-  selectedUnitId: string | undefined;
   toggleExpandAllNestedUnits: () => void;
   toggleExpandedFlowNodeFromKeyboard: (unitId: string) => void;
   toggleFocusMode: () => void;
@@ -356,7 +348,7 @@ type FlowTelemetryActionsInput = Readonly<{
   unitById: ReadonlyMap<string, FlowGraphUnitDto>;
 }>;
 
-const useFlowTelemetryActions = ({
+const useFlowViewerActions = ({
   currentUnitIdState,
   flowDocumentDto,
   openSelectedNodeDefinition,
@@ -368,25 +360,18 @@ const useFlowTelemetryActions = ({
   selectFlowNode,
   selectTreeUnit,
   selectedNodeCanOpenDefinition,
-  selectedUnitId,
   toggleExpandAllNestedUnits,
   toggleExpandedFlowNodeFromKeyboard,
   toggleFocusMode,
   toggleMiniMap,
   unitById,
-}: FlowTelemetryActionsInput) => {
-  const selectFlowNodeWithTelemetry = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("unit.select");
-      selectFlowNode(unitId);
-    },
+}: FlowViewerActionsInput) => {
+  const selectFlowNodeAction = useCallback(
+    (unitId: string) => selectFlowNode(unitId),
     [selectFlowNode],
   );
-  const selectTreeUnitWithTelemetry = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("unit.select");
-      selectTreeUnit(unitId);
-    },
+  const selectTreeUnitAction = useCallback(
+    (unitId: string) => selectTreeUnit(unitId),
     [selectTreeUnit],
   );
   const handleEnterFlowTreeUnit = useCallback(
@@ -394,11 +379,8 @@ const useFlowTelemetryActions = ({
     [requestGraphFocus],
   );
   const handleFocusDetail = useCallback(
-    (unitId: string) => {
-      if (selectedUnitId !== unitId) reportFlowOperation("unit.select");
-      requestDetailFocus(unitId);
-    },
-    [requestDetailFocus, selectedUnitId],
+    (unitId: string) => requestDetailFocus(unitId),
+    [requestDetailFocus],
   );
   const handleFocusSelector = useCallback(
     (unitId?: string) =>
@@ -418,56 +400,50 @@ const useFlowTelemetryActions = ({
     ],
   );
   const handleOpenFlowScope = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("flow.scope.open");
-      requestScopeTransition(unitId, unitId);
-    },
+    (unitId: string) => requestScopeTransition(unitId, unitId),
     [requestScopeTransition],
   );
-  const openSelectedNodeDefinitionWithTelemetry = useCallback(
+  const openSelectedNodeDefinitionAction = useCallback(
     () =>
-      openSelectedDefinitionWithTelemetry(
+      openSelectedDefinition(
         selectedNodeCanOpenDefinition,
         openSelectedNodeDefinition,
       ),
     [openSelectedNodeDefinition, selectedNodeCanOpenDefinition],
   );
-  const openSelectedNodeScopeWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.scope.open");
-    openSelectedNodeScope();
-  }, [openSelectedNodeScope]);
-  const toggleExpandAllNestedUnitsWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.nested.toggle");
-    toggleExpandAllNestedUnits();
-  }, [toggleExpandAllNestedUnits]);
-  const toggleExpandedFlowNodeFromKeyboardWithTelemetry = useCallback(
-    (unitId: string) => {
-      reportFlowOperation("flow.nested.toggle");
-      toggleExpandedFlowNodeFromKeyboard(unitId);
-    },
+  const openSelectedNodeScopeAction = useCallback(
+    () => openSelectedNodeScope(),
+    [openSelectedNodeScope],
+  );
+  const toggleExpandAllNestedUnitsAction = useCallback(
+    () => toggleExpandAllNestedUnits(),
+    [toggleExpandAllNestedUnits],
+  );
+  const toggleExpandedFlowNodeFromKeyboardAction = useCallback(
+    (unitId: string) => toggleExpandedFlowNodeFromKeyboard(unitId),
     [toggleExpandedFlowNodeFromKeyboard],
   );
-  const toggleFocusModeWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.relationship_focus.toggle");
-    toggleFocusMode();
-  }, [toggleFocusMode]);
-  const toggleMiniMapWithTelemetry = useCallback(() => {
-    reportFlowOperation("flow.minimap.toggle");
-    toggleMiniMap();
-  }, [toggleMiniMap]);
+  const toggleFocusModeAction = useCallback(
+    () => toggleFocusMode(),
+    [toggleFocusMode],
+  );
+  const toggleMiniMapAction = useCallback(
+    () => toggleMiniMap(),
+    [toggleMiniMap],
+  );
   return {
     handleEnterFlowTreeUnit,
     handleFocusDetail,
     handleFocusSelector,
     handleOpenFlowScope,
-    openSelectedNodeDefinitionWithTelemetry,
-    openSelectedNodeScopeWithTelemetry,
-    selectFlowNodeWithTelemetry,
-    selectTreeUnitWithTelemetry,
-    toggleExpandAllNestedUnitsWithTelemetry,
-    toggleExpandedFlowNodeFromKeyboardWithTelemetry,
-    toggleFocusModeWithTelemetry,
-    toggleMiniMapWithTelemetry,
+    openSelectedNodeDefinitionAction,
+    openSelectedNodeScopeAction,
+    selectFlowNodeAction,
+    selectTreeUnitAction,
+    toggleExpandAllNestedUnitsAction,
+    toggleExpandedFlowNodeFromKeyboardAction,
+    toggleFocusModeAction,
+    toggleMiniMapAction,
   };
 };
 
@@ -530,6 +506,7 @@ const FlowContents: FC = () => {
     returnFromDetail,
     selectionFocusRequest,
   } = useFlowViewerController({ theme });
+  useFlowDisplayAcknowledgement();
   const { onRendererReady, reactFlowInstanceRef } = useFlowViewportAdapter({
     edges,
     focusRequestVersion,
@@ -546,7 +523,7 @@ const FlowContents: FC = () => {
   const openSelectedNodeUnitList =
     useSelectedNodeUnitListAction(selectedNodeDetail);
   const miniMapColors = useFlowMiniMapColors(theme);
-  const telemetryActions = useFlowTelemetryActions({
+  const viewerActions = useFlowViewerActions({
     currentUnitIdState,
     flowDocumentDto,
     openSelectedNodeDefinition,
@@ -558,7 +535,6 @@ const FlowContents: FC = () => {
     selectFlowNode,
     selectTreeUnit,
     selectedNodeCanOpenDefinition: selectedNodeDetail?.canOpenDefinition,
-    selectedUnitId,
     toggleExpandAllNestedUnits,
     toggleExpandedFlowNodeFromKeyboard,
     toggleFocusMode,
@@ -570,15 +546,15 @@ const FlowContents: FC = () => {
     handleFocusDetail,
     handleFocusSelector,
     handleOpenFlowScope,
-    openSelectedNodeDefinitionWithTelemetry,
-    openSelectedNodeScopeWithTelemetry,
-    selectFlowNodeWithTelemetry,
-    selectTreeUnitWithTelemetry,
-    toggleExpandAllNestedUnitsWithTelemetry,
-    toggleExpandedFlowNodeFromKeyboardWithTelemetry,
-    toggleFocusModeWithTelemetry,
-    toggleMiniMapWithTelemetry,
-  } = telemetryActions;
+    openSelectedNodeDefinitionAction,
+    openSelectedNodeScopeAction,
+    selectFlowNodeAction,
+    selectTreeUnitAction,
+    toggleExpandAllNestedUnitsAction,
+    toggleExpandedFlowNodeFromKeyboardAction,
+    toggleFocusModeAction,
+    toggleMiniMapAction,
+  } = viewerActions;
   const {
     announceFlow,
     announceFlowNestedExpansion,
@@ -596,10 +572,10 @@ const FlowContents: FC = () => {
   );
   const selectTreeUnitWithAnnouncement = useCallback(
     (unitId: string) => {
-      selectTreeUnitWithTelemetry(unitId);
+      selectTreeUnitAction(unitId);
       announceFlowSelection(unitId);
     },
-    [announceFlowSelection, selectTreeUnitWithTelemetry],
+    [announceFlowSelection, selectTreeUnitAction],
   );
   useFlowAnnouncementEffects({
     announceFlow,
@@ -639,12 +615,12 @@ const FlowContents: FC = () => {
             language={lang}
             canToggleExpandAllNestedUnits={expandableNestedUnitIds.length > 0}
             hasExpandedAllNestedUnits={hasExpandedAllNestedUnits}
-            toggleExpandAllNestedUnits={toggleExpandAllNestedUnitsWithTelemetry}
+            toggleExpandAllNestedUnits={toggleExpandAllNestedUnitsAction}
             canEnableFocusMode={canEnableFocusMode}
             focusModeEnabled={focusModeEnabled}
-            toggleFocusMode={toggleFocusModeWithTelemetry}
+            toggleFocusMode={toggleFocusModeAction}
             showMiniMap={showMiniMap}
-            toggleMiniMap={toggleMiniMapWithTelemetry}
+            toggleMiniMap={toggleMiniMapAction}
             searchedUnitId={searchedUnitId}
             searchResultPosition={searchResultPosition}
             onSearchNavigate={handleSearchNavigate}
@@ -680,22 +656,22 @@ const FlowContents: FC = () => {
             onScopeChange={changeScope}
             onReturnFromDetail={returnFromDetail}
             onSelectorEscape={handleSelectorEscape}
-            openSelectedNodeDefinition={openSelectedNodeDefinitionWithTelemetry}
-            openSelectedNodeScope={openSelectedNodeScopeWithTelemetry}
+            openSelectedNodeDefinition={openSelectedNodeDefinitionAction}
+            openSelectedNodeScope={openSelectedNodeScopeAction}
             openSelectedNodeUnitList={openSelectedNodeUnitList}
             language={lang}
             reactFlowInstanceRef={reactFlowInstanceRef}
             selectedNodeDetail={selectedNodeDetail}
             selectedUnitId={selectedUnitId}
-            selectFlowNode={selectFlowNodeWithTelemetry}
+            selectFlowNode={selectFlowNodeAction}
             selectTreeUnit={selectTreeUnitWithAnnouncement}
             setDialogData={setDialogData}
             showMiniMap={showMiniMap}
             theme={theme}
             toggleExpandedFlowNodeFromKeyboard={
-              toggleExpandedFlowNodeFromKeyboardWithTelemetry
+              toggleExpandedFlowNodeFromKeyboardAction
             }
-            toggleFocusMode={toggleFocusModeWithTelemetry}
+            toggleFocusMode={toggleFocusModeAction}
             treeHoveredUnit={treeHoveredUnit}
             unitById={unitById}
           />

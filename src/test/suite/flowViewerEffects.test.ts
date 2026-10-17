@@ -355,7 +355,7 @@ suite("Flow viewer effects", () => {
     assert.strictEqual(view.getByTestId("definition-count").textContent, "1");
     assert.deepStrictEqual(
       postedMessages.map((message) => (message as { type: string }).type),
-      ["performance", "ready"],
+      ["ready"],
     );
 
     view.unmount();

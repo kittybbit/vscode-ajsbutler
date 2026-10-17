@@ -1,8 +1,8 @@
 import * as assert from "assert";
 import {
+  createViewerCsvExportRequest,
+  createViewerDisplayAcknowledgementRequest,
   createViewerNavigationRequest,
-  createViewerOperationRequest,
-  createViewerPerformanceRequest,
   createViewerReadyRequest,
   createViewerResourceRequest,
   createViewerSaveRequest,
@@ -18,63 +18,29 @@ const createEveryViewerRequest = (): ViewerRequest[] => [
   createViewerResourceRequest("table"),
   createViewerReadyRequest(),
   createViewerSaveRequest("csv"),
-  createViewerOperationRequest("copy.csv"),
   createViewerNavigationRequest("flow", "/root/job"),
-  createViewerSearchRequest({
-    surface: "table",
-    action: "submitted",
-    result: "matched",
-    mode: "partial",
-    queryLengthBucket: "2_9",
-    resultCountBucket: "1",
-    durationBucket: "lt100ms",
-    scope: "visible_rows",
-  }),
-  createViewerPerformanceRequest({
-    operation: "csv_export",
-    result: "success",
-    durationBucket: "lt100ms",
-    rowCountBucket: "10_99",
-  }),
+  createViewerSearchRequest("table"),
+  createViewerCsvExportRequest(),
+  createViewerDisplayAcknowledgementRequest("success"),
 ];
 
 suite("Viewer request messages", () => {
-  test("inventories every builder and round-trips plain JSON", () => {
+  test("round-trips the exact functional and completion protocol", () => {
     const requests = createEveryViewerRequest();
 
     assert.deepStrictEqual(
       requests.map(({ type }) => type),
       viewerRequestTypes,
     );
-    requests.forEach((request) => {
+    for (const request of requests) {
       assertPlainJsonValue(request);
       const restored = JSON.parse(JSON.stringify(request)) as unknown;
       assert.deepStrictEqual(restored, request);
       assert.deepStrictEqual(parseViewerRequest(restored), request);
-    });
+    }
   });
 
-  test("omits optional telemetry fields instead of owning undefined values", () => {
-    const requests = [
-      createViewerSearchRequest({
-        surface: "flow",
-        action: "cleared",
-        result: "cleared",
-        mode: "partial",
-        scope: "current_flow_scope",
-      }),
-      createViewerPerformanceRequest({
-        operation: "flow_render",
-        result: "success",
-      }),
-    ];
-
-    requests.forEach(assertPlainJsonValue);
-    assert.ok(!("durationBucket" in requests[0].data));
-    assert.ok(!("durationBucket" in requests[1].data));
-  });
-
-  test("rejects unknown, malformed, unbucketed, and non-plain requests", () => {
+  test("rejects retired, malformed, and privacy-sensitive request shapes", () => {
     class RequestEnvelope {
       readonly type = "ready";
     }
@@ -82,68 +48,40 @@ suite("Viewer request messages", () => {
     for (const value of [
       undefined,
       { type: "unknown" },
+      { type: "operation", data: "csv.copy" },
+      { type: "performance", data: { operation: "render" } },
       { type: "ready", data: {} },
       { type: "ready", extra: true },
       { type: "resource", data: {} },
-      { type: "resource", data: { scrollType: "table" }, extra: true },
-      {
-        type: "resource",
-        data: {
-          isDarkMode: true,
-          lang: "ja",
-          scrollType: "table",
-        },
-      },
+      { type: "resource", data: { scrollType: "table", filePath: "/private" } },
       { type: "save", data: "csv", extra: true },
-      { type: "operation", data: "unknown.operation" },
       {
         type: "navigate",
         data: { targetView: "flow", absolutePath: "/root", extra: true },
       },
-      {
-        type: "search",
-        data: {
-          surface: "table",
-          action: "submitted",
-          result: "matched",
-          mode: "partial",
-          queryLengthBucket: "raw query",
-          scope: "visible_rows",
-        },
-      },
-      {
-        type: "search",
-        data: {
-          surface: "table",
-          action: "submitted",
-          result: "matched",
-          mode: "partial",
-          scope: "visible_rows",
-          extra: true,
-        },
-      },
-      {
-        type: "performance",
-        data: {
-          operation: "parse",
-          result: "success",
-        },
-      },
-      {
-        type: "performance",
-        data: {
-          operation: "flow_render",
-          result: "success",
-          extra: true,
-        },
-      },
+      { type: "search", data: { feature: "flow", query: "/private" } },
+      { type: "search", data: { feature: "unknown" } },
+      { type: "csv_export", data: { method: "save" } },
+      { type: "csv_export", data: { method: "copy", filePath: "/private" } },
+      { type: "display", data: "pending" },
       new RequestEnvelope(),
     ]) {
       assert.strictEqual(parseViewerRequest(value), undefined);
     }
   });
 
-  test("identifies only plain save envelopes with invalid data", () => {
+  test("rejects inherited object-prototype request types without throwing", () => {
+    for (const type of ["__proto__", "constructor", "toString"]) {
+      assert.doesNotThrow(() => {
+        assert.strictEqual(parseViewerRequest({ type, data: {} }), undefined);
+      });
+    }
+    assert.deepStrictEqual(parseViewerRequest(createViewerReadyRequest()), {
+      type: "ready",
+    });
+  });
+
+  test("identifies only plain save envelopes with invalid content", () => {
     assert.strictEqual(
       isInvalidViewerSaveRequest({ type: "save", data: 1 }),
       true,
@@ -154,6 +92,10 @@ suite("Viewer request messages", () => {
     );
     assert.strictEqual(
       isInvalidViewerSaveRequest({ type: "unknown", data: 1 }),
+      false,
+    );
+    assert.strictEqual(
+      isInvalidViewerSaveRequest(Object.create({ type: "save" })),
       false,
     );
   });

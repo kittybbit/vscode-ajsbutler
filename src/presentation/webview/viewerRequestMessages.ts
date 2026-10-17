@@ -2,35 +2,23 @@ import {
   parseNavigationRequest,
   type NavigationRequestDto,
 } from "../../application/navigation/resolveNavigationTarget";
-import {
-  isSearchTelemetryData,
-  type SearchTelemetryData,
-} from "../../application/telemetry/searchTelemetryData";
-import {
-  viewerOperationIds,
-  type ViewerOperationId,
-} from "../../application/telemetry/viewerOperation";
-import {
-  isViewerPerformanceTelemetryData,
-  type ViewerPerformanceTelemetryData,
-} from "../../application/telemetry/viewerPerformanceTelemetryData";
 
 export const RESOURCE = "resource";
 export const READY = "ready";
 export const SAVE = "save";
-export const OPERATION = "operation";
 export const NAVIGATE = "navigate";
 export const SEARCH = "search";
-export const PERFORMANCE = "performance";
+export const CSV_EXPORT = "csv_export";
+export const DISPLAY = "display";
 
 export const viewerRequestTypes = [
   RESOURCE,
   READY,
   SAVE,
-  OPERATION,
   NAVIGATE,
   SEARCH,
-  PERFORMANCE,
+  CSV_EXPORT,
+  DISPLAY,
 ] as const;
 
 export type NavigationTargetView = "flow" | "table";
@@ -49,31 +37,33 @@ export type ViewerResourceRequest = {
 
 export type ViewerReadyRequest = { type: typeof READY };
 export type ViewerSaveRequest = { type: typeof SAVE; data: string };
-export type ViewerOperationRequest = {
-  type: typeof OPERATION;
-  data: ViewerOperationId;
-};
 export type ViewerNavigationRequest = {
   type: typeof NAVIGATE;
   data: ViewerNavigationRequestData;
 };
+export type ViewerSearchFeature = "table" | "flow";
 export type ViewerSearchRequest = {
   type: typeof SEARCH;
-  data: SearchTelemetryData;
+  data: { feature: ViewerSearchFeature };
 };
-export type ViewerPerformanceRequest = {
-  type: typeof PERFORMANCE;
-  data: ViewerPerformanceTelemetryData;
+export type ViewerCsvExportRequest = {
+  type: typeof CSV_EXPORT;
+  data: { method: "copy" };
+};
+export type ViewerDisplayResult = "success" | "failed";
+export type ViewerDisplayAcknowledgementRequest = {
+  type: typeof DISPLAY;
+  data: ViewerDisplayResult;
 };
 
 export type ViewerRequest =
   | ViewerResourceRequest
   | ViewerReadyRequest
   | ViewerSaveRequest
-  | ViewerOperationRequest
   | ViewerNavigationRequest
   | ViewerSearchRequest
-  | ViewerPerformanceRequest;
+  | ViewerCsvExportRequest
+  | ViewerDisplayAcknowledgementRequest;
 
 const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" &&
@@ -87,11 +77,6 @@ const hasOnlyKeys = (
   const allowedKeys = new Set(keys);
   return Object.keys(value).every((key) => allowedKeys.has(key));
 };
-
-const viewerOperationIdSet = new Set<string>(Object.values(viewerOperationIds));
-
-const isViewerOperationId = (value: unknown): value is ViewerOperationId =>
-  typeof value === "string" && viewerOperationIdSet.has(value);
 
 const parseViewerResourceRequest = (
   data: unknown,
@@ -115,10 +100,7 @@ const parseViewerNavigationRequest = (
   }
   const targetView = data.targetView;
   return targetView === "flow" || targetView === "table"
-    ? {
-        type: NAVIGATE,
-        data: { targetView, ...navigation.request },
-      }
+    ? { type: NAVIGATE, data: { targetView, ...navigation.request } }
     : undefined;
 };
 
@@ -126,46 +108,31 @@ const parseViewerSearchRequest = (
   data: unknown,
 ): ViewerSearchRequest | undefined =>
   isPlainRecord(data) &&
-  hasOnlyKeys(data, [
-    "surface",
-    "action",
-    "result",
-    "mode",
-    "queryLengthBucket",
-    "resultCountBucket",
-    "durationBucket",
-    "scope",
-  ]) &&
-  isSearchTelemetryData(data)
-    ? createViewerSearchRequest(data)
+  Object.keys(data).length === 1 &&
+  (data.feature === "table" || data.feature === "flow")
+    ? createViewerSearchRequest(data.feature)
     : undefined;
 
-const parseViewerPerformanceRequest = (
+const parseViewerCsvExportRequest = (
   data: unknown,
-): ViewerPerformanceRequest | undefined => {
-  return isPlainRecord(data) &&
-    hasOnlyKeys(data, [
-      "operation",
-      "result",
-      "durationBucket",
-      "rowCountBucket",
-      "nodeCountBucket",
-      "edgeCountBucket",
-    ]) &&
-    isViewerPerformanceTelemetryData(data)
-    ? createViewerPerformanceRequest(data)
+): ViewerCsvExportRequest | undefined =>
+  isPlainRecord(data) &&
+  Object.keys(data).length === 1 &&
+  data.method === "copy"
+    ? createViewerCsvExportRequest()
     : undefined;
-};
+
+const parseViewerDisplayRequest = (
+  data: unknown,
+): ViewerDisplayAcknowledgementRequest | undefined =>
+  data === "success" || data === "failed"
+    ? createViewerDisplayAcknowledgementRequest(data)
+    : undefined;
 
 const parseViewerSaveRequest = (
   data: unknown,
 ): ViewerSaveRequest | undefined =>
   typeof data === "string" ? { type: SAVE, data } : undefined;
-
-const parseViewerOperationRequest = (
-  data: unknown,
-): ViewerOperationRequest | undefined =>
-  isViewerOperationId(data) ? { type: OPERATION, data } : undefined;
 
 type ViewerRequestDataParser = (data: unknown) => ViewerRequest | undefined;
 
@@ -174,28 +141,27 @@ const viewerRequestDataParsers: Readonly<
 > = {
   [RESOURCE]: parseViewerResourceRequest,
   [SAVE]: parseViewerSaveRequest,
-  [OPERATION]: parseViewerOperationRequest,
   [NAVIGATE]: parseViewerNavigationRequest,
   [SEARCH]: parseViewerSearchRequest,
-  [PERFORMANCE]: parseViewerPerformanceRequest,
+  [CSV_EXPORT]: parseViewerCsvExportRequest,
+  [DISPLAY]: parseViewerDisplayRequest,
 };
 
 export const parseViewerRequest = (
   value: unknown,
 ): ViewerRequest | undefined => {
-  let result: ViewerRequest | undefined;
-  if (isPlainRecord(value)) {
-    const isReadyRequest = value.type === READY;
-    const allowedKeys = isReadyRequest ? ["type"] : ["type", "data"];
-    if (hasOnlyKeys(value, allowedKeys)) {
-      const parser =
-        typeof value.type === "string"
-          ? viewerRequestDataParsers[value.type]
-          : undefined;
-      result = isReadyRequest ? { type: READY } : parser?.(value.data);
-    }
+  if (!isPlainRecord(value)) return undefined;
+  const isReadyRequest = value.type === READY;
+  if (!hasOnlyKeys(value, isReadyRequest ? ["type"] : ["type", "data"])) {
+    return undefined;
   }
-  return result;
+  const parser =
+    !isReadyRequest &&
+    typeof value.type === "string" &&
+    Object.prototype.hasOwnProperty.call(viewerRequestDataParsers, value.type)
+      ? viewerRequestDataParsers[value.type]
+      : undefined;
+  return isReadyRequest ? { type: READY } : parser?.(value.data);
 };
 
 export const isInvalidViewerSaveRequest = (value: unknown): boolean =>
@@ -203,10 +169,7 @@ export const isInvalidViewerSaveRequest = (value: unknown): boolean =>
 
 export const createViewerResourceRequest = (
   scrollType: ViewerResourceRequestData["scrollType"],
-): ViewerResourceRequest => ({
-  type: RESOURCE,
-  data: { scrollType },
-});
+): ViewerResourceRequest => ({ type: RESOURCE, data: { scrollType } });
 
 export const createViewerReadyRequest = (): ViewerReadyRequest => ({
   type: READY,
@@ -214,13 +177,6 @@ export const createViewerReadyRequest = (): ViewerReadyRequest => ({
 
 export const createViewerSaveRequest = (data: string): ViewerSaveRequest => ({
   type: SAVE,
-  data,
-});
-
-export const createViewerOperationRequest = (
-  data: ViewerOperationId,
-): ViewerOperationRequest => ({
-  type: OPERATION,
   data,
 });
 
@@ -232,38 +188,15 @@ export const createViewerNavigationRequest = (
   data: { targetView, absolutePath },
 });
 
-const optionalField = <Key extends string, Value>(
-  key: Key,
-  value: Value | undefined,
-): { [Field in Key]?: Value } =>
-  value === undefined ? {} : ({ [key]: value } as { [Field in Key]: Value });
-
 export const createViewerSearchRequest = (
-  data: SearchTelemetryData,
-): ViewerSearchRequest => ({
-  type: SEARCH,
-  data: {
-    surface: data.surface,
-    action: data.action,
-    result: data.result,
-    mode: data.mode,
-    ...optionalField("queryLengthBucket", data.queryLengthBucket),
-    ...optionalField("resultCountBucket", data.resultCountBucket),
-    ...optionalField("durationBucket", data.durationBucket),
-    scope: data.scope,
-  },
+  feature: ViewerSearchFeature,
+): ViewerSearchRequest => ({ type: SEARCH, data: { feature } });
+
+export const createViewerCsvExportRequest = (): ViewerCsvExportRequest => ({
+  type: CSV_EXPORT,
+  data: { method: "copy" },
 });
 
-export const createViewerPerformanceRequest = (
-  data: ViewerPerformanceTelemetryData,
-): ViewerPerformanceRequest => ({
-  type: PERFORMANCE,
-  data: {
-    operation: data.operation,
-    result: data.result,
-    ...optionalField("durationBucket", data.durationBucket),
-    ...optionalField("rowCountBucket", data.rowCountBucket),
-    ...optionalField("nodeCountBucket", data.nodeCountBucket),
-    ...optionalField("edgeCountBucket", data.edgeCountBucket),
-  },
-});
+export const createViewerDisplayAcknowledgementRequest = (
+  result: ViewerDisplayResult,
+): ViewerDisplayAcknowledgementRequest => ({ type: DISPLAY, data: result });

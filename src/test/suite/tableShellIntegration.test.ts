@@ -125,11 +125,8 @@ const isViewerMessage = (
   "type" in value &&
   value.type === type;
 
-const countUnitSelectOperations = (messages: readonly unknown[]): number =>
-  messages.filter((message) => {
-    if (!isViewerMessage(message, "operation")) return false;
-    return (message as { data?: unknown }).data === "unit.select";
-  }).length;
+const countRetiredOperationRequests = (messages: readonly unknown[]): number =>
+  messages.filter((message) => isViewerMessage(message, "operation")).length;
 
 const dispatchTableDocument = async (
   eventBridge: ReturnType<typeof createViewerEventBridge>,
@@ -281,6 +278,155 @@ suite("Table shell integration", () => {
     assert.ok(view.getByRole("dialog"));
   });
 
+  test("reports CSV copy only after clipboard write succeeds", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+    const previousClipboard = Object.getOwnPropertyDescriptor(
+      navigator,
+      "clipboard",
+    );
+    let completeWrite: (() => void) | undefined;
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: () =>
+          new Promise<void>((resolve) => {
+            completeWrite = resolve;
+          }),
+      },
+    });
+
+    try {
+      const view = renderTableViewer();
+      await dispatchTableDocument(
+        eventBridge,
+        toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+        postedMessages,
+      );
+      await waitFor(() =>
+        assert.ok(view.getByRole("grid", { name: "Unit list" })),
+      );
+
+      fireEvent.click(
+        view.getByRole("button", {
+          name: "Copy the contents to clipboard as CSV.",
+        }),
+      );
+      assert.strictEqual(
+        postedMessages.some((message) =>
+          isViewerMessage(message, "csv_export"),
+        ),
+        false,
+      );
+      assert.ok(completeWrite);
+      completeWrite();
+      await waitFor(() =>
+        assert.strictEqual(
+          postedMessages.filter((message) =>
+            isViewerMessage(message, "csv_export"),
+          ).length,
+          1,
+        ),
+      );
+
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: {
+          writeText: async () => {
+            throw new Error("clipboard unavailable");
+          },
+        },
+      });
+      fireEvent.click(
+        view.getByRole("button", {
+          name: "Copy the contents to clipboard as CSV.",
+        }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      assert.strictEqual(
+        postedMessages.filter((message) =>
+          isViewerMessage(message, "csv_export"),
+        ).length,
+        1,
+      );
+    } finally {
+      if (previousClipboard) {
+        Object.defineProperty(navigator, "clipboard", previousClipboard);
+      } else {
+        Reflect.deleteProperty(navigator, "clipboard");
+      }
+    }
+  });
+
+  test("shows successful CSV copy feedback when telemetry transport throws", async () => {
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    let throwCsvTelemetry = false;
+    let attemptedCsvTelemetry = 0;
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => {
+        if (throwCsvTelemetry && isViewerMessage(message, "csv_export")) {
+          attemptedCsvTelemetry += 1;
+          throw new Error("webview transport unavailable");
+        }
+        postedMessages.push(message);
+      },
+    } as never;
+    const previousClipboard = Object.getOwnPropertyDescriptor(
+      navigator,
+      "clipboard",
+    );
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async () => undefined },
+    });
+
+    try {
+      const view = renderTableViewer();
+      await dispatchTableDocument(
+        eventBridge,
+        toUnitListDocumentDto(parseAjsDocumentForTest(definition)),
+        postedMessages,
+      );
+      await waitFor(() =>
+        assert.ok(view.getByRole("grid", { name: "Unit list" })),
+      );
+
+      throwCsvTelemetry = true;
+      fireEvent.click(
+        view.getByRole("button", {
+          name: "Copy the contents to clipboard as CSV.",
+        }),
+      );
+
+      await waitFor(() =>
+        assert.strictEqual(
+          view.getByRole("status").textContent,
+          "Unit list copied as CSV.",
+        ),
+      );
+      assert.strictEqual(attemptedCsvTelemetry, 1);
+      assert.strictEqual(
+        postedMessages.some((message) =>
+          isViewerMessage(message, "csv_export"),
+        ),
+        false,
+      );
+      assert.ok(view.getByText("Copied"));
+    } finally {
+      if (previousClipboard) {
+        Object.defineProperty(navigator, "clipboard", previousClipboard);
+      } else {
+        Reflect.deleteProperty(navigator, "clipboard");
+      }
+    }
+  });
+
   test("keeps keyboard movement provisional until Enter and commits once", async () => {
     const eventBridge = createViewerEventBridge();
     const postedMessages: unknown[] = [];
@@ -302,7 +448,7 @@ suite("Table shell integration", () => {
     const rootRow = getTableRowByCellText(view.container, "root");
     const rootCell = within(rootRow).getAllByRole("gridcell")[0];
     fireEvent.click(rootCell);
-    const committedCount = countUnitSelectOperations(postedMessages);
+    const committedCount = countRetiredOperationRequests(postedMessages);
     assert.strictEqual(rootRow.getAttribute("aria-selected"), "true");
 
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
@@ -310,7 +456,7 @@ suite("Table shell integration", () => {
     assert.strictEqual(rootRow.getAttribute("aria-selected"), "true");
     assert.strictEqual(focusedRow.getAttribute("aria-selected"), "false");
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
+      countRetiredOperationRequests(postedMessages),
       committedCount,
     );
 
@@ -320,8 +466,8 @@ suite("Table shell integration", () => {
       assert.strictEqual(focusedRow.getAttribute("aria-selected"), "true"),
     );
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
-      committedCount + 1,
+      countRetiredOperationRequests(postedMessages),
+      committedCount,
     );
     assert.ok(view.getByRole("status").textContent?.includes("jobnet"));
   });
@@ -351,7 +497,7 @@ suite("Table shell integration", () => {
     fireEvent.click(rootCell);
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
     const provisionalRow = getTableRowByCellText(view.container, "jobnet");
-    const beforeReveal = countUnitSelectOperations(postedMessages);
+    const beforeReveal = countRetiredOperationRequests(postedMessages);
 
     act(() => {
       eventBridge.dispatch(
@@ -370,8 +516,8 @@ suite("Table shell integration", () => {
     );
     assert.strictEqual(provisionalRow.getAttribute("aria-selected"), "false");
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
-      beforeReveal + 1,
+      countRetiredOperationRequests(postedMessages),
+      beforeReveal,
     );
 
     const leafCell = within(
@@ -386,8 +532,8 @@ suite("Table shell integration", () => {
       assert.strictEqual(document.activeElement, leafTreeItem);
     });
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
-      beforeReveal + 1,
+      countRetiredOperationRequests(postedMessages),
+      beforeReveal,
     );
   });
 
@@ -416,15 +562,15 @@ suite("Table shell integration", () => {
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
     const jobnetActionCell = within(jobnetRow).getAllByRole("gridcell")[2];
     assert.ok(jobnetActionCell.querySelector("[data-grid-cell-action]"));
-    const beforeEnter = countUnitSelectOperations(postedMessages);
+    const beforeEnter = countRetiredOperationRequests(postedMessages);
 
     fireEvent.keyDown(jobnetActionCell, { key: "Enter" });
     await waitFor(() =>
       assert.strictEqual(rootRow.getAttribute("aria-selected"), "true"),
     );
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
-      beforeEnter + 2,
+      countRetiredOperationRequests(postedMessages),
+      beforeEnter,
     );
     assert.strictEqual(jobnetRow.getAttribute("aria-selected"), "false");
   });
@@ -454,7 +600,7 @@ suite("Table shell integration", () => {
     fireEvent.click(rootCell);
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
     const provisionalRow = getTableRowByCellText(view.container, "jobnet");
-    const beforeTreeSelection = countUnitSelectOperations(postedMessages);
+    const beforeTreeSelection = countRetiredOperationRequests(postedMessages);
 
     fireEvent.click(
       getUnitTreeItemByAbsolutePath(view.container, "/root/jobnet/leaf-job"),
@@ -469,8 +615,8 @@ suite("Table shell integration", () => {
     );
     assert.strictEqual(provisionalRow.getAttribute("aria-selected"), "false");
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
-      beforeTreeSelection + 1,
+      countRetiredOperationRequests(postedMessages),
+      beforeTreeSelection,
     );
   });
 
@@ -501,12 +647,12 @@ suite("Table shell integration", () => {
     const focusedCell = within(
       getTableRowByCellText(view.container, "jobnet"),
     ).getAllByRole("gridcell")[0];
-    const beforeHeaderExit = countUnitSelectOperations(postedMessages);
+    const beforeHeaderExit = countRetiredOperationRequests(postedMessages);
 
     fireEvent.keyDown(focusedCell, { key: "h" });
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
-      beforeHeaderExit + 1,
+      countRetiredOperationRequests(postedMessages),
+      beforeHeaderExit,
     );
     assert.strictEqual(
       document.activeElement?.getAttribute("role"),
@@ -522,13 +668,13 @@ suite("Table shell integration", () => {
         }),
       ),
     );
-    const beforeDetailReturn = countUnitSelectOperations(postedMessages);
+    const beforeDetailReturn = countRetiredOperationRequests(postedMessages);
     fireEvent.keyDown(
       view.getByRole("complementary", { name: "Selected list unit details" }),
       { key: "r" },
     );
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
+      countRetiredOperationRequests(postedMessages),
       beforeDetailReturn,
     );
   });
@@ -556,7 +702,7 @@ suite("Table shell integration", () => {
     ).querySelector('[role="gridcell"]') as HTMLElement;
     fireEvent.click(rootCell);
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
-    const beforeReplacement = countUnitSelectOperations(postedMessages);
+    const beforeReplacement = countRetiredOperationRequests(postedMessages);
     act(() => {
       eventBridge.dispatch(
         new MessageEvent("message", {
@@ -577,13 +723,13 @@ suite("Table shell integration", () => {
       null,
     );
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
+      countRetiredOperationRequests(postedMessages),
       beforeReplacement,
     );
 
     view.unmount();
     assert.strictEqual(
-      countUnitSelectOperations(postedMessages),
+      countRetiredOperationRequests(postedMessages),
       beforeReplacement,
     );
   });

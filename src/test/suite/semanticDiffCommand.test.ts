@@ -59,6 +59,7 @@ type SemanticDiffCommandObservations = {
   builtContexts: unknown[];
   presentedModes: string[];
   reportSteps: string[];
+  completedResults: ("success" | "failed" | "cancelled")[];
 };
 
 const emptyResult = (): SemanticDiffResult => ({
@@ -88,6 +89,7 @@ class SemanticDiffCommandHarness {
     builtContexts: [],
     presentedModes: [],
     reportSteps: [],
+    completedResults: [],
   };
 
   readonly beforeUri = vscode.Uri.parse("untitled:before.ajs");
@@ -159,6 +161,9 @@ class SemanticDiffCommandHarness {
               : "text/markdown; charset=utf-8",
           content: "rendered semantic diff",
         } as SemanticDiffOutputDocument;
+      },
+      reportCompleted: (result) => {
+        this.observed.completedResults.push(result);
       },
       ...overrides,
     };
@@ -398,6 +403,7 @@ suite("Semantic diff command", () => {
       "display",
     ]);
     assert.deepStrictEqual(harness.observed.clipboardWrites, []);
+    assert.deepStrictEqual(harness.observed.completedResults, ["success"]);
   });
 
   test("opens the default Explorer with the retained context", async () => {
@@ -649,6 +655,7 @@ suite("Semantic diff command", () => {
     assert.strictEqual(result.error.code, "cancelled");
     assert.strictEqual(harness.observed.openDialogCount, 0);
     assert.deepStrictEqual(harness.observed.reportInputs, []);
+    assert.deepStrictEqual(harness.observed.completedResults, ["cancelled"]);
   });
 
   test("passes the selected JSON mode and one context to the dispatcher", async () => {
@@ -705,6 +712,23 @@ suite("Semantic diff command", () => {
     assert.deepStrictEqual(harness.observed.errorMessages, [
       "Semantic diff report could not be displayed.",
     ]);
+    assert.deepStrictEqual(harness.observed.completedResults, ["failed"]);
+  });
+
+  test("keeps the command outcome when completion reporting throws", async () => {
+    const harness = new SemanticDiffCommandHarness({
+      reportCompleted: () => {
+        throw new Error("telemetry transport failed");
+      },
+    });
+
+    const result = await executeCompareSemanticDiffCommand(harness.deps);
+
+    assert.deepStrictEqual(result, {
+      ok: true,
+      report: "rendered semantic diff",
+      action: "displayed",
+    });
   });
 
   test("maps before-definition picker failure to a host-safe result", async () => {

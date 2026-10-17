@@ -4,6 +4,7 @@ import * as ts from "typescript";
 export type ImportReferenceKind =
   | "import"
   | "import-type"
+  | "import-type-query"
   | "export"
   | "export-type"
   | "dynamic-import"
@@ -15,6 +16,7 @@ export type ImportReference = {
   specifier: string;
   resolvedPath?: string;
   kind: ImportReferenceKind;
+  namedSymbols?: readonly string[];
 };
 
 export type ConstructionReferenceKind = "call" | "new";
@@ -67,6 +69,32 @@ const readImportEqualsReference = (
     : undefined;
 };
 
+const readImportTypeReference = (
+  node: ts.ImportTypeNode,
+): string | undefined => {
+  const argument = node.argument;
+  return ts.isLiteralTypeNode(argument) &&
+    ts.isStringLiteralLike(argument.literal)
+    ? argument.literal.text
+    : undefined;
+};
+
+const readNamedImportSymbols = (
+  clause: ts.ImportClause | undefined,
+): string[] | undefined => {
+  if (
+    !clause ||
+    clause.name ||
+    !clause.namedBindings ||
+    !ts.isNamedImports(clause.namedBindings)
+  ) {
+    return undefined;
+  }
+  return clause.namedBindings.elements.map(
+    (element) => element.propertyName?.text ?? element.name.text,
+  );
+};
+
 export const resolveImportPath = (
   file: string,
   specifier: string,
@@ -87,11 +115,13 @@ const toImportReference = (
   file: string,
   specifier: string,
   kind: ImportReferenceKind,
+  namedSymbols?: readonly string[],
 ): ImportReference => ({
   file,
   specifier,
   resolvedPath: resolveImportPath(file, specifier),
   kind,
+  ...(namedSymbols === undefined ? {} : { namedSymbols }),
 });
 
 export const collectImportReferencesFromSource = (
@@ -115,7 +145,14 @@ export const collectImportReferencesFromSource = (
       const specifier = readStringArgument(node.moduleSpecifier);
       if (specifier) {
         const kind = node.importClause?.isTypeOnly ? "import-type" : "import";
-        references.push(toImportReference(file, specifier, kind));
+        references.push(
+          toImportReference(
+            file,
+            specifier,
+            kind,
+            readNamedImportSymbols(node.importClause),
+          ),
+        );
       }
     } else if (ts.isExportDeclaration(node)) {
       const specifier = readStringArgument(node.moduleSpecifier);
@@ -138,6 +175,13 @@ export const collectImportReferencesFromSource = (
       if (reference) {
         references.push(
           toImportReference(file, reference.specifier, reference.kind),
+        );
+      }
+    } else if (ts.isImportTypeNode(node)) {
+      const specifier = readImportTypeReference(node);
+      if (specifier) {
+        references.push(
+          toImportReference(file, specifier, "import-type-query"),
         );
       }
     }

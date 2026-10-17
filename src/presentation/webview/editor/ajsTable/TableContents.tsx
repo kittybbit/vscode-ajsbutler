@@ -19,10 +19,6 @@ import { ThemeProvider, type Theme } from "@mui/material/styles";
 import { type Table as ReactTable } from "@tanstack/react-table";
 import { Row, SortingState, VisibilityState } from "@tanstack/table-core";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import {
-  toCountBucket,
-  toDurationBucket,
-} from "../../../../application/telemetry/telemetryBuckets";
 import { useMyAppContext } from "../MyContexts";
 import { ParameterSearchValuesByPath } from "./globalFilter";
 import Header from "./Header";
@@ -30,8 +26,7 @@ import VirtualizedTable from "./VirtualizedTable";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import { CHANGE_DOCUMENT, REVEAL_UNIT } from "../../viewerHostMessages";
 import {
-  createViewerOperationRequest,
-  createViewerPerformanceRequest,
+  createViewerDisplayAcknowledgementRequest,
   createViewerReadyRequest,
 } from "../../viewerRequestMessages";
 import UnitTreeSelector, {
@@ -89,6 +84,7 @@ type TableDocumentState = {
   viewerData: TableViewerData;
   changeDocument: (type: string, data: unknown) => void;
   documentRevision: number;
+  displayResult: "success" | "failed";
 };
 
 type TableViewerShellProps = {
@@ -160,17 +156,22 @@ const useChangeDocument = (): TableDocumentState => {
     createTableViewerData(undefined, new Map()),
   );
   const [documentRevision, setDocumentRevision] = useState(0);
+  const [displayResult, setDisplayResult] = useState<"success" | "failed">(
+    "failed",
+  );
   const changeDocument = useCallback((type: string, data: unknown) => {
     try {
       const nextState = parseTableDocumentState(data);
       setViewerData(() => nextState.viewerData);
+      setDisplayResult("success");
     } catch (error) {
       console.error("Failed to parse data:", error);
       setViewerData(() => createTableViewerData(undefined, new Map()));
+      setDisplayResult("failed");
     }
     setDocumentRevision((revision) => revision + 1);
   }, []);
-  return { viewerData, changeDocument, documentRevision };
+  return { viewerData, changeDocument, documentRevision, displayResult };
 };
 
 const useTableViewerTheme = (isDarkMode: boolean): Theme =>
@@ -178,23 +179,6 @@ const useTableViewerTheme = (isDarkMode: boolean): Theme =>
     () => createViewerTheme({ mode: isDarkMode ? "dark" : "light" }),
     [isDarkMode],
   );
-
-const reportTableOperation = (
-  operation: Parameters<typeof createViewerOperationRequest>[0],
-): void => {
-  window.vscode.postMessage(createViewerOperationRequest(operation));
-};
-
-export const createTableRenderReadyEvent = (
-  durationMs: number,
-  rowCount: number,
-) =>
-  createViewerPerformanceRequest({
-    operation: "table_render",
-    result: "success",
-    durationBucket: toDurationBucket(durationMs),
-    rowCountBucket: toCountBucket(rowCount),
-  });
 
 const TableViewerShell = ({
   theme,
@@ -319,10 +303,9 @@ const TableViewerShell = ({
                 focusRequestRevision={detailFocusRequestRevision}
                 onClose={closeDetailPane}
                 onFocusRequestHandled={handleDetailFocusRequest}
-                onOpenDefinition={() => {
-                  reportTableOperation("definition.open");
-                  setDialogData(selectedDetail.definition);
-                }}
+                onOpenDefinition={() =>
+                  setDialogData(selectedDetail.definition)
+                }
                 onOpenFlow={() =>
                   navigateToFlow(selectedDetail.row.absolutePath)
                 }
@@ -615,7 +598,6 @@ const commitTableRowSelection = ({
   if (committedAbsolutePathRef.current === absolutePath) return false;
   committedAbsolutePathRef.current = absolutePath;
   setDetailPaneClosed(false);
-  reportTableOperation("unit.select");
   dispatchRowSelection({ type: "select", absolutePath });
   return true;
 };
@@ -802,25 +784,51 @@ const useTableTreeActions = ({
   return { focusUnitTree, openTreeUnitScope, selectTreeUnit };
 };
 
+const postTableDisplayAcknowledgement = (
+  displayResult: "success" | "failed",
+): void => {
+  try {
+    window.vscode.postMessage(
+      createViewerDisplayAcknowledgementRequest(displayResult),
+    );
+  } catch {
+    // The host resolves an absent acknowledgement at panel disposal.
+  }
+};
+
+const useTableDisplayAcknowledgement = (
+  documentRevision: number,
+  displayResult: "success" | "failed",
+): void => {
+  const acknowledgedRef = useRef(false);
+  useEffect(() => {
+    if (documentRevision === 0 || acknowledgedRef.current) return;
+    acknowledgedRef.current = true;
+    postTableDisplayAcknowledgement(displayResult);
+  }, [documentRevision, displayResult]);
+};
+
 const useTableViewerLifecycle = ({
   changeDocument,
   dispatchRowSelection,
-  renderReadyStartedAt,
+  documentRevision,
+  displayResult,
   resetSearch,
   revealUnit,
-  rowCount,
   tableData,
 }: {
   changeDocument: (type: string, data: unknown) => void;
   dispatchRowSelection: React.Dispatch<
     Parameters<typeof reduceTableRowSelection>[1]
   >;
-  renderReadyStartedAt: React.MutableRefObject<number>;
+  documentRevision: number;
+  displayResult: "success" | "failed";
   resetSearch: () => void;
   revealUnit: (data: unknown) => boolean;
-  rowCount: number;
   tableData: TableViewerData["tableData"];
 }): void => {
+  useTableDisplayAcknowledgement(documentRevision, displayResult);
+
   useEffect(() => {
     dispatchRowSelection({ type: "documentChanged" });
     resetSearch();
@@ -832,32 +840,26 @@ const useTableViewerLifecycle = ({
       if (revealUnit(data)) resetSearch();
     };
     window.EventBridge.addCallback(REVEAL_UNIT, revealUnitFn);
-    window.vscode.postMessage(
-      createTableRenderReadyEvent(
-        performance.now() - renderReadyStartedAt.current,
-        rowCount,
-      ),
-    );
     window.vscode.postMessage(createViewerReadyRequest());
     return () => {
       window.EventBridge.removeCallback(CHANGE_DOCUMENT, changeDocument);
       window.EventBridge.removeCallback(REVEAL_UNIT, revealUnitFn);
     };
-  }, [changeDocument, renderReadyStartedAt, resetSearch, revealUnit]);
+  }, [changeDocument, resetSearch, revealUnit]);
 };
 
 const TableContents = () => {
   console.log("render TableContents.");
 
   const { isDarkMode, lang } = useMyAppContext();
-  const renderReadyStartedAt = useRef(performance.now());
 
   const [dialogData, setDialogData] = useState<
     UnitDefinitionDialogDto | undefined
   >();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const { viewerData, changeDocument, documentRevision } = useChangeDocument();
+  const { viewerData, changeDocument, documentRevision, displayResult } =
+    useChangeDocument();
   const tableSelection = useTableSelectionActions();
   const {
     closeDetailPane,
@@ -967,10 +969,10 @@ const TableContents = () => {
   useTableViewerLifecycle({
     changeDocument,
     dispatchRowSelection,
-    renderReadyStartedAt,
+    documentRevision,
+    displayResult,
     resetSearch,
     revealUnit,
-    rowCount: rowViews?.length ?? 0,
     tableData,
   });
 

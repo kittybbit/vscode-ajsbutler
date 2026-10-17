@@ -273,7 +273,9 @@ suite("Flow Search Controller", () => {
       position: { current: 1, total: 1 },
       searchedUnitId: leaf.id,
     });
-    assert.strictEqual((postedMessages[0] as { type: string }).type, "search");
+    assert.deepStrictEqual(postedMessages, [
+      { type: "search", data: { feature: "flow" } },
+    ]);
 
     fireEvent.click(view.getByTestId("navigate"));
     assert.deepStrictEqual(readState(view), {
@@ -287,7 +289,9 @@ suite("Flow Search Controller", () => {
       position: { current: 1, total: 1 },
       searchedUnitId: leaf.id,
     });
-    assert.strictEqual((postedMessages[1] as { type: string }).type, "search");
+    assert.deepStrictEqual(postedMessages, [
+      { type: "search", data: { feature: "flow" } },
+    ]);
 
     fireEvent.click(view.getByTestId("clear"));
     assert.deepStrictEqual(readState(view), {
@@ -299,7 +303,44 @@ suite("Flow Search Controller", () => {
       focusRequestVersion: 2,
       matchedUnitIds: [],
     });
-    assert.strictEqual((postedMessages[2] as { type: string }).type, "search");
+    assert.deepStrictEqual(postedMessages, [
+      { type: "search", data: { feature: "flow" } },
+    ]);
+  });
+
+  test("keeps flow search state when telemetry transport throws", () => {
+    const flowDocument = parseFlowGraphDocumentForTest();
+    const scope = findRequiredUnit(flowDocument, "jobnet");
+    const leaf = findRequiredUnit(flowDocument, "leaf-job");
+    let attempted = 0;
+    window.vscode = {
+      postMessage: () => {
+        attempted += 1;
+        throw new Error("webview transport unavailable");
+      },
+    } as never;
+
+    const view = render(
+      React.createElement(FlowSearchControllerFixture, {
+        flowDocument,
+        initialScopeId: scope.id,
+      }),
+    );
+
+    fireEvent.click(view.getByTestId("submit"));
+
+    assert.strictEqual(attempted, 1);
+    assert.deepStrictEqual(readState(view), {
+      currentUnitId: scope.id,
+      expandedUnitIds: [
+        findRequiredUnit(flowDocument, "child-net").id,
+        findRequiredUnit(flowDocument, "grand-net").id,
+      ],
+      focusRequestVersion: 1,
+      matchedUnitIds: [leaf.id],
+      position: { current: 1, total: 1 },
+      searchedUnitId: leaf.id,
+    });
   });
 
   test("reveals an available unit in its flow scope and preserves search intent", () => {

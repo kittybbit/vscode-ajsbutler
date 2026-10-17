@@ -1,11 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import type { TelemetryProperties } from "../../application/telemetry/telemetryEvent";
-import {
-  createExtensionDependencies,
-  instrumentParserPerformance,
-} from "../../bootstrap/extension/extensionDependencies";
-import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
+import { createExtensionDependencies } from "../../bootstrap/extension/extensionDependencies";
 
 suite("Extension dependencies", () => {
   test("constructs bootstrap-owned dependencies", () => {
@@ -95,73 +90,5 @@ suite("Extension dependencies", () => {
     assert.strictEqual(new Set(sessions).size, sessions.length);
     assert.strictEqual(new Set(actions).size, actions.length);
     dependencies.telemetry.dispose();
-  });
-
-  test("instruments parser performance without exposing content", () => {
-    const events: Array<{
-      eventName: string;
-      properties?: TelemetryProperties;
-    }> = [];
-    const parser = instrumentParserPerformance(
-      {
-        parse: () => ({
-          ok: true,
-          document: { rootUnits: [], warnings: [] },
-        }),
-      },
-      {
-        report: (event) => {
-          events.push({ eventName: event.name, properties: event.properties });
-        },
-        dispose() {},
-      },
-    );
-
-    assert.deepStrictEqual(parser.parse("raw definition content"), {
-      ok: true,
-      document: { rootUnits: [], warnings: [] },
-    });
-    assert.deepStrictEqual(
-      {
-        ...events[0]?.properties,
-        durationBucket: "<bucket>",
-      },
-      {
-        development: String(DEVELOPMENT),
-        host: getTelemetryHost(),
-        operation: "parse",
-        result: "success",
-        durationBucket: "<bucket>",
-        diagnosticCountBucket: "0",
-      },
-    );
-    assert.strictEqual(events[0]?.eventName, "performance.parse.completed");
-    assert.ok(events[0]?.properties?.durationBucket);
-  });
-
-  test("preserves parser failures while reporting their count", () => {
-    const events: Array<{
-      eventName: string;
-      properties?: TelemetryProperties;
-    }> = [];
-    const failure = {
-      ok: false as const,
-      errors: [{ line: 1, column: 2, message: "invalid syntax" }],
-    };
-    const parser = instrumentParserPerformance(
-      { parse: () => failure },
-      {
-        report: (event) => {
-          events.push({ eventName: event.name, properties: event.properties });
-        },
-        dispose() {},
-      },
-    );
-
-    assert.deepStrictEqual(parser.parse("raw definition content"), failure);
-    assert.strictEqual(events[0]?.properties?.result, "failed");
-    assert.strictEqual(events[0]?.properties?.diagnosticCountBucket, "1");
-    assert.ok(!JSON.stringify(events[0]).includes("invalid syntax"));
-    assert.ok(!JSON.stringify(events[0]).includes("raw definition content"));
   });
 });

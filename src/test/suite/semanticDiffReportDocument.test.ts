@@ -16,6 +16,7 @@ type ReportDocumentObservations = {
   saveDialogOptions: vscode.SaveDialogOptions[];
   savedUris: vscode.Uri[];
   savedContents: string[];
+  completedExports: ("copy" | "save")[];
 };
 
 class SemanticDiffReportDocumentHarness {
@@ -28,6 +29,7 @@ class SemanticDiffReportDocumentHarness {
     saveDialogOptions: [],
     savedUris: [],
     savedContents: [],
+    completedExports: [],
   };
 
   activeUri: vscode.Uri | undefined;
@@ -76,6 +78,8 @@ class SemanticDiffReportDocumentHarness {
           this.observed.savedUris.push(uri);
           this.observed.savedContents.push(new TextDecoder().decode(content));
         },
+        onExportCompleted: (method) =>
+          this.observed.completedExports.push(method),
         ...overrides,
       },
       limit,
@@ -113,6 +117,7 @@ suite("Semantic diff report document", () => {
     assert.deepStrictEqual(harness.observed.informationMessages, [
       "Semantic diff Markdown copied to clipboard.",
     ]);
+    assert.deepStrictEqual(harness.observed.completedExports, ["copy"]);
   });
 
   test("copies an explicit report URI instead of a stale active editor", async () => {
@@ -156,6 +161,7 @@ suite("Semantic diff report document", () => {
     assert.deepStrictEqual(harness.observed.errorMessages, [
       "Semantic diff Markdown could not be copied.",
     ]);
+    assert.deepStrictEqual(harness.observed.completedExports, []);
   });
 
   test("shows an error when no semantic diff report is active", async () => {
@@ -201,6 +207,7 @@ suite("Semantic diff report document", () => {
       "/semantic-diff-audit.md",
     );
     assert.deepStrictEqual(harness.observed.savedContents, ["audit content"]);
+    assert.deepStrictEqual(harness.observed.completedExports, ["save"]);
   });
 
   test("treats save cancellation as a no-op", async () => {
@@ -212,6 +219,7 @@ suite("Semantic diff report document", () => {
     assert.strictEqual(await harness.provider.saveReport(uri), false);
     assert.deepStrictEqual(harness.observed.errorMessages, []);
     assert.deepStrictEqual(harness.observed.savedContents, []);
+    assert.deepStrictEqual(harness.observed.completedExports, []);
   });
 
   test("evicts only the least recently used inactive report at the limit", async () => {

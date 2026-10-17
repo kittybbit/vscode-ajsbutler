@@ -334,7 +334,7 @@ suite("Show Unit Definition interaction", () => {
     assert.strictEqual(React.Children.count(props.children), 1);
   });
 
-  test("flow nested toggle action uses the shared click operation", () => {
+  test("flow nested toggle remains functional without action telemetry", () => {
     const toggled: string[] = [];
     const messages: unknown[] = [];
     const previousWindow = Object.getOwnPropertyDescriptor(
@@ -365,8 +365,6 @@ suite("Show Unit Definition interaction", () => {
     }
 
     assert.deepStrictEqual(toggled, ["/root/jobnet/child-net"]);
-    assert.deepStrictEqual(messages, [
-      { type: "operation", data: "flow.nested.toggle" },
-    ]);
+    assert.deepStrictEqual(messages, []);
   });
 });

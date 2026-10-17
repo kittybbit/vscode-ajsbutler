@@ -1,10 +1,4 @@
 import type * as vscode from "vscode";
-import type { AjsParserPort } from "../../application/parsing/AjsParserPort";
-import { createPerformanceTelemetryEvent } from "../../application/telemetry/performanceTelemetry";
-import {
-  toCountBucket,
-  toDurationBucket,
-} from "../../application/telemetry/telemetryBuckets";
 import {
   createDiagnoseAjsDefinition,
   type DiagnoseAjsDefinition,
@@ -46,7 +40,6 @@ import { Jp1Ajs3WebApiImportAdapter } from "../../infrastructure/webapi/Jp1Ajs3W
 import type { ImportAjsDefinitionCapability } from "../../presentation/vscode/commands/importAjsDefinitionViaWebApiCommand";
 import { VscodeWebApiCredentialStore } from "../../infrastructure/webapi/VscodeWebApiCredentialStore";
 import { createTelemetry } from "./createTelemetry";
-import { getTelemetryHost } from "../../presentation/vscode/telemetryHost";
 import type { ExtensionHostKind } from "./extensionRuntime";
 import { createWebApiImportCapability } from "./webapiImportWiring";
 import { createVscodeGitHeadDefinitionSourceAdapter } from "../../infrastructure/git/VscodeGitHeadDefinitionSourceAdapter";
@@ -73,45 +66,6 @@ type ExtensionDependencyFactories = {
     context: vscode.ExtensionContext,
   ) => ImportAjsDefinitionCapability;
 };
-
-const reportParserPerformance = ({
-  result,
-  startedAt,
-  telemetry,
-}: Readonly<{
-  result: ReturnType<AjsParserPort["parse"]>;
-  startedAt: number;
-  telemetry: TelemetryPort;
-}>): void => {
-  const errorCount = result.ok === true ? 0 : result.errors.length;
-  telemetry.report(
-    createPerformanceTelemetryEvent({
-      operation: "parse",
-      result: result.ok ? "success" : "failed",
-      host: getTelemetryHost(),
-      durationBucket: toDurationBucket(performance.now() - startedAt),
-      diagnosticCountBucket: toCountBucket(errorCount),
-    }),
-  );
-};
-
-const parseWithPerformance = (
-  parser: AjsParserPort,
-  telemetry: TelemetryPort,
-  content: string,
-): ReturnType<AjsParserPort["parse"]> => {
-  const startedAt = performance.now();
-  const result = parser.parse(content);
-  reportParserPerformance({ result, startedAt, telemetry });
-  return result;
-};
-
-export const instrumentParserPerformance = (
-  parser: AjsParserPort,
-  telemetry: TelemetryPort,
-): AjsParserPort => ({
-  parse: (content) => parseWithPerformance(parser, telemetry, content),
-});
 
 const createDesktopWebApiImportCapability = (
   context: vscode.ExtensionContext,
@@ -157,10 +111,7 @@ export const createExtensionDependencies = (
     createSemanticDiffExplorerSessionIdAllocator();
   const actionIdAllocator: SemanticDiffExplorerActionIdAllocator =
     createSemanticDiffExplorerActionIdAllocator();
-  const parser = instrumentParserPerformance(
-    new AntlrAjsParser({ sourceIndexIdAllocator }),
-    telemetry,
-  );
+  const parser = new AntlrAjsParser({ sourceIndexIdAllocator });
   const enrichedParser = new AntlrAjsParser({ sourceIndexIdAllocator });
   const parameterSyntaxLookup = new ParameterSyntaxResourceAdapter();
   const webApiImport = createWebApiImportCapability(host, () =>

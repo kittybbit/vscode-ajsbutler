@@ -10,11 +10,12 @@ import {
   type ViewerPanelRegistration,
 } from "../../presentation/vscode/webview/viewerMessageRouting";
 import {
+  CSV_EXPORT,
   NAVIGATE,
-  OPERATION,
   READY,
   RESOURCE,
   SAVE,
+  SEARCH,
 } from "../../presentation/webview/viewerRequestMessages";
 import { AJS_TABLE_VIEWER_TYPE } from "../../presentation/vscode/webview/constant";
 
@@ -266,6 +267,7 @@ suite("ViewerFactory", () => {
         },
         onSave: async (content) => {
           calls.push(`save:${content}`);
+          return true;
         },
       },
       deps: {
@@ -289,7 +291,8 @@ suite("ViewerFactory", () => {
       data: { scrollType: "table" },
     });
     receiveMessageHandler?.({ type: SAVE, data: "body" });
-    receiveMessageHandler?.({ type: OPERATION, data: "copy.csv" });
+    receiveMessageHandler?.({ type: SEARCH, data: { feature: "table" } });
+    receiveMessageHandler?.({ type: CSV_EXPORT, data: { method: "copy" } });
     receiveMessageHandler?.({
       type: NAVIGATE,
       data: { targetView: "table", absolutePath: "/root/unit" },
@@ -308,9 +311,8 @@ suite("ViewerFactory", () => {
     assert.deepStrictEqual(added, [{ uri: document.uri, panel }]);
     assert.deepStrictEqual(navigated, ["table:/root/unit"]);
     assert.deepStrictEqual(telemetryEvents, [
-      OPERATION,
-      "viewer.table.csv_copied",
-      "viewer.table.closed",
+      "search.executed",
+      "csv.exported",
     ]);
     assert.deepStrictEqual(removed, ["file:///sample.ajs"]);
     assert.strictEqual(receiverDisposed, true);

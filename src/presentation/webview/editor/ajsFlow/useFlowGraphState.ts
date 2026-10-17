@@ -12,14 +12,9 @@ import type {
   FlowGraphUnitDto,
   ValidatedFlowGraphDocument,
 } from "../../../../application/flow-graph/flowGraphDocument";
-import {
-  toCountBucket,
-  toDurationBucket,
-} from "../../../../application/telemetry/telemetryBuckets";
 import type { FlowGraphSemanticDiffHighlights } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { flowGraphSemanticDiffHighlightsFromOverlay } from "../../../../application/flow-graph/buildFlowGraphCore";
 import { UnitDefinitionDialogDto } from "../../../../application/unit-definition/buildUnitDefinition";
-import { createViewerPerformanceRequest } from "../../viewerRequestMessages";
 import { buildExpandedFlowGraph } from "./buildExpandedFlowGraph";
 import { ExpandedFlowGraphResult } from "./expandedFlowGraphTypes";
 import {
@@ -187,19 +182,7 @@ export const useFlowGraphState = ({
   );
 
   useEffect(() => {
-    const startedAt = performance.now();
     const nextFlowData = buildNodesAndEdges(currentUnitId);
-    if (flowDocument && currentUnitId) {
-      window.vscode.postMessage(
-        createViewerPerformanceRequest({
-          operation: "flow_graph_build",
-          result: "success",
-          durationBucket: toDurationBucket(performance.now() - startedAt),
-          nodeCountBucket: toCountBucket(nextFlowData.nodes.length),
-          edgeCountBucket: toCountBucket(nextFlowData.edges.length),
-        }),
-      );
-    }
     updateFlowDataState(nextFlowData, setNodes, setEdges);
     previousUnitIdRef.current = currentUnitId;
   }, [flowDocument, buildNodesAndEdges, currentUnitId, previousUnitIdRef]);

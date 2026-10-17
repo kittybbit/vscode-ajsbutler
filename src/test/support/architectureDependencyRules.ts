@@ -60,14 +60,37 @@ export const findParserPortBoundaryViolations = (
 
 const telemetryInternalModulePath = "src/application/telemetry/telemetryEvent";
 const telemetryOuterSourcePrefixes = ["src/bootstrap", "src/presentation"];
+const telemetryPublicSymbols = new Set([
+  "createExtensionActivatedEvent",
+  "createViewerOpenCompletedEvent",
+  "createSearchExecutedEvent",
+  "createCsvExportedEvent",
+  "createWebApiImportCompletedEvent",
+  "createSemanticDiffCompletedEvent",
+  "createSemanticDiffExportedEvent",
+  "TelemetryHost",
+  "ViewerFeature",
+  "TelemetryResult",
+  "ExportMethod",
+]);
+
+const isTelemetryPublicModule = (target: string): boolean =>
+  target.replace(/\.(?:tsx?|mts|cts)$/u, "") === telemetryInternalModulePath;
+
+const isAllowedTelemetryPublicImport = (reference: ImportReference): boolean =>
+  (reference.kind === "import" || reference.kind === "import-type") &&
+  reference.namedSymbols !== undefined &&
+  reference.namedSymbols.length > 0 &&
+  reference.namedSymbols.every((symbol) => telemetryPublicSymbols.has(symbol));
 
 export const findTelemetryBoundaryViolations = (
   references: readonly ImportReference[],
 ): ImportReference[] =>
   references.filter(
-    ({ file, resolvedPath, specifier }) =>
-      startsWithAny(file, telemetryOuterSourcePrefixes) &&
-      (resolvedPath ?? specifier) === telemetryInternalModulePath,
+    (reference) =>
+      startsWithAny(reference.file, telemetryOuterSourcePrefixes) &&
+      isTelemetryPublicModule(reference.resolvedPath ?? reference.specifier) &&
+      !isAllowedTelemetryPublicImport(reference),
   );
 
 const ruleMessages: Record<ArchitectureRuleId, string> = {

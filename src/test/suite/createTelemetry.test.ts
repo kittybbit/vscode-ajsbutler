@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import {
-  createTelemetryEvent,
-  telemetryEvents,
+  createExtensionActivatedEvent,
+  createViewerOpenCompletedEvent,
 } from "../../application/telemetry/telemetryEvent";
 import { createTelemetry } from "../../bootstrap/extension/createTelemetry";
 import { TelemetryPort } from "../../application/telemetry/TelemetryPort";
@@ -13,11 +13,7 @@ suite("Create Telemetry", () => {
 
     assert.ok(telemetry instanceof NoopTelemetryAdapter);
     assert.doesNotThrow(() => {
-      telemetry.report(
-        createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
-          development: false,
-        }),
-      );
+      telemetry.report(createExtensionActivatedEvent("desktop"));
       telemetry.dispose();
     });
   });
@@ -29,11 +25,7 @@ suite("Create Telemetry", () => {
 
     assert.ok(telemetry instanceof NoopTelemetryAdapter);
     assert.doesNotThrow(() => {
-      telemetry.report(
-        createTelemetryEvent(telemetryEvents.legacyExtensionActivated, {
-          development: false,
-        }),
-      );
+      telemetry.report(createExtensionActivatedEvent("desktop"));
       telemetry.dispose();
     });
   });
@@ -69,19 +61,19 @@ suite("Create Telemetry", () => {
     );
 
     telemetry.report(
-      createTelemetryEvent(telemetryEvents.viewerFlowOpenStarted, {
+      createViewerOpenCompletedEvent({
+        feature: "flow",
         host: "web",
-        source: "restore",
         result: "success",
       }),
     );
 
     assert.deepStrictEqual(events, [
       {
-        name: "viewer.flow.open_started",
+        name: "viewer.open_completed",
         properties: {
+          feature: "flow",
           host: "web",
-          source: "restore",
           result: "success",
         },
       },

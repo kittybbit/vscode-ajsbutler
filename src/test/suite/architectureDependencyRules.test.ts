@@ -134,13 +134,14 @@ suite("Architecture dependency rules", () => {
     });
   });
 
-  test("rejects internal telemetry imports from outer callers in every import form", () => {
+  test("rejects internal telemetry symbols from outer callers", () => {
     const internalNames = [
-      "telemetryEvents",
-      "TelemetryEventDefinition",
-      "TelemetryPropertyInput",
-      "createTelemetryEvent",
-      "allowTelemetryProperties",
+      "TelemetryEventName",
+      "TelemetryEvent",
+      "EventPropertyValues",
+      "createEvent",
+      "parseTelemetryEvent",
+      "eventProperties",
     ];
     const moduleSpecifier = "../../application/telemetry/telemetryEvent";
     const fixtures = internalNames.flatMap((name) => [
@@ -169,8 +170,52 @@ suite("Architecture dependency rules", () => {
     });
   });
 
-  test("allows the public telemetry port and named builders", () => {
+  test("rejects telemetry exports, module access, and type queries", () => {
+    const moduleSpecifier = "../../application/telemetry/telemetryEvent";
     const fixtures = [
+      `export { createSearchExecutedEvent } from "${moduleSpecifier}";`,
+      `export type { TelemetryHost } from "${moduleSpecifier}";`,
+      `const loaded = import("${moduleSpecifier}");`,
+      `const loaded = require("${moduleSpecifier}");`,
+      `import loaded = require("${moduleSpecifier}");`,
+      `type Internal = import("${moduleSpecifier}").TelemetryHost;`,
+      `import * as telemetry from "${moduleSpecifier}";`,
+      `import telemetry from "${moduleSpecifier}";`,
+      `import telemetry, { createSearchExecutedEvent } from "${moduleSpecifier}";`,
+      `import "${moduleSpecifier}";`,
+      `import { TelemetryEvent as Internal } from "${moduleSpecifier}";`,
+    ];
+
+    fixtures.forEach((source) => {
+      assert.strictEqual(
+        findTelemetryBoundaryViolations(
+          collectImportReferencesFromSource(
+            "src/presentation/vscode/example.ts",
+            source,
+          ),
+        ).length,
+        1,
+        `must reject ${source}`,
+      );
+    });
+  });
+
+  test("allows only named telemetry builders and public enum types", () => {
+    const moduleSpecifier = "../../application/telemetry/telemetryEvent.ts";
+    const fixtures = [
+      ...[
+        "createExtensionActivatedEvent",
+        "createViewerOpenCompletedEvent",
+        "createSearchExecutedEvent",
+        "createCsvExportedEvent",
+        "createWebApiImportCompletedEvent",
+        "createSemanticDiffCompletedEvent",
+        "createSemanticDiffExportedEvent",
+      ].map(
+        (symbol) => `import { ${symbol} as build } from "${moduleSpecifier}";`,
+      ),
+      'import type { TelemetryHost, ViewerFeature, TelemetryResult, ExportMethod } from "../../application/telemetry/telemetryEvent";',
+      'import { type TelemetryHost as Host, type ViewerFeature, type TelemetryResult, type ExportMethod } from "../../application/telemetry/telemetryEvent";',
       {
         file: "src/bootstrap/extension/example.ts",
         source:
@@ -181,12 +226,14 @@ suite("Architecture dependency rules", () => {
         source:
           'import { type ValidatedTelemetryEvent } from "../../application/telemetry/TelemetryPort";',
       },
-      {
-        file: "src/presentation/vscode/example.ts",
-        source:
-          'import { createLegacyWebviewOperationEvent } from "../../application/telemetry/viewerActionTelemetry";',
-      },
-    ];
+    ].map((fixture) =>
+      typeof fixture === "string"
+        ? {
+            file: "src/presentation/vscode/example.ts",
+            source: fixture,
+          }
+        : fixture,
+    );
 
     fixtures.forEach(({ file, source }) => {
       assert.deepStrictEqual(
@@ -200,6 +247,16 @@ suite("Architecture dependency rules", () => {
     assert.deepStrictEqual(
       findTelemetryBoundaryViolations(
         collectProductionImportReferences(repoRoot),
+      ),
+      [],
+    );
+
+    assert.deepStrictEqual(
+      findTelemetryBoundaryViolations(
+        collectImportReferencesFromSource(
+          "src/application/example.ts",
+          `import { createSearchExecutedEvent } from "${moduleSpecifier}";`,
+        ),
       ),
       [],
     );

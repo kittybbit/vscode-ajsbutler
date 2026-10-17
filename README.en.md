@@ -88,7 +88,7 @@ Semantic Diff starts with `JP1/AJS: Compare Definition`. Choose a definition fil
 
 The extension reads local definitions that you open and performs the analysis you request, including list, flow, diagnostic, and comparison operations. It does not automatically rewrite the source definition file.
 
-Telemetry may send anonymous operational metadata such as host kind, feature area, result, diagnostic category, and coarse count or duration buckets to help improve the extension. It does not send definition content, file paths, job or unit names, server names, search strings, credentials, or command text. Telemetry respects VS Code's `telemetry.enableTelemetry` setting.
+Telemetry may send fixed aggregate categories for extension activation, Table/Flow display and search, CSV export, WebAPI import, Semantic Diff, and explicit report export. It does not send definition content, file paths, job or unit names, search text, credentials, or command text. Telemetry respects VS Code's `telemetry.enableTelemetry` setting. See the [telemetry requirement](docs/requirements/cross-cutting/telemetry.md) for the event and property contract.
 
 Telemetry communication goes through the telemetry adapter. CSV output occurs only after you choose copy or save and, for a file, select a destination. Semantic Diff opens a virtual Markdown report in VS Code; copying happens only after you explicitly request it. Saving the report is also a user action.
 
