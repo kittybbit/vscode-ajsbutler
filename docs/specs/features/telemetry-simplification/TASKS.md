@@ -4,37 +4,72 @@
 
 - Purpose: seven fixed events and four enum properties; preserve JP1/AJS,
   viewer/search/export/import/comparison/editor behavior under [SPECS](SPECS.md).
-- Active slice: S1, independently reviewed Ready; Human Approval Approved.
+- Active slice: S1; original 105-path plan reviewed Ready and Human Approved.
+  The one additional test path below is also Human Approved (106 paths total).
 - Read: requirements R1–R9, S1 scope/design/checks below,
   [traceability](TRACEABILITY.md), and the
   [planning discovery](/tmp/ajsbutler-telemetry-plan-20261017/discovery.md).
 - Prohibitions: no implementation before the approved planning commit;
   no identifiers, generic tracker, timeout, dual sending, architecture exception,
   dependency/engine/configuration change or inherited-feature edit.
-- Next operation: Main commits this approved planning package, then delegates S1.
+- Next operation: Main commits the approved one-path replan, then resumes S1.
+  Existing implementation remains incomplete.
 
 ## Current state and gate
 
 - Lifecycle state: APPROVED
 - Feature: `docs/specs/features/telemetry-simplification` (transient branch).
-- Mode: Planning; predecessor intake identity
+- Mode: Replanning, one-path approval-boundary delta; predecessor intake identity
   `cc4914f191b6921377a4722ac579d72d2aedd84f30633a7dbd3e05813c5a1571`.
 - Branch: `codex/telemetry-simplification`; comparison base `origin/main` =
   `4ef3356dddad932ec514fb949831555b8ea77447`.
-- Plan review: Ready for approval; no Findings. Planning commit: none.
+- Original plan review: Ready; no Findings. Approved planning/implementation
+  base commit: `5d28d9f5ce0b9c8c9546962153e1963438e8d090`.
   Reviewed substantive plan identity:
   `0dd582e615f1c6aaa5d57d48f67d6b6d3b17b15bd4bc84935185009cd99367aa`.
   Review record: [independent review](/tmp/ajsbutler-telemetry-plan-20261017/review.md).
 - Human Approval: Status: Approved;
   Approved at: approved in current conversation (2026-10-17).
   Approved scope: reviewed S1 outcomes, Solution Shape and required validation.
-  Approved paths: all 105 exact paths enumerated below; no additional paths.
+  Approved paths: original 105 exact paths in the
+  [approved manifest](/tmp/ajsbutler-telemetry-plan-20261017/proposed-paths.txt);
+  no additional paths. Original approval/provenance remains unchanged.
 - Approval covers: S1 outcomes, Solution Shape, exact product/support/docs
   paths below and required validation. Closure removal remains a separate gate.
-- No implementation, completion review/approval/commit, Feature Exit,
-  Closure Approval or Human Merge Approval is claimed.
+- S1 runtime implementation exists but is incomplete; no implementation Ready,
+  completion review/approval/commit, Feature Exit, Closure Approval or Human
+  Merge Approval is claimed.
 
 Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
+
+## Approved one-path approval delta
+
+- Trigger: approved Flow `nodes/Utils.ts` removes retired nested-toggle
+  telemetry, but an existing interaction test outside the original boundary
+  still expects that retired message. Its path is restored to HEAD.
+- Approved S1 path addition: `src/test/suite/showUnitDefinitionInteraction.test.ts`.
+  Approved S1 boundary total: 106 exact paths (original 105 plus this path).
+- Exact test delta: preserve the existing functional toggle assertion; change
+  the message expectation to `[]` and clarify the test title. No production,
+  behavior, Solution Shape, dependency, compatibility, risk tier, validation
+  command/coverage strategy or closure-boundary change is proposed.
+- Proposal: [reviewable test delta](/tmp/ajsbutler-telemetry-s1-20261017/approval-boundary/showUnitDefinitionInteraction.test.ts.proposal.diff).
+- Delta review: Ready for approval; no Findings.
+  Reviewed plan identity:
+  `4ae21c0ef9eb6e0e84e704cf69a06b9ef4a4ed513da53d915b381cda6633b903`.
+  Review: [delta review](/tmp/ajsbutler-telemetry-replan-path-20261017/review.md).
+  Delta Human Approval: Status: Approved;
+  Approved at: approved in current conversation (2026-10-17).
+  Approved scope: this exact one-test-path addition and preserved functional
+  assertion with no retired telemetry, as independently reviewed.
+  Resume this test edit after the focused replan commit.
+- Original 105-path Human Approval, review and planning commit remain intact.
+  Only affected delta review/approval and scope-dependent evidence need renewal.
+  The existing final S1 checks still apply and include this interaction suite;
+  preserve incomplete implementation and do not claim its final checks passed.
+- Delta discovery and exact content/check identity:
+  [discovery](/tmp/ajsbutler-telemetry-replan-path-20261017/discovery.md),
+  [documentation validation](/tmp/ajsbutler-telemetry-replan-path-20261017/validation.json).
 
 ## Native stack
 
@@ -49,8 +84,8 @@ head. Internal work order is not a second slice or approval gate.
 - Trunk/target: `main`.
 - Layer S1 branch/head ref: `codex/telemetry-simplification`; PR: not created.
 - Layer predecessor/base: `origin/main` at the SHA above. Planning package
-  precedes implementation on this branch; implementation base is the eventual
-  approved planning commit (currently none).
+  precedes implementation on this branch; approved implementation base is
+  `5d28d9f5ce0b9c8c9546962153e1963438e8d090`.
 - Layer head/reviewed diff: not established; record exact base/head commit and
   content identities, PR URL and acceptance evidence at review/publication.
 - Top integration head: S1 head; no integration branch or integration-only PR.
@@ -179,8 +214,9 @@ retry/timeout, general event bus or operation manager is introduced.
 
 ### Exact production and validation-support paths
 
-All entries below are proposed modify paths unless explicitly marked new or
-obsolete. No changes outside these paths are approved by this plan. Existing
+The original entries below retain their 105-path approval. The separately
+listed one-path delta proposes a 106-path S1 boundary and remains Pending.
+Entries are modify paths unless explicitly marked new or obsolete. Existing
 paths may remain unchanged when unnecessary; need for another path returns to
 Main before edits.
 
@@ -422,8 +458,8 @@ and blocks Ready until Main resolves it; it cannot be silently deferred.
   [discovery](/tmp/ajsbutler-telemetry-plan-20261017/discovery.md),
   [validation](/tmp/ajsbutler-telemetry-plan-20261017/validation.json).
   The artifact supplies the exact plan content manifest/identity and check logs.
-- S1 runtime evidence/review/approval/commit: none yet; record a compact index
-  here when produced. Preserve exact base/head, approved paths, configuration/
+- S1 implementation remains incomplete; this replan makes no runtime pass or
+  readiness claim. Preserve exact base/head, approved paths, configuration/
   dependency/tool hashes, tracked/untracked/deletion manifests and check status
   in accessible artifacts outside analyzed inputs. No evidence collector or
   parallel registry is introduced.
