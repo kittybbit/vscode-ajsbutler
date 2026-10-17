@@ -17,11 +17,9 @@ import {
   DISPLAY,
   type ViewerDisplayResult,
   type ViewerNavigationRequest,
-  type ViewerReadyRequest,
   type ViewerRequest,
   type ViewerResourceRequest,
   type ViewerSaveRequest,
-  type ViewerSearchRequest,
 } from "../../webview/viewerRequestMessages";
 
 export type ViewerPanelHandlers = {
@@ -106,13 +104,7 @@ const runViewerHostOperationSafely = (
 };
 
 type ViewerMessageRouteMap = {
-  [RESOURCE]: (event: ViewerResourceRequest) => void;
-  [READY]: (event: ViewerReadyRequest) => void;
-  [SAVE]: (event: ViewerSaveRequest) => void;
-  [SEARCH]: (event: ViewerSearchRequest) => void;
-  [CSV_EXPORT]: () => void;
-  [DISPLAY]: (result: ViewerDisplayResult) => void;
-  [NAVIGATE]: (event: ViewerNavigationRequest) => void;
+  [Request in ViewerRequest as Request["type"]]: (event: Request) => void;
 };
 
 const reportTelemetrySafely = (
@@ -195,7 +187,7 @@ const createViewerMessageRoutes = ({
       telemetry,
       createCsvExportedEvent("copy"),
     ),
-  [DISPLAY]: onDisplay,
+  [DISPLAY]: (event) => onDisplay(event.data),
   [NAVIGATE]: (event) => {
     runViewerHostOperationSafely(
       () => onNavigate(document, event),
@@ -212,28 +204,7 @@ const dispatchViewerRequest = (
   routes: ViewerMessageRouteMap,
   event: ViewerRequest,
 ): void => {
-  switch (event.type) {
-    case RESOURCE:
-      routes[RESOURCE](event);
-      return;
-    case READY:
-      routes[READY](event);
-      return;
-    case SAVE:
-      routes[SAVE](event);
-      return;
-    case SEARCH:
-      routes[SEARCH](event);
-      return;
-    case CSV_EXPORT:
-      routes[CSV_EXPORT]();
-      return;
-    case DISPLAY:
-      routes[DISPLAY](event.data);
-      return;
-    case NAVIGATE:
-      routes[NAVIGATE](event);
-  }
+  routes[event.type](event as never);
 };
 
 export const createViewerMessageHandler = (

@@ -13,12 +13,13 @@
 - Prohibitions: no implementation before the approved planning commit;
   no identifiers, generic tracker, timeout, dual sending, architecture exception,
   dependency/engine/configuration change or inherited-feature edit.
-- Next operation: Main creates the approved S1 implementation commit, then
-  coordinates publication and Feature Exit. Closure and merge are separate.
+- Next operation: Main commits the approved Cloud correction and updates
+  PR #342, then verifies checks on the new head. Feature Exit, closure and
+  merge remain separate gates.
 
 ## Current state and gate
 
-- Lifecycle state: SLICE_READY
+- Lifecycle state: SLICE_APPROVED
 - Feature: `docs/specs/features/telemetry-simplification` (transient branch).
 - Mode: Implementation, approved direct-builder cleanup; predecessor intake identity
   `cc4914f191b6921377a4722ac579d72d2aedd84f30633a7dbd3e05813c5a1571`.
@@ -40,11 +41,33 @@
   Original approval/provenance remains unchanged.
 - Approval covers: S1 outcomes, Solution Shape, exact product/support/docs
   paths below and required validation. Closure removal remains a separate gate.
-- S1 implementation and both independent reviews are Ready; no Findings remain.
-  Completion Approval is Approved; implementation commit, Feature Exit,
-  Closure Approval and Human Merge Approval are not yet claimed.
+- The committed S1 implementation and both independent reviews are Ready; no
+  Findings remain. Completion Approval and S1 implementation commit are
+  complete. Those gates cover commit `c11bc921a0366aadb95aade25355e5be77853019`,
+  not the current uncommitted Cloud correction. Both correction reviews are
+  Ready; renewed Completion Approval is Approved. Feature Exit, Closure
+  Approval and Human Merge Approval are not yet claimed.
 
 Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
+
+## Cloud correction completion gate
+
+- Completion Approval: Status: Approved;
+  Approved at: approved in current conversation (2026-10-17).
+- Approved scope: the reviewed four-file Cloud correction and separate gate
+  metadata, based on `c11bc921a0366aadb95aade25355e5be77853019`, followed by
+  updating the existing PR #342 branch. No closure or merge is authorized.
+- Exact paths: `src/presentation/vscode/commands/importAjsDefinitionViaWebApiCommand.ts`,
+  `src/presentation/vscode/webview/viewerMessageRouting.ts`, and the selected
+  feature's `TASKS.md` and `TRACEABILITY.md`. All are within the approved 110.
+- Reviewed patch SHA-256:
+  `798f4608c9b95898cf6f36d6ec5a7fdc1ea5d6b667c1bfc1d1a31d234b0787f2`.
+- Integrated review: [Ready](/tmp/ajsbutler-telemetry-s1-20261017/cloud-correction-review-integrated.md).
+- Additional routing review: [Ready](/tmp/ajsbutler-telemetry-s1-20261017/cloud-correction-review-lifecycle.md).
+- Validation: [Cloud correction evidence](/tmp/ajsbutler-telemetry-s1-20261017/cloud-correction-evidence.md).
+  Main's following gate annotations are metadata only; product inputs remain
+  the reviewed snapshot. Configured formatter/Markdown checks cover annotations.
+- Correction commit: none. Existing remote head still has Cloud failures.
 
 ## Completion gate
 
@@ -61,8 +84,16 @@ Apply [lifecycle and approvals](../../README.md#lifecycle-and-approval-gates).
 - Main's review-state/approval-pending annotations are a separate metadata patch
   in [gate metadata](/tmp/ajsbutler-telemetry-s1-20261017/main-ready-metadata.diff).
   They do not change product inputs or claim new product checks.
-- Implementation commit: none. Completion Approval does not grant closure or
-  merge approval.
+- Implementation commit: `c11bc921a0366aadb95aade25355e5be77853019`;
+  executor Main; staged diff check Pass, exact 89 approved paths, clean tree
+  immediately after commit. Approval and reviews are recorded above.
+- Published single-layer draft PR: [#342](https://github.com/kittybbit/vscode-ajsbutler/pull/342),
+  `codex/telemetry-simplification` into `main`, current head is the S1 commit.
+  At 2026-10-17 09:41:05 UTC, Verify, CodeQL, Analyze, changes and decide
+  passed; Qlty Cloud `check` failed with two blocking issues and `fmt` failed
+  with one formatting issue. Current-head status and exact finding references
+  are recorded in the [Feature Exit evidence](/tmp/ajsbutler-telemetry-s1-20261017/feature-exit/closure-evidence.md).
+- Completion Approval does not grant closure or merge approval.
 
 ## Approved direct-builder cleanup delta
 
@@ -161,14 +192,14 @@ the complete smaller privacy contract, including Semantic Diff, works at its
 head. Internal work order is not a second slice or approval gate.
 
 - Trunk/target: `main`.
-- Layer S1 branch/head ref: `codex/telemetry-simplification`; PR: not created.
+- Layer S1 branch/head ref: `codex/telemetry-simplification`; draft PR:
+  [#342](https://github.com/kittybbit/vscode-ajsbutler/pull/342).
 - Layer predecessor/base: `origin/main` at the SHA above. Planning package
   precedes implementation on this branch; approved implementation base is
   `5d28d9f5ce0b9c8c9546962153e1963438e8d090`.
-- Layer head/reviewed diff: completed uncommitted patch based on
-  `9b080585a72f79d7d38af94795e4a2741c937d37`; its content identity and
-  acceptance evidence are recorded below. This operation creates no PR or
-  implementation commit.
+- Layer head/reviewed diff: committed S1 `c11bc921a0366aadb95aade25355e5be77853019`
+  based on `9b080585a72f79d7d38af94795e4a2741c937d37`; its content identity,
+  acceptance and commit evidence are recorded above and in the validation index.
 - Top integration head: S1 head; no integration branch or integration-only PR.
 - Completion: independent Ready, explicit Completion Approval and focused commit.
 - Closure propagation/removal lands in this same top PR after Feature Exit,
@@ -182,7 +213,7 @@ head. Internal work order is not a second slice or approval gate.
 
 ## S1: Complete minimum telemetry contract
 
-- Lifecycle state: SLICE_READY
+- Lifecycle state: SLICE_COMMITTED
 - Value: collect only meaningful aggregate user actions through seven fixed
   event shapes while all existing extension workflows remain functional.
 - Dependencies: complete intake; independently Ready plan; explicit Human
@@ -654,3 +685,43 @@ valuable unfinished work or unapproved durable destination returns to Main for
 scope/owner decision; no planned roadmap edit. Final merge needs separate Human
 Merge Approval; Main records actual verified merge SHAs/CLOSED outside the
 removed feature folder.
+
+### Feature Exit result for S1 commit `c11bc921`
+
+- The prior assessment recommended **Do not close**.
+- The current-head Cloud correction returns the feature lifecycle to
+  `SLICE_READY` pending renewed Completion Approval;
+  the prior recommendation does not authorize Feature Exit or closure.
+- S1 acceptance, local validation, both independent reviews, compatibility,
+  durable propagation and exact planned removals are assessed in the retained
+  [Feature Exit evidence](/tmp/ajsbutler-telemetry-s1-20261017/feature-exit/closure-evidence.md).
+- Current-head Verify and CodeQL passed, but Qlty Cloud `check` and `fmt` failed
+  on PR #342. Policy requires the current-head Cloud pass before Feature Exit.
+  Main owns routing the exact findings through the S1 correction loop; local
+  baseline-comparison results do not replace this gate.
+- Projected tracked-tree manifest after the three planned deletions:
+  667 paths, SHA-256 `59d6806e189c14d719288e2680b53dfa17ac705cadcf0da2e280d1ed4846fed2`.
+  Manifest and source identities are recorded in the external evidence.
+- No closure deletion, closure-patch review, Closure Approval, closure commit,
+  Human Merge Approval or merge is claimed.
+
+## Current-head Qlty Cloud correction
+
+- The Cloud `check` and `fmt` findings on published S1 commit
+  `c11bc921a0366aadb95aade25355e5be77853019` are being corrected within the
+  existing 110-path approval. Current working-tree changes are the import
+  prompt collector identity (`collectInputSteps`), the typed viewer request
+  route-map dispatch, and outcome/validation metadata in this document and
+  `TRACEABILITY.md`. Existing import-cancellation and all-route behavior is
+  retained; the duplicate dispatch switch is removed.
+- The correction is Ready after both independent reviews, but not committed
+  or published. Renewed Completion Approval is recorded above.
+  Qlty Cloud checks must then pass at that new PR head before Feature Exit;
+  the old c11 Cloud failure remains the current remote status.
+- Local baseline/final evidence for this correction is indexed in the
+  [Cloud correction evidence](/tmp/ajsbutler-telemetry-s1-20261017/cloud-correction-evidence.md).
+  It records exact 670-file snapshot identity, raw commands and exits, native
+  inventories, unchanged two-record check SARIF, 151-to-126 smells, and the
+  passing Qlty aggregate. Final supported desktop/web, VS Code 1.75.0, build,
+  TypeScript and ESLint checks also pass there. These local results do not
+  replace the pending current-head Cloud gate.

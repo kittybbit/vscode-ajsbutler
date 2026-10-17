@@ -117,7 +117,7 @@ const IMPORT_INPUT_STEPS: ImportInputStep[] = [
   },
 ];
 
-const collectInputValues = async (
+const collectInputSteps = async (
   deps: ImportAjsDefinitionCommandDeps,
 ): Promise<Partial<ImportInputValues> | undefined> => {
   let values: Partial<ImportInputValues> = {};
@@ -149,7 +149,7 @@ const buildImportRequest = (
 const collectInputs = async (
   deps: ImportAjsDefinitionCommandDeps,
 ): Promise<ImportInputCollection> => {
-  const values = await collectInputValues(deps);
+  const values = await collectInputSteps(deps);
   if (!values || !hasImportInputValues(values)) return { kind: "cancelled" };
   return {
     kind: "ready",
