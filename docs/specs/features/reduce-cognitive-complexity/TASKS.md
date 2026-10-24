@@ -4,27 +4,28 @@
 
 - Purpose: satisfy [R1-R9](SPECS.md#requirements-and-acceptance) through actual
   decision/state simplification with existing viewer behavior preserved.
-- Active or approved slice: S1 is approved; planning commit is the next gate.
+- Active or approved slice: S1 Completion Approval is recorded; commit is next.
 - Read: [specification](SPECS.md), [discovery](#discovery), Solution Shape and
   the selected slice below, [traceability](TRACEABILITY.md), validation/evidence
   policy. D1/V1 remain valid for their unchanged intake facts and inputs.
-- Next: focused planning commit, then S1 implementation by implementer.
+- Next: S1 focused commit, then approved S2 implementation.
 - Prohibit cosmetic splitting, behavior/API changes, metric configuration or
   selection changes, architecture exceptions and inherited-feature edits.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Plan identity: P1, Planning Mode, 2026-10-24; SHA-256 content identities of
   all three feature documents are supplied in the planner handoff.
 - Feature kind: transient branch feature; selected: `reduce-cognitive-complexity`.
 - Branch: `codex/reduce-cognitive-complexity`; comparison base: `main` at
   `6894f9ddfee566b5d2f3207a821ca5168e94022f`.
-- Next decision: focused planning commit, then S1; no unresolved design blocker.
+- Next decision: commit approved S1, then S2; no design blocker.
 - Gate evidence: independent plan-reviewer returned Ready for approval with no
   Findings. Human Approval of P1 S1-S5 and the planning commit was explicit in
-  the current conversation. Planning commit is pending; each slice remains
-  PLANNED. See [review record](#independent-plan-review).
+  the current conversation. Planning commit is complete. S1 is implemented and
+  has been independently reviewed Ready; S2-S5 remain PLANNED. See
+  [review record](#independent-plan-review).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -38,12 +39,33 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 - Approved paths: exact product/test/support paths enumerated in S1-S5 below;
   the three selected feature documents for planning and the explicitly listed
   TASKS/TRACEABILITY metadata paths during implementation. No other paths.
-- Plan review / plan commit: Ready for approval (P1) / not performed.
-- Completion Approval and Closure Approval: not requested; their prerequisite
-  independent reviews have not occurred.
+- Plan review / plan commit: Ready for approval (P1) /
+  `924d46ed1270e2206f93c7fb85114aacb8ddc87f` by Main; S1 implementation
+  record follows the selected slice.
+- Staged check: Pass (`git diff --cached --check`, exit 0); exact three-file
+  planning scope inspected, Markdown lint Pass, unrelated index entries absent.
+- Completion Approval: S1 approved, with independent Ready recorded below.
+- Closure Approval: not requested; Feature Exit has not occurred.
 
 Apply [Human Approval](../../README.md#human-approval) and the
 [commit policy](../../README.md#approval-gated-commit-policy).
+
+## S1 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-25.
+- Approved scope: exact reviewed S1 product, test and two feature-record
+  paths listed below; no other slice or path.
+- Review: independent implementation-reviewer Ready, no remaining Findings.
+  Reviewed diff against `924d46ed1270e2206f93c7fb85114aacb8ddc87f` has SHA-256
+  `47100be38797ec1a190490e88496cad5683b9adde1638c79c413b01e607ee241`.
+- Evidence: `/private/tmp/vscode-ajsbutler-s1-evidence.d9FjJV/s1.md`, SHA-256
+  `872e5891a6e6878b9763aabddbc2d31bbd0ed0dbfdbaa3b3e1dba51532c2eaa5`.
+  Prior semantic, Solution Shape, compatibility and validation results reused;
+  re-review confirmed inventories/statuses and corrected baseline count.
+- Commit: pending; Main verified the reviewed content plus Ready metadata,
+  retained evidence access and empty index before recording this approval.
+  This annotation does not change the reviewed substantive patch.
 
 ## Native Stack References
 
@@ -52,13 +74,13 @@ branch names as published references. Planning commit belongs to bottom S1.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Layer | Branch | PR / head | Base |
-| --- | --- | --- | --- |
-| S1 | `codex/reduce-cognitive-complexity` | absent / uncommitted at comparison base | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
-| S2 | `codex/reduce-cognitive-complexity-focus` | absent / pending | committed S1 head |
-| S3 | `codex/reduce-cognitive-complexity-tree` | absent / pending | committed S2 head |
-| S4 | `codex/reduce-cognitive-complexity-routing` | absent / pending | committed S3 head |
-| S5 | `codex/reduce-cognitive-complexity-scope` | absent / pending final head | committed S4 head |
+| Layer | Branch                                      | PR / head                                                           | Base                                                 |
+| ----- | ------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
+| S1    | `codex/reduce-cognitive-complexity`         | absent / planning commit `924d46ed1270e2206f93c7fb85114aacb8ddc87f` | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
+| S2    | `codex/reduce-cognitive-complexity-focus`   | absent / pending                                                    | committed S1 head                                    |
+| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / pending                                                    | committed S2 head                                    |
+| S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                                    | committed S3 head                                    |
+| S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                         | committed S4 head                                    |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -116,7 +138,7 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S1: Unify table movement rules
 
-- Lifecycle state: PLANNED. Dependency: approved/committed P1.
+- Lifecycle state: SLICE_APPROVED. Dependency: approved/committed P1.
 - Value: one coordinate movement policy removes repeated axis calculations and
   bounds decisions for visible columns and logical rows.
 - Product: `src/presentation/webview/editor/ajsTable/tableNavigationModel.ts`.
@@ -135,6 +157,43 @@ Independent review and Completion Approval/commit are required for each.
   ArrowUp from first data row enters its column header; PageUp stays data.
 - Risk: normalizing key rules can accidentally reorder special cases. No UI,
   DOM, renderer, controller or interaction-policy changes in this slice.
+
+#### S1 implementation record
+
+- Solution Shape: per-origin movement tables select axis operations, while
+  shared axis resolvers apply clamping once. Explicit transition resolvers
+  preserve ArrowUp-to-header and Ctrl+Home priority; target resolvers apply the
+  selected cell or header result once. This replaces repeated key-specific
+  coordinate branches rather than moving them into wrappers.
+- Result: all functions in `tableNavigationModel.ts` are cognitive complexity
+  <=12. The full qlty selection decreased from cognitive 4,260 to 4,217 and
+  cyclomatic 4,406 to 4,385. The model file decreased from cognitive 115 to 72
+  and cyclomatic 82 to 61. `tableNavigation.test.ts` now characterizes key
+  families, Ctrl precedence, endpoints, empty axes, invalid focus, page-size
+  clamping, and unchanged-focus identity. Existing navigation behavior is
+  retained by those boundary assertions and the full regression suite.
+- Validation: full desktop/web tests, zero-exception architecture test, type
+  check, desktop/web/editor build and VS Code 1.75 smoke all passed. See the
+  evidence record at `/private/tmp/vscode-ajsbutler-s1-evidence.d9FjJV/s1.md`.
+  The canonical refreshed baseline/final qlty `--all` check SARIF has five and
+  two findings respectively. Three baseline findings are absent in final: qlty
+  prettier-format findings on TASKS and TRACEABILITY, and a markdownlint-format
+  finding on TASKS. The other two are
+  unchanged findings in `.github/ISSUE_TEMPLATE/pull_request_template.md` and
+  `src/test/suite/index.ts`. No adverse result remains in changed paths. The
+  baseline and final `check --all --sarif --no-fix --no-cache` observations
+  each exit 1. An earlier cached baseline artifact reported four and is
+  superseded by the canonical refreshed SARIF.
+  Their isolated official invocation inventories include `targetPaths` and
+  `targetsCount`. Baseline and final `smells --all --sarif --no-snippets`
+  observations each exit 0 and trace two 372-file passes. Exact statuses,
+  path inventories, SARIF, logs and identities are indexed in the evidence
+  record. The required aggregate command passed.
+- Readiness: independent implementation review Ready, no remaining Findings.
+  Completion Approval is recorded; the S1 commit is pending. Evidence is bound
+  to the immutable
+  substantive snapshot; this implementation record is a separate metadata
+  annotation.
 
 ### S2: Consolidate virtualized table focus lifecycle
 
@@ -254,7 +313,7 @@ Independent review and Completion Approval/commit are required for each.
 
 - Before each behavior-sensitive change, execute relevant existing coverage and
   add missing boundary tests within that slice. Then run `rtk pnpm run
-  test:full` (desktop regression suite, zero-exception architecture dependency
+test:full` (desktop regression suite, zero-exception architecture dependency
   tests, real Chromium DOM fixture, web smoke), `rtk pnpm exec tsc --noEmit`,
   `rtk pnpm run build` (desktop/web/editor production bundles), and
   `rtk pnpm run test:desktop:min` (VS Code 1.75.0 smoke). These existing runners
@@ -379,7 +438,7 @@ Independent review and Completion Approval/commit are required for each.
   template structure, traceability, state/approval provenance, scope inspection
   and `rtk git diff --check`.
 - Result: Pass. `rtk pnpm exec markdownlint-cli2
-  'docs/specs/features/reduce-cognitive-complexity/*.md'` reports zero errors
+'docs/specs/features/reduce-cognitive-complexity/*.md'` reports zero errors
   for three files (markdownlint-cli2 0.22.0, markdownlint 0.40.0).
 - Relative links/anchors and absence of unresolved template tokens: Pass using
   Python 3 `pathlib`/`re` validation of each local Markdown destination against

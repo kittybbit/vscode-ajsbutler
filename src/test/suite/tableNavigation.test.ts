@@ -288,6 +288,209 @@ suite("Table navigation", () => {
     );
   });
 
+  test("applies each cell movement rule and preserves control-key priority", () => {
+    const context = {
+      current: {
+        kind: "cell" as const,
+        absolutePath: "/root/middle",
+        columnId: "name",
+      },
+      pageSize: 0,
+      rowAbsolutePaths: ["/root/first", "/root/middle", "/root/last"],
+      visibleColumnIds: ["#", "name", "comment"],
+      sortableColumnIds: ["name", "comment"],
+    };
+    const movements = [
+      [
+        "ArrowLeft",
+        undefined,
+        { kind: "cell", absolutePath: "/root/middle", columnId: "#" },
+      ],
+      [
+        "ArrowRight",
+        undefined,
+        { kind: "cell", absolutePath: "/root/middle", columnId: "comment" },
+      ],
+      [
+        "ArrowUp",
+        undefined,
+        { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+      ],
+      [
+        "ArrowDown",
+        undefined,
+        { kind: "cell", absolutePath: "/root/last", columnId: "name" },
+      ],
+      [
+        "PageUp",
+        undefined,
+        { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+      ],
+      [
+        "PageDown",
+        undefined,
+        { kind: "cell", absolutePath: "/root/last", columnId: "name" },
+      ],
+      [
+        "Home",
+        undefined,
+        { kind: "cell", absolutePath: "/root/middle", columnId: "#" },
+      ],
+      [
+        "End",
+        undefined,
+        { kind: "cell", absolutePath: "/root/middle", columnId: "comment" },
+      ],
+      ["Home", true, { kind: "header", columnId: "name" }],
+      [
+        "End",
+        true,
+        { kind: "cell", absolutePath: "/root/last", columnId: "comment" },
+      ],
+    ] as const;
+
+    for (const [key, ctrlKey, expected] of movements) {
+      assert.deepStrictEqual(
+        moveTableGridFocus({ ...context, key, ctrlKey }),
+        expected,
+        `${ctrlKey ? "Ctrl+" : ""}${key}`,
+      );
+    }
+
+    const firstCell = {
+      kind: "cell" as const,
+      absolutePath: "/root/first",
+      columnId: "#",
+    };
+    assert.strictEqual(
+      moveTableGridFocus({ ...context, current: firstCell, key: "ArrowLeft" }),
+      firstCell,
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({ ...context, key: "PageDown", pageSize: -8 }),
+      { kind: "cell", absolutePath: "/root/last", columnId: "name" },
+    );
+  });
+
+  test("applies header movement rules while Ctrl+Home remains header-local", () => {
+    const context = {
+      current: { kind: "header" as const, columnId: "name" },
+      pageSize: 4,
+      rowAbsolutePaths: ["/root/first", "/root/last"],
+      visibleColumnIds: ["#", "name", "comment"],
+      sortableColumnIds: ["name", "comment"],
+    };
+    const movements = [
+      ["ArrowLeft", undefined, { kind: "header", columnId: "#" }],
+      ["Home", undefined, { kind: "header", columnId: "#" }],
+      ["Home", true, { kind: "header", columnId: "#" }],
+      ["ArrowRight", undefined, { kind: "header", columnId: "comment" }],
+      ["End", undefined, { kind: "header", columnId: "comment" }],
+      [
+        "ArrowDown",
+        undefined,
+        { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+      ],
+      [
+        "PageDown",
+        undefined,
+        { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+      ],
+      [
+        "End",
+        true,
+        { kind: "cell", absolutePath: "/root/last", columnId: "comment" },
+      ],
+    ] as const;
+
+    for (const [key, ctrlKey, expected] of movements) {
+      assert.deepStrictEqual(
+        moveTableGridFocus({ ...context, key, ctrlKey }),
+        expected,
+        `${ctrlKey ? "Ctrl+" : ""}${key}`,
+      );
+    }
+
+    const firstHeader = { kind: "header" as const, columnId: "#" };
+    assert.strictEqual(
+      moveTableGridFocus({
+        ...context,
+        current: firstHeader,
+        key: "ArrowLeft",
+      }),
+      firstHeader,
+    );
+  });
+
+  test("preserves focus for invalid identities and handles empty grid axes", () => {
+    const staleRow = {
+      kind: "cell" as const,
+      absolutePath: "/root/removed",
+      columnId: "name",
+    };
+    const staleColumn = {
+      kind: "cell" as const,
+      absolutePath: "/root/first",
+      columnId: "hidden",
+    };
+    const validCell = {
+      kind: "cell" as const,
+      absolutePath: "/root/last",
+      columnId: "comment",
+    };
+    const base = {
+      pageSize: 1,
+      rowAbsolutePaths: ["/root/first", "/root/last"],
+      visibleColumnIds: ["name", "comment"],
+      sortableColumnIds: [],
+    };
+
+    assert.strictEqual(
+      moveTableGridFocus({ ...base, current: staleRow, key: "ArrowDown" }),
+      staleRow,
+    );
+    assert.strictEqual(
+      moveTableGridFocus({ ...base, current: staleColumn, key: "ArrowDown" }),
+      staleColumn,
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: validCell,
+        key: "Home",
+        ctrlKey: true,
+      }),
+      { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+    );
+    assert.deepStrictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: { kind: "header", columnId: "hidden" },
+        key: "ArrowDown",
+      }),
+      { kind: "cell", absolutePath: "/root/first", columnId: "name" },
+    );
+    assert.strictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: { kind: "header", columnId: "name" },
+        key: "ArrowDown",
+        rowAbsolutePaths: [],
+      }),
+      undefined,
+    );
+    const headerWithoutColumns = { kind: "header" as const, columnId: "name" };
+    assert.strictEqual(
+      moveTableGridFocus({
+        ...base,
+        current: headerWithoutColumns,
+        key: "ArrowLeft",
+        visibleColumnIds: [],
+      }),
+      headerWithoutColumns,
+    );
+  });
+
   test("moves between sortable headers and data without trapping Tab", () => {
     const base = {
       pageSize: 10,
