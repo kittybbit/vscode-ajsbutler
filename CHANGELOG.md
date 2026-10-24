@@ -2,15 +2,16 @@
 
 ## Unreleased
 
+## [1.18.0] - 2026-10-24
+
 - Reduced telemetry to seven aggregate events for activation, viewer-open
   completion, committed searches, successful CSV and Semantic Diff exports,
   and terminal WebAPI import and Semantic Diff results. Removed detailed
   diagnostic, hover, rendering, navigation, performance, and workflow-step
   collection; no definition or search content is collected.
 
-- Removed Semantic Diff execution-date simulation, comparison periods, and
-  Schedule Impact Calendar. Definition attributes remain comparable. JSON
-  output uses schema version 2 without simulation fields.
+- Semantic Diff compares definition attributes without execution-date simulation
+  or a Schedule Impact Calendar. JSON output uses schema version 2.
 
 - Corrected UTF-16 source ranges and semantic diagnostic highlights for AJS
   definitions containing supplementary Unicode characters.
