@@ -170,12 +170,11 @@
 
 - Purpose: satisfy [R1-R9](SPECS.md#requirements-and-acceptance) through actual
   decision/state simplification with existing viewer behavior preserved.
-- Active or approved slice: S4 is independently reviewed Ready;
-  S1-S3 are committed.
+- Active or approved slice: S5 is independently reviewed Ready; S1-S4 are committed.
 - Read: [specification](SPECS.md), [discovery](#discovery), Solution Shape and
   the selected slice below, [traceability](TRACEABILITY.md), validation/evidence
   policy. D1/V1 remain valid for their unchanged intake facts and inputs.
-- Next: explicit S4 Completion Approval and focused commit.
+- Next: explicit S5 Completion Approval and focused commit.
 - Prohibit cosmetic splitting, behavior/API changes, metric configuration or
   selection changes, architecture exceptions and inherited-feature edits.
 
@@ -185,15 +184,17 @@
 - Plan identity: P1, Planning Mode, 2026-10-24; SHA-256 content identities of
   all three feature documents are supplied in the planner handoff.
 - Feature kind: transient branch feature; selected: `reduce-cognitive-complexity`.
-- Branch: `codex/reduce-cognitive-complexity-routing`; feature base: `main` at
+- Branch: `codex/reduce-cognitive-complexity-scope`; feature base: `main` at
   `6894f9ddfee566b5d2f3207a821ca5168e94022f`.
-- Next decision: S4 Completion Approval and focused commit; no design blocker.
+- Next decision: S5 Completion Approval and focused commit; no design blocker.
 - Gate evidence: independent plan-reviewer returned Ready for approval with no
   Findings. Human Approval of P1 S1-S5 and the planning commit was explicit in
   the current conversation. Planning commit is complete. S1 and S2 are
   implemented and committed. S3 is independently reviewed Ready after its
   coverage correction and committed. S4 is independently reviewed Ready after
-  its return-value correction; S5 remains PLANNED. See
+  its return-value correction and committed; S5 is independently reviewed Ready
+  after its evidence-reference correction. Completion Approval and commit are
+  pending. See
   [review record](#independent-plan-review).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
@@ -213,11 +214,42 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   record follows the selected slice.
 - Staged check: Pass (`git diff --cached --check`, exit 0); exact three-file
   planning scope inspected, Markdown lint Pass, unrelated index entries absent.
-- Completion Approval: S1-S3 approved and committed.
+- Completion Approval: S1-S4 approved and committed.
 - Closure Approval: not requested; Feature Exit has not occurred.
 
 Apply [Human Approval](../../README.md#human-approval) and the
 [commit policy](../../README.md#approval-gated-commit-policy).
+
+## S5 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-25.
+- Approved scope: reviewed five-path S5 patch and focused commit; no other slice
+  or path. Completion paths:
+  `src/application/navigation/resolveNavigationTarget.ts`,
+  `src/test/suite/revealUnit.test.ts`,
+  `src/test/suite/flowScopeState.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: independent implementation-reviewer Ready, no remaining Findings.
+  The P2 evidence-reference correction is resolved: the accepted full-test run
+  is `final-corrected-test-full-retry1.log/.status`; the TS2322 attempt is
+  explicitly superseded. Its exact source/test and dependency inputs match.
+- Reviewed complete patch against `5018ba7f43a98e13602f3f68ea9c3bc44b5d8ddb`:
+  `/private/tmp/vscode-ajsbutler-s5-evidence/S5-complete.patch`, SHA-256
+  `4c7fa26ec81815f33d41df68f5a45e30a67d186cc59f0ec09bdff6ba08cc03d1`.
+  Product/test patch SHA-256:
+  `6b59e979e8aa94ef37a03bd01092f96a591408eee0bfd5d32ede1973c1e64c9b`.
+- Evidence: `/private/tmp/vscode-ajsbutler-s5-evidence/s5.md`, SHA-256
+  `e48a220202bafd92fb75eeda7fa678eec101ba319141fb735d7ef99a2801b368`.
+  Retry input identity is `final-corrected-test-full-retry1.input-identity.md`
+  in that directory, SHA-256
+  `cd6566a750f63841ec9350327d6f8dda89ca585a1455b9dc51c8a42e10465f29`.
+  The reviewer reused matching semantic and validation judgments; no product
+  checks were rerun.
+- Commit: pending focused S5 commit by Main. Main verified the reviewed
+  five-path patch, evidence identity and empty index. Gate metadata is
+  separately validated; no product or test content changed after review.
 
 ## S4 Completion Approval
 
@@ -242,9 +274,10 @@ Apply [Human Approval](../../README.md#human-approval) and the
   SHA-256 `dd5b42b89e4c68ebac862d067836058fe291d76a5bbca846140018c368ba7429`.
   The reviewer verified the complete layer and all four file hashes, reused
   matching validation evidence, and ran no product checks.
-- Commit: pending focused S4 commit by Main. Main verified reviewed
-  content, evidence identity and empty index. Gate metadata is separately
-  validated; no product or test content changed after review.
+- Commit: `5018ba7f43a98e13602f3f68ea9c3bc44b5d8ddb` by Main; staged
+  `git diff --cached --check` Pass, exact four-path scope inspected, metadata
+  qlty format and Markdown lint Pass, unrelated index entries absent. Reviewed
+  content and evidence matched; no product checks rerun.
 
 ## S3 Completion Approval
 
@@ -340,8 +373,8 @@ branch names as published references. Planning commit belongs to bottom S1.
 | S1    | `codex/reduce-cognitive-complexity`         | absent / committed `8b293446b5fe5d5f0b7676cf4406a43744c47766` | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
 | S2    | `codex/reduce-cognitive-complexity-focus`   | absent / committed `143eaf2e8ae05de22bb5f161df664e17b6533aea` | S1 `8b293446b5fe5d5f0b7676cf4406a43744c47766`        |
 | S3    | `codex/reduce-cognitive-complexity-tree`    | absent / committed `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409` | S2 `143eaf2e8ae05de22bb5f161df664e17b6533aea`        |
-| S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                              | S3 `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`        |
-| S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                   | committed S4 head                                    |
+| S4    | `codex/reduce-cognitive-complexity-routing` | absent / committed `5018ba7f43a98e13602f3f68ea9c3bc44b5d8ddb` | S3 `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`        |
+| S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                   | S4 `5018ba7f43a98e13602f3f68ea9c3bc44b5d8ddb`        |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -640,7 +673,7 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S4: Unify registered viewer activity guards
 
-- Lifecycle state: SLICE_APPROVED. Dependency: S3 committed at
+- Lifecycle state: SLICE_COMMITTED. Dependency: S3 committed at
   `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`.
 - Value: repeated panel-active checks become one registration-local guarded
   execution policy without suppressing existing routing errors.
@@ -705,7 +738,7 @@ Independent review and Completion Approval/commit are required for each.
   `/private/tmp/vscode-ajsbutler-s4-evidence/s4-correction-1.md`.
 - Readiness: independent implementation-reviewer Ready, no remaining Findings.
   The P2 return-value correction is resolved within the approved boundary.
-  Completion Approval and commit remain pending. The full test run emitted
+  Completion Approval and commit are recorded. The full test run emitted
   transient Chromium/web stream diagnostics
   after browser checks but exited 0; the VS Code 1.75 smoke emitted
   host/browser warnings but exited 0. No acceptance or compatibility blocker
@@ -714,7 +747,8 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S5: Simplify application flow-scope resolution
 
-- Lifecycle state: PLANNED. Dependency: S4 committed.
+- Lifecycle state: SLICE_APPROVED. Dependency: S4 committed at
+  `5018ba7f43a98e13602f3f68ea9c3bc44b5d8ddb`.
 - Value: candidate selection and one result conversion replace repeated
   available/unavailable branches while making existing scope priorities clear.
 - Product: `src/application/navigation/resolveNavigationTarget.ts`.
@@ -734,6 +768,34 @@ Independent review and Completion Approval/commit are required for each.
   flow-state tests confirm revealed unit and expanded ancestors.
 - Risk: candidate simplification can hide cycle precedence. Domain/parser,
   graph construction, caches and public result types are excluded from edits.
+- Solution Shape: `findParentScopeCandidate` keeps direct condition-parent
+  priority before nearest jobnet ancestor selection. `selectFlowScopeCandidate`
+  chooses the separate job-group descendant or parent candidate. The existing
+  `resolveFlowScopeUnit` preserves cycle failure, applies the eligible self
+  fallback, and converts the chosen unit to one result. Iterative traversals,
+  document cache and ordering remain unchanged; no public or layer boundary
+  changes.
+- Implementation: the three existing scope branches no longer construct
+  repeated available/unavailable results. The selected candidate path preserves
+  the approved behavior and boundary tests; see V5 at
+  `/private/tmp/vscode-ajsbutler-s5-evidence/s5.md`.
+- Validation V5: final `test:full`, `tsc --noEmit`, desktop/web/editor build,
+  and VS Code 1.75.0 smoke passed. Qlty 0.645.0 full-file totals are
+  4,120/4,370 → 4,117/4,370 cognitive/cyclomatic from S4; the original-base
+  totals are 4,260/4,406 → 4,117/4,370. All 3,418 measured functions are <=14;
+  `resolveFlowScopeUnit` is 16 → 7, with candidate helpers at 4 and 2.
+  Baseline/final CHECK SARIFs contain the same two inherited findings.
+  Smells status is 0 on both snapshots with 114 → 113 results; normalized
+  comparison finds no new/adverse result. Final qlty aggregate passed. The
+  CHECK inventory is reused from S4's final set: 142 invocations, 636 paths,
+  2,461 path-target entries; selection, config, dependencies and path set are
+  unchanged. Raw commands, statuses, SARIF, manifests, identities and the
+  inventory reuse source are indexed in V5.
+- Readiness: independent implementation-reviewer Ready, no remaining Findings.
+  The evidence-reference correction is resolved. Completion Approval and commit
+  remain pending. No observable behavior, API, DTO, error code/message, telemetry,
+  compatibility or architecture change was introduced. No durable documentation
+  update is required.
 
 ## Common validation and evidence
 

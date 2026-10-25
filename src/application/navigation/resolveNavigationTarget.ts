@@ -160,35 +160,49 @@ type ScopeResolutionResult =
   | { status: "available"; scopeUnit: FlowGraphUnitDto }
   | { status: "unavailable"; code: FlowNavigationTargetIssue["code"] };
 
-const resolveFlowScopeUnit = (
+const findParentScopeCandidate = (
   document: ValidatedFlowGraphDocument,
   revealedUnit: FlowGraphUnitDto,
-): ScopeResolutionResult => {
-  if (isJobGroupUnit(revealedUnit)) {
-    const rootJobnet = findFirstDescendantRootJobnet(document, revealedUnit);
-    return rootJobnet
-      ? { status: "available", scopeUnit: rootJobnet }
-      : { status: "unavailable", code: "flow_scope_unavailable" };
-  }
-
+): ParentTraversalResult => {
   const directParent = revealedUnit.parentId
     ? document.index.unitById.get(revealedUnit.parentId)
     : undefined;
   if (isConditionUnit(directParent)) {
-    return { status: "available", scopeUnit: directParent as FlowGraphUnitDto };
+    return { status: "available", unit: directParent };
   }
+  return findNearestJobnetAncestor(document, directParent);
+};
 
-  const ancestor = findNearestJobnetAncestor(document, directParent);
-  if (ancestor.status === "cycle") {
+const selectFlowScopeCandidate = (
+  document: ValidatedFlowGraphDocument,
+  revealedUnit: FlowGraphUnitDto,
+): ParentTraversalResult => {
+  if (isJobGroupUnit(revealedUnit)) {
+    return {
+      status: "available",
+      unit: findFirstDescendantRootJobnet(document, revealedUnit),
+    };
+  }
+  return findParentScopeCandidate(document, revealedUnit);
+};
+
+const resolveFlowScopeUnit = (
+  document: ValidatedFlowGraphDocument,
+  revealedUnit: FlowGraphUnitDto,
+): ScopeResolutionResult => {
+  const candidate = selectFlowScopeCandidate(document, revealedUnit);
+  if (candidate.status === "cycle") {
     return { status: "unavailable", code: "navigation_parent_cycle" };
   }
-  if (ancestor.unit) {
-    return { status: "available", scopeUnit: ancestor.unit };
-  }
-  if (isJobnetUnit(revealedUnit) || isConditionUnit(revealedUnit)) {
-    return { status: "available", scopeUnit: revealedUnit };
-  }
-  return { status: "unavailable", code: "flow_scope_unavailable" };
+
+  const scopeUnit =
+    candidate.unit ??
+    (isJobnetUnit(revealedUnit) || isConditionUnit(revealedUnit)
+      ? revealedUnit
+      : undefined);
+  return scopeUnit
+    ? { status: "available", scopeUnit }
+    : { status: "unavailable", code: "flow_scope_unavailable" };
 };
 
 type ExpandedAncestorResult =

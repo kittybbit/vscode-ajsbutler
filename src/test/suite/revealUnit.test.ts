@@ -141,6 +141,41 @@ suite("Resolve navigation target", () => {
     assert.strictEqual(result.target.revealedUnitId, "group");
   });
 
+  test("reports a parent cycle before an available group descendant scope", () => {
+    const descendantRootJobnet = createFlowTestUnit({
+      id: "descendant-root",
+      absolutePath: "/group/descendant-root",
+      parentId: "group",
+      depth: 1,
+      isRootJobnet: true,
+    });
+    const group = createFlowTestUnit({
+      id: "group",
+      absolutePath: "/group",
+      unitType: "g",
+      parentId: "second",
+      depth: 0,
+      isRoot: true,
+      isRootJobnet: false,
+      children: [descendantRootJobnet],
+    });
+    const second = createFlowTestUnit({
+      id: "second",
+      absolutePath: "/second",
+      unitType: "g",
+      parentId: "group",
+      isRootJobnet: false,
+    });
+
+    const result = resolveFlowNavigationTarget(
+      createValidatedDocument([group, second]),
+      { absolutePath: "/group" },
+    );
+
+    assert.strictEqual(result.status, "unavailable");
+    assert.strictEqual(result.issues[0]?.code, "navigation_parent_cycle");
+  });
+
   test("opens a direct condition parent as the active scope", () => {
     const job = createFlowTestUnit({
       id: "job",
@@ -221,6 +256,20 @@ suite("Resolve navigation target", () => {
     });
     assert.strictEqual(missing.status, "unavailable");
     assert.strictEqual(missing.issues[0]?.code, "navigation_target_not_found");
+
+    const missingParentUnit = createFlowTestUnit({
+      id: "orphan-job",
+      absolutePath: "/orphan-job",
+      unitType: "j",
+      parentId: "missing-parent",
+      isRootJobnet: false,
+    });
+    const missingParent = resolveFlowNavigationTarget(
+      createValidatedDocument([missingParentUnit]),
+      { absolutePath: "/orphan-job" },
+    );
+    assert.strictEqual(missingParent.status, "unavailable");
+    assert.strictEqual(missingParent.issues[0]?.code, "flow_scope_unavailable");
 
     const group = createFlowTestUnit({
       id: "group",
