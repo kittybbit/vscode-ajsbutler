@@ -85,6 +85,7 @@ const createDeepTree = (
 
 type AccessibilityDeepTreeFixture = {
   mount: (rootUnits: FlowGraphUnitDto[], selectedUnitId: string) => void;
+  mountGrid: (rowCount: number) => void;
   dispose: () => void;
 };
 
@@ -644,6 +645,99 @@ suite("Browser accessibility DOM", () => {
     });
   });
 
+  test("focuses an unrendered grid cell after real virtualization mounts it", async function () {
+    this.timeout(30_000);
+    const browser = await chromium.launch({ timeout: 10_000 });
+
+    try {
+      const page = await browser.newPage();
+      const browserErrors: string[] = [];
+      page.on("pageerror", (error) => browserErrors.push(error.message));
+      const fixtureBundle = fs.readFileSync(
+        path.resolve(__dirname, "../fixtures/accessibilityDeepTree.bundle.js"),
+        "utf8",
+      );
+      await page.setContent(
+        `<!doctype html><html><body><script>${fixtureBundle}</script></body></html>`,
+        { timeout: 7_000 },
+      );
+      await page.evaluate(() => {
+        const fixture = (window as AccessibilityBrowserWindow)
+          .accessibilityDeepTreeFixture;
+        if (!fixture)
+          throw new Error("The accessibility browser fixture did not load.");
+        fixture.mountGrid(1_000);
+      });
+      await page.waitForFunction(
+        () =>
+          document.querySelector('[role="grid"] [role="gridcell"]') !== null,
+        undefined,
+        { timeout: 8_000 },
+      );
+      await page.waitForTimeout(100);
+
+      const initialMove = await page.evaluate(() => {
+        const target = document.querySelector(
+          '[role="gridcell"][aria-rowindex="1001"][aria-colindex="3"]',
+        );
+        const source = document.querySelector<HTMLElement>(
+          '[role="gridcell"][aria-rowindex="2"][aria-colindex="1"]',
+        );
+        const event = new KeyboardEvent("keydown", {
+          key: "End",
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true,
+        });
+        source?.focus();
+        source?.dispatchEvent(event);
+        return {
+          targetInitiallyRendered: target !== null,
+          sourceFound: source !== null,
+          defaultPrevented: event.defaultPrevented,
+        };
+      });
+      assert.deepStrictEqual(initialMove, {
+        targetInitiallyRendered: false,
+        sourceFound: true,
+        defaultPrevented: true,
+      });
+
+      await page.waitForFunction(
+        () =>
+          document.activeElement?.getAttribute("aria-rowindex") === "1001" &&
+          document.activeElement?.getAttribute("aria-colindex") === "3",
+        undefined,
+        { timeout: 8_000 },
+      );
+      const focusedTarget = await page.evaluate(() => {
+        const activeElement = document.activeElement as HTMLElement | null;
+        return {
+          rowIndex: activeElement?.getAttribute("aria-rowindex"),
+          columnIndex: activeElement?.getAttribute("aria-colindex"),
+          tabIndex: activeElement?.tabIndex,
+          tabStopCount: document.querySelectorAll(
+            '[role="gridcell"][tabindex="0"]',
+          ).length,
+        };
+      });
+      assert.deepStrictEqual(focusedTarget, {
+        rowIndex: "1001",
+        columnIndex: "3",
+        tabIndex: 0,
+        tabStopCount: 1,
+      });
+      assert.deepStrictEqual(browserErrors, []);
+      await page.evaluate(() =>
+        (
+          window as AccessibilityBrowserWindow
+        ).accessibilityDeepTreeFixture?.dispose(),
+      );
+    } finally {
+      await browser.close();
+    }
+  });
+
   test("separates Enter focus handoff from Space selection", () => {
     const root = createUnit("/root", 0);
     const selected: string[] = [];
@@ -765,6 +859,7 @@ suite("Browser accessibility DOM", () => {
       cells.filter((cell) => cell.getAttribute("tabindex") === "0").length,
       1,
     );
+    assert.strictEqual(grid.querySelectorAll('[tabindex="0"]').length, 1);
     assert.ok(cells.some((cell) => cell.getAttribute("aria-colindex") === "2"));
 
     const focusedCell = cells.find(

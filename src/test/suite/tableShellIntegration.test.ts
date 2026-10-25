@@ -12,6 +12,9 @@ import {
 } from "@testing-library/react";
 import { toUnitListDocumentDto } from "../../application/unit-list/unitListDocument";
 import { AjsTableViewerApp } from "../../presentation/webview/editor/ajsTable/AjsTableViewerApp";
+import { useTableGridKeyboard } from "../../presentation/webview/editor/ajsTable/useTableGridKeyboard";
+import type { TableGridFocusController } from "../../presentation/webview/editor/ajsTable/useTableGridFocus";
+import type { TableGridFocus } from "../../presentation/webview/editor/ajsTable/tableNavigationModel";
 import { createViewerEventBridge } from "../../presentation/webview/editor/viewerEventBridge";
 import {
   createViewerDocumentChangedMessage,
@@ -561,8 +564,15 @@ suite("Table shell integration", () => {
     const jobnetRow = getTableRowByCellText(view.container, "jobnet");
     fireEvent.keyDown(rootCell, { key: "ArrowDown" });
     const jobnetActionCell = within(jobnetRow).getAllByRole("gridcell")[2];
-    assert.ok(jobnetActionCell.querySelector("[data-grid-cell-action]"));
+    const action = jobnetActionCell.querySelector<HTMLElement>(
+      "[data-grid-cell-action]",
+    );
+    assert.ok(action);
     const beforeEnter = countRetiredOperationRequests(postedMessages);
+
+    action?.focus();
+    assert.strictEqual(fireEvent.keyDown(action, { key: "Enter" }), true);
+    assert.strictEqual(jobnetRow.getAttribute("aria-selected"), "false");
 
     fireEvent.keyDown(jobnetActionCell, { key: "Enter" });
     await waitFor(() =>
@@ -660,6 +670,19 @@ suite("Table shell integration", () => {
     );
 
     fireEvent.keyDown(document.activeElement as HTMLElement, { key: "Escape" });
+    assert.ok(
+      document.activeElement === focusedCell,
+      "Escape must restore the originating grid cell",
+    );
+    const grid = view.getByRole("grid", { name: "Unit list" });
+    const rovingTabStops = grid.querySelectorAll<HTMLElement>(
+      '[role="gridcell"][tabindex="0"], [role="columnheader"][tabindex="0"]',
+    );
+    assert.strictEqual(rovingTabStops.length, 1);
+    assert.ok(
+      rovingTabStops[0] === focusedCell,
+      "the sole grid tab stop must be the originating cell",
+    );
     fireEvent.keyDown(focusedCell, { key: "d" });
     await waitFor(() =>
       assert.ok(
@@ -677,6 +700,54 @@ suite("Table shell integration", () => {
       countRetiredOperationRequests(postedMessages),
       beforeDetailReturn,
     );
+  });
+
+  test("clears saved header return when no restoration target exists", () => {
+    const rowAbsolutePaths: string[] = [];
+    const restoredTargets: (TableGridFocus | undefined)[] = [];
+    let savedHeaderReturnFocus: TableGridFocus | undefined = {
+      kind: "cell",
+      absolutePath: "/root/removed",
+      columnId: "#",
+    };
+    let clearCount = 0;
+    const focusController = {
+      getHeaderReturnFocus: () => savedHeaderReturnFocus,
+      clearHeaderReturnFocus: () => {
+        savedHeaderReturnFocus = undefined;
+        clearCount += 1;
+      },
+      focusGridTarget: (focus: TableGridFocus | undefined) =>
+        restoredTargets.push(focus),
+    } as unknown as TableGridFocusController;
+    const Header = () => {
+      const handleGridKeyDown = useTableGridKeyboard({
+        focusController,
+        focusUnitTree: () => undefined,
+        openDetailPane: () => undefined,
+        pageSize: 10,
+        rowAbsolutePaths,
+        sortableColumnIds: [],
+        visibleColumnIds: ["#"],
+      });
+      const focus: TableGridFocus = { kind: "header", columnId: "#" };
+      return React.createElement("div", {
+        role: "columnheader",
+        onKeyDown: (event: React.KeyboardEvent<HTMLElement>) =>
+          handleGridKeyDown(event, focus),
+      });
+    };
+    const view = render(React.createElement(Header));
+    const header = view.getByRole("columnheader");
+
+    assert.strictEqual(fireEvent.keyDown(header, { key: "Escape" }), false);
+    assert.strictEqual(clearCount, 1);
+    assert.deepStrictEqual(restoredTargets, [undefined]);
+
+    rowAbsolutePaths.push("/root/removed");
+    assert.strictEqual(fireEvent.keyDown(header, { key: "Escape" }), true);
+    assert.strictEqual(clearCount, 1);
+    assert.deepStrictEqual(restoredTargets, [undefined]);
   });
 
   test("discards provisional focus on document replacement and unmount", async () => {
