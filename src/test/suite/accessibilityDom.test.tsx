@@ -25,6 +25,8 @@ import type { TableRowView } from "../../presentation/webview/editor/ajsTable/ta
 import UnitTreeSelector, {
   type UnitTreeFocusRequest,
 } from "../../presentation/webview/editor/shared/UnitTreeSelector";
+import { useUnitTreeSelectorFocus } from "../../presentation/webview/editor/shared/useUnitTreeSelectorFocus";
+import type { UnitTreeNavigationRow } from "../../presentation/webview/editor/shared/unitTreeNavigation";
 import SharedUnitDetailPane from "../../presentation/webview/editor/shared/SharedUnitDetailPane";
 import DisplayColumnSelector from "../../presentation/webview/editor/ajsTable/DisplayColumnSelector";
 import { resolveTableGridRestorationFocus } from "../../presentation/webview/editor/ajsTable/navigation";
@@ -198,7 +200,7 @@ const TableGridFixture = ({ rowCount }: { rowCount: number }) => {
   );
 };
 
-const renderTree = (
+const createTreeElement = (
   rootUnits: FlowGraphUnitDto[],
   options: {
     canOpenScopeUnit?: (unit: FlowGraphUnitDto) => boolean;
@@ -211,27 +213,81 @@ const renderTree = (
     onOpenScope?: (unitId: string) => void;
     onSelectUnit?: (unitId: string) => void;
   } = {},
-) =>
-  render(
-    <ThemeProvider theme={createTheme()}>
-      <UnitTreeSelector
-        rootUnits={rootUnits}
-        unitById={createUnitById(rootUnits)}
-        canOpenScopeUnit={options.canOpenScopeUnit}
-        currentUnitId={options.currentUnitId}
-        focusRequest={options.focusRequest}
-        selectedUnitId={options.selectedUnitId}
-        autoScrollSelectedUnit={false}
-        isUnitEnabled={options.isUnitEnabled}
-        onEscape={options.onEscape}
-        onEnterUnit={options.onEnterUnit}
-        onOpenScope={options.onOpenScope}
-        onSelectUnit={options.onSelectUnit ?? (() => undefined)}
-        ariaLabel="Unit tree"
-        title="Unit tree"
-      />
-    </ThemeProvider>,
+) => (
+  <ThemeProvider theme={createTheme()}>
+    <UnitTreeSelector
+      rootUnits={rootUnits}
+      unitById={createUnitById(rootUnits)}
+      canOpenScopeUnit={options.canOpenScopeUnit}
+      currentUnitId={options.currentUnitId}
+      focusRequest={options.focusRequest}
+      selectedUnitId={options.selectedUnitId}
+      autoScrollSelectedUnit={false}
+      isUnitEnabled={options.isUnitEnabled}
+      onEscape={options.onEscape}
+      onEnterUnit={options.onEnterUnit}
+      onOpenScope={options.onOpenScope}
+      onSelectUnit={options.onSelectUnit ?? (() => undefined)}
+      ariaLabel="Unit tree"
+      title="Unit tree"
+    />
+  </ThemeProvider>
+);
+
+const renderTree = (
+  rootUnits: FlowGraphUnitDto[],
+  options: Parameters<typeof createTreeElement>[1] = {},
+) => render(createTreeElement(rootUnits, options));
+
+const UnitTreeSelectorFocusHarness = ({
+  collapsed,
+  focusRequest,
+  navigableVisibleRows,
+  onExpand,
+  rowUnitIds,
+}: {
+  collapsed: boolean;
+  focusRequest?: UnitTreeFocusRequest;
+  navigableVisibleRows: readonly UnitTreeNavigationRow[];
+  onExpand: VoidFunction;
+  rowUnitIds: readonly string[];
+}) => {
+  const rowByUnitIdRef = useRef(new Map<string, HTMLElement>());
+  const { handleRowFocus } = useUnitTreeSelectorFocus({
+    collapsed,
+    expand: onExpand,
+    focusRequest,
+    navigableVisibleRows,
+    rowByUnitIdRef,
+  });
+
+  return (
+    <>
+      <button type="button" data-testid="focus-harness-external-control">
+        External focus
+      </button>
+      {!collapsed &&
+        navigableVisibleRows
+          .filter((row) => rowUnitIds.includes(row.id))
+          .map((row) => (
+            <div
+              key={row.id}
+              ref={(element) => {
+                if (element) {
+                  rowByUnitIdRef.current.set(row.id, element);
+                } else {
+                  rowByUnitIdRef.current.delete(row.id);
+                }
+              }}
+              role="treeitem"
+              tabIndex={-1}
+              data-unit-tree-unit-id={row.id}
+              onFocus={() => handleRowFocus(row.id)}
+            />
+          ))}
+    </>
   );
+};
 
 const DetailFocusFixture = () => {
   const invokingButtonRef = useRef<HTMLButtonElement>(null);
@@ -348,7 +404,7 @@ suite("Browser accessibility DOM", () => {
           rootUnits={[root, other]}
           unitById={createUnitById([root, other])}
           currentUnitId={root.id}
-          selectedUnitId={other.id}
+          selectedUnitId={root.id}
           autoScrollSelectedUnit={false}
           onSelectUnit={() => undefined}
           ariaLabel="Unit tree"
@@ -357,6 +413,232 @@ suite("Browser accessibility DOM", () => {
       </ThemeProvider>,
     );
     assert.strictEqual(document.activeElement, rows[1]);
+  });
+
+  test("waits for a requested row and ignores consumed focus request revisions", () => {
+    const late = createUnit("/late", 0);
+    const other = createUnit("/other", 0);
+    const focusRequest = { revision: 1, targetUnitId: late.id };
+    const view = renderTree([], { focusRequest });
+
+    assert.strictEqual(view.queryAllByRole("treeitem").length, 0);
+    assert.strictEqual(
+      view.getByRole("tree", { name: "Unit tree" }).tabIndex,
+      0,
+    );
+
+    view.rerender(createTreeElement([late], { focusRequest }));
+    const lateRow = getTreeItemByUnitId(view.container, late.id);
+    assert.ok(
+      document.activeElement === lateRow,
+      "late request target receives focus",
+    );
+
+    view.rerender(
+      createTreeElement([other, late], {
+        focusRequest: { ...focusRequest, targetUnitId: other.id },
+      }),
+    );
+    assert.ok(
+      document.activeElement === lateRow,
+      "the consumed revision is ignored",
+    );
+
+    view.rerender(
+      createTreeElement([other, late], {
+        focusRequest: { revision: 2, targetUnitId: other.id },
+      }),
+    );
+    const otherRow = getTreeItemByUnitId(view.container, other.id);
+    assert.ok(
+      document.activeElement === otherRow,
+      "a newer revision receives focus",
+    );
+  });
+
+  test("keeps a collapsed panel focus request pending until expansion", () => {
+    const target = createUnit("/target", 0);
+    const other = createUnit("/other", 0);
+    const visibleRows: UnitTreeNavigationRow[] = [
+      {
+        id: target.id,
+        depth: 0,
+        hasChildren: false,
+        isEnabled: true,
+        isExpanded: false,
+        canOpenScope: false,
+      },
+      {
+        id: other.id,
+        depth: 0,
+        hasChildren: false,
+        isEnabled: true,
+        isExpanded: false,
+        canOpenScope: false,
+      },
+    ];
+    const focusRequest = { revision: 3, targetUnitId: target.id };
+    const expansionRequests: number[] = [];
+    const view = render(
+      <UnitTreeSelectorFocusHarness
+        collapsed
+        focusRequest={focusRequest}
+        navigableVisibleRows={visibleRows}
+        onExpand={() => expansionRequests.push(focusRequest.revision)}
+        rowUnitIds={[]}
+      />,
+    );
+    const externalControl = view.getByTestId("focus-harness-external-control");
+
+    assert.strictEqual(view.queryAllByRole("treeitem").length, 0);
+    assert.deepStrictEqual(expansionRequests, [focusRequest.revision]);
+    externalControl.focus();
+    assert.ok(
+      document.activeElement === externalControl,
+      "the collapsed request does not focus before expansion",
+    );
+
+    view.rerender(
+      <UnitTreeSelectorFocusHarness
+        collapsed={false}
+        focusRequest={focusRequest}
+        navigableVisibleRows={visibleRows}
+        onExpand={() => expansionRequests.push(focusRequest.revision)}
+        rowUnitIds={[target.id, other.id]}
+      />,
+    );
+    const targetRow = getTreeItemByUnitId(view.container, target.id);
+    assert.ok(
+      document.activeElement === targetRow,
+      "the same request revision applies after expansion",
+    );
+
+    externalControl.focus();
+    view.rerender(
+      <UnitTreeSelectorFocusHarness
+        collapsed={false}
+        focusRequest={{ ...focusRequest, targetUnitId: other.id }}
+        navigableVisibleRows={[...visibleRows]}
+        onExpand={() => expansionRequests.push(focusRequest.revision)}
+        rowUnitIds={[target.id, other.id]}
+      />,
+    );
+    assert.ok(
+      document.activeElement === externalControl,
+      "the consumed revision does not refocus another target",
+    );
+    assert.deepStrictEqual(expansionRequests, [focusRequest.revision]);
+  });
+
+  test("applies pending focus when the row map catches up to the visible roster", () => {
+    const target = createUnit("/target", 0);
+    const other = createUnit("/other", 0);
+    const visibleRows: UnitTreeNavigationRow[] = [
+      {
+        id: target.id,
+        depth: 0,
+        hasChildren: false,
+        isEnabled: true,
+        isExpanded: false,
+        canOpenScope: false,
+      },
+      {
+        id: other.id,
+        depth: 0,
+        hasChildren: false,
+        isEnabled: true,
+        isExpanded: false,
+        canOpenScope: false,
+      },
+    ];
+    const focusRequest = { revision: 4, targetUnitId: target.id };
+    const view = render(
+      <UnitTreeSelectorFocusHarness
+        collapsed={false}
+        focusRequest={focusRequest}
+        navigableVisibleRows={visibleRows}
+        onExpand={() => undefined}
+        rowUnitIds={[]}
+      />,
+    );
+    const externalControl = view.getByTestId("focus-harness-external-control");
+
+    assert.strictEqual(view.queryAllByRole("treeitem").length, 0);
+    externalControl.focus();
+    assert.ok(
+      document.activeElement === externalControl,
+      "the visible target waits while its DOM row is not registered",
+    );
+
+    view.rerender(
+      <UnitTreeSelectorFocusHarness
+        collapsed={false}
+        focusRequest={focusRequest}
+        navigableVisibleRows={[...visibleRows]}
+        onExpand={() => undefined}
+        rowUnitIds={[target.id, other.id]}
+      />,
+    );
+    const targetRow = getTreeItemByUnitId(view.container, target.id);
+    assert.ok(
+      document.activeElement === targetRow,
+      "pending DOM focus applies after row-set reevaluation",
+    );
+
+    externalControl.focus();
+    view.rerender(
+      <UnitTreeSelectorFocusHarness
+        collapsed={false}
+        focusRequest={{ ...focusRequest, targetUnitId: other.id }}
+        navigableVisibleRows={[...visibleRows]}
+        onExpand={() => undefined}
+        rowUnitIds={[target.id, other.id]}
+      />,
+    );
+    assert.ok(
+      document.activeElement === externalControl,
+      "the already consumed revision does not focus the changed target",
+    );
+  });
+
+  test("moves focus from a disabled row with a focused child control to the selected row", () => {
+    const grandchild = createUnit(
+      "/root/child/grandchild",
+      2,
+      [],
+      "/root/child",
+    );
+    const child = createUnit("/root/child", 1, [grandchild], "/root");
+    const selected = createUnit("/root/selected", 1, [], "/root");
+    const first = createUnit("/root/first", 1, [], "/root");
+    const root = createUnit("/root", 0, [child, selected, first]);
+    const rootUnits = [root];
+    const view = renderTree(rootUnits, {
+      canOpenScopeUnit: () => false,
+      currentUnitId: root.id,
+      selectedUnitId: selected.id,
+      isUnitEnabled: () => true,
+    });
+    const childRow = getTreeItemByUnitId(view.container, child.id);
+    const expandButton = childRow.querySelector("button");
+
+    assert.ok(expandButton);
+    childRow.focus();
+    expandButton.focus();
+    view.rerender(
+      createTreeElement(rootUnits, {
+        canOpenScopeUnit: () => false,
+        currentUnitId: root.id,
+        selectedUnitId: selected.id,
+        isUnitEnabled: (unit) => unit.id !== child.id,
+      }),
+    );
+
+    const selectedRow = getTreeItemByUnitId(view.container, selected.id);
+    assert.ok(
+      document.activeElement === selectedRow,
+      "focus moves to the selected visible row",
+    );
   });
 
   test("keeps collapsed descendants out of the accessibility tree and restores focus", async () => {
@@ -476,8 +758,28 @@ suite("Browser accessibility DOM", () => {
     const rootRow = getTreeItemByUnitId(view.container, root.id);
     rootRow.focus();
     fireEvent.keyDown(rootRow, { key: "Enter", altKey: true });
-    fireEvent.keyDown(rootRow, { key: "Escape" });
-
+    const expandButton = rootRow.querySelector("button");
+    assert.ok(expandButton);
+    assert.strictEqual(
+      fireEvent.keyDown(expandButton, { key: "Escape" }),
+      false,
+    );
+    assert.strictEqual(
+      fireEvent.keyDown(rootRow, { key: "Escape", shiftKey: true }),
+      true,
+    );
+    assert.strictEqual(
+      fireEvent.keyDown(rootRow, { key: "Escape", ctrlKey: true }),
+      true,
+    );
+    assert.strictEqual(
+      fireEvent.keyDown(rootRow, { key: "Escape", altKey: true }),
+      true,
+    );
+    assert.strictEqual(
+      fireEvent.keyDown(rootRow, { key: "Escape", metaKey: true }),
+      true,
+    );
     assert.deepStrictEqual(opened, [root.id]);
     assert.strictEqual(escaped, 1);
   });

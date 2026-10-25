@@ -114,11 +114,11 @@
 
 - Purpose: satisfy [R1-R9](SPECS.md#requirements-and-acceptance) through actual
   decision/state simplification with existing viewer behavior preserved.
-- Active or approved slice: S2 Completion Approval is recorded; commit is next.
+- Active or approved slice: S3 Completion Approval is recorded; commit is next.
 - Read: [specification](SPECS.md), [discovery](#discovery), Solution Shape and
   the selected slice below, [traceability](TRACEABILITY.md), validation/evidence
   policy. D1/V1 remain valid for their unchanged intake facts and inputs.
-- Next: S2 focused commit, then approved S3 implementation.
+- Next: S3 focused commit, then approved S4 implementation.
 - Prohibit cosmetic splitting, behavior/API changes, metric configuration or
   selection changes, architecture exceptions and inherited-feature edits.
 
@@ -128,14 +128,14 @@
 - Plan identity: P1, Planning Mode, 2026-10-24; SHA-256 content identities of
   all three feature documents are supplied in the planner handoff.
 - Feature kind: transient branch feature; selected: `reduce-cognitive-complexity`.
-- Branch: `codex/reduce-cognitive-complexity-focus`; feature base: `main` at
+- Branch: `codex/reduce-cognitive-complexity-tree`; feature base: `main` at
   `6894f9ddfee566b5d2f3207a821ca5168e94022f`.
-- Next decision: commit approved S2, then S3; no design blocker.
+- Next decision: commit approved S3, then S4; no design blocker.
 - Gate evidence: independent plan-reviewer returned Ready for approval with no
   Findings. Human Approval of P1 S1-S5 and the planning commit was explicit in
-  the current conversation. Planning commit is complete. S1 is implemented and
-  has been committed; S2 is independently reviewed Ready, with its implementation
-  recorded below. S3-S5 remain PLANNED. See
+  the current conversation. Planning commit is complete. S1 and S2 are
+  implemented and committed. S3 is independently reviewed Ready after its
+  coverage correction; S4-S5 remain PLANNED. See
   [review record](#independent-plan-review).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
@@ -155,11 +155,41 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   record follows the selected slice.
 - Staged check: Pass (`git diff --cached --check`, exit 0); exact three-file
   planning scope inspected, Markdown lint Pass, unrelated index entries absent.
-- Completion Approval: S1 approved and committed; S2 approved after Ready.
+- Completion Approval: S1 and S2 approved and committed; S3 approved after Ready.
 - Closure Approval: not requested; Feature Exit has not occurred.
 
 Apply [Human Approval](../../README.md#human-approval) and the
 [commit policy](../../README.md#approval-gated-commit-policy).
+
+## S3 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-25.
+- Approved scope: reviewed seven-path S3 patch and focused commit; no other slice
+  or path. Completion paths:
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorFocus.ts`,
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorKeyboard.ts`,
+  `src/presentation/webview/editor/shared/unitTreeFocusModel.ts`,
+  `src/test/suite/unitTreeSelector.test.ts`,
+  `src/test/suite/accessibilityDom.test.tsx`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: independent implementation-reviewer Ready, no remaining Findings.
+  The P2 coverage correction is resolved by collapsed-request, delayed DOM
+  registration and consumed-revision replay tests. Production is unchanged
+  from the prior semantic review; valid product checks were reused.
+- Reviewed complete patch against `143eaf2e8ae05de22bb5f161df664e17b6533aea`:
+  `/private/tmp/vscode-ajsbutler-s3-evidence/s3-corrected-complete.patch`, SHA-256
+  `4bac1d7a2ba34fdd24dc00066cb7dd929f388af5c705b99bb22a619898bc348d`.
+  Product/test patch SHA-256:
+  `f3d086621b5d0da52bc4ed74c6bc09a2cee0ae2187dcfcdb6d57936bdb7c4bda`.
+- Evidence: `/private/tmp/vscode-ajsbutler-s3-evidence/s3.md` and
+  `s3-corrected-file-hashes.txt` in the same directory. The reviewer verified
+  current seven-file hashes and the corrected evidence; no product check was
+  rerun during review.
+- Commit: pending. Main verified reviewed content plus Ready metadata,
+  retained evidence access and empty index before recording this approval.
+  No acceptance, scope or product/test content changed.
 
 ## S2 Completion Approval
 
@@ -189,9 +219,10 @@ Apply [Human Approval](../../README.md#human-approval) and the
   `db634ffb189b159f80d913aefac7bd83ad512eab9b53af3f8fbd65be0c64c987`.
   The reviewer reused valid checks and reviewed the complete corrected layer;
   no product check was rerun during review.
-- Commit: pending. Main verified the reviewed content plus Ready metadata,
-  retained evidence access and empty index before recording this approval.
-  No acceptance, scope or product/test content changed.
+- Commit: `143eaf2e8ae05de22bb5f161df664e17b6533aea` by Main; staged
+  `git diff --cached --check` Pass, exact eight-path scope inspected, metadata
+  qlty format and Markdown lint Pass, unrelated index entries absent. Reviewed
+  content and retained evidence matched; no product check rerun.
 
 ## S1 Completion Approval
 
@@ -221,8 +252,8 @@ branch names as published references. Planning commit belongs to bottom S1.
 | Layer | Branch                                      | PR / head                                                     | Base                                                 |
 | ----- | ------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------- |
 | S1    | `codex/reduce-cognitive-complexity`         | absent / committed `8b293446b5fe5d5f0b7676cf4406a43744c47766` | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
-| S2    | `codex/reduce-cognitive-complexity-focus`   | absent / pending                                              | S1 `8b293446b5fe5d5f0b7676cf4406a43744c47766`        |
-| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / pending                                              | committed S2 head                                    |
+| S2    | `codex/reduce-cognitive-complexity-focus`   | absent / committed `143eaf2e8ae05de22bb5f161df664e17b6533aea` | S1 `8b293446b5fe5d5f0b7676cf4406a43744c47766`        |
+| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / pending                                              | S2 `143eaf2e8ae05de22bb5f161df664e17b6533aea`        |
 | S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                              | committed S3 head                                    |
 | S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                   | committed S4 head                                    |
 
@@ -341,7 +372,7 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S2: Consolidate virtualized table focus lifecycle
 
-- Lifecycle state: SLICE_APPROVED. Dependency: S1 committed.
+- Lifecycle state: SLICE_COMMITTED. Dependency: S1 committed.
 - Value: one lifecycle and one keyboard interpretation remove duplicated reset,
   mounted/pending focus, target narrowing and selection-commit decisions.
 - Product paths:
@@ -419,11 +450,14 @@ Independent review and Completion Approval/commit are required for each.
   and was not waived. See `/private/tmp/vscode-ajsbutler-s2-evidence/s2.md` for
   snapshot identities, complete patch hash, statuses, inventories and SARIF.
 - Readiness: independent implementation-reviewer Ready, no remaining Findings.
-  S2 Completion Approval is recorded; its commit is pending. S3-S5 have not started.
+  S2 Completion Approval and commit are recorded. S3-S5 have not started.
 
 ### S3: Deduplicate shared tree interaction
 
-- Lifecycle state: PLANNED. Dependency: S2 committed.
+- Lifecycle state: SLICE_APPROVED. Dependency: S2 committed at
+  `143eaf2e8ae05de22bb5f161df664e17b6533aea`; the independent implementation
+  review is Ready after resolving the missing collapsed-request and delayed
+  DOM-row coverage. S3 completion approval is recorded; commit is pending.
 - Value: one Escape path and one visible-row focus policy remove repeated
   modifier tests, scans and fallback/request decisions in both viewers.
 - Product paths:
@@ -440,16 +474,48 @@ Independent review and Completion Approval/commit are required for each.
   Escape into selector capture; remove the duplicate row interpretation while
   preserving capture from child controls and excluding targets outside treeitems.
   Interpret remaining actions once, with expand/collapse as one state operation.
+- Implementation result: `unitTreeFocusModel.ts` owns the visible candidate,
+  explicit request-target and fallback-restoration decisions. The focus hook
+  remains the only lifecycle owner for roving rows, pending DOM focus and request
+  revisions. Keyboard handling keeps row ownership, selector Escape capture and
+  action execution as separate operations; action callbacks are selected once by
+  navigation action, and handled default suppression still occurs when no action
+  is available. No markup, expansion/scroll owner or navigation action changed.
+  The correction changes tests only and keeps this Solution Shape unchanged.
+- Metrics: qlty 0.645.0, unchanged configuration and full selection. The exact
+  S2 predecessor-to-S3 snapshot reduced aggregate cognitive complexity from
+  4,161 to 4,133 and cyclomatic complexity from 4,385 to 4,374. Focus and
+  keyboard file totals fell from 37/25 to 20/16 and from 30/25 to 14/12
+  cognitive/cyclomatic; the new policy file is 5/11. The named hooks are
+  cognitive 13 and 0, and every changed/new measured function is <=14; new
+  operation helpers are <=4. The check SARIF retained the same two existing
+  results (zero added); smells fell from 118 to 114 with no new model, helper or
+  test-path result. See the S3 evidence index for exact inventories and hashes.
 - Acceptance: both named hooks and new/changed functions <=14; total metric gate
   passes. Preserve single roving row, focus without selection, Enter vs Space,
   expansion waiting, revision ordering and current/selected/first fallback.
-- Validation: existing unit/tree and DOM tests, plus missing repeated/stale
-  request, collapsed request, late visible/DOM row, removed focused row with
-  active descendant, empty roster, modified Escape and child-control cases.
-  Real-browser deep tree remains bounded and passes existing focus checks.
+- Validation: after correction, `pnpm run test:full` passed 1,027 desktop tests,
+  the zero-exception architecture checks, Chromium DOM tests and WEB-12/14/15/7/8
+  smoke checks. It refreshed test compilation and both browser test bundles.
+  Existing `pnpm exec tsc --noEmit`, `pnpm run build` and
+  `pnpm run test:desktop:min` (VS Code 1.75.0) results are reused because the
+  correction changes only tests and the approved metadata; product, host,
+  configuration and dependency inputs are unchanged. The focused DOM assertions
+  cover empty and late-visible rosters, collapsed requests remaining pending
+  through expansion, requests whose target row is not yet in the DOM map, request
+  revision consumption, focus retention and nested child controls. The delayed
+  row test re-evaluates the row set after the DOM node is registered; it adds no
+  observer or polling. Existing real-browser deep-tree focus coverage passed.
+  Fresh corrected-snapshot Qlty scans retain two unchanged CHECK results and 114
+  smell results with no finding on the corrected test paths. Corrected totals
+  remain 4,133 cognitive / 4,374 cyclomatic; the final aggregate passed. Exact
+  commands, statuses, inventories and identities are in the S3 evidence index.
 - Risk: visible roster identity and effect ordering can consume requests early.
   Navigation action meanings, expansion state/scroll owner, selector markup and
   DTOs are excluded from edits; use their existing contracts.
+- Readiness: independent implementation-reviewer Ready, no remaining Findings.
+  Explicit S3 completion approval is recorded; commit is pending. S4 and S5 remain
+  unstarted.
 
 ### S4: Unify registered viewer activity guards
 

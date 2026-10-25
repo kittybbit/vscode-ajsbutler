@@ -8,6 +8,10 @@ import {
 import { mergeUnitIds } from "../../presentation/webview/editor/shared/useUnitTreeSelectorState";
 import { UNIT_TREE_ACTION_SIZE_PX } from "../../presentation/webview/editor/shared/UnitTreeSelector";
 import {
+  resolveUnitTreeFocusCandidate,
+  resolveUnitTreeFocusRequestTarget,
+} from "../../presentation/webview/editor/shared/unitTreeFocusModel";
+import {
   resolveUnitTreeNavigationKey,
   resolveVisibleUnitTreeRows,
 } from "../../presentation/webview/editor/shared/unitTreeNavigation";
@@ -32,6 +36,40 @@ const selectorUnit = (
 ): FlowGraphUnitDto => ({ id, children }) as unknown as FlowGraphUnitDto;
 
 suite("Unit Tree Selector", () => {
+  test("keeps the focused row ahead of selected and first visible fallbacks", () => {
+    const visibleUnitIds = ["/focused", "/selected", "/first"];
+
+    assert.strictEqual(
+      resolveUnitTreeFocusCandidate(visibleUnitIds, "/focused", "/selected"),
+      "/focused",
+    );
+    assert.strictEqual(
+      resolveUnitTreeFocusCandidate(visibleUnitIds, "/removed", "/selected"),
+      "/selected",
+    );
+    assert.strictEqual(
+      resolveUnitTreeFocusCandidate(visibleUnitIds, "/removed", "/missing"),
+      "/focused",
+    );
+  });
+
+  test("waits for an explicit request target without using the focus fallback", () => {
+    const visibleUnitIds = ["/root"];
+
+    assert.strictEqual(
+      resolveUnitTreeFocusRequestTarget(visibleUnitIds, "/late"),
+      undefined,
+    );
+    assert.strictEqual(
+      resolveUnitTreeFocusRequestTarget(visibleUnitIds, "/root"),
+      "/root",
+    );
+    assert.strictEqual(
+      resolveUnitTreeFocusRequestTarget(visibleUnitIds, undefined),
+      "/root",
+    );
+  });
+
   test("recognizes only tree movement keys as navigation keys", () => {
     assert.strictEqual(isTreeNavigationKey("ArrowDown"), true);
     assert.strictEqual(isTreeNavigationKey("Home"), true);
