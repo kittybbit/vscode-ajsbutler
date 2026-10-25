@@ -170,11 +170,12 @@
 
 - Purpose: satisfy [R1-R9](SPECS.md#requirements-and-acceptance) through actual
   decision/state simplification with existing viewer behavior preserved.
-- Active or approved slice: S3 Completion Approval is recorded; commit is next.
+- Active or approved slice: S4 is independently reviewed Ready;
+  S1-S3 are committed.
 - Read: [specification](SPECS.md), [discovery](#discovery), Solution Shape and
   the selected slice below, [traceability](TRACEABILITY.md), validation/evidence
   policy. D1/V1 remain valid for their unchanged intake facts and inputs.
-- Next: S3 focused commit, then approved S4 implementation.
+- Next: explicit S4 Completion Approval and focused commit.
 - Prohibit cosmetic splitting, behavior/API changes, metric configuration or
   selection changes, architecture exceptions and inherited-feature edits.
 
@@ -184,14 +185,15 @@
 - Plan identity: P1, Planning Mode, 2026-10-24; SHA-256 content identities of
   all three feature documents are supplied in the planner handoff.
 - Feature kind: transient branch feature; selected: `reduce-cognitive-complexity`.
-- Branch: `codex/reduce-cognitive-complexity-tree`; feature base: `main` at
+- Branch: `codex/reduce-cognitive-complexity-routing`; feature base: `main` at
   `6894f9ddfee566b5d2f3207a821ca5168e94022f`.
-- Next decision: commit approved S3, then S4; no design blocker.
+- Next decision: S4 Completion Approval and focused commit; no design blocker.
 - Gate evidence: independent plan-reviewer returned Ready for approval with no
   Findings. Human Approval of P1 S1-S5 and the planning commit was explicit in
   the current conversation. Planning commit is complete. S1 and S2 are
   implemented and committed. S3 is independently reviewed Ready after its
-  coverage correction; S4-S5 remain PLANNED. See
+  coverage correction and committed. S4 is independently reviewed Ready after
+  its return-value correction; S5 remains PLANNED. See
   [review record](#independent-plan-review).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
@@ -211,11 +213,38 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   record follows the selected slice.
 - Staged check: Pass (`git diff --cached --check`, exit 0); exact three-file
   planning scope inspected, Markdown lint Pass, unrelated index entries absent.
-- Completion Approval: S1 and S2 approved and committed; S3 approved after Ready.
+- Completion Approval: S1-S3 approved and committed.
 - Closure Approval: not requested; Feature Exit has not occurred.
 
 Apply [Human Approval](../../README.md#human-approval) and the
 [commit policy](../../README.md#approval-gated-commit-policy).
+
+## S4 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-25.
+- Approved scope: reviewed four-path S4 patch and focused commit; no other slice
+  or path. Completion paths:
+  `src/presentation/vscode/webview/viewerMessageRouting.ts`,
+  `src/test/suite/viewerMessageRouting.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: independent implementation-reviewer Ready, no remaining Findings.
+  The P2 return-value correction is resolved: navigation and display discard
+  callback returns, while READY and SAVE preserve their return boundaries.
+  The throwing-thenable regression passed; Solution Shape and behavior pass.
+- Reviewed complete patch against `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`:
+  `/private/tmp/vscode-ajsbutler-s4-evidence/s4-correction-1.complete.patch`,
+  SHA-256 `98c26ee655dd6b1b3b6763341ca8e9a53bb9bd5c841c0093a3cb620a653d0114`.
+  Product/test patch SHA-256:
+  `1bfef62354f6b9779e1642b251c2584a25bd998f3c1229bee8f39287eab16291`.
+- Evidence: `/private/tmp/vscode-ajsbutler-s4-evidence/s4-correction-1.md`,
+  SHA-256 `dd5b42b89e4c68ebac862d067836058fe291d76a5bbca846140018c368ba7429`.
+  The reviewer verified the complete layer and all four file hashes, reused
+  matching validation evidence, and ran no product checks.
+- Commit: pending focused S4 commit by Main. Main verified reviewed
+  content, evidence identity and empty index. Gate metadata is separately
+  validated; no product or test content changed after review.
 
 ## S3 Completion Approval
 
@@ -243,9 +272,10 @@ Apply [Human Approval](../../README.md#human-approval) and the
   `s3-corrected-file-hashes.txt` in the same directory. The reviewer verified
   current seven-file hashes and the corrected evidence; no product check was
   rerun during review.
-- Commit: pending. Main verified reviewed content plus Ready metadata,
-  retained evidence access and empty index before recording this approval.
-  No acceptance, scope or product/test content changed.
+- Commit: `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409` by Main; staged
+  `git diff --cached --check` Pass, exact seven-path scope inspected, metadata
+  qlty format and Markdown lint Pass, unrelated index entries absent. Reviewed
+  content and retained evidence matched; no product check rerun.
 
 ## S2 Completion Approval
 
@@ -309,8 +339,8 @@ branch names as published references. Planning commit belongs to bottom S1.
 | ----- | ------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------- |
 | S1    | `codex/reduce-cognitive-complexity`         | absent / committed `8b293446b5fe5d5f0b7676cf4406a43744c47766` | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
 | S2    | `codex/reduce-cognitive-complexity-focus`   | absent / committed `143eaf2e8ae05de22bb5f161df664e17b6533aea` | S1 `8b293446b5fe5d5f0b7676cf4406a43744c47766`        |
-| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / pending                                              | S2 `143eaf2e8ae05de22bb5f161df664e17b6533aea`        |
-| S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                              | committed S3 head                                    |
+| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / committed `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409` | S2 `143eaf2e8ae05de22bb5f161df664e17b6533aea`        |
+| S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                              | S3 `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`        |
 | S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                   | committed S4 head                                    |
 
 <!-- markdownlint-enable MD013 MD060 -->
@@ -510,10 +540,10 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S3: Deduplicate shared tree interaction
 
-- Lifecycle state: SLICE_APPROVED. Dependency: S2 committed at
+- Lifecycle state: SLICE_COMMITTED. Dependency: S2 committed at
   `143eaf2e8ae05de22bb5f161df664e17b6533aea`; the independent implementation
   review is Ready after resolving the missing collapsed-request and delayed
-  DOM-row coverage. S3 completion approval is recorded; commit is pending.
+  DOM-row coverage. S3 completion approval and commit are recorded.
 - Value: one Escape path and one visible-row focus policy remove repeated
   modifier tests, scans and fallback/request decisions in both viewers.
 - Product paths:
@@ -571,8 +601,8 @@ Independent review and Completion Approval/commit are required for each.
   Navigation action meanings, expansion state/scroll owner, selector markup and
   DTOs are excluded from edits; use their existing contracts.
 - Readiness: independent implementation-reviewer Ready, no remaining Findings.
-  Explicit S3 completion approval is recorded; commit is pending. S4 and S5 remain
-  unstarted.
+  Explicit S3 completion approval and commit are recorded. S4 is implemented;
+  S5 remains unstarted.
 
 #### S3 Cloud correction record
 
@@ -610,16 +640,19 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S4: Unify registered viewer activity guards
 
-- Lifecycle state: PLANNED. Dependency: S3 committed.
+- Lifecycle state: SLICE_APPROVED. Dependency: S3 committed at
+  `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`.
 - Value: repeated panel-active checks become one registration-local guarded
   execution policy without suppressing existing routing errors.
 - Product: `src/presentation/vscode/webview/viewerMessageRouting.ts`.
 - Tests: `src/test/suite/viewerMessageRouting.test.ts`.
 - Design: use a typed local guarded-operation helper for registration callbacks,
-  preserving callback arguments, return values and `this` behavior. SAVE guard
-  remains inside the deferred callback, returns false when inactive, and keeps
-  onSave absent when unsupported. Do not guard the entire message dispatcher:
-  direct `createViewerMessageHandler` behavior, malformed-SAVE and missing-save
+  preserving callback arguments, handler receivers and each wrapper's return
+  boundary. Ready returns its handler result; resource, navigation and display
+  discard callback returns as their original wrappers did; SAVE returns its
+  deferred promise or false when inactive and keeps onSave absent when
+  unsupported. Do not guard the entire message dispatcher: direct
+  `createViewerMessageHandler` behavior, malformed-SAVE and missing-save
   notifications must remain unchanged. Preserve optional callback lookup timing.
 - Acceptance: registerViewerPanel and changed/new functions <=14; total metric
   gate passes; errors, resource/ready/navigation safety, disposal and telemetry
@@ -631,6 +664,53 @@ Independent review and Completion Approval/commit are required for each.
 - Risk: a broad early return could silence errors; a captured optional callback
   could alter invocation timing. Store/lifecycle ownership and bootstrap edits
   are excluded. Host-boundary tests and desktop/web checks remain required.
+
+#### S4 implementation record
+
+- Solution Shape: a typed, registration-local helper runs only the functional
+  callback after the current panel activity check. Ready, resource, navigation
+  and display registrations share that decision. SAVE keeps its guard inside
+  the deferred callback and retains its false fallback. Ready forwards its
+  handler result. Resource, navigation and display execute in block closures
+  that discard callback returns, preserving the previous wrapper boundaries
+  even when a void callback returns a thenable. Handler methods are invoked
+  through the current `handlers` object, and optional properties are looked up
+  at the same registration or invocation point as before. The dispatcher,
+  direct handler, error paths, disposal and telemetry remain unchanged.
+- Result: `registerViewerPanel` cognitive complexity decreased from 18 to 5
+  and cyclomatic complexity from 8 to 4. The new helper measures 2/2; every
+  changed or new function is <=14. The official full-file aggregate decreased
+  from cognitive 4,133 / cyclomatic 4,374 to 4,120 / 4,370. The routing file
+  decreased from 40/21 to 27/17. Boundary tests cover registered active and
+  inactive callbacks, SAVE deferred activity and errors, optional lookup and
+  receiver behavior, unsupported SAVE, direct handler semantics, and
+  synchronous/asynchronous failures, and verifies navigation/display thenable
+  getters are not inspected.
+- Review correction: the first independent review found that navigation and
+  display wrapper closures forwarded values from void handlers. The corrected
+  closures now discard them, and the new thenable-getter regression confirms
+  navigation does not trigger host failure handling and display does not inspect
+  the return value. The previously reviewed patch/evidence is retained as
+  superseded at `/private/tmp/vscode-ajsbutler-s4-evidence/s4.md`.
+- Validation: corrected official `test:compile`, `test:full`, and
+  `test:desktop:min` passed on the corrected test bytes; standalone
+  `tsc --noEmit` and desktop/web/editor build passed on the corrected product
+  source. The final qlty CHECK results match baseline's two preexisting
+  findings; smells scans have identical 375-file successful inventories and no
+  new finding; the corrected disposable-final `pnpm run qlty` aggregate passed.
+  Full-file totals remain 4,120 cognitive / 4,370 cyclomatic. Targeted qlty
+  formatting, Markdown lint and `git diff --check` passed after metadata edits.
+  Commands, raw output/status files, inventories, identities and the correction
+  observation are indexed in
+  `/private/tmp/vscode-ajsbutler-s4-evidence/s4-correction-1.md`.
+- Readiness: independent implementation-reviewer Ready, no remaining Findings.
+  The P2 return-value correction is resolved within the approved boundary.
+  Completion Approval and commit remain pending. The full test run emitted
+  transient Chromium/web stream diagnostics
+  after browser checks but exited 0; the VS Code 1.75 smoke emitted
+  host/browser warnings but exited 0. No acceptance or compatibility blocker
+  remains. Evidence is bound to the corrected immutable substantive snapshot;
+  this record is a metadata annotation. No durable behavior contract changed.
 
 ### S5: Simplify application flow-scope resolution
 
