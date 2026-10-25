@@ -1,5 +1,42 @@
 # Feature Tasks: Reduce Cognitive Complexity
 
+## Active Cloud correction: S1
+
+- Lifecycle state: SLICE_APPROVED; additive correction commit is next.
+- Trigger: PR #344 Qlty Cloud reports prettier formatting on TRACEABILITY.
+- Approved boundary: original P1 S1 approval and the Correction Loop authorize
+  this deterministic format repair. Changed paths are only `TASKS.md` and
+  `TRACEABILITY.md`; no product, test, configuration, or acceptance change.
+- Acceptance: normalize the reported TRACEABILITY formatting; preserve S1
+  behavior and all R1-R9 requirement mappings/results.
+- Validation: qlty formatting and changed-surface documentation checks Pass.
+  Reuse original S1 code, test, type, build, full SARIF, and metric evidence
+  because product and analyzed-code inputs are unchanged. See corrective
+  evidence at `/private/tmp/vscode-ajsbutler-s1-cloud-evidence/s1-cloud.md`.
+- Identity: correction base is original committed S1 head
+  `8b293446b5fe5d5f0b7676cf4406a43744c47766`; full patch and file identities
+  are recorded in the corrective evidence.
+- Branch / PR: `codex/reduce-cognitive-complexity`,
+  `https://github.com/kittybbit/vscode-ajsbutler/pull/344`.
+- Readiness: independent implementation-reviewer Ready, no Findings.
+  Correction Completion Approval is explicit; additive commit remains pending.
+- Risk: no product compatibility or privacy impact; current-head Cloud status
+  must be observed after the correction is committed.
+- Publication: five prepared stack branches and draft PRs were explicitly
+  approved in the current conversation, 2026-10-25. Merge is not approved.
+
+- Correction Completion Approval: Approved.
+- Approved at: approved in current conversation, 2026-10-25.
+- Approved scope: the reviewed two-file corrective patch and focused additive
+  S1 commit. Reviewed patch SHA-256:
+  `d3bd40db5e550fb71cff083c019b7bf6059aa8f1b7d6ef9332e2a869ef9f5de7`.
+  Evidence SHA-256:
+  `3aea9c931d65910d98f6c6c54205c0cfdfefedf459dbc5402db489e4cd263f01`.
+  Exact paths: `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Commit: pending. Main verified reviewed patch/evidence and empty index;
+  Ready/approval metadata is separately validated.
+
 ## Agent Brief
 
 - Purpose: satisfy [R1-R9](SPECS.md#requirements-and-acceptance) through actual
