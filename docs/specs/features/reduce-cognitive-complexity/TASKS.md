@@ -2,7 +2,8 @@
 
 ## Active CI correction: S2 table integration timing
 
-- Lifecycle state: SLICE_APPROVED; additive corrective commit is next.
+- Lifecycle state: SLICE_COMMITTED; corrective commit
+  `1fa902fc29dae1d2df3273552a4bd8a621d93548` is published.
 - Trigger: the unchanged table-shell multi-action integration case exceeded
   Mocha's default 2,000 ms in PR #346 and #348. Failed-job reruns reproduced
   the same timeout. Logs and same-head passing runs remain in the ignored
@@ -40,9 +41,9 @@
   unchanged-input measurement instability. Preserve all three records for
   independent review. Full metrics remain 4,161 cognitive / 4,385 cyclomatic;
   the final-snapshot `pnpm run qlty` aggregate passed.
-- Readiness: implementation complete; independent implementation review and
-  explicit corrective Completion Approval remain pending. Main owns commit
-  and native restack gates. Merge is not approved.
+- Readiness: independent implementation-reviewer Ready, no Findings. Explicit
+  corrective Completion Approval and additive commit are recorded. Main owns
+  native restacking and updated-head checks; merge is not approved.
 - Evidence index: `/Users/jconee/git/vscode-ajsbutler/node_modules/.cache/reduce-cognitive-complexity-evidence/s2-ci/index.md`.
 - Material risks: the captured local web setup failure and Qlty unchanged-input
   measurement instability are retained for reviewer judgment.
@@ -68,14 +69,68 @@
   and minimum-host CI reuse was independently verified. The retained initial
   Qlty measurement variation has an unchanged-input controlled repeat; its
   direction is unreliable. Aggregate and metadata checks pass.
-- Commit: pending focused additive commit by Main. Main verified
-  reviewed patch/evidence and empty index. Gate metadata is separately checked.
+- Corrective commit before native restacking:
+  `1fa902fc29dae1d2df3273552a4bd8a621d93548` by Main; exact three-path
+  scope, reviewed test hash and staged whitespace check Pass. Native replay
+  identities are retained in the integration evidence.
 - Integration: Main will follow the user's native restack instruction, verify
   all layer contents and current-head CI/Cloud results. Merge is excluded.
 
-## Active Cloud correction: S1
+## S3 Cloud correction record
 
-- Lifecycle state: SLICE_APPROVED; additive correction commit is next.
+- Lifecycle state: SLICE_COMMITTED (S3 corrective patch); native restack is
+  in progress.
+- Trigger: PR #346 Qlty Cloud reports many returns, count 4, in
+  `useUnitTreeSelectorFocus`; the request lifecycle must remain unchanged.
+- Authority: original human-approved P1 S3 boundary, committed plan, existing
+  independent review and the deterministic Correction Loop. Current user
+  explicitly requests resolving each PR error. No scope or design change.
+- Branch / base: `codex/reduce-cognitive-complexity-tree` at
+  `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`; PR #346 in native stack #349.
+- Approved paths remain exactly the S3 product, test and two metadata paths
+  below. Focus revision, collapsed expansion, pending DOM, single roving tab
+  stop and current/selected/first priority must stay unchanged.
+- Qlty validation: local Qlty 0.645.0 `check --all` completed with the same two
+  inherited findings in baseline and final; `smells --all` went from 114 to 113
+  results, removing the mapped return-count result. Two mapped similar-code
+  values improved from 17 to 15. Aggregate passed after the Markdown
+  correction. Full metrics are unchanged; see the S3 evidence index.
+- Execution note: an earlier full-check attempt was rejected before execution.
+  The factual local-only reassessment succeeded with telemetry disabled; see
+  the evidence index for the rejection, reassessment, logs and identities.
+- Next: Main completes the user-requested native restack and verifies all
+  updated-head checks. Independent Ready and explicit approval are recorded.
+- S1 Cloud formatting correction was independently Ready and approved after
+  review, committed as `90c0e35cf3126b5e9643390c078834ccb9cd20b1` and pushed.
+  Stack propagation follows the corrective commits; merge is not approved.
+
+## S3 Cloud correction Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-27.
+- Approved scope: the independently reviewed three-path S3 correction and
+  focused additive commit. Exact paths:
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorFocus.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: implementation-reviewer Ready; no actionable Findings. Reviewed
+  base `ebcdc9c4d58383ff0e4e8d0b527309658aaa6409`, patch SHA-256
+  `d5c37b48dcafef568c0e0f78df5e63a7a03018aa40b99d34e6e043892839166b`.
+- Evidence: `evidence.md` in
+  `/Users/jconee/git/vscode-ajsbutler/node_modules/.cache/reduce-cognitive-complexity-evidence/s3-cloud`,
+  SHA-256 `ac1353cb66a9273e6e1129e35cb4403c21d34f6658ad30f5c63f3caab402e4f0`.
+- Corrective commit before native restacking:
+  `a6b0de6c8bf3eb8efd854b105455764905e1a5a3` by Main; exact three-path
+  scope, reviewed source identity and staged whitespace check Pass. Native
+  replay identities will be retained in the integration evidence.
+- Integration: user explicitly requested correct native stack restacking.
+  Main will preserve layer contents, use the official stack rebase and
+  lease-checked push, then verify all current-head checks. Merge is excluded.
+
+## S1 Cloud correction record
+
+- Lifecycle state: SLICE_COMMITTED; corrective commit
+  `90c0e35cf3126b5e9643390c078834ccb9cd20b1` is published.
 - Trigger: PR #344 Qlty Cloud reports prettier formatting on TRACEABILITY.
 - Approved boundary: original P1 S1 approval and the Correction Loop authorize
   this deterministic format repair. Changed paths are only `TASKS.md` and
@@ -92,7 +147,7 @@
 - Branch / PR: `codex/reduce-cognitive-complexity`,
   `https://github.com/kittybbit/vscode-ajsbutler/pull/344`.
 - Readiness: independent implementation-reviewer Ready, no Findings.
-  Correction Completion Approval is explicit; additive commit remains pending.
+  Correction Completion Approval and additive commit are recorded.
 - Risk: no product compatibility or privacy impact; current-head Cloud status
   must be observed after the correction is committed.
 - Publication: five prepared stack branches and draft PRs were explicitly
@@ -107,8 +162,9 @@
   `3aea9c931d65910d98f6c6c54205c0cfdfefedf459dbc5402db489e4cd263f01`.
   Exact paths: `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
   `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
-- Commit: pending. Main verified reviewed patch/evidence and empty index;
-  Ready/approval metadata is separately validated.
+- Commit: `90c0e35cf3126b5e9643390c078834ccb9cd20b1` by Main; exact
+  two-path scope and staged whitespace check Pass. Current-head CI, CodeQL and
+  Qlty Cloud check/fmt passed before restacking.
 
 ## Agent Brief
 
@@ -481,7 +537,8 @@ Independent review and Completion Approval/commit are required for each.
   action execution as separate operations; action callbacks are selected once by
   navigation action, and handled default suppression still occurs when no action
   is available. No markup, expansion/scroll owner or navigation action changed.
-  The correction changes tests only and keeps this Solution Shape unchanged.
+  The review correction changes tests only and keeps this Solution Shape
+  unchanged.
 - Metrics: qlty 0.645.0, unchanged configuration and full selection. The exact
   S2 predecessor-to-S3 snapshot reduced aggregate cognitive complexity from
   4,161 to 4,133 and cyclomatic complexity from 4,385 to 4,374. Focus and
@@ -516,6 +573,40 @@ Independent review and Completion Approval/commit are required for each.
 - Readiness: independent implementation-reviewer Ready, no remaining Findings.
   Explicit S3 completion approval is recorded; commit is pending. S4 and S5 remain
   unstarted.
+
+#### S3 Cloud correction record
+
+- Correction: the missing-target guard ended the effect even though the effect
+  had no later work. Focus and request-revision consumption now run only when a
+  visible target exists. The revision guard and collapsed-expansion path remain
+  unchanged; a missing target stays pending for a later visible-row update.
+  `useUnitTreeSelectorFocus` remains the lifecycle owner. APIs, markup,
+  navigation, selection, and the S3 Solution Shape are unchanged.
+- Changed path: only
+  `src/presentation/webview/editor/shared/useUnitTreeSelectorFocus.ts`.
+  Existing unit-tree and DOM boundary tests already cover collapsed requests,
+  delayed rows, revision consumption, focus retention, and child controls, so no
+  test file changed.
+- Qlty: version 0.645.0, same full selection/configuration/dependencies.
+  Baseline/final `metrics --all` remain 4,133/4,374 cognitive/cyclomatic; the
+  focus hook remains 13/9. `smells --all` has 114/113 SARIF results; the
+  `useUnitTreeSelectorFocus` return-count result (count 4) is removed and its
+  pre-existing complexity result (count 13) remains. Full `check --all` has the
+  same two inherited results in both snapshots and no new/adverse result. Two
+  mapped `similar-code` results also improve from 17 to 15 (mass remains 78).
+  The required aggregate passes. See
+  `node_modules/.cache/reduce-cognitive-complexity-evidence/s3-cloud/evidence.md`.
+- Validation: `pnpm exec tsc --noEmit` and `pnpm run build` exit 0 on the
+  corrected source. On the short-path disposable clone, `pnpm run test:full`
+  exits 0 with 1,027 desktop tests, the architecture check, Chromium DOM tests,
+  and WEB-12/14/15/7/8. `pnpm run test:desktop:min` exits 0 on VS Code 1.75.0
+  with the same web smoke checks. Two earlier long-path desktop launches failed
+  before assertions because the VS Code IPC socket exceeded macOS's 103-character
+  path limit; the short-path runs passed.
+- Readiness: implementation and required local validation are complete.
+  Independent re-review and corrective Completion Approval remain pending;
+  no commit is authorized. Existing effect-ordering sensitivity remains covered
+  by the retained collapsed and delayed-DOM tests.
 
 ### S4: Unify registered viewer activity guards
 

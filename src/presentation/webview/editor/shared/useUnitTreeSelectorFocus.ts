@@ -129,9 +129,10 @@ export const useUnitTreeSelectorFocus = ({
       navigableVisibleUnitIds,
       focusRequest.targetUnitId,
     );
-    if (!targetUnitId) return;
-    requestRowFocus(targetUnitId);
-    handledFocusRequestRevisionRef.current = requestRevision;
+    if (targetUnitId) {
+      requestRowFocus(targetUnitId);
+      handledFocusRequestRevisionRef.current = requestRevision;
+    }
   }, [
     collapsed,
     expand,
