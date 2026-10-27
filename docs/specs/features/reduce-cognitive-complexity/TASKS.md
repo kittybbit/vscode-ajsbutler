@@ -76,7 +76,7 @@
 - Integration: Main will follow the user's native restack instruction, verify
   all layer contents and current-head CI/Cloud results. Merge is excluded.
 
-## S3 Cloud correction record
+## S3 Cloud correction gate record
 
 - Lifecycle state: SLICE_COMMITTED (S3 corrective patch); native restack is
   in progress.
