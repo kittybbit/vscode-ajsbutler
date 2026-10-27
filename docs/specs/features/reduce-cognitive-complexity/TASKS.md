@@ -1,5 +1,78 @@
 # Feature Tasks: Reduce Cognitive Complexity
 
+## Active CI correction: S2 table integration timing
+
+- Lifecycle state: SLICE_APPROVED; additive corrective commit is next.
+- Trigger: the unchanged table-shell multi-action integration case exceeded
+  Mocha's default 2,000 ms in PR #346 and #348. Failed-job reruns reproduced
+  the same timeout. Logs and same-head passing runs remain in the ignored
+  integration evidence directory; no blind retries remain.
+- Authority: the original human-approved P1 S2 test boundary and its
+  deterministic Correction Loop. The requested CI repair adds no scope,
+  product behavior, dependency, or validation-strategy change.
+- Base / PR: `cef970312b72575ad05bb610485248f2d9cad9e9`, #345 in native
+  stack #349. The original S2 implementation and later source layers retain
+  their independent reviews and completion approvals.
+- Exact corrective paths: `src/test/suite/tableShellIntegration.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Acceptance and correction: keep all observable-state waits and every
+  search/detail/reveal/focus/navigation assertion. This case now has a local
+  10,000 ms Mocha ceiling because its four sequential `waitFor` calls can
+  outlast the default 2,000 ms test ceiling. No assertion or wait predicate
+  changed.
+- Solution Shape: validation-only test timing adjustment; product ownership,
+  architecture, runtime behavior, compatibility and privacy contracts are
+  unchanged.
+- Validation: the final captured local `pnpm run test:full` attempt failed at
+  web-test setup with `ETIMEDOUT` to `150.171.110.129:443`; the web assertions
+  did not run in that attempt. Its desktop stage passed 1,021 tests with zero
+  failures, including this case in 1,031 ms. Reuse the passing web step from
+  current S2 CI run `40421191854`: its web runtime, harness, fixtures and
+  bundle inputs are unchanged by this desktop-only test edit. Preserve the
+  local wrapper failure separately from the reused web pass.
+- Quality evidence: Qlty 0.645.0 check SARIF scanned the same 635 paths on
+  baseline and final; both completed with the same two existing findings and
+  no added result. Smells SARIF scanned the same 374 paths and returned 118
+  records on each snapshot. One mapped `similar-code` actual value differed
+  on the unchanged `nls.ts` / `unitInformationLocalization.ts` pair; a repeat
+  of the identical baseline command changed the same value, establishing
+  unchanged-input measurement instability. Preserve all three records for
+  independent review. Full metrics remain 4,161 cognitive / 4,385 cyclomatic;
+  the final-snapshot `pnpm run qlty` aggregate passed.
+- Readiness: implementation complete; independent implementation review and
+  explicit corrective Completion Approval remain pending. Main owns commit
+  and native restack gates. Merge is not approved.
+- Evidence index: `/Users/jconee/git/vscode-ajsbutler/node_modules/.cache/reduce-cognitive-complexity-evidence/s2-ci/index.md`.
+- Material risks: the captured local web setup failure and Qlty unchanged-input
+  measurement instability are retained for reviewer judgment.
+
+## S2 CI correction Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-27.
+- Approved scope: the reviewed three-path S2 correction and focused additive
+  commit. Exact paths: `src/test/suite/tableShellIntegration.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: implementation-reviewer Ready; no actionable Findings. All four
+  waits and every assertion remain unchanged. One integration case has a
+  bounded 10,000 ms Mocha ceiling; product timing contracts are unchanged.
+- Reviewed base: `cef970312b72575ad05bb610485248f2d9cad9e9`; patch SHA-256:
+  `ca972d3ffc971efd096a4b87371375437a208a18f26673e5f4e8bd44b8e49973`.
+- Evidence: `index.md` under
+  `/Users/jconee/git/vscode-ajsbutler/node_modules/.cache/reduce-cognitive-complexity-evidence/s2-ci`,
+  SHA-256 `7e28b19255623e576596b41289688fd3fc51ff002a03087ed8b361272a51c04f`.
+- Validation: accepted desktop stage passed 1,021 tests; the local full wrapper
+  failed only at web setup with ETIMEDOUT. Exact-input web, production build
+  and minimum-host CI reuse was independently verified. The retained initial
+  Qlty measurement variation has an unchanged-input controlled repeat; its
+  direction is unreliable. Aggregate and metadata checks pass.
+- Commit: pending focused additive commit by Main. Main verified
+  reviewed patch/evidence and empty index. Gate metadata is separately checked.
+- Integration: Main will follow the user's native restack instruction, verify
+  all layer contents and current-head CI/Cloud results. Merge is excluded.
+
 ## Active Cloud correction: S1
 
 - Lifecycle state: SLICE_APPROVED; additive correction commit is next.

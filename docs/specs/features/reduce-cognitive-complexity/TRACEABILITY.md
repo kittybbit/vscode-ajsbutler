@@ -17,4 +17,10 @@ The S1 Cloud correction changes table alignment only. It does not change the
 R1-R9 acceptance mappings or implementation results; no traceability row
 change is required. See the corrective validation record in `TASKS.md`.
 
+The S2 CI correction gives the existing multi-action integration case a
+10,000 ms Mocha limit because its four sequential `waitFor` calls can outlast
+the default 2,000 ms ceiling. It preserves every wait and assertion, so the
+R1-R9 acceptance mappings and implementation results remain unchanged. See
+the corrective validation record in `TASKS.md`.
+
 <!-- markdownlint-enable MD013 MD060 -->

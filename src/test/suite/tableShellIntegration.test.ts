@@ -216,7 +216,9 @@ suite("Table shell integration", () => {
     restoreDomGlobals(dom, previousGlobals);
   });
 
-  test("connects search, detail actions, and counterpart reveal in one shell", async () => {
+  test("connects search, detail actions, and counterpart reveal in one shell", async function () {
+    this.timeout(10_000);
+
     const eventBridge = createViewerEventBridge();
     const postedMessages: unknown[] = [];
     window.EventBridge = eventBridge;
