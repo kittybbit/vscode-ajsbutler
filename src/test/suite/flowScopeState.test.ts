@@ -3,6 +3,7 @@ import { JSDOM } from "jsdom";
 import React, { useMemo, useRef, useState } from "react";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { createTheme } from "@mui/material/styles";
+import { resolveFlowNavigationTarget } from "../../application/navigation/resolveNavigationTarget";
 import {
   type FlowGraphUnitDto,
   type ValidatedFlowGraphDocument,
@@ -378,6 +379,17 @@ suite("Flow scope state", () => {
     const childScope = findRequiredUnit(flowDocument, "child-net");
     const grandScope = findRequiredUnit(flowDocument, "grand-net");
     const leaf = findRequiredUnit(flowDocument, "leaf");
+    const navigation = resolveFlowNavigationTarget(flowDocument, {
+      absolutePath: leaf.absolutePath,
+    });
+    assert.strictEqual(navigation.status, "available");
+    if (navigation.status !== "available") return;
+    assert.strictEqual(navigation.target.activeFlowScopeUnitId, grandScope.id);
+    assert.strictEqual(navigation.target.revealedUnitId, leaf.id);
+    assert.deepStrictEqual(
+      navigation.target.requiredExpandedAncestorUnitIds,
+      [],
+    );
     window.vscode = { postMessage: () => undefined } as never;
 
     const view = render(
