@@ -1,5 +1,78 @@
 # Feature Tasks: Reduce Cognitive Complexity
 
+## Active CI correction: S2 table integration timing
+
+- Lifecycle state: SLICE_APPROVED; additive corrective commit is next.
+- Trigger: the unchanged table-shell multi-action integration case exceeded
+  Mocha's default 2,000 ms in PR #346 and #348. Failed-job reruns reproduced
+  the same timeout. Logs and same-head passing runs remain in the ignored
+  integration evidence directory; no blind retries remain.
+- Authority: the original human-approved P1 S2 test boundary and its
+  deterministic Correction Loop. The requested CI repair adds no scope,
+  product behavior, dependency, or validation-strategy change.
+- Base / PR: `cef970312b72575ad05bb610485248f2d9cad9e9`, #345 in native
+  stack #349. The original S2 implementation and later source layers retain
+  their independent reviews and completion approvals.
+- Exact corrective paths: `src/test/suite/tableShellIntegration.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Acceptance and correction: keep all observable-state waits and every
+  search/detail/reveal/focus/navigation assertion. This case now has a local
+  10,000 ms Mocha ceiling because its four sequential `waitFor` calls can
+  outlast the default 2,000 ms test ceiling. No assertion or wait predicate
+  changed.
+- Solution Shape: validation-only test timing adjustment; product ownership,
+  architecture, runtime behavior, compatibility and privacy contracts are
+  unchanged.
+- Validation: the final captured local `pnpm run test:full` attempt failed at
+  web-test setup with `ETIMEDOUT` to `150.171.110.129:443`; the web assertions
+  did not run in that attempt. Its desktop stage passed 1,021 tests with zero
+  failures, including this case in 1,031 ms. Reuse the passing web step from
+  current S2 CI run `40421191854`: its web runtime, harness, fixtures and
+  bundle inputs are unchanged by this desktop-only test edit. Preserve the
+  local wrapper failure separately from the reused web pass.
+- Quality evidence: Qlty 0.645.0 check SARIF scanned the same 635 paths on
+  baseline and final; both completed with the same two existing findings and
+  no added result. Smells SARIF scanned the same 374 paths and returned 118
+  records on each snapshot. One mapped `similar-code` actual value differed
+  on the unchanged `nls.ts` / `unitInformationLocalization.ts` pair; a repeat
+  of the identical baseline command changed the same value, establishing
+  unchanged-input measurement instability. Preserve all three records for
+  independent review. Full metrics remain 4,161 cognitive / 4,385 cyclomatic;
+  the final-snapshot `pnpm run qlty` aggregate passed.
+- Readiness: implementation complete; independent implementation review and
+  explicit corrective Completion Approval remain pending. Main owns commit
+  and native restack gates. Merge is not approved.
+- Evidence index: `/Users/jconee/git/vscode-ajsbutler/node_modules/.cache/reduce-cognitive-complexity-evidence/s2-ci/index.md`.
+- Material risks: the captured local web setup failure and Qlty unchanged-input
+  measurement instability are retained for reviewer judgment.
+
+## S2 CI correction Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-27.
+- Approved scope: the reviewed three-path S2 correction and focused additive
+  commit. Exact paths: `src/test/suite/tableShellIntegration.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: implementation-reviewer Ready; no actionable Findings. All four
+  waits and every assertion remain unchanged. One integration case has a
+  bounded 10,000 ms Mocha ceiling; product timing contracts are unchanged.
+- Reviewed base: `cef970312b72575ad05bb610485248f2d9cad9e9`; patch SHA-256:
+  `ca972d3ffc971efd096a4b87371375437a208a18f26673e5f4e8bd44b8e49973`.
+- Evidence: `index.md` under
+  `/Users/jconee/git/vscode-ajsbutler/node_modules/.cache/reduce-cognitive-complexity-evidence/s2-ci`,
+  SHA-256 `7e28b19255623e576596b41289688fd3fc51ff002a03087ed8b361272a51c04f`.
+- Validation: accepted desktop stage passed 1,021 tests; the local full wrapper
+  failed only at web setup with ETIMEDOUT. Exact-input web, production build
+  and minimum-host CI reuse was independently verified. The retained initial
+  Qlty measurement variation has an unchanged-input controlled repeat; its
+  direction is unreliable. Aggregate and metadata checks pass.
+- Commit: pending focused additive commit by Main. Main verified
+  reviewed patch/evidence and empty index. Gate metadata is separately checked.
+- Integration: Main will follow the user's native restack instruction, verify
+  all layer contents and current-head CI/Cloud results. Merge is excluded.
+
 ## Active Cloud correction: S1
 
 - Lifecycle state: SLICE_APPROVED; additive correction commit is next.
@@ -41,11 +114,11 @@
 
 - Purpose: satisfy [R1-R9](SPECS.md#requirements-and-acceptance) through actual
   decision/state simplification with existing viewer behavior preserved.
-- Active or approved slice: S1 Completion Approval is recorded; commit is next.
+- Active or approved slice: S2 Completion Approval is recorded; commit is next.
 - Read: [specification](SPECS.md), [discovery](#discovery), Solution Shape and
   the selected slice below, [traceability](TRACEABILITY.md), validation/evidence
   policy. D1/V1 remain valid for their unchanged intake facts and inputs.
-- Next: S1 focused commit, then approved S2 implementation.
+- Next: S2 focused commit, then approved S3 implementation.
 - Prohibit cosmetic splitting, behavior/API changes, metric configuration or
   selection changes, architecture exceptions and inherited-feature edits.
 
@@ -55,13 +128,14 @@
 - Plan identity: P1, Planning Mode, 2026-10-24; SHA-256 content identities of
   all three feature documents are supplied in the planner handoff.
 - Feature kind: transient branch feature; selected: `reduce-cognitive-complexity`.
-- Branch: `codex/reduce-cognitive-complexity`; comparison base: `main` at
+- Branch: `codex/reduce-cognitive-complexity-focus`; feature base: `main` at
   `6894f9ddfee566b5d2f3207a821ca5168e94022f`.
-- Next decision: commit approved S1, then S2; no design blocker.
+- Next decision: commit approved S2, then S3; no design blocker.
 - Gate evidence: independent plan-reviewer returned Ready for approval with no
   Findings. Human Approval of P1 S1-S5 and the planning commit was explicit in
   the current conversation. Planning commit is complete. S1 is implemented and
-  has been independently reviewed Ready; S2-S5 remain PLANNED. See
+  has been committed; S2 is independently reviewed Ready, with its implementation
+  recorded below. S3-S5 remain PLANNED. See
   [review record](#independent-plan-review).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
@@ -81,11 +155,43 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   record follows the selected slice.
 - Staged check: Pass (`git diff --cached --check`, exit 0); exact three-file
   planning scope inspected, Markdown lint Pass, unrelated index entries absent.
-- Completion Approval: S1 approved, with independent Ready recorded below.
+- Completion Approval: S1 approved and committed; S2 approved after Ready.
 - Closure Approval: not requested; Feature Exit has not occurred.
 
 Apply [Human Approval](../../README.md#human-approval) and the
 [commit policy](../../README.md#approval-gated-commit-policy).
+
+## S2 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation, 2026-10-25.
+- Approved scope: reviewed eight-path S2 patch and focused commit; no other slice
+  or path. Completion paths:
+  `src/presentation/webview/editor/ajsTable/VirtualizedTable.tsx`,
+  `src/presentation/webview/editor/ajsTable/useTableGridFocus.ts`,
+  `src/presentation/webview/editor/ajsTable/useTableGridKeyboard.ts`,
+  `src/test/fixtures/accessibilityDeepTreeBrowser.tsx`,
+  `src/test/suite/accessibilityDom.test.tsx`,
+  `src/test/suite/tableShellIntegration.test.ts`,
+  `docs/specs/features/reduce-cognitive-complexity/TASKS.md`,
+  `docs/specs/features/reduce-cognitive-complexity/TRACEABILITY.md`.
+- Review: independent implementation-reviewer Ready, no remaining Findings.
+  F1 is resolved: the header handoff retains its originating cell, and the
+  integration test checks actual focus and the sole Tab stop after H/Escape.
+- Reviewed complete patch against `8b293446b5fe5d5f0b7676cf4406a43744c47766`:
+  `/private/tmp/vscode-ajsbutler-s2-evidence/s2.complete.patch`, SHA-256
+  `7492485dbafc0fc308503281f9b78819a0fd6a2e9959ab7b1d7de60899759ff3`.
+  Product/test patch SHA-256:
+  `8826901a9d4cd2658036c5e4ea36034dad94ca18c595e4dc813e2229b00bd523`.
+- Evidence: `/private/tmp/vscode-ajsbutler-s2-evidence/s2.md`, approved-path
+  hashes and `review-f1.final.snapshot.identity.txt` in the same directory.
+  Evidence index SHA-256:
+  `db634ffb189b159f80d913aefac7bd83ad512eab9b53af3f8fbd65be0c64c987`.
+  The reviewer reused valid checks and reviewed the complete corrected layer;
+  no product check was rerun during review.
+- Commit: pending. Main verified the reviewed content plus Ready metadata,
+  retained evidence access and empty index before recording this approval.
+  No acceptance, scope or product/test content changed.
 
 ## S1 Completion Approval
 
@@ -100,9 +206,10 @@ Apply [Human Approval](../../README.md#human-approval) and the
   `872e5891a6e6878b9763aabddbc2d31bbd0ed0dbfdbaa3b3e1dba51532c2eaa5`.
   Prior semantic, Solution Shape, compatibility and validation results reused;
   re-review confirmed inventories/statuses and corrected baseline count.
-- Commit: pending; Main verified the reviewed content plus Ready metadata,
-  retained evidence access and empty index before recording this approval.
-  This annotation does not change the reviewed substantive patch.
+- Commit: `8b293446b5fe5d5f0b7676cf4406a43744c47766` by Main; staged
+  `git diff --cached --check` Pass, exact four-path scope inspected, metadata
+  Markdown lint Pass, unrelated index entries absent. Reviewed content and
+  retained evidence matched before approval metadata; no product check rerun.
 
 ## Native Stack References
 
@@ -111,13 +218,13 @@ branch names as published references. Planning commit belongs to bottom S1.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Layer | Branch                                      | PR / head                                                           | Base                                                 |
-| ----- | ------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
-| S1    | `codex/reduce-cognitive-complexity`         | absent / planning commit `924d46ed1270e2206f93c7fb85114aacb8ddc87f` | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
-| S2    | `codex/reduce-cognitive-complexity-focus`   | absent / pending                                                    | committed S1 head                                    |
-| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / pending                                                    | committed S2 head                                    |
-| S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                                    | committed S3 head                                    |
-| S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                         | committed S4 head                                    |
+| Layer | Branch                                      | PR / head                                                     | Base                                                 |
+| ----- | ------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------- |
+| S1    | `codex/reduce-cognitive-complexity`         | absent / committed `8b293446b5fe5d5f0b7676cf4406a43744c47766` | `main` at `6894f9ddfee566b5d2f3207a821ca5168e94022f` |
+| S2    | `codex/reduce-cognitive-complexity-focus`   | absent / pending                                              | S1 `8b293446b5fe5d5f0b7676cf4406a43744c47766`        |
+| S3    | `codex/reduce-cognitive-complexity-tree`    | absent / pending                                              | committed S2 head                                    |
+| S4    | `codex/reduce-cognitive-complexity-routing` | absent / pending                                              | committed S3 head                                    |
+| S5    | `codex/reduce-cognitive-complexity-scope`   | absent / pending final head                                   | committed S4 head                                    |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -175,7 +282,7 @@ Independent review and Completion Approval/commit are required for each.
 
 ### S1: Unify table movement rules
 
-- Lifecycle state: SLICE_APPROVED. Dependency: approved/committed P1.
+- Lifecycle state: SLICE_COMMITTED. Dependency: approved/committed P1.
 - Value: one coordinate movement policy removes repeated axis calculations and
   bounds decisions for visible columns and logical rows.
 - Product: `src/presentation/webview/editor/ajsTable/tableNavigationModel.ts`.
@@ -227,14 +334,14 @@ Independent review and Completion Approval/commit are required for each.
   path inventories, SARIF, logs and identities are indexed in the evidence
   record. The required aggregate command passed.
 - Readiness: independent implementation review Ready, no remaining Findings.
-  Completion Approval is recorded; the S1 commit is pending. Evidence is bound
+  Completion Approval and the S1 commit are recorded. Evidence is bound
   to the immutable
   substantive snapshot; this implementation record is a separate metadata
   annotation.
 
 ### S2: Consolidate virtualized table focus lifecycle
 
-- Lifecycle state: PLANNED. Dependency: S1 committed.
+- Lifecycle state: SLICE_APPROVED. Dependency: S1 committed.
 - Value: one lifecycle and one keyboard interpretation remove duplicated reset,
   mounted/pending focus, target narrowing and selection-commit decisions.
 - Product paths:
@@ -268,6 +375,51 @@ Independent review and Completion Approval/commit are required for each.
 - Risk: callback/effect ordering can cause stale selection or duplicate commits.
   Keep render-time revision reconciliation behavior; do not introduce asynchronous
   state dispatch or a new state library. Renderer/header contracts are excluded.
+
+#### S2 implementation record
+
+- Solution Shape: `useTableGridFocus` owns the grid's focus lifecycle, revision
+  resets, pending DOM target and scroll/reveal behavior; `useTableGridKeyboard`
+  resolves typed operations and performs the applicable handoff or selection
+  commit. `VirtualizedTable` retains data derivation, rendering and Virtuoso
+  integration. The hooks own distinct table responsibilities rather than
+  forwarding work through generic wrappers.
+- Result: the unified focus lifecycle removed repeated reset and mounted versus
+  pending DOM-application decisions. Typed keyboard operations resolve their
+  target and commit choice once, removing repeated target narrowing and commit
+  branches while preserving child-event ownership, Enter activation, unmodified
+  shortcuts, header Escape return intent and provisional navigation. The original
+  scroll-left equality guard remains to avoid interrupting an active smooth
+  scroll. A duplicate optional-target guard was removed where the focus operation
+  already handles an absent target as a no-op. A regression test covers clearing
+  saved header-return state when no restoration target can be resolved. The
+  review correction carries the originating cell separately from the header
+  navigation target and saves it before moving focus to the header.
+- Header-return regression: the official pre-fix suite failed only the new
+  assertion after pressing H from a non-first-row cell and Escape on the actual
+  active header. The corrected test confirms focus and the sole grid tab stop
+  both return to that exact originating cell.
+- Metrics: qlty 0.645.0 on the unchanged full selection reduced cognitive
+  complexity from 4,217 to 4,161 and kept cyclomatic complexity at 4,385.
+  `VirtualizedTable` and both new hooks together decreased from 129/61 to 73/61
+  cognitive/cyclomatic file complexity; all changed and new functions are <=14.
+  The final full check SARIF has zero added and two removed results; neither
+  remaining result is in S2 product or test paths. Final smells SARIF has zero
+  added and four removed results.
+- Validation: after the review correction, `pnpm run test:full` passed
+  (1,021 desktop tests, zero-exception
+  architecture checks and WEB suites); `pnpm exec tsc --noEmit`,
+  `pnpm run build`, `pnpm run test:desktop:min` (VS Code 1.75), and the required
+  `pnpm run qlty` aggregate passed. The full qlty check scanned 635 paths and
+  exited 1 on two existing findings (zero added, two removed); the full smells
+  scan traced 374 paths in two passes, with 118 results (zero added, four
+  removed). The
+  baseline smells repeat matched the original baseline; a prior adverse smells
+  observation on a superseded pre-correction snapshot is retained, unaccepted,
+  and was not waived. See `/private/tmp/vscode-ajsbutler-s2-evidence/s2.md` for
+  snapshot identities, complete patch hash, statuses, inventories and SARIF.
+- Readiness: independent implementation-reviewer Ready, no remaining Findings.
+  S2 Completion Approval is recorded; its commit is pending. S3-S5 have not started.
 
 ### S3: Deduplicate shared tree interaction
 
