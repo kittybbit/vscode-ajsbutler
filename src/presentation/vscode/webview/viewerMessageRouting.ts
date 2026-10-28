@@ -248,31 +248,37 @@ export const registerViewerPanel = ({
   store,
   showErrorMessage,
 }: ViewerPanelRegistrationDeps): void => {
+  const runActivePanelOperation = <TResult>(
+    operation: () => TResult,
+  ): TResult | undefined => {
+    if (!isActivePanel()) return undefined;
+    return operation();
+  };
   const onDidReceiveMessage = createViewerMessageHandler({
     document,
     panel,
     telemetry,
     isActivePanel,
     onReady: (receivedDocument, receivedPanel) =>
-      isActivePanel()
-        ? handlers.onReady(receivedDocument, receivedPanel)
-        : undefined,
-    onResource: (event, receivedPanel) => {
-      if (!isActivePanel()) return;
-      console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
-      postResourceMessage(event.data, receivedPanel);
-    },
-    onNavigate: (receivedDocument, event) => {
-      if (isActivePanel()) handlers.onNavigate(receivedDocument, event);
-    },
-    onDisplay: (result) => {
-      if (isActivePanel()) handlers.onDisplay?.(result, panel);
-    },
+      runActivePanelOperation(() =>
+        handlers.onReady(receivedDocument, receivedPanel),
+      ),
+    onResource: (event, receivedPanel) =>
+      runActivePanelOperation(() => {
+        console.log("invoke ViewerFactory.onDidReceiveMessage.", event);
+        postResourceMessage(event.data, receivedPanel);
+      }),
+    onNavigate: (receivedDocument, event) =>
+      runActivePanelOperation(() => {
+        handlers.onNavigate(receivedDocument, event);
+      }),
+    onDisplay: (result) =>
+      runActivePanelOperation(() => {
+        handlers.onDisplay?.(result, panel);
+      }),
     onSave: handlers.onSave
-      ? async (content) => {
-          if (!isActivePanel()) return false;
-          return handlers.onSave?.(content) ?? false;
-        }
+      ? async (content) =>
+          runActivePanelOperation(() => handlers.onSave?.(content)) ?? false
       : undefined,
     showErrorMessage,
   });

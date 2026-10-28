@@ -16,6 +16,7 @@ import {
 import {
   createViewerMessageHandler,
   registerViewerPanel,
+  type ViewerPanelHandlers,
 } from "../../presentation/vscode/webview/viewerMessageRouting";
 
 const flushMicrotasks = async (): Promise<void> => {
@@ -199,6 +200,371 @@ suite("Viewer message routing", () => {
       "The file could not be saved.",
     ]);
     assert.ok(errors.every((message) => !message.includes("secret")));
+  });
+
+  test("guards registered resource, ready, navigation, and display callbacks", async () => {
+    const calls: string[] = [];
+    const resourceMessages: unknown[] = [];
+    let active = true;
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    const panel = {
+      title: "routing test",
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return { dispose() {} };
+        },
+        async postMessage(message: unknown) {
+          resourceMessages.push(message);
+          return true;
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers: {
+        onReady: () => {
+          calls.push("ready");
+        },
+        onNavigate: () => calls.push("navigate"),
+        onDisplay: (result) => calls.push(`display:${result}`),
+      },
+      isActivePanel: () => active,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: async () => undefined,
+    });
+
+    receiveMessageHandler?.(createViewerResourceRequest("table"));
+    receiveMessageHandler?.(createViewerReadyRequest());
+    receiveMessageHandler?.(
+      createViewerNavigationRequest("flow", "/root/unit"),
+    );
+    receiveMessageHandler?.(
+      createViewerDisplayAcknowledgementRequest("success"),
+    );
+    active = false;
+    receiveMessageHandler?.(createViewerResourceRequest("window"));
+    receiveMessageHandler?.(createViewerReadyRequest());
+    receiveMessageHandler?.(
+      createViewerNavigationRequest("table", "/root/other"),
+    );
+    receiveMessageHandler?.(
+      createViewerDisplayAcknowledgementRequest("failed"),
+    );
+    await flushMicrotasks();
+
+    assert.deepStrictEqual(calls, ["ready", "navigate", "display:success"]);
+    assert.strictEqual(resourceMessages.length, 1);
+  });
+
+  test("discards registered navigation and display callback return values", async () => {
+    let navigationThenReads = 0;
+    let displayThenReads = 0;
+    const errors: string[] = [];
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    const navigationResult = Object.defineProperty({}, "then", {
+      get() {
+        navigationThenReads += 1;
+        throw new Error("navigation result was inspected");
+      },
+    });
+    const displayResult = Object.defineProperty({}, "then", {
+      get() {
+        displayThenReads += 1;
+        throw new Error("display result was inspected");
+      },
+    });
+    const panel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return { dispose() {} };
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers: {
+        onReady: () => undefined,
+        onNavigate: () => navigationResult,
+        onDisplay: () => displayResult,
+      },
+      isActivePanel: () => true,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    receiveMessageHandler?.(
+      createViewerNavigationRequest("flow", "/root/unit"),
+    );
+    receiveMessageHandler?.(
+      createViewerDisplayAcknowledgementRequest("success"),
+    );
+    await flushMicrotasks();
+
+    assert.strictEqual(navigationThenReads, 0);
+    assert.strictEqual(displayThenReads, 0);
+    assert.deepStrictEqual(errors, []);
+  });
+
+  test("checks registered save activity when the deferred callback runs", async () => {
+    const saved: string[] = [];
+    const errors: string[] = [];
+    let active = true;
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    const panel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return { dispose() {} };
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers: {
+        onReady: () => undefined,
+        onNavigate: () => undefined,
+        onSave: async (content) => {
+          saved.push(content);
+          return true;
+        },
+      },
+      isActivePanel: () => active,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    receiveMessageHandler?.(createViewerSaveRequest("inactive-at-execution"));
+    active = false;
+    await flushMicrotasks();
+    receiveMessageHandler?.(createViewerSaveRequest("active-at-execution"));
+    active = true;
+    await flushMicrotasks();
+    active = false;
+    receiveMessageHandler?.({ type: "save", data: 1 });
+
+    assert.deepStrictEqual(saved, ["active-at-execution"]);
+    assert.deepStrictEqual(errors, [
+      "Data is not a string and cannot be saved.",
+    ]);
+  });
+
+  test("looks up optional registered handlers at invocation time", async () => {
+    const calls: string[] = [];
+    const errors: string[] = [];
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    const handlers: ViewerPanelHandlers = {
+      onReady: () => undefined,
+      onNavigate: () => undefined,
+      onSave: async () => {
+        calls.push("initial-save");
+        return true;
+      },
+    };
+    const panel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return { dispose() {} };
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers,
+      isActivePanel: () => true,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    handlers.onDisplay = function (
+      this: ViewerPanelHandlers,
+      result,
+      receivedPanel,
+    ) {
+      assert.strictEqual(this, handlers);
+      calls.push(`display:${result}:${receivedPanel === (panel as never)}`);
+    };
+    handlers.onSave = async function (this: ViewerPanelHandlers, content) {
+      assert.strictEqual(this, handlers);
+      calls.push(`replacement-save:${content}`);
+      return true;
+    };
+    receiveMessageHandler?.(
+      createViewerDisplayAcknowledgementRequest("success"),
+    );
+    receiveMessageHandler?.(createViewerSaveRequest("replacement"));
+    await flushMicrotasks();
+    handlers.onSave = undefined;
+    receiveMessageHandler?.(createViewerSaveRequest("removed"));
+    await flushMicrotasks();
+
+    assert.deepStrictEqual(calls, [
+      "display:success:true",
+      "replacement-save:replacement",
+    ]);
+    assert.deepStrictEqual(errors, []);
+  });
+
+  test("keeps unsupported saves and direct handler behavior unchanged", async () => {
+    const registeredSaves: string[] = [];
+    const directSaves: string[] = [];
+    const errors: string[] = [];
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    const handlers: ViewerPanelHandlers = {
+      onReady: () => undefined,
+      onNavigate: () => undefined,
+    };
+    const panel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return { dispose() {} };
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers,
+      isActivePanel: () => false,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+    handlers.onSave = async (content) => {
+      registeredSaves.push(content);
+      return true;
+    };
+    receiveMessageHandler?.({ type: "save", data: 1 });
+    receiveMessageHandler?.(createViewerSaveRequest("registered-late"));
+
+    const directHandler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: { report() {}, dispose() {} },
+      isActivePanel: () => false,
+      onReady: () => undefined,
+      onResource: () => undefined,
+      onNavigate: () => undefined,
+      onDisplay: () => undefined,
+      onSave: async (content) => {
+        directSaves.push(content);
+        return true;
+      },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+    directHandler(createViewerSaveRequest("direct"));
+    await flushMicrotasks();
+
+    assert.deepStrictEqual(registeredSaves, []);
+    assert.deepStrictEqual(directSaves, ["direct"]);
+    assert.deepStrictEqual(errors, [
+      "Data is not a string and cannot be saved.",
+      "Saving is not available for this viewer.",
+    ]);
+  });
+
+  test("contains host and notification failures at the registered boundary", async () => {
+    const errors: string[] = [];
+    let receiveMessageHandler: ((value: unknown) => void) | undefined;
+    const panel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveMessageHandler = handler;
+          return { dispose() {} };
+        },
+      },
+      onDidDispose() {
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      panel: panel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers: {
+        onReady: async () => {
+          throw new Error("secret ready failure");
+        },
+        onNavigate: () => {
+          throw new Error("secret navigation failure");
+        },
+        onSave: async () => {
+          throw new Error("secret save failure");
+        },
+      },
+      isActivePanel: () => true,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: (message) => {
+        errors.push(message);
+        return Promise.reject(new Error("secret notification failure"));
+      },
+    });
+
+    receiveMessageHandler?.(createViewerReadyRequest());
+    receiveMessageHandler?.(
+      createViewerNavigationRequest("flow", "/root/unit"),
+    );
+    receiveMessageHandler?.(createViewerSaveRequest("body"));
+    await flushMicrotasks();
+
+    assert.deepStrictEqual(errors.sort(), [
+      "The file could not be saved.",
+      "The viewer document could not be refreshed.",
+      "Viewer navigation could not be completed.",
+    ]);
   });
 
   test("registers active-panel guards and cleans up on disposal", () => {
