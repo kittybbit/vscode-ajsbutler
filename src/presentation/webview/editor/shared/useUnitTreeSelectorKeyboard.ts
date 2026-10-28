@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { KeyboardEvent } from "react";
 import { isTreeNavigationKey } from "./unitTreeSelectorModel";
 import {
   resolveUnitTreeNavigationKey,
+  type UnitTreeNavigationAction,
   type UnitTreeNavigationRow,
 } from "./unitTreeNavigation";
 
@@ -21,6 +22,121 @@ export type UnitTreeSelectorKeyboardHandlers = {
   handleSelectorKeyDownCapture: (event: KeyboardEvent<HTMLElement>) => void;
 };
 
+type UnitTreeNavigationActions = Pick<
+  UseUnitTreeSelectorKeyboardOptions,
+  | "onEnterUnit"
+  | "onOpenScope"
+  | "onSelectUnit"
+  | "requestRowFocus"
+  | "setExpanded"
+>;
+
+type UnitTreeNavigationOptions = UnitTreeNavigationActions &
+  Pick<UseUnitTreeSelectorKeyboardOptions, "visibleRows">;
+
+type UnitTreeNavigationActionHandler = (
+  targetUnitId: string,
+  event: KeyboardEvent<HTMLElement>,
+  actions: UnitTreeNavigationActions,
+) => void;
+
+const applyUnitTreeSelection: UnitTreeNavigationActionHandler = (
+  targetUnitId,
+  event,
+  actions,
+) => {
+  actions.onSelectUnit(targetUnitId);
+  if (event.key === "Enter") actions.onEnterUnit?.(targetUnitId);
+};
+
+const unitTreeNavigationActionHandlers: Record<
+  UnitTreeNavigationAction["kind"],
+  UnitTreeNavigationActionHandler
+> = {
+  collapse: (targetUnitId, _event, actions) =>
+    actions.setExpanded(targetUnitId, false),
+  expand: (targetUnitId, _event, actions) =>
+    actions.setExpanded(targetUnitId, true),
+  focus: (targetUnitId, _event, actions) =>
+    actions.requestRowFocus(targetUnitId),
+  select: applyUnitTreeSelection,
+  "open-scope": (targetUnitId, _event, actions) =>
+    actions.onOpenScope?.(targetUnitId),
+};
+
+const applyUnitTreeNavigationAction = (
+  action: UnitTreeNavigationAction,
+  event: KeyboardEvent<HTMLElement>,
+  actions: UnitTreeNavigationActions,
+): void =>
+  unitTreeNavigationActionHandlers[action.kind](
+    action.targetUnitId,
+    event,
+    actions,
+  );
+
+const handleUnitTreeNavigationKey = (
+  event: KeyboardEvent<HTMLElement>,
+  unitId: string,
+  options: UnitTreeNavigationOptions,
+): void => {
+  const result = resolveUnitTreeNavigationKey(options.visibleRows, unitId, {
+    altKey: event.altKey,
+    ctrlKey: event.ctrlKey,
+    key: event.key,
+    metaKey: event.metaKey,
+    shiftKey: event.shiftKey,
+  });
+  if (!result.suppressDefault) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (!result.action) return;
+  applyUnitTreeNavigationAction(result.action, event, options);
+};
+
+const isOwnedUnitTreeRowKeyDown = (
+  event: KeyboardEvent<HTMLElement>,
+): boolean => {
+  const target = event.target as HTMLElement | null;
+  return (
+    target?.closest?.('[role="treeitem"]') === event.currentTarget &&
+    (event.target === event.currentTarget || isTreeNavigationKey(event.key))
+  );
+};
+
+const handleOwnedUnitTreeRowKeyDown = (
+  event: KeyboardEvent<HTMLElement>,
+  unitId: string,
+  handleNavigationKey: (
+    event: KeyboardEvent<HTMLElement>,
+    unitId: string,
+  ) => void,
+): void => {
+  if (!isOwnedUnitTreeRowKeyDown(event)) return;
+  handleNavigationKey(event, unitId);
+};
+
+const isUnmodifiedEscape = (event: KeyboardEvent<HTMLElement>): boolean =>
+  event.key === "Escape" &&
+  ![event.altKey, event.ctrlKey, event.metaKey, event.shiftKey].some(Boolean);
+
+const isWithinUnitTreeRow = (event: KeyboardEvent<HTMLElement>): boolean => {
+  const target = event.target as HTMLElement | null;
+  return Boolean(target?.closest?.('[role="treeitem"]'));
+};
+
+const handleUnitTreeEscapeCapture = (
+  event: KeyboardEvent<HTMLElement>,
+  onEscape: VoidFunction | undefined,
+): void => {
+  if (!onEscape || !isUnmodifiedEscape(event) || !isWithinUnitTreeRow(event)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  onEscape();
+};
+
 export const useUnitTreeSelectorKeyboard = ({
   onEnterUnit,
   onEscape,
@@ -30,55 +146,17 @@ export const useUnitTreeSelectorKeyboard = ({
   setExpanded,
   visibleRows,
 }: UseUnitTreeSelectorKeyboardOptions): UnitTreeSelectorKeyboardHandlers => {
-  const handleUnitTreeKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
-      if (
-        event.key === "Escape" &&
-        !event.altKey &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.shiftKey &&
-        onEscape
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        onEscape();
-        return;
-      }
-      const result = resolveUnitTreeNavigationKey(visibleRows, unitId, {
-        altKey: event.altKey,
-        ctrlKey: event.ctrlKey,
-        key: event.key,
-        metaKey: event.metaKey,
-        shiftKey: event.shiftKey,
-      });
-      if (!result.suppressDefault) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const action = result.action;
-      if (!action) return;
-      switch (action.kind) {
-        case "collapse":
-        case "expand":
-          setExpanded(action.targetUnitId, action.kind === "expand");
-          return;
-        case "focus":
-          requestRowFocus(action.targetUnitId);
-          return;
-        case "select":
-          onSelectUnit(action.targetUnitId);
-          if (event.key === "Enter") {
-            onEnterUnit?.(action.targetUnitId);
-          }
-          return;
-        case "open-scope":
-          onOpenScope?.(action.targetUnitId);
-          return;
-      }
-    },
+  const options = useMemo(
+    () => ({
+      onEnterUnit,
+      onOpenScope,
+      onSelectUnit,
+      requestRowFocus,
+      setExpanded,
+      visibleRows,
+    }),
     [
       onEnterUnit,
-      onEscape,
       onOpenScope,
       onSelectUnit,
       requestRowFocus,
@@ -86,41 +164,22 @@ export const useUnitTreeSelectorKeyboard = ({
       visibleRows,
     ],
   );
+  const handleUnitTreeKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
+      handleUnitTreeNavigationKey(event, unitId, options);
+    },
+    [options],
+  );
 
   const handleRowKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>, unitId: string) => {
-      const target = event.target as HTMLElement | null;
-      const owningTreeItem = target?.closest?.('[role="treeitem"]');
-      if (owningTreeItem !== event.currentTarget) return;
-      if (
-        event.target !== event.currentTarget &&
-        !isTreeNavigationKey(event.key)
-      ) {
-        return;
-      }
-      handleUnitTreeKeyDown(event, unitId);
-    },
+    (event: KeyboardEvent<HTMLElement>, unitId: string) =>
+      handleOwnedUnitTreeRowKeyDown(event, unitId, handleUnitTreeKeyDown),
     [handleUnitTreeKeyDown],
   );
 
   const handleSelectorKeyDownCapture = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (
-        !onEscape ||
-        event.key !== "Escape" ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey
-      ) {
-        return;
-      }
-      const target = event.target as HTMLElement | null;
-      if (!target?.closest?.('[role="treeitem"]')) return;
-      event.preventDefault();
-      event.stopPropagation();
-      onEscape();
-    },
+    (event: KeyboardEvent<HTMLElement>) =>
+      handleUnitTreeEscapeCapture(event, onEscape),
     [onEscape],
   );
 

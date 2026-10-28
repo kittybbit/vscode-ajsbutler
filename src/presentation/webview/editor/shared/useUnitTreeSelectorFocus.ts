@@ -1,6 +1,11 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { UnitTreeFocusRequest } from "./unitTreeSelectorModel";
+import {
+  resolveUnitTreeFocusCandidate,
+  resolveUnitTreeFocusRequestTarget,
+  shouldRestoreUnitTreeFallbackFocus,
+} from "./unitTreeFocusModel";
 import { focusUnitTreeRow } from "./useUnitTreeSelectorState";
 import type { UnitTreeNavigationRow } from "./unitTreeNavigation";
 
@@ -18,6 +23,40 @@ export type UnitTreeSelectorFocusHandlers = {
   requestRowFocus: (unitId: string) => void;
 };
 
+const setActiveUnitTreeRow = (
+  focusedUnitIdRef: MutableRefObject<string | undefined>,
+  rowByUnitId: ReadonlyMap<string, HTMLElement>,
+  unitId: string | undefined,
+): void => {
+  const previousUnitId = focusedUnitIdRef.current;
+  if (previousUnitId !== unitId) {
+    rowByUnitId.get(previousUnitId ?? "")?.setAttribute("tabindex", "-1");
+  }
+  rowByUnitId.get(unitId ?? "")?.setAttribute("tabindex", "0");
+  focusedUnitIdRef.current = unitId;
+};
+
+const resolvePendingUnitTreeFocus = (
+  rowByUnitId: ReadonlyMap<string, HTMLElement>,
+  unitId: string,
+): string | undefined =>
+  focusUnitTreeRow(rowByUnitId, unitId) ? undefined : unitId;
+
+const applyPendingUnitTreeFocus = (
+  pendingFocusUnitIdRef: MutableRefObject<string | undefined>,
+  visibleUnitIds: readonly string[],
+  rowByUnitId: ReadonlyMap<string, HTMLElement>,
+): void => {
+  const pendingUnitId = pendingFocusUnitIdRef.current;
+  if (
+    pendingUnitId &&
+    (!visibleUnitIds.includes(pendingUnitId) ||
+      focusUnitTreeRow(rowByUnitId, pendingUnitId))
+  ) {
+    pendingFocusUnitIdRef.current = undefined;
+  }
+};
+
 export const useUnitTreeSelectorFocus = ({
   collapsed,
   expand,
@@ -29,91 +68,86 @@ export const useUnitTreeSelectorFocus = ({
   const focusedUnitIdRef = useRef<string | undefined>(undefined);
   const pendingFocusUnitIdRef = useRef<string | undefined>(undefined);
   const handledFocusRequestRevisionRef = useRef(0);
+  const navigableVisibleUnitIds = useMemo(
+    () => navigableVisibleRows.map((row) => row.id),
+    [navigableVisibleRows],
+  );
 
   const setActiveRow = useCallback(
-    (unitId: string | undefined) => {
-      const previousUnitId = focusedUnitIdRef.current;
-      if (previousUnitId && previousUnitId !== unitId) {
-        rowByUnitIdRef.current
-          .get(previousUnitId)
-          ?.setAttribute("tabindex", "-1");
-      }
-      if (unitId) {
-        rowByUnitIdRef.current.get(unitId)?.setAttribute("tabindex", "0");
-      }
-      focusedUnitIdRef.current = unitId;
-    },
+    (unitId: string | undefined) =>
+      setActiveUnitTreeRow(focusedUnitIdRef, rowByUnitIdRef.current, unitId),
     [rowByUnitIdRef],
   );
 
   useEffect(() => {
     const currentUnitId = focusedUnitIdRef.current;
-    if (
-      currentUnitId &&
-      navigableVisibleRows.some((row) => row.id === currentUnitId)
-    ) {
-      setActiveRow(currentUnitId);
-      return;
-    }
-    const fallbackUnitId =
-      navigableVisibleRows.find((row) => row.id === selectedUnitId)?.id ??
-      navigableVisibleRows[0]?.id;
-    if (
-      currentUnitId &&
-      fallbackUnitId &&
+    const fallbackUnitId = resolveUnitTreeFocusCandidate(
+      navigableVisibleUnitIds,
+      currentUnitId,
+      selectedUnitId,
+    );
+    const focusWasInsideFocusedRow =
       rowByUnitIdRef.current
-        .get(currentUnitId)
-        ?.contains(document.activeElement)
+        .get(currentUnitId ?? "")
+        ?.contains(document.activeElement) ?? false;
+    if (
+      shouldRestoreUnitTreeFallbackFocus(
+        currentUnitId,
+        fallbackUnitId,
+        focusWasInsideFocusedRow,
+      )
     ) {
       pendingFocusUnitIdRef.current = fallbackUnitId;
     }
     setActiveRow(fallbackUnitId);
-  }, [navigableVisibleRows, rowByUnitIdRef, selectedUnitId, setActiveRow]);
+  }, [navigableVisibleUnitIds, rowByUnitIdRef, selectedUnitId, setActiveRow]);
 
   const requestRowFocus = useCallback(
     (unitId: string) => {
       setActiveRow(unitId);
-      pendingFocusUnitIdRef.current = focusUnitTreeRow(
+      pendingFocusUnitIdRef.current = resolvePendingUnitTreeFocus(
         rowByUnitIdRef.current,
         unitId,
-      )
-        ? undefined
-        : unitId;
+      );
     },
     [rowByUnitIdRef, setActiveRow],
   );
 
   useEffect(() => {
-    const revision = focusRequest?.revision ?? 0;
-    if (revision <= handledFocusRequestRevisionRef.current) return;
+    const requestRevision = focusRequest?.revision;
+    if (
+      requestRevision === undefined ||
+      requestRevision <= handledFocusRequestRevisionRef.current
+    ) {
+      return;
+    }
     if (collapsed) {
       expand();
       return;
     }
-    const requestedUnitId = focusRequest?.targetUnitId;
-    if (
-      requestedUnitId &&
-      !navigableVisibleRows.some((row) => row.id === requestedUnitId)
-    ) {
-      return;
+    const targetUnitId = resolveUnitTreeFocusRequestTarget(
+      navigableVisibleUnitIds,
+      focusRequest.targetUnitId,
+    );
+    if (targetUnitId) {
+      requestRowFocus(targetUnitId);
+      handledFocusRequestRevisionRef.current = requestRevision;
     }
-    const targetUnitId = requestedUnitId ?? navigableVisibleRows[0]?.id;
-    if (!targetUnitId) return;
-    requestRowFocus(targetUnitId);
-    handledFocusRequestRevisionRef.current = revision;
-  }, [collapsed, expand, focusRequest, navigableVisibleRows, requestRowFocus]);
+  }, [
+    collapsed,
+    expand,
+    focusRequest,
+    navigableVisibleUnitIds,
+    requestRowFocus,
+  ]);
 
   useEffect(() => {
-    const pendingUnitId = pendingFocusUnitIdRef.current;
-    if (!pendingUnitId) return;
-    if (!navigableVisibleRows.some((row) => row.id === pendingUnitId)) {
-      pendingFocusUnitIdRef.current = undefined;
-      return;
-    }
-    if (focusUnitTreeRow(rowByUnitIdRef.current, pendingUnitId)) {
-      pendingFocusUnitIdRef.current = undefined;
-    }
-  }, [navigableVisibleRows, rowByUnitIdRef]);
+    applyPendingUnitTreeFocus(
+      pendingFocusUnitIdRef,
+      navigableVisibleUnitIds,
+      rowByUnitIdRef.current,
+    );
+  }, [navigableVisibleUnitIds, rowByUnitIdRef]);
 
   const handleRowFocus = useCallback(
     (unitId: string) => {
