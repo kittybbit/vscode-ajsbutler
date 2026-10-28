@@ -45,9 +45,10 @@ Apply [Human Approval](../../README.md#human-approval) and the
 - Scope and value: {{cohesive change and user/domain value}}
 - Acceptance: {{observable or reviewable result}}
 - Dependencies / risks / stop conditions: {{only material items}}
-- Stack layer: {{order, PR URL, head branch/identity, predecessor base
-  branch/identity}}
-- Validation: {{required checks, results, and evidence link}}
+- Stack layer: {{order, PR URL/publication update, target and predecessor
+  branches, base and current PR-head identities}}
+- Validation: {{local evidence and exact PR-head GitHub/CI and applicable Cloud
+  gate results; predecessor readiness reference before dependent work}}
 - Production readiness: {{relevant failure, JP1/AJS, input-size,
   desktop/web/VS Code, and documentation impact}}
 - Approval boundary: {{concrete product and validation-support paths; excluded work}}

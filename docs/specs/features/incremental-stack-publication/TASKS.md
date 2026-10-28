@@ -4,36 +4,52 @@
 
 - Purpose: publish and verify each completed native stack layer before dependent
   work; acceptance is [R1-R6](SPECS.md#requirements-and-acceptance).
-- Active slice: Slice 1; prior scope approval retained; base-only replan awaits
-  renewed independent review and Main gate reconciliation.
+- Active slice: Slice 1; implementation complete within the approved boundary.
 - Decision context: [scope](SPECS.md#decisions-and-impact),
   [core contract](../../README.md#github-standard-stacked-pull-requests),
   [corrections](../../validation.md#correction-loop-for-deterministic-failures),
   and [freshness](../../evidence.md#freshness-and-invalidation).
 - Validate: changed-document Markdown lint, local links/anchors, structure,
   static scenarios below, scope/approval inspection, and `rtk git diff --check`.
-- Constraints / next decision: Main commits the approved remote-main planning
-  package, then delegates Slice 1 implementation.
-  No completion, closure, or merge approval is granted.
+- Constraints / next decision: Completion Approval is recorded below; Main
+  performs the focused commit gates, then publishes the slice PR. No closure
+  or merge approval is granted.
+
+## Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation after implementation review Ready.
+- Approved scope: exact corrected Slice 1 patch identified in the independent
+  implementation review record, plus separately validated gate metadata.
+- Approved paths: `docs/specs/README.md`, `docs/specs/validation.md`,
+  `docs/specs/features/_templates/TASKS.template.md`, and this feature's `TASKS.md`
+  for lifecycle/evidence metadata. The planning package retains its separate
+  prior approval; no closure edits or merge are authorized.
+- Review verdict: Ready, no Findings;
+  `/tmp/ajsbutler-incremental-stack-implementation-review-evidence/record.md`.
+- Commit status: Pending; local `.git` writes are denied. Main uses the connected
+  GitHub Git API for focused plan and completion commits on the same branch.
 
 ## Current state
 
-- Lifecycle state: PLAN_APPROVED
+- Lifecycle state: SLICE_APPROVED
 - Feature kind: transient branch feature.
 - Branch: `docs/sdd-incremental-stack-publication`.
 - Base: `6eb4b1d0e6cdcc40f6416f893b5c384d5bbfd196`.
 - Plan identity: `incremental-stack-publication-plan-v3-remote-main-base`;
   exact hashes and metadata validation are in
   `/tmp/ajsbutler-incremental-stack-remote-main-replan-evidence/record.md`.
-- Next decision / blocker: remote-main planning commit, then Slice 1 implementation.
+- Next decision / blocker: target plan/completion commit gates and publication.
+  Completion Approval is recorded below. Independent implementation review is Ready;
+  `/tmp/ajsbutler-incremental-stack-implementation-review-evidence/record.md`.
 - Current review: plan v3 Ready, no Findings, at the exact remote-main base;
   `/tmp/ajsbutler-incremental-stack-remote-main-plan-review-evidence/record.md`.
-- Base correction: user directed a dedicated branch from main and questioned
-  origin synchronization. Main verified actual GitHub main five commits ahead
-  of local main and recreated this branch from `main = origin/main = HEAD`.
+- Base correction: the user directed a dedicated branch from current main.
+  Main verified GitHub main and recreated this branch from
+  `main = origin/main = HEAD` at `6eb4b1d0e6cdcc40f6416f893b5c384d5bbfd196`.
   Import/reference proof: `/tmp/ajsbutler-remote-main-import-evidence.json`.
   Remote-main tree equals the original scope base tree; no scope, design,
-  acceptance, validation or approval-boundary change is required.
+  acceptance, validation or approval-boundary change was required.
 - Prior gates: original plan v1 Ready and subsequent explicit Human Approval are
   retained in `/tmp/ajsbutler-incremental-stack-plan-review-evidence/record.md`
   and `/tmp/ajsbutler-incremental-stack-plan-commit-evidence/record.json`.
@@ -42,6 +58,18 @@
   its planning commit `81da81858b1500a0aeefcabb314fe9e956a81eca` is preserved on
   `docs/sdd-incremental-stack-publication-local-main`. No implementation occurred.
   Prior commits/reviews do not establish this corrected branch's planning gate.
+- Source plan commit: `c28281cbc5ad5e773f9e0029de551ff15aa0aeb8`, parent
+  `6eb4b1d0e6cdcc40f6416f893b5c384d5bbfd196`; source gate record:
+  `/tmp/ajsbutler-incremental-stack-remote-plan-commit-evidence/record.json`.
+  This commit is retained in source evidence but is not imported into the active
+  original-repository target history. Target HEAD remains
+  `6eb4b1d0e6cdcc40f6416f893b5c384d5bbfd196`; transfer proof is
+  `/tmp/ajsbutler-incremental-stack-transfer-evidence.json`. No target plan
+  commit is claimed.
+- Implementation review: one in-boundary P2 sentence correction was returned;
+  correction evidence and affected-document checks are at
+  `/tmp/ajsbutler-incremental-stack-correction-evidence/record.md`. Re-review
+  of the corrected patch is pending.
 - Reused discovery: `/tmp/ajsbutler-incremental-stack-intake-evidence/record.md`
   and `/tmp/ajsbutler-incremental-stack-planning-evidence/record.md` retain
   matching facts and judgments. Only current base/plan review identity and
@@ -53,11 +81,16 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
 - Feature PRs / target: one implementation layer on
   `docs/sdd-incremental-stack-publication`, targeting `main`; PR not created.
-  Planning commit precedes the completion commit on this bottom/top branch.
-- Final feature identity: HEAD initially
-  `6eb4b1d0e6cdcc40f6416f893b5c384d5bbfd196`; reviewed layer base is that commit.
-  Implementation, publication, exact current head/checks, and closure commit
-  references are Missing until produced, never inferred from local validation.
+  Planning and implementation content are transferred working-tree files;
+  the source plan commit is not in the target history. Target plan/completion
+  commits and publication remain pending.
+- Final feature identity: reviewed layer base is
+  `6eb4b1d0e6cdcc40f6416f893b5c384d5bbfd196`; transferred source identity is in
+  `/tmp/ajsbutler-incremental-stack-publication-implementation-evidence/record.md`
+  and corrected target identities are in
+  `/tmp/ajsbutler-incremental-stack-correction-evidence/record.md`.
+  Completion commit, publication, exact PR-head checks, and closure commit are
+  Missing until produced; local validation does not establish GitHub readiness.
 - Closure / merge evidence: none; retain gate records externally before feature
   removal. Feature Exit, Closure Approval and Human Merge Approval are separate.
 
@@ -88,7 +121,7 @@ Apply [Human Approval](../../README.md#human-approval) and the
 
 ### Slice 1: Publish and verify each completed stack layer
 
-- Lifecycle state: PLANNED
+- Lifecycle state: SLICE_APPROVED
 - Scope and value: one cohesive operating-policy change prevents dependent
   branches and work from building on an unpublished or failing predecessor.
   README timing, committed-slice corrections, and template references form one
@@ -144,10 +177,9 @@ Apply [Human Approval](../../README.md#human-approval) and the
 
 #### Validation index
 
-- Identity / result: planning documents validated in the planning evidence record;
-  implementation checks are Missing until implementation. Pass requires lint,
-  link/anchor/structure validation, all static scenarios, scope/provenance
-  inspection and whitespace checks on the exact final patch.
+- Identity / result: transferred implementation validation is in the source
+  record; corrected target hashes and affected-document revalidation are in the
+  correction record. The nine static outcomes remain Pass.
 - Coverage: lint every changed Markdown file explicitly, including the TASKS
   template; validate local links/anchors and structure; run `rtk git diff --check`
   plus explicit untracked-file whitespace checks where needed. Inspect exact
@@ -155,31 +187,35 @@ Apply [Human Approval](../../README.md#human-approval) and the
   global `rtk proxy markdownlint-cli2` method already established at intake.
 - Static scenarios: inspect the combined proposed policy and template using the
   cases below; retain verdict and references for each, not only a command exit.
-- Evidence artifact: producer retains exact input hashes, command versions/exits,
-  raw outputs, scenario judgments and changed-path manifest outside inspected
-  inputs; add its reference here. Planning evidence record is above.
-- Review / approval / commit: all Pending. Implementation review covers the exact
-  three-file policy patch and separately validated feature metadata; Main alone
-  performs the focused completion commit after Ready and explicit approval.
+- Evidence artifact: original implementation validation is retained at
+  `/tmp/ajsbutler-incremental-stack-publication-implementation-evidence/record.md`;
+  corrected target hashes and affected-document revalidation are at
+  `/tmp/ajsbutler-incremental-stack-correction-evidence/record.md`.
+- Review / approval / commit: P2 resolved; whole corrected patch independently
+  Ready with no Findings. Review identities are retained in the review record
+  above; Completion Approval is Approved below. Plan review and Human Approval
+  provenance are referenced above. The source plan commit is not present in
+  target history; Main owns the target commit gates.
 - Not Applicable: product tests/builds, architecture test, qlty baseline/final
   scans/aggregate and desktop/web smoke tests, because no product code, analysis
-  inputs, dependencies or execution conditions change. Actual GitHub operations
-  are not exercised by static scenarios; no current-head pass is claimed. Actual
-  publication/Exit/Merge must obey all required GitHub gates and actual rules.
+  inputs, dependencies or execution conditions change. Publication and actual
+  GitHub/Cloud checks are still Missing because no PR/current head exists; static
+  scenarios do not exercise them or claim a current-head pass. Actual
+  publication/Exit/Merge must obey all required gates and repository rules.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Case | Requirements | Required static outcome |
-| --- | --- | --- |
-| First and dependent slices succeed | R1, R2, R5 | Approved completion commit immediately published; exact predecessor head gates pass before dependent branch creation/work; native three-layer bases and predecessor-only diffs preserved. |
-| Pending or missing predecessor checks | R2, R5 | Dependent creation/work blocked; missing result never becomes Pass or Not Applicable. |
-| Failed or old-head checks | R2, R3 | Dependent creation/work blocked; old successful head cannot authorize the current head. |
-| Expected skipped checks | R2, R4 | Only actual repository rules may accept expected skips; docs-only local validation never overrides required GitHub/Cloud gates. |
-| Committed predecessor CI correction | R3, R5 | Main routes to owning implementer; unchanged approved boundary, affected validation/review, explicit approval and focused extra commit update same PR; new head gates required. |
-| Correction needs new decision or path | R3 | Stop before edits; Main routes affected-scope Replanning, independent plan review and Human Approval; unrelated completed gates preserved. |
-| Correction changes existing dependent content/base | R3, R5 | Existing evidence/review owners determine affected invalidation; unchanged facts reused, changed current-head gates refreshed; no amend/force push or new stack registry. |
-| Closure modifies top head | R4, R6 | Affected current-head checks refreshed for closure head; closure patch review/approval/commit and separate Human Merge Approval retained. |
-| Final merge pending, partial or complete | R1, R4, R6 | No lower-layer early merge; final actual rules/reviews/checks honored; only every PR observed Merged permits CLOSED. |
+| Case | Requirements | Policy references | Required static outcome | Implementation result |
+| --- | --- | --- | --- | --- |
+| First and dependent slices succeed | R1, R2, R5 | [stack policy](../../README.md#github-standard-stacked-pull-requests); [lifecycle](../../README.md#lifecycle-and-approval-gates) | Approved completion commit immediately published; exact predecessor head gates pass before dependent branch creation/work; native three-layer bases and predecessor-only diffs preserved. | Pass |
+| Pending or missing predecessor checks | R2, R5 | [stack policy](../../README.md#github-standard-stacked-pull-requests) | Dependent creation/work blocked; missing result never becomes Pass or Not Applicable. | Pass |
+| Failed or old-head checks | R2, R3 | [stack policy](../../README.md#github-standard-stacked-pull-requests) | Dependent creation/work blocked; old successful head cannot authorize the current head. | Pass |
+| Expected skipped checks | R2, R4 | [stack policy](../../README.md#github-standard-stacked-pull-requests) | Only actual repository rules may accept expected skips; docs-only local validation never overrides required GitHub/Cloud gates. | Pass |
+| Committed predecessor CI correction | R3, R5 | [correction loop](../../validation.md#correction-loop-for-deterministic-failures); [lifecycle](../../README.md#lifecycle-state-contract) | Main routes to owning implementer; unchanged approved boundary, affected validation/review, explicit approval and focused extra commit update same PR; new head gates required. | Pass |
+| Correction needs new decision or path | R3 | [correction loop](../../validation.md#correction-loop-for-deterministic-failures); [approval gates](../../README.md#lifecycle-and-approval-gates) | Stop before edits; Main routes affected-scope Replanning, independent plan review and Human Approval; unrelated completed gates preserved. | Pass |
+| Correction changes existing dependent content/base | R3, R5 | [correction loop](../../validation.md#correction-loop-for-deterministic-failures); [evidence freshness](../../evidence.md#freshness-and-invalidation) | Existing evidence/review owners determine affected invalidation; unchanged facts reused, changed current-head gates refreshed; no amend/force push or new stack registry. | Pass |
+| Closure modifies top head | R4, R6 | [stack policy](../../README.md#github-standard-stacked-pull-requests); [lifecycle](../../README.md#lifecycle-state-contract) | Affected current-head checks refreshed for closure head; closure patch review/approval/commit and separate Human Merge Approval retained. | Pass |
+| Final merge pending, partial or complete | R1, R4, R6 | [stack policy](../../README.md#github-standard-stacked-pull-requests); [lifecycle](../../README.md#lifecycle-state-contract) | No lower-layer early merge; final actual rules/reviews/checks honored; only every PR observed Merged permits CLOSED. | Pass |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -200,6 +236,9 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract) and
   evidence; independent review judges ownership, absence of duplicated policy,
   scenario completeness and preserved authorization. Architecture automation
   does not prove this operating-policy design.
+- Implementation confirmation: changes are confined to the approved policy
+  owners and this slice's metadata; no custom mechanism, state, or validation
+  strategy was introduced. No Solution Shape deviation was needed.
 - Stop conditions: any missing durable owner requiring another path, new lifecycle
   state/tooling, changed role/CI/merge contract, new validation strategy, material
   scope/risk or approval-boundary decision returns to Main before edits.
