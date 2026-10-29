@@ -149,23 +149,23 @@ decision.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Input state                                     | Operation and owner                           | Output state / required fact                                           |
-| ----------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------- |
-| Concrete proposal                               | Intake: `feature-author`                      | `INTAKE`: scoped intake recorded                                       |
-| `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                       |
-| `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner           |
-| `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                         |
-| `PLAN_APPROVED`                                 | Plan commit: Main                             | `PLAN_COMMITTED`: planning commit on bottom stack branch succeeded     |
-| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded       |
-| `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer                   |
-| `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved                   |
+| Input state                                     | Operation and owner                           | Output state / required fact                                                                                          |
+| ----------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Concrete proposal                               | Intake: `feature-author`                      | `INTAKE`: scoped intake recorded                                                                                      |
+| `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                                                                      |
+| `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner                                                          |
+| `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                                                                        |
+| `PLAN_APPROVED`                                 | Plan commit: Main                             | `PLAN_COMMITTED`: planning commit on bottom stack branch succeeded                                                    |
+| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded                                                      |
+| `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer                                                                  |
+| `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved                                                                  |
 | `SLICE_APPROVED`                                | Completion commit and PR publication: Main    | `SLICE_COMMITTED`: approved layer committed and PR published/updated; exact-head gates recorded before dependent work |
-| All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision                 |
-| `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                                    |
-| `CLOSE_READY` with a changed top-layer patch    | Independent review: `implementation-reviewer` | `CLOSE_READY`: final closure patch Ready; Findings return to closer    |
-| `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact reviewed propagation/removal paths approved    |
-| `CLOSE_APPROVED`                                | Closure commit: Main                          | `CLOSE_APPROVED`: final top-head closure commit recorded               |
-| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; resulting identities recorded |
+| All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision                                                                |
+| `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                                                                                   |
+| `CLOSE_READY` with a changed top-layer patch    | Independent review: `implementation-reviewer` | `CLOSE_READY`: final closure patch Ready; Findings return to closer                                                   |
+| `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact reviewed propagation/removal paths approved                                                   |
+| `CLOSE_APPROVED`                                | Closure commit: Main                          | `CLOSE_APPROVED`: final top-head closure commit recorded                                                              |
+| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; resulting identities recorded                                                |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
