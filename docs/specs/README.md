@@ -84,8 +84,10 @@ creates one focused planning commit under the commit policy. Only then may
 [Correction Loop](validation.md#correction-loop-for-deterministic-failures);
 a new decision as defined above returns through Main for replanning. After
 `Ready`, explicit Completion Approval and that slice's focused commit are
-required before another dependent slice starts. Once all slices are complete
-and committed, `feature-closer` performs Feature Exit. Its `Close` result,
+required. Main immediately publishes or updates its PR; a dependent slice may
+start only after its predecessor's exact-current-head gates pass under the
+native stack contract. Once all slices are complete and committed,
+`feature-closer` performs Feature Exit. Its `Close` result,
 explicit Closure Approval, and focused closure commit are separate gates.
 Merge and final closure follow the
 [native stack contract](#github-standard-stacked-pull-requests).
@@ -105,13 +107,22 @@ and active repository rules govern publication and merge operations.
 Each slice PR has an exact layer diff, acceptance, approved scope, independent
 review and evidence. The feature's final head contains every slice and its
 closure patch. The planning package precedes implementation; dependent slices
-start from committed predecessors. Do not split without independently useful
-value. Main owns publication and merge authority, separately from commit gates.
-No custom stack tooling/state, integration branch or integration-only PR is
-permitted.
+start from committed predecessors. After each approved completion commit, Main
+immediately publishes or updates that slice's PR. The first PR targets `main`;
+each later PR targets its predecessor branch and retains only its layer diff.
+Before creating a dependent branch or starting its work, Main verifies that the
+predecessor PR is at its exact current head and its required GitHub CI/checks
+and applicable Cloud gates pass under actual repository rules. Pending, failed,
+missing, or old-head results block dependent work; expected skips count only
+when actual repository rules accept them. A commit or local validation alone
+does not satisfy this prerequisite. Do not merge lower layers early. Main owns
+publication and merge authority, separately from commit gates. No custom stack
+tooling/state, integration branch or integration-only PR is permitted.
 
 Feature integration requires all slice gates, Feature Exit, the closure commit
-and explicit Human Merge Approval of the final feature identities. Main must
+and explicit Human Merge Approval of the final feature identities. Because a
+closure commit changes the top head, Main refreshes affected required GitHub
+checks and applicable Cloud gates for that exact head before merge. Main must
 respect GitHub's actual reviews, required checks and protection rules without
 bypass. Publication, PR approval and Closure Approval do not authorize merge.
 Review and evidence validity follow [validation](validation.md#independent-review)
@@ -138,23 +149,23 @@ decision.
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Input state                                     | Operation and owner                           | Output state / required fact                                           |
-| ----------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------- |
-| Concrete proposal                               | Intake: `feature-author`                      | `INTAKE`: scoped intake recorded                                       |
-| `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                       |
-| `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner           |
-| `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                         |
-| `PLAN_APPROVED`                                 | Plan commit: Main                             | `PLAN_COMMITTED`: planning commit on bottom stack branch succeeded     |
-| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded       |
-| `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer                   |
-| `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved                   |
-| `SLICE_APPROVED`                                | Completion commit: Main                       | `SLICE_COMMITTED`: approved layer committed on its stack branch        |
-| All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision                 |
-| `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                                    |
-| `CLOSE_READY` with a changed top-layer patch    | Independent review: `implementation-reviewer` | `CLOSE_READY`: final closure patch Ready; Findings return to closer    |
-| `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact reviewed propagation/removal paths approved    |
-| `CLOSE_APPROVED`                                | Closure commit: Main                          | `CLOSE_APPROVED`: final top-head closure commit recorded               |
-| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; resulting identities recorded |
+| Input state                                     | Operation and owner                           | Output state / required fact                                                                                          |
+| ----------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Concrete proposal                               | Intake: `feature-author`                      | `INTAKE`: scoped intake recorded                                                                                      |
+| `INTAKE`                                        | Planning: `planner`                           | `PLANNED`: complete feature plan                                                                                      |
+| `PLANNED`                                       | Independent review: `plan-reviewer`           | `PLAN_READY`: Ready for approval; Findings return to planner                                                          |
+| `PLAN_READY`                                    | Human Approval: human, recorded by Main       | `PLAN_APPROVED`: exact reviewed scope approved                                                                        |
+| `PLAN_APPROVED`                                 | Plan commit: Main                             | `PLAN_COMMITTED`: planning commit on bottom stack branch succeeded                                                    |
+| `PLAN_COMMITTED` or preceding `SLICE_COMMITTED` | One approved slice: `implementer`             | `IMPLEMENTING`, then `IMPLEMENTED`: diff and validation recorded                                                      |
+| `IMPLEMENTED`                                   | Independent review: `implementation-reviewer` | `SLICE_READY`: Ready; Findings return to implementer                                                                  |
+| `SLICE_READY`                                   | Completion Approval: human, recorded by Main  | `SLICE_APPROVED`: exact reviewed completion approved                                                                  |
+| `SLICE_APPROVED`                                | Completion commit and PR publication: Main    | `SLICE_COMMITTED`: approved layer committed and PR published/updated; exact-head gates recorded before dependent work |
+| All slices `SLICE_COMMITTED`                    | Exit entry check: Main                        | `FEATURE_EXIT_READY`: no pending scope/design decision                                                                |
+| `FEATURE_EXIT_READY`                            | Aggregate exit review: `feature-closer`       | `CLOSE_READY`: Close recommendation                                                                                   |
+| `CLOSE_READY` with a changed top-layer patch    | Independent review: `implementation-reviewer` | `CLOSE_READY`: final closure patch Ready; Findings return to closer                                                   |
+| `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact reviewed propagation/removal paths approved                                                   |
+| `CLOSE_APPROVED`                                | Closure commit: Main                          | `CLOSE_APPROVED`: final top-head closure commit recorded                                                              |
+| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; resulting identities recorded                                                |
 
 <!-- markdownlint-enable MD013 MD060 -->
 

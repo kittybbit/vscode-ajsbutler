@@ -31,12 +31,12 @@ architecture rules, and validation requirements. Preserve the failed command,
 diagnostics, and affected paths; determine whether production, tests, fixtures,
 harness, or generated outputs violate that contract before editing.
 
-Correction is authorized only within explicitly approved product and
-validation-support paths, with unchanged approved acceptance, intended
-observable behavior,
-public contracts, JP1/AJS and VS Code compatibility, Solution Shape,
-dependency direction, and required validation coverage. Size, a test-only
-change, or an automated suggestion does not establish authorization.
+Correction is authorized only within explicitly approved product,
+validation-support, or durable-document paths, with unchanged approved
+acceptance, intended observable behavior, public contracts, JP1/AJS and VS Code
+compatibility, Solution Shape, dependency direction, and required validation
+coverage. Size, a test-only change, or an automated suggestion does not
+establish authorization.
 Restoring actual implementation behavior to an already-approved observable
 contract is a correction, not a new behavior decision. Changing that approved
 contract requires Replanning.
@@ -83,6 +83,22 @@ followed by correction, affected validation, and independent re-review.
 `decision-required` Findings return to Main for the missing decision and
 Replanning when required. These classifications are not lifecycle states.
 Completion remains subject to the core lifecycle gates.
+
+If required GitHub CI/checks or applicable Cloud gates report a failure after
+the slice completion commit or PR publication, Main routes it to the owning
+implementer with the failure evidence and affected PR head. A deterministic
+correction within the approved boundary follows this loop: run affected
+validation, obtain independent review of the complete corrected patch and
+explicit scoped Completion Approval, then have Main make a focused additional
+commit on the same layer branch and update the same PR. Do not amend the prior
+commit, force-push, weaken required checks, or reset unrelated slice gates.
+Verify required checks and applicable Cloud gates for the exact new PR head
+before dependent work; pending, failed, missing, and old-head results block it.
+Expected skips count only when actual repository rules accept them. Reuse
+unchanged evidence only under the Evidence Contract. For existing dependent
+layers, their evidence and review owners determine whether base/content changes
+invalidate prior evidence and which affected PR heads and gates need refresh. A
+new decision or unapproved path follows the stop and Replanning route above.
 
 ### Test Organization and Repair
 
