@@ -69,7 +69,9 @@ the change as non-trivial and route intake through `feature-author`.
 
 For non-trivial work, use a dedicated feature branch (`docs/...` for docs-only
 work), create or select one feature, plan all implementation slices, and have
-the plan independently reviewed. Plan-review Findings return to `planner`.
+the plan independently reviewed. Switch branches in the existing checkout and
+use it for implementation and validation. Do not create disposable worktrees
+or copies of the checkout. Plan-review Findings return to `planner`.
 Replanning is required for a new scope, contract, design, dependency,
 compatibility, validation requirement/coverage/strategy, material impact, or
 approval-boundary decision. A deterministic check failure is not itself a

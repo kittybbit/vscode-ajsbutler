@@ -153,6 +153,12 @@ approved boundary and are not incidental corrections.
   or configuration:** add the relevant desktop or web tests and build
   evidence.
 
+Use automated tests for desktop and web validation. Run the applicable test
+suites through headless or CI runners when they need an extension host or
+browser. Do not launch a local GUI or add manual visual checks to SDD
+validation. If required coverage cannot be obtained from the available tests,
+record it as Missing and route the coverage gap through Main.
+
 Combine requirements for mixed surfaces. Each check is Pass only with valid
 successful evidence, Not Applicable only with a changed-impact reason, Missing
 when required evidence is unavailable, or Failed when it failed. Missing/Failed
@@ -200,7 +206,10 @@ also pass before Feature Exit.
 
 #### Execution Procedure
 
-In exact disposable baseline and final snapshots, run the same commands:
+Run both observations in the existing checkout. Reuse matching baseline
+evidence under the Evidence Contract, or capture the baseline at the slice's
+approved base before applying the slice changes. Use the same commands for the
+baseline and the final working-tree content:
 
 ```sh
 rtk pnpm exec qlty check --all --sarif --no-fix
@@ -210,10 +219,13 @@ rtk pnpm exec qlty smells --all --sarif --no-snippets
 Save each complete SARIF file, command output and exit status. Record the
 version, analyzed-path inventory/count per command and snapshot, configuration
 hash, snapshot revisions and commands required by the Quality Contract.
-Keep qlty cache and output local to each snapshot. Run `rtk pnpm run qlty` only
-in the disposable final snapshot. If formatting changes approved content,
-sync those paths, rebuild that snapshot, and repeat both observations and the
-aggregate until stable.
+Keep qlty cache and output outside inspected inputs. Run `rtk pnpm run qlty`
+on the slice's final working tree before capturing the final observations. The
+aggregate runs formatting. Check its write scope before running it and review
+the resulting diff against the approved paths. Preserve unrelated changes. If
+formatting would affect an unapproved path, route the issue through Main before
+proceeding. If any inspected input changes after an observation, refresh only
+the affected evidence under the Evidence Contract.
 
 ### Independent Review
 
