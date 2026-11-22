@@ -1,3 +1,5 @@
+# Pull request
+
 ## Summary
 
 <!-- Briefly describe what was changed -->
@@ -27,6 +29,13 @@
 - [ ] durable knowledge propagated to its owning document when needed
 - [ ] Feature Exit approved and only the selected feature folder removed when
       completing a feature
+
+<!-- For a stack layer, link the feature and slice and give the layer order,
+base, head and predecessor PR. -->
+
+<!-- For Feature Exit, link the reviewed closure patch, approvals, validation
+evidence and closure commit. Record each layer's merge result and commit
+identity. Record CLOSED only after all layers have merged. -->
 
 ## Validation
 

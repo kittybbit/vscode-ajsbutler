@@ -21,7 +21,10 @@ next role; missing artifacts are unavailable evidence, never a pass. Preserve
 them through review, approval, commit, and Feature Exit. Carry the compact
 acceptance, validation, review, approval, and commit references for all
 completed slices until closure; remove superseded narrative, not necessary
-gate proof. Do not build a collector service, custom SARIF parser, or
+gate proof. At closure, keep approvals, validation results, evidence references
+and merge results in the feature PRs. Ensure linked raw artifacts remain
+accessible after the selected feature folder is removed. Do not build a
+collector service, custom SARIF parser, or
 comparator. Agents receive only identity, verdict, failure reason, affected
 paths/diffs, actionable Findings and accessible artifact references. Keep full
 SARIF, logs and manifests as artifacts; consumers open only necessary evidence
@@ -35,7 +38,7 @@ for a missing fact or concrete concern, without injecting entire artifacts.
 | Documentation validation | Role changing the documentation                   | Reviewer and next role: validate that changed documentation surface                                        |
 | Slice validation         | Implementer, one baseline/final set per slice     | Implementation-reviewer: semantic review; feature-closer: aggregate completeness                           |
 | Review findings          | Independent reviewer                              | Main and author: verdict, precise Findings, reviewed patch identity, affected revalidation                 |
-| Closure evidence         | Feature-closer                                    | Main and committer: cross-slice completeness, durable ownership, risk ownership, current-head global gates |
+| Feature Exit handoff     | Feature-closer                                    | Main and committer: cross-slice completeness, durable ownership, risks and current-head gates for the PR record |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -61,7 +64,9 @@ Each validation record identifies:
 - For native stacks: PR URL/order, trunk, predecessor base/head commit and
   content identities, reviewed layer diff, top integration head, closure commit,
   current-head CI/review/rules references and actual merge result identities.
-  Keep these facts in existing gate/evidence records, not a second stack state.
+  Keep these facts in existing gate/evidence records and carry the closure
+  references into the PRs. For applicable CodeQL checks, record how the
+  analyzed revision maps to the exact PR head.
 - Missing/ambiguous facts and execution exceptions. Human approval provenance
   and review judgments remain separate gate records.
 

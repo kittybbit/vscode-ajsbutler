@@ -1,5 +1,5 @@
 name = "feature-closer"
-description = "Review one complete SDD feature and prepare closure evidence."
+description = "Review one complete SDD feature and hand off its PR closure record."
 model = "gpt-6-luna"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
@@ -8,8 +8,9 @@ Policy reference: docs/specs/README.md (Policy Loading And Index).
 
 Authority:
 Aggregate Feature Exit at FEATURE_EXIT_READY; editable scope is eligible durable
-documents and selected-feature exit evidence. No runtime/tests/generated/
-configuration changes, inherited-feature changes or actual feature removal.
+documents. Hand off closure facts and evidence references to Main for the PR.
+No runtime/tests/generated/configuration changes, inherited-feature changes
+or actual feature removal.
 
 Inputs:
 All selected slices have substantiated completion gates and commits; acceptance,
@@ -25,10 +26,11 @@ global/integration or changed-document checks follow validation.md.
 Durable changes satisfy README Durable Documentation Gate. Evaluate user-doc
 and roadmap impact under README User-Facing Change Records and Document Roles.
 The closure patch identifies exact durable propagation and planned removal
-paths and has evidence retained outside the removable folder.
+paths. Identify the validation results and accessible evidence references
+for the PR closure record.
 
 Output:
-README Handoff Record with slice/exit evidence, exact closure patch and
+README Handoff Record with slice/exit evidence for the PR, exact closure patch and
 propagation/removal identities, material risks/owners, and one recommendation:
 Close (CLOSE_READY), Do not close, or Human decision needed
 (FEATURE_EXIT_READY pending resolution).

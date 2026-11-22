@@ -21,11 +21,12 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
 - Feature PRs / target: {{ordered slice PR references and target branch}}
 - Final feature identity: {{complete head and closure patch reference}}
-- Closure / merge evidence: {{retained approval/review/validation references,
-  closure commit and each PR's actual merge result/commit identity}}
+- Feature Exit handoff: {{durable edits, exact feature-document removal paths,
+  and approval/review/validation references for the top-layer PR}}
 
 Apply [native stacks](../../README.md#github-standard-stacked-pull-requests).
 Keep these as references in the existing plan, not a separate stack state.
+Record closure and merge results in the top-layer PR.
 
 ## Human Approval
 

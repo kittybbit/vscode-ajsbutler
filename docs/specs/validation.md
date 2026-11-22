@@ -162,7 +162,8 @@ record it as Missing and route the coverage gap through Main.
 Combine requirements for mixed surfaces. Each check is Pass only with valid
 successful evidence, Not Applicable only with a changed-impact reason, Missing
 when required evidence is unavailable, or Failed when it failed. Missing/Failed
-required checks block readiness; neither is Not Applicable. Apply
+required checks block readiness except for the explicit qlty aggregate decision
+in the [Quality Contract](#quality-contract); neither is Not Applicable. Apply
 this selection before validation without an extra review or completed cost
 measurement as a prerequisite. Ordinary independent reviews and human gates
 remain required. GitHub Required Checks, code scanning and branch rules are
@@ -172,7 +173,7 @@ docs-only allowlist; its classification does not determine local validation.
 Architecture or product-contract documents with material product impact require
 the affected product coverage, even when no code file changes.
 
-For code slices, qlty must pass under the [Quality Contract](#quality-contract).
+For code slices, apply the [Quality Contract](#quality-contract).
 Treat identity or direction that cannot be mapped reliably as advisory;
 unchanged unrelated findings stay out of scope. Metric movement is a review
 signal only when no mapped adverse finding exists.
@@ -201,8 +202,12 @@ Compare official SARIF records; do not create a repository-specific parser or
 textual-output comparator. Any new SARIF finding is NG regardless of severity.
 Compare reliably mapped findings using explicit severity ordering, measured
 values, and whether higher or lower is worse; any mapped adverse movement is NG.
-The final `rtk pnpm run qlty` aggregate must pass. Current-head Qlty Cloud must
-also pass before Feature Exit.
+The final `rtk pnpm run qlty` aggregate must pass. If it fails solely because
+of unchanged baseline findings, Main may ask for an explicit human decision
+for the exact findings and approval gate. Retain the failed result and its
+evidence even if the exception is approved. New or worsened findings,
+unavailable or incomplete scans, and required GitHub or Cloud checks are
+ineligible. Current-head Qlty Cloud must pass before Feature Exit.
 
 #### Execution Procedure
 
@@ -221,7 +226,8 @@ version, analyzed-path inventory/count per command and snapshot, configuration
 hash, snapshot revisions and commands required by the Quality Contract.
 Keep qlty cache and output outside inspected inputs. Run `rtk pnpm run qlty`
 on the slice's final working tree before capturing the final observations. The
-aggregate runs formatting. Check its write scope before running it and review
+aggregate runs formatting. Run it explicitly, outside compile and test hooks.
+Check its write scope before running it and review
 the resulting diff against the approved paths. Preserve unrelated changes. If
 formatting would affect an unapproved path, route the issue through Main before
 proceeding. If any inspected input changes after an observation, refresh only

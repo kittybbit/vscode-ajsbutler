@@ -131,15 +131,15 @@ Review and evidence validity follow [validation](validation.md#independent-revie
 and [evidence](evidence.md#freshness-and-invalidation).
 
 Completion is the observed merge of every feature PR, with resulting commit
-identities and required check evidence retained. Pending or partial integration
-is not `CLOSED`; retain actual results and the missing gates. Changed merge
-scope or identities require renewed Human Merge Approval.
+identities and required check evidence recorded in the PRs. Pending or partial
+integration is not `CLOSED`; record actual results and missing gates. Changed
+merge scope or identities require renewed Human Merge Approval.
 
 ### Lifecycle State Contract
 
 `TASKS.md` records the current feature state and each slice's state until its
-approved removal. The retained closure artifact then records the final merge
-result and `CLOSED` gate fact, without a second active stack-state registry.
+approved removal. Main records the final merge result and `CLOSED` in the
+top-layer PR after verifying that every layer merged.
 For new features, `Lifecycle state` is the sole authoritative state field; review
 verdicts, approvals, and commits are supporting gate evidence, not parallel
 plan or slice status vocabularies. The names below describe gate results, not
@@ -167,7 +167,7 @@ decision.
 | `CLOSE_READY` with a changed top-layer patch    | Independent review: `implementation-reviewer` | `CLOSE_READY`: final closure patch Ready; Findings return to closer                                                   |
 | `CLOSE_READY`                                   | Closure Approval: human, recorded by Main     | `CLOSE_APPROVED`: exact reviewed propagation/removal paths approved                                                   |
 | `CLOSE_APPROVED`                                | Closure commit: Main                          | `CLOSE_APPROVED`: final top-head closure commit recorded                                                              |
-| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; resulting identities recorded                                                |
+| `CLOSE_APPROVED` with closure commit            | Human Merge Approval, then Stack Merge: Main  | `CLOSED`: all layer PRs verified Merged; top-layer PR records resulting identities                                     |
 
 <!-- markdownlint-enable MD013 MD060 -->
 
@@ -236,10 +236,10 @@ unapproved path returns to Main before editing for an approval-boundary decision
 
 Add Completion Approval only after implementation review and Closure Approval
 only after Feature Exit. Human Merge Approval is separate: its scope identifies
-the final feature PRs, order, target branch, head, merge method, closure commit
-and current GitHub gates. Keep it in the feature PRs or a retained closure
-artifact after feature-folder removal. Closure Approval alone never grants
-merge authority. Each record contains status, exact scope and paths,
+the final feature PRs, order, target branch, base and head identities, merge
+method, closure commit and current GitHub gates. Record it in the feature PRs.
+Closure Approval alone never grants merge authority. Each record contains
+status, exact scope and paths,
 review verdict, approval result, and commit status. Keep the active gate near
 the top of `TASKS.md` and compact references for completed gates through Feature
 Exit. Ordinary corrections keep the existing plan and approval records; do not
@@ -437,11 +437,12 @@ integration-only PR. The feature-closer owns integration and durable-edit
 judgments. A changed top-layer patch requires independent
 implementation-reviewer Ready before Closure Approval; unchanged content
 retains its valid independent review.
-The external closure artifact binds propagation/removal paths to the exact
-projected final snapshot, including planned deletions, so review, validation
-and the resulting commit cover the same content. The sole commit executor applies
-the approved removal. Durable knowledge and gate proof must remain accessible
-after removal.
+The top-layer PR links the exact projected final snapshot, including planned
+deletions, to the propagation/removal paths, approvals, review and validation
+evidence. The sole commit executor applies the approved removal. Main records
+the closure commit, actual merge results and resulting commit identities in the
+PR. Keep evidence references accessible after the selected feature folder is
+removed. Do not add a separate closure record to the repository.
 The final closure head follows the native stack review/merge gates and Evidence
 Contract. Do not retain the removed folder's
 `SPECS.md`, `TASKS.md`, or `TRACEABILITY.md` as history. Assign unfinished
