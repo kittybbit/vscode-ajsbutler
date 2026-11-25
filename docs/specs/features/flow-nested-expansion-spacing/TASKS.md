@@ -6,17 +6,22 @@
   slice for panel spacing and overlapping siblings.
 - Keep rendered placement in the shared Flow webview. Use the geometry and
   renderer checks below.
-- Obtain independent plan review and explicit Human Approval for the listed
-  paths, then commit the plan before starting implementation.
+- Review the changed collision precedence and approval boundary against the
+  preserved implementation patch. Obtain explicit Human Approval and commit
+  the replan before changing implementation.
 
 ## Current state
 
 - Lifecycle state: `PLAN_APPROVED`
-- Next step: commit the approved plan before implementation.
-- Independent plan review: `PLAN_READY` in the current conversation for
-  [the reviewed manifest](</private/tmp/ajsbutler-flow-plan-review.d2kVn2XD/manifest.sha256>).
-- Gate evidence: [intake](</private/tmp/ajsbutler-flow-intake.E5272k51/intake.md>)
-  and [plan validation](</private/tmp/ajsbutler-flow-plan-review.d2kVn2XD/plan.md>).
+- Next step: commit the approved replan before implementing the revised scope.
+- Independent replan review: `PLAN_READY` in the current conversation for
+  [the reviewed manifest](/private/tmp/ajsbutler-flow-replan-review.lw99IOuO/manifest.sha256).
+- Previous independent plan review: `PLAN_READY` in the current conversation for
+  [the reviewed manifest](/private/tmp/ajsbutler-flow-plan-review.d2kVn2XD/manifest.sha256).
+- Gate evidence: [intake](/private/tmp/ajsbutler-flow-intake.E5272k51/intake.md)
+  and [plan validation](/private/tmp/ajsbutler-flow-plan-review.d2kVn2XD/plan.md).
+- Previous approved plan commit: `7bc2a9e0211d6bd88e22feebdc1a1f6d939d293d`.
+- Replan evidence: [scope and validation](/private/tmp/ajsbutler-flow-replan-review.lw99IOuO/plan.md).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -38,9 +43,12 @@ Apply the [native stack contract](../../README.md#github-standard-stacked-pull-r
 ## Human Approval
 
 - Status: Approved
-- Approved at: approved in the current conversation on 2026-11-25.
-- Approved scope: Slice 1 and its exact path list below, as independently
-  reviewed. Feature Exit has a separate approval gate.
+- Approved at: approved in the current conversation on 2026-11-26.
+- Approved scope: revised Slice 1 and its exact path list below, as
+  independently reviewed. Feature Exit has a separate approval gate.
+- Previous approval: the human approved the original Slice 1 scope in the
+  current conversation on 2026-11-25. It is recorded on the previous approved
+  plan commit.
 
 Apply [Human Approval](../../README.md#human-approval) and the
 [approval-gated commit policy](../../README.md#approval-gated-commit-policy).
@@ -59,20 +67,40 @@ Apply [Human Approval](../../README.md#human-approval) and the
   inherit the anchor offset. This gives connections at different depths
   different handle coordinates in aligned cases, while preserving the
   relative positions within each level and within a moved subtree.
-- Keep the existing growth-phase constraints for ordinary row and column
-  offsets. In sibling layout, use current occupied rectangles to clear
-  actual collisions with expanded frames, including a regular sibling
-  whose origin precedes the frame owner's on either or both axes. For a
-  panel and an ordinary sibling, move the ordinary sibling clear of the
-  panel. For two frames, preserve deterministic layout precedence.
-- Preserve existing eligible rightward and downward directions for a
-  collision where the current placement can clear it. Whenever an actual
-  panel collision has no eligible direction, move right or down by the
-  smaller clearance distance, preferring right on a tie. This includes
-  aligned origins on either or both axes. Refresh occupied bounds after
-  movement and recheck collisions along the affected path so the moved unit
-  clears any additional sibling it reaches. Keep updates monotone and
-  bounded, with deterministic results for the same expansion set.
+- Keep the existing panel intrusion pass and ordinary row and column
+  growth constraints before resolving sibling collisions. Keep ordinary
+  sibling spacing. Classify precedence as needed using the positions
+  after ordinary sibling spacing and before the final collision phase
+  moves panels or propagates displacement. A preceding axis has a
+  strictly smaller ordinary sibling origin than the panel owner.
+  Use current occupied rectangles to test contact and measure clearance.
+- For a panel that contacts a preceding ordinary sibling, move the
+  panel's owning unit and whole anchored subtree along the preceding
+  axis. This means right for a left sibling on the same row, and down
+  for an upper sibling in the same column. In a mixed-axis contact, the
+  preceding axis determines the clearance direction. When both axes
+  precede, choose the smaller positive clearance, preferring right on
+  a tie. Keep precedence stable as positions change during resolution.
+- Process panels in the existing stable order. Clear each moving panel
+  against the preceding ordinary obstacles it actually reaches and
+  earlier resolved panels. Resolve a preceding ordinary sibling's
+  existing overlap with a panel before ordinary displacement starts,
+  including when multiple expanded panels are present. For later ordinary
+  siblings, preserve the existing rightward and downward directions. If both
+  origins initially coincide, treat the ordinary sibling as the movable
+  target and choose the shorter clearance when there is no eligible
+  axis, preferring right on a tie.
+- After panel clearance, resolve affected ordinary targets against the
+  updated panel and sibling bounds in stable order. Once an affected
+  ordinary unit moves, it remains the moving target if its displacement
+  creates a new overlap with any other settled expanded panel. Keep that
+  panel fixed through the rest of the displacement, even if the ordinary
+  unit's earlier origin precedes the panel's on the collision axis.
+  Apply the same rule to an ordinary unit moved by the resulting chain.
+  Keep unrelated units in place. Recheck each affected target along its
+  displacement and avoid touching-edge retriggers. Preserve monotone,
+  bounded obstacle scanning and a single committed subtree translation
+  per moved target. Use current rectangles for collision checks.
 - Preserve relative positions inside moved subtrees through existing anchor
   offsets. Keep unaffected units stable, preserve normal non-expanded
   placement, and regenerate collapsed layout from the remaining expansion
@@ -115,23 +143,55 @@ test harness, configuration, generated files, and dependencies are excluded.
   endpoints, and generated fit-bound nodes. Hidden content, navigation,
   search, identifiers, semantics, and VS Code `^1.75.0` stay in the existing
   contracts. The same webview code serves both hosts.
-- Risks are touching-box rounding, secondary collisions, alignment across
-  multiple expanded siblings, and accumulating offsets in deep graphs.
+- Risks are touching-box rounding, secondary collisions, reclassifying
+  precedence after a shift, and accumulating offsets in dense or deep graphs.
   Architecture automation proves its cataloged rules. Review judges the
   ownership, framework boundary, layout invariants, and cost separately.
   Route required changes to the approved paths, algorithm boundary, or
   validation coverage through Main before editing outside this scope.
 
+### Preserved implementation evidence
+
+- The existing anchor initializer shifts direct children at every expanded
+  level. The bottom-up bounds builder encloses owner and descendant rectangles
+  and inner frames, with one `basePx` of clearance on each side. Frame offsets
+  still feed the existing XYFlow fit nodes.
+- Under the previous plan, the collision phase gave panels priority over
+  ordinary siblings. Its optimized scan plans movement with local rectangles,
+  discards permanently passed obstacles, and applies the total offset once
+  per target. Retain that performance property for the revised precedence.
+- The prior corrected patch received `SLICE_READY` in the current
+  conversation. The changed behavior supersedes that review for readiness.
+  Preserve the patch during Replanning. Revalidate and independently review
+  the revised patch after the new plan is approved and committed.
+
 ### Validation
 
 - Compile and run the expanded Flow geometry and Flow Graph View suites.
-  Cover a sibling starting left in the same row, above in the same column,
-  left and above, and at a coincident origin. Cover an unaffected sibling
-  and an affected-path collision. Cover shared underlying X and Y alignment
-  at two graph font sizes, layering of the frame bounds, the uniform level
-  inset, subtree stability, repeated and reordered expansion, collapse,
-  and existing well-separated placements. Replace the old fixed
-  frame-origin assertion with content enclosure and stable unit anchors.
+  Cover same-row left, same-column above, both preceding axes including a
+  clearance tie, mixed-axis precedence, and coincident origins. Compare
+  with collapse to show that the preceding sibling stays in place and all
+  descendants translate with the owning unit. Verify blockers reached by
+  horizontal and vertical panel displacement, final clearance, an
+  unrelated unit, and existing right/below and two-panel behavior.
+- Cover a same-row collision chain with frame A at x `[0, 12]`,
+  ordinary unit U at x `[6, 11]`, and frame B at x `[14, 23]`, or an
+  equivalent scaled fixture. Choose vertical clearance greater than
+  horizontal clearance. A first moves U into B's range. U then clears
+  B to x `[23, 28]`. Assert both frame positions stay fixed, all pairs
+  clear, results are repeatable, and a distant unit stays fixed. Add
+  the direct-overlap control with U initially at x `[13, 18]`: B moves
+  to x `[18, 27]` while U and A stay fixed.
+- Retain shared underlying X and Y alignment at two graph font sizes,
+  layering of frame bounds, the level inset, subtree stability, repeated
+  and reordered expansion, collapse, and existing well-separated placement.
+- Retain the corrected dense-sibling regression and the recorded 800- and
+  1,200-sibling diagnostic probe sizes. Exercise both a preceding dense
+  group that stays put and a downstream group that must clear in stable
+  order. Preserve deterministic geometry and unrelated positions.
+  Compare the downstream probe against the prior corrected scan on the
+  same layout and runner. Record any timings as diagnostics, with geometry
+  assertions in the test and no wall-clock test threshold.
 - Exercise the existing renderer-data boundary with a representative
   connected aligned fixture. Assert fit-bound rectangles reflect the frames
   and relation endpoints retain their IDs. From realized node coordinates,
@@ -154,3 +214,14 @@ test harness, configuration, generated files, and dependencies are excluded.
   the [Evidence Contract](../../evidence.md#evidence-contract). Record any
   unavailable required run as Missing. Preserve test and check gates for
   the exact published head.
+
+### Previous implementation results
+
+- [Validation and correction evidence](/private/tmp/ajsbutler-flow-correction.2IiAnhap/validation.md)
+  retains the approved scope, final patch identity, dense probe results,
+  desktop and web builds, test and architecture results, and Qlty records
+  for the preserved patch.
+- No completion commit or published layer exists. Repeat final validation
+  for the revised patch, followed by independent implementation review and
+  Completion Approval. Required host suites, Verify and Qlty Cloud follow
+  publication on the exact PR head.
