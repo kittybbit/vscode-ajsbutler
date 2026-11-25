@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed inline Flow expansion so jobnet panels move clear of units on the left
+  or above, and nested panel borders and connections are easier to distinguish.
+
 ## [1.18.0] - 2026-10-24
 
 - Reduced telemetry to seven aggregate events for activation, viewer-open

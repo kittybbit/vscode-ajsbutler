@@ -28,8 +28,9 @@ export type LayoutBox = {
 };
 
 export type LayoutItem = {
-  unit: FlowGraphUnitDto;
+  unitId: string;
   position: FlowGraphPosition;
+  hasPanel: boolean;
   occupiedBox: LayoutBox;
 };
 

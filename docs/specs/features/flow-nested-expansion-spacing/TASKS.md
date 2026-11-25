@@ -6,14 +6,14 @@
   slice for panel spacing and overlapping siblings.
 - Keep rendered placement in the shared Flow webview. Use the geometry and
   renderer checks below.
-- Review the changed collision precedence and approval boundary against the
-  preserved implementation patch. Obtain explicit Human Approval and commit
-  the replan before changing implementation.
+- Review the revised collision precedence against the committed replan and
+  the retained implementation evidence.
 
 ## Current state
 
-- Lifecycle state: `PLAN_APPROVED`
-- Next step: commit the approved replan before implementing the revised scope.
+- Lifecycle state: `SLICE_APPROVED`
+- Next step: commit the approved Slice 1 patch and publish its PR.
+- Approved replan commit: `616cdf7e26be83066eba1f9f13835ce05e860fbf`.
 - Independent replan review: `PLAN_READY` in the current conversation for
   [the reviewed manifest](/private/tmp/ajsbutler-flow-replan-review.lw99IOuO/manifest.sha256).
 - Previous independent plan review: `PLAN_READY` in the current conversation for
@@ -165,6 +165,19 @@ test harness, configuration, generated files, and dependencies are excluded.
   Preserve the patch during Replanning. Revalidate and independently review
   the revised patch after the new plan is approved and committed.
 
+### Revised implementation shape
+
+- Ordinary grid spacing precedes panel clearance. Each panel classifies
+  preceding ordinary units against its starting position and applies one
+  anchored translation after clearing their occupied rectangles and earlier
+  panels. Same-origin or later ordinary siblings clear the settled frames.
+- A moving ordinary target clears any frame it reaches. The ordered scan
+  keeps the established clearance directions and permanently removes passed
+  obstacles before applying the accumulated translation once per target.
+- The tests link both acceptance themes to occupied geometry, fit bounds,
+  and realized smoothstep segments. The revised slice records that mapping
+  here.
+
 ### Validation
 
 - Compile and run the expanded Flow geometry and Flow Graph View suites.
@@ -225,3 +238,21 @@ test harness, configuration, generated files, and dependencies are excluded.
   for the revised patch, followed by independent implementation review and
   Completion Approval. Required host suites, Verify and Qlty Cloud follow
   publication on the exact PR head.
+
+### Revised implementation results
+
+- [Validation evidence](/private/tmp/ajsbutler-flow-revised.0Gt2BUBP/validation.md)
+  records the final patch, approved paths, and check results for this revision.
+- Desktop and web production bundles, compilation, 34 Flow tests, 17
+  architecture tests, Markdown and scope checks, and the Qlty aggregate and
+  comparison passed. Both full Qlty scans retain their baseline findings.
+  Webpack reported bundle-size warnings.
+- Geometry checks cover fixed preceding units, movement of the owner and its
+  anchored contents, downstream displacement past settled panels, and nested
+  spacing and connections. The dense probes confirm fixed preceding positions
+  and matching downstream geometry at 800 and 1,200 siblings.
+- Independent implementation review returned `SLICE_READY` in the current
+  conversation for the [reviewed patch](/private/tmp/ajsbutler-flow-revised.0Gt2BUBP/final.patch).
+- Completion Approval: the human approved the reviewed revised Slice 1 patch
+  in the current conversation on 2026-11-26. Required host suites, Verify,
+  and Qlty Cloud follow publication at the exact PR head.

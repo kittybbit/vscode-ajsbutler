@@ -1,5 +1,12 @@
 import * as assert from "assert";
 import { createTheme } from "@mui/material/styles";
+import { getSmoothStepPath, Position } from "@xyflow/react";
+import { parseAjsDocumentForTest } from "../support/parseAjs";
+import {
+  toFlowGraphDocumentDto,
+  validateFlowGraphDocument,
+} from "../../application/flow-graph/flowGraphDocument";
+import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
 import type { FlowGraphUnitDto } from "../../application/flow-graph/flowGraphDocument";
 import {
   flowGraphEdgeId,
@@ -31,6 +38,84 @@ const createTestUnit = ({
   children,
   ...params,
 });
+
+const alignedRelationsDefinition = `
+unit=scope,,jp1admin,;
+{
+  ty=n;
+  el=panel,n,+400+48;
+  el=outer-source,j,+80+240;
+  el=outer-target,j,+1360+240;
+  ar=(f=outer-source,t=outer-target);
+  unit=outer-source,,jp1admin,;{ty=j;}
+  unit=outer-target,,jp1admin,;{ty=j;}
+  unit=panel,,jp1admin,;
+  {
+    ty=n;
+    el=inner-source,j,+240+144;
+    el=inner-target,j,+400+144;
+    ar=(f=inner-source,t=inner-target);
+    unit=inner-source,,jp1admin,;{ty=j;}
+    unit=inner-target,,jp1admin,;{ty=j;}
+  }
+}
+`;
+
+const getSourceHorizontalSegment = (path: string) => {
+  const commands = [...path.matchAll(/([MLQ])\s*([^MLQ]+)/g)];
+  const toPoint = (match: RegExpMatchArray) =>
+    match[2]
+      .trim()
+      .split(/[\s,]+/)
+      .map(Number);
+  assert.strictEqual(commands[0]?.[1], "M");
+  const [startX, y] = toPoint(commands[0]);
+  let endX = startX;
+  for (const command of commands.slice(1)) {
+    if (command[1] !== "L") break;
+    const [nextX, nextY] = toPoint(command);
+    if (nextY !== y) break;
+    endX = nextX;
+  }
+  assert.ok(startX < endX, "Expected a rightward horizontal source segment");
+  return { startX, endX, y };
+};
+
+type FlowData = ReturnType<typeof createReactFlowData>;
+
+const getRenderedRelationSegment = (
+  data: FlowData,
+  sourceId: string,
+  targetId: string,
+  inset = 0,
+) => {
+  const edgeId = flowGraphEdgeId({
+    source: sourceId,
+    target: targetId,
+    type: "seq",
+  });
+  const edge = data.edges.find(({ id }) => id === edgeId);
+  assert.ok(edge);
+  assert.strictEqual(edge.type, "smoothstep");
+  assert.strictEqual(edge.source, sourceId);
+  assert.strictEqual(edge.target, targetId);
+  const source = data.nodes.find(({ id }) => id === edge.source);
+  const target = data.nodes.find(({ id }) => id === edge.target);
+  assert.ok(source);
+  assert.ok(target);
+  assert.ok(
+    source.initialWidth && source.initialHeight && target.initialHeight,
+  );
+  const [path] = getSmoothStepPath({
+    sourcePosition: Position.Right,
+    sourceX: source.position.x + source.initialWidth - inset,
+    sourceY: source.position.y + source.initialHeight / 2 - inset,
+    targetPosition: Position.Left,
+    targetX: target.position.x - inset,
+    targetY: target.position.y + target.initialHeight / 2 - inset,
+  });
+  return getSourceHorizontalSegment(path);
+};
 
 suite("Flow Graph View", () => {
   test("maps flow graph DTOs without requiring UnitEntity instances", () => {
@@ -388,6 +473,101 @@ suite("Flow Graph View", () => {
       flowDataWithoutDefinitions.nodes[0].data.unitDefinition,
       undefined,
     );
+  });
+
+  test("realizes panel fit bounds and separates aligned relation segments", () => {
+    const document = validateFlowGraphDocument(
+      toFlowGraphDocumentDto(
+        parseAjsDocumentForTest(alignedRelationsDefinition),
+      ),
+    );
+    assert.strictEqual(document.status, "available");
+    const scopeId = document.document.rootUnits[0].id;
+    const panelId = `${scopeId}/panel`;
+    const theme = createTheme();
+    const basePx = theme.typography.htmlFontSize;
+    const realize = (expandedUnitIds: string[]) => {
+      const result = buildExpandedFlowGraph({
+        document,
+        currentUnitId: scopeId,
+        expandedUnitIds,
+        basePx,
+      });
+      assert.ok(result.graph);
+      return createReactFlowData({
+        graph: result.graph,
+        unitDefinitionByPath: new Map(),
+        theme,
+        dialogDataState: {
+          dialogData: undefined,
+          setDialogData: () => undefined,
+        },
+        currentUnitIdState: {
+          currentUnitId: scopeId,
+          setCurrentUnitId: () => undefined,
+        },
+        options: {
+          positionOverrides: result.positionOverrides,
+          nodeDecorations: result.nodeDecorations,
+        },
+      });
+    };
+
+    const collapsed = realize([]);
+    const expanded = realize([panelId]);
+    const panel = expanded.nodes.find(({ id }) => id === panelId);
+    const bounds = expanded.nodes.find(
+      ({ id }) => id === `${panelId}::nested-panel-bounds`,
+    );
+    assert.ok(panel);
+    assert.ok(bounds);
+    assert.strictEqual(bounds.type, "group");
+    assert.deepStrictEqual(bounds.position, {
+      x: panel.position.x - basePx,
+      y: panel.position.y - basePx,
+    });
+    const innerTarget = expanded.nodes.find(
+      ({ id }) => id === `${panelId}/inner-target`,
+    );
+    assert.ok(innerTarget?.initialWidth && innerTarget.initialHeight);
+    assert.strictEqual(
+      bounds.position.x + bounds.width!,
+      innerTarget.position.x + innerTarget.initialWidth + basePx,
+    );
+    assert.strictEqual(
+      bounds.position.y + bounds.height!,
+      innerTarget.position.y + innerTarget.initialHeight + basePx,
+    );
+
+    const outer = getRenderedRelationSegment(
+      expanded,
+      `${scopeId}/outer-source`,
+      `${scopeId}/outer-target`,
+    );
+    const collapsedOuter = getRenderedRelationSegment(
+      collapsed,
+      `${scopeId}/outer-source`,
+      `${scopeId}/outer-target`,
+    );
+    const inner = getRenderedRelationSegment(
+      expanded,
+      `${panelId}/inner-source`,
+      `${panelId}/inner-target`,
+    );
+    const innerWithoutInset = getRenderedRelationSegment(
+      expanded,
+      `${panelId}/inner-source`,
+      `${panelId}/inner-target`,
+      basePx,
+    );
+    assert.strictEqual(outer.y, collapsedOuter.y);
+    assert.strictEqual(innerWithoutInset.y, outer.y);
+    assert.ok(
+      outer.startX < innerWithoutInset.startX &&
+        innerWithoutInset.endX < outer.endX,
+    );
+    assert.ok(outer.startX < inner.startX && inner.endX < outer.endX);
+    assert.strictEqual(inner.y - outer.y, basePx);
   });
 
   test("preserves edge realization and deterministic output for a bounded deep graph", () => {

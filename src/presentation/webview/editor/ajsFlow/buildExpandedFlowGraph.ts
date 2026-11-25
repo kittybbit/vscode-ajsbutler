@@ -47,18 +47,16 @@ const calculateNestedInitialPosition = (
   kind: "nested_grid" | "nested_condition",
   basePx: number,
 ): FlowGraphPosition => {
+  const parentPosition = { x: basePx, y: basePx };
   if (kind === "nested_condition") {
-    return calculateNestedConditionPosition({ x: 0, y: 0 }, basePx);
+    return calculateNestedConditionPosition(parentPosition, basePx);
   }
   const layout = node.metadata.layout;
-  return layout.kind === "grid"
-    ? calculateNestedChildPosition({
-        parentPosition: { x: 0, y: 0 },
-        h: layout.h,
-        v: layout.v,
-        basePx,
-      })
-    : calculateFlowGraphNodePosition(node, basePx);
+  if (layout.kind === "grid") {
+    return calculateNestedChildPosition({ parentPosition, ...layout, basePx });
+  }
+  const position = calculateFlowGraphNodePosition(node, basePx);
+  return { x: position.x + basePx, y: position.y + basePx };
 };
 
 const initializePositions = (
