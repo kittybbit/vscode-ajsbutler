@@ -5,15 +5,25 @@
 - Implement one revised slice for the [Verify and package task requirements](SPECS.md#requirements-and-acceptance).
 - Keep the reviewed combined test recipe and simplify Verify with a short
   Git path check. Keep all three suites and both fixture outputs.
-- Obtain independent re-review and fresh Human Approval. Commit the
-  approved replan before editing the preserved implementation.
+- Implement the committed, approved replan without changing its acceptance or
+  the preserved package, lockfile, fixture config, and contributor guide.
+- Return the exact final patch and evidence to Main for independent review.
 
 ## Current state
 
-- Lifecycle state: `PLAN_APPROVED`
-- Next step: commit the approved simplified Verify plan.
+- Lifecycle state: `SLICE_APPROVED`
+- Next step: commit the approved Slice 1 patch and publish its PR.
+- Independent implementation review: `SLICE_READY` in the current conversation
+  for the [reviewed patch](/private/tmp/ajsbutler-ci-opt.working/native-git-final/final.patch).
+- Completion Approval: approved in the current conversation for the reviewed
+  simplified Verify Slice 1 patch and PR publication.
 - Independent replan review: `PLAN_READY` in the current conversation for
   [the reviewed manifest](/private/tmp/ajsbutler-ci-replan.jsDhnp6x/manifest.sha256).
+- Approved plan commit: `f573f539e9618da9cdfb10d9c36504b94d3b4976`.
+- Human Approval: Approved in the current conversation on 2026-11-26 after
+  independent `PLAN_READY`, for the exact paths and acceptance recorded here.
+- Plan manifest SHA-256:
+  `16b71ab57bd89dd3f861e268519feffcb5be1e0abcaff7c3f4bd4d37072390f7`.
 - Replanning trigger: the maintainer asked to minimize Verify's inline
   script and leave build and test recipes in the package manifest.
 - Evidence: [current replan](/private/tmp/ajsbutler-ci-replan.jsDhnp6x/plan.md)
@@ -43,6 +53,9 @@ Apply the [native stack contract](../../README.md#github-standard-stacked-pull-r
 - Approved at: approved in the current conversation on 2026-11-26.
 - Approved scope: simplified Verify Slice 1 and its independently reviewed
   exact paths. Feature Exit has a separate approval gate.
+- Approved replan commit: `f573f539e9618da9cdfb10d9c36504b94d3b4976`;
+  independent `PLAN_READY` manifest SHA-256
+  `16b71ab57bd89dd3f861e268519feffcb5be1e0abcaff7c3f4bd4d37072390f7`.
 - Previous approval: combined-host Slice 1 was approved on 2026-11-26 in
   the current conversation and committed as
   `6a02ac6e1ca930522ea492d32b10792f6d18174f`.
@@ -245,5 +258,70 @@ managed workflow settings and inherited features are outside the slice.
   `f5bd38b1bbdc1f6039c99295eb2ac492ea4d7811c895563618186a722ac3e6c8`.
   Its product-only patch SHA-256 is
   `8c4dcb9f2ba444ba5c1e9fa652f56d382594d3b46c1c6f18acc0bfff6476281c`.
-  Preserve those product bytes until the new workflow plan is approved.
-  The API classifier evidence does not validate the new Bash step.
+  The four product paths remain byte-for-byte unchanged through this workflow
+  revision. The API classifier evidence does not validate the new Bash step.
+
+## Implementation Record
+
+- State: `IMPLEMENTED`; implementation and required local validation are
+  complete. Main routes the exact patch and evidence to the independent
+  implementation reviewer.
+- The workflow now has one `verify` job and one checkout at depth two with
+  credentials disabled. The native-Git classifier compares the tested merge
+  commit and ordered parents to event SHAs; uncertainty and Git failures route
+  to product checks. Only positive docs-only results skip guarded setup, lint,
+  and test steps. The GitHub API classifier, extra job permissions, second
+  checkout, and browser binary cache are removed. pnpm reads its pinned version
+  from `package.json`; the pnpm store cache, locked headless Chromium install,
+  `pnpm run lint:md`, and `xvfb-run -a pnpm test` remain.
+- Parsed workflow counts: 3 jobs to 1; 16 workflow steps to 8; 14 steps in the
+  `verify` job to 8. Package-script evidence remains 34 to 12 total scripts
+  and 15 to 1 entries matching `^(pre)?test(?::|$)` (13 named test scripts and
+  two hooks to the single `test` recipe). Detailed output is in the external
+  validation sidecar.
+- The exact inline workflow Bash passed 26 real-Git fixture cases: allowlisted
+  docs and deletions, docs renames, both cross-allowlist directions, more than
+  300 mixed paths, empty net diff, path-pattern boundaries, base-versus-merge
+  differences, missing/wrong event revisions, shallow and non-merge history,
+  unavailable history, and injected failures in all Git probes. The parsed
+  workflow assertions passed for job/checkout count, checkout settings,
+  permissions, guards, package-manager selection, and retained install/lint/test
+  commands. The aggregate first found two YAML line-length findings in the
+  classifier at lines 28–29; the merge comparison was shortened without
+  changing behavior. The first failure and corrected pass are retained.
+- Qlty CLI `0.645.0`, `.qlty/qlty.toml` SHA-256
+  `f551fa47da3ac111a3e29857ff0f431abb0e0a20c17a8c794660c255f4dfb4c2`:
+  baseline and implementation candidate used the same full selection and
+  trace-enabled `check --all --sarif --no-fix` and
+  `smells --all --sarif --no-snippets` commands. Check inventories matched at
+  635 paths and smells inventories at 375 paths. Check exited 1 with the same
+  3 SARIF findings; smells exited 0 with 112 findings in each snapshot. The
+  check findings and all smells findings except one mirrored metric property
+  match exactly. The Qlty aggregate exited 0 after the line-length correction.
+- The two mirrored `qlty:similar-code` results are for
+  `src/domain/services/i18n/nls.ts:144–158` and
+  `src/presentation/webview/editor/unitInformationLocalization.ts:143–159`,
+  related to each other. Their structural hash, mass, messages, ranges, and
+  source bytes are unchanged; `properties.actual` is 15 in the baseline and 17
+  in both final records. Qlty v0.645.0's
+  [duplication executor](https://github.com/qltysh/qlty/blob/v0.645.0/qlty-smells/src/duplication/executor.rs#L145-L170)
+  takes `actual` from the first clone member and copies it to each location,
+  while each message describes its own range. The per-path metric is therefore
+  not reliably comparable. This is recorded without a waiver or source change;
+  the full SARIF and exact records are retained in the sidecar.
+- The exact six changed paths remain the approved set. `package.json`,
+  `pnpm-lock.yaml`, `webpack.web-test.config.js`, and `CONTRIBUTING.md` retain
+  their approved combined-host bytes; their SHA-256 values and all raw results
+  are in the external sidecar. Prior package recipe, output artifact, lockfile,
+  frozen-install, and architecture evidence remains valid for those unchanged
+  paths and is referenced above.
+- No `TRACEABILITY.md` exists and no product requirement-to-test mapping
+  changed; a traceability file is unnecessary for this slice. The actual PR
+  head's Ubuntu 24.04 Desktop, minimum Desktop, Web, CodeQL, and Qlty Cloud
+  checks have not run and remain Feature Exit gates for Main.
+- Full Qlty observations precede only this final validation-index update in
+  `TASKS.md`. Product, workflow, lockfile, Qlty configuration, and dependency
+  bytes match the scanned candidate. The metadata-only update was checked with
+  Markdown lint, link and changed-path validation, and `git diff --check`; raw
+  identities, commands, inventories, SARIF, and output references are in the
+  [implementation evidence sidecar](/private/tmp/ajsbutler-ci-opt.working/native-git-final/validation.md).
