@@ -6,117 +6,69 @@ name: Verify
 
 permissions:
   contents: read
-  pull-requests: read
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      docs_only: ${{ steps.classify.outputs.docs_only }}
-    steps:
-      - id: classify
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const pull_number = context.payload.pull_request.number;
-            const docsOnlyPatterns = [
-              /^docs\/.+/,
-              /^README\.md$/,
-              /^\.codex\/.+\.md$/,
-              /^\.github\/.+\.md$/,
-            ];
-
-            const files = await github.paginate(
-              github.rest.pulls.listFiles,
-              {
-                owner,
-                repo,
-                pull_number,
-                per_page: 100,
-              },
-              (response) => response.data.map((file) => file.filename),
-            );
-
-            const docsOnly =
-              files.length > 0 &&
-              files.every((filename) =>
-                docsOnlyPatterns.some((pattern) => pattern.test(filename)),
-              );
-
-            core.info(`changed files: ${JSON.stringify(files)}`);
-            core.info(`docs_only=${docsOnly}`);
-            core.setOutput("docs_only", String(docsOnly));
-
-  decide:
-    needs: changes
-    runs-on: ubuntu-latest
-    outputs:
-      should_verify: ${{ steps.decide.outputs.should_verify }}
-    steps:
-      - id: decide
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const docsOnly =
-              "${{ needs.changes.outputs.docs_only }}" === "true";
-
-            core.setOutput("should_verify", docsOnly ? "false" : "true");
-
   verify:
-    needs: decide
-    if: needs.decide.outputs.should_verify == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - id: classify
+        name: Classify the tested merge with Git
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          classify() {
+            local expected_merge actual_merge
+            expected_merge="${GITHUB_SHA:-} ${BASE_SHA:-} ${HEAD_SHA:-}"
+            actual_merge="$(git show -s --format='%H %P' HEAD)" || return 1
+            [[ "$actual_merge" == "$expected_merge" ]] || return 1
+            if git diff --quiet --no-renames HEAD^1 HEAD -- .; then
+              return 1
+            elif [[ $? -ne 1 ]]; then
+              return 1
+            fi
+            git diff --quiet --no-renames HEAD^1 HEAD -- . \
+              ':(exclude)docs/**' ':(exclude,glob)README.m[d]' \
+              ':(exclude).codex/?*.md' ':(exclude).github/?*.md'
+          }
+
+          if classify; then
+            docs_only=true
+          else
+            docs_only=false
+          fi
+          printf 'docs_only=%s\n' "$docs_only" >> "$GITHUB_OUTPUT"
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
+        if: steps.classify.outputs.docs_only != 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.classify.outputs.docs_only != 'true'
         with:
           node-version: 24.x
           cache: pnpm
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: >-
-            ${{ runner.os }}-playwright-1.59.1-${{
-            hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-1.59.1-
-
       - name: Install dependencies
+        if: steps.classify.outputs.docs_only != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright headless browser
+        if: steps.classify.outputs.docs_only != 'true'
         run: pnpm exec playwright install --with-deps chromium-headless-shell
 
       - name: >-
           Markdown lint for docs/specs/features and
           docs/requirements/use-cases
+        if: steps.classify.outputs.docs_only != 'true'
         run: pnpm run lint:md
 
-      - name: Production build
-        run: pnpm run build
-
-      - name: Compile tests
-        run: pnpm run test:compile
-
-      - name: Prepare browser accessibility fixture
-        run: pnpm run test:prepare:browser:bundle
-
-      - name: Prepare shared host smoke bundle
-        run: pnpm run test:prepare:web:bundle
-
-      - name: Desktop extension tests
-        run: xvfb-run -a pnpm run test:desktop:run
-
-      - name: Minimum Desktop extension smoke tests
-        run: xvfb-run -a pnpm run test:desktop:min:run
-
-      - name: Web extension tests
-        run: pnpm run test:web:run
+      - name: Build and test Desktop and Web hosts
+        if: steps.classify.outputs.docs_only != 'true'
+        run: xvfb-run -a pnpm test

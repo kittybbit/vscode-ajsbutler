@@ -56,5 +56,4 @@ const accessibilityConfig = {
   },
 };
 
-module.exports = (env = {}) =>
-  env.target === "accessibility" ? accessibilityConfig : webSmokeConfig;
+module.exports = [accessibilityConfig, webSmokeConfig];
