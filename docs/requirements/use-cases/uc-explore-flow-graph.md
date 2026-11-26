@@ -42,6 +42,18 @@ flow scope while preserving predictable navigation and viewport state.
   bounds, and rendered-surface dimensions while preserving non-overlap,
   unaffected-region stability, and relative positions within repositioned
   subtrees
+- when expansion would make a panel's displayed rectangle overlap the displayed
+  rectangle of a visible, unexpanded sibling in the same flow scope whose
+  starting position is left of or above the panel's owning jobnet, the sibling
+  stays in place while the panel and affected units move right or down to clear
+  it; this precedence does not apply to other expanded panels or ancestors
+- when that sibling starts both left of and above the panel's owning jobnet,
+  the shorter clearance wins and the panel moves right when the clearances tie
+- units displaced into another settled expanded panel move right or down past
+  it while that panel stays in place
+- each expanded panel leaves about one em of space around its enclosed
+  rendered content, including nested panel bounds, so aligned nested borders
+  and representative connections remain visually distinct
 - after expansion geometry is available, the viewer can fit the viewport to
   include newly visible rendered bounds
 - current-scope search uses case-insensitive contiguous partial matching across
@@ -122,6 +134,30 @@ Scenario: Nested jobnet expands in the current scope
   Then its graph is revealed without changing the active root-jobnet scope
   And presentation realizes the graph placement constraints without overlap
   And the viewer can include the newly visible rendered bounds
+
+Scenario: Expansion clears units that intrude from the left or above
+  Given expansion would make the nested panel's displayed rectangle overlap a
+    visible sibling's displayed rectangle
+  And the sibling is unexpanded, in the same flow scope, and starts left of or
+    above the panel's owning jobnet
+  When the user expands the jobnet
+  Then the sibling stays in place
+  And the panel and any affected units move right or down until the overlap is
+    cleared
+  And other expanded panels and ancestors do not trigger this left or above
+    precedence
+  And when the sibling starts both left of and above the panel's owning jobnet,
+    the shorter clearance is used, with right preferred on a tie
+  And a panel reached by a displaced unit stays in place while that unit moves
+    past it
+
+Scenario: Nested expanded panels retain visual clearance
+  Given nested jobnets with the same X or Y position
+  When the user expands them
+  Then about one em of space remains between each panel and its enclosed
+    rendered content
+  And nested panel borders and representative connections remain visually
+    distinct
 
 Scenario: Search reveals a collapsed descendant match
   Given a matching unit below collapsed ancestor jobnets
