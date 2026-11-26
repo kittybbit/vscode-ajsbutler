@@ -13,6 +13,8 @@ and restore the Linux browser setup needed to run them.
 - The maintainer then requested a review of the whole package script
   catalog and specified that the Desktop and Web hosts ship together and
   should be built and tested together.
+- The maintainer asked to simplify Verify to environment setup, a small
+  changed-path check, and calls to the package scripts.
 - [Verify on Flow PR #351](https://github.com/kittybbit/vscode-ajsbutler/actions/runs/45719321375/job/139573444293)
   failed at the Playwright 1.59.1 browser installation step on Ubuntu 26.04.
 - [Contributor commands](../../../../CONTRIBUTING.md#common-scripts) describe
@@ -20,11 +22,11 @@ and restore the Linux browser setup needed to run them.
 
 ## Requirements and acceptance
 
-- Present one repository-owned Verify result per pull request. Preserve the
-  repository's docs-only path allowlist and product coverage for mixed and
-  product changes. Keep the product setup, build, and host suites off the
-  docs-only path. Surface classification errors instead of silently omitting
-  product verification.
+- Present one repository-owned Verify result per pull request. Check out
+  the merge revision that Verify will test. Preserve the docs-only
+  allowlist and skip product setup and checks only when the nonempty tree
+  diff from that merge's base parent is wholly allowlisted. Run product
+  verification when classification is inconclusive.
 - Use one `pnpm test` recipe for contributor and product CI verification.
   Build both production outputs, compile test TypeScript, and prepare both
   fixture bundles once. Run stable Desktop, minimum-version Desktop, and
@@ -46,19 +48,22 @@ and restore the Linux browser setup needed to run them.
 
 ## Decisions and impact
 
-- `.github/workflows/verify.yml` owns pull request classification and hosting
-  setup. `package.json` owns reusable build and test commands. The existing
-  `changes` and `decide` jobs only classify and invert a Boolean, respectively.
+- Verify owns checkout, changed-path classification, and Linux setup. A
+  native Git comparison classifies the effect on the tested merge tree.
+  The result may differ from a PR file list when a branch change has no
+  net effect on that tree. `package.json` owns reusable build and test
+  recipes and command ordering.
 - Minimum Desktop and Web share the host smoke bundle. Stable Desktop uses a
   separate accessibility fixture. Coverage stays distinct even where the
   build and test preparation are shared.
-- The package manifest owns contributor entry points, reusable preparation,
-  and simple command ordering. Verify sets up Linux and runs `pnpm test`
-  in one step under Xvfb. Existing runner logs identify each host suite.
-- Assess docs-only, mixed, and product paths, including pagination, renames
-  across the allowlist, and classification failure. Validate task composition,
-  the installed dependency's runner support, and the resulting exact-head CI
-  outcomes. Record any necessary contributor command documentation update.
+- Verify runs Markdown lint and the one `pnpm test` step under Xvfb.
+  Existing runner logs identify each host suite. pnpm setup reads the
+  package manager from the manifest. Verify caches the pnpm dependency
+  store and installs the locked Playwright browser on the product path.
+- Assess docs-only, mixed, and product paths, including large diffs,
+  renames across the allowlist, incomplete history, and merge identity
+  mismatches. Validate task composition, the Linux browser setup, and
+  exact-head hosted results.
 - Keep CI setup scoped to this repository's workflow. CodeQL and Qlty Cloud
   are managed separately and their current branch rules remain applicable.
 

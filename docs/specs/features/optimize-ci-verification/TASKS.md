@@ -3,22 +3,21 @@
 ## Agent Brief
 
 - Implement one revised slice for the [Verify and package task requirements](SPECS.md#requirements-and-acceptance).
-- Build and test both product hosts with one recipe. Keep all three suites
-  and both fixture outputs. Preserve the implemented Verify classifier.
-- Obtain independent plan review and fresh Human Approval of the paths below.
-  Commit the approved replan before editing the preserved implementation.
+- Keep the reviewed combined test recipe and simplify Verify with a short
+  Git path check. Keep all three suites and both fixture outputs.
+- Obtain independent re-review and fresh Human Approval. Commit the
+  approved replan before editing the preserved implementation.
 
 ## Current state
 
 - Lifecycle state: `PLAN_APPROVED`
-- Next step: commit the approved combined-host Slice 1 plan.
+- Next step: commit the approved simplified Verify plan.
 - Independent replan review: `PLAN_READY` in the current conversation for
-  [the reviewed manifest](/private/tmp/ajsbutler-ci-replan.AHAL699J/manifest.sha256).
-- Replanning trigger: the maintainer specified that Desktop and Web ship
-  together and should pass the build and tests together.
-- Evidence: [intake](/private/tmp/ajsbutler-ci-intake.3RbxZWSu/intake.md),
-  [original plan](/private/tmp/ajsbutler-ci-plan.yccWpbyD/plan.md), and
-  [current replan](/private/tmp/ajsbutler-ci-replan.nji5O90M/plan.md).
+  [the reviewed manifest](/private/tmp/ajsbutler-ci-replan.jsDhnp6x/manifest.sha256).
+- Replanning trigger: the maintainer asked to minimize Verify's inline
+  script and leave build and test recipes in the package manifest.
+- Evidence: [current replan](/private/tmp/ajsbutler-ci-replan.jsDhnp6x/plan.md)
+  and [prior implementation](/private/tmp/ajsbutler-ci-opt.working/revised-handoff.md).
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -42,15 +41,13 @@ Apply the [native stack contract](../../README.md#github-standard-stacked-pull-r
 
 - Status: Approved
 - Approved at: approved in the current conversation on 2026-11-26.
-- Approved scope: revised Slice 1 and its independently reviewed exact paths.
-  Feature Exit has a separate approval gate.
-- Previous approval: the human approved the original independently reviewed
-  scope in the current conversation on 2026-11-26. The original plan commit
-  is `b5b7481e9c80c5805be7a78106c8797ae719e3fe`, reviewed as `PLAN_READY`
-  for the [original manifest](/private/tmp/ajsbutler-ci-plan.yccWpbyD/manifest.sha256).
-- Previous replans: the [eight-test-script plan](/private/tmp/ajsbutler-ci-replan.0JuoeKg6/plan.md)
-  and [six-test-script plan](/private/tmp/ajsbutler-ci-replan.2uXERSSF/plan.md)
-  reached independent `PLAN_READY` and were superseded before Human Approval.
+- Approved scope: simplified Verify Slice 1 and its independently reviewed
+  exact paths. Feature Exit has a separate approval gate.
+- Previous approval: combined-host Slice 1 was approved on 2026-11-26 in
+  the current conversation and committed as
+  `6a02ac6e1ca930522ea492d32b10792f6d18174f`.
+  Its independent `PLAN_READY` review covers the
+  [approved manifest](/private/tmp/ajsbutler-ci-replan.AHAL699J/manifest.sha256).
 
 Apply the [approval-gated commit policy](../../README.md#approval-gated-commit-policy).
 
@@ -58,25 +55,46 @@ Apply the [approval-gated commit policy](../../README.md#approval-gated-commit-p
 
 ### Verify and fixture behavior
 
-- Keep the workflow name `Verify`, pull-request trigger, read permissions,
-  and single `verify` job on `ubuntu-24.04` for Playwright 1.59.1. The
-  classifier remains in the job. Only an explicit docs-only result skips
-  checkout, dependency and browser setup, lint, build and test steps.
-- Preserve the existing docs allowlist `docs/**`, `README.md`,
-  `.codex/**/*.md` and `.github/**/*.md`. The implemented classifier verifies
-  both rename paths and current file names, live versus event head and base
-  revisions, and the list against the verified changed-file count. Mixed,
-  empty, capped, duplicate, malformed, unstable and failed classifications
-  take the product path. Preserve the corrected classifier's code and
-  evidence subject to the final workflow identity check.
+- Keep the workflow name `Verify`, pull-request trigger, and single
+  `verify` job on `ubuntu-24.04` for Playwright 1.59.1. Keep read
+  permission for contents only. On both paths check out the event's
+  synthetic merge with existing `actions/checkout@v4` at depth two,
+  without persisting credentials. Report checkout failures normally.
+- Replace the inline GitHub API classifier with a short shell step. Set
+  expected base and head SHAs through the step environment. Verify
+  `git show -s --format='%H %P' HEAD` matches the event merge SHA and those
+  two ordered parent SHAs before using `HEAD^1` as the diff base.
+  Require a nonempty base-to-merge tree diff and no changed paths
+  outside the allowlist. For the unfiltered quiet diff, only exit 1
+  proves a change. For the filtered quiet diff, only exit 0 proves
+  no product change. Treat missing metadata, wrong revisions,
+  empty changes, unavailable history and failed Git probes as product
+  verification. Only positive docs-only results skip product setup, lint
+  and tests.
+- Use native `git diff --quiet --no-renames` and quoted exclusions for
+  `docs/**`, root `README.md`, `.codex/**/*.md` and `.github/**/*.md`.
+  Use the verified patterns `:(exclude)docs/**`,
+  `:(exclude,glob)README.m[d]`, `:(exclude).codex/?*.md`, and
+  `:(exclude).github/?*.md`. These treat bare `.md` at the two dot-directory
+  roots and descendants of a root directory named `README.md` as product
+  paths. Disabling rename pairing checks both sides as independent paths.
+  Compare the base parent with the merge actually tested. API file
+  enumeration, native trigger filters and added classifier dependencies
+  are outside the approach.
 - Have the fixture Webpack config export the existing two configurations
   as one multi-compiler array. Preserve the browser accessibility and
   Web smoke entries, output paths and cache identities. The fixture config
   still consumes the internal production Webpack target selectors.
-- After existing Node, dependency and browser setup and Markdown lint,
-  Verify runs `xvfb-run -a pnpm test` as one labeled step. The runner
-  logs distinguish stable Desktop, minimum Desktop and Web. Browser setup,
-  caching, permissions and managed checks retain their existing contracts.
+- On the product path, read pnpm's pinned version from the manifest via
+  existing `pnpm/action-setup@v4`. Retain the Node action's pnpm store
+  cache and frozen install. Remove the separate Playwright browser
+  binary cache and install the locked browser with system dependencies.
+  Cold hosted runs require network access; measure any timing change on
+  the hosted runner.
+- Keep browser installation, `pnpm run lint:md`, and
+  `xvfb-run -a pnpm test` as separate labeled steps after setup.
+  The runner logs distinguish stable Desktop, minimum Desktop and Web.
+  Managed checks retain their existing contracts.
 
 ### Package recipes
 
@@ -119,31 +137,38 @@ Apply the [approval-gated commit policy](../../README.md#approval-gated-commit-p
 - `webpack.web-test.config.js`
 - `pnpm-lock.yaml`
 - `CONTRIBUTING.md`
+- `docs/specs/features/optimize-ci-verification/TASKS.md`
 
-The selected `TASKS.md` records gate and evidence updates. Keep probes,
-fixtures and raw logs outside the checkout. Extension and test source,
-host runner implementations, production Webpack configuration, managed
-workflow settings and inherited features are outside the slice.
+The selected `TASKS.md` records gate and evidence updates. Preserve the
+four other implemented product paths byte-for-byte during the workflow
+revision. Keep probes, fixtures and raw logs outside the checkout.
+Extension and test source, host runners, production Webpack configuration,
+managed workflow settings and inherited features are outside the slice.
 
 ### Solution Shape and impact
 
-- Verify owns classification, Linux setup and invocation of `pnpm test`.
+- Verify owns checkout, a short Git path check, Linux setup and invocation
+  of the two package commands.
   `package.json` owns user-facing recipes and the shared test order.
   The existing fixture Webpack config owns the combined fixture outputs.
   Reuse the existing pnpm script shell, Node runners and Webpack
   multi-compiler support. No additional test-task or runner layer is needed.
+- Git inspects the actual checked-out revision. This removes API pagination,
+  count and revision-race handling. Checking ordered merge parents ties
+  the decision to the event. Checkout now runs for docs-only changes so
+  the job can inspect their paths before installing product dependencies.
 - Direct impact covers Verify jobs, script names and execution order,
   the production clean boundary, and removal of one unused orchestration
   dependency. Transitive impact covers local and CI test artifacts,
   VSIX preparation, parser regeneration, developer quality checks, and
   lockfile install. Engine support, runner inputs, and Qlty/CodeQL branch
   rules remain intact.
-- The major risks are stale callers of removed commands, incorrect
-  artifact mode or failure propagation after removing hooks, and
-  retained dependency drift. Check tracked callers including `.vscode`,
-  isolate tests from stale output, exercise failure short-circuiting,
-  and verify the parsed lock graph. Route new paths, package version
-  changes or lost coverage through Main.
+- Risks include PR metadata deviating from the tested merge, a shallow
+  checkout missing the first parent, and a cache miss or cold browser
+  download. Git probe uncertainty runs product checks. Reuse valid
+  package and artifact evidence and verify installed versions and the
+  uncached browser installation on the hosted runner. Route new paths,
+  package version changes or lost coverage through Main.
 
 ### Validation
 
@@ -172,13 +197,22 @@ workflow settings and inherited features are outside the slice.
   from that dependency; retained importer resolutions, package records
   and snapshots are unchanged. Run `pnpm install --frozen-lockfile` and
   record the pnpm version and install result.
-- Reuse the classifier boundary evidence only when the classifier content
-  identity matches. Recheck the workflow graph and actual guards, and
-  rerun the inline classifier harness on the final workflow. Cover both
-  docs-only and full product routing, cross-allowlist renames, duplicate
-  files hiding a product path, pagination, count/revision drift and
-  request failures. Confirm the runner remains compatible with the
-  installed Playwright version.
+- Extract and run the actual inline Bash against disposable real Git
+  merge fixtures. Cover each allowlisted path, docs-only deletions and
+  renames, mixed and product changes, both cross-allowlist rename
+  directions, a change list exceeding 300 files, an empty net delta,
+  missing or mismatched event SHAs, nonmerge or shallow history, and
+  Git errors. Exercise successful classification at depth two. Cover
+  root versus nested README, bare Markdown names and non-Markdown paths
+  under the dot directories. Compare a PR branch's change already in
+  the base with the net change actually entering its merge.
+- Check the parsed workflow's one job, checkout depth and credentials,
+  contents read permission, and dependency, browser, lint and test
+  guards. Verify it uses the package manager version from the manifest,
+  keeps the Node action's pnpm store cache, omits the browser binary
+  cache, and keeps the locked Playwright installation and the two
+  package calls. Confirm the Ubuntu runner selection still matches
+  the installed Playwright version.
 - Run Markdown lint, including `CONTRIBUTING.md`, and the architecture
   dependency suite. Validate exact changed paths, links and
   `git diff --check`. Use the same complete
@@ -188,12 +222,12 @@ workflow settings and inherited features are outside the slice.
   lock, and workflow facts for this scope. Preserve earlier evidence links
   and reuse unchanged observations only as allowed by the
   [Evidence Contract](../../evidence.md#evidence-contract).
-- Verify the exact published product PR head installs Chromium headless
-  shell on Ubuntu 24.04 and completes the same `pnpm test` under Xvfb,
-  with stable Desktop, minimum Desktop and Web all passing. Check CodeQL
-  and Qlty Cloud on that head. Use supported automation for host
-  launches. Exact-head hosted coverage is a Feature Exit gate; report
-  missing or failed evidence explicitly.
+- Verify the exact published product PR head installs the pinned pnpm
+  version and Chromium headless shell on Ubuntu 24.04. It must run
+  Markdown lint and complete the same `pnpm test` under Xvfb, with
+  stable Desktop, minimum Desktop and Web all passing. Check CodeQL
+  and Qlty Cloud on that head. Hosted coverage remains a Feature Exit
+  gate; report missing or failed evidence explicitly.
 
 ### Previous scope evidence
 
@@ -203,7 +237,13 @@ workflow settings and inherited features are outside the slice.
   The product-only SHA-256 is
   `f083a5fd8086085d6a7f9d2331d64db2507987720b26d1bb51ecfdb0692edac9`.
 - The [previous correction evidence](/private/tmp/ajsbutler-ci-opt.working/slice-1-correction-evidence.md)
-  remains available for prior gate provenance, including exact patch
-  records and classifier, artifact, architecture and Qlty results.
-  Replanning preserves those product bytes. The previous review and
-  approval do not authorize the revised package or lockfile changes.
+  remains available for the original gate provenance.
+- The [combined-host implementation handoff](/private/tmp/ajsbutler-ci-opt.working/revised-handoff.md)
+  records the implemented 12 scripts, ordered test recipe, both fixtures,
+  frozen install, CLI quality runs and reviewed path set. Its uncommitted
+  full patch SHA-256 is
+  `f5bd38b1bbdc1f6039c99295eb2ac492ea4d7811c895563618186a722ac3e6c8`.
+  Its product-only patch SHA-256 is
+  `8c4dcb9f2ba444ba5c1e9fa652f56d382594d3b46c1c6f18acc0bfff6476281c`.
+  Preserve those product bytes until the new workflow plan is approved.
+  The API classifier evidence does not validate the new Bash step.
