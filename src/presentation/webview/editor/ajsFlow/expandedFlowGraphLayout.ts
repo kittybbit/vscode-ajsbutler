@@ -9,7 +9,6 @@ import type {
 } from "./expandedFlowGraphTypes";
 import {
   buildPanelBoundsFromSubtreeBounds,
-  buildUnitBaseBounds,
   buildUnitPanelBounds,
   includeDecorationBounds,
   includeNodeBounds,
@@ -60,12 +59,12 @@ const buildOccupiedLayoutItem = (
 ): LayoutItem | undefined => {
   const position = getDisplayPosition(context, unit.id);
   if (!position) return undefined;
+  const decoration = context.nodeDecorations.get(unit.id);
   return {
-    unit,
+    unitId: unit.id,
     position,
-    occupiedBox:
-      buildExpandedUnitPanelBounds(context, unit) ??
-      buildUnitBaseBounds(position, context.metrics),
+    hasPanel: decoration !== undefined,
+    occupiedBox: buildUnitPanelBounds(position, decoration, context.metrics),
   };
 };
 
@@ -220,8 +219,7 @@ const buildExpandedPanelBounds = (
   const parentPosition = context.positionOverrides.get(expandedUnit.id);
   if (!parentPosition) return undefined;
   return buildPanelBoundsFromSubtreeBounds(
-    parentPosition,
     buildExpandedPanelSubtreeBounds(context, expandedUnit, parentPosition),
-    context.metrics,
+    context.basePx,
   );
 };

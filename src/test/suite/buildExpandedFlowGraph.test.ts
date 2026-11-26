@@ -9,7 +9,12 @@ import {
   validateFlowGraphDocument,
 } from "../../application/flow-graph/flowGraphDocument";
 import { buildExpandedFlowGraph } from "../../presentation/webview/editor/ajsFlow/buildExpandedFlowGraph";
-import { createFlowGraphMetrics } from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
+import {
+  calculateFlowGraphNodePosition,
+  calculateNestedChildPosition,
+  calculateNestedConditionPosition,
+  createFlowGraphMetrics,
+} from "../../presentation/webview/editor/ajsFlow/flowGraphPosition";
 import { flowGraphEdgeId } from "../../application/flow-graph/buildFlowGraphCore";
 
 const assertClose = (actual: number, expected: number): void => {
@@ -60,21 +65,97 @@ const toEdgeLabel = (edge: {
     edge.type
   }`;
 
-const toRoundedDecoration = (
-  id: string,
-  decoration: {
-    panelOffsetXPx: number;
-    panelOffsetYPx: number;
-    panelWidthPx: number;
-    panelHeightPx: number;
-  },
-) => ({
-  id: id.split("/").pop() ?? id,
-  panelOffsetXPx: Math.round(decoration.panelOffsetXPx),
-  panelOffsetYPx: Math.round(decoration.panelOffsetYPx),
-  panelWidthPx: Math.round(decoration.panelWidthPx),
-  panelHeightPx: Math.round(decoration.panelHeightPx),
-});
+type ExpandedGraph = ReturnType<typeof buildExpandedFlowGraph>;
+
+const getPosition = (result: ExpandedGraph, id: string) => {
+  const position = result.positionOverrides.get(id);
+  assert.ok(position, `Missing position for ${id}`);
+  return position;
+};
+
+const getPanel = (result: ExpandedGraph, id: string) => {
+  const position = getPosition(result, id);
+  const decoration = result.nodeDecorations.get(id);
+  assert.ok(decoration, `Missing frame for ${id}`);
+  const left = position.x + decoration.panelOffsetXPx;
+  const top = position.y + decoration.panelOffsetYPx;
+  return {
+    left,
+    top,
+    right: left + decoration.panelWidthPx,
+    bottom: top + decoration.panelHeightPx,
+  };
+};
+
+const intrusionDefinition = (
+  h: number,
+  v: number,
+  blocker = { h: 1200, v: 48 },
+): string => `
+unit=scope,,jp1admin,;
+{
+  ty=n;
+  el=panel,n,+400+144;
+  el=intruder,j,+${h}+${v};
+  el=blocker,j,+${blocker.h}+${blocker.v};
+  el=unaffected,j,+80+48;
+  unit=panel,,jp1admin,;
+  {
+    ty=n;
+    el=leaf,j,+240+144;
+    unit=leaf,,jp1admin,;{ty=j;}
+  }
+  unit=intruder,,jp1admin,;{ty=j;}
+  unit=blocker,,jp1admin,;{ty=j;}
+  unit=unaffected,,jp1admin,;{ty=j;}
+}
+`;
+
+const panelChainDefinition = (h: number): string => `
+unit=scope,,jp1admin,;
+{
+  ty=n;
+  el=panel-a,n,+400+144;
+  el=panel-b,n,+680+144;
+  el=ordinary,j,+${h}+144;
+  el=distant,j,+80+48;
+  unit=panel-a,,jp1admin,;
+  {
+    ty=n;
+    el=leaf-a,j,+240+144;
+    unit=leaf-a,,jp1admin,;{ty=j;}
+  }
+  unit=panel-b,,jp1admin,;
+  {
+    ty=n;
+    el=leaf-b,j,+240+144;
+    unit=leaf-b,,jp1admin,;{ty=j;}
+  }
+  unit=ordinary,,jp1admin,;{ty=j;}
+  unit=distant,,jp1admin,;{ty=j;}
+}
+`;
+
+const alignedDefinition = `
+unit=scope,,jp1admin,;
+{
+  ty=n;
+  el=outer,n,+400+144;
+  unit=outer,,jp1admin,;
+  {
+    ty=n;
+    el=inner,n,+240+48;
+    unit=inner,,jp1admin,;
+    {
+      ty=n;
+      el=leaf,j,+400+48;
+      el=condition,rc,+0+0;
+      unit=leaf,,jp1admin,;{ty=j;}
+      unit=condition,,jp1admin,;{ty=rc;}
+    }
+  }
+}
+`;
 
 const nestedDefinition = `
 unit=root,,jp1admin,;
@@ -327,7 +408,7 @@ unit=root,,jp1admin,;
     unit=parent-net,,jp1admin,;
     {
       ty=n;
-      el=child-net,n,+240+144;
+      el=child-net,n,+400+144;
       unit=child-net,,jp1admin,;
       {
         ty=n;
@@ -654,72 +735,16 @@ suite("Build Expanded Flow Graph", () => {
         edgeCount: expanded.graph.edges.length,
         positionCount: expanded.positionOverrides.size,
         decorationCount: expanded.nodeDecorations.size,
-        decorations: Array.from(expanded.nodeDecorations)
-          .map(([id, decoration]) => toRoundedDecoration(id, decoration))
-          .sort((left, right) => left.id!.localeCompare(right.id!)),
-        keyPositions: [
-          "branch_alpha",
-          "alpha_nested_1",
-          "alpha1_deep",
-          "top_mid_a",
-          "branch_beta",
-          "top_right_a",
-          "branch_gamma",
-          "top_mid_b",
-          "branch_delta",
-          "top_right_b",
-        ].map((name) => [
-          name,
-          expanded.positionOverrides.get(findUnitByName(rootUnit, name).id),
-        ]),
+        decoratedUnits: expandedUnitNames.filter((name) =>
+          expanded.nodeDecorations.has(findUnitByName(rootUnit, name).id),
+        ),
       },
       {
         nodeCount: 31,
         edgeCount: 25,
         positionCount: 31,
         decorationCount: 4,
-        decorations: [
-          {
-            id: "alpha_nested_1",
-            panelOffsetXPx: -50,
-            panelOffsetYPx: -23,
-            panelWidthPx: 1109,
-            panelHeightPx: 470,
-          },
-          {
-            id: "branch_alpha",
-            panelOffsetXPx: -50,
-            panelOffsetYPx: -23,
-            panelWidthPx: 2369,
-            panelHeightPx: 1195,
-          },
-          {
-            id: "branch_beta",
-            panelOffsetXPx: -50,
-            panelOffsetYPx: -23,
-            panelWidthPx: 1529,
-            panelHeightPx: 905,
-          },
-          {
-            id: "branch_gamma",
-            panelOffsetXPx: -50,
-            panelOffsetYPx: -23,
-            panelWidthPx: 1529,
-            panelHeightPx: 470,
-          },
-        ],
-        keyPositions: [
-          ["branch_alpha", { x: 476, y: 377 }],
-          ["alpha_nested_1", { x: 896, y: 667 }],
-          ["alpha1_deep", { x: 1316, y: 957 }],
-          ["top_mid_a", { x: 2996, y: 377 }],
-          ["branch_beta", { x: 3416, y: 377 }],
-          ["top_right_a", { x: 5096, y: 377 }],
-          ["branch_gamma", { x: 476, y: 1827 }],
-          ["top_mid_b", { x: 2996, y: 1827 }],
-          ["branch_delta", { x: 3416, y: 1827 }],
-          ["top_right_b", { x: 5096, y: 1827 }],
-        ],
+        decoratedUnits: expandedUnitNames,
       },
     );
   });
@@ -839,7 +864,7 @@ suite("Build Expanded Flow Graph", () => {
       fullyExpandedGrandDecoration!.panelOffsetXPx +
       fullyExpandedGrandDecoration!.panelWidthPx;
     assert.ok(childPanelRight >= grandPanelRight);
-    assert.ok(fullyExpandedSiblingPosition!.x > childPanelRight);
+    assert.ok(fullyExpandedSiblingPosition!.x >= childPanelRight);
   });
 
   test("adds offsets by row, column, and lower-right position around the expanded node", () => {
@@ -887,13 +912,12 @@ suite("Build Expanded Flow Graph", () => {
     const panelBottom =
       childExpanded!.y + decoration!.panelOffsetYPx + decoration!.panelHeightPx;
     assert.ok(orjExpanded!.x > orjCollapsed!.x);
-    assert.ok(orjExpanded!.y > panelBottom);
+    assertClose(orjExpanded!.y, panelBottom);
     const metrics = createFlowGraphMetrics(16);
     const panelLeft = childExpanded!.x + decoration!.panelOffsetXPx;
     assert.ok(flwjExpanded!.x + metrics.width <= panelLeft);
     assert.strictEqual(flwjExpanded!.y, flwjCollapsed!.y);
-    assert.strictEqual(ntwjExpanded!.x, ntwjCollapsed!.x);
-    assert.ok(ntwjExpanded!.y > ntwjCollapsed!.y);
+    assert.deepStrictEqual(ntwjExpanded, ntwjCollapsed);
   });
 
   test("keeps revealed children anchored near the expanded node origin", () => {
@@ -1045,52 +1069,307 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(deepSiblingPosition!.x > deepLevel2PanelRight);
   });
 
-  test("keeps panel origin anchored to the expanded unit while deeper descendants grow it", () => {
-    const document = parseFlowGraphDocumentForTest(deepNestedJobnetDefinition);
-    const currentUnitId = document.document.rootUnits[0].children[0].id;
-    const level2Id = document.document.rootUnits[0].children[0].children[0].id;
-    const level3Id =
-      document.document.rootUnits[0].children[0].children[0].children[0].id;
-    const level4Id =
-      document.document.rootUnits[0].children[0].children[0].children[0]
-        .children[0].id;
+  for (const basePx of [16, 20]) {
+    test(`pads aligned frames by one font unit at ${basePx}px`, () => {
+      const dto = toFlowGraphDocumentDto(
+        parseAjsDocumentForTest(alignedDefinition),
+      );
+      const scope = dto.rootUnits[0];
+      // Align both supported DTO coordinates with the parent in the rendered grid.
+      findUnitByName(scope, "inner").layout.v = -48;
+      findUnitByName(scope, "leaf").layout.v = -48;
+      const document = validateFlowGraphDocument(dto);
+      assert.strictEqual(document.status, "available");
+      const outer = findUnitByName(scope, "outer");
+      const inner = findUnitByName(scope, "inner");
+      const leaf = findUnitByName(scope, "leaf");
+      const condition = findUnitByName(scope, "condition");
+      const build = (expandedUnitIds: string[]) =>
+        buildExpandedFlowGraph({
+          document,
+          currentUnitId: scope.id,
+          expandedUnitIds,
+          basePx,
+        });
+      const shallow = build([outer.id]);
+      const deep = build([outer.id, inner.id]);
+      const outerPosition = getPosition(deep, outer.id);
+      const innerPosition = getPosition(deep, inner.id);
+      assert.deepStrictEqual(outerPosition, getPosition(shallow, outer.id));
+      assert.deepStrictEqual(innerPosition, getPosition(shallow, inner.id));
 
-    const shallowExpanded = buildExpandedFlowGraph({
-      document,
-      currentUnitId,
-      expandedUnitIds: new Set<string>([level2Id]),
-      basePx: 16,
+      // Both nested grid coordinates would put the child at its owner's origin.
+      assert.deepStrictEqual(
+        calculateNestedChildPosition({
+          parentPosition: outerPosition,
+          ...inner.layout,
+          basePx,
+        }),
+        outerPosition,
+      );
+      assertClose(innerPosition.x - outerPosition.x, basePx);
+      assertClose(innerPosition.y - outerPosition.y, basePx);
+      const leafPosition = getPosition(deep, leaf.id);
+      assertClose(
+        leafPosition.x - innerPosition.x,
+        createFlowGraphMetrics(basePx).width * 1.25 + basePx,
+      );
+      assertClose(leafPosition.y - innerPosition.y, basePx);
+
+      const conditionPosition = getPosition(deep, condition.id);
+      const originalCondition = calculateNestedConditionPosition(
+        innerPosition,
+        basePx,
+      );
+      assertClose(conditionPosition.x - originalCondition.x, basePx);
+      assertClose(conditionPosition.y - originalCondition.y, basePx);
+
+      const outerPanel = getPanel(deep, outer.id);
+      const innerPanel = getPanel(deep, inner.id);
+      const { width, height } = createFlowGraphMetrics(basePx);
+      assertClose(conditionPosition.x - innerPanel.left, basePx);
+      assertClose(innerPosition.y - innerPanel.top, basePx);
+      assertClose(innerPanel.right - (leafPosition.x + width), basePx);
+      assertClose(innerPanel.bottom - (conditionPosition.y + height), basePx);
+      assertClose(innerPanel.left - outerPanel.left, basePx);
+      assertClose(innerPanel.top - outerPanel.top, basePx);
+      assertClose(outerPanel.right - innerPanel.right, basePx);
+      assertClose(outerPanel.bottom - innerPanel.bottom, basePx);
+      assert.deepStrictEqual(build([inner.id, outer.id]), deep);
+      assert.deepStrictEqual(build([outer.id, inner.id]), deep);
+      assert.deepStrictEqual(build([outer.id]), shallow);
     });
-    const deepExpanded = buildExpandedFlowGraph({
-      document,
-      currentUnitId,
-      expandedUnitIds: new Set<string>([level2Id, level3Id, level4Id]),
-      basePx: 16,
+  }
+
+  for (const example of [
+    {
+      name: "left on the same row",
+      h: 388,
+      v: 144,
+      axis: "x",
+      blocker: { h: 630, v: 144 },
+    },
+    {
+      name: "above in the same column",
+      h: 400,
+      v: 136,
+      axis: "y",
+      blocker: { h: 400, v: 260 },
+    },
+    { name: "above and left", h: 388, v: 136, axis: "y" },
+    { name: "below and left", h: 388, v: 312, axis: "x" },
+    { name: "above and right", h: 412, v: 136, axis: "y" },
+    {
+      name: "above and left with a clearance tie",
+      h: 400 - 88.25 / 1.3125,
+      v: 120,
+      axis: "x",
+      tie: true,
+    },
+  ] as const) {
+    test(`moves the panel past a fixed sibling ${example.name}`, () => {
+      const blocker = "blocker" in example ? example.blocker : undefined;
+      const dto = toFlowGraphDocumentDto(
+        parseAjsDocumentForTest(
+          intrusionDefinition(Math.floor(example.h), example.v, blocker),
+        ),
+      );
+      const scope = dto.rootUnits[0];
+      const { id: panelId } = findUnitByName(scope, "panel");
+      const intruder = findUnitByName(scope, "intruder");
+      intruder.layout.h = example.h;
+      const document = validateFlowGraphDocument(dto);
+      assert.strictEqual(document.status, "available");
+      const basePx = 16;
+      const collapsed = buildExpandedFlowGraph({
+        document,
+        currentUnitId: scope.id,
+        expandedUnitIds: [],
+        basePx,
+      });
+      const expanded = buildExpandedFlowGraph({
+        document,
+        currentUnitId: scope.id,
+        expandedUnitIds: [panelId],
+        basePx,
+      });
+      const reference = buildExpandedFlowGraph({
+        document: parseFlowGraphDocumentForTest(
+          intrusionDefinition(80, 48, blocker),
+        ),
+        currentUnitId: scope.id,
+        expandedUnitIds: [panelId],
+        basePx,
+      });
+
+      const earlier = getPosition(collapsed, intruder.id);
+      const panel = getPanel(expanded, panelId);
+      const before = getPanel(reference, panelId);
+      const { width, height } = createFlowGraphMetrics(basePx);
+      const xClearance = earlier.x + width - before.left;
+      const yClearance = earlier.y + height - before.top;
+      assert.ok(xClearance > 0 && earlier.x < before.right);
+      assert.ok(yClearance > 0 && earlier.y < before.bottom);
+      assert.deepStrictEqual(getPosition(expanded, intruder.id), earlier);
+      if ("tie" in example) assert.strictEqual(xClearance, yClearance);
+      const delta =
+        example.axis === "x"
+          ? { x: xClearance, y: 0 }
+          : { x: 0, y: yClearance };
+      const leafId = findUnitByName(scope, "leaf").id;
+      for (const unitId of [panelId, leafId]) {
+        const initial = getPosition(reference, unitId);
+        const moved = getPosition(expanded, unitId);
+        assertClose(moved.x - initial.x, delta.x);
+        assertClose(moved.y - initial.y, delta.y);
+      }
+      assertClose(panel.left - before.left, delta.x);
+      assertClose(panel.top - before.top, delta.y);
+      const unaffectedId = findUnitByName(scope, "unaffected").id;
+      assert.deepStrictEqual(
+        getPosition(expanded, unaffectedId),
+        getPosition(collapsed, unaffectedId),
+      );
+
+      if (blocker) {
+        const blockerId = findUnitByName(scope, "blocker").id;
+        const initial = getPosition(reference, blockerId);
+        const final = getPosition(expanded, blockerId);
+        const rightward = example.axis === "x";
+        const initialEdge = rightward ? before.right : before.bottom;
+        const movedEdge = rightward ? panel.right : panel.bottom;
+        assert.ok(initial[example.axis] > initialEdge);
+        assert.ok(initial[example.axis] < movedEdge);
+        assertClose(final[example.axis], movedEdge);
+        assertClose(
+          final[rightward ? "y" : "x"],
+          initial[rightward ? "y" : "x"],
+        );
+      }
     });
+  }
 
-    const shallowLevel2Decoration =
-      shallowExpanded.nodeDecorations.get(level2Id);
-    const deepLevel2Decoration = deepExpanded.nodeDecorations.get(level2Id);
+  test("a moving sibling clears both settled frames while a direct overlap moves the second frame", () => {
+    const scopeId = "/scope";
+    const panelA = `${scopeId}/panel-a`;
+    const panelB = `${scopeId}/panel-b`;
+    const ordinary = `${scopeId}/ordinary`;
+    const distant = `${scopeId}/distant`;
+    const basePx = 16;
+    const build = (h: number, expandedUnitIds = [panelA, panelB]) =>
+      buildExpandedFlowGraph({
+        document: parseFlowGraphDocumentForTest(panelChainDefinition(h)),
+        currentUnitId: scopeId,
+        expandedUnitIds,
+        basePx,
+      });
+    const fixed = build(80);
+    const chained = build(528);
+    const direct = build(664);
+    const a = getPanel(fixed, panelA);
+    const b = getPanel(fixed, panelB);
+    const { width, height } = createFlowGraphMetrics(basePx);
+    const beforeNode = build(528, []).graph?.nodes.find(
+      ({ id }) => id === ordinary,
+    );
+    assert.ok(beforeNode);
+    const before = calculateFlowGraphNodePosition(beforeNode, basePx);
+    assert.ok(before.x < a.right && before.x + width > a.left);
+    assert.ok(before.y < a.bottom && before.y + height > a.top);
+    assert.ok(before.x + width < b.left && a.right + width > b.left);
+    assert.ok(a.right < b.left);
+    assert.ok(b.right - a.right < b.bottom - before.y);
+    assert.deepStrictEqual(getPanel(chained, panelA), a);
+    assert.deepStrictEqual(getPanel(chained, panelB), b);
+    assert.deepStrictEqual(getPosition(chained, ordinary), {
+      x: b.right,
+      y: before.y,
+    });
+    assert.deepStrictEqual(build(528, [panelB, panelA]), chained);
+    assert.deepStrictEqual(build(528), chained);
 
-    assert.ok(shallowLevel2Decoration);
-    assert.ok(deepLevel2Decoration);
-    assert.strictEqual(
-      deepLevel2Decoration!.panelOffsetXPx,
-      shallowLevel2Decoration!.panelOffsetXPx,
-    );
-    assert.strictEqual(
-      deepLevel2Decoration!.panelOffsetYPx,
-      shallowLevel2Decoration!.panelOffsetYPx,
-    );
-    assert.ok(
-      deepLevel2Decoration!.panelWidthPx >
-        shallowLevel2Decoration!.panelWidthPx,
-    );
-    assert.ok(
-      deepLevel2Decoration!.panelHeightPx >
-        shallowLevel2Decoration!.panelHeightPx,
-    );
+    const initiallyDirect = getPosition(build(664, []), ordinary);
+    assert.ok(initiallyDirect.x > a.right);
+    assert.ok(initiallyDirect.x < b.left && initiallyDirect.x + width > b.left);
+    assert.deepStrictEqual(getPosition(direct, ordinary), initiallyDirect);
+    assert.deepStrictEqual(getPanel(direct, panelA), a);
+    const moved = getPanel(direct, panelB);
+    assertClose(moved.left, initiallyDirect.x + width);
+    assertClose(moved.right - moved.left, b.right - b.left);
+    assertClose(moved.top, b.top);
+    assertClose(moved.bottom, b.bottom);
+    for (const result of [chained, direct]) {
+      assert.deepStrictEqual(
+        getPosition(result, distant),
+        getPosition(fixed, distant),
+      );
+    }
   });
+
+  for (const h of [388, 400]) {
+    test(`keeps dense ${h === 388 ? "preceding" : "downstream"} sibling placement deterministic`, () => {
+      const names = Array.from(
+        { length: 64 },
+        (_, index) => `job-${String(index).padStart(2, "0")}`,
+      );
+      const document = parseFlowGraphDocumentForTest(`
+unit=scope,,jp1admin,;
+{
+  ty=n;
+  el=panel,n,+400+144;
+  el=distant,j,+80+48;
+  ${names.map((name) => `el=${name},j,+${h}+144;`).join("\n")}
+  unit=panel,,jp1admin,;
+  {
+    ty=n;
+    el=leaf,j,+240+144;
+    unit=leaf,,jp1admin,;{ty=j;}
+  }
+  unit=distant,,jp1admin,;{ty=j;}
+  ${names.map((name) => `unit=${name},,jp1admin,;{ty=j;}`).join("\n")}
+}
+`);
+      const scope = document.document.rootUnits[0];
+      const panel = findUnitByName(scope, "panel");
+      const distant = findUnitByName(scope, "distant");
+      const basePx = 16;
+      const options = { document, currentUnitId: scope.id, basePx };
+      const collapsed = buildExpandedFlowGraph({
+        ...options,
+        expandedUnitIds: [],
+      });
+      const expanded = buildExpandedFlowGraph({
+        ...options,
+        expandedUnitIds: [panel.id],
+      });
+      const panelBounds = getPanel(expanded, panel.id);
+      const panelPosition = getPosition(expanded, panel.id);
+      const { height } = createFlowGraphMetrics(basePx);
+
+      names.forEach((name, index) => {
+        const position = getPosition(expanded, `${scope.id}/${name}`);
+        if (h === 388) {
+          const earlier = getPosition(collapsed, `${scope.id}/${name}`);
+          assert.deepStrictEqual(position, earlier);
+          assertClose(
+            panelBounds.left,
+            earlier.x + createFlowGraphMetrics(basePx).width,
+          );
+        } else {
+          assertClose(position.x, panelBounds.right);
+          assertClose(position.y, panelPosition.y + height * index);
+        }
+      });
+      assert.deepStrictEqual(
+        getPosition(expanded, distant.id),
+        getPosition(collapsed, distant.id),
+      );
+      assert.deepStrictEqual(
+        buildExpandedFlowGraph({ ...options, expandedUnitIds: [panel.id] }),
+        expanded,
+      );
+    });
+  }
 
   test("expands recovery jobnet variants with nested children", () => {
     const document = parseFlowGraphDocumentForTest(recoveryJobnetDefinition);
@@ -1161,19 +1440,19 @@ suite("Build Expanded Flow Graph", () => {
     assert.ok(movedJobPosition);
 
     assert.ok(movedParentPosition!.x > rightOnlyParentPosition!.x);
-    assert.strictEqual(
+    assertClose(
       movedGrandPosition!.x - movedParentPosition!.x,
       rightOnlyGrandPosition!.x - rightOnlyParentPosition!.x,
     );
-    assert.strictEqual(
+    assertClose(
       movedGrandPosition!.y - movedParentPosition!.y,
       rightOnlyGrandPosition!.y - rightOnlyParentPosition!.y,
     );
-    assert.strictEqual(
+    assertClose(
       movedJobPosition!.x - movedParentPosition!.x,
       rightOnlyJobPosition!.x - rightOnlyParentPosition!.x,
     );
-    assert.strictEqual(
+    assertClose(
       movedJobPosition!.y - movedParentPosition!.y,
       rightOnlyJobPosition!.y - rightOnlyParentPosition!.y,
     );

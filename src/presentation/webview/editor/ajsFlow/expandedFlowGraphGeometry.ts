@@ -81,7 +81,7 @@ const buildPaddedBounds = (
     },
   );
 
-const getExpandedPanelPadding = (metrics: FlowGraphMetrics): PanelPadding => ({
+const getUnitBasePadding = (metrics: FlowGraphMetrics): PanelPadding => ({
   left: metrics.width * 0.3,
   right: metrics.width * 0.3,
   top: metrics.height * 0.2,
@@ -89,15 +89,14 @@ const getExpandedPanelPadding = (metrics: FlowGraphMetrics): PanelPadding => ({
 });
 
 export const buildPanelBoundsFromSubtreeBounds = (
-  position: FlowGraphPosition,
   bounds: FlowGraphBounds,
-  metrics: FlowGraphMetrics,
-): FlowGraphBounds =>
-  buildPaddedBounds(
-    position,
-    { x: bounds.maxX, y: bounds.maxY },
-    getExpandedPanelPadding(metrics),
-  );
+  basePx: number,
+): FlowGraphBounds => ({
+  minX: bounds.minX - basePx,
+  maxX: bounds.maxX + basePx,
+  minY: bounds.minY - basePx,
+  maxY: bounds.maxY + basePx,
+});
 
 export const buildUnitBaseBounds = (
   position: FlowGraphPosition,
@@ -109,7 +108,7 @@ export const buildUnitBaseBounds = (
       x: position.x + metrics.width,
       y: position.y + metrics.height,
     },
-    getExpandedPanelPadding(metrics),
+    getUnitBasePadding(metrics),
   );
 
 const buildUnitDecorationBounds = (
@@ -134,23 +133,28 @@ export const buildUnitPanelBounds = (
 ): FlowGraphBounds =>
   decoration
     ? buildUnitDecorationBounds(position, decoration)
-    : buildUnitBaseBounds(position, metrics);
+    : {
+        minX: position.x,
+        maxX: position.x + metrics.width,
+        minY: position.y,
+        maxY: position.y + metrics.height,
+      };
 
 const doHorizontalRangesOverlap = (
   left: Pick<FlowGraphBounds, "minX" | "maxX">,
   right: Pick<FlowGraphBounds, "minX" | "maxX">,
 ): boolean => left.minX < right.maxX && right.minX < left.maxX;
 
-const doVerticalRangesOverlap = (
-  left: Pick<FlowGraphBounds, "minY" | "maxY">,
-  right: Pick<FlowGraphBounds, "minY" | "maxY">,
-): boolean => left.minY < right.maxY && right.minY < left.maxY;
-
 export const doBoundsOverlapHorizontally = (
   upperBounds: FlowGraphBounds,
   lowerBounds: FlowGraphBounds,
 ): boolean => doHorizontalRangesOverlap(upperBounds, lowerBounds);
 
-export const doBoundsOverlap = (left: LayoutBox, right: LayoutBox): boolean =>
-  doHorizontalRangesOverlap(left, right) &&
-  doVerticalRangesOverlap(left, right);
+export const doBoundsOverlap = (
+  left: LayoutBox,
+  right: LayoutBox,
+  tolerance = 0,
+): boolean =>
+  Math.min(left.maxX, right.maxX) - Math.max(left.minX, right.minX) >
+    tolerance &&
+  Math.min(left.maxY, right.maxY) - Math.max(left.minY, right.minY) > tolerance;
