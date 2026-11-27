@@ -1,0 +1,15 @@
+# Requirements Traceability: Flow Image Export
+
+<!-- markdownlint-disable MD013 -->
+
+| Requirement or source | Slice | Planned test or validation |
+| --- | --- | --- |
+| [FE-01](SPECS.md#requirements-and-acceptance) SVG file save | 1 | Desktop wiring tests check dialog, cancellation, failure and UTF-8. Web driver captures and reads the actual SVG download. |
+| [FE-02](SPECS.md#requirements-and-acceptance) active scope, expansion and geometry | 1, 2 | Flow Contents integration exercises root, N/RC, expansion, state and viewport. SVG tests cover panels, edge paths and bounds. Web retrieves both formats and checks retained expanded content. |
+| [FE-03](SPECS.md#requirements-and-acceptance) portable SVG and labels | 1 | SVG tests cover XML, inert markup, highlight exclusion, Japanese and XML-sensitive labels, large-flow completeness. The actual download opens in Chromium. |
+| [FE-04](SPECS.md#requirements-and-acceptance) view and data safety | 1, 2 | Flow state, typed request/resource boundaries, active panel URI, same-source rejection including corresponding output suffixes, provider routing, zero SVG/PNG telemetry, CSV telemetry and no external asset fetch. |
+| [FE-05](SPECS.md#requirements-and-acceptance) SVG source clipboard | 1 | Flow integration checks text equality and success/denial with file save available. Stable and minimum Desktop production Webviews exercise a trusted copy gesture and native text readback. Web driver reads back actual SVG text. |
+| [FE-06](SPECS.md#requirements-and-acceptance) PNG file save | 2 | Rasterizer tests cover bounds, cleanup and failures. Stable Desktop wiring tests verify raw PNG file bytes and host outcomes. Shared smoke verifies real binary transport in Web and minimum Desktop. Web driver checks the actual saved PNG. |
+| [FE-07](SPECS.md#requirements-and-acceptance) PNG image clipboard | 2 | Flow Contents integration checks gesture handoff, PNG-only MIME, limits, denial, and continuing file save. Stable and minimum Desktop production Webviews exercise a trusted image copy gesture and native image readback. Web driver reads back the real clipboard MIME and image bytes. |
+
+<!-- markdownlint-enable MD013 -->
