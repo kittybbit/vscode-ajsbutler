@@ -44,19 +44,83 @@ unit=root,,jp1admin,;
   unit=jobnet,,jp1admin,;
   {
     ty=n;
+    ar=f=source-scope-job,t=report::nested-panel-bounds,con;
     el=child-net,n,+240+144;
+    el=source-scope-job,j,+0+144;
+    el=report::nested-panel-bounds,j,+480+144;
+    el=outer-sibling,j,+720+144;
     unit=child-net,,jp1admin,;
     {
       ty=n;
-      el=leaf-job,j,+240+144;
-      unit=leaf-job,,jp1admin,;
+      el=nested-net,n,+240+144;
+      el=inner-sibling,j,+480+144;
+      unit=nested-net,,jp1admin,;
+      {
+        ty=n;
+        el=leaf-job,j,+240+144;
+        unit=leaf-job,,jp1admin,;
+        {
+          ty=j;
+        }
+      }
+      unit=inner-sibling,,jp1admin,;
       {
         ty=j;
       }
     }
+    unit=source-scope-job,,jp1admin,;
+    {
+      ty=j;
+    }
+    unit=report::nested-panel-bounds,,jp1admin,;
+    {
+      ty=j;
+    }
+    unit=outer-sibling,,jp1admin,;
+    {
+      ty=j;
+    }
   }
 }
 `;
+
+const recoveryDefinition = `
+unit=root,,jp1admin,;
+{
+  ty=g;
+  el=jobnet,n,+0+0;
+  unit=jobnet,,jp1admin,;
+  {
+    ty=n;
+    el=.CONDITION,rc,+0+0;
+    el=outer-job,j,+240+144;
+    unit=.CONDITION,,jp1admin,;
+    {
+      ty=rc;
+      el=recovery-job,j,+240+144;
+      unit=recovery-job,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+    unit=outer-job,,jp1admin,;
+    {
+      ty=j;
+    }
+  }
+}
+`;
+
+const getExportedUnitTitles = (svg: string): string[] => {
+  const dom = new JSDOM(svg, { contentType: "image/svg+xml" });
+  try {
+    return Array.from(dom.window.document.querySelectorAll("g > title"))
+      .map((title) => title.textContent ?? "")
+      .sort();
+  } finally {
+    dom.window.close();
+  }
+};
 
 const hasViewerReadyRequest = (messages: readonly unknown[]): boolean =>
   messages.some(
@@ -91,6 +155,11 @@ const installDomGlobals = (): {
     HTMLElement: domWindow.HTMLElement,
     Node: domWindow.Node,
     Element: domWindow.Element,
+    SVGElement: domWindow.SVGElement,
+    SVGSVGElement: domWindow.SVGSVGElement,
+    CSS: {
+      escape: (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "\\$&"),
+    },
     Event: domWindow.Event,
     MessageEvent: domWindow.MessageEvent,
     KeyboardEvent: domWindow.KeyboardEvent,
@@ -245,5 +314,321 @@ suite("Flow Contents integration", () => {
       ),
       [{ type: "search", data: { feature: "flow" } }],
     );
+  });
+
+  test("exports the entered N scope without changing selection or expansion", async () => {
+    const { AjsFlowViewerApp } = await loadFlowViewerApp();
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    const clipboardWrites: string[] = [];
+    let resolveClipboardWrite: (() => void) | undefined;
+    const previousClipboard = Object.getOwnPropertyDescriptor(
+      navigator,
+      "clipboard",
+    );
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (text: string) => {
+          clipboardWrites.push(text);
+          return new Promise<void>((resolve) => {
+            resolveClipboardWrite = resolve;
+          });
+        },
+      },
+    });
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    try {
+      const view = render(React.createElement(AjsFlowViewerApp));
+      const documentDto = toUnitListDocumentDto(
+        parseAjsDocumentForTest(nestedDefinition),
+      );
+      act(() => {
+        eventBridge.dispatch(
+          new MessageEvent("message", {
+            data: createViewerResourceStateMessage({
+              isDarkMode: false,
+              lang: "en",
+              scrollType: "table",
+              flowSaveMode: "dialog",
+            }),
+          }),
+        );
+      });
+      await waitFor(() => assert.ok(hasViewerReadyRequest(postedMessages)));
+      act(() => {
+        eventBridge.dispatch(
+          new MessageEvent("message", {
+            data: createViewerDocumentChangedMessage(documentDto),
+          }),
+        );
+      });
+
+      const copyButton = await view.findByRole("button", {
+        name: "Copy SVG source",
+      });
+      const saveButton = view.getByRole("button", { name: "Save flow as SVG" });
+      assert.strictEqual((saveButton as HTMLButtonElement).disabled, false);
+      const exportStatus = within(view.getByRole("banner")).getByRole("status");
+
+      const copySvg = async (): Promise<string> => {
+        const writeIndex = clipboardWrites.length;
+        fireEvent.click(copyButton);
+        await waitFor(() =>
+          assert.strictEqual(clipboardWrites.length, writeIndex + 1),
+        );
+        const svg = clipboardWrites[writeIndex];
+        assert.ok(svg?.startsWith("<svg "));
+        act(() => resolveClipboardWrite?.());
+        await waitFor(() =>
+          assert.strictEqual(exportStatus.textContent, "SVG source copied."),
+        );
+        return svg as string;
+      };
+
+      const saveSvg = async (): Promise<string> => {
+        const saveCount = postedMessages.filter(
+          (message) =>
+            typeof message === "object" &&
+            message !== null &&
+            "type" in message &&
+            message.type === "save",
+        ).length;
+        fireEvent.click(saveButton);
+        await waitFor(() =>
+          assert.strictEqual(
+            postedMessages.filter(
+              (message) =>
+                typeof message === "object" &&
+                message !== null &&
+                "type" in message &&
+                message.type === "save",
+            ).length,
+            saveCount + 1,
+          ),
+        );
+        const saveMessage = postedMessages.filter(
+          (message): message is { type: string; data: string } =>
+            typeof message === "object" &&
+            message !== null &&
+            "type" in message &&
+            message.type === "save",
+        )[saveCount];
+        return saveMessage?.data ?? "";
+      };
+
+      const rootSvg = await copySvg();
+      const rootTitles = getExportedUnitTitles(rootSvg);
+      assert.ok(rootTitles.includes("report::nested-panel-bounds"));
+      assert.ok(rootTitles.includes("outer-sibling"));
+      assert.strictEqual(
+        (rootSvg.match(/<path d=.*?marker-end=/g) ?? []).length,
+        1,
+      );
+      assert.strictEqual(await saveSvg(), rootSvg);
+
+      const scopeNode = view.getByRole("group", { name: "child-net" });
+      fireEvent.keyDown(scopeNode, { key: "Enter" });
+      const banner = within(view.getByRole("banner"));
+      await waitFor(() =>
+        assert.ok(banner.getByText("child-net", { exact: true })),
+      );
+      const expandAll = view.getByRole("button", {
+        name: /expand all nested jobnets/i,
+      });
+      await waitFor(() =>
+        assert.strictEqual((expandAll as HTMLButtonElement).disabled, false),
+      );
+      fireEvent.click(expandAll);
+      const collapseAll = await view.findByRole("button", {
+        name: /collapse all nested jobnets/i,
+      });
+      assert.ok(view.getByRole("group", { name: "leaf-job" }));
+      const tree = view.getByRole("tree");
+      const leafTreeRow = tree.querySelector<HTMLElement>(
+        '[data-unit-tree-unit-id$="/leaf-job"]',
+      );
+      assert.ok(leafTreeRow);
+      fireEvent.click(leafTreeRow);
+      await waitFor(() =>
+        assert.strictEqual(leafTreeRow.getAttribute("aria-selected"), "true"),
+      );
+
+      const captureViewerState = () => ({
+        scope: banner.getByText("child-net", { exact: true }).textContent,
+        selectedUnitId: tree
+          .querySelector<HTMLElement>('[aria-selected="true"]')
+          ?.getAttribute("data-unit-tree-unit-id"),
+        expansion: collapseAll.getAttribute("aria-label"),
+      });
+      const expandedState = captureViewerState();
+      assert.strictEqual(
+        expandedState.selectedUnitId,
+        "/root/jobnet/child-net/nested-net/leaf-job",
+      );
+      const expandedSvg = await copySvg();
+      assert.deepStrictEqual(
+        getExportedUnitTitles(expandedSvg),
+        [
+          "child-net",
+          "inner-sibling",
+          "jobnet",
+          "leaf-job",
+          "nested-net",
+          "root",
+        ].sort(),
+      );
+      assert.strictEqual(await saveSvg(), expandedSvg);
+      assert.deepStrictEqual(captureViewerState(), expandedState);
+
+      fireEvent.click(collapseAll);
+      const expandCollapsed = await view.findByRole("button", {
+        name: /expand all nested jobnets/i,
+      });
+      const collapsedSvg = await copySvg();
+      assert.deepStrictEqual(
+        getExportedUnitTitles(collapsedSvg),
+        ["child-net", "inner-sibling", "jobnet", "nested-net", "root"].sort(),
+      );
+      assert.ok(!collapsedSvg.includes("outer-sibling"));
+      assert.ok(!collapsedSvg.includes("report::nested-panel-bounds"));
+      assert.strictEqual(
+        (expandCollapsed as HTMLButtonElement).disabled,
+        false,
+      );
+      assert.strictEqual(
+        banner.getByText("child-net", { exact: true }).textContent,
+        "child-net",
+      );
+
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: {
+          writeText: async () => {
+            throw new Error("clipboard denied");
+          },
+        },
+      });
+      fireEvent.click(copyButton);
+      await waitFor(() =>
+        assert.strictEqual(
+          exportStatus.textContent,
+          "Could not copy SVG source.",
+        ),
+      );
+      assert.strictEqual((saveButton as HTMLButtonElement).disabled, false);
+
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: undefined,
+      });
+      fireEvent.click(copyButton);
+      await waitFor(() =>
+        assert.strictEqual(
+          exportStatus.textContent,
+          "SVG source copy is unavailable in this host.",
+        ),
+      );
+      assert.strictEqual(
+        banner.getByText("child-net", { exact: true }).textContent,
+        "child-net",
+      );
+    } finally {
+      if (previousClipboard) {
+        Object.defineProperty(navigator, "clipboard", previousClipboard);
+      } else {
+        Reflect.deleteProperty(navigator, "clipboard");
+      }
+    }
+  });
+
+  test("exports an entered RC scope with its own children and no outer sibling", async () => {
+    const { AjsFlowViewerApp } = await loadFlowViewerApp();
+    const eventBridge = createViewerEventBridge();
+    const postedMessages: unknown[] = [];
+    let copiedSvg = "";
+    const previousClipboard = Object.getOwnPropertyDescriptor(
+      navigator,
+      "clipboard",
+    );
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (svg: string) => {
+          copiedSvg = svg;
+          return Promise.resolve();
+        },
+      },
+    });
+    window.EventBridge = eventBridge;
+    window.vscode = {
+      postMessage: (message: unknown) => postedMessages.push(message),
+    } as never;
+
+    try {
+      const view = render(React.createElement(AjsFlowViewerApp));
+      const documentDto = toUnitListDocumentDto(
+        parseAjsDocumentForTest(recoveryDefinition),
+      );
+      act(() => {
+        eventBridge.dispatch(
+          new MessageEvent("message", {
+            data: createViewerResourceStateMessage({
+              isDarkMode: false,
+              lang: "en",
+              scrollType: "table",
+              flowSaveMode: "dialog",
+            }),
+          }),
+        );
+      });
+      await waitFor(() => assert.ok(hasViewerReadyRequest(postedMessages)));
+      act(() => {
+        eventBridge.dispatch(
+          new MessageEvent("message", {
+            data: createViewerDocumentChangedMessage(documentDto),
+          }),
+        );
+      });
+
+      const recoveryCondition = view.getByRole("group", {
+        name: ".CONDITION",
+      });
+      fireEvent.keyDown(recoveryCondition, { key: "Enter" });
+      const banner = within(view.getByRole("banner"));
+      await waitFor(() =>
+        assert.ok(banner.getByText(".CONDITION", { exact: true })),
+      );
+      const copyButton = view.getByRole("button", { name: "Copy SVG source" });
+      fireEvent.click(copyButton);
+      await waitFor(() => assert.ok(copiedSvg.startsWith("<svg ")));
+      await waitFor(() =>
+        assert.strictEqual(
+          banner.getByRole("status").textContent,
+          "SVG source copied.",
+        ),
+      );
+      assert.deepStrictEqual(getExportedUnitTitles(copiedSvg), [
+        ".CONDITION",
+        "jobnet",
+        "recovery-job",
+        "root",
+      ]);
+      assert.ok(!copiedSvg.includes("outer-job"));
+      assert.strictEqual(
+        banner.getByText(".CONDITION", { exact: true }).textContent,
+        ".CONDITION",
+      );
+    } finally {
+      if (previousClipboard) {
+        Object.defineProperty(navigator, "clipboard", previousClipboard);
+      } else {
+        Reflect.deleteProperty(navigator, "clipboard");
+      }
+    }
   });
 });

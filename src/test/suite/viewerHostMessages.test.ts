@@ -73,6 +73,30 @@ suite("Viewer host messages", () => {
     assert.deepStrictEqual(parseViewerHostMessage(message), message);
   });
 
+  test("validates the optional Flow save mode and retains old resource states", () => {
+    const legacy = {
+      type: "resource",
+      data: messagesResourceData(),
+    };
+    assert.deepStrictEqual(parseViewerHostMessage(legacy), legacy);
+    for (const flowSaveMode of ["dialog", "download"] as const) {
+      const message = {
+        type: "resource",
+        data: { ...messagesResourceData(), flowSaveMode },
+      };
+      assert.deepStrictEqual(parseViewerHostMessage(message), message);
+    }
+    for (const flowSaveMode of ["clipboard", null, 1]) {
+      assert.strictEqual(
+        parseViewerHostMessage({
+          type: "resource",
+          data: { ...messagesResourceData(), flowSaveMode },
+        }),
+        undefined,
+      );
+    }
+  });
+
   test("round-trips a state-only semantic diff overlay through changeDocument", () => {
     const base = toUnitListDocumentDto(document);
     const overlayDocument = {

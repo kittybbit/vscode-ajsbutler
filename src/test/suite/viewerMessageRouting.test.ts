@@ -327,6 +327,8 @@ suite("Viewer message routing", () => {
   test("checks registered save activity when the deferred callback runs", async () => {
     const saved: string[] = [];
     const errors: string[] = [];
+    const sourceUri = { toString: () => "file:///sample.ajs" };
+    let receivedSourceUri: unknown;
     let active = true;
     let receiveMessageHandler: ((value: unknown) => void) | undefined;
     const panel = {
@@ -342,14 +344,15 @@ suite("Viewer message routing", () => {
     };
 
     registerViewerPanel({
-      document: { uri: { toString: () => "file:///sample.ajs" } } as never,
+      document: { uri: sourceUri } as never,
       panel: panel as never,
       viewType: "ajsbutler.flowViewer",
       handlers: {
         onReady: () => undefined,
         onNavigate: () => undefined,
-        onSave: async (content) => {
+        onSave: async (content, receivedUri) => {
           saved.push(content);
+          receivedSourceUri = receivedUri;
           return true;
         },
       },
@@ -372,6 +375,7 @@ suite("Viewer message routing", () => {
     receiveMessageHandler?.({ type: "save", data: 1 });
 
     assert.deepStrictEqual(saved, ["active-at-execution"]);
+    assert.strictEqual(receivedSourceUri, sourceUri);
     assert.deepStrictEqual(errors, [
       "Data is not a string and cannot be saved.",
     ]);

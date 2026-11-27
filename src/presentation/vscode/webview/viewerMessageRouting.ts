@@ -33,7 +33,7 @@ export type ViewerPanelHandlers = {
   ) => void;
   onDisplay?: (result: ViewerDisplayResult, panel: vscode.WebviewPanel) => void;
   onDisposed?: (panel: vscode.WebviewPanel) => void;
-  onSave?: (content: string) => Promise<boolean>;
+  onSave?: (content: string, sourceUri: vscode.Uri) => Promise<boolean>;
 };
 
 export type ViewerPanelRegistrationRequest = {
@@ -66,7 +66,7 @@ type ViewerMessageRoutingDeps = {
     event: ViewerNavigationRequest,
   ) => void;
   onDisplay: (result: ViewerDisplayResult) => void;
-  onSave?: (content: string) => Promise<boolean>;
+  onSave?: (content: string, sourceUri: vscode.Uri) => Promise<boolean>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
 
@@ -124,8 +124,11 @@ const handleSaveMessage = (
   event: ViewerSaveRequest,
   {
     onSave,
+    sourceUri,
     showErrorMessage,
-  }: Pick<ViewerMessageRoutingDeps, "onSave" | "showErrorMessage">,
+  }: Pick<ViewerMessageRoutingDeps, "onSave" | "showErrorMessage"> & {
+    sourceUri: vscode.Uri;
+  },
 ): void => {
   if (typeof event.data !== "string") {
     showErrorMessageSafely(showErrorMessage, SAVE_DATA_ERROR_MESSAGE);
@@ -139,7 +142,7 @@ const handleSaveMessage = (
     return;
   }
   void Promise.resolve()
-    .then(() => onSave(event.data))
+    .then(() => onSave(event.data, sourceUri))
     .catch(() => {
       showErrorMessageSafely(showErrorMessage, SAVE_OPERATION_ERROR_MESSAGE);
     });
@@ -174,7 +177,12 @@ const createViewerMessageRoutes = ({
         showErrorMessageSafely(showErrorMessage, READY_OPERATION_ERROR_MESSAGE),
     );
   },
-  [SAVE]: (event) => handleSaveMessage(event, { onSave, showErrorMessage }),
+  [SAVE]: (event) =>
+    handleSaveMessage(event, {
+      onSave,
+      showErrorMessage,
+      sourceUri: document.uri,
+    }),
   [SEARCH]: (event) =>
     reportTelemetrySafely(
       isActivePanel,
@@ -277,8 +285,10 @@ export const registerViewerPanel = ({
         handlers.onDisplay?.(result, panel);
       }),
     onSave: handlers.onSave
-      ? async (content) =>
-          runActivePanelOperation(() => handlers.onSave?.(content)) ?? false
+      ? async (content, sourceUri) =>
+          runActivePanelOperation(() =>
+            handlers.onSave?.(content, sourceUri),
+          ) ?? false
       : undefined,
     showErrorMessage,
   });

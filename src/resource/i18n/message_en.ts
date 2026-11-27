@@ -323,4 +323,16 @@ export const en = {
   "semanticDiff.flow.title.changed": "Semantic diff: changed",
   "semanticDiff.flow.title.confirmationRequired":
     "Semantic diff: confirmation required",
+  "a11y.flow.controls.saveSvg": "Save flow as SVG",
+  "a11y.flow.controls.copySvg": "Copy SVG source",
+  "flow.svg.copy.success": "SVG source copied.",
+  "flow.svg.copy.unavailable": "SVG source copy is unavailable in this host.",
+  "flow.svg.copy.failed": "Could not copy SVG source.",
+  "flow.svg.save.cancelled": "SVG was not saved.",
+  "flow.svg.save.failed": "Could not save SVG.",
+  "flow.svg.save.sourceConflict":
+    "The Flow Viewer's source definition cannot be overwritten.",
+  "flow.svg.save.extension": "Choose a destination with the .svg extension.",
+  "flow.svg.save.complete": "SVG saved.",
+  "flow.svg.export.failed": "Could not create the SVG export.",
 };

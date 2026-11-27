@@ -10,6 +10,8 @@ import UnfoldLess from "@mui/icons-material/UnfoldLess";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import { HeaderSearchControl } from "../shared/HeaderSearchControl";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
 import type {
@@ -17,6 +19,7 @@ import type {
   FlowSearchResultPosition,
 } from "./flowSearchState";
 import { unitInformationMessage } from "../unitInformationLocalization";
+import type { ViewerResourceStateDto } from "../../viewerHostMessages";
 import {
   getCurrentUnitLabel,
   getExpandAllLabel,
@@ -39,6 +42,11 @@ type HeaderProps = {
   onSearchNavigate: (query: string, direction: FlowSearchDirection) => void;
   onSearchSubmit: (query: string) => void;
   onSearchClear: () => void;
+  hasExportableGraph: boolean;
+  flowSaveMode?: ViewerResourceStateDto["flowSaveMode"];
+  exportStatus: string;
+  onSaveSvg: () => void;
+  onCopySvg: () => void;
 };
 
 type HeaderSearchFieldProps = {
@@ -234,6 +242,11 @@ const Header: FC<HeaderProps> = ({
   onSearchNavigate,
   onSearchSubmit,
   onSearchClear,
+  hasExportableGraph,
+  flowSaveMode,
+  exportStatus,
+  onSaveSvg,
+  onCopySvg,
 }) => {
   console.log("render Header.");
 
@@ -276,7 +289,55 @@ const Header: FC<HeaderProps> = ({
             shown={showMiniMap}
             onToggle={toggleMiniMap}
           />
+          <Tooltip
+            title={unitInformationMessage(
+              "a11y.flow.controls.saveSvg",
+              language,
+            )}
+          >
+            <span>
+              <IconButton
+                size="small"
+                aria-label={unitInformationMessage(
+                  "a11y.flow.controls.saveSvg",
+                  language,
+                )}
+                onClick={onSaveSvg}
+                disabled={!hasExportableGraph || !flowSaveMode}
+              >
+                <SaveAltIcon fontSize="inherit" />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip
+            title={unitInformationMessage(
+              "a11y.flow.controls.copySvg",
+              language,
+            )}
+          >
+            <span>
+              <IconButton
+                size="small"
+                aria-label={unitInformationMessage(
+                  "a11y.flow.controls.copySvg",
+                  language,
+                )}
+                onClick={onCopySvg}
+                disabled={!hasExportableGraph}
+              >
+                <ContentCopyIcon fontSize="inherit" />
+              </IconButton>
+            </span>
+          </Tooltip>
           <CurrentUnitBadge currentUnit={currentUnit} language={language} />
+          <Typography
+            variant="caption"
+            role="status"
+            aria-live="polite"
+            sx={{ minWidth: 0, maxWidth: "12rem" }}
+          >
+            {exportStatus}
+          </Typography>
         </Toolbar>
       </AppBar>
     </>
