@@ -5,7 +5,7 @@
 - Purpose: Save or copy the full active JP1/AJS flow with its current
   nested-jobnet expansion.
 - Slice order: SVG save and source copy, followed by PNG save and image copy.
-  The plan is approved. Begin Slice 1 after the planning commit succeeds.
+  Slice 1 is approved for its completion commit and PR publication.
 - Read [requirements and acceptance](SPECS.md#requirements-and-acceptance),
   Slice 1 scope and validation, and [traceability](TRACEABILITY.md).
 - Constraints: Preserve existing graph and CSV behavior. Desktop uses the
@@ -13,10 +13,12 @@
 
 ## Current state
 
-- Lifecycle state: `PLAN_APPROVED`
-- Next operation: Main commits the approved planning package before Slice 1.
-- Gate evidence: Independent plan review returned `Ready` for the reviewed
-  identity below. The human approved both exact slice boundaries.
+- Lifecycle state: `SLICE_APPROVED`
+- Active slice: Slice 1, SVG save and SVG source copy.
+- Next operation: Main commits and publishes the approved Slice 1 patch.
+- Gate evidence: Plan commit `c569202e9bb023e4f07320d92da417a5612b315d`
+  followed `Ready` review for the identity and base recorded below. The human
+  approved both exact slice boundaries.
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -59,18 +61,37 @@ and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 - Review base: `80e5e5b18ac54db0fdf1525f53fc5a61783a74ba`.
 - Review and validation evidence:
   `/private/tmp/ajsbutler-flow-image-desktop-review/manifest.json`.
-- Planning commit: Main executes and records the staged check and result
-  at the commit gate. Slice 2 also requires its predecessor gate.
+- Planning commit: `c569202e9bb023e4f07320d92da417a5612b315d` by Main.
+  The exact staged paths and `git diff --cached --check` passed.
+  Slice 2 also requires its predecessor gate.
 
 Apply
 [Human Approval](../../README.md#human-approval) and the
 [approval-gated commit policy](../../README.md#approval-gated-commit-policy).
 
+## Slice 1 Completion Approval
+
+- Status: Approved
+- Approved at: approved in current conversation
+- Approved scope: The exact reviewed Slice 1 behavior, product paths,
+  validation-support paths, and implementation records.
+- Review verdicts: Both independent implementation reviewers returned
+  `Ready` with no actionable findings. The second review covered the shared
+  viewer contract and extension host.
+- Reviewed head: `c569202e9bb023e4f07320d92da417a5612b315d`.
+- Reviewed tracked patch:
+  `75a9a4f338e000a40f1431197695e811c8200ca99ea843347828c708cb1341db`.
+- Reviewed 22-path manifest:
+  `a20e4597c9d3457bf19d47e5ca544fea2417ae14f2d90f28750b1b583ca24711`.
+- Validation:
+  `/private/tmp/flow-image-export-slice1/review-correction/implementation-evidence.json`.
+- Commit and PR publication: Approved for Main to execute.
+
 ## Implementation Slices
 
 ### Slice 1: Save SVG and copy SVG source
 
-- State: `PLANNED`. No predecessor slice.
+- State: `SLICE_APPROVED`. No predecessor slice.
 - Scope and value: A usable SVG workflow covering FE-01 through FE-05 on
   Desktop and Web. Saving provides a reusable diagram, and copying its source
   provides the same content as plain text for reuse in SVG-aware tools.
@@ -272,6 +293,43 @@ new dependencies, generated-output edits, and CI configuration edits.
 - Plan evidence: `/private/tmp/ajsbutler-flow-image-desktop-review/manifest.json`.
   Retain implementation evidence outside analyzed inputs. Main records the
   independent verdicts, human approvals, and focused commits.
+
+#### Implementation record
+
+- Result: `IMPLEMENTED`. The approved FE-01 through FE-05 behavior and
+  boundary tests are complete. PNG save and image copy remain in Slice 2.
+- Validation identity and detailed results:
+  `/private/tmp/flow-image-export-slice1/review-correction/implementation-evidence.json`.
+- Correction loop: Synthetic bounds panels are identified by their graph
+  structure, so a real unit ending in `::nested-panel-bounds` and its relation
+  remain exportable. SVG labels use Japanese-capable system font fallbacks and
+  bounded visible text. Flow integration tests cover entered N and RC scopes,
+  collapse, keyboard entry, active-scope save/copy, and selection/expansion
+  continuity. Bounds are reduced iteratively, final dimensions are validated,
+  and unexpected serialization failures return localized export feedback.
+- Desktop: Stable 1.148.0 passed 1,060 tests, including the actual Flow Viewer
+  clipboard/source-guard smoke. The first same-hash attempt had one unrelated
+  existing 2-second table selection timeout; the same-hash retry passed all
+  tests. Minimum 1.75.0 compatibility and the same trusted clipboard/source
+  guard smoke passed. The Ubuntu 24.04 arm64, Node 24.21.0, Xvfb logs and
+  matching 20 input hashes are recorded at
+  `/private/tmp/ajsbutler-flow-linux.iaSExo/desktop-review-stable-retry.log`
+  and `/private/tmp/ajsbutler-flow-linux.iaSExo/desktop-web-review-run-1.log`.
+- Web: The headless runner passed. It verified keyboard-activated SVG save and
+  copy, exact native text clipboard readback, unchanged viewport transform,
+  valid rendered XML, visible wide Latin and Japanese label bounds, and no
+  external requests. Production bundles and test compilation passed. Focused
+  serializer tests passed 7/7; entered N/RC Flow Contents tests passed 2/2;
+  architecture, Markdown lint, and `git diff --check` passed.
+- Qlty: `qlty fmt`, `qlty check`, and changed-path `qlty smells` passed as an
+  aggregate. The full-repository check has four baseline findings versus five
+  at baseline; the 112 smell findings have an identical baseline inventory.
+  Official analyzed-path inventories and SARIF are recorded under
+  `/private/tmp/flow-image-export-slice1/review-correction/{baseline,final}`.
+- Readiness: Independent implementation reviews are complete. See
+  [Slice 1 Completion Approval](#slice-1-completion-approval) for the reviewed
+  identity and human approval. Detailed validation and the initial retry
+  evidence remain indexed above.
 
 Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 [Correction Loop](../../validation.md#correction-loop-for-deterministic-failures),

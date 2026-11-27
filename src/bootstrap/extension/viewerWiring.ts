@@ -29,17 +29,33 @@ import {
   createReadyAjsDocument,
 } from "../../presentation/vscode/webview/ajsDocument";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
-import { saveText } from "../../presentation/vscode/webview/messageHandlers";
+import {
+  saveSvg,
+  saveText,
+} from "../../presentation/vscode/webview/messageHandlers";
 import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
+
+type ViewerSaveRequest = Readonly<{
+  content: string;
+  sourceUri: vscode.Uri;
+  telemetry: TelemetryPort;
+}>;
 
 type ViewerConfig = {
   viewType: string;
-  saveHandler?: (content: string) => Promise<boolean>;
+  saveHandler?: (request: ViewerSaveRequest) => Promise<boolean>;
 };
 
 const viewerConfigs: ViewerConfig[] = [
-  { viewType: AJS_TABLE_VIEWER_TYPE, saveHandler: saveText },
-  { viewType: AJS_FLOW_VIEWER_TYPE },
+  {
+    viewType: AJS_TABLE_VIEWER_TYPE,
+    saveHandler: ({ content, sourceUri, telemetry }) =>
+      saveCsvAndReport({ content, sourceUri, telemetry }),
+  },
+  {
+    viewType: AJS_FLOW_VIEWER_TYPE,
+    saveHandler: ({ content, sourceUri }) => saveSvg(content, sourceUri),
+  },
 ];
 
 export type ViewerWiringDeps = {
@@ -408,7 +424,7 @@ type ViewerBundleOptions = ViewerWiringDeps & {
   previewDeps: OpenPreviewCommandDependencies;
   factoryByViewType: Map<string, ViewerFactory>;
   viewType: string;
-  saveHandler?: (content: string) => Promise<boolean>;
+  saveHandler?: ViewerConfig["saveHandler"];
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
   displayStateByPanel: WeakMap<vscode.WebviewPanel, ViewerDisplayState>;
   flowBridge?: SemanticDiffFlowViewerBridge;
@@ -513,12 +529,11 @@ const reportCsvExportedSafely = (telemetry: TelemetryPort): void => {
   }
 };
 
-const saveCsvAndReport = async (
-  telemetry: TelemetryPort,
-  saveHandler: NonNullable<ViewerBundleOptions["saveHandler"]>,
-  content: string,
-): Promise<boolean> => {
-  const saved = await saveHandler(content);
+const saveCsvAndReport = async ({
+  content,
+  telemetry,
+}: ViewerSaveRequest): Promise<boolean> => {
+  const saved = await saveText(content);
   if (saved) reportCsvExportedSafely(telemetry);
   return saved;
 };
@@ -526,9 +541,11 @@ const saveCsvAndReport = async (
 const createViewerSaveHandler = (
   telemetry: TelemetryPort,
   saveHandler: ViewerBundleOptions["saveHandler"],
-): ((content: string) => Promise<boolean>) | undefined => {
+):
+  | ((content: string, sourceUri: vscode.Uri) => Promise<boolean>)
+  | undefined => {
   if (!saveHandler) return undefined;
-  return (content) => saveCsvAndReport(telemetry, saveHandler, content);
+  return (content, sourceUri) => saveHandler({ content, sourceUri, telemetry });
 };
 
 const createViewerFactory = ({

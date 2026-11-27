@@ -1,0 +1,35 @@
+unit=flow-root,,jp1admin,;
+{
+  ty=n;
+  el=日本語-net,n,+240+144;
+  unit=日本語-net,,jp1admin,;
+  {
+    ty=n;
+    el=expanded-net,n,+240+144;
+    unit=expanded-net,,jp1admin,;
+    {
+      ty=n;
+      ar=f=source-job,t=offscreen-job,con;
+      el=source-job,j,+240+144;
+      el=offscreen-job,j,+1200+720;
+      el=WWWWWWWWWWWWWWWWWWWW,j,+1440+864;
+      el=日本語日本語日本語日本語日本語日本語日本語日本語,j,+1680+864;
+      unit=source-job,,jp1admin,;
+      {
+        ty=j;
+      }
+      unit=offscreen-job,,jp1admin,;
+      {
+        ty=j;
+      }
+      unit=WWWWWWWWWWWWWWWWWWWW,,jp1admin,;
+      {
+        ty=j;
+      }
+      unit=日本語日本語日本語日本語日本語日本語日本語日本語,,jp1admin,;
+      {
+        ty=j;
+      }
+    }
+  }
+}

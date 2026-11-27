@@ -1,5 +1,6 @@
 import * as path from "path";
 import { runTests } from "@vscode/test-web";
+import { runFlowImageWebSmoke } from "./support/flowImageWebSmoke";
 
 async function main() {
   try {
@@ -23,6 +24,7 @@ async function main() {
       extensionDevelopmentPath,
       extensionTestsPath,
     });
+    await runFlowImageWebSmoke(extensionDevelopmentPath, testRunnerDataDir);
   } catch (err) {
     console.error(`Failed to run web tests. ${err}`);
     process.exit(1);

@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import type { BuildUnitList } from "../../application/unit-list/buildUnitList";
 import type { UnitListDocumentDto } from "../../application/unit-list/unitListDocument";
+import { en } from "../../resource/i18n/message_en";
+import { ja } from "../../resource/i18n/message_ja";
 import {
   createViewerReadyHandler,
   createViewerSubscriptions,
@@ -13,6 +15,7 @@ import {
   AJS_FLOW_VIEWER_TYPE,
   AJS_TABLE_VIEWER_TYPE,
 } from "../../presentation/vscode/webview/constant";
+import { saveSvg } from "../../presentation/vscode/webview/messageHandlers";
 
 type PropertyOverride = {
   restore: () => void;
@@ -36,6 +39,70 @@ const overrideProperty = (
 type ViewerPanelFixture = {
   panel: vscode.WebviewPanel;
   receive: (message: unknown) => void;
+};
+
+const registerWritableMemoryFileSystem = (
+  scheme: string,
+  onWrite: (uri: vscode.Uri, bytes: Uint8Array) => void,
+): vscode.Disposable => {
+  const files = new Map<string, Uint8Array>();
+  const changes = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+  const fileNotFound = (uri: vscode.Uri): never => {
+    throw vscode.FileSystemError.FileNotFound(uri);
+  };
+  const provider: vscode.FileSystemProvider = {
+    onDidChangeFile: changes.event,
+    watch: () => ({ dispose() {} }),
+    stat: (uri) => {
+      const bytes = files.get(uri.toString());
+      if (!bytes) return fileNotFound(uri);
+      return {
+        type: vscode.FileType.File,
+        ctime: 0,
+        mtime: 0,
+        size: bytes.byteLength,
+      };
+    },
+    readDirectory: () => [],
+    createDirectory: () => undefined,
+    readFile: (uri) => files.get(uri.toString()) ?? fileNotFound(uri),
+    writeFile: (uri, bytes, options) => {
+      const key = uri.toString();
+      const exists = files.has(key);
+      if (!exists && !options.create) {
+        fileNotFound(uri);
+      }
+      if (exists && !options.overwrite) {
+        throw vscode.FileSystemError.FileExists(uri);
+      }
+      const content = bytes.slice();
+      files.set(key, content);
+      onWrite(uri, content);
+      changes.fire([{ type: vscode.FileChangeType.Changed, uri }]);
+    },
+    delete: (uri) => {
+      if (!files.delete(uri.toString())) fileNotFound(uri);
+    },
+    rename: (oldUri, newUri) => {
+      const bytes = files.get(oldUri.toString());
+      if (!bytes) fileNotFound(oldUri);
+      files.set(newUri.toString(), bytes);
+      files.delete(oldUri.toString());
+    },
+  };
+  const registration = vscode.workspace.registerFileSystemProvider(
+    scheme,
+    provider,
+    {
+      isCaseSensitive: true,
+    },
+  );
+  return {
+    dispose: () => {
+      registration.dispose();
+      changes.dispose();
+    },
+  };
 };
 
 const createViewerPanelFixture = (
@@ -79,6 +146,9 @@ const createViewerLifecycleHarness = (
   options: {
     buildUnitList?: BuildUnitList;
     postMessage?: () => Thenable<boolean>;
+    documentUri?: vscode.Uri;
+    onError?: (message: string) => void;
+    onEvent?: (eventName: string) => void;
   } = {},
 ) => {
   const commandHandlers = new Map<string, () => void>();
@@ -90,7 +160,7 @@ const createViewerLifecycleHarness = (
   let activeEditor: vscode.TextEditor | undefined;
   const errorMessages: string[] = [];
   const document = {
-    uri: vscode.Uri.parse("untitled:viewer-lifecycle"),
+    uri: options.documentUri ?? vscode.Uri.parse("untitled:viewer-lifecycle"),
     getText: () => "unit=viewer,,jp1admin,;{ty=g;}",
   } as vscode.TextDocument;
   const emptyDocument = {
@@ -123,12 +193,16 @@ const createViewerLifecycleHarness = (
     overrideProperty(vscode.window, "showErrorMessage", {
       value: (message: string) => {
         errorMessages.push(message);
+        options.onError?.(message);
         return Promise.resolve(undefined);
       },
     }),
   ];
   const telemetry: TelemetryPort = {
-    report: (event) => events.push(event),
+    report: (event) => {
+      events.push(event);
+      options.onEvent?.(event.name);
+    },
     dispose() {},
   };
   const subscriptions = createViewerSubscriptions({
@@ -186,6 +260,297 @@ const createCounterpartRevealDeps = (
 });
 
 suite("Viewer wiring", () => {
+  test("routes Flow save through the bound source identity without CSV telemetry", async () => {
+    const sourceUri = vscode.Uri.parse(
+      "file:///tmp/flow/../source.svg?version=1#definition",
+    );
+    const destination = vscode.Uri.file("/tmp/source.svg");
+    let harness: ReturnType<typeof createViewerLifecycleHarness> | undefined;
+    const information: string[] = [];
+    let reportConflict!: () => void;
+    const conflictReported = new Promise<void>((resolve) => {
+      reportConflict = resolve;
+    });
+    const overrides: PropertyOverride[] = [];
+    try {
+      harness = createViewerLifecycleHarness({
+        documentUri: sourceUri,
+        onError: reportConflict,
+      });
+      overrides.push(
+        overrideProperty(vscode.window, "showSaveDialog", {
+          value: async () => destination,
+        }),
+        overrideProperty(vscode.window, "showInformationMessage", {
+          value: async (message: string) => {
+            information.push(message);
+            return undefined;
+          },
+        }),
+      );
+      harness.setActiveDocument(harness.document);
+      harness.commandHandlers.get(`open.${AJS_FLOW_VIEWER_TYPE}`)?.();
+      const fixture = harness.panels[0];
+      assert.ok(fixture);
+      fixture.receive({ type: "display", data: "success" });
+      fixture.receive({ type: "ready" });
+      await flushMicrotasks();
+      fixture.receive({ type: "save", data: "<svg/>" });
+      await conflictReported;
+
+      assert.strictEqual(harness.errorMessages.length, 1);
+      assert.ok(
+        [
+          en["flow.svg.save.sourceConflict"],
+          ja["flow.svg.save.sourceConflict"],
+        ].includes(harness.errorMessages[0] ?? ""),
+      );
+      assert.deepStrictEqual(information, []);
+      assert.ok(harness.events.every((event) => event.name !== "csv.exported"));
+    } finally {
+      overrides.reverse().forEach(({ restore }) => restore());
+      harness?.restore();
+    }
+  });
+
+  test("keeps successful Table saves on the CSV-only telemetry path", async () => {
+    const destination = vscode.Uri.parse("tablecsv://workspace/table.csv");
+    let harness: ReturnType<typeof createViewerLifecycleHarness> | undefined;
+    let writtenContent = "";
+    let reportWrite!: () => void;
+    const writeObserved = new Promise<void>((resolve) => {
+      reportWrite = resolve;
+    });
+    let reportCsvTelemetry!: () => void;
+    const csvTelemetryReported = new Promise<void>((resolve) => {
+      reportCsvTelemetry = resolve;
+    });
+    let fileSystem: vscode.Disposable | undefined;
+    const overrides: PropertyOverride[] = [];
+    try {
+      fileSystem = registerWritableMemoryFileSystem(
+        "tablecsv",
+        (_uri, bytes) => {
+          writtenContent = new TextDecoder().decode(bytes);
+          reportWrite();
+        },
+      );
+      harness = createViewerLifecycleHarness({
+        onEvent: (eventName) => {
+          if (eventName === "csv.exported") reportCsvTelemetry();
+        },
+      });
+      overrides.push(
+        overrideProperty(vscode.window, "showSaveDialog", {
+          value: async () => destination,
+        }),
+      );
+      harness.setActiveDocument(harness.document);
+      harness.commandHandlers.get(`open.${AJS_TABLE_VIEWER_TYPE}`)?.();
+      const fixture = harness.panels[0];
+      assert.ok(fixture);
+      fixture.receive({ type: "display", data: "success" });
+      fixture.receive({ type: "ready" });
+      await flushMicrotasks();
+      fixture.receive({ type: "save", data: "column,value\n" });
+      await Promise.all([writeObserved, csvTelemetryReported]);
+
+      assert.strictEqual(writtenContent, "column,value\n");
+      assert.ok(
+        harness.events.some(
+          (event) =>
+            event.name === "csv.exported" && event.properties.method === "save",
+        ),
+      );
+      assert.ok(
+        harness.events.every((event) =>
+          ["viewer.open_completed", "csv.exported"].includes(event.name),
+        ),
+      );
+    } finally {
+      overrides.reverse().forEach(({ restore }) => restore());
+      harness?.restore();
+      fileSystem?.dispose();
+    }
+  });
+
+  test("rejects the source SVG URI after normalizing file path aliases", async () => {
+    const destination = vscode.Uri.file("/tmp/source.svg");
+    const source = vscode.Uri.parse(
+      "file:///tmp/flow/../source.svg?version=1#definition",
+    );
+    const errors: string[] = [];
+    const information: string[] = [];
+    const overrides = [
+      overrideProperty(vscode.window, "showSaveDialog", {
+        value: async (options: vscode.SaveDialogOptions) => {
+          assert.deepStrictEqual(options.filters, { "SVG image": ["svg"] });
+          return destination;
+        },
+      }),
+      overrideProperty(vscode.window, "showErrorMessage", {
+        value: async (message: string) => {
+          errors.push(message);
+          return undefined;
+        },
+      }),
+      overrideProperty(vscode.window, "showInformationMessage", {
+        value: async (message: string) => {
+          information.push(message);
+          return undefined;
+        },
+      }),
+    ];
+    try {
+      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.strictEqual(errors.length, 1);
+      assert.ok(
+        [
+          en["flow.svg.save.sourceConflict"],
+          ja["flow.svg.save.sourceConflict"],
+        ].includes(errors[0] ?? ""),
+      );
+      assert.deepStrictEqual(information, []);
+    } finally {
+      overrides.reverse().forEach(({ restore }) => restore());
+    }
+  });
+
+  test("writes selected SVG bytes to a distinct provider URI with localized completion", async () => {
+    const destination = vscode.Uri.parse(
+      "flow-svg-save://workspace/project/export.svg?version=3#main",
+    );
+    const source = vscode.Uri.parse(
+      "flow-svg-save://workspace/project/source.ajs",
+    );
+    let writtenUri: vscode.Uri | undefined;
+    let writtenBytes: Uint8Array | undefined;
+    const errors: string[] = [];
+    const information: { message: string; options: vscode.MessageOptions }[] =
+      [];
+    let reportWrite!: () => void;
+    const writeObserved = new Promise<void>((resolve) => {
+      reportWrite = resolve;
+    });
+    let reportCompletion!: () => void;
+    const completionReported = new Promise<void>((resolve) => {
+      reportCompletion = resolve;
+    });
+    const overrides: PropertyOverride[] = [];
+    let fileSystem: vscode.Disposable | undefined;
+    try {
+      fileSystem = registerWritableMemoryFileSystem(
+        "flow-svg-save",
+        (uri, bytes) => {
+          writtenUri = uri;
+          writtenBytes = bytes;
+          reportWrite();
+        },
+      );
+      overrides.push(
+        overrideProperty(vscode.window, "showSaveDialog", {
+          value: async () => destination,
+        }),
+        overrideProperty(vscode.window, "showErrorMessage", {
+          value: async (message: string) => {
+            errors.push(message);
+            return undefined;
+          },
+        }),
+        overrideProperty(vscode.window, "showInformationMessage", {
+          value: async (message: string, options: vscode.MessageOptions) => {
+            information.push({ message, options });
+            reportCompletion();
+            return undefined;
+          },
+        }),
+      );
+      assert.strictEqual(await saveSvg("<svg>日本語</svg>", source), true);
+      await Promise.all([writeObserved, completionReported]);
+      assert.strictEqual(writtenUri, destination);
+      assert.strictEqual(
+        new TextDecoder().decode(writtenBytes),
+        "<svg>日本語</svg>",
+      );
+      assert.deepStrictEqual(errors, []);
+      assert.strictEqual(information.length, 1);
+      assert.ok(
+        [en["flow.svg.save.complete"], ja["flow.svg.save.complete"]].includes(
+          information[0]?.message ?? "",
+        ),
+      );
+      assert.deepStrictEqual(information[0]?.options, {
+        detail: "",
+        modal: false,
+      });
+    } finally {
+      overrides.reverse().forEach(({ restore }) => restore());
+      fileSystem?.dispose();
+    }
+  });
+
+  test("reports SVG cancellation and dialog or write failures without success", async () => {
+    const source = vscode.Uri.file("/tmp/source.ajs");
+    const errors: string[] = [];
+    const information: string[] = [];
+    let dialogFails = false;
+    let writeFails = false;
+    const destination = vscode.Uri.parse(
+      "flow-svg-failure://workspace/output.svg",
+    );
+    const overrides: PropertyOverride[] = [];
+    let fileSystem: vscode.Disposable | undefined;
+    try {
+      fileSystem = registerWritableMemoryFileSystem("flow-svg-failure", () => {
+        if (writeFails) throw new Error("private write failure");
+      });
+      overrides.push(
+        overrideProperty(vscode.window, "showSaveDialog", {
+          value: async () => {
+            if (dialogFails) throw new Error("private dialog failure");
+            return writeFails ? destination : undefined;
+          },
+        }),
+        overrideProperty(vscode.window, "showErrorMessage", {
+          value: async (message: string) => {
+            errors.push(message);
+            return undefined;
+          },
+        }),
+        overrideProperty(vscode.window, "showInformationMessage", {
+          value: async (message: string) => {
+            information.push(message);
+            return undefined;
+          },
+        }),
+      );
+      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.ok(
+        [en["flow.svg.save.cancelled"], ja["flow.svg.save.cancelled"]].includes(
+          information[0] ?? "",
+        ),
+      );
+      dialogFails = true;
+      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      dialogFails = false;
+      writeFails = true;
+      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.strictEqual(errors.length, 2);
+      assert.ok(
+        errors.every((message) =>
+          [en["flow.svg.save.failed"], ja["flow.svg.save.failed"]].includes(
+            message,
+          ),
+        ),
+      );
+      assert.ok(errors.every((message) => !message.includes("private")));
+      assert.strictEqual(information.length, 1);
+    } finally {
+      overrides.reverse().forEach(({ restore }) => restore());
+      fileSystem?.dispose();
+    }
+  });
+
   test("creates viewer subscriptions for both table and flow viewers", () => {
     const context = { subscriptions: [] } as vscode.ExtensionContext;
     const telemetry: TelemetryPort = {

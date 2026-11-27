@@ -17,10 +17,13 @@ export const viewerHostMessageTypes = [
 
 export type ViewerHostMessageType = (typeof viewerHostMessageTypes)[number];
 
+export type ViewerFlowSaveMode = "dialog" | "download";
+
 export type ViewerResourceStateDto = {
   isDarkMode: boolean;
   lang: string;
   scrollType: "window" | "table";
+  flowSaveMode?: ViewerFlowSaveMode;
 };
 
 export type ViewerDocumentChangedMessage = {
@@ -103,10 +106,15 @@ const isViewerResourceState = (
 ): value is Record<string, unknown> =>
   isPlainRecord(value) &&
   allChecksPass([
-    () => hasOnlyKeys(value, ["isDarkMode", "lang", "scrollType"]),
+    () =>
+      hasOnlyKeys(value, ["isDarkMode", "lang", "scrollType", "flowSaveMode"]),
     () => typeof value.isDarkMode === "boolean",
     () => typeof value.lang === "string",
     () => value.scrollType === "window" || value.scrollType === "table",
+    () =>
+      value.flowSaveMode === undefined ||
+      value.flowSaveMode === "dialog" ||
+      value.flowSaveMode === "download",
   ]);
 
 const isPlainJsonValue = (root: unknown): boolean => {
@@ -160,11 +168,15 @@ export const parseViewerResourceState = (
     isDarkMode: boolean;
     lang: string;
     scrollType: "window" | "table";
+    flowSaveMode?: ViewerFlowSaveMode;
   };
   return {
     isDarkMode: resource.isDarkMode,
     lang: resource.lang,
     scrollType: resource.scrollType,
+    ...(resource.flowSaveMode === undefined
+      ? {}
+      : { flowSaveMode: resource.flowSaveMode }),
   };
 };
 
