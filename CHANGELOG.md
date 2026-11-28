@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.19.0] - 2026-11-28
+
 - Added SVG and PNG choices to the Flow Viewer Save and Copy menus. Exports
   include the full active flow scope and its current nested expansion. Desktop
   saves through the VS Code destination picker; Web downloads through the
