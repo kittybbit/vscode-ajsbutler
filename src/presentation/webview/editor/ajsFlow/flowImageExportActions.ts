@@ -139,8 +139,8 @@ const saveSvgForMode = (
 };
 
 export const saveFlowSvg = (context: FlowImageSaveContext): void => {
-  const svg = createSvgForAction(context);
-  if (svg) saveSvgForMode(svg, context);
+  const svgExport = createSvgForAction(context);
+  if (svgExport) saveSvgForMode(svgExport, context);
 };
 
 type ClipboardWriteFeedback = Readonly<{
@@ -185,8 +185,8 @@ export const copyFlowSvg = (context: FlowImageExportContext): void => {
     );
     return;
   }
-  const svg = createSvgForAction(context);
-  if (svg) writeSvgToClipboard(svg.svg, context, clipboard);
+  const svgExport = createSvgForAction(context);
+  if (svgExport) writeSvgToClipboard(svgExport.svg, context, clipboard);
 };
 
 const downloadPng = (blob: Blob, feedback: FlowImageExportFeedback): void =>
@@ -227,12 +227,12 @@ const savePngForMode = async (
 export const saveFlowPng = async (
   context: FlowImageSaveContext,
 ): Promise<void> => {
-  const image = createSvgForAction(context);
-  if (!image) return;
+  const svgExport = createSvgForAction(context);
+  if (!svgExport) return;
   const result = await createFlowPng({
-    svg: image.svg,
-    width: image.width,
-    height: image.height,
+    svg: svgExport.svg,
+    width: svgExport.width,
+    height: svgExport.height,
   });
   if (result.status !== "available") {
     showPngResultError(result, context);
@@ -244,7 +244,7 @@ export const saveFlowPng = async (
 type PngRasterFailure = Extract<FlowPngExportResult, { status: "unavailable" }>;
 
 type PngRasterization = Readonly<{
-  blob: Promise<Blob>;
+  blobPromise: Promise<Blob>;
   getFailure: () => PngRasterFailure | undefined;
 }>;
 
@@ -254,28 +254,28 @@ const canWritePng = (
   typeof ClipboardItem !== "undefined" &&
   typeof clipboard?.write === "function";
 
-const createPngRasterization = (image: FlowSvgExport): PngRasterization => {
+const createPngRasterization = (svgExport: FlowSvgExport): PngRasterization => {
   let failure: PngRasterFailure | undefined;
-  const blob = createFlowPng({
-    svg: image.svg,
-    width: image.width,
-    height: image.height,
+  const blobPromise = createFlowPng({
+    svg: svgExport.svg,
+    width: svgExport.width,
+    height: svgExport.height,
   }).then((result) => {
     if (result.status === "available") return result.blob;
     failure = result;
     throw new Error("PNG rasterization failed.");
   });
-  void blob.catch(() => undefined);
-  return { blob, getFailure: () => failure };
+  void blobPromise.catch(() => undefined);
+  return { blobPromise, getFailure: () => failure };
 };
 
 const startPngClipboardWrite = (
   clipboard: Clipboard,
-  rasterization: PngRasterization["blob"],
+  blobPromise: PngRasterization["blobPromise"],
 ): Promise<void> => {
   try {
     return clipboard.write([
-      new ClipboardItem({ [FLOW_PNG_MIME_TYPE]: rasterization }),
+      new ClipboardItem({ [FLOW_PNG_MIME_TYPE]: blobPromise }),
     ]);
   } catch (error) {
     return Promise.reject(error);
@@ -291,10 +291,10 @@ const reportPngClipboardFailure = (
 };
 
 const finishPngClipboardWrite = (
-  rasterization: PngRasterization["blob"],
+  blobPromise: PngRasterization["blobPromise"],
   complete: () => void,
 ): void => {
-  void Promise.allSettled([rasterization]).then(complete);
+  void Promise.allSettled([blobPromise]).then(complete);
 };
 
 export const copyFlowPng = (
@@ -310,13 +310,13 @@ export const copyFlowPng = (
     complete();
     return;
   }
-  const image = createSvgForAction(context);
-  if (!image) {
+  const svgExport = createSvgForAction(context);
+  if (!svgExport) {
     complete();
     return;
   }
-  const rasterization = createPngRasterization(image);
-  const write = startPngClipboardWrite(clipboard, rasterization.blob);
+  const rasterization = createPngRasterization(svgExport);
+  const write = startPngClipboardWrite(clipboard, rasterization.blobPromise);
   void write
     .then(
       () =>
@@ -325,5 +325,7 @@ export const copyFlowPng = (
         ),
       () => reportPngClipboardFailure(rasterization.getFailure(), context),
     )
-    .finally(() => finishPngClipboardWrite(rasterization.blob, complete));
+    .finally(() =>
+      finishPngClipboardWrite(rasterization.blobPromise, complete),
+    );
 };

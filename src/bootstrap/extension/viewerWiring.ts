@@ -30,8 +30,8 @@ import {
 } from "../../presentation/vscode/webview/ajsDocument";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 import {
-  saveFlowPng,
-  saveSvg,
+  saveFlowPngFile,
+  saveFlowSvgFile,
   saveText,
 } from "../../presentation/vscode/webview/messageHandlers";
 import type { SemanticDiffFlowViewerBridge } from "./semanticDiffFlowViewerBridge";
@@ -61,14 +61,15 @@ const viewerConfigs: ViewerConfig[] = [
   },
   {
     viewType: AJS_FLOW_VIEWER_TYPE,
-    saveHandler: ({ content, sourceUri }) => saveSvg(content, sourceUri),
+    saveHandler: ({ content, sourceUri }) =>
+      saveFlowSvgFile(content, sourceUri),
   },
 ];
 
 const saveFlowPngRequest = ({
   bytes,
   sourceUri,
-}: ViewerPngSaveRequest): Promise<boolean> => saveFlowPng(bytes, sourceUri);
+}: ViewerPngSaveRequest): Promise<boolean> => saveFlowPngFile(bytes, sourceUri);
 
 const pngSaveHandlersByUiKind: Readonly<
   Record<vscode.UIKind, ReadonlyMap<string, ViewerConfig["pngSaveHandler"]>>

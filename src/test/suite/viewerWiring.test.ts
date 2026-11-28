@@ -15,7 +15,7 @@ import {
   AJS_FLOW_VIEWER_TYPE,
   AJS_TABLE_VIEWER_TYPE,
 } from "../../presentation/vscode/webview/constant";
-import { saveSvg } from "../../presentation/vscode/webview/messageHandlers";
+import { saveFlowSvgFile } from "../../presentation/vscode/webview/messageHandlers";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 import { createViewerFlowPngSaveRequest } from "../../presentation/webview/viewerRequestMessages";
 
@@ -576,7 +576,7 @@ suite("Viewer wiring", () => {
       }),
     ];
     try {
-      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.strictEqual(await saveFlowSvgFile("<svg/>", source), false);
       assert.strictEqual(errors.length, 1);
       assert.ok(
         [
@@ -639,7 +639,10 @@ suite("Viewer wiring", () => {
           },
         }),
       );
-      assert.strictEqual(await saveSvg("<svg>日本語</svg>", source), true);
+      assert.strictEqual(
+        await saveFlowSvgFile("<svg>日本語</svg>", source),
+        true,
+      );
       await Promise.all([writeObserved, completionReported]);
       assert.strictEqual(writtenUri, destination);
       assert.strictEqual(
@@ -698,17 +701,17 @@ suite("Viewer wiring", () => {
           },
         }),
       );
-      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.strictEqual(await saveFlowSvgFile("<svg/>", source), false);
       assert.ok(
         [en["flow.svg.save.cancelled"], ja["flow.svg.save.cancelled"]].includes(
           information[0] ?? "",
         ),
       );
       dialogFails = true;
-      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.strictEqual(await saveFlowSvgFile("<svg/>", source), false);
       dialogFails = false;
       writeFails = true;
-      assert.strictEqual(await saveSvg("<svg/>", source), false);
+      assert.strictEqual(await saveFlowSvgFile("<svg/>", source), false);
       assert.strictEqual(errors.length, 2);
       assert.ok(
         errors.every((message) =>

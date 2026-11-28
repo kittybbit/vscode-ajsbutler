@@ -16,8 +16,8 @@
 
 - Lifecycle state: `SLICE_APPROVED`
 - Active slice: Slice 2, PNG output and format menus for Save and Copy.
-- Next operation: Commit the approved Slice 2 changes and publish the
-  layer PR, then verify its exact-head gates.
+- Next operation: Commit and publish the approved naming correction in
+  PR #355, then verify its exact-head gates.
 - Gate evidence: Slice 1 is `SLICE_COMMITTED`. The approved Layer 1 head
   passed its predecessor gates. The reviewed and human-approved Slice 2
   action-module replan is committed as
@@ -130,6 +130,24 @@ and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 Apply
 [Human Approval](../../README.md#human-approval) and the
 [approval-gated commit policy](../../README.md#approval-gated-commit-policy).
+
+## Slice 2 Naming Correction Completion Approval
+
+- Status: Approved
+- Approved at: 2026-11-28, in the current conversation.
+- Trigger: The user requested consistent names across Flow image export.
+- Approved scope: Commit and publish the reviewed identifier correction in
+  the host save adapter, its wiring and tests, and the Flow image export
+  actions.
+- Review verdict: Independent implementation review returned `Ready`.
+  The correction preserves the serialized contract and behavior.
+- Reviewed head: `8c9af04d198cf6d78c7ce5475b0a936c019eb570`.
+- Reviewed tracked patch:
+  `f384ba1daf44b61233b52c41197634acd5ddc2d2e23eaa1f8d5f460d1cdf1259`.
+- Reviewed full worktree:
+  `58d67e7f76fc3d2cf7f5f3fdda1ccafe6a656e39e6fb5786cb6dcd977ee428d7`.
+- Validation:
+  `/private/tmp/flow-image-export-slice2/naming-review/final/implementation-evidence.json`.
 
 ## Slice 2 Completion Approval
 
@@ -421,7 +439,8 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 
 ### Slice 2: PNG output and shared export menus
 
-- Lifecycle state: `SLICE_APPROVED`. Depends on Slice 1 at verified PR #354 head
+- Lifecycle state: `SLICE_APPROVED` for the naming correction. Depends on
+  Slice 1 at verified PR #354 head
   `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
 - Replan trigger: After simplification within the approved paths, the
   retained candidate's targeted Qlty scan reports file complexity of 74
@@ -742,8 +761,9 @@ closure boundary above for the durable edits and feature-record removal.
   A transient byte-range helper complexity finding was decomposed; final Qlty
   has no new finding on changed paths. Earlier failed host retries and the
   corrected Qlty log-permission retry remain in the evidence sidecar.
-- Readiness: `SLICE_APPROVED` after both independent reviews and human
-  [Slice 2 Completion Approval](#slice-2-completion-approval).
-  The implementation commit, PR publication, and exact-head GitHub or Cloud
-  gates follow that approval. Release documentation remains at Feature Exit
-  as approved.
+- Readiness: The original [Slice 2 Completion Approval](#slice-2-completion-approval)
+  was committed as `8c9af04d198cf6d78c7ce5475b0a936c019eb570` and
+  [PR #355](https://github.com/kittybbit/vscode-ajsbutler/pull/355) passed
+  Verify and Qlty at that head. The naming correction is `SLICE_APPROVED`
+  under its [Completion Approval](#slice-2-naming-correction-completion-approval).
+  Release documentation remains at Feature Exit.
