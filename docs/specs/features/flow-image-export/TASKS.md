@@ -5,33 +5,38 @@
 - Purpose: Save or copy the full active JP1/AJS flow with its current
   nested-jobnet expansion.
 - Slice order: SVG save and source copy, followed by PNG save and image copy.
-  Slice 1 is approved for its completion commit and PR publication.
+  Slice 1 is committed and published. Slice 2 is awaiting replan review.
 - Read [requirements and acceptance](SPECS.md#requirements-and-acceptance),
-  Slice 1 scope and validation, and [traceability](TRACEABILITY.md).
+  Slice 2 scope and validation, and [traceability](TRACEABILITY.md).
 - Constraints: Preserve existing graph and CSV behavior. Desktop uses the
   VS Code save dialog. Web uses the browser download flow.
 
 ## Current state
 
-- Lifecycle state: `SLICE_APPROVED`
-- Active slice: Slice 1, SVG save and SVG source copy.
-- Next operation: Main commits and publishes the approved Slice 1 patch.
-- Gate evidence: Plan commit `c569202e9bb023e4f07320d92da417a5612b315d`
-  followed `Ready` review for the identity and base recorded below. The human
-  approved both exact slice boundaries.
+- Lifecycle state: `PLANNED`
+- Active slice: Slice 2, PNG save and image copy.
+- Next operation: Independent review of the revised Slice 2 plan, then
+  Human Approval for the affected boundary and a replan commit.
+- Gate evidence: Slice 1 is `SLICE_COMMITTED`. The approved Layer 1 head
+  has passed its predecessor gates. Original plan approval and Slice 1
+  Completion Approval are recorded below.
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
 ## Native Stack References
 
 - Layer 1: `codex/flow-image-export` to `main`, selected from base
-  `80e5e5b18ac54db0fdf1525f53fc5a61783a74ba`. The PR, reviewed layer diff,
-  completion commit, and exact-head checks are pending.
-- Layer 2: planned `codex/flow-image-export-png` to
-  `codex/flow-image-export`. Main verifies Layer 1's exact-current-head
-  GitHub and applicable Cloud gates before creating the dependent branch
-  or starting Slice 2. Its base is that verified predecessor commit.
-  The branch, PR, layer identities, and exact-head checks are pending.
+  `80e5e5b18ac54db0fdf1525f53fc5a61783a74ba`. Main published
+  [PR #354](https://github.com/kittybbit/vscode-ajsbutler/pull/354) at
+  completion commit `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
+  At that exact head, Verify attempt 2, CodeQL, Qlty check and Qlty fmt
+  passed, and the PR reported `CLEAN`. Verify attempt 1 had an intermittent
+  failure in the unchanged bootstrap suite. Main's same-head evidence is
+  `/private/tmp/ajsbutler-svg-completion-vavq0kzc/pr-verified.json`.
+- Layer 2: Main created `codex/flow-image-export-png` from verified Layer 1
+  head `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`. The planned PR targets
+  `codex/flow-image-export`. Layer 2 approval, replan commit,
+  implementation, PR, and exact-head checks are pending.
 - Main publishes or updates each layer promptly after its independent Ready
   verdict, explicit Completion Approval, and focused completion commit.
   Layer 2 is the final integration head. The layers remain open for feature
@@ -47,15 +52,29 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 Apply the [native stack contract](../../README.md#github-standard-stacked-pull-requests)
 and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 
-## Human Approval
+## Slice 2 Replan Human Approval
+
+- Status: Approved
+- Approved at: 2026-11-28, in the current conversation.
+- Approved scope: The reviewed Slice 2 plan, adding the existing runner to
+  stable and minimum Desktop PNG smoke validation.
+- Approved paths: The Slice 2 boundary below, with `src/test/runTest.ts` as
+  the sole addition to the original validation-support paths.
+- Review verdict: `Ready` from the independent plan reviewer.
+- Reviewed plan: `65cf3794f16826743abaf65477a8f8b8ff4f3cc634ee0019a3aa82ceddbef0b5`.
+- Review base: `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
+- Review and validation evidence:
+  `/private/tmp/ajsbutler-flow-image-slice2-replan/manifest.json`.
+
+## Original Plan Human Approval
 
 - Status: Approved
 - Approved at: approved in current conversation
 - Approved scope: Slice 1 SVG save and SVG source copy, and Slice 2 PNG save
   and PNG image copy, under their reviewed acceptance, design, and validation.
 - Approved paths: The exact product, validation-support, and slice-record
-  paths in both boundaries below. The planning commit contains this
-  feature's `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`.
+  paths recorded in the approved planning commit. The planning commit
+  contains this feature's `SPECS.md`, `TASKS.md`, and `TRACEABILITY.md`.
 - Review verdict: `Ready` from the independent plan reviewer.
 - Reviewed plan: `9d97f17f451fa375e4ee13843223f2707340c45881769ab5373973fca7b810e1`.
 - Review base: `80e5e5b18ac54db0fdf1525f53fc5a61783a74ba`.
@@ -85,13 +104,15 @@ Apply
   `a20e4597c9d3457bf19d47e5ca544fea2417ae14f2d90f28750b1b583ca24711`.
 - Validation:
   `/private/tmp/flow-image-export-slice1/review-correction/implementation-evidence.json`.
-- Commit and PR publication: Approved for Main to execute.
+- Commit and PR publication: Main committed
+  `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea` and published
+  [PR #354](https://github.com/kittybbit/vscode-ajsbutler/pull/354).
 
 ## Implementation Slices
 
 ### Slice 1: Save SVG and copy SVG source
 
-- State: `SLICE_APPROVED`. No predecessor slice.
+- Lifecycle state: `SLICE_COMMITTED`. No predecessor slice.
 - Scope and value: A usable SVG workflow covering FE-01 through FE-05 on
   Desktop and Web. Saving provides a reusable diagram, and copying its source
   provides the same content as plain text for reuse in SVG-aware tools.
@@ -338,8 +359,14 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 
 ### Slice 2: Save PNG and copy an image
 
-- State: `PLANNED`. Depends on the committed Slice 1 and its verified
-  predecessor head gates described above.
+- Lifecycle state: `PLANNED`. Depends on Slice 1 at verified PR #354 head
+  `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
+- Replan trigger: Slice 1's verified implementation puts trusted renderer
+  actions and native Electron clipboard reads in `src/test/runTest.ts`.
+  Slice 2 needs that path to drive the actual PNG action on both Desktop
+  versions. The existing support module owns the extension-host fixture
+  and result handshake. This replan adds only the runner to the exact
+  validation-support boundary.
 - Scope and value: Save PNG and Copy image cover FE-02, FE-04, FE-06 and
   FE-07, adding a ready-to-paste raster image while keeping the SVG choices.
 - Acceptance: One keyboard-operable action saves a PNG of the same graph and
@@ -444,6 +471,7 @@ Validation-support paths:
 - `src/test/suite/viewerMessageRouting.test.ts`
 - `src/test/suite/viewerWiring.test.ts`
 - `src/test/suite/webSmoke.ts`
+- `src/test/runTest.ts`
 - `src/test/support/flowImageDesktopSmoke.ts`
 - `src/test/support/flowImageWebSmoke.ts`
 
@@ -476,15 +504,16 @@ closure boundary above for the durable edits and feature-record removal.
   requests. Retain the SVG cases. Exercise denied clipboard writes and
   continuing PNG file save in the Flow Contents integration suite.
 - Production Desktop clipboard: Extend the Layer 1 smoke in stable and
-  minimum 1.75.0. Click the actual Copy image action in the Flow Webview
-  with trusted input, observing its confirmed-success status only after
-  the real clipboard write resolves. In the live Desktop Webview read
-  the system clipboard through its standard Clipboard API. Require an
-  `image/png` item with a PNG signature and fixture dimensions matching
-  the SVG copied in that host. This exercises Electron's actual read and
-  sanitized-write policy. The test never observes clipboard data
-  outside its own isolated session and fixture. Keep SVG copy coverage
-  in both Desktop hosts and separate Web clipboard readback.
+  minimum 1.75.0 through the existing renderer driver and
+  `exerciseFlowClipboard` in `src/test/runTest.ts`. Click the actual Copy
+  image action in the Flow Webview with trusted input and wait for its
+  confirmed-success status. Read back the actual `image/png` clipboard item
+  and use the runner's `application.evaluate` bridge for native Electron
+  image readback. Check the PNG signature and dimensions against the SVG
+  copied in that host. Compare the decoded fixture pixels from both readers
+  so a platform re-encode is acceptable. Retain the isolated test session,
+  the existing extension-host handshake, SVG copy coverage in both Desktop
+  hosts, and separate Web readback.
 - Real Webview binary transport: Add a temporary script-enabled panel in
   the existing shared extension smoke entry. Have it send an `ArrayBuffer`
   containing a small valid PNG and assert byte-for-byte receipt at
@@ -501,3 +530,9 @@ closure boundary above for the durable edits and feature-record removal.
   explicit if a required test cannot complete. Retain code and host evidence
   outside analyzed inputs and record the final layer identities and gate
   references in this plan and the PR.
+  Replan discovery and document validation are recorded at
+  `/private/tmp/ajsbutler-flow-image-slice2-replan/manifest.json`.
+  The pre-replan observation at
+  `/private/tmp/flow-image-export-slice2/pre-replan-predecessor`
+  applies to the predecessor head. Verify the approved implementation
+  baseline after the replan commit under the Evidence Contract.
