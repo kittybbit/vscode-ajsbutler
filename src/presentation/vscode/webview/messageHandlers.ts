@@ -263,7 +263,7 @@ const saveFlowImage = async (
   }
 };
 
-export const saveSvg = async (
+export const saveFlowSvgFile = async (
   content: string,
   sourceUri: vscode.Uri,
 ): Promise<boolean> =>
@@ -274,7 +274,7 @@ export const saveSvg = async (
     sourceUri,
   });
 
-export const saveFlowPng = async (
+export const saveFlowPngFile = async (
   bytes: ArrayBuffer,
   sourceUri: vscode.Uri,
 ): Promise<boolean> =>
