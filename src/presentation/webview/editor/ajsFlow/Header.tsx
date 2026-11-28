@@ -1,7 +1,9 @@
-import React, { FC, memo } from "react";
+import React, { FC, memo, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
@@ -45,8 +47,11 @@ type HeaderProps = {
   hasExportableGraph: boolean;
   flowSaveMode?: ViewerResourceStateDto["flowSaveMode"];
   exportStatus: string;
+  isPngExporting: boolean;
   onSaveSvg: () => void;
   onCopySvg: () => void;
+  onSavePng: () => void;
+  onCopyPng: () => void;
 };
 
 type HeaderSearchFieldProps = {
@@ -245,9 +250,29 @@ const Header: FC<HeaderProps> = ({
   hasExportableGraph,
   flowSaveMode,
   exportStatus,
+  isPngExporting,
   onSaveSvg,
   onCopySvg,
+  onSavePng,
+  onCopyPng,
 }) => {
+  const [saveMenuAnchor, setSaveMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+  const [copyMenuAnchor, setCopyMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+  const saveMenuOpen = Boolean(saveMenuAnchor);
+  const copyMenuOpen = Boolean(copyMenuAnchor);
+  const saveMenuLabel = unitInformationMessage(
+    "a11y.flow.controls.saveMenu",
+    language,
+  );
+  const copyMenuLabel = unitInformationMessage(
+    "a11y.flow.controls.copyMenu",
+    language,
+  );
+
   console.log("render Header.");
 
   return (
@@ -289,46 +314,90 @@ const Header: FC<HeaderProps> = ({
             shown={showMiniMap}
             onToggle={toggleMiniMap}
           />
-          <Tooltip
-            title={unitInformationMessage(
-              "a11y.flow.controls.saveSvg",
-              language,
-            )}
-          >
+          <Tooltip title={saveMenuLabel}>
             <span>
               <IconButton
                 size="small"
-                aria-label={unitInformationMessage(
-                  "a11y.flow.controls.saveSvg",
-                  language,
-                )}
-                onClick={onSaveSvg}
+                id="flow-save-menu-button"
+                aria-label={saveMenuLabel}
+                aria-controls="flow-save-menu"
+                aria-haspopup="menu"
+                aria-expanded={saveMenuOpen}
+                onClick={(event) => setSaveMenuAnchor(event.currentTarget)}
                 disabled={!hasExportableGraph || !flowSaveMode}
               >
                 <SaveAltIcon fontSize="inherit" />
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip
-            title={unitInformationMessage(
-              "a11y.flow.controls.copySvg",
-              language,
-            )}
+          <Menu
+            id="flow-save-menu"
+            anchorEl={saveMenuAnchor}
+            open={saveMenuOpen}
+            onClose={() => setSaveMenuAnchor(null)}
+            MenuListProps={{ "aria-labelledby": "flow-save-menu-button" }}
           >
+            <MenuItem
+              disabled={!hasExportableGraph || !flowSaveMode}
+              onClick={() => {
+                setSaveMenuAnchor(null);
+                onSaveSvg();
+              }}
+            >
+              {unitInformationMessage("a11y.flow.controls.saveSvg", language)}
+            </MenuItem>
+            <MenuItem
+              disabled={!hasExportableGraph || !flowSaveMode || isPngExporting}
+              onClick={() => {
+                setSaveMenuAnchor(null);
+                onSavePng();
+              }}
+            >
+              {unitInformationMessage("a11y.flow.controls.savePng", language)}
+            </MenuItem>
+          </Menu>
+          <Tooltip title={copyMenuLabel}>
             <span>
               <IconButton
                 size="small"
-                aria-label={unitInformationMessage(
-                  "a11y.flow.controls.copySvg",
-                  language,
-                )}
-                onClick={onCopySvg}
+                id="flow-copy-menu-button"
+                aria-label={copyMenuLabel}
+                aria-controls="flow-copy-menu"
+                aria-haspopup="menu"
+                aria-expanded={copyMenuOpen}
+                onClick={(event) => setCopyMenuAnchor(event.currentTarget)}
                 disabled={!hasExportableGraph}
               >
                 <ContentCopyIcon fontSize="inherit" />
               </IconButton>
             </span>
           </Tooltip>
+          <Menu
+            id="flow-copy-menu"
+            anchorEl={copyMenuAnchor}
+            open={copyMenuOpen}
+            onClose={() => setCopyMenuAnchor(null)}
+            MenuListProps={{ "aria-labelledby": "flow-copy-menu-button" }}
+          >
+            <MenuItem
+              disabled={!hasExportableGraph}
+              onClick={() => {
+                setCopyMenuAnchor(null);
+                onCopySvg();
+              }}
+            >
+              {unitInformationMessage("a11y.flow.controls.copySvg", language)}
+            </MenuItem>
+            <MenuItem
+              disabled={!hasExportableGraph || isPngExporting}
+              onClick={() => {
+                setCopyMenuAnchor(null);
+                onCopyPng();
+              }}
+            >
+              {unitInformationMessage("a11y.flow.controls.copyPng", language)}
+            </MenuItem>
+          </Menu>
           <CurrentUnitBadge currentUnit={currentUnit} language={language} />
           <Typography
             variant="caption"

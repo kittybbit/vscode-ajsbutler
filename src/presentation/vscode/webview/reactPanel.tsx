@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { v4 } from "uuid";
+import { AJS_FLOW_VIEWER_TYPE } from "./constant";
 
 export function initReactPanel(
   context: vscode.ExtensionContext,
@@ -19,6 +20,10 @@ function _getHtmlForWebview(
   bundle: string,
 ): string {
   const nonce = v4();
+  const imageSource =
+    panel.viewType === AJS_FLOW_VIEWER_TYPE
+      ? `${panel.webview.cspSource} blob:`
+      : panel.webview.cspSource;
 
   return `
 <!DOCTYPE html>
@@ -31,7 +36,7 @@ function _getHtmlForWebview(
         http-equiv='Content-Security-Policy'
         content="default-src 'none';
                 frame-src ${panel.webview.cspSource};
-                img-src ${panel.webview.cspSource};
+                img-src ${imageSource};
                 script-src ${panel.webview.cspSource} 'nonce-${nonce}' 'wasm-unsafe-eval';
                 style-src ${panel.webview.cspSource} 'unsafe-inline';
                 child-src ${panel.webview.cspSource};

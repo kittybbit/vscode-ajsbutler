@@ -7,6 +7,8 @@ import type { TelemetryPort } from "../../../application/telemetry/TelemetryPort
 import { postResourceMessage } from "./messageHandlers";
 import {
   isInvalidViewerSaveRequest,
+  isInvalidViewerFlowPngSaveRequest,
+  FLOW_PNG_SAVE,
   NAVIGATE,
   parseViewerRequest,
   READY,
@@ -16,6 +18,7 @@ import {
   CSV_EXPORT,
   DISPLAY,
   type ViewerDisplayResult,
+  type ViewerFlowPngSaveRequest,
   type ViewerNavigationRequest,
   type ViewerRequest,
   type ViewerResourceRequest,
@@ -34,6 +37,7 @@ export type ViewerPanelHandlers = {
   onDisplay?: (result: ViewerDisplayResult, panel: vscode.WebviewPanel) => void;
   onDisposed?: (panel: vscode.WebviewPanel) => void;
   onSave?: (content: string, sourceUri: vscode.Uri) => Promise<boolean>;
+  onSavePng?: (bytes: ArrayBuffer, sourceUri: vscode.Uri) => Promise<boolean>;
 };
 
 export type ViewerPanelRegistrationRequest = {
@@ -67,6 +71,7 @@ type ViewerMessageRoutingDeps = {
   ) => void;
   onDisplay: (result: ViewerDisplayResult) => void;
   onSave?: (content: string, sourceUri: vscode.Uri) => Promise<boolean>;
+  onSavePng?: (bytes: ArrayBuffer, sourceUri: vscode.Uri) => Promise<boolean>;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
 
@@ -148,6 +153,33 @@ const handleSaveMessage = (
     });
 };
 
+const handleFlowPngSaveMessage = (
+  event: ViewerFlowPngSaveRequest,
+  {
+    onSavePng,
+    sourceUri,
+    showErrorMessage,
+  }: Pick<ViewerMessageRoutingDeps, "onSavePng" | "showErrorMessage"> & {
+    sourceUri: vscode.Uri;
+  },
+): void => {
+  if (!onSavePng) {
+    showErrorMessageSafely(
+      showErrorMessage,
+      SAVE_HANDLER_UNAVAILABLE_ERROR_MESSAGE,
+    );
+    return;
+  }
+  void Promise.resolve()
+    .then(() => onSavePng(event.data.bytes, sourceUri))
+    .catch(() => {
+      showErrorMessageSafely(
+        showErrorMessage,
+        "The PNG file could not be saved.",
+      );
+    });
+};
+
 const createViewerMessageRoutes = ({
   document,
   panel,
@@ -158,6 +190,7 @@ const createViewerMessageRoutes = ({
   onNavigate,
   onDisplay,
   onSave,
+  onSavePng,
   showErrorMessage,
 }: ViewerMessageRoutingDeps): ViewerMessageRouteMap => ({
   [RESOURCE]: (event) => {
@@ -180,6 +213,12 @@ const createViewerMessageRoutes = ({
   [SAVE]: (event) =>
     handleSaveMessage(event, {
       onSave,
+      showErrorMessage,
+      sourceUri: document.uri,
+    }),
+  [FLOW_PNG_SAVE]: (event) =>
+    handleFlowPngSaveMessage(event, {
+      onSavePng,
       showErrorMessage,
       sourceUri: document.uri,
     }),
@@ -215,6 +254,25 @@ const dispatchViewerRequest = (
   routes[event.type](event as never);
 };
 
+const invalidViewerRequestErrors: readonly [
+  (value: unknown) => boolean,
+  string,
+][] = [
+  [isInvalidViewerSaveRequest, SAVE_DATA_ERROR_MESSAGE],
+  [isInvalidViewerFlowPngSaveRequest, "The PNG export data is invalid."],
+];
+
+const getInvalidViewerRequestError = (value: unknown): string | undefined =>
+  invalidViewerRequestErrors.find(([isInvalid]) => isInvalid(value))?.[1];
+
+const showInvalidViewerRequestError = (
+  value: unknown,
+  showErrorMessage: ViewerMessageRoutingDeps["showErrorMessage"],
+): void => {
+  const message = getInvalidViewerRequestError(value);
+  if (message) showErrorMessageSafely(showErrorMessage, message);
+};
+
 export const createViewerMessageHandler = (
   deps: ViewerMessageRoutingDeps,
 ): ((value: unknown) => void) => {
@@ -222,9 +280,7 @@ export const createViewerMessageHandler = (
   return (value: unknown): void => {
     const event = parseViewerRequest(value);
     if (!event) {
-      if (isInvalidViewerSaveRequest(value)) {
-        showErrorMessageSafely(deps.showErrorMessage, SAVE_DATA_ERROR_MESSAGE);
-      }
+      showInvalidViewerRequestError(value, deps.showErrorMessage);
       return;
     }
     dispatchViewerRequest(routes, event);
@@ -245,6 +301,43 @@ type ViewerPanelRegistrationDeps = ViewerPanelRegistrationRequest & {
   store: Pick<ViewerPanelDisposeDeps["store"], "removeByUri">;
   showErrorMessage: (message: string) => Thenable<string | undefined>;
 };
+
+const invokeActivePanelSaveHandler = <TArgs extends unknown[]>(
+  isActivePanel: () => boolean,
+  handler: (...args: TArgs) => Promise<boolean>,
+  args: TArgs,
+): Promise<boolean> => {
+  if (!isActivePanel()) return Promise.resolve(false);
+  return handler(...args);
+};
+
+const createActivePanelSaveHandler = <TArgs extends unknown[]>(
+  isActivePanel: () => boolean,
+  handler: ((...args: TArgs) => Promise<boolean>) | undefined,
+  invoke: (...args: TArgs) => Promise<boolean>,
+): ((...args: TArgs) => Promise<boolean>) | undefined =>
+  handler
+    ? (...args: TArgs) =>
+        invokeActivePanelSaveHandler(isActivePanel, invoke, args)
+    : undefined;
+
+const invokeRegisteredSvgSave = (
+  handlers: ViewerPanelHandlers,
+  content: string,
+  sourceUri: vscode.Uri,
+): Promise<boolean> =>
+  handlers.onSave
+    ? handlers.onSave(content, sourceUri)
+    : Promise.resolve(false);
+
+const invokeRegisteredPngSave = (
+  handlers: ViewerPanelHandlers,
+  bytes: ArrayBuffer,
+  sourceUri: vscode.Uri,
+): Promise<boolean> =>
+  handlers.onSavePng
+    ? handlers.onSavePng(bytes, sourceUri)
+    : Promise.resolve(false);
 
 export const registerViewerPanel = ({
   document,
@@ -284,12 +377,17 @@ export const registerViewerPanel = ({
       runActivePanelOperation(() => {
         handlers.onDisplay?.(result, panel);
       }),
-    onSave: handlers.onSave
-      ? async (content, sourceUri) =>
-          runActivePanelOperation(() =>
-            handlers.onSave?.(content, sourceUri),
-          ) ?? false
-      : undefined,
+    onSave: createActivePanelSaveHandler(
+      isActivePanel,
+      handlers.onSave,
+      (content, sourceUri) =>
+        invokeRegisteredSvgSave(handlers, content, sourceUri),
+    ),
+    onSavePng: createActivePanelSaveHandler(
+      isActivePanel,
+      handlers.onSavePng,
+      (bytes, sourceUri) => invokeRegisteredPngSave(handlers, bytes, sourceUri),
+    ),
     showErrorMessage,
   });
   const receiveMessageDispose =

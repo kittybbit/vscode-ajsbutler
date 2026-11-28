@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import * as vscode from "vscode";
 import {
   executeCompareSemanticDiffCommand,
@@ -48,8 +49,95 @@ const waitForCondition = async (
   }
 };
 
+const decodeBase64Bytes = (encoded: string): Uint8Array => {
+  const alphabet =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const padding = encoded.endsWith("==") ? 2 : encoded.endsWith("=") ? 1 : 0;
+  const bytes = new Uint8Array((encoded.length / 4) * 3 - padding);
+  let outputOffset = 0;
+  for (let offset = 0; offset < encoded.length; offset += 4) {
+    const first = alphabet.indexOf(encoded[offset] ?? "");
+    const second = alphabet.indexOf(encoded[offset + 1] ?? "");
+    const third =
+      encoded[offset + 2] === "="
+        ? 0
+        : alphabet.indexOf(encoded[offset + 2] ?? "");
+    const fourth =
+      encoded[offset + 3] === "="
+        ? 0
+        : alphabet.indexOf(encoded[offset + 3] ?? "");
+    bytes[outputOffset++] = (first << 2) | (second >> 4);
+    if (encoded[offset + 2] !== "=") {
+      bytes[outputOffset++] = ((second & 15) << 4) | (third >> 2);
+    }
+    if (encoded[offset + 3] !== "=") {
+      bytes[outputOffset++] = ((third & 3) << 6) | fourth;
+    }
+  }
+  return bytes;
+};
+
+const verifyBinaryWebviewTransport = async (): Promise<void> => {
+  const panel = vscode.window.createWebviewPanel(
+    "ajs-flow-binary-transport-web-smoke",
+    "Flow binary transport smoke",
+    vscode.ViewColumn.Beside,
+    { enableScripts: true },
+  );
+  let listener: vscode.Disposable | undefined;
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    const expectedBase64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=";
+    const expectedBytes = Array.from(decodeBase64Bytes(expectedBase64));
+    const received = new Promise<number[]>((resolve, reject) => {
+      timer = setTimeout(
+        () => reject(new Error("Timed out waiting for binary Webview data.")),
+        10_000,
+      );
+      listener = panel.webview.onDidReceiveMessage((value: unknown) => {
+        if (
+          typeof value !== "object" ||
+          value === null ||
+          (value as { type?: unknown }).type !== "png-transport-probe"
+        ) {
+          return;
+        }
+        const bytes = (value as { bytes?: unknown }).bytes;
+        if (bytes instanceof ArrayBuffer) {
+          resolve(Array.from(new Uint8Array(bytes)));
+        } else if (
+          ArrayBuffer.isView(bytes) &&
+          bytes.buffer instanceof ArrayBuffer
+        ) {
+          resolve(
+            Array.from(
+              new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
+            ),
+          );
+        } else {
+          reject(new Error("Binary Webview data was not an ArrayBuffer view."));
+        }
+      });
+    });
+    const nonce = "flow-transport-smoke";
+    panel.webview.html = `<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src ${panel.webview.cspSource} 'nonce-${nonce}';"><script nonce="${nonce}">
+      const vscode = acquireVsCodeApi();
+      const binary = atob("${expectedBase64}");
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      vscode.postMessage({ type: "png-transport-probe", bytes: bytes.buffer });
+    </script>`;
+    assert.deepStrictEqual(await received, expectedBytes);
+  } finally {
+    if (timer) clearTimeout(timer);
+    listener?.dispose();
+    panel.dispose();
+  }
+};
+
 export async function run(): Promise<void> {
   await activateExtension();
+  await verifyBinaryWebviewTransport();
 
   const web12Jobnet: AjsUnit = {
     id: "/web12/jobnet",
