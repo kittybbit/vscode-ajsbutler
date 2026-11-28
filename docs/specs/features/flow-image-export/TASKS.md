@@ -5,7 +5,7 @@
 - Purpose: Save or copy the full active JP1/AJS flow with its current
   nested-jobnet expansion.
 - Slice order: SVG save and source copy, followed by PNG save and image copy.
-  Slice 1 is committed and published. Slice 2 is awaiting replan review.
+  Slice 1 is committed and published. Slice 2 adds the shared format menus.
 - Read [requirements and acceptance](SPECS.md#requirements-and-acceptance),
   Slice 2 scope and validation, and [traceability](TRACEABILITY.md).
 - Constraints: Preserve existing graph and CSV behavior. Desktop uses the
@@ -13,10 +13,10 @@
 
 ## Current state
 
-- Lifecycle state: `PLANNED`
-- Active slice: Slice 2, PNG save and image copy.
-- Next operation: Independent review of the revised Slice 2 plan, then
-  Human Approval for the affected boundary and a replan commit.
+- Lifecycle state: `PLAN_APPROVED`
+- Active slice: Slice 2, PNG output and format menus for Save and Copy.
+- Next operation: Resume Slice 2 implementation after the focused
+  format-menu replan commit.
 - Gate evidence: Slice 1 is `SLICE_COMMITTED`. The approved Layer 1 head
   has passed its predecessor gates. Original plan approval and Slice 1
   Completion Approval are recorded below.
@@ -35,14 +35,18 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   `/private/tmp/ajsbutler-svg-completion-vavq0kzc/pr-verified.json`.
 - Layer 2: Main created `codex/flow-image-export-png` from verified Layer 1
   head `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`. The planned PR targets
-  `codex/flow-image-export`. Layer 2 approval, replan commit,
-  implementation, PR, and exact-head checks are pending.
+  `codex/flow-image-export`. Slice 2's revised validation boundary was
+  reviewed and approved. Main recorded that approval and committed the
+  smoke-path replan as `d8fd31e77bec8d6a8652b43f7b7b8e7b9b302c78`.
+  That commit is the format-menu replan comparison base. The renewed approval
+  is recorded below. Implementation review, PR publication, and exact-head
+  checks are pending.
 - Main publishes or updates each layer promptly after its independent Ready
   verdict, explicit Completion Approval, and focused completion commit.
   Layer 2 is the final integration head. The layers remain open for feature
   integration, with closure and explicit merge approval on final identities.
-- Feature Exit propagates current usage to [README.md](../../../../README.md),
-  save and clipboard behavior to
+- Feature Exit propagates the two-menu workflow to
+  [README.md](../../../../README.md), save and clipboard behavior to
   [Explore Flow Graph](../../../requirements/use-cases/uc-explore-flow-graph.md),
   and both user-visible additions to [CHANGELOG.md](../../../../CHANGELOG.md).
   The exit proposal lists removal of this feature's `SPECS.md`, `TASKS.md`,
@@ -52,14 +56,30 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 Apply the [native stack contract](../../README.md#github-standard-stacked-pull-requests)
 and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 
-## Slice 2 Replan Human Approval
+## Slice 2 Format Menu Replan Human Approval
+
+- Status: Approved
+- Approved at: 2026-11-28, in the current conversation.
+- Approved scope: Replace the two completed SVG toolbar buttons and the
+  two PNG buttons in the pending candidate with one Save and one Copy
+  button. Each opens SVG and PNG choices under FE-08.
+- Approved paths: The existing Slice 2 product and validation-support path
+  boundary below and this feature's planning documents.
+- Review verdict: `Ready` from the independent plan reviewer.
+- Reviewed plan: `71ccf82e49f711b51843d31a512487d1ed2d8547ff3535cb6e034311fa4ebcee`.
+- Review base: `d8fd31e77bec8d6a8652b43f7b7b8e7b9b302c78`.
+- Review and validation evidence:
+  `/private/tmp/ajsbutler-flow-png-format-menu-replan-r1/manifest.json`.
+
+## Slice 2 Desktop Smoke Replan Human Approval
 
 - Status: Approved
 - Approved at: 2026-11-28, in the current conversation.
 - Approved scope: The reviewed Slice 2 plan, adding the existing runner to
   stable and minimum Desktop PNG smoke validation.
-- Approved paths: The Slice 2 boundary below, with `src/test/runTest.ts` as
-  the sole addition to the original validation-support paths.
+- Approved paths: The Slice 2 boundary recorded in the smoke-path replan
+  commit, with `src/test/runTest.ts` as the sole addition to the original
+  validation-support paths.
 - Review verdict: `Ready` from the independent plan reviewer.
 - Reviewed plan: `65cf3794f16826743abaf65477a8f8b8ff4f3cc634ee0019a3aa82ceddbef0b5`.
 - Review base: `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
@@ -357,25 +377,31 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 [Quality Contract](../../validation.md#quality-contract), and
 [Solution Shape](../../architecture.md#solution-shape).
 
-### Slice 2: Save PNG and copy an image
+### Slice 2: PNG output and shared export menus
 
-- Lifecycle state: `PLANNED`. Depends on Slice 1 at verified PR #354 head
+- Lifecycle state: `PLAN_APPROVED`. Depends on Slice 1 at verified PR #354 head
   `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
-- Replan trigger: Slice 1's verified implementation puts trusted renderer
-  actions and native Electron clipboard reads in `src/test/runTest.ts`.
-  Slice 2 needs that path to drive the actual PNG action on both Desktop
-  versions. The existing support module owns the extension-host fixture
-  and result handshake. This replan adds only the runner to the exact
-  validation-support boundary.
-- Scope and value: Save PNG and Copy image cover FE-02, FE-04, FE-06 and
-  FE-07, adding a ready-to-paste raster image while keeping the SVG choices.
-- Acceptance: One keyboard-operable action saves a PNG of the same graph and
-  paint as SVG. A separate Copy image action writes one `image/png` item,
-  which can be pasted into applications that accept images. Each action
-  uses the full scope and expansion captured at activation. Desktop
+- Replan trigger: The user requested a Save icon and a Copy icon, with a
+  format choice in each menu. The separate-button implementation is paused
+  and uncommitted. Its retained candidate is indexed separately from the
+  documentation patch. The Layer 1 commit stays intact.
+- Scope and value: Provide PNG save and image copy alongside the existing SVG
+  operations, through one Save and one Copy icon in the final toolbar.
+  Slice 2 covers FE-02, FE-04, and FE-06 through FE-08, and retains FE-01 and
+  FE-05 behavior through the new entry points.
+- Acceptance: Save offers SVG file and PNG file. Copy offers SVG source text
+  and PNG image. SVG copy still writes plain text. PNG copy writes one
+  `image/png` item. Opening and dismissing the menu leave the export and
+  graph state untouched. The selected menu item captures the current scope
+  and expansion. Keyboard navigation, selection, dismissal and focus
+  return use the menu interaction. With an exportable graph, selecting
+  either copy format can report missing clipboard capability without
+  serializing or rasterizing the graph. A pending PNG operation disables
+  PNG actions while preserving usable SVG actions. Desktop
   supports the same source-URI protection and destination handling as SVG,
   including for a JP1/AJS source with a `.png` suffix. Web uses a browser
-  Blob download after rasterization, with one user action.
+  Blob download after rasterization, without another confirmation step
+  after PNG selection.
 - Failures and risks: Rasterization, oversized input or output, absent
   image clipboard support, rejected clipboard writes, and host write
   failures receive localized feedback. Copy failures leave file save
@@ -387,6 +413,28 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 
 #### Solution Shape for Slice 2
 
+- `Header.tsx` owns the two localized `IconButton` triggers and anchored
+  MUI `Menu` and `MenuItem` choices. Use MUI focus, arrow navigation and
+  dismissal. The triggers expose their names and menu expanded state.
+  Close on selection, Escape or outside dismissal. Escape restores focus
+  to the trigger. Graph readiness, save mode and the existing PNG in-flight
+  guard determine which controls or choices are disabled. Keep both copy
+  choices reachable with an exportable graph, subject to that PNG guard,
+  even when the browser lacks one or both clipboard capabilities. Copy
+  labels distinguish SVG source text from the PNG image.
+- `FlowContents.tsx` provides the existing four action callbacks. Each
+  menu item calls only its corresponding callback directly from selection.
+  This preserves trusted activation for clipboard writes and captures the
+  graph at selection. Menu state carries the anchor and the operation
+  only. Opening or dismissing a menu starts no serialization, rasterization,
+  download, host save, or clipboard action. Use the existing format
+  payloads, host contracts, localization resources and status feedback.
+- The selected copy callback checks its existing clipboard requirements before
+  serializing the diagram or starting rasterization. SVG checks `writeText`.
+  PNG checks `ClipboardItem` and `write`. Missing support reports the existing
+  format-specific localized unavailable status without drawing, writing the
+  clipboard, or saving a file. A denied write reports the corresponding
+  localized failure. File save remains independent of both capabilities.
 - The Flow Viewer webview owns rasterization. It uses Slice 1's exact
   standalone SVG representation and its padded dimensions at CSS-pixel
   scale. Reuse dimensions computed with the SVG instead of reconstructing
@@ -421,8 +469,9 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 - Browser PNG save reuses the existing Flow Blob download action with a
   PNG name/MIME after encoding finishes. A Chromium discovery probe
   observed a successful Blob download after transient activation expired
-  using the matching nested frame capabilities. There is no second gesture
-  or successful-download claim in the extension.
+  using the matching nested frame capabilities. The selected menu item
+  starts the download path. The extension reports initiation failures
+  it detects, and completion remains with the browser.
 - Desktop gets a separate typed PNG save request with an `ArrayBuffer` in
   the existing viewer protocol, supported by the baseline's binary message
   transport. The host validates type, length, PNG signature, and valid
@@ -475,6 +524,11 @@ Validation-support paths:
 - `src/test/support/flowImageDesktopSmoke.ts`
 - `src/test/support/flowImageWebSmoke.ts`
 
+The format-menu change uses the existing header, Flow callback wiring,
+English and Japanese strings, Flow Contents integration suite, Desktop runner,
+and Web smoke driver listed above. The prior exact implementation paths
+remain the proposed boundary.
+
 Slice records: `docs/specs/features/flow-image-export/TASKS.md` and
 `docs/specs/features/flow-image-export/TRACEABILITY.md`. Use the separate
 closure boundary above for the durable edits and feature-record removal.
@@ -490,6 +544,21 @@ closure boundary above for the durable edits and feature-record removal.
   clipboard when unsupported, keeps `image/png` as the sole clipboard
   MIME, and localizes progress and outcomes. Cover view-state conservation
   and overlapping activation while a raster operation is pending.
+- Format menus: Flow Contents integration covers exactly two export
+  triggers, both choices per menu, the difference between copying text
+  and an image, no-graph availability, and busy PNG options with usable SVG
+  siblings. Verify that opening and dismissing either menu causes no
+  export or graph changes.
+  Exercise Escape focus return, keyboard format selection, and routing
+  exactly one operation using the graph at selection. Keep existing
+  unrelated header controls and Flow behaviors covered by their checks.
+- Missing copy capability: In Flow Contents integration, exercise SVG-only
+  support, PNG-only support, and neither capability. Selecting a missing
+  format reports its localized unavailable status without SVG serialization,
+  PNG rasterization, or clipboard or file writes. The supported copy choice
+  still works when present. Both Save choices remain usable when clipboard
+  APIs are missing. Retain coverage for denied writes and their
+  localized failure status.
 - Host boundaries: Validate binary request shape, size, signature and
   dimensions. Check a disposed, Table, or Web panel cannot initiate the
   Desktop PNG save. Desktop wiring tests cover actual bytes at the
@@ -498,15 +567,18 @@ closure boundary above for the durable edits and feature-record removal.
   CSP delta preserves the other viewers' generated markup.
 - Production Web clipboard and download: Extend the Layer 1 headless
   Chromium workbench driver to observe actual PNG download bytes, read
-  back the actual clipboard MIME, and decode both images. Compare dimensions,
+  back the actual clipboard MIME, and decode both images. Drive both
+  menus with keyboard input and verify both formats for saving and copying.
+  Compare dimensions,
   same-scope expansion and visible content including rendered Japanese
   text, panel borders and off-viewport edges. Check no external asset
   requests. Retain the SVG cases. Exercise denied clipboard writes and
   continuing PNG file save in the Flow Contents integration suite.
 - Production Desktop clipboard: Extend the Layer 1 smoke in stable and
   minimum 1.75.0 through the existing renderer driver and
-  `exerciseFlowClipboard` in `src/test/runTest.ts`. Click the actual Copy
-  image action in the Flow Webview with trusted input and wait for its
+  `exerciseFlowClipboard` in `src/test/runTest.ts`. Use trusted input to
+  select SVG and PNG from the actual Copy menu and exercise both Save
+  menu items for source protection. Wait for PNG copy's
   confirmed-success status. Read back the actual `image/png` clipboard item
   and use the runner's `application.evaluate` bridge for native Electron
   image readback. Check the PNG signature and dimensions against the SVG
@@ -530,9 +602,9 @@ closure boundary above for the durable edits and feature-record removal.
   explicit if a required test cannot complete. Retain code and host evidence
   outside analyzed inputs and record the final layer identities and gate
   references in this plan and the PR.
-  Replan discovery and document validation are recorded at
-  `/private/tmp/ajsbutler-flow-image-slice2-replan/manifest.json`.
-  The pre-replan observation at
-  `/private/tmp/flow-image-export-slice2/pre-replan-predecessor`
-  applies to the predecessor head. Verify the approved implementation
-  baseline after the replan commit under the Evidence Contract.
+  Format-menu plan identity and document checks are recorded at
+  `/private/tmp/ajsbutler-flow-png-format-menu-replan-r1/manifest.json`.
+  The paused product and test candidate is retained separately at
+  `/private/tmp/flow-png-pre-format-menu.lv8rKD`. Reconcile that candidate
+  with the reviewed plan and verify baseline and final evidence after
+  the approved replan commit under the Evidence Contract.
