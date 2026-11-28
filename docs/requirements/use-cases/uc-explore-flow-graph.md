@@ -13,6 +13,7 @@ flow scope while preserving predictable navigation and viewport state.
 - the user searches within the current flow scope
 - the user selects or hovers a graph or flow-tree unit
 - the user changes relationship focus or collapses supporting panels
+- the user chooses a format to save or copy the flow diagram
 
 ## Inputs
 
@@ -32,6 +33,7 @@ flow scope while preserving predictable navigation and viewport state.
 - selected, hovered, and relationship-focused units
 - viewport fitting, reveal, or centering requests that preserve the current
   graph scope
+- a saved SVG or PNG diagram, or SVG text or PNG image copied to the clipboard
 
 ## Rules
 
@@ -122,6 +124,23 @@ flow scope while preserving predictable navigation and viewport state.
   a defined meaningful fallback
 - this presentation-local search behavior does not create a shared search
   domain contract
+- Save and Copy each offer SVG and PNG choices. Selecting a choice captures
+  the current graph and starts only that operation; opening or dismissing a
+  menu does not export or change graph state. Users can open, navigate,
+  select, and dismiss each menu with the keyboard; Escape restores focus to
+  the invoking control
+- saved and copied diagrams include the full active flow scope and its
+  currently expanded nested jobnets, including content outside the viewport.
+  They exclude viewer controls and transient search, Semantic Diff, hover,
+  selection, and focus emphasis, and leave exploration state unchanged
+- Desktop saves use VS Code's destination picker and reject overwriting the
+  source definition. Web saves use browser-managed downloads
+- SVG copy writes standalone SVG source as text. PNG copy writes an
+  `image/png` item when the host supports and permits image clipboard access.
+  Missing or denied clipboard access and export failures receive localized
+  feedback; save remains available when clipboard access is unavailable
+- PNG output has dimension and size limits. When a diagram exceeds those
+  limits, PNG export reports a localized failure and SVG remains available
 
 ## Behavioral Scenarios
 
@@ -251,6 +270,22 @@ Scenario: Semantic Diff overlay preserves accessible Flow exploration
   Then added, removed, changed, and confirmation-required states are exposed
   through text and non-color cues
   And ordinary search, nesting, scope, and keyboard behavior remain unchanged
+
+Scenario: Save or copy the full active flow in the selected format
+  Given an active flow scope with expanded nested jobnets and content outside
+    the viewport
+  When the user selects SVG or PNG from Save or Copy
+  Then only the selected operation runs using the current graph
+  And the output includes the full active scope and current expansion
+  And the viewer's scope, expansion, selection, and viewport remain unchanged
+  And the output excludes viewer controls and transient emphasis
+
+Scenario: Copy reports unavailable clipboard formats
+  Given an active flow and a host without the selected clipboard capability
+  When the user selects SVG text or a PNG image from Copy
+  Then localized feedback reports that copying is unavailable
+  And no diagram is serialized or rasterized for the unavailable choice
+  And available save and copy choices remain usable
 
 Scenario: Duplicate semantic relation targets remain distinguishable
   Given multiple formal Flow edges match one Semantic Diff relation pair
