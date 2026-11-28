@@ -6,12 +6,15 @@ import {
 import type { TelemetryPort } from "../../application/telemetry/TelemetryPort";
 import {
   createViewerDisplayAcknowledgementRequest,
+  createViewerFlowPngSaveRequest,
   createViewerNavigationRequest,
   createViewerReadyRequest,
   createViewerResourceRequest,
   createViewerSaveRequest,
   createViewerSearchRequest,
   parseViewerRequest,
+  FLOW_PNG_MAX_BYTES,
+  FLOW_PNG_SAVE,
 } from "../../presentation/webview/viewerRequestMessages";
 import {
   createViewerMessageHandler,
@@ -21,6 +24,17 @@ import {
 
 const flushMicrotasks = async (): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, 0));
+};
+
+const createPngHeader = (): ArrayBuffer => {
+  const bytes = new Uint8Array(33);
+  bytes.set([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82]);
+  const header = new DataView(bytes.buffer);
+  header.setUint32(16, 1);
+  header.setUint32(20, 1);
+  bytes[24] = 8;
+  bytes[25] = 6;
+  return bytes.buffer;
 };
 
 suite("Viewer message routing", () => {
@@ -110,6 +124,40 @@ suite("Viewer message routing", () => {
     assert.deepStrictEqual(calls, []);
   });
 
+  test("reports oversized PNG views without allocating during invalid routing", () => {
+    const errors: string[] = [];
+    const bytes = new ArrayBuffer(FLOW_PNG_MAX_BYTES + 1);
+    let sliceCalls = 0;
+    Object.defineProperty(bytes, "slice", {
+      value: () => {
+        sliceCalls += 1;
+        throw new Error("oversized PNG data must not be copied");
+      },
+    });
+    const handler = createViewerMessageHandler({
+      document: {} as never,
+      panel: {} as never,
+      telemetry: { report() {}, dispose() {} },
+      isActivePanel: () => true,
+      onReady: () => {},
+      onResource: () => {},
+      onNavigate: () => {},
+      onDisplay: () => {},
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    handler({
+      type: FLOW_PNG_SAVE,
+      data: { bytes: new Uint8Array(bytes) },
+    });
+
+    assert.deepStrictEqual(errors, ["The PNG export data is invalid."]);
+    assert.strictEqual(sliceCalls, 0);
+  });
+
   test("keeps analytics silent for an inactive panel", () => {
     const events: unknown[] = [];
     const handler = createViewerMessageHandler({
@@ -186,6 +234,7 @@ suite("Viewer message routing", () => {
     });
 
     handler({ type: "save", data: 1 });
+    handler({ type: "flow_png_save", data: { bytes: new ArrayBuffer(1) } });
     handler(createViewerResourceRequest("window"));
     handler(createViewerReadyRequest());
     handler(createViewerSaveRequest("body"));
@@ -194,6 +243,7 @@ suite("Viewer message routing", () => {
 
     assert.deepStrictEqual(errors, [
       "Data is not a string and cannot be saved.",
+      "The PNG export data is invalid.",
       "Viewer resources could not be loaded.",
       "The viewer document could not be refreshed.",
       "Viewer navigation could not be completed.",
@@ -381,6 +431,94 @@ suite("Viewer message routing", () => {
     ]);
   });
 
+  test("denies PNG saves for disposed Flow and Table panels", async () => {
+    const calls: string[] = [];
+    const errors: string[] = [];
+    const flowUri = { toString: () => "file:///flow.ajs" };
+    let active = true;
+    let receiveFlowMessage: ((value: unknown) => void) | undefined;
+    let disposeFlowPanel: (() => void) | undefined;
+    const flowPanel = {
+      webview: {
+        onDidReceiveMessage(handler: (value: unknown) => void) {
+          receiveFlowMessage = handler;
+          return { dispose() {} };
+        },
+      },
+      onDidDispose(handler: () => void) {
+        disposeFlowPanel = () => {
+          active = false;
+          handler();
+        };
+        return { dispose() {} };
+      },
+    };
+
+    registerViewerPanel({
+      document: { uri: flowUri } as never,
+      panel: flowPanel as never,
+      viewType: "ajsbutler.flowViewer",
+      handlers: {
+        onReady: () => undefined,
+        onNavigate: () => undefined,
+        onSavePng: async () => {
+          calls.push("flow-save");
+          return true;
+        },
+      },
+      isActivePanel: () => active,
+      telemetry: { report() {}, dispose() {} },
+      store: { removeByUri() {} },
+      showErrorMessage: async (message) => {
+        errors.push(message);
+        return undefined;
+      },
+    });
+
+    disposeFlowPanel?.();
+    receiveFlowMessage?.(createViewerFlowPngSaveRequest(createPngHeader()));
+
+    const registerUnsupportedPanel = (viewType: string): void => {
+      let receiveMessage: ((value: unknown) => void) | undefined;
+      registerViewerPanel({
+        document: {
+          uri: { toString: () => `file:///${viewType}.ajs` },
+        } as never,
+        panel: {
+          webview: {
+            onDidReceiveMessage(handler: (value: unknown) => void) {
+              receiveMessage = handler;
+              return { dispose() {} };
+            },
+          },
+          onDidDispose() {
+            return { dispose() {} };
+          },
+        } as never,
+        viewType,
+        handlers: {
+          onReady: () => undefined,
+          onNavigate: () => undefined,
+        },
+        isActivePanel: () => true,
+        telemetry: { report() {}, dispose() {} },
+        store: { removeByUri() {} },
+        showErrorMessage: async (message) => {
+          errors.push(message);
+          return undefined;
+        },
+      });
+      receiveMessage?.(createViewerFlowPngSaveRequest(createPngHeader()));
+    };
+    registerUnsupportedPanel("ajsbutler.tableViewer");
+    await flushMicrotasks();
+
+    assert.deepStrictEqual(calls, []);
+    assert.deepStrictEqual(errors, [
+      "Saving is not available for this viewer.",
+    ]);
+  });
+
   test("looks up optional registered handlers at invocation time", async () => {
     const calls: string[] = [];
     const errors: string[] = [];
@@ -390,6 +528,10 @@ suite("Viewer message routing", () => {
       onNavigate: () => undefined,
       onSave: async () => {
         calls.push("initial-save");
+        return true;
+      },
+      onSavePng: async () => {
+        calls.push("initial-png-save");
         return true;
       },
     };
@@ -432,18 +574,30 @@ suite("Viewer message routing", () => {
       calls.push(`replacement-save:${content}`);
       return true;
     };
+    handlers.onSavePng = async function (this: ViewerPanelHandlers, bytes) {
+      assert.strictEqual(this, handlers);
+      calls.push(`replacement-png-save:${bytes.byteLength}`);
+      return true;
+    };
     receiveMessageHandler?.(
       createViewerDisplayAcknowledgementRequest("success"),
     );
     receiveMessageHandler?.(createViewerSaveRequest("replacement"));
+    const replacementPngBytes = createPngHeader();
+    receiveMessageHandler?.(
+      createViewerFlowPngSaveRequest(replacementPngBytes),
+    );
     await flushMicrotasks();
     handlers.onSave = undefined;
+    handlers.onSavePng = undefined;
     receiveMessageHandler?.(createViewerSaveRequest("removed"));
+    receiveMessageHandler?.(createViewerFlowPngSaveRequest(createPngHeader()));
     await flushMicrotasks();
 
     assert.deepStrictEqual(calls, [
       "display:success:true",
       "replacement-save:replacement",
+      `replacement-png-save:${replacementPngBytes.byteLength}`,
     ]);
     assert.deepStrictEqual(errors, []);
   });

@@ -5,7 +5,6 @@ import Stack from "@mui/material/Stack";
 import { ThemeProvider, type Theme } from "@mui/material/styles";
 import { useMyAppContext } from "../MyContexts";
 import { type Edge, ReactFlowProvider } from "@xyflow/react";
-import { createViewerSaveRequest } from "../../viewerRequestMessages";
 import "@xyflow/react/dist/style.css";
 import UnitDefinitionDialog from "../UnitDefinitionDialog";
 import type { FlowGraphUnitDto } from "../../../../application/flow-graph/flowGraphDocument";
@@ -39,8 +38,14 @@ import {
 } from "../shared/viewerAnnouncements";
 import { unitInformationMessage } from "../unitInformationLocalization";
 import { useFlowDisplayAcknowledgement } from "./useFlowViewerEffects";
-import { createFlowSvg, isPanelBoundsNode } from "./flowSvgExport";
-import type { ViewerResourceStateDto } from "../../viewerHostMessages";
+import { isPanelBoundsNode } from "./flowSvgExport";
+import {
+  copyFlowPng,
+  copyFlowSvg,
+  reportFlowPngExportFailure,
+  saveFlowPng,
+  saveFlowSvg,
+} from "./flowImageExportActions";
 
 export type { SemanticDiffRelationDuplicateGroup } from "./FlowGraphCanvas";
 
@@ -100,6 +105,10 @@ export const collectSemanticDiffRelationDuplicateGroups = (
 };
 
 type FlowViewerController = ReturnType<typeof useFlowViewerController>;
+
+const isExportableFlowNode = (
+  node: FlowViewerController["nodes"][number],
+): boolean => node.data.unitId === node.id && !isPanelBoundsNode(node);
 
 type FlowViewerBodyProps = Pick<
   FlowViewerController,
@@ -332,6 +341,23 @@ const openSelectedDefinition = (
   openDefinition();
 };
 
+const withPngExportLock =
+  (beginPngExport: () => boolean, action: VoidFunction): VoidFunction =>
+  () => {
+    if (!beginPngExport()) return;
+    action();
+  };
+
+const tryBeginFlowPngExport = (
+  inProgress: { current: boolean },
+  setExporting: (value: boolean) => void,
+): boolean => {
+  if (inProgress.current) return false;
+  inProgress.current = true;
+  setExporting(true);
+  return true;
+};
+
 type FlowViewerActionsInput = Readonly<{
   currentUnitIdState: CurrentUnitIdStateType;
   flowDocumentDto: FlowViewerController["flowDocumentDto"];
@@ -450,157 +476,22 @@ const useFlowViewerActions = ({
   };
 };
 
-type ExportStatusSetter = (message: string) => void;
-type FlowSvgNode = Parameters<typeof createFlowSvg>[0][number];
-type FlowSvgEdge = Parameters<typeof createFlowSvg>[1][number];
-type FlowSvgActionContext = Readonly<{
-  nodes: readonly FlowSvgNode[];
-  edges: readonly FlowSvgEdge[];
-  language: string;
-  setExportStatus: ExportStatusSetter;
-}>;
-type FlowSvgFeedback = Pick<
-  FlowSvgActionContext,
-  "language" | "setExportStatus"
->;
-
-const createSvgForAction = ({
-  nodes,
-  edges,
-  language,
-  setExportStatus,
-}: FlowSvgActionContext): string | undefined => {
-  setExportStatus("");
-  const result = createFlowSvg(nodes, edges);
-  if (result.status !== "available") {
-    setExportStatus(unitInformationMessage("flow.svg.export.failed", language));
-    return undefined;
-  }
-  return result.image.svg;
-};
-
-const showSvgActionError = (
-  messageKey: "flow.svg.export.failed" | "flow.svg.copy.failed",
-  language: string,
-  setExportStatus: ExportStatusSetter,
-): void => setExportStatus(unitInformationMessage(messageKey, language));
-
-const saveSvgToDesktop = (
-  svg: string,
-  { language, setExportStatus }: FlowSvgFeedback,
-): void => {
-  try {
-    window.vscode.postMessage(createViewerSaveRequest(svg));
-  } catch {
-    showSvgActionError("flow.svg.export.failed", language, setExportStatus);
-  }
-};
-
-const revokeDownloadUrl = (objectUrl: string | undefined): void => {
-  if (objectUrl) URL.revokeObjectURL(objectUrl);
-};
-
-const downloadSvg = (
-  svg: string,
-  { language, setExportStatus }: FlowSvgFeedback,
-): void => {
-  let objectUrl: string | undefined;
-  let anchor: HTMLAnchorElement | undefined;
-  try {
-    const downloadUrl = URL.createObjectURL(
-      new Blob([svg], { type: "image/svg+xml;charset=utf-8" }),
-    );
-    objectUrl = downloadUrl;
-    anchor = document.createElement("a");
-    anchor.href = downloadUrl;
-    anchor.download = "ajs-flow.svg";
-    anchor.style.display = "none";
-    document.body.appendChild(anchor);
-    anchor.click();
-    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-  } catch {
-    revokeDownloadUrl(objectUrl);
-    showSvgActionError("flow.svg.export.failed", language, setExportStatus);
-  } finally {
-    anchor?.remove();
-  }
-};
-
-const saveSvgForMode = (
-  svg: string,
-  context: FlowSvgActionContext & {
-    mode: ViewerResourceStateDto["flowSaveMode"];
-  },
-): void => {
-  switch (context.mode) {
-    case "dialog":
-      saveSvgToDesktop(svg, context);
-      return;
-    case "download":
-      downloadSvg(svg, context);
-      return;
-    default:
-      return;
-  }
-};
-
-const saveSvgForGraph = (
-  context: FlowSvgActionContext & {
-    mode: ViewerResourceStateDto["flowSaveMode"];
-  },
-): void => {
-  const svg = createSvgForAction(context);
-  if (svg === undefined) return;
-  saveSvgForMode(svg, context);
-};
-
-const reportClipboardWrite = (
-  write: Promise<void>,
-  { language, setExportStatus }: FlowSvgFeedback,
-): void => {
-  void write
-    .then(() =>
-      setExportStatus(
-        unitInformationMessage("flow.svg.copy.success", language),
-      ),
-    )
-    .catch(() =>
-      showSvgActionError("flow.svg.copy.failed", language, setExportStatus),
-    );
-};
-
-const writeSvgToClipboard = (
-  svg: string,
-  { language, setExportStatus }: FlowSvgFeedback,
-): void => {
-  const clipboard = navigator.clipboard;
-  if (typeof clipboard?.writeText !== "function") {
-    setExportStatus(
-      unitInformationMessage("flow.svg.copy.unavailable", language),
-    );
-    return;
-  }
-  try {
-    reportClipboardWrite(clipboard.writeText(svg), {
-      language,
-      setExportStatus,
-    });
-  } catch {
-    showSvgActionError("flow.svg.copy.failed", language, setExportStatus);
-  }
-};
-
-const copySvgForGraph = (context: FlowSvgActionContext): void => {
-  const svg = createSvgForAction(context);
-  if (svg !== undefined) writeSvgToClipboard(svg, context);
-};
-
 const FlowContents: FC = () => {
   console.log("render FlowContents.");
 
   const theme = useFlowTheme();
   const { flowSaveMode, lang = "en" } = useMyAppContext();
   const [exportStatus, setExportStatus] = useState("");
+  const [isPngExporting, setIsPngExporting] = useState(false);
+  const pngExportInProgressRef = useRef(false);
+  const beginPngExport = useCallback(
+    () => tryBeginFlowPngExport(pngExportInProgressRef, setIsPngExporting),
+    [],
+  );
+  const finishPngExport = useCallback((): void => {
+    pngExportInProgressRef.current = false;
+    setIsPngExporting(false);
+  }, []);
   const announcementHostRef = useRef<ViewerAnnouncementHostHandle>(null);
 
   const {
@@ -655,12 +546,10 @@ const FlowContents: FC = () => {
     returnFromDetail,
     selectionFocusRequest,
   } = useFlowViewerController({ theme });
-  const hasExportableGraph = nodes.some(
-    (node) => node.data.unitId === node.id && !isPanelBoundsNode(node),
-  );
+  const hasExportableGraph = nodes.some(isExportableFlowNode);
   const handleSaveSvg = useCallback(
     () =>
-      saveSvgForGraph({
+      saveFlowSvg({
         nodes,
         edges,
         mode: flowSaveMode,
@@ -670,8 +559,36 @@ const FlowContents: FC = () => {
     [edges, flowSaveMode, lang, nodes],
   );
   const handleCopySvg = useCallback(
-    () => copySvgForGraph({ nodes, edges, language: lang, setExportStatus }),
+    () => copyFlowSvg({ nodes, edges, language: lang, setExportStatus }),
     [edges, lang, nodes],
+  );
+  const handleSavePng = useCallback(
+    withPngExportLock(beginPngExport, () => {
+      void saveFlowPng({
+        nodes,
+        edges,
+        mode: flowSaveMode,
+        language: lang,
+        setExportStatus,
+      })
+        .catch(() =>
+          reportFlowPngExportFailure({
+            language: lang,
+            setExportStatus,
+          }),
+        )
+        .finally(finishPngExport);
+    }),
+    [beginPngExport, edges, finishPngExport, flowSaveMode, lang, nodes],
+  );
+  const handleCopyPng = useCallback(
+    withPngExportLock(beginPngExport, () =>
+      copyFlowPng(
+        { nodes, edges, language: lang, setExportStatus },
+        finishPngExport,
+      ),
+    ),
+    [beginPngExport, edges, finishPngExport, lang, nodes],
   );
   useFlowDisplayAcknowledgement();
   const { onRendererReady, reactFlowInstanceRef } = useFlowViewportAdapter({
@@ -796,8 +713,11 @@ const FlowContents: FC = () => {
             hasExportableGraph={hasExportableGraph}
             flowSaveMode={flowSaveMode}
             exportStatus={exportStatus}
+            isPngExporting={isPngExporting}
             onSaveSvg={handleSaveSvg}
             onCopySvg={handleCopySvg}
+            onSavePng={handleSavePng}
+            onCopyPng={handleCopyPng}
           />
           <FlowViewerBody
             flowDocumentDto={flowDocumentDto}

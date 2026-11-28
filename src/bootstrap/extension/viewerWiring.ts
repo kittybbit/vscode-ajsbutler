@@ -30,6 +30,7 @@ import {
 } from "../../presentation/vscode/webview/ajsDocument";
 import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
 import {
+  saveFlowPng,
   saveSvg,
   saveText,
 } from "../../presentation/vscode/webview/messageHandlers";
@@ -44,7 +45,13 @@ type ViewerSaveRequest = Readonly<{
 type ViewerConfig = {
   viewType: string;
   saveHandler?: (request: ViewerSaveRequest) => Promise<boolean>;
+  pngSaveHandler?: (request: ViewerPngSaveRequest) => Promise<boolean>;
 };
+
+type ViewerPngSaveRequest = Readonly<{
+  bytes: ArrayBuffer;
+  sourceUri: vscode.Uri;
+}>;
 
 const viewerConfigs: ViewerConfig[] = [
   {
@@ -57,6 +64,20 @@ const viewerConfigs: ViewerConfig[] = [
     saveHandler: ({ content, sourceUri }) => saveSvg(content, sourceUri),
   },
 ];
+
+const saveFlowPngRequest = ({
+  bytes,
+  sourceUri,
+}: ViewerPngSaveRequest): Promise<boolean> => saveFlowPng(bytes, sourceUri);
+
+const pngSaveHandlersByUiKind: Readonly<
+  Record<vscode.UIKind, ReadonlyMap<string, ViewerConfig["pngSaveHandler"]>>
+> = {
+  [vscode.UIKind.Desktop]: new Map([
+    [AJS_FLOW_VIEWER_TYPE, saveFlowPngRequest],
+  ]),
+  [vscode.UIKind.Web]: new Map(),
+};
 
 export type ViewerWiringDeps = {
   context: vscode.ExtensionContext;
@@ -425,6 +446,7 @@ type ViewerBundleOptions = ViewerWiringDeps & {
   factoryByViewType: Map<string, ViewerFactory>;
   viewType: string;
   saveHandler?: ViewerConfig["saveHandler"];
+  pngSaveHandler?: ViewerConfig["pngSaveHandler"];
   pendingRevealByPanel: WeakMap<vscode.WebviewPanel, string>;
   displayStateByPanel: WeakMap<vscode.WebviewPanel, ViewerDisplayState>;
   flowBridge?: SemanticDiffFlowViewerBridge;
@@ -538,15 +560,30 @@ const saveCsvAndReport = async ({
   return saved;
 };
 
-const createViewerSaveHandler = (
+const createViewerHandler = <TRequest, TArgs extends unknown[]>(
+  handler: ((request: TRequest) => Promise<boolean>) | undefined,
+  createRequest: (...args: TArgs) => TRequest,
+): ((...args: TArgs) => Promise<boolean>) | undefined =>
+  handler ? (...args: TArgs) => handler(createRequest(...args)) : undefined;
+
+const createViewerSaveHandlers = (
   telemetry: TelemetryPort,
   saveHandler: ViewerBundleOptions["saveHandler"],
-):
-  | ((content: string, sourceUri: vscode.Uri) => Promise<boolean>)
-  | undefined => {
-  if (!saveHandler) return undefined;
-  return (content, sourceUri) => saveHandler({ content, sourceUri, telemetry });
-};
+  pngSaveHandler: ViewerBundleOptions["pngSaveHandler"],
+) => ({
+  onSave: createViewerHandler(
+    saveHandler,
+    (content: string, sourceUri: vscode.Uri) => ({
+      content,
+      sourceUri,
+      telemetry,
+    }),
+  ),
+  onSavePng: createViewerHandler(
+    pngSaveHandler,
+    (bytes: ArrayBuffer, sourceUri: vscode.Uri) => ({ bytes, sourceUri }),
+  ),
+});
 
 const createViewerFactory = ({
   telemetry,
@@ -555,6 +592,7 @@ const createViewerFactory = ({
   factoryByViewType,
   viewType,
   saveHandler,
+  pngSaveHandler,
   pendingRevealByPanel,
   displayStateByPanel,
   flowBridge,
@@ -563,8 +601,13 @@ const createViewerFactory = ({
 }: ViewerBundleOptions & {
   store: WebviewStore;
   registerPanel: ViewerPanelRegistration;
-}): ViewerFactory =>
-  new ViewerFactory({
+}): ViewerFactory => {
+  const saveHandlers = createViewerSaveHandlers(
+    telemetry,
+    saveHandler,
+    pngSaveHandler,
+  );
+  return new ViewerFactory({
     viewType,
     store,
     handlers: {
@@ -585,13 +628,14 @@ const createViewerFactory = ({
           result,
         ),
       onDisposed: (panel) => failPendingViewerOpens(displayStateByPanel, panel),
-      onSave: createViewerSaveHandler(telemetry, saveHandler),
+      ...saveHandlers,
     },
     deps: {
       createWebviewPanel: vscode.window.createWebviewPanel,
       registerPanel,
     },
   });
+};
 
 const createViewerOpenCommand = (
   viewType: string,
@@ -669,6 +713,9 @@ export const createViewerSubscriptions = (
       displayStateByPanel,
       flowBridge: deps.flowBridge,
       ...config,
+      pngSaveHandler: pngSaveHandlersByUiKind[vscode.env.uiKind].get(
+        config.viewType,
+      ),
     }),
   );
 };

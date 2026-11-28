@@ -2,7 +2,12 @@ import * as assert from "assert";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { open } from "@vscode/test-web";
-import { chromium, type Browser, type BrowserContext } from "playwright";
+import {
+  chromium,
+  type Browser,
+  type BrowserContext,
+  type Frame,
+} from "playwright";
 import { en } from "../../resource/i18n/message_en";
 import {
   assertQuickInputHasResults,
@@ -32,7 +37,100 @@ const setLanguageMode = async (
   await page.keyboard.press("Enter");
 };
 
-const copyButtonLabelCandidates = [en["a11y.flow.controls.copySvg"]];
+const copyButtonLabelCandidates = [en["a11y.flow.controls.copyMenu"]];
+
+const chooseFlowMenuItemWithKeyboard = async (
+  frame: Frame,
+  trigger: import("playwright").Locator,
+  itemName: string,
+  firstItemName: string,
+): Promise<void> => {
+  await trigger.focus();
+  await trigger.press("Enter");
+  const firstItem = frame.getByRole("menuitem", {
+    name: firstItemName,
+    exact: true,
+  });
+  await firstItem.waitFor({ state: "visible", timeout: 10_000 });
+  if (itemName !== firstItemName) {
+    await firstItem.press("ArrowDown");
+    const activeMenuItem = await frame.evaluate(
+      () => document.activeElement?.textContent?.trim() ?? "",
+    );
+    assert.strictEqual(activeMenuItem, itemName);
+  }
+  await frame
+    .getByRole("menuitem", { name: itemName, exact: true })
+    .press("Enter");
+};
+
+const assertPngMatchesSvg = async (
+  frame: Frame,
+  svg: string,
+  pngBase64: string,
+): Promise<void> => {
+  const comparison = await frame.evaluate(
+    async ({ svgContent, encodedPng }) => {
+      const binary = atob(encodedPng);
+      const bytes = Uint8Array.from(binary, (character) =>
+        character.charCodeAt(0),
+      );
+      const loadImage = (blob: Blob): Promise<HTMLImageElement> =>
+        new Promise((resolve, reject) => {
+          const objectUrl = URL.createObjectURL(blob);
+          const image = new Image();
+          image.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            resolve(image);
+          };
+          image.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error(`Could not decode ${blob.type} image.`));
+          };
+          image.src = objectUrl;
+        });
+      const [svgImage, pngImage] = await Promise.all([
+        loadImage(
+          new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" }),
+        ),
+        loadImage(new Blob([bytes], { type: "image/png" })),
+      ]);
+      const canvas = document.createElement("canvas");
+      canvas.width = svgImage.naturalWidth;
+      canvas.height = svgImage.naturalHeight;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("PNG pixel comparison needs a canvas.");
+      context.drawImage(svgImage, 0, 0);
+      const expected = context.getImageData(0, 0, canvas.width, canvas.height);
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(pngImage, 0, 0);
+      const actual = context.getImageData(0, 0, canvas.width, canvas.height);
+      let differentPixels = 0;
+      for (let offset = 0; offset < expected.data.length; offset += 4) {
+        if (
+          Math.abs(expected.data[offset] - actual.data[offset]) > 2 ||
+          Math.abs(expected.data[offset + 1] - actual.data[offset + 1]) > 2 ||
+          Math.abs(expected.data[offset + 2] - actual.data[offset + 2]) > 2 ||
+          expected.data[offset + 3] !== actual.data[offset + 3]
+        ) {
+          differentPixels += 1;
+        }
+      }
+      return {
+        pngSize: [pngImage.naturalWidth, pngImage.naturalHeight],
+        svgSize: [svgImage.naturalWidth, svgImage.naturalHeight],
+        differentPixels,
+      };
+    },
+    { svgContent: svg, encodedPng: pngBase64 },
+  );
+  assert.deepStrictEqual(comparison.pngSize, comparison.svgSize);
+  assert.strictEqual(
+    comparison.differentPixels,
+    0,
+    "PNG pixels differ from the complete SVG geometry.",
+  );
+};
 
 export const runFlowImageWebSmoke = async (
   extensionDevelopmentPath: string,
@@ -85,7 +183,7 @@ export const runFlowImageWebSmoke = async (
     );
     const messages = en;
     const copyButton = frame.getByRole("button", {
-      name: messages["a11y.flow.controls.copySvg"],
+      name: messages["a11y.flow.controls.copyMenu"],
       exact: true,
     });
     const copyStatus = frame.getByText(messages["flow.svg.copy.success"], {
@@ -96,11 +194,15 @@ export const runFlowImageWebSmoke = async (
     assert.ok(viewportBeforeExport);
     const downloadPromise = page.waitForEvent("download", { timeout: 20_000 });
     const saveButton = frame.getByRole("button", {
-      name: messages["a11y.flow.controls.saveSvg"],
+      name: messages["a11y.flow.controls.saveMenu"],
       exact: true,
     });
-    await saveButton.focus();
-    await saveButton.press("Enter");
+    await chooseFlowMenuItemWithKeyboard(
+      frame,
+      saveButton,
+      messages["a11y.flow.controls.saveSvg"],
+      messages["a11y.flow.controls.saveSvg"],
+    );
     const download = await downloadPromise;
     assert.strictEqual(
       await viewport.getAttribute("style"),
@@ -204,8 +306,12 @@ export const runFlowImageWebSmoke = async (
       );
     }
 
-    await copyButton.focus();
-    await copyButton.press("Enter");
+    await chooseFlowMenuItemWithKeyboard(
+      frame,
+      copyButton,
+      messages["a11y.flow.controls.copySvg"],
+      messages["a11y.flow.controls.copySvg"],
+    );
     await copyStatus.waitFor({ state: "visible", timeout: 10_000 });
     assert.strictEqual(
       await viewport.getAttribute("style"),
@@ -215,12 +321,69 @@ export const runFlowImageWebSmoke = async (
       navigator.clipboard.readText(),
     );
     assert.strictEqual(copiedSvg, downloadedSvg);
-    await copyButton.click();
+    await chooseFlowMenuItemWithKeyboard(
+      frame,
+      copyButton,
+      messages["a11y.flow.controls.copySvg"],
+      messages["a11y.flow.controls.copySvg"],
+    );
     await copyStatus.waitFor({ state: "visible", timeout: 10_000 });
     assert.strictEqual(
       await frame.evaluate(async () => navigator.clipboard.readText()),
       copiedSvg,
     );
+
+    const pngDownloadPromise = page.waitForEvent("download", {
+      timeout: 20_000,
+    });
+    await chooseFlowMenuItemWithKeyboard(
+      frame,
+      saveButton,
+      messages["a11y.flow.controls.savePng"],
+      messages["a11y.flow.controls.saveSvg"],
+    );
+    const pngDownload = await pngDownloadPromise;
+    assert.strictEqual(pngDownload.suggestedFilename(), "ajs-flow.png");
+    const pngDownloadPath = await pngDownload.path();
+    assert.ok(pngDownloadPath);
+    const downloadedPng = await fs.readFile(pngDownloadPath);
+    assert.deepStrictEqual(
+      Array.from(downloadedPng.subarray(0, 8)),
+      [137, 80, 78, 71, 13, 10, 26, 10],
+    );
+    const pngWidth = downloadedPng.readUInt32BE(16);
+    const pngHeight = downloadedPng.readUInt32BE(20);
+    assert.strictEqual(pngWidth, parsed.width);
+    assert.strictEqual(pngHeight, parsed.height);
+    assert.ok(downloadedPng.length <= 32 * 1024 * 1024);
+    await assertPngMatchesSvg(
+      frame,
+      downloadedSvg,
+      downloadedPng.toString("base64"),
+    );
+
+    await chooseFlowMenuItemWithKeyboard(
+      frame,
+      copyButton,
+      messages["a11y.flow.controls.copyPng"],
+      messages["a11y.flow.controls.copySvg"],
+    );
+    await frame
+      .getByText(messages["flow.png.copy.success"], { exact: true })
+      .waitFor({ state: "visible", timeout: 10_000 });
+    const copiedPngBase64 = await frame.evaluate(async () => {
+      const [item] = await navigator.clipboard.read();
+      const blob = await item.getType("image/png");
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      let binary = "";
+      for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+        binary += String.fromCharCode(
+          ...bytes.subarray(offset, offset + 0x8000),
+        );
+      }
+      return btoa(binary);
+    });
+    await assertPngMatchesSvg(frame, downloadedSvg, copiedPngBase64);
   } finally {
     try {
       await context?.close();

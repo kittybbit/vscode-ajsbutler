@@ -16,6 +16,8 @@ import {
   AJS_TABLE_VIEWER_TYPE,
 } from "../../presentation/vscode/webview/constant";
 import { saveSvg } from "../../presentation/vscode/webview/messageHandlers";
+import { mountViewerPanel } from "../../presentation/vscode/webview/mountViewerPanel";
+import { createViewerFlowPngSaveRequest } from "../../presentation/webview/viewerRequestMessages";
 
 type PropertyOverride = {
   restore: () => void;
@@ -147,6 +149,7 @@ const createViewerLifecycleHarness = (
     buildUnitList?: BuildUnitList;
     postMessage?: () => Thenable<boolean>;
     documentUri?: vscode.Uri;
+    uiKind?: vscode.UIKind;
     onError?: (message: string) => void;
     onEvent?: (eventName: string) => void;
   } = {},
@@ -169,7 +172,13 @@ const createViewerLifecycleHarness = (
     unitDefinitions: [],
     unitList: { units: [], rows: [], columns: [] },
   } as unknown as UnitListDocumentDto;
-  const overrides = [
+  const overrides: PropertyOverride[] = [];
+  if (options.uiKind !== undefined) {
+    overrides.push(
+      overrideProperty(vscode.env, "uiKind", { value: options.uiKind }),
+    );
+  }
+  overrides.push(
     overrideProperty(vscode.commands, "registerCommand", {
       value: (command: string, callback: () => void) => {
         commandHandlers.set(command, callback);
@@ -197,7 +206,7 @@ const createViewerLifecycleHarness = (
         return Promise.resolve(undefined);
       },
     }),
-  ];
+  );
   const telemetry: TelemetryPort = {
     report: (event) => {
       events.push(event);
@@ -238,6 +247,21 @@ const flushMicrotasks = async (): Promise<void> => {
   await Promise.resolve();
 };
 
+const createPngBytes = (): ArrayBuffer => {
+  const bytes = new ArrayBuffer(33);
+  const view = new DataView(bytes);
+  [137, 80, 78, 71, 13, 10, 26, 10].forEach((value, index) =>
+    view.setUint8(index, value),
+  );
+  view.setUint32(8, 13);
+  [73, 72, 68, 82].forEach((value, index) => view.setUint8(12 + index, value));
+  view.setUint32(16, 1);
+  view.setUint32(20, 1);
+  view.setUint8(24, 8);
+  view.setUint8(25, 6);
+  return bytes;
+};
+
 type CounterpartRevealTestDeps = {
   factoryByViewType: ReadonlyMap<string, ViewerFactory>;
   mountPanel: (panel: vscode.WebviewPanel, viewType: string) => void;
@@ -260,6 +284,156 @@ const createCounterpartRevealDeps = (
 });
 
 suite("Viewer wiring", () => {
+  test("adds Blob image decoding permission to Flow alone", () => {
+    const context = {
+      extensionUri: vscode.Uri.file("/extension"),
+    } as vscode.ExtensionContext;
+    const flow = createViewerPanelFixture(AJS_FLOW_VIEWER_TYPE, "Flow");
+    const table = createViewerPanelFixture(AJS_TABLE_VIEWER_TYPE, "Table");
+
+    mountViewerPanel(context, flow.panel, AJS_FLOW_VIEWER_TYPE);
+    mountViewerPanel(context, table.panel, AJS_TABLE_VIEWER_TYPE);
+
+    assert.match(flow.panel.webview.html, /img-src vscode-webview: blob:/u);
+    assert.match(table.panel.webview.html, /img-src vscode-webview:;/u);
+    assert.doesNotMatch(table.panel.webview.html, /img-src[^;]*\bblob:/u);
+  });
+
+  test("routes bounded PNG bytes to the Flow provider without CSV telemetry", async () => {
+    const sourceUri = vscode.Uri.file("/tmp/ajs-flow-source.png");
+    const destination = vscode.Uri.parse(
+      "ajs-flow-png-test:/exports/result.png",
+    );
+    const bytes = createPngBytes();
+    let nextSaveLocation = sourceUri;
+    let resolveConflict!: () => void;
+    let resolveWrite!: (value: { uri: vscode.Uri; bytes: Uint8Array }) => void;
+    const conflict = new Promise<void>((resolve) => {
+      resolveConflict = resolve;
+    });
+    const write = new Promise<{ uri: vscode.Uri; bytes: Uint8Array }>(
+      (resolve) => {
+        resolveWrite = resolve;
+      },
+    );
+    const provider = registerWritableMemoryFileSystem(
+      "ajs-flow-png-test",
+      (uri, writtenBytes) => resolveWrite({ uri, bytes: writtenBytes }),
+    );
+    let harness: ReturnType<typeof createViewerLifecycleHarness> | undefined;
+    const overrides: PropertyOverride[] = [];
+    try {
+      harness = createViewerLifecycleHarness({
+        documentUri: sourceUri,
+        onError: (message) => {
+          if (
+            message === en["flow.png.save.sourceConflict"] ||
+            message === ja["flow.png.save.sourceConflict"]
+          ) {
+            resolveConflict();
+          }
+        },
+      });
+      overrides.push(
+        overrideProperty(vscode.window, "showSaveDialog", {
+          value: async () => nextSaveLocation,
+        }),
+        overrideProperty(vscode.window, "showInformationMessage", {
+          value: async () => undefined,
+        }),
+      );
+      harness.setActiveDocument(harness.document);
+      harness.commandHandlers.get(`open.${AJS_FLOW_VIEWER_TYPE}`)?.();
+      const fixture = harness.panels[0];
+      assert.ok(fixture);
+      fixture.receive({ type: "display", data: "success" });
+      fixture.receive({ type: "ready" });
+      await flushMicrotasks();
+
+      fixture.receive(createViewerFlowPngSaveRequest(bytes));
+      await conflict;
+      assert.deepStrictEqual(
+        harness.events.map(({ name }) => name),
+        ["viewer.open_completed"],
+      );
+
+      nextSaveLocation = destination;
+      fixture.receive(createViewerFlowPngSaveRequest(bytes));
+      const written = await write;
+      assert.strictEqual(written.uri.toString(), destination.toString());
+      assert.deepStrictEqual(written.bytes, new Uint8Array(bytes));
+      assert.deepStrictEqual(
+        harness.events.map(({ name }) => name),
+        ["viewer.open_completed"],
+      );
+    } finally {
+      harness?.restore();
+      overrides.reverse().forEach(({ restore }) => restore());
+      provider.dispose();
+    }
+  });
+
+  test("does not route valid PNG saves to the filesystem from a Web Flow viewer", async () => {
+    const destination = vscode.Uri.parse(
+      "ajs-flow-png-web-test:/exports/result.png",
+    );
+    let showSaveDialogCalls = 0;
+    let fileWrites = 0;
+    let resolveUnavailable!: () => void;
+    const unavailable = new Promise<void>((resolve) => {
+      resolveUnavailable = resolve;
+    });
+    const provider = registerWritableMemoryFileSystem(
+      "ajs-flow-png-web-test",
+      () => {
+        fileWrites += 1;
+      },
+    );
+    let harness: ReturnType<typeof createViewerLifecycleHarness> | undefined;
+    const overrides: PropertyOverride[] = [];
+
+    try {
+      harness = createViewerLifecycleHarness({
+        uiKind: vscode.UIKind.Web,
+        onError: (message) => {
+          if (message === "Saving is not available for this viewer.") {
+            resolveUnavailable();
+          }
+        },
+      });
+      overrides.push(
+        overrideProperty(vscode.window, "showSaveDialog", {
+          value: async () => {
+            showSaveDialogCalls += 1;
+            return destination;
+          },
+        }),
+      );
+      harness.setActiveDocument(harness.document);
+      harness.commandHandlers.get(`open.${AJS_FLOW_VIEWER_TYPE}`)?.();
+      const flow = harness.panels[0];
+      assert.ok(flow);
+      assert.strictEqual(flow.panel.viewType, AJS_FLOW_VIEWER_TYPE);
+      flow.receive({ type: "display", data: "success" });
+      flow.receive({ type: "ready" });
+      await flushMicrotasks();
+
+      flow.receive(createViewerFlowPngSaveRequest(createPngBytes()));
+      await unavailable;
+
+      assert.strictEqual(showSaveDialogCalls, 0);
+      assert.strictEqual(fileWrites, 0);
+      assert.deepStrictEqual(harness.errorMessages, [
+        "Saving is not available for this viewer.",
+      ]);
+      assert.ok(harness.events.every((event) => event.name !== "csv.exported"));
+    } finally {
+      harness?.restore();
+      overrides.reverse().forEach(({ restore }) => restore());
+      provider.dispose();
+    }
+  });
+
   test("routes Flow save through the bound source identity without CSV telemetry", async () => {
     const sourceUri = vscode.Uri.parse(
       "file:///tmp/flow/../source.svg?version=1#definition",

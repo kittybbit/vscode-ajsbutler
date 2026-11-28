@@ -2,7 +2,12 @@ import * as assert from "assert";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { _electron, type ElectronApplication, type Page } from "playwright";
+import {
+  _electron,
+  type ElectronApplication,
+  type Frame,
+  type Page,
+} from "playwright";
 import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
 import { en } from "../resource/i18n/message_en";
 import {
@@ -171,7 +176,7 @@ const exerciseFlowClipboard = async (
     })
     .click({ timeout: 15_000 });
   const frame = await waitForWebviewFrame(page, [
-    en["a11y.flow.controls.copySvg"],
+    en["a11y.flow.controls.copyMenu"],
   ]);
   const expandButton = frame.getByRole("button", {
     name: en["a11y.flow.controls.expandAll"],
@@ -183,11 +188,14 @@ const exerciseFlowClipboard = async (
     .getByRole("group", { name: "offscreen-job", exact: true })
     .waitFor({ state: "attached", timeout: 10_000 });
 
-  const copyButton = frame.getByRole("button", {
-    name: en["a11y.flow.controls.copySvg"],
-    exact: true,
-  });
-  await copyButton.click();
+  const copyMenuLabel = en["a11y.flow.controls.copyMenu"];
+  const saveMenuLabel = en["a11y.flow.controls.saveMenu"];
+  await selectFlowMenuItemWithKeyboard(
+    frame,
+    copyMenuLabel,
+    en["a11y.flow.controls.copySvg"],
+    en["a11y.flow.controls.copySvg"],
+  );
   await frame
     .getByText(en["flow.svg.copy.success"], { exact: true })
     .waitFor({ state: "visible", timeout: 10_000 });
@@ -201,16 +209,70 @@ const exerciseFlowClipboard = async (
   assert.ok(copiedSvg.includes("offscreen-job"));
   await assertFlowSvgDocument(frame, copiedSvg);
 
+  await selectFlowMenuItemWithKeyboard(
+    frame,
+    copyMenuLabel,
+    en["a11y.flow.controls.copyPng"],
+    en["a11y.flow.controls.copySvg"],
+  );
   await frame
-    .getByRole("button", {
-      name: en["a11y.flow.controls.saveSvg"],
-      exact: true,
-    })
-    .click();
+    .getByText(en["flow.png.copy.success"], { exact: true })
+    .waitFor({ state: "visible", timeout: 10_000 });
+  const copiedClipboardItem = await frame.evaluate(async () => {
+    const items = await navigator.clipboard.read();
+    if (items.length !== 1) throw new Error("Expected one clipboard image.");
+    if (items[0].types.length !== 1 || items[0].types[0] !== "image/png") {
+      throw new Error("Expected one image/png clipboard item.");
+    }
+    const blob = await items[0].getType("image/png");
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let binary = "";
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    }
+    return { type: blob.type, base64: btoa(binary) };
+  });
+  assert.strictEqual(copiedClipboardItem.type, "image/png");
+  const copiedPngBase64 = copiedClipboardItem.base64;
+  const copiedPngBytes = Buffer.from(copiedPngBase64, "base64");
+  const nativePngBytes = Buffer.from(
+    await application.evaluate(({ clipboard }) =>
+      Array.from(clipboard.readImage().toPNG()),
+    ),
+  );
+  assertPngBytesMatchSvg(copiedPngBytes, copiedSvg);
+  assertPngBytesMatchSvg(nativePngBytes, copiedSvg);
+  await assertPngMatchesSvg(frame, copiedSvg, copiedPngBase64);
+  await assertPngMatchesSvg(
+    frame,
+    copiedSvg,
+    nativePngBytes.toString("base64"),
+  );
+
+  await selectFlowMenuItemWithKeyboard(
+    frame,
+    saveMenuLabel,
+    en["a11y.flow.controls.saveSvg"],
+    en["a11y.flow.controls.saveSvg"],
+  );
   await page
     .getByText(en["flow.svg.save.sourceConflict"], { exact: true })
     .waitFor({ state: "visible", timeout: 10_000 });
-  await copyButton.click();
+  await selectFlowMenuItemWithKeyboard(
+    frame,
+    saveMenuLabel,
+    en["a11y.flow.controls.savePng"],
+    en["a11y.flow.controls.saveSvg"],
+  );
+  await page
+    .getByText(en["flow.png.save.sourceConflict"], { exact: true })
+    .waitFor({ state: "visible", timeout: 10_000 });
+  await selectFlowMenuItemWithKeyboard(
+    frame,
+    copyMenuLabel,
+    en["a11y.flow.controls.copySvg"],
+    en["a11y.flow.controls.copySvg"],
+  );
   await frame
     .getByText(en["flow.svg.copy.success"], { exact: true })
     .waitFor({ state: "visible", timeout: 10_000 });
@@ -222,6 +284,118 @@ const exerciseFlowClipboard = async (
     await application.evaluate(({ clipboard }) => clipboard.readText()),
     copiedSvg,
   );
+};
+
+const selectFlowMenuItemWithKeyboard = async (
+  frame: Frame,
+  triggerLabel: string,
+  itemLabel: string,
+  firstItemLabel: string,
+): Promise<void> => {
+  const trigger = frame.getByRole("button", {
+    name: triggerLabel,
+    exact: true,
+  });
+  await trigger.focus();
+  await trigger.press("Enter");
+  const firstItem = frame.getByRole("menuitem", {
+    name: firstItemLabel,
+    exact: true,
+  });
+  await firstItem.waitFor({ state: "visible", timeout: 10_000 });
+  if (itemLabel !== firstItemLabel) {
+    await firstItem.press("ArrowDown");
+    const activeMenuItem = await frame.evaluate(
+      () => document.activeElement?.textContent?.trim() ?? "",
+    );
+    assert.strictEqual(activeMenuItem, itemLabel);
+  }
+  await frame
+    .getByRole("menuitem", { name: itemLabel, exact: true })
+    .press("Enter");
+};
+
+const assertPngMatchesSvg = async (
+  frame: Frame,
+  svg: string,
+  pngBase64: string,
+): Promise<void> => {
+  const comparison = await frame.evaluate(
+    async ({ svgContent, encodedPng }) => {
+      const binary = atob(encodedPng);
+      const bytes = Uint8Array.from(binary, (character) =>
+        character.charCodeAt(0),
+      );
+      const loadImage = (blob: Blob): Promise<HTMLImageElement> =>
+        new Promise((resolve, reject) => {
+          const objectUrl = URL.createObjectURL(blob);
+          const image = new Image();
+          image.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            resolve(image);
+          };
+          image.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error(`Could not decode ${blob.type} image.`));
+          };
+          image.src = objectUrl;
+        });
+      const [svgImage, pngImage] = await Promise.all([
+        loadImage(
+          new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" }),
+        ),
+        loadImage(new Blob([bytes], { type: "image/png" })),
+      ]);
+      const canvas = document.createElement("canvas");
+      canvas.width = svgImage.naturalWidth;
+      canvas.height = svgImage.naturalHeight;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("PNG pixel comparison needs a canvas.");
+      context.drawImage(svgImage, 0, 0);
+      const expected = context.getImageData(0, 0, canvas.width, canvas.height);
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(pngImage, 0, 0);
+      const actual = context.getImageData(0, 0, canvas.width, canvas.height);
+      let differentPixels = 0;
+      for (let offset = 0; offset < expected.data.length; offset += 4) {
+        if (
+          Math.abs(expected.data[offset] - actual.data[offset]) > 2 ||
+          Math.abs(expected.data[offset + 1] - actual.data[offset + 1]) > 2 ||
+          Math.abs(expected.data[offset + 2] - actual.data[offset + 2]) > 2 ||
+          expected.data[offset + 3] !== actual.data[offset + 3]
+        ) {
+          differentPixels += 1;
+        }
+      }
+      return {
+        pngSize: [pngImage.naturalWidth, pngImage.naturalHeight],
+        svgSize: [svgImage.naturalWidth, svgImage.naturalHeight],
+        differentPixels,
+      };
+    },
+    { svgContent: svg, encodedPng: pngBase64 },
+  );
+  assert.deepStrictEqual(comparison.pngSize, comparison.svgSize);
+  assert.strictEqual(
+    comparison.differentPixels,
+    0,
+    "PNG pixels differ from the complete SVG geometry.",
+  );
+};
+
+const assertPngBytesMatchSvg = (bytes: Buffer, svg: string): void => {
+  assert.deepStrictEqual(
+    Array.from(bytes.subarray(0, 8)),
+    [137, 80, 78, 71, 13, 10, 26, 10],
+  );
+  assert.strictEqual(bytes.readUInt32BE(8), 13);
+  const svgDimensions = svg.match(
+    /^<svg\s[^>]*width="(\d+)"[^>]*height="(\d+)"/u,
+  );
+  assert.ok(svgDimensions);
+  assert.strictEqual(bytes.readUInt32BE(16), Number(svgDimensions[1]));
+  assert.strictEqual(bytes.readUInt32BE(20), Number(svgDimensions[2]));
+  assert.ok(bytes.length <= 32 * 1024 * 1024);
 };
 
 const assertFlowSvgDocument = async (

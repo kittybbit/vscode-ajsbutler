@@ -133,24 +133,133 @@ const sameProviderUri = (left: vscode.Uri, right: vscode.Uri): boolean =>
     left.fragment === right.fragment,
   ].every(Boolean);
 
-const getSvgSaveDestinationError = (
-  destination: vscode.Uri,
-  sourceUri: vscode.Uri,
-): "flow.svg.save.sourceConflict" | "flow.svg.save.extension" | undefined => {
-  if (sameUri(destination, sourceUri)) return "flow.svg.save.sourceConflict";
-  if (!/\.svg$/i.test(destination.path)) return "flow.svg.save.extension";
-  return undefined;
+type FlowImageSaveFormat = "svg" | "png";
+
+type FlowImageSaveMessages = Readonly<{
+  cancelled: "flow.svg.save.cancelled" | "flow.png.save.cancelled";
+  sourceConflict:
+    | "flow.svg.save.sourceConflict"
+    | "flow.png.save.sourceConflict";
+  extension: "flow.svg.save.extension" | "flow.png.save.extension";
+  failed: "flow.svg.save.failed" | "flow.png.save.failed";
+  complete: "flow.svg.save.complete" | "flow.png.save.complete";
+}>;
+
+const flowImageSaveMessages: Record<
+  FlowImageSaveFormat,
+  FlowImageSaveMessages
+> = {
+  svg: {
+    cancelled: "flow.svg.save.cancelled",
+    sourceConflict: "flow.svg.save.sourceConflict",
+    extension: "flow.svg.save.extension",
+    failed: "flow.svg.save.failed",
+    complete: "flow.svg.save.complete",
+  },
+  png: {
+    cancelled: "flow.png.save.cancelled",
+    sourceConflict: "flow.png.save.sourceConflict",
+    extension: "flow.png.save.extension",
+    failed: "flow.png.save.failed",
+    complete: "flow.png.save.complete",
+  },
 };
 
-const selectSvgSaveLocation = async (): Promise<SaveLocationResult> => {
+const flowImageSaveFilters = {
+  svg: { "SVG image": ["svg"] },
+  png: { "PNG image": ["png"] },
+} satisfies Record<FlowImageSaveFormat, vscode.SaveDialogOptions["filters"]>;
+
+const selectFlowImageSaveLocation = async (
+  format: FlowImageSaveFormat,
+): Promise<SaveLocationResult> => {
   try {
     const uri = await vscode.window.showSaveDialog({
-      filters: { "SVG image": ["svg"] },
+      filters: flowImageSaveFilters[format],
     });
     return uri ? { kind: "selected", uri } : { kind: "cancelled" };
   } catch {
-    showErrorMessageSafely(localizedMessage("flow.svg.save.failed"));
+    showErrorMessageSafely(
+      localizedMessage(flowImageSaveMessages[format].failed),
+    );
     return { kind: "failed" };
+  }
+};
+
+type FlowImageSaveRequest = Readonly<{
+  location: SaveLocationResult;
+  content: string | Uint8Array;
+  format: FlowImageSaveFormat;
+  sourceUri: vscode.Uri;
+}>;
+
+const getFlowImageDestinationError = (
+  destination: vscode.Uri,
+  sourceUri: vscode.Uri,
+  format: FlowImageSaveFormat,
+):
+  | FlowImageSaveMessages["sourceConflict"]
+  | FlowImageSaveMessages["extension"]
+  | undefined => {
+  const messages = flowImageSaveMessages[format];
+  if (sameUri(destination, sourceUri)) return messages.sourceConflict;
+  return destination.path.toLowerCase().endsWith(`.${format}`)
+    ? undefined
+    : messages.extension;
+};
+
+const writeFlowImageFile = (
+  destination: vscode.Uri,
+  content: FlowImageSaveRequest["content"],
+  format: FlowImageSaveFormat,
+): Promise<boolean> => {
+  const errorMessage = localizedMessage(flowImageSaveMessages[format].failed);
+  return typeof content === "string"
+    ? writeSaveFile(destination, content, errorMessage)
+    : writeBinarySaveFile(destination, content, errorMessage);
+};
+
+const saveFlowImageToDestination = async (
+  request: FlowImageSaveRequest & { destination: vscode.Uri },
+): Promise<boolean> => {
+  const { content, format, sourceUri, destination } = request;
+  const destinationError = getFlowImageDestinationError(
+    destination,
+    sourceUri,
+    format,
+  );
+  if (destinationError) {
+    showErrorMessageSafely(localizedMessage(destinationError));
+    return false;
+  }
+  const saved = await writeFlowImageFile(destination, content, format);
+  if (saved) {
+    showInformationMessageSafely(
+      localizedMessage(flowImageSaveMessages[format].complete),
+      { detail: "", modal: false },
+    );
+  }
+  return saved;
+};
+
+const saveFlowImage = async (
+  request: FlowImageSaveRequest,
+): Promise<boolean> => {
+  const { location, format } = request;
+  switch (location.kind) {
+    case "cancelled":
+      showInformationMessageSafely(
+        localizedMessage(flowImageSaveMessages[format].cancelled),
+        { detail: "", modal: false },
+      );
+      return false;
+    case "failed":
+      return false;
+    case "selected":
+      return saveFlowImageToDestination({
+        ...request,
+        destination: location.uri,
+      });
   }
 };
 
@@ -158,48 +267,23 @@ export const saveSvg = async (
   content: string,
   sourceUri: vscode.Uri,
 ): Promise<boolean> =>
-  saveSelectedSvg(await selectSvgSaveLocation(), content, sourceUri);
-
-const saveSelectedSvg = async (
-  location: SaveLocationResult,
-  content: string,
-  sourceUri: vscode.Uri,
-): Promise<boolean> => {
-  switch (location.kind) {
-    case "cancelled":
-      showInformationMessageSafely(
-        localizedMessage("flow.svg.save.cancelled"),
-        {
-          detail: "",
-          modal: false,
-        },
-      );
-      return false;
-    case "failed":
-      return false;
-    case "selected":
-      return saveSvgToDestination(location.uri, content, sourceUri);
-  }
-};
-
-const saveSvgToDestination = async (
-  destination: vscode.Uri,
-  content: string,
-  sourceUri: vscode.Uri,
-): Promise<boolean> => {
-  const destinationError = getSvgSaveDestinationError(destination, sourceUri);
-  if (destinationError) {
-    showErrorMessageSafely(localizedMessage(destinationError));
-    return false;
-  }
-  const saved = await writeSaveFile(
-    destination,
+  saveFlowImage({
+    location: await selectFlowImageSaveLocation("svg"),
     content,
-    localizedMessage("flow.svg.save.failed"),
-  );
-  if (saved) showSvgSaveComplete();
-  return saved;
-};
+    format: "svg",
+    sourceUri,
+  });
+
+export const saveFlowPng = async (
+  bytes: ArrayBuffer,
+  sourceUri: vscode.Uri,
+): Promise<boolean> =>
+  saveFlowImage({
+    location: await selectFlowImageSaveLocation("png"),
+    content: new Uint8Array(bytes),
+    format: "png",
+    sourceUri,
+  });
 
 const selectSaveLocation = async (): Promise<SaveLocationResult> => {
   try {
@@ -225,11 +309,19 @@ const writeSaveFile = async (
   }
 };
 
-const showSvgSaveComplete = (): void =>
-  showInformationMessageSafely(localizedMessage("flow.svg.save.complete"), {
-    detail: "",
-    modal: false,
-  });
+const writeBinarySaveFile = async (
+  uri: vscode.Uri,
+  content: Uint8Array,
+  errorMessage = localizedMessage("flow.png.save.failed"),
+): Promise<boolean> => {
+  try {
+    await vscode.workspace.fs.writeFile(uri, content);
+    return true;
+  } catch {
+    showErrorMessageSafely(errorMessage);
+    return false;
+  }
+};
 
 const showSaveComplete = (uri: vscode.Uri): void => {
   let detail: string;

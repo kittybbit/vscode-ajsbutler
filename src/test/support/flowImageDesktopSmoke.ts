@@ -65,13 +65,72 @@ const override = (
   };
 };
 
+const verifyBinaryWebviewTransport = async (): Promise<void> => {
+  const panel = vscode.window.createWebviewPanel(
+    "ajs-flow-binary-transport-smoke",
+    "Flow binary transport smoke",
+    vscode.ViewColumn.Beside,
+    { enableScripts: true },
+  );
+  let listener: vscode.Disposable | undefined;
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    const expectedBase64 =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=";
+    const expectedBytes = Array.from(Buffer.from(expectedBase64, "base64"));
+    const received = new Promise<number[]>((resolve, reject) => {
+      timer = setTimeout(
+        () => reject(new Error("Timed out waiting for binary Webview data.")),
+        10_000,
+      );
+      listener = panel.webview.onDidReceiveMessage((value: unknown) => {
+        if (
+          typeof value !== "object" ||
+          value === null ||
+          (value as { type?: unknown }).type !== "png-transport-probe"
+        ) {
+          return;
+        }
+        const bytes = (value as { bytes?: unknown }).bytes;
+        if (bytes instanceof ArrayBuffer) {
+          resolve(Array.from(new Uint8Array(bytes)));
+        } else if (
+          ArrayBuffer.isView(bytes) &&
+          bytes.buffer instanceof ArrayBuffer
+        ) {
+          resolve(
+            Array.from(
+              new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
+            ),
+          );
+        } else {
+          reject(new Error("Binary Webview data was not an ArrayBuffer view."));
+        }
+      });
+    });
+    const csp = panel.webview.cspSource;
+    const nonce = "flow-transport-smoke";
+    panel.webview.html = `<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src ${csp} 'nonce-${nonce}';"><script nonce="${nonce}">
+      const vscode = acquireVsCodeApi();
+      const binary = atob("${expectedBase64}");
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      vscode.postMessage({ type: "png-transport-probe", bytes: bytes.buffer });
+    </script>`;
+    assert.deepStrictEqual(await received, expectedBytes);
+  } finally {
+    if (timer) clearTimeout(timer);
+    listener?.dispose();
+    panel.dispose();
+  }
+};
+
 const openFlowViewerFromWorkbench = async (): Promise<void> => {
   const signalPath = process.env.FLOW_IMAGE_SMOKE_SIGNAL_PATH;
   if (!signalPath) throw new Error("Desktop smoke signal path is missing.");
   const fixtureDirectory = await fs.mkdtemp(
     path.join(os.tmpdir(), "ajs-flow-image-desktop-"),
   );
-  const sourcePath = path.join(fixtureDirectory, "flow-source.svg");
+  const sourcePath = path.join(fixtureDirectory, "flow-source.png");
   await fs.copyFile(fixturePath, sourcePath);
   const sourceUri = vscode.Uri.file(sourcePath);
   const originalBytes = await fs.readFile(sourcePath);
@@ -102,7 +161,10 @@ const openFlowViewerFromWorkbench = async (): Promise<void> => {
     const messages = vscode.env.language.toLowerCase().startsWith("ja")
       ? (await import("../../resource/i18n/message_ja")).ja
       : (await import("../../resource/i18n/message_en")).en;
-    assert.deepStrictEqual(errors, [messages["flow.svg.save.sourceConflict"]]);
+    assert.deepStrictEqual(errors, [
+      messages["flow.svg.save.sourceConflict"],
+      messages["flow.png.save.sourceConflict"],
+    ]);
     assert.deepStrictEqual(await fs.readFile(sourcePath), originalBytes);
     verification = { status: "passed" };
   } catch (error) {
@@ -129,5 +191,6 @@ export async function run(): Promise<void> {
   await vscode.extensions
     .getExtension("kittybbit.vscode-ajsbutler")
     ?.activate();
+  await verifyBinaryWebviewTransport();
   await openFlowViewerFromWorkbench();
 }

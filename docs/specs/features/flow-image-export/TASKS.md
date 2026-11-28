@@ -5,8 +5,8 @@
 - Purpose: Save or copy the full active JP1/AJS flow with its current
   nested-jobnet expansion.
 - Slice order: SVG save and source copy, followed by PNG save and image copy.
-  Slice 1 is committed and published. Slice 2 awaits review of the
-  export-action module boundary.
+  Slice 1 is committed and published. Slice 2 implementation is complete and
+  awaits independent review.
 - Read [requirements and acceptance](SPECS.md#requirements-and-acceptance),
   Slice 2 scope and validation, and [traceability](TRACEABILITY.md).
 - Constraints: Preserve existing graph and CSV behavior. Desktop uses the
@@ -14,13 +14,14 @@
 
 ## Current state
 
-- Lifecycle state: `PLAN_APPROVED`
+- Lifecycle state: `SLICE_APPROVED`
 - Active slice: Slice 2, PNG output and format menus for Save and Copy.
-- Next operation: Resume Slice 2 implementation after the focused
-  export-action module replan commit.
+- Next operation: Commit the approved Slice 2 changes and publish the
+  layer PR, then verify its exact-head gates.
 - Gate evidence: Slice 1 is `SLICE_COMMITTED`. The approved Layer 1 head
-  has passed its predecessor gates. Original plan approval and Slice 1
-  Completion Approval are recorded below.
+  passed its predecessor gates. The reviewed and human-approved Slice 2
+  action-module replan is committed as
+  `eb037c72c499e986b315f0dd8792bdaf5d05fcbd`; its approval is recorded below.
 
 Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 
@@ -41,9 +42,11 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   smoke-path replan as `d8fd31e77bec8d6a8652b43f7b7b8e7b9b302c78`.
   The approved format-menu replan was committed as
   `daaa9ee378864cb10004236796d2ab5d821da2ac`. That commit is the
-  comparison base for the action-module replan. The renewed approval is
-  recorded below. Implementation review, PR publication, and exact-head
-  checks are pending.
+  comparison base for the action-module replan. Main committed the reviewed
+  action-module replan as
+  `eb037c72c499e986b315f0dd8792bdaf5d05fcbd`. The renewed approval is
+  recorded below. Independent implementation review, PR publication, and
+  exact-head checks are pending.
 - Main publishes or updates each layer promptly after its independent Ready
   verdict, explicit Completion Approval, and focused completion commit.
   Layer 2 is the final integration head. The layers remain open for feature
@@ -127,6 +130,25 @@ and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 Apply
 [Human Approval](../../README.md#human-approval) and the
 [approval-gated commit policy](../../README.md#approval-gated-commit-policy).
+
+## Slice 2 Completion Approval
+
+- Status: Approved
+- Approved at: 2026-11-28, in the current conversation.
+- Approved scope: Commit and publish the exact reviewed Slice 2 implementation
+  and records for the shared Save and Copy menus and PNG output.
+- Review verdicts: Both independent implementation reviews returned
+  `Ready` after correction. The second review covered the shared host,
+  PNG protocol and Flow Webview CSP.
+- Reviewed head: `eb037c72c499e986b315f0dd8792bdaf5d05fcbd`.
+- Reviewed tracked patch:
+  `d583c9a8a2cb0460cabb5076dd448b73a008251ae2bdf60c56508b5636ceae09`.
+- Reviewed 22-file manifest:
+  `1d1fda244a842a8fd159fc09c47b42da26df73e6b695d0e2f13528318ce2ab86`.
+- Reviewed full worktree:
+  `c034e8931bcc41157eeb3480acf74509c0d3cafd573087e352797329bdd45926`.
+- Validation:
+  `/private/tmp/flow-image-export-slice2/action-module-correction-final/correction-evidence.json`.
 
 ## Slice 1 Completion Approval
 
@@ -355,7 +377,7 @@ new dependencies, generated-output edits, and CI configuration edits.
   Retain implementation evidence outside analyzed inputs. Main records the
   independent verdicts, human approvals, and focused commits.
 
-#### Implementation record
+#### Slice 1 implementation record
 
 - Result: `IMPLEMENTED`. The approved FE-01 through FE-05 behavior and
   boundary tests are complete. PNG save and image copy remain in Slice 2.
@@ -399,7 +421,7 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 
 ### Slice 2: PNG output and shared export menus
 
-- Lifecycle state: `PLAN_APPROVED`. Depends on Slice 1 at verified PR #354 head
+- Lifecycle state: `SLICE_APPROVED`. Depends on Slice 1 at verified PR #354 head
   `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
 - Replan trigger: After simplification within the approved paths, the
   retained candidate's targeted Qlty scan reports file complexity of 74
@@ -644,7 +666,84 @@ closure boundary above for the durable edits and feature-record removal.
   The paused candidate is retained separately at
   `/private/tmp/flow-png-pre-controller-replan.zRHgXs`. Historical host logs
   record the round 3 Web and minimum Desktop passes and a subsequent stable
-  Desktop test-only failure before a handshake correction. Run stable
-  Desktop, minimum Desktop and Web for the final reviewed candidate, and
-  bind Qlty baseline and final evidence to the approved replan under the
-  Evidence Contract.
+  Desktop test-only failure before a handshake correction. The final stable
+  Desktop, minimum Desktop and Web results for this implementation identity
+  are recorded below and bound to the approved replan under the Evidence
+  Contract.
+
+#### Slice 2 implementation record
+
+- Result: `IMPLEMENTED`. FE-01 through FE-08 are implemented in Slice 2 and
+  validated on Desktop and Web. The Save and Copy menus expose SVG and PNG
+  choices; PNG save and image copy preserve active-scope behavior and leave
+  SVG save and source copy available under their existing contracts.
+- Implementation identity: Base and approved Layer 2 plan commit
+  `eb037c72c499e986b315f0dd8792bdaf5d05fcbd`; reviewed action-module plan
+  `31dbc778955ab8bf5ad280cf91a636ed039692a86163b887325c3b134afc51fb`.
+  No implementation commit was created. The full-repository manifest for the
+  immutable substantive source/test snapshot used by Qlty and host checks is
+  `/private/tmp/flow-image-export-slice2/action-module-final-4/working-tree-content.json`
+  (SHA-256
+  `44d679cc186d1cbe29fd1591854b6a19f29ec92e6d44b32e82b2750e0195d466`).
+  Its substantive tracked patch SHA-256 is
+  `839e0d5fa2c41097feb70f2d05338ef9cdc0c4b4e9f0c98b0318ef5093baf474`;
+  the source/test changed-path manifest is in the same evidence directory.
+  The current full worktree includes a separately validated metadata-only
+  update to `TASKS.md` and `TRACEABILITY.md`. The sidecar records its exact
+  diff, per-file hashes, and combined current-manifest identity.
+- Implemented Solution Shape: `Header.tsx` owns the two format menus.
+  `FlowContents.tsx` captures the selected graph and owns PNG busy state.
+  `flowImageExportActions.ts` owns the four Flow save and copy actions, their
+  selection-gesture handoff, capability checks, downloads, and localized
+  outcomes. `flowPngExport.ts` owns the bounded PNG codec and resource
+  cleanup; the existing SVG serializer remains the shared diagram
+  representation. The existing host protocol and filesystem adapter
+  validate and save PNG bytes with the same source-URI protection as SVG.
+  No layer or dependency boundary was added, and shared code remains
+  browser-safe.
+- Validation identity and detailed results:
+  `/private/tmp/flow-image-export-slice2/action-module-implementation-evidence.json`.
+  The corrected source/test snapshot inspected by official Qlty is
+  `/private/tmp/flow-image-export-slice2/action-module-correction-final/working-tree-content.json`
+  (SHA-256 `f26bfe1d98af08d660f1fef2e099b3575da9756952fc8e5c788f4ae3f241567c`).
+  The current combined worktree identity and correction evidence are indexed
+  in the linked sidecar. Baseline and final Qlty artifacts are under
+  `/private/tmp/flow-image-export-slice2/action-module-baseline/` and
+  `/private/tmp/flow-image-export-slice2/action-module-correction-final/`.
+- Desktop and Web: One complete real-host run passed all lanes. Stable VS Code
+  1.148.0 passed 1,072 tests, including the production Flow Web-kind denial,
+  Desktop PNG save, actual image clipboard readback, and source protection.
+  Minimum VS Code 1.75.0 passed the extension smoke and actual clipboard/
+  source-protection check. Headless VS Code Web 1.148.0 passed the real Save
+  and Copy menus, SVG and PNG downloads, image clipboard MIME/bytes, rendered
+  dimensions/content, and no-external-request checks. Host log SHA-256 is
+  `7ca085a9fcd03038a4843f20a5903630201edd9226d3f8d7103f89a0f8590b53`.
+- Build and tests: Production webpack build and production/test TypeScript
+  checks passed. The build completes with the existing webpack bundle-size
+  recommendation warnings. Architecture dependency rules passed 17/17 and
+  viewer request boundary tests passed 6/6. Markdown lint reported zero
+  errors and `git diff --check` passed. The host run includes all changed
+  Flow, routing, request, wiring, and smoke coverage.
+- Qlty: The final `rtk pnpm run qlty` aggregate passed. Qlty 0.645.0 full
+  `check` retained the same four baseline findings (status 1) across 641
+  baseline and 644 final files. Full `smells` had 112 baseline and 110 final
+  findings (status 0), with two baseline routing findings resolved and no new
+  or worsened changed-path finding. Baseline/final structure and duplication
+  inventories were 376 and 378 files. Official SARIF, inventories, raw logs,
+  and snapshot hashes are retained under the linked evidence directories.
+- Correction loop: The production PNG handler is now registered only for a
+  Desktop Flow viewer; a valid PNG sent through actual Web-kind Flow wiring
+  returns the safe unavailable status without opening a dialog or writing a
+  file. Desktop save remains covered. PNG length and header are validated on
+  the original byte range before copying; oversized buffers and views prove
+  that `slice` is never called, while offset views copy exactly their accepted
+  range and full buffers retain identity. The Slice 1 and Slice 2 record
+  headings and the FE-04 traceability link now point to their correct records.
+  A transient byte-range helper complexity finding was decomposed; final Qlty
+  has no new finding on changed paths. Earlier failed host retries and the
+  corrected Qlty log-permission retry remain in the evidence sidecar.
+- Readiness: `SLICE_APPROVED` after both independent reviews and human
+  [Slice 2 Completion Approval](#slice-2-completion-approval).
+  The implementation commit, PR publication, and exact-head GitHub or Cloud
+  gates follow that approval. Release documentation remains at Feature Exit
+  as approved.
