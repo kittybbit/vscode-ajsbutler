@@ -4,8 +4,9 @@
 
 Let users save the active JP1/AJS jobnet flow as SVG or PNG for design
 documents, incident reports, and reviews. Users can also copy the SVG source
-as text or copy the PNG image for pasting. Each action covers the full active
-graph and preserves the current nested-jobnet expansion.
+as text or copy the PNG image for pasting. The Save and Copy icons each open
+a format menu. Each export covers the full active graph and preserves the
+current nested-jobnet expansion.
 
 ## Source
 
@@ -15,6 +16,8 @@ graph and preserves the current nested-jobnet expansion.
   and font fidelity before adding PNG.
 - The follow-up request adds clipboard actions analogous to those in List
   View and asks for PNG in a separate implementation slice.
+- A later request replaces the format-specific toolbar controls with one
+  Save icon and one Copy icon, each offering SVG and PNG.
 - [Build Flow Graph](../../../requirements/use-cases/uc-build-flow-graph.md)
   and [Explore Flow Graph](../../../requirements/use-cases/uc-explore-flow-graph.md)
   define the existing graph content, placement, active scope, and expansion
@@ -64,6 +67,18 @@ graph and preserves the current nested-jobnet expansion.
   support, denied permission, rasterization failure, and oversize produce
   unavailable or failed feedback. PNG save remains available on supported
   browsers without image clipboard permission.
+- **FE-08** The final Flow Viewer toolbar has two export controls, Save and
+  Copy. Each opens a menu with localized SVG and PNG choices. The copy
+  choices identify SVG source as text and PNG as an image. Users can open,
+  navigate, select, and dismiss each menu with the keyboard. Escape returns
+  focus to the invoking control. Opening and dismissing a menu preserve the
+  graph and perform no export. Selecting a format captures the then-current
+  graph and starts only the chosen operation. With an exportable graph,
+  choosing a copy format with missing clipboard capability gives the
+  corresponding localized unavailability feedback without generating output.
+  The existing PNG busy gate applies independently of clipboard capability.
+  An unavailable copy format leaves file save and other usable choices
+  available.
 
 ## Decisions and impact
 
@@ -71,7 +86,9 @@ graph and preserves the current nested-jobnet expansion.
   graph semantics and presentation geometry, including search-triggered
   expansion if that expansion is visible when the user exports.
 - SVG save and source copy come first. PNG save and image copy reuse the
-  same diagram representation and add no new JP1/AJS interpretation.
+  same diagram representation and add no new JP1/AJS interpretation. The
+  PNG layer introduces the two format menus and keeps both SVG workflows
+  accessible through them.
 - Validation needs a graph with content outside the viewport, nested expanded
   and collapsed jobnets, relation endpoints, Japanese and XML-sensitive
   labels, and a representative large graph. Cover save success, cancellation,
