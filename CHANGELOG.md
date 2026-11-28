@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added SVG and PNG choices to the Flow Viewer Save and Copy menus. Exports
+  include the full active flow scope and its current nested expansion. Desktop
+  saves through the VS Code destination picker; Web downloads through the
+  browser. SVG is copied as text and PNG as an image when clipboard access is
+  available.
 - Fixed inline Flow expansion so jobnet panels move clear of units on the left
   or above, and nested panel borders and connections are easier to distinguish.
 
