@@ -5,7 +5,8 @@
 - Purpose: Save or copy the full active JP1/AJS flow with its current
   nested-jobnet expansion.
 - Slice order: SVG save and source copy, followed by PNG save and image copy.
-  Slice 1 is committed and published. Slice 2 adds the shared format menus.
+  Slice 1 is committed and published. Slice 2 awaits review of the
+  export-action module boundary.
 - Read [requirements and acceptance](SPECS.md#requirements-and-acceptance),
   Slice 2 scope and validation, and [traceability](TRACEABILITY.md).
 - Constraints: Preserve existing graph and CSV behavior. Desktop uses the
@@ -16,7 +17,7 @@
 - Lifecycle state: `PLAN_APPROVED`
 - Active slice: Slice 2, PNG output and format menus for Save and Copy.
 - Next operation: Resume Slice 2 implementation after the focused
-  format-menu replan commit.
+  export-action module replan commit.
 - Gate evidence: Slice 1 is `SLICE_COMMITTED`. The approved Layer 1 head
   has passed its predecessor gates. Original plan approval and Slice 1
   Completion Approval are recorded below.
@@ -38,8 +39,10 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
   `codex/flow-image-export`. Slice 2's revised validation boundary was
   reviewed and approved. Main recorded that approval and committed the
   smoke-path replan as `d8fd31e77bec8d6a8652b43f7b7b8e7b9b302c78`.
-  That commit is the format-menu replan comparison base. The renewed approval
-  is recorded below. Implementation review, PR publication, and exact-head
+  The approved format-menu replan was committed as
+  `daaa9ee378864cb10004236796d2ab5d821da2ac`. That commit is the
+  comparison base for the action-module replan. The renewed approval is
+  recorded below. Implementation review, PR publication, and exact-head
   checks are pending.
 - Main publishes or updates each layer promptly after its independent Ready
   verdict, explicit Completion Approval, and focused completion commit.
@@ -56,6 +59,22 @@ Apply the [Lifecycle State Contract](../../README.md#lifecycle-state-contract).
 Apply the [native stack contract](../../README.md#github-standard-stacked-pull-requests)
 and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 
+## Slice 2 Export Action Replan Human Approval
+
+- Status: Approved
+- Approved at: 2026-11-28, in the current conversation.
+- Approved scope: Separate the existing export orchestration within Flow
+  presentation under the reviewed Slice 2 requirements and validation.
+- Approved paths: Add
+  `src/presentation/webview/editor/ajsFlow/flowImageExportActions.ts` to
+  the existing Slice 2 product boundary. Validation-support paths remain
+  as previously approved.
+- Review verdict: `Ready` from the independent plan reviewer.
+- Reviewed plan: `31dbc778955ab8bf5ad280cf91a636ed039692a86163b887325c3b134afc51fb`.
+- Review base: `daaa9ee378864cb10004236796d2ab5d821da2ac`.
+- Review and validation evidence:
+  `/private/tmp/ajsbutler-flow-png-actions-replan/manifest.json`.
+
 ## Slice 2 Format Menu Replan Human Approval
 
 - Status: Approved
@@ -63,8 +82,9 @@ and [Durable Documentation Gate](../../README.md#durable-documentation-gate).
 - Approved scope: Replace the two completed SVG toolbar buttons and the
   two PNG buttons in the pending candidate with one Save and one Copy
   button. Each opens SVG and PNG choices under FE-08.
-- Approved paths: The existing Slice 2 product and validation-support path
-  boundary below and this feature's planning documents.
+- Approved paths: The Slice 2 product and validation-support boundary and
+  this feature's planning documents in the format-menu replan commit
+  `daaa9ee378864cb10004236796d2ab5d821da2ac`.
 - Review verdict: `Ready` from the independent plan reviewer.
 - Reviewed plan: `71ccf82e49f711b51843d31a512487d1ed2d8547ff3535cb6e034311fa4ebcee`.
 - Review base: `d8fd31e77bec8d6a8652b43f7b7b8e7b9b302c78`.
@@ -381,10 +401,13 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 
 - Lifecycle state: `PLAN_APPROVED`. Depends on Slice 1 at verified PR #354 head
   `dd22e4e9e4a21d7bb2be1c74ea18bacf3b0ef1ea`.
-- Replan trigger: The user requested a Save icon and a Copy icon, with a
-  format choice in each menu. The separate-button implementation is paused
-  and uncommitted. Its retained candidate is indexed separately from the
-  documentation patch. The Layer 1 commit stays intact.
+- Replan trigger: After simplification within the approved paths, the
+  retained candidate's targeted Qlty scan reports file complexity of 74
+  in `FlowContents.tsx`, above the threshold of 55, together with
+  concentrated action complexity. The approved format-menu baseline
+  has no corresponding finding. Add one Flow presentation module for
+  export actions. The candidate remains uncommitted and is indexed
+  separately from the documentation patch.
 - Scope and value: Provide PNG save and image copy alongside the existing SVG
   operations, through one Save and one Copy icon in the final toolbar.
   Slice 2 covers FE-02, FE-04, and FE-06 through FE-08, and retains FE-01 and
@@ -424,18 +447,26 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
   labels distinguish SVG source text from the PNG image.
 - `FlowContents.tsx` provides the existing four action callbacks. Each
   menu item calls only its corresponding callback directly from selection.
-  This preserves trusted activation for clipboard writes and captures the
-  graph at selection. Menu state carries the anchor and the operation
-  only. Opening or dismissing a menu starts no serialization, rasterization,
-  download, host save, or clipboard action. Use the existing format
-  payloads, host contracts, localization resources and status feedback.
+  `FlowContents.tsx` captures the current graph there and retains panel
+  state, PNG busy gating and callback wiring. Menu state carries the anchor
+  and the operation only. Opening or dismissing a menu starts no export.
+- `flowImageExportActions.ts` owns the four SVG and PNG save/copy operations
+  in Flow presentation, including capability preflight, immediate clipboard
+  and rasterization promise handoff, download reuse, and localized result
+  reporting. The action functions reuse the serializers, status resources
+  and host messages. Simplify duplicated work and separate capability,
+  encoding, delivery and reporting branches by responsibility. Keep the
+  selection gesture and existing promise/error behavior when delegating
+  directly from `FlowContents.tsx`. Do not add a new layer boundary,
+  action registry, generic export port or separate state owner.
 - The selected copy callback checks its existing clipboard requirements before
   serializing the diagram or starting rasterization. SVG checks `writeText`.
   PNG checks `ClipboardItem` and `write`. Missing support reports the existing
   format-specific localized unavailable status without drawing, writing the
   clipboard, or saving a file. A denied write reports the corresponding
   localized failure. File save remains independent of both capabilities.
-- The Flow Viewer webview owns rasterization. It uses Slice 1's exact
+- `flowPngExport.ts` owns rasterization and codec limits.
+  `flowSvgExport.ts` remains the diagram serializer. PNG uses Slice 1's exact
   standalone SVG representation and its padded dimensions at CSS-pixel
   scale. Reuse dimensions computed with the SVG instead of reconstructing
   the layout, generating a second rendering, or parsing untrusted XML.
@@ -485,8 +516,9 @@ Apply the [Evidence Contract](../../evidence.md#evidence-contract),
 - Solution boundaries: one rasterization helper owns the browser image
   decode/encode and limit checks. The message contract owns validation
   and a shared format-specific size limit used by webview and host.
-  The existing Flow action controller owns gesture, file and clipboard
-  outcomes. The existing host filesystem adapter owns destination
+  The Flow export action module owns file and clipboard orchestration.
+  The Flow component owns selection-time graph capture and state. The
+  existing host filesystem adapter owns destination
   selection and write. Browser and VS Code APIs supply the codec,
   clipboard, and filesystem transport. No application/domain port or
   renderer dependency is needed. The architecture test checks mechanical
@@ -501,6 +533,7 @@ Product paths:
 
 - `src/presentation/webview/editor/ajsFlow/FlowContents.tsx`
 - `src/presentation/webview/editor/ajsFlow/Header.tsx`
+- `src/presentation/webview/editor/ajsFlow/flowImageExportActions.ts` (new)
 - `src/presentation/webview/editor/ajsFlow/flowSvgExport.ts`
 - `src/presentation/webview/editor/ajsFlow/flowPngExport.ts` (new)
 - `src/presentation/webview/viewerRequestMessages.ts`
@@ -524,10 +557,8 @@ Validation-support paths:
 - `src/test/support/flowImageDesktopSmoke.ts`
 - `src/test/support/flowImageWebSmoke.ts`
 
-The format-menu change uses the existing header, Flow callback wiring,
-English and Japanese strings, Flow Contents integration suite, Desktop runner,
-and Web smoke driver listed above. The prior exact implementation paths
-remain the proposed boundary.
+The export-action module is the only added product path. Existing integration,
+codec, request-routing, and host smoke paths cover the change.
 
 Slice records: `docs/specs/features/flow-image-export/TASKS.md` and
 `docs/specs/features/flow-image-export/TRACEABILITY.md`. Use the separate
@@ -544,6 +575,12 @@ closure boundary above for the durable edits and feature-record removal.
   clipboard when unsupported, keeps `image/png` as the sole clipboard
   MIME, and localizes progress and outcomes. Cover view-state conservation
   and overlapping activation while a raster operation is pending.
+- Action module: Use existing boundary tests for the extracted operations
+  and run targeted Qlty diagnostics on the Flow component and new module.
+  The final official baseline comparison must show that the reported
+  complexity findings are resolved and that no new or worsened findings
+  appear on either path or elsewhere. Moving the same finding into the
+  new path does not satisfy this test.
 - Format menus: Flow Contents integration covers exactly two export
   triggers, both choices per menu, the difference between copying text
   and an image, no-graph availability, and busy PNG options with usable SVG
@@ -602,9 +639,12 @@ closure boundary above for the durable edits and feature-record removal.
   explicit if a required test cannot complete. Retain code and host evidence
   outside analyzed inputs and record the final layer identities and gate
   references in this plan and the PR.
-  Format-menu plan identity and document checks are recorded at
-  `/private/tmp/ajsbutler-flow-png-format-menu-replan-r1/manifest.json`.
-  The paused product and test candidate is retained separately at
-  `/private/tmp/flow-png-pre-format-menu.lv8rKD`. Reconcile that candidate
-  with the reviewed plan and verify baseline and final evidence after
-  the approved replan commit under the Evidence Contract.
+  Export-action replan discovery and document validation are indexed at
+  `/private/tmp/ajsbutler-flow-png-actions-replan/manifest.json`.
+  The paused candidate is retained separately at
+  `/private/tmp/flow-png-pre-controller-replan.zRHgXs`. Historical host logs
+  record the round 3 Web and minimum Desktop passes and a subsequent stable
+  Desktop test-only failure before a handshake correction. Run stable
+  Desktop, minimum Desktop and Web for the final reviewed candidate, and
+  bind Qlty baseline and final evidence to the approved replan under the
+  Evidence Contract.
